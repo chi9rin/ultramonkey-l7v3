@@ -75,6 +75,10 @@ private:
 	}
 };
 
+//
+// l7vsd -> l7vsadm data class
+//
+
 class	l7vsd_response{
 public:
 	enum	COMMAND_RESPONSE_CODE{

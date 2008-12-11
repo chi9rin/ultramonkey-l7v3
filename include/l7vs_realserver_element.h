@@ -15,8 +15,6 @@
 namespace l7vsd{
 
 class	realserver_element{
-protected:
-	friend class boost::serialization::access;
 public:
 	boost::asio::ip::tcp::endpoint	tcp_endpoint;
 	boost::asio::ip::udp::endpoint	udp_endpoint;
