@@ -1,8 +1,20 @@
+//
+//	@file	protocol_module_base.h
+//	@brief	shared object protocol module absctract class
+//
+//	copyright (c) sdy corporation. 2008
+//	mail: h dot okada at sdy dot co dot jp
+//
+//	Distributed under the Boost Software License, Version 1.0.(See accompanying
+//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
+//
+
 #ifndef	PROTOCOL_MODULE_BASE_H
 #define	PROTOCOL_MODULE_BASE_H
 
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
+#include "logger_enum.h"
 #include "module_base.h"
 
 namespace l7vsd{
@@ -32,23 +44,37 @@ public:
 
 	//this class is POD
 	struct check_message_result{
-		bool	flag;
-		string	message;
-		bool	operator==( const check_message& in ){ return flag == in.flag; }
-		bool	operator!=( const check_message& in ){ return flag != in.flag; }
+		bool		flag;
+		std::string	message;
+		bool		operator==( const check_message& in ){ return flag == in.flag; }
+		bool		operator!=( const check_message& in ){ return flag != in.flag; }
 	};
-
+protected:
+	boost::function< void ( const LOG_LEVEL_TAG, const LOG_CATEGORY_TAG, const std::string) >	logger;
+	boost::function< void ( const std::string&, unsigned int* ) > replication_pay_memory;
 public:
 
 	// event function
-	protocol_module_base() = 0;
+	protocol_module_base(
+							boost::function< std::list<realserver>::iterator (void)> inlist_begin,
+							boost::function< std::list<realserver>::iterator (void)> inlist_end,
+							boost::function< std::list<realserver>::iterator (void)> inlist next,
+							boost::function< void ( const LOG_LEVEL_TAG, const LOG_CATEGORY_TAG, const std::string ) > inlog,
+							boost::function< void ( std::string&, unsigned int* ) >  inreplication_pay_memory
+						) : rs_list_begin( inlist_begin ),
+							rs_list_end( inlist_end ),
+							rs_list_ned( inlist_next ),
+							logger( inlog ),
+							replication_pay_memory( inreplication_pay_memory ) = 0;
+							
 	virtual ~protocol_module_base() = 0;
+
 	virtual	bool	is_use_sorry() = 0;
 	virtual	const check_message_result&	check_parameter( const std::vector<std::string>& args ) =0;
 
-	virtual boost::function< void ( void ) > rs_list_begin;
-	virtual boost::function< void ( void ) > rs_list_end;
-	virtual boost::function< void ( void ) > rs_list_next;
+	virtual boost::function< std::list<realserver>::iterator ( void ) > rs_list_begin;
+	virtual boost::function< std::list<realserver>::iterator ( void ) > rs_list_end;
+	virtual boost::function< std::list<realserver>::iterator ( void ) > rs_list_next;
 
 	virtual	handle_rslist_update() = 0;
 
