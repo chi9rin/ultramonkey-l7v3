@@ -17,6 +17,7 @@ namespace l7vsd{
 class module_base
 {
 public:
+	std::string	name;
 	module_base(){}
 	virtual ~module_base() = 0;
 	virtual	bool	is_tcp() = 0;
