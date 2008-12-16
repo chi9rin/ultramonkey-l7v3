@@ -3,11 +3,13 @@
 
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
-#include <module_base.h>
+#include "module_base.h"
+
+namespace l7vsd{
 
 class protocol_module_base : public module_base{
 public:
-	enum	HANDLE_STATUS_TAG
+	enum	EVENT_TAG
 	{
 		//use in upstream_thread
 		CLIENT_RECV = 0,
@@ -60,51 +62,76 @@ public:
 	virtual	void	handle_sorry_disable() = 0;
 
 	//use in upstream_thread
-	virtual	HANDLE_STATUS_TAG	handle_accept( const pthread_t upstream_thread_id,
-											   const pthread_t downstream_thread_id ) = 0;
+	virtual	EVENT_TAG	handle_accept(
+									const pthread_t upstream_thread_id,
+									const pthread_t downstream_thread_id ) = 0;
 
-	virtual	HANDLE_STATUS_TAG	handle_client_recv( const pthread_t thread_id,
-													const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-													const int recv_len,
-													boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;
+	virtual	EVENT_TAG	handle_client_recv(
+									const pthread_t thread_id,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+									const int recv_len,
+									const boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;
 
-	virtual	HANDLE_STATUS_TAG	handle_realserver_connect(	const pthread_t thread_id,
-															boost::array<char,MAX_BFFER_SIZE>& sendbuffer ) = 0;
+	virtual	EVENT_TAG	handle_realserver_connect(
+									const pthread_t thread_id,
+									const boost::array<char,MAX_BFFER_SIZE>& sendbuffer ) = 0;
 	
-	virtual	HANDLE_STATUS_TAG	handle_realserver_connection_fail( const pthread_t thread_id ) = 0;
+	virtual	EVENT_TAG	handle_realserver_connection_fail(
+									const pthread_t thread_id ) = 0;
 	
-	virtual	HANDLE_STATUS_TAG	handle_realserver_send( const pthread_t thread_id) = 0;
+	virtual	EVENT_TAG	handle_realserver_send(
+									const pthread_t thread_id ) = 0;
 	
-	virtual	HANDLE_STATUS_TAG	handle_sorryserver_connect( const pthread_t thread_id,
-															boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
+	virtual	EVENT_TAG	handle_sorryserver_connect(
+									const pthread_t thread_id,
+									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
 
-	virtual	HANDLE_STATUS_TAG	handle_sorryserver_connection_fail( const pthread_t thread_id ) = 0;
+	virtual	EVENT_TAG	handle_sorryserver_connection_fail(
+									const pthread_t thread_id ) = 0;
 	
-	virtual	HANDLE_STATUS_TAG	handle_sorryserver_send( const pthread_t thread_id ) = 0;
+	virtual	EVENT_TAG	handle_sorryserver_send(
+									const pthread_t thread_id ) = 0;
 
 	//use in downstream_thread
-	virtual	HANDLE_STATUS_TAG	handle_realserver_recv( const pthread_t thread_id,
-														const boost::asio::ip::basic_endpoint & rs_endpoint,
-														const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-														const int recv_len ) = 0;
+	virtual	EVENT_TAG	handle_realserver_recv(
+									const pthread_t thread_id,
+									const boost::asio::ip::basic_endpoint & rs_endpoint,
+									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
+									const int recv_len ) = 0;
 	
-	virtual	HANDLE_STATUS_TAG	handle_sorryserver_recv(	const pthread_t thread_id,
-															const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-															const int recv_len ) = 0;
+	virtual	EVENT_TAG	handle_sorryserver_recv(
+									const pthread_t thread_id,
+									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
+									const int recv_len ) = 0;
 	
-	virtual	HANDLE_STATUS_TAG	handle_clientrespondmessage_get(	const pthread_t thread_id,
-																	boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
-	
-	virtual	HANDLE_STATUS_TAG	handle_client_send( const pthread_t thread_id ) = 0;
+	virtual	EVENT_TAG	handle_clientrespondmessage_get(
+									const pthread_t thread_id,
+									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
+
+	virtual EVENT_TAG	handle_client_connection_check(
+									const pthread_t,
+									const boost::asio::ip::basic_endpoint& client_endpoint = 0);
+
+	virtual	EVENT_TAG	handle_client_send(
+									const pthread_t thread_id ) = 0;
 
 	//use in upstream/downstream thread
-	virtual	HANDLE_STATUS_TAG	handle_client_disconnect( const pthread_t thread_id ) = 0;
-	virtual	HANDLE_STATUS_TAG	handle_realserver_disconnect(	const pthread_t thread_id,
-																const boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;
-	virtual	HANDLE_STATUS_TAG	handle_sorryserver_disconnect( const pthread_t thread_id ) = 0;
-	virtual	HANDLE_STATUS_TAG	handle_finalize( const pthread_t thread_id ) = 0;
+	virtual	EVENT_TAG	handle_client_disconnect(
+									const pthread_t thread_id ) = 0;
+	
+	virtual	EVENT_TAG	handle_realserver_disconnect(
+									const pthread_t thread_id,
+									const boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;
+	
+	virtual	EVENT_TAG	handle_sorryserver_disconnect(
+									const pthread_t thread_id ) = 0;
+	
+	virtual	EVENT_TAG	handle_finalize(
+									const pthread_t thread_id ) = 0;
 
-//	virtual	HANDLE_STATUS_TAG	handle_event( const pthread_t thread_id, HANDLE_STATUS_TAG prev_status,  ) = 0;
+//	virtual	EVENT_TAG	handle_event( const pthread_t thread_id, EVENT_TAG prev_status,  ) = 0;
 };
+
+}; // namespace l7vsd
 
 #endif	//PROTOCOL_MODULE_BASE_H
