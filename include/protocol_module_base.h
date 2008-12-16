@@ -54,7 +54,6 @@ protected:
 	boost::function< void ( const std::string&, unsigned int* ) > replication_pay_memory;
 public:
 
-	// event function
 	protocol_module_base(
 							boost::function< std::list<realserver>::iterator (void)> inlist_begin,
 							boost::function< std::list<realserver>::iterator (void)> inlist_end,
@@ -69,6 +68,7 @@ public:
 							
 	virtual ~protocol_module_base() = 0;
 
+	// event function
 	virtual	bool	is_use_sorry() = 0;
 	virtual	const check_message_result&	check_parameter( const std::vector<std::string>& args ) =0;
 
