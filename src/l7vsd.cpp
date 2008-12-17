@@ -16,7 +16,7 @@ namespace l7vsd{
 l7vs::Logger l7vs::Logger::instance;
 l7vs::Parameter l7vs::Parameter::instance;
 
-void l7vsd::run() {
+void l7vsd::start() {
 
 }
 
@@ -51,12 +51,12 @@ static int set_sighandler(int sig, void (*handler)(int)) {
 static int set_sighandlers() {
 	int ret;
 
-#define SET_SIGHANDLER(sig, handler)					\
-	do {													\
+#define SET_SIGHANDLER(sig, handler)				\
+	do {											\
 		ret = set_sighandler((sig), (handler));		\
-		if (ret < 0) {									\
-			return ret;									\
-		}													\
+		if (ret < 0) {								\
+			return ret;								\
+		}											\
 	} while (0)
 
 	SET_SIGHANDLER(SIGHUP,	sig_exit_handler);
@@ -80,7 +80,12 @@ static void usage(FILE* p) {
 #ifndef	TEST_CASE
 int main( int argc, char* argv[] ){
 	try{
+		if (0 > set_sighandlers()) {
+			exit(-1);
+		}
 
+		l7vsd::l7vsd l7vsd_;
+		l7vsd_.start();
 
 
 	}
