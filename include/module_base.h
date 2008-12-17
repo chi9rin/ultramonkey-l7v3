@@ -16,12 +16,14 @@ namespace l7vsd{
 
 class module_base
 {
-public:
+protected:
 	std::string	name;
+public:
 	module_base(){}
 	virtual ~module_base() = 0;
 	virtual	bool	is_tcp() = 0;
 	virtual	bool	is_udp() = 0;
+	virtual	std::strung&	get_name(){return &string;};
 };
 
 };	//namespace l7vsd
