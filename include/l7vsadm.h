@@ -14,8 +14,6 @@
 #define	L7VSADM_H
 
 #include <map>
-#include <cstdio.h>
-#include <cstdlib.h>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
@@ -29,21 +27,57 @@ namespace l7vsd{
 
 class	l7vsadm{
 protected:
-	std::map<std::string, boost::function<void (l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] )> >	command_dic;
-	std::set
+
+	typedef	std::map< std::string, boost::function< bool (l7vsadm_request::COMMAND_CODE_TAG, int, char*[] )> >
+			command_func_map_type;
+	typedef	std::map< std::string, boost::function< bool (int&, int, char*[] ) > >
+			option_func_map_type;
+	
+	command_func_map_type	command_dic;
 	
 	boost::array<char, MAXBUFFER_SIZE>	send_data;
-	boost::array<char, MAXBUFFER_SIZE>	send_data;
+	boost::array<char, MAXBUFFER_SIZE>	recv_data;
 	l7vsadm_request						request;
-	l7vsadm_response						response;
-	void	cmd_list_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_vs_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_rs_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_replicaton_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_log_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_snmp_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_paramter_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int, const char*[] );
-	void	cmd_help_parse( const l7vsadm_request::COMMAND_CODE_TAG, const int ,const char*[] );
+	l7vsadm_response					response;
+	
+	bool	cmd_list_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_list_dic;
+		bool					option_list_numeric_parse( int&, int, char*[] );
+
+	bool	cmd_vs_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_vs_dic;
+		bool	option_vs_scheduler_parse( int&, int, char*[] );
+		bool	option_vs_upper_parse( int&, int, char*[] );
+		bool	option_vs_bypass_parse( int&, int, char*[] );
+		bool	option_vs_qos_service_parse( int&, int, char*[] );
+		bool	option_vs_qos_client_parse( int&, int, char*[] );
+		bool	option_vs_udp_parse( int&, int, char*[] );
+
+	bool	cmd_rs_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_rs_dic;
+		bool	option_rs_weight( int&, int, char*[] );
+
+	bool	cmd_replicaton_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_replication_dic;
+		bool	option_replication_switch( int&, int, char*[] );
+		bool	option_replication_force( int&, int, char*[] );
+		bool	option_replication_dump( int&, int, char*[] );
+
+	bool	cmd_log_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_log_dic;
+		bool	option_log_category( int&, int, char*[] );
+		bool	option_log_level( int&, int, char*[] );
+
+	bool	cmd_snmp_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_snmp_dic;
+		bool	option_snmp_category( int&, int, char*[] );
+		bool	option_snmp_level( int&, int, char*[] );
+
+	bool	cmd_paramter_parse( const l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+		option_func_map_type	option_parameter_dic;
+		bool	option_parameter_reload( int&, int, char*[] );
+
+	bool	cmd_help_parse( const l7vsadm_request::COMMAND_CODE_TAG, int ,char*[] );
 
 	bool	request_send();
 	bool	response_recv();

@@ -14,13 +14,15 @@
 
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/list.hpp>
 #include <boost/asio.hpp>
-#include <vector>
-#include <logger_enum.h>
-#include <parameter_enum.h>
+#include <list>
+#include <memory>
+#include "logger_enum.h"
+#include "parameter_enum.h"
+#include "l7vs_replication.h"
 #include "l7vs_realserver_element.h"
 #include "l7vs_virtualservice_command_element.h"
-
 
 namespace l7vsd{
 //
@@ -51,16 +53,20 @@ public:
 
 	COMMAND_CODE_TAG			command;
 	bool						list_numeric_flag;
-	virtualservice_element	vs_element;
+	virtualservice_element		vs_element;
 	LOG_CATEGORY_TAG			log_category;
 	LOG_LEVEL_TAG				log_level;
 	bool						category_all_flag;
 	bool						start_replication_flag;
-	PARAMETER_COMPONENT_TAG	reload_param;
+	PARAMETER_COMPONENT_TAG		reload_param;
 	l7vsadm_request() :		command( CMD_NONE ),
 								list_numeric_flag( false ),
 								category_all_flag( false ),
-								start_replication_flag( false ){}
+								start_replication_flag( false ),
+								log_category( LOG_CAT_NONE ),
+								log_level( LOG_LV_NONE ),
+								snmp_log_category( LOG_CAT_NONE ),
+								snmp_log_level( LOG_LV_NONE ){}
 private:
 	friend class	boost::serialization::access;
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
@@ -82,7 +88,8 @@ private:
 class	l7vsd_response{
 public:
 	enum	COMMAND_RESPONSE_CODE{
-		RESPONSE_OK = 0,
+		RESPONSE_NONE = 0,
+		RESPONSE_OK,
 		RESPONSE_LIST_ERROR,
 		RESPONSE_LIST_VERBOSE_ERROR,
 		RESPONSE_LIST_KEY_ERROR,
@@ -99,19 +106,44 @@ public:
 		RESPONSE_PARAMETER_ERROR,
 		RESPONSE_HELP_ERROR
 	};
-	l7vsadm_request::COMMAND_CODE_TAG	code;
+	l7vsadm_request::COMMAND_CODE_TAG
+							code;
+	
 	bool					status;
-	unsigned long long	total_bps;
-	unsigned long long	total_client_recv_byte;
-	unsigned long long	total_client_send_byte;
-	unsigned long long	total_realserver_recv_byte;
-	unsigned long long	total_realserver_send_byte;
+	
+	std::string				message;
+	
+	std::list< l7vs_virtualservice_element >
+							virtualservice_status_list;
+	
+	REPLICATION_MODE_TAG	replication_mode_status;
+	
+	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
+							log_status_list;
+							
+	bool					snmp_connection_status;
+	
+	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
+							snmp_log_status_list;
+	
+	unsigned long long		total_bps;
+	unsigned long long		total_client_recv_byte;
+	unsigned long long		total_client_send_byte;
+	unsigned long long		total_realserver_recv_byte;
+	unsigned long long		total_realserver_send_byte;
 	std::vector<virtualservice_element>
 							virtualservice_vec;	
 private:
 	friend class	boost::serialization::access;
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+		ar & code;
 		ar & status;
+		ar & message;
+		ar & virtualservice_status_list;
+		ar & replication_mode_status;
+		ar & log_status_list;
+		ar & snmp_connection_status;
+		ar & snmp_log_status_list;
 		ar & total_bps;
 		ar & total_client_recv_byte;
 		ar & total_client_send_byte;

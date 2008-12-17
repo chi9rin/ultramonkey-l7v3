@@ -1,0 +1,183 @@
+/*
+ * @file  logger_wapprer.h
+ * @brief logger module c wrapper.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2008  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *      
+ **********************************************************************/
+
+#ifndef __LOGGER_WRAPPER_H__
+#define __LOGGER_WRAPPER_H__
+
+#include "logger.h"
+
+/*!
+ * retrieve category's log level.
+ * this is only wrapper to implement method.
+ * @param   category that want to know
+ * @return  log level
+ */
+inline	enum LOG_LEVEL_TAG logger_get_log_level(const enum LOG_CATEGORY_TAG cat)
+{
+	return l7vs::Logger::getInstance().getLogLevel(cat);
+}
+
+/*!
+ * set category's log level.
+ * this is only wrapper to implement method.
+ * @param   category to set log level
+ * @param   level
+ * @retval  0  succeed
+ * @retval  -1 failed
+ */
+inline int	logger_set_log_level(const enum LOG_CATEGORY_TAG cat, const enum LOG_LEVEL_TAG level)
+{
+	if (l7vs::Logger::getInstance().setLogLevel(cat, level)) {
+		return 0;
+	}
+	return -1;
+}
+
+/*!
+ * output fatal log.
+ * this is only wrapper to implement method.
+ * @param   category that logging matter occured
+ * @param   log message id 
+ * @param   current file 
+ * @param   current line
+ * @param   log message 
+ * @retrun  void
+ */
+inline	void	logger_put_log_fatal(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
+{
+	l7vs::Logger::getInstance().putLogFatal(cat, message_id, message, file, line);
+}
+
+/*!
+ * output error log.
+ * this is only wrapper to implement method.
+ * @param   category that logging matter occured
+ * @param   log message id 
+ * @param   current file 
+ * @param   current line
+ * @param   log message 
+ * @retrun  void
+ */
+inline	void	logger_put_log_error(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
+{
+	l7vs::Logger::getInstance().putLogError(cat, message_id, message, file, line);
+}
+
+/*!
+ * output warn log.
+ * this is only wrapper to implement method.
+ * @param   category that logging matter occured
+ * @param   log message id 
+ * @param   current file 
+ * @param   current line
+ * @param   log message 
+ * @retrun  void
+ */
+inline	void	logger_put_log_warn(const enum LOG_CATEGORY_TAG cat, const unsigned int  message_id, char* file, int line, const char* message)
+{
+	l7vs::Logger::getInstance().putLogWarn(cat, message_id, message, file, line);
+}
+
+/*!
+ * output info log.
+ * this is only wrapper to implement method.
+ * @param   category that logging matter occured
+ * @param   log message id 
+ * @param   current file 
+ * @param   current line
+ * @param   log message 
+ * @retrun  void
+ */
+inline	void	logger_put_log_info(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
+{
+	l7vs::Logger::getInstance().putLogInfo(cat, message_id, message, file, line);
+}
+
+/*!
+ * output debug log.
+ * this is only wrapper to implement method.
+ * @param   category that logging matter occured
+ * @param   log message id 
+ * @param   current file 
+ * @param   current line
+ * @param   log message 
+ * @retrun  void
+ */
+inline	void	logger_put_log_debug(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
+{
+	l7vs::Logger::getInstance().putLogDebug(cat, message_id, message, file, line);
+}
+
+/*!
+ * return start category by using module.
+ * this is only wrapper to implement method.
+ * @param   module
+ * @retrun  start category
+ */
+inline	enum LOG_CATEGORY_TAG logger_get_category_range_start(enum LOG_MODULE_TAG mod)
+{
+	return l7vs::Logger::getInstance().getCategoryRangeStart(mod);
+}
+
+/*!
+ * return end category by using module.
+ * this is only wrapper to implement method.
+ * @param   module
+ * @retrun  end category
+ */
+inline	enum LOG_CATEGORY_TAG logger_get_category_range_end(enum LOG_MODULE_TAG mod)
+{
+	return l7vs::Logger::getInstance().getCategoryRangeEnd(mod);
+}
+
+#define LOGGER_PUT_LOG_FATAL(cat, message_id, message, arg...) { \
+	if (LOG_LV_FATAL >= logger_get_log_level(cat)) { \
+	char buf[BUF_LEN]; \
+	snprintf(buf, BUF_LEN, message, ##arg); \
+	logger_put_log_fatal(cat, message_id, __FILE__, __LINE__, buf); }}
+	
+#define LOGGER_PUT_LOG_ERROR(cat, message_id, message, arg...) { \
+	if (LOG_LV_ERROR >= logger_get_log_level(cat)) { \
+	char buf[BUF_LEN]; \
+	snprintf(buf, BUF_LEN, message, ##arg); \
+	logger_put_log_error(cat, message_id, __FILE__, __LINE__, buf); }}
+
+#define LOGGER_PUT_LOG_WARN(cat, message_id, message, arg...) { \
+	if (LOG_LV_WARN >= logger_get_log_level(cat)) { \
+	char buf[BUF_LEN]; \
+	snprintf(buf, BUF_LEN, message, ##arg); \
+	logger_put_log_warn(cat, message_id, __FILE__, __LINE__, buf); }}
+
+#define LOGGER_PUT_LOG_INFO(cat, message_id, message, arg...) { \
+	if (LOG_LV_INFO >= logger_get_log_level(cat)) { \
+	char buf[BUF_LEN]; \
+	snprintf(buf, BUF_LEN, message, ##arg); \
+	logger_put_log_info(cat, message_id, __FILE__, __LINE__, buf); }}
+
+#define LOGGER_PUT_LOG_DEBUG(cat, message_id, message, arg...) { \
+	char buf[BUF_LEN]; \
+	snprintf(buf, BUF_LEN, message, ##arg); \
+	logger_put_log_debug(cat, message_id, __FILE__, __LINE__, buf); }
+
+#endif	//__LOGGER_WRAPPER_H__
