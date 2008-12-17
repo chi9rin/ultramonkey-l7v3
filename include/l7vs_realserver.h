@@ -22,11 +22,13 @@ public:
 	int								send_byte;
 
 	realserver() : nactive(0), ninact(0), send_byte(0){}
-	realserver( const realserver& in ) : nactive( in.nactive ), 
+	realserver( const realserver& in ) : realserver_element( in ), 
+													nactive( in.nactive ), 
 													ninact( in.ninact ), 
 													send_byte( in.send_byte ){}
 
 	realserver& operator=( const realserver& rs ){
+		realserver::operator= (rs);
 		nactive = rs.nactive;
 		ninact = rs.ninact;
 		send_byte = rs.send_byte;
