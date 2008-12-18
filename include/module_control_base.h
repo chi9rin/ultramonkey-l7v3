@@ -13,11 +13,13 @@
 
 #include<string>
 #include<map>
+#include<boost/thread/locks.hpp>
 
 class	module_control_base
 {
 protected:
-	std::map<std::string,int>	refarence_map;
+	std::map<std::string,int>	loadedmodule_map;
+	boost::mutex				loadedmodule_map_mutex;
 
 	module_control_base(){}
 	virtual	~module_control_base() = 0;
