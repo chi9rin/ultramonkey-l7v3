@@ -39,21 +39,7 @@
 #define LOGGER_LEVEL_NUM (6)
 #define LOGGER_CATEGORY_NUM (40)
 
-#if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
-#define LOGGER_PROCESS_VSD
-#endif
-
-#if defined(LOGGER_PROCESS_VSD)
-#define LOGGER_PROCESS_ID "VSD"
-#elif defined(LOGGER_PROCESS_ADM)
-#define LOGGER_PROCESS_ID "ADM"
-#else
-#define LOGGER_PROCESS_ID "SNM"
-#endif
-
-#if defined(LOGGER_PROCESS_VSD)
-#include "l7vs_snmpbridge.h"
-#endif
+#define LOGGER_PROCESS_ID "SLP"
 
 #define LOGGER_NULL "/dev/null"
 
@@ -86,28 +72,12 @@ namespace l7vs
 			levelTable[LOG_LV_WARN] = log4cxx::Level::getWarn();
 			levelTable[LOG_LV_ERROR] = log4cxx::Level::getError();
 			levelTable[LOG_LV_FATAL] = log4cxx::Level::getFatal();
-#if defined(LOGGER_PROCESS_VSD)
-			loggerCategory = LOG_CAT_L7VSD_LOGGER;
-			loggerProcess = LOG_MOD_L7VSD;
+
+			loggerCategory = LOG_CAT_SSLPROXY_LOGGER;
 			//set default log level
-			for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT); ++cat) {
+			for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
 				categoryLevel[cat] = log4cxx::Level::getError();
 			}
-#elif defined(LOGGER_PROCESS_ADM)
-			loggerCategory = LOG_CAT_L7VSADM_LOGGER;
-			loggerProcess = LOG_MOD_L7VSADM;
-			//set default log level
-			for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT); ++cat) {
-				categoryLevel[cat] = log4cxx::Level::getError();
-			}
-#else	//LOGGER_PROCESS_SNM
-			loggerCategory = LOG_CAT_SNMPAGENT_LOGGER;
-			loggerProcess = LOG_MOD_SNMPAGENT;
-			//set default log level
-			for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT); ++cat) {
-				categoryLevel[cat] = log4cxx::Level::getError();
-			}
-#endif
 		}
 		//! cpoy constructor disable
 		LoggerImpl( const LoggerImpl& );
@@ -121,8 +91,6 @@ namespace l7vs
 		bool initialized;
 		//! logger category
 		LOG_CATEGORY_TAG loggerCategory;
-		//! logger process
-		LOG_MODULE_TAG loggerProcess;
 		//! hostname
 		char hostname[HOST_NAME_LEN];
 
@@ -158,6 +126,15 @@ namespace l7vs
 		 *  hour		"45"		(45)
 		 */
 		std::string rotationTimingValue;
+
+		//! key strings for logger
+		std::string log_filename_key;
+		std::string rotation_key;
+		std::string max_backup_index_key;
+		std::string max_file_size_key;
+		std::string rotation_timing_key;
+		std::string rotation_timing_value_key;
+
 
 		//! for transration between log4cxx::LevelPtr and LOGER_LEVEL_TAG
 		static log4cxx::LevelPtr levelTable[LOGGER_LEVEL_NUM];
@@ -199,6 +176,8 @@ namespace l7vs
 	 	virtual bool init();
 		//! Configuration function
 		virtual	void loadConf();
+		//! Category logger configuration function
+		virtual	void loadCategoryLoggerConf(LOG_CATEGORY_TAG cat);
 		//1 initialize loglevel table
 		void initLogLevelTable();
 
@@ -210,17 +189,11 @@ namespace l7vs
 		 */
 		virtual inline LOG_LEVEL_TAG getLogLevel(LOG_CATEGORY_TAG cat)
 		{
-#if defined(LOGGER_PROCESS_VSD)
-			if (cat >= getCategoryRangeStart(LOG_MOD_SNMPAGENT) && cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT)) {
-				return l7vs_snmpbridge_get_loglevel(cat);
-			}
-#endif
 			if (LOG_LV_NONE == loglevel[cat]) {
 				this->loglevel[cat] = toLevelTag(log4cxx::Logger::getLogger(categoryTable[cat])->getLevel());
 			}
 
 			return loglevel[cat];
-			//return toLevelTag(log4cxx::Logger::getLogger(categoryTable[cat])->getLevel());
 		}
 
 		/*!
@@ -234,11 +207,6 @@ namespace l7vs
 		virtual inline bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level)
 		{
 			try {
-#if defined(LOGGER_PROCESS_VSD)
-				if (cat >= getCategoryRangeStart(LOG_MOD_SNMPAGENT) && cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT)) {
-					l7vs_snmpbridge_change_loglevel(cat, level);
-				}
-#endif
 				log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(toLevel(level));
 			}
 			catch (const std::exception& ex) {
@@ -365,35 +333,6 @@ namespace l7vs
 				std::ostringstream oss;
 				oss << "Logging Error (Debug Log) : " << ex.what();
 				errorConf(5, oss.str(), __FILE__, __LINE__);
-			}
-		}
-
-		/*!
-		 * return start category by using module.
-		 *
-		 * @param   module
-		 * @retrun  start category
-		 */
-		virtual inline LOG_CATEGORY_TAG getCategoryRangeStart(LOG_MODULE_TAG mod)
-		{
-			switch (mod) {
-				case LOG_MOD_L7VSADM: return LOG_CAT_L7VSADM_PARSE;
-				case LOG_MOD_SNMPAGENT: return LOG_CAT_SNMPAGENT_START_STOP;
-				default: return LOG_CAT_L7VSD_NETWORK;
-			}
-		}
-		/*!
-		 * return end category by using module.
-		 *
-		 * @param   module
-		 * @retrun  end category
-		 */
-		virtual inline LOG_CATEGORY_TAG getCategoryRangeEnd(LOG_MODULE_TAG mod)
-		{
-			switch (mod) {
-				case LOG_MOD_L7VSADM: return LOG_CAT_L7VSADM_MODULE;
-				case LOG_MOD_SNMPAGENT: return LOG_CAT_SNMPAGENT_PARAMETER;
-				default: return LOG_CAT_L7VSD_MODULE;
 			}
 		}
 	};

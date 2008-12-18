@@ -31,8 +31,8 @@
 #include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/helpers/optionconverter.h>
 #include <time.h>
+#include <boost/lexical_cast.hpp>
 #include "time_and_size_based_rolling_policy.h"
-#include "lexical_cast.h"
 
 #define DEFAULT_MAX_FILE_SIZE (10 * 1024 * 1024)
 

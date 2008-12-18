@@ -129,28 +129,6 @@ inline	void	logger_put_log_debug(const enum LOG_CATEGORY_TAG cat, const unsigned
 	l7vs::Logger::getInstance().putLogDebug(cat, message_id, message, file, line);
 }
 
-/*!
- * return start category by using module.
- * this is only wrapper to implement method.
- * @param   module
- * @retrun  start category
- */
-inline	enum LOG_CATEGORY_TAG logger_get_category_range_start(enum LOG_MODULE_TAG mod)
-{
-	return l7vs::Logger::getInstance().getCategoryRangeStart(mod);
-}
-
-/*!
- * return end category by using module.
- * this is only wrapper to implement method.
- * @param   module
- * @retrun  end category
- */
-inline	enum LOG_CATEGORY_TAG logger_get_category_range_end(enum LOG_MODULE_TAG mod)
-{
-	return l7vs::Logger::getInstance().getCategoryRangeEnd(mod);
-}
-
 #define LOGGER_PUT_LOG_FATAL(cat, message_id, message, arg...) { \
 	if (LOG_LV_FATAL >= logger_get_log_level(cat)) { \
 	char buf[BUF_LEN]; \

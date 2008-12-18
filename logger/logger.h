@@ -69,10 +69,6 @@ namespace l7vs
 		void putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
 		//! output debug log.
 		void putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
-		//! return start category by using module.
-		LOG_CATEGORY_TAG getCategoryRangeStart(LOG_MODULE_TAG mod);
-		//! return end category by using module.
-		LOG_CATEGORY_TAG getCategoryRangeEnd(LOG_MODULE_TAG mod);
 
 	protected:
 		/*!

@@ -13,7 +13,7 @@
 #ifndef PARAMETER_ENUM_H
 #define PARAMETER_ENUM_H
 
-namespace l7vsd{
+namespace l7vs{
 
 enum PARAMETER_COMPONENT_TAG
 {
@@ -32,6 +32,6 @@ enum PARAMETER_COMPONENT_TAG
 	PARAM_COMP_SNMPAGENT
 };
 
-};	//namespace l7vsd
+}	//namespace l7vsd
 	
 #endif	//PARAMETER_ENUM

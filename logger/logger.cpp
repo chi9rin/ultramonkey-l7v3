@@ -53,7 +53,7 @@ l7vs::Logger::~Logger()
  * @param   category that want to know
  * @return  log level
  */
-LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
+l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
 {
 	return LoggerImpl::getInstance().getLogLevel(cat);
 }
@@ -144,28 +144,6 @@ void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_i
 void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
 {
 	LoggerImpl::getInstance().putLogDebug(cat, message_id, message, file, line);
-}
-
-/*!
- * return start category by using module.
- * this is only wrapper to implement method.
- * @param   module
- * @retrun  start category
- */
-LOG_CATEGORY_TAG l7vs::Logger::getCategoryRangeStart(LOG_MODULE_TAG mod)
-{
-	return LoggerImpl::getInstance().getCategoryRangeStart(mod);
-}
-
-/*!
- * return end category by using module.
- * this is only wrapper to implement method.
- * @param   module
- * @retrun  end category
- */
-LOG_CATEGORY_TAG l7vs::Logger::getCategoryRangeEnd(LOG_MODULE_TAG mod)
-{
-	return LoggerImpl::getInstance().getCategoryRangeEnd(mod);
 }
 
 /*!

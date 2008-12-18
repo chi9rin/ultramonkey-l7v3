@@ -34,10 +34,10 @@
 #include <log4cxx/consoleappender.h>
 #include <errno.h>
 #include <stdexcept>
+#include <boost/lexical_cast.hpp>
 
 #include "logger_impl.h"
 #include "parameter.h"
-#include "lexical_cast.h"
 #include "strict_time_based_rolling_policy.h"
 #include "time_and_size_based_rolling_policy.h"
 
@@ -49,72 +49,30 @@
 #define LOGGER_FILESIZE_LOWER_LIMIT (65535)
 #define LOGGER_FILE_PATTERN "%i"
 
-#if defined(LOGGER_PROCESS_VSD)
-#define LOGGER_LOG_FILENAME_KEY "l7vsd_log_filename"
-#define LOGGER_ROTATION_KEY "l7vsd_rotation"
-#define LOGGER_MAX_BACKUP_INDEX_KEY "l7vsd_max_backup_index"
-#define LOGGER_MAX_FILE_SIZE_KEY "l7vsd_max_filesize"
-#define LOGGER_ROTATION_TIMING_KEY "l7vsd_rotation_timing"
-#define LOGGER_ROTATION_TIMING_VALUE_KEY "l7vsd_rotation_timing_value"
+#define LOGGER_LOG_FILENAME_KEY "sslproxy_log_filename"
+#define LOGGER_ROTATION_KEY "sslproxy_rotation"
+#define LOGGER_MAX_BACKUP_INDEX_KEY "sslproxy_max_backup_index"
+#define LOGGER_MAX_FILE_SIZE_KEY "sslproxy_max_filesize"
+#define LOGGER_ROTATION_TIMING_KEY "sslproxy_rotation_timing"
+#define LOGGER_ROTATION_TIMING_VALUE_KEY "sslproxy_rotation_timing_value"
 
-#elif defined(LOGGER_PROCESS_ADM)
-#define LOGGER_LOG_FILENAME_KEY "l7vsadm_log_filename"
-#define LOGGER_ROTATION_KEY "l7vsadm_rotation"
-#define LOGGER_MAX_BACKUP_INDEX_KEY "l7vsadm_max_backup_index"
-#define LOGGER_MAX_FILE_SIZE_KEY "l7vsadm_max_filesize"
-#define LOGGER_ROTATION_TIMING_KEY "l7vsadm_rotation_timing"
-#define LOGGER_ROTATION_TIMING_VALUE_KEY "l7vsadm_rotation_timing_value"
-#else	//LOGGER_PROCESS_SNM
-#define LOGGER_LOG_FILENAME_KEY "snmpagent_log_filename"
-#define LOGGER_ROTATION_KEY "snmpagent_rotation"
-#define LOGGER_MAX_BACKUP_INDEX_KEY "snmpagent_max_backup_index"
-#define LOGGER_MAX_FILE_SIZE_KEY "snmpagent_max_filesize"
-#define LOGGER_ROTATION_TIMING_KEY "snmpagent_rotation_timing"
-#define LOGGER_ROTATION_TIMING_VALUE_KEY "snmpagent_rotation_timing_value"
-#endif
+#define LOGGER_CONN_LOG_FILENAME_KEY "conn_log_filename"
+#define LOGGER_CONN_ROTATION_KEY "conn_rotation"
+#define LOGGER_CONN_MAX_BACKUP_INDEX_KEY "conn_max_backup_index"
+#define LOGGER_CONN_MAX_FILE_SIZE_KEY "conn_max_filesize"
+#define LOGGER_CONN_ROTATION_TIMING_KEY "conn_rotation_timing"
+#define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY "conn_rotation_timing_value"
 
 //! for transration between log4cxx::LevelPtr and LOGER_LEVEL_TAG
 char l7vs::LoggerImpl::categoryTable[][LOGGER_CATEGORY_NUM] = { 
 	"none",
-	"l7vsd_network",
-	"l7vsd_network.bandwidth",
-	"l7vsd_network.num_connection",
-	"l7vsd_network.qos",
-	"l7vsd_virtual_service",
-	"l7vsd_real_server",
-	"l7vsd_sorry_server",
-	"l7vsd_real_server.balancing",
-	"l7vsd_replication",
-	"l7vsd_start_stop",
-	"l7vsd_system",
-	"l7vsd_system.memory",
-	"l7vsd_system.socket",
-	"l7vsd_system.signal",
-	"l7vsd_environment",
-	"l7vsd_environment.parameter",
-	"l7vsd_logger",
-	"l7vsd_parameter",
-	"l7vsd_event",
-	"l7vsd_schedule",
-	"l7vsd_program",
-	"l7vsd_protocol",
-	"l7vsd_module",
-	"l7vsadm_parse",
-	"l7vsadm_operate",
-	"l7vsadm_communicate",
-	"l7vsadm_config_result",
-	"l7vsadm_common",
-	"l7vsadm_logger",
-	"l7vsadm_parameter",
-	"l7vsadm_protocol",
-	"l7vsadm_module",
-	"snmpagent_start_stop",
-	"snmpagent_manager_receive",
-	"snmpagent_manager_send",
-	"snmpagent_l7vsd_receive",
-	"snmpagent_l7vsd_send",
-	"snmpagent_logger",
-	"snmpagent_parameter"
+	"sslproxy_logger",
+	"sslproxy_parameter",
+	"sslproxy_common",
+	"sslproxy_server",
+	"sslproxy_session",
+	"sslproxy_connection",
+	"end"
 	};
 
 //! for transration between string and LOGGER_CATEGORY_TAG
@@ -164,7 +122,7 @@ bool l7vs::LoggerImpl::init()
 			new log4cxx::ConsoleAppender( layout, log4cxx::ConsoleAppender::getSystemErr() );
 		root->addAppender(consoleAppender);
 
-		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT); ++cat) {
+		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
 			log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
 		}
 	}
@@ -216,7 +174,7 @@ void l7vs::LoggerImpl::errorConf(unsigned int message_id, const std::string& err
                 root->addAppender(consoleAppender);
 		root->addAppender(syslogAppender);
 
-		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT); ++cat) {
+		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
 			log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
 		}
 
@@ -240,11 +198,75 @@ void l7vs::LoggerImpl::errorConf(unsigned int message_id, const std::string& err
  */
 void l7vs::LoggerImpl::loadConf()
 {
+	for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
+		if (cat == LOG_CAT_SSLPROXY_CONNECTION) {
+			// Connection category Logger setting.
+			log_filename_key          = LOGGER_CONN_LOG_FILENAME_KEY;
+			rotation_key              = LOGGER_CONN_ROTATION_KEY;
+			max_backup_index_key      = LOGGER_CONN_MAX_BACKUP_INDEX_KEY;
+			max_file_size_key         = LOGGER_CONN_MAX_FILE_SIZE_KEY;
+			rotation_timing_key       = LOGGER_CONN_ROTATION_TIMING_KEY;
+			rotation_timing_value_key = LOGGER_CONN_ROTATION_TIMING_VALUE_KEY;
+			/*-------- DEBUG LOG for sslproxy --------*/
+			if (LOG_LV_DEBUG >= this->getLogLevel(loggerCategory)) {
+				std::ostringstream oss;
+				oss << "function : void l7vs::LoggerImpl::loadConf() : "
+				    << "Connection category Logger setting. "
+				    << "cat = " << cat;
+				this->putLogDebug(loggerCategory, 1, oss.str(), __FILE__, __LINE__);
+			}
+			/*------ DEBUG LOG END for sslproxy ------*/
+		} else {
+			// Other category Logger setting.
+			log_filename_key          = LOGGER_LOG_FILENAME_KEY;
+			rotation_key              = LOGGER_ROTATION_KEY;
+			max_backup_index_key      = LOGGER_MAX_BACKUP_INDEX_KEY;
+			max_file_size_key         = LOGGER_MAX_FILE_SIZE_KEY;
+			rotation_timing_key       = LOGGER_ROTATION_TIMING_KEY;
+			rotation_timing_value_key = LOGGER_ROTATION_TIMING_VALUE_KEY;
+			/*-------- DEBUG LOG for sslproxy --------*/
+			if (LOG_LV_DEBUG >= this->getLogLevel(loggerCategory) &&
+			    cat != LOG_CAT_SSLPROXY_LOGGER) {
+				std::ostringstream oss;
+				oss << "function : void l7vs::LoggerImpl::loadConf() : "
+				    << "Other category Logger setting. "
+				    << "cat = " << cat;
+				this->putLogDebug(loggerCategory, 2, oss.str(), __FILE__, __LINE__);
+			}
+			/*------ DEBUG LOG END for sslproxy ------*/
+		}
+		loadCategoryLoggerConf(cat);
+	}
+	if (LOG_LV_INFO >= this->getLogLevel(loggerCategory)) {
+		std::ostringstream oss;
+		oss << "Logger Configuration Succeed.";
+		this->putLogInfo(loggerCategory,2, oss.str(), __FILE__, __LINE__);
+	}
+
+	/*-------- DEBUG LOG for sslproxy --------*/
+	if (LOG_LV_DEBUG >= this->getLogLevel(loggerCategory)) {
+		std::ostringstream oss;
+		oss << "out_function : void l7vs::LoggerImpl::loadConf() : "
+		    << "loadCategoryLoggerConf() END.";
+		this->putLogDebug(loggerCategory, 3, oss.str(), __FILE__, __LINE__);
+	}
+	/*------ DEBUG LOG END for sslproxy ------*/
+}
+
+/*!
+ * load the category logger parameter.
+ * get settings from parameter component of each category, and configure log4cxx property
+ *
+ * @param[in]	catnum	LOG_CATEGORY_TAG
+ * @return  void
+ */
+void l7vs::LoggerImpl::loadCategoryLoggerConf(LOG_CATEGORY_TAG catnum)
+{
 	std::string ret;
 
 	//get log filename
-	if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_LOG_FILENAME_KEY)) {
-		logFilename = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_LOG_FILENAME_KEY);
+	if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, log_filename_key)) {
+		logFilename = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, log_filename_key);
 	}
 	else {
 		if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
@@ -254,8 +276,8 @@ void l7vs::LoggerImpl::loadConf()
 	}
 	
 	//get rotation
-	if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_KEY)) {
-		std::string rotationStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_KEY);
+	if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_key)) {
+		std::string rotationStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_key);
 		if ("size" == rotationStr) rotation = LOG_ROT_SIZE;
 		else if ("date" == rotationStr) rotation = LOG_ROT_DATE;
 		else if ("datesize" == rotationStr) rotation = LOG_ROT_DATESIZE;
@@ -274,12 +296,12 @@ void l7vs::LoggerImpl::loadConf()
 	}
 
 	//get max backup index
-	if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_MAX_BACKUP_INDEX_KEY)) {
-		std::string maxBackupIndexStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_MAX_BACKUP_INDEX_KEY);
+	if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, max_backup_index_key)) {
+		std::string maxBackupIndexStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, max_backup_index_key);
 		try {
-			maxBackupIndex = lexical_cast<unsigned int>(maxBackupIndexStr);
+			maxBackupIndex = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
 		}
-		catch (const l7vs::bad_lexical_cast& bc) {
+		catch (const boost::bad_lexical_cast& bc) {
 			if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 				this->putLogError(loggerCategory,4, "Invalid MaxBackupIndex Value.", __FILE__, __LINE__);
 			}
@@ -312,8 +334,8 @@ void l7vs::LoggerImpl::loadConf()
 	if (LOG_ROT_SIZE == rotation || LOG_ROT_DATESIZE == rotation) {
 		// get max file size
 		std::string maxFileSizeStr;
-		if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_MAX_FILE_SIZE_KEY)) {
-			maxFileSizeStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_MAX_FILE_SIZE_KEY);
+		if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, max_file_size_key)) {
+			maxFileSizeStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, max_file_size_key);
 		}
 		else {
 			if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
@@ -333,9 +355,9 @@ void l7vs::LoggerImpl::loadConf()
 		}
 			
 		try {
-			maxFileSize = lexical_cast<size_t>(size_val);
+			maxFileSize = boost::lexical_cast<size_t>(size_val);
 		}
-		catch (const l7vs::bad_lexical_cast& bc) {
+		catch (const boost::bad_lexical_cast& bc) {
 			if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 				this->putLogError(loggerCategory,9, "Invalid FileSize Value.", __FILE__, __LINE__);
 			}
@@ -382,8 +404,8 @@ void l7vs::LoggerImpl::loadConf()
 
 	if (LOG_ROT_DATE == rotation || LOG_ROT_DATESIZE == rotation) {
 		// get rotation timing
-		if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_KEY)) {
-			std::string rotationTimingStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_KEY);
+		if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_timing_key)) {
+			std::string rotationTimingStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_timing_key);
 			if ("year" == rotationTimingStr) rotationTiming = LOG_TIM_YEAR;
 			else if ("month" == rotationTimingStr) rotationTiming = LOG_TIM_MONTH;
 			else if ("week" == rotationTimingStr) rotationTiming = LOG_TIM_WEEK;
@@ -404,8 +426,8 @@ void l7vs::LoggerImpl::loadConf()
 		}
 
 		if (LOG_TIM_YEAR == rotationTiming) {
-			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY)) {
-				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY);
+			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_timing_value_key)) {
+				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_timing_value_key);
 
 				std::string::size_type fpos = 0;
 				std::string::size_type rpos = 0;
@@ -418,9 +440,9 @@ void l7vs::LoggerImpl::loadConf()
 				if (std::string::npos != rpos) {
 					std::string monthStr = ret.substr(fpos, rpos - fpos);
 					try {
-						month = lexical_cast<int>(monthStr);
+						month = boost::lexical_cast<int>(monthStr);
 					}
-					catch (const l7vs::bad_lexical_cast& bc) {
+					catch (const boost::bad_lexical_cast& bc) {
 						if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 							this->putLogError(loggerCategory,16, "Parse Timing Year Error.", __FILE__, __LINE__);
 						}
@@ -438,9 +460,9 @@ void l7vs::LoggerImpl::loadConf()
 					if (std::string::npos != rpos) {
 						std::string dateStr = ret.substr(fpos, rpos - fpos);
 						try {
-							date = lexical_cast<int>(dateStr);
+							date = boost::lexical_cast<int>(dateStr);
 						}
-						catch (const l7vs::bad_lexical_cast& bc) {
+						catch (const boost::bad_lexical_cast& bc) {
 							if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 								this->putLogError(loggerCategory,18, "Parse Timing Year Error.", __FILE__, __LINE__);
 							}
@@ -465,9 +487,9 @@ void l7vs::LoggerImpl::loadConf()
 						if (std::string::npos != rpos) {
 							std::string hourStr = ret.substr(fpos, rpos - fpos);
 							try {
-								hour = lexical_cast<int>(hourStr);
+								hour = boost::lexical_cast<int>(hourStr);
 							}
-							catch (const l7vs::bad_lexical_cast& bc) {
+							catch (const boost::bad_lexical_cast& bc) {
 								if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 									this->putLogError(loggerCategory,21, "Parse Timing Year Error.", __FILE__, __LINE__);
 								}
@@ -482,9 +504,9 @@ void l7vs::LoggerImpl::loadConf()
 							// minute
 							std::string minuteStr = ret.substr(rpos + 1);
 							try {
-								minute = lexical_cast<int>(minuteStr);
+								minute = boost::lexical_cast<int>(minuteStr);
 							}
-							catch (const l7vs::bad_lexical_cast& bc) {
+							catch (const boost::bad_lexical_cast& bc) {
 								if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 									this->putLogError(loggerCategory,23, "Parse Timing Year Error.", __FILE__, __LINE__);
 								}
@@ -537,8 +559,8 @@ void l7vs::LoggerImpl::loadConf()
 		}
 
 		if (LOG_TIM_MONTH == rotationTiming) {
-			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY)) {
-				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY);
+			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_timing_value_key)) {
+				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_timing_value_key);
 
 				std::string::size_type fpos = 0;
 				std::string::size_type rpos = 0;
@@ -550,9 +572,9 @@ void l7vs::LoggerImpl::loadConf()
 				if (std::string::npos != rpos) {
 					std::string dateStr = ret.substr(fpos, rpos - fpos);
 					try {
-						date = lexical_cast<int>(dateStr);
+						date = boost::lexical_cast<int>(dateStr);
 					}
-					catch (const l7vs::bad_lexical_cast& bc) {
+					catch (const boost::bad_lexical_cast& bc) {
 						if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 							this->putLogError(loggerCategory,29, "Parse Timing Month Error.", __FILE__, __LINE__);
 						}
@@ -570,9 +592,9 @@ void l7vs::LoggerImpl::loadConf()
 					if (std::string::npos != rpos) {
 						std::string hourStr = ret.substr(fpos, rpos - fpos);
 						try {
-							hour = lexical_cast<int>(hourStr);
+							hour = boost::lexical_cast<int>(hourStr);
 						}
-						catch (const l7vs::bad_lexical_cast& bc) {
+						catch (const boost::bad_lexical_cast& bc) {
 							if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 								this->putLogError(loggerCategory,31, "Parse Timing Month Error.", __FILE__, __LINE__);
 							}
@@ -587,9 +609,9 @@ void l7vs::LoggerImpl::loadConf()
 						// minute
 						std::string minuteStr = ret.substr(rpos + 1);
 						try {
-							minute = lexical_cast<int>(minuteStr);
+							minute = boost::lexical_cast<int>(minuteStr);
 						}
-						catch (const l7vs::bad_lexical_cast& bc) {
+						catch (const boost::bad_lexical_cast& bc) {
 							if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 								this->putLogError(loggerCategory,33, "Parse Timing Month Error.", __FILE__, __LINE__);
 							}
@@ -634,8 +656,8 @@ void l7vs::LoggerImpl::loadConf()
 		}
 
 		if (LOG_TIM_WEEK == rotationTiming) {
-			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY)) {
-				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY);
+			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_timing_value_key)) {
+				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_timing_value_key);
 
 				std::string::size_type fpos = 0;
 				std::string::size_type rpos = 0;
@@ -666,9 +688,9 @@ void l7vs::LoggerImpl::loadConf()
 					if (std::string::npos != rpos) {
 						std::string hourStr = ret.substr(fpos, rpos - fpos);
 						try {
-							hour = lexical_cast<int>(hourStr);
+							hour = boost::lexical_cast<int>(hourStr);
 						}
-						catch (const l7vs::bad_lexical_cast& bc) {
+						catch (const boost::bad_lexical_cast& bc) {
 							if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 								this->putLogError(loggerCategory,39, "Parse Timing Week Error.", __FILE__, __LINE__);
 							}
@@ -683,9 +705,9 @@ void l7vs::LoggerImpl::loadConf()
 						// minute
 						std::string minuteStr = ret.substr(rpos + 1);
 						try {
-							minute = lexical_cast<int>(minuteStr);
+							minute = boost::lexical_cast<int>(minuteStr);
 						}
-						catch (const l7vs::bad_lexical_cast& bc) {
+						catch (const boost::bad_lexical_cast& bc) {
 							if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 								this->putLogError(loggerCategory,41, "Parse Timing Week Error.", __FILE__, __LINE__);
 							}
@@ -730,8 +752,8 @@ void l7vs::LoggerImpl::loadConf()
 		}
 
 		if (LOG_TIM_DATE == rotationTiming) {
-			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY)) {
-				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY);
+			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_timing_value_key)) {
+				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_timing_value_key);
 
 				std::string::size_type fpos = 0;
 				std::string::size_type rpos = 0;
@@ -742,9 +764,9 @@ void l7vs::LoggerImpl::loadConf()
 				if (std::string::npos != rpos) {
 					std::string hourStr = ret.substr(fpos, rpos - fpos);
 					try {
-						hour = lexical_cast<int>(hourStr);
+						hour = boost::lexical_cast<int>(hourStr);
 					}
-					catch (const l7vs::bad_lexical_cast& bc) {
+					catch (const boost::bad_lexical_cast& bc) {
 						if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 							this->putLogError(loggerCategory,46, "Parse Timing Date Error.", __FILE__, __LINE__);
 						}
@@ -759,9 +781,9 @@ void l7vs::LoggerImpl::loadConf()
 					// minute
 					std::string minuteStr = ret.substr(rpos + 1);
 					try {
-						minute = lexical_cast<int>(minuteStr);
+						minute = boost::lexical_cast<int>(minuteStr);
 					}
-					catch (const l7vs::bad_lexical_cast& bc) {
+					catch (const boost::bad_lexical_cast& bc) {
 						if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 							this->putLogError(loggerCategory,48, "Parse Timing Date Error.", __FILE__, __LINE__);
 						}
@@ -798,15 +820,15 @@ void l7vs::LoggerImpl::loadConf()
 		}
 
 		if (LOG_TIM_HOUR == rotationTiming) {
-			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY)) {
-				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, LOGGER_ROTATION_TIMING_VALUE_KEY);
+			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, rotation_timing_value_key)) {
+				ret = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, rotation_timing_value_key);
 
 				// minute
 				int minute = 0;
 				try {
-					minute = lexical_cast<int>(ret);
+					minute = boost::lexical_cast<int>(ret);
 				}
-				catch (const l7vs::bad_lexical_cast& bc) {
+				catch (const boost::bad_lexical_cast& bc) {
 					if (LOG_LV_ERROR >= this->getLogLevel(loggerCategory)) {
 						this->putLogError(loggerCategory,52, "Parse Timing Hour Error.", __FILE__, __LINE__);
 					}
@@ -836,12 +858,37 @@ void l7vs::LoggerImpl::loadConf()
 	}
 
 	try {
+		/*-------- DEBUG LOG for sslproxy --------*/
+		if (LOG_LV_DEBUG >= this->getLogLevel(loggerCategory) &&
+		    catnum != LOG_CAT_SSLPROXY_LOGGER) {
+			std::ostringstream oss;
+			oss << "function : void l7vs::LoggerImpl::loadCategoryLoggerConf("
+			    << "LOG_CATEGORY_TAG catnum) : "
+			    << "Set category Logger appender. "
+			    << "catnum = " << catnum;
+			this->putLogDebug(loggerCategory, 4, oss.str(), __FILE__, __LINE__);
+		}
+		/*------ DEBUG LOG END for sslproxy ------*/
+
 		// reset current configuration
+		// when category is LOG_CAT_NONE (first category)
 		log4cxx::helpers::Pool pool;
-		log4cxx::LogManager::resetConfiguration();
-		log4cxx::LoggerPtr root = log4cxx::Logger::getRootLogger();
-		if (0 == root) {
-			throw std::logic_error("getRootLogger Failed.");
+		if (catnum == LOG_CAT_NONE) {
+			/*-------- DEBUG LOG for sslproxy --------*/
+			if (LOG_LV_DEBUG >= this->getLogLevel(loggerCategory) &&
+			    catnum != LOG_CAT_SSLPROXY_LOGGER) {
+				std::ostringstream oss;
+				oss << "function : l7vs::LoggerImpl::loadCategoryLoggerConf() : "
+				    << "Reset all Logger configuration. "
+				    << "catnum = " << catnum;
+				this->putLogDebug(loggerCategory, 5, oss.str(), __FILE__, __LINE__);
+			}
+			/*------ DEBUG LOG END for sslproxy ------*/
+			log4cxx::LogManager::resetConfiguration();
+		}
+		log4cxx::LoggerPtr catlogger = log4cxx::Logger::getLogger(categoryTable[catnum]);
+		if (0 == catlogger) {
+			throw std::logic_error("getLogger Failed.");
 		}
 		log4cxx::LayoutPtr layout =
 			new log4cxx::PatternLayout(LOGGER_LAYOUT);
@@ -890,9 +937,9 @@ void l7vs::LoggerImpl::loadConf()
 				// activate appender options
 				sizeAppender->activateOptions(pool);
 	
-				// add size_base_appender to rootLogger
-				root->addAppender(sizeAppender);
-	
+				// add size_base_appender to CategoryLogger
+				catlogger->addAppender(sizeAppender);
+
 				break;
 			}
 		case LOG_ROT_DATE:
@@ -934,9 +981,9 @@ void l7vs::LoggerImpl::loadConf()
 				// activate appender options
 				dateAppender->activateOptions(pool);
 	
-				// add date_based_appender to rootRogger
-				root->addAppender(dateAppender);
-	
+				// add date_based_appender to CategoryLogger
+				catlogger->addAppender(dateAppender);
+
 				break;
 			}
 		default:	//LOG_ROT_DATESIZE:
@@ -981,17 +1028,19 @@ void l7vs::LoggerImpl::loadConf()
 				// activate appender options
 				dateSizeAppender->activateOptions(pool);
 	
-				// add time_and_size_based_appender to rootLogger
-				root->addAppender(dateSizeAppender);
+				// add time_and_size_based_appender to CategoryLogger
+				catlogger->addAppender(dateSizeAppender);
 			}
 		}
+
 		//set default log level
-		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat <= getCategoryRangeEnd(LOG_MOD_SNMPAGENT); ++cat) {
+		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
 			log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
 		}
-		
+
 		//get category level
-		for (LOG_CATEGORY_TAG cat = getCategoryRangeStart(loggerProcess); cat <= getCategoryRangeEnd(loggerProcess); ++cat) {
+		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
+			if (cat == LOG_CAT_NONE) continue;
 			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, categoryTable[cat])) {
 				std::string levelStr = l7vs::Parameter::getInstance().getStringValue(PARAM_COMP_LOGGER, categoryTable[cat]);
 				if ("debug" == levelStr) {
@@ -1042,9 +1091,6 @@ void l7vs::LoggerImpl::loadConf()
 		throw std::logic_error(oss.str());
 	}
 
-	if (LOG_LV_INFO >= this->getLogLevel(loggerCategory)) {
-		this->putLogInfo(loggerCategory,2, "Logger Configuration Succeed.", __FILE__, __LINE__);
-	}
 	initLogLevelTable();
 }
 
@@ -1057,11 +1103,11 @@ void l7vs::LoggerImpl::loadConf()
  */
 void l7vs::LoggerImpl::initLogLevelTable(void)
 {
-  int nCounter = 0;
-  
-  for (;nCounter < LOGGER_CATEGORY_NUM; nCounter++) {
-    loglevel[nCounter] = LOG_LV_NONE;
-  }
+	int nCounter = 0;
 
-  return;
+	for (;nCounter < LOGGER_CATEGORY_NUM; nCounter++) {
+		loglevel[nCounter] = LOG_LV_NONE;
+	}
+
+	return;
 }

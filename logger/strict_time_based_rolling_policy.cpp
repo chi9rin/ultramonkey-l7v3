@@ -30,11 +30,12 @@
 #include <log4cxx/helpers/optionconverter.h>
 #include <time.h>
 #include "strict_time_based_rolling_policy.h"
-#include "lexical_cast.h"
+#include <boost/lexical_cast.hpp>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+using namespace l7vs;
 using namespace log4cxx;
 using namespace log4cxx::rolling;
 using namespace log4cxx::helpers;
@@ -238,24 +239,20 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 	try {
 		switch (rotationTiming) {
 		case LOG_TIM_YEAR:
-			numNowDate = l7vs::lexical_cast<unsigned long long>(now.substr(4));
-			numTimingDate = l7vs::lexical_cast<unsigned long long>(rotationTimingValue);
+			numNowDate = boost::lexical_cast<unsigned long long>(now.substr(4));
+			numTimingDate = boost::lexical_cast<unsigned long long>(rotationTimingValue);
 	
-			numYear = l7vs::lexical_cast<int>(now.substr(0, 4));
-			numMonth = l7vs::lexical_cast<int>(rotationTimingValue.substr(0, 2));
-			numDate = l7vs::lexical_cast<int>(rotationTimingValue.substr(2, 2));
-			numHour = l7vs::lexical_cast<int>(rotationTimingValue.substr(4, 2));
-			numMinute = l7vs::lexical_cast<int>(rotationTimingValue.substr(6));
+			numYear = boost::lexical_cast<int>(now.substr(0, 4));
+			numMonth =boost::lexical_cast<int>(rotationTimingValue.substr(0, 2));
+			numDate = boost::lexical_cast<int>(rotationTimingValue.substr(2, 2));
+			numHour = boost::lexical_cast<int>(rotationTimingValue.substr(4, 2));
+			numMinute = boost::lexical_cast<int>(rotationTimingValue.substr(6));
 	
 			if (numTimingDate > numNowDate) {
 				t.tm_year = numYear - 1900;
 			}
 			else {
-#if defined(LOGGER_PROCESS_ADM)
-				t.tm_year = numYear - 1900;
-#else	//LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
 				t.tm_year = numYear + 1 - 1900;
-#endif
 			}
 			t.tm_mon = numMonth - 1;
 			t.tm_mday = numDate;
@@ -269,24 +266,20 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 			break;
 	
 		case LOG_TIM_MONTH:
-			numNowDate = l7vs::lexical_cast<unsigned long long>(now.substr(6));
-			numTimingDate = l7vs::lexical_cast<unsigned long long>(rotationTimingValue);
+			numNowDate = boost::lexical_cast<unsigned long long>(now.substr(6));
+			numTimingDate = boost::lexical_cast<unsigned long long>(rotationTimingValue);
 	
-			numYear = l7vs::lexical_cast<int>(now.substr(0, 4));
-			numMonth = l7vs::lexical_cast<int>(now.substr(4, 2));
-			numDate = l7vs::lexical_cast<int>(rotationTimingValue.substr(0, 2));
-			numHour = l7vs::lexical_cast<int>(rotationTimingValue.substr(2, 2));
-			numMinute = l7vs::lexical_cast<int>(rotationTimingValue.substr(4));
+			numYear = boost::lexical_cast<int>(now.substr(0, 4));
+			numMonth = boost::lexical_cast<int>(now.substr(4, 2));
+			numDate = boost::lexical_cast<int>(rotationTimingValue.substr(0, 2));
+			numHour = boost::lexical_cast<int>(rotationTimingValue.substr(2, 2));
+			numMinute = boost::lexical_cast<int>(rotationTimingValue.substr(4));
 	
 			if (numTimingDate > numNowDate) {
 				t.tm_year = numYear - 1900;
 				t.tm_mon = numMonth - 1;
 			}
 			else {
-#if defined(LOGGER_PROCESS_ADM)
-				t.tm_year = numYear - 1900;
-				t.tm_mon = numMonth - 1;
-#else	//LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
 				if (12 == numMonth) {
 					t.tm_year = numYear + 1 - 1900;
 					t.tm_mon = 0;
@@ -295,7 +288,6 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 					t.tm_year = numYear - 1900;
 					t.tm_mon = numMonth + 1 - 1;
 				}
-#endif
 			}
 	
 			if (numDate > dates[t.tm_mon]) {
@@ -315,16 +307,16 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 	
 			break;
 		case LOG_TIM_WEEK:
-			numNowDate = l7vs::lexical_cast<unsigned long long>(now.substr(8));
-			numTimingDate = l7vs::lexical_cast<unsigned long long>(rotationTimingValue);
+			numNowDate = boost::lexical_cast<unsigned long long>(now.substr(8));
+			numTimingDate = boost::lexical_cast<unsigned long long>(rotationTimingValue);
 	
-			numYear = l7vs::lexical_cast<int>(now.substr(0, 4));
-			numMonth = l7vs::lexical_cast<int>(now.substr(4, 2));
-			numDate = l7vs::lexical_cast<int>(now.substr(6, 2));
-			numNowWeek = l7vs::lexical_cast<int>(now.substr(8, 1));
-			numTimingWeek = l7vs::lexical_cast<int>(rotationTimingValue.substr(0, 1));
-			numHour = l7vs::lexical_cast<int>(rotationTimingValue.substr(1, 2));
-			numMinute = l7vs::lexical_cast<int>(rotationTimingValue.substr(3));
+			numYear = boost::lexical_cast<int>(now.substr(0, 4));
+			numMonth = boost::lexical_cast<int>(now.substr(4, 2));
+			numDate = boost::lexical_cast<int>(now.substr(6, 2));
+			numNowWeek = boost::lexical_cast<int>(now.substr(8, 1));
+			numTimingWeek = boost::lexical_cast<int>(rotationTimingValue.substr(0, 1));
+			numHour = boost::lexical_cast<int>(rotationTimingValue.substr(1, 2));
+			numMinute = boost::lexical_cast<int>(rotationTimingValue.substr(3));
 	
 			t.tm_year = numYear - 1900;
 			t.tm_mon = numMonth - 1;
@@ -332,11 +324,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 				t.tm_mday = numDate + (numTimingWeek - numNowWeek); 
 			}
 			else {
-#if defined(LOGGER_PROCESS_ADM)
-				t.tm_mday = numDate + (numTimingWeek - numNowWeek); 
-#else	//LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
 				t.tm_mday = numDate + (7 - (numNowWeek - numTimingWeek));
-#endif
 			}
 			t.tm_hour = numHour;
 			t.tm_min = numMinute;
@@ -349,14 +337,14 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 			break;
 	
 		case LOG_TIM_DATE:
-			numNowDate = l7vs::lexical_cast<unsigned long long>(now.substr(8));
-			numTimingDate = l7vs::lexical_cast<unsigned long long>(rotationTimingValue);
+			numNowDate = boost::lexical_cast<unsigned long long>(now.substr(8));
+			numTimingDate = boost::lexical_cast<unsigned long long>(rotationTimingValue);
 	
-			numYear = l7vs::lexical_cast<int>(now.substr(0, 4));
-			numMonth = l7vs::lexical_cast<int>(now.substr(4, 2));
-			numDate = l7vs::lexical_cast<int>(now.substr(6, 2));
-			numHour = l7vs::lexical_cast<int>(rotationTimingValue.substr(0, 2));
-			numMinute = l7vs::lexical_cast<int>(rotationTimingValue.substr(2));
+			numYear = boost::lexical_cast<int>(now.substr(0, 4));
+			numMonth = boost::lexical_cast<int>(now.substr(4, 2));
+			numDate = boost::lexical_cast<int>(now.substr(6, 2));
+			numHour = boost::lexical_cast<int>(rotationTimingValue.substr(0, 2));
+			numMinute = boost::lexical_cast<int>(rotationTimingValue.substr(2));
 	
 			t.tm_year = numYear - 1900;
 			t.tm_mon = numMonth - 1;
@@ -364,11 +352,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 				t.tm_mday = numDate;
 			}
 			else {
-#if defined(LOGGER_PROCESS_ADM)
-				t.tm_mday = numDate; 
-#else	//LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
 				t.tm_mday = numDate + 1; 
-#endif
 			}
 			t.tm_hour = numHour;
 			t.tm_min = numMinute;
@@ -380,14 +364,14 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 			break;
 	
 		default:	//HOUR
-			numNowDate = l7vs::lexical_cast<unsigned long long>(now.substr(10));
-			numTimingDate = l7vs::lexical_cast<unsigned long long>(rotationTimingValue);
+			numNowDate = boost::lexical_cast<unsigned long long>(now.substr(10));
+			numTimingDate = boost::lexical_cast<unsigned long long>(rotationTimingValue);
 	
-			numYear = l7vs::lexical_cast<int>(now.substr(0, 4));
-			numMonth = l7vs::lexical_cast<int>(now.substr(4, 2));
-			numDate = l7vs::lexical_cast<int>(now.substr(6, 2));
-			numHour = l7vs::lexical_cast<int>(now.substr(8, 2));
-			numMinute = l7vs::lexical_cast<int>(rotationTimingValue);
+			numYear = boost::lexical_cast<int>(now.substr(0, 4));
+			numMonth = boost::lexical_cast<int>(now.substr(4, 2));
+			numDate = boost::lexical_cast<int>(now.substr(6, 2));
+			numHour = boost::lexical_cast<int>(now.substr(8, 2));
+			numMinute = boost::lexical_cast<int>(rotationTimingValue);
 	
 			t.tm_year = numYear - 1900;
 			t.tm_mon = numMonth - 1;
@@ -396,11 +380,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 				t.tm_hour = numHour;
 			}
 			else {
-#if defined(LOGGER_PROCESS_ADM)
-				t.tm_hour = numHour;
-#else	//LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
 				t.tm_hour = numHour + 1;
-#endif
 			}
 			t.tm_min = numMinute;
 	
@@ -470,21 +450,5 @@ bool StrictTimeBasedRollingPolicy::isTriggeringEvent(
 		LogLog::warn(LOG4CXX_STR("Fail to get time. "));
 		return false;
 	}
-#if defined(LOGGER_PROCESS_ADM)
-	struct stat sb;
-
-	if (-1 == stat(filename.c_str(), &sb)) {
-		LogLog::warn(LOG4CXX_STR("Fail to get logfile update time. "));
-		return false;
-	}
-	if (now_time > nextCheck && nextCheck > sb.st_mtime) {
-		// Do rollover.
-		return true;
-	} else {
-		// Do not rollover.
-		return false;
-	}
-#else	//LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
 	return now_time > nextCheck;
-#endif
 }

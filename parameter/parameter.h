@@ -13,6 +13,7 @@
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
+#include <string>
 #include "parameter_enum.h"
 
 namespace l7vs{
@@ -41,6 +42,6 @@ namespace l7vs{
 		std::string	getStringValue(const PARAMETER_COMPONENT_TAG,
 							const std::string&);
 	};
-}
+};
 	
 #endif	//PARAMETER_H

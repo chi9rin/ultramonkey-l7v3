@@ -60,7 +60,7 @@ namespace log4cxx {
 			 *  LOG_TIM_DATE   = daily
 			 *  LOG_TIM_HOUR   = hourly
 			 */
-			LOG_ROTATION_TIMING_TAG rotationTiming;
+			l7vs::LOG_ROTATION_TIMING_TAG rotationTiming;
 			/*!
 			 *  rotation timing value 
 			 *
@@ -89,9 +89,9 @@ namespace log4cxx {
 			void activateOptions(log4cxx::helpers::Pool& );
 
 			//! rotationTiming getter
-			LOG_ROTATION_TIMING_TAG getRotationTiming();
+			l7vs::LOG_ROTATION_TIMING_TAG getRotationTiming();
 			//! rotationTiming setter
-			void setRotationTiming(const LOG_ROTATION_TIMING_TAG);
+			void setRotationTiming(const l7vs::LOG_ROTATION_TIMING_TAG);
 			//! rotatioTimingValue getter
 			std::string getRotationTimingValue();
 			//! rotatioTimingValue setter
