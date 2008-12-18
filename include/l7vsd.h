@@ -27,10 +27,11 @@ protected:
 
 	std::list<virtual_service> virtual_service_list;
 
-	shared_ptr<config> config_;
+	shared_ptr<command_receiver> command_receiever_;
 	shared_ptr<replication> replication_;
 	shared_ptr<snmp_bridge> snmp_bridge_;
 
+public:
 	config_message_result list_virtual_service(std::vector<virtualservice_element>& out_vslist);
 
 	config_message_result add_virtual_service(virtualservice_element in_vselement);
@@ -58,10 +59,11 @@ protected:
 	config_message_result set_snmp_log_level_all(LOG_LEVEL_TAG in_log_level);
 
 	config_message_result reload_parameter(PARAMETER_COMPONENT_TAG in_reload_param);
-		
 
-public:
 	void start();
+
+protected:
+	bool is_exit_requested();
 
 };
 
