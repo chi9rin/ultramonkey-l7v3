@@ -44,7 +44,9 @@ protected:
 	config_message_result flush_virtual_service();
 
 	config_message_result get_replication_info(REPLICATION_MODE_TAG& out_status);
-	config_message_result set_replication(REPLICATION_KIND_TAG in_repkind);
+	config_message_result set_replication(bool start_replication_flag);
+	config_message_result replication_dump_memory();
+	config_message_result replication_compulsorily();
 
 	config_message_result get_log_level(LOG_CATEGORY_TAG in_log_category, LOG_LEVEL_TAG& out_log_level);
 	config_message_result set_log_level(LOG_CATEGORY_TAG in_log_category, LOG_LEVEL_TAG in_log_level);
