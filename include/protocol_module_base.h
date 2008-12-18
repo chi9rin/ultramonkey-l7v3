@@ -16,11 +16,15 @@
 #include <boost/function.hpp>
 #include "logger_enum.h"
 #include "module_base.h"
+#include "realserver.h"
 
 namespace l7vsd{
 
 class protocol_module_base : public module_base{
 public:
+	typedef	list<realserver>	realserverlist_type;
+	typedef	boost::function< realserverlist_type::iretarot( void ) > rs_list_itr_func_type;
+
 	enum	EVENT_TAG
 	{
 		//use in upstream_thread
@@ -51,18 +55,29 @@ public:
 		bool		operator!=( const check_message& in ){ return flag != in.flag; }
 	};
 protected:
-	boost::function< std::list<realserver>::iterator ( void ) > rs_list_begin;
-	boost::function< std::list<realserver>::iterator ( void ) > rs_list_end;
-	boost::function< std::list<realserver>::iterator ( void ) > rs_list_next;
+	rs_list_itr_func_type	rs_list_begin;
+	rs_list_itr_func_type	rs_list_end;
+	rs_list_itr_func_type	rs_list_next;
 
 	boost::function< void ( const LOG_LEVEL_TAG, const std::string) >	logger;
 	boost::function< void ( const std::string&, unsigned int* ) > replication_pay_memory;
+
+	//scheduler_method
+	boost::function< boost::asio::ip::basic_endpoint&(	const boost::thread::id,
+														const boost::thread::id,
+														rs_list_itr_func_type,
+														rs_list_itr_func_type,
+														rs_list_itr_func_type ) >	schedule;
+	boost::function< void( boost::thread::id,boost::thread::id ) >	schedul_session_initialize;
+	boost::function< void( boost::thread::id,boost::thread::id ) >	schedul_session_finalize;
+	boost::function< void( void ) >	schedul_table_lock;
+	boost::function< void( void ) >	schedul_table_unlock;
 public:
 
 	protocol_module_base(
-							boost::function< std::list<realserver>::iterator (void)> inlist_begin,
-							boost::function< std::list<realserver>::iterator (void)> inlist_end,
-							boost::function< std::list<realserver>::iterator (void)> inlist next,
+							rs_list_itr_func_type	inlist_begin,
+							rs_list_itr_func_type	inlist_end,
+							rs_list_itr_func_type	inlist_next,
 							boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
 							boost::function< void ( std::string&, unsigned int* ) >  inreplication_pay_memory
 						) : rs_list_begin( inlist_begin ),
@@ -94,6 +109,27 @@ public:
 	virtual	void	handle_session_finalize(
 									const boost::thread::id up_thread_id,
 									const boost::thread::id down_thread_id ) = 0;
+
+	void	register_schedule_handle_schedule(
+									boost::function< boost::asio::ip::basic_endpoint&(
+																const boost::thread::id,
+																const boost::thread::id,
+																rs_list_itr_func_type,
+																rs_list_itr_func_type,
+																rs_list_itr_func_type ) > inschedule 
+											)  : schedule( inschedule )= 0;
+
+	void	register_schedule_handle_session_initialize(
+									boost::function< void( const boost::thread::id, const boost::thread::id ) > ininitialize ) : schedul_session_initialize( ininitialize ) = 0;
+
+	void	register_schedule_handle_session_finalize(
+									boost::function< void( const boost::thread::id, const boost::thread::id ) > finalize) :schedul_session_finalize( infinalize ) = 0;
+
+	void	register_schedule_table_lock(
+									boost::function< void( void ) > intable_lock ) : schedule_table_lock( intable_lock ) = 0;
+
+	void	register_schedule_table_unlock(
+									boost::function< void( void ) > intable_unlock ) : schedule_table_unlock( intable_unlock ) = 0;
 
 	//use in upstream_thread
 	virtual	EVENT_TAG	handle_accept(
