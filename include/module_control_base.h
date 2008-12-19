@@ -25,7 +25,7 @@ protected:
 	virtual	~module_control_base() = 0;
 
 public:
-	virtual	void	load_module( const std::string&	modulename ) = 0;
+	virtual	bool	load_module( const std::string&	modulename ) = 0;
 	virtual	void	unload_module( const std::string&	modulename ) = 0;
 };
 

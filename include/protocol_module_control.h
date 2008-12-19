@@ -28,7 +28,7 @@ protected:
 public:
 	static protocol_module_control&	getInstance();
 
-	void	load_module( const std::string&	modulename );
+	bool	load_module( const std::string&	modulename );
 	void	unload_module( const std::string&	modulename );
 
 	protocol_module_base*	module_new(
