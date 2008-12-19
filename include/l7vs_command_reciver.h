@@ -13,7 +13,7 @@ protected:
 	boost::asio::local::stream_protocol::acceptor		acceptor_;
 	void	handle_accept( boost::shared_ptr<l7vs_command_session>, const boost::system::error_code& );
 public:
-	command_reciver(	boost::asio::io_service& io_service, const std::string& file ) 
+	command_receiver(	boost::asio::io_service& io_service, const std::string& file ) 
 		:	dispatcher( io_service ),
 			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) );
 	~command_receiver();
