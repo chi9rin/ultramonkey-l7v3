@@ -12,6 +12,7 @@
 #define PROTOCOL_MODULE_CONTROL
 
 #include<string>
+#include<boost/thread/locks.hpp>
 #include"logger.h"
 #include "realserver.h"
 #include "protocol_module_base.h"
@@ -20,24 +21,42 @@ class	protocol_module_control : public module_control_base
 {
 public:
 	typedef	list<realserver>	realserverlist_type;
-	typedef	boost::function< realserverlist_type::iretarot( void ) > rs_list_itr_func_type;
+	typedef	boost::function< realserverlist_type::iretarot( void ) >	rs_list_itr_func_type;
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) >	logger_func_type;
+	typedef	boost::function< void ( std::string&, unsigned int* ) >				replication_pay_memory_func_type;
+
+	struct	module_info{
+		unsigned int	ref_count;
+		protocol_module_base*	(*module_create)(
+										rs_list_itr_func_type,
+										rs_list_itr_func_type,
+										rs_list_itr_func_type,
+										logger_func_type,
+										replication_pay_memory_func_type);
+		void					(*module_restroy)(protocol_module_base*);
+	};
+
 protected:
+	std::map<std::string,int>	loadedmodule_map;
+	boost::mutex				loadedmodule_map_mutex;
+
 	protocol_module_control();
 	protocol_module_control( const protocol_module_control& );
 	protocol_module_control&	operator=( const protocol_module_control& );
+
 public:
 	static protocol_module_control&	getInstance();
 
-	bool	load_module( const std::string&	modulename );
-	void	unload_module( const std::string&	modulename );
+	bool	load_module( const std::string& );
+	void	unload_module( const std::string& );
 
 	protocol_module_base*	module_new(
 								std::string& modulename,
-								rs_list_itr_func_type rslist_begin,
-								rs_list_itr_func_type rslist_end,
-								rs_list_itr_func_type rslist_next,
-								boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
-								boost::function< void ( std::string&, unsigned int* ) >  inpaymemory );
+								rs_list_itr_func_type	rslist_begin,
+								rs_list_itr_func_type	rslist_end,
+								rs_list_itr_func_type	rslist_next,
+								logger_func_type		inlog,
+								replication_pay_memory_func_type	inpaymemory );
 	void	module_delete( protocol_module_base* module_ptr );
 };
 

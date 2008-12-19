@@ -12,15 +12,32 @@
 #define SCHEDULE_MODULE_CONTROL
 
 #include<string>
+#include<boost/thread/locks.hpp>
 #include"logger.h"
 #include"schedule_module_base.h"
 
 class	schedule_module_control : public module_control_base
 {
+public:
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) >	logger_func_type;
+	typedef	boost::function< void ( std::string&, unsigned int* ) >				replication_pay_memory_func_type;
+
+	struct	module_info{
+		unsigned int	ref_count;
+		protocol_module_base*	(*module_create)(
+										logger_func_type,
+										replication_pay_memory_func_type);
+		void					(*module_restroy)(protocol_module_base*);
+	};
+
 protected:
+	std::map<std::string,int>	loadedmodule_map;
+	boost::mutex				loadedmodule_map_mutex;
+
 	schedule_module_control();
 	schedule_module_control( const schedule_module_control& );
 	schedule_module_control&	operator=( const schedule_module_control& );
+
 public:
 	static schedule_module_control&	getInstance();
 
@@ -29,8 +46,8 @@ public:
 
 	schedule_module_base*	module_new(
 								std::string& modulename,
-								boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
-								boost::function< void ( std::string&, unsigned int* ) >  inpaymemory );
+								logger_func_type	inlog,
+								replication_pay_memory_func_type	inpaymemory );
 	void	module_delete( schedule_module_base* module_ptr );
 };
 

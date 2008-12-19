@@ -13,18 +13,18 @@
 
 #include<string>
 #include<map>
-#include<boost/thread/locks.hpp>
 
 class	module_control_base
 {
 protected:
-	std::map<std::string,int>	loadedmodule_map;
-	boost::mutex				loadedmodule_map_mutex;
+	std::string	modulefile_path;
 
 	module_control_base(){}
 	virtual	~module_control_base() = 0;
-
+	virtual	operator=( const module_control_base& ) = 0;
 public:
+	virtual	void	initialize( const std::string& infile_path ) = 0;
+	virtual	void	finalize() = 0;
 	virtual	bool	load_module( const std::string&	modulename ) = 0;
 	virtual	void	unload_module( const std::string&	modulename ) = 0;
 };
