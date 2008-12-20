@@ -37,8 +37,8 @@ public:
 	};
 
 protected:
-	std::map<std::string,int>	loadedmodule_map;
-	boost::mutex				loadedmodule_map_mutex;
+	std::map<std::string,module_info>	loadedmodule_map;
+	boost::mutex						loadedmodule_map_mutex;
 
 	protocol_module_control();
 	protocol_module_control( const protocol_module_control& );
@@ -50,14 +50,14 @@ public:
 	bool	load_module( const std::string& );
 	void	unload_module( const std::string& );
 
-	protocol_module_base*	module_new(
+	protocol_module_base*	module_create(
 								std::string& modulename,
 								rs_list_itr_func_type	rslist_begin,
 								rs_list_itr_func_type	rslist_end,
 								rs_list_itr_func_type	rslist_next,
 								logger_func_type		inlog,
 								replication_pay_memory_func_type	inpaymemory );
-	void	module_delete( protocol_module_base* module_ptr );
+	void	module_destroy( protocol_module_base* module_ptr );
 };
 
 #endif//PROTOCOL_MODULE_CONTROL

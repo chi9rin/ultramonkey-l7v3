@@ -24,15 +24,15 @@ public:
 
 	struct	module_info{
 		unsigned int	ref_count;
-		protocol_module_base*	(*module_create)(
+		schedule_module_base*	(*module_create)(
 										logger_func_type,
 										replication_pay_memory_func_type);
 		void					(*module_restroy)(protocol_module_base*);
 	};
 
 protected:
-	std::map<std::string,int>	loadedmodule_map;
-	boost::mutex				loadedmodule_map_mutex;
+	std::map<std::string,module_info>	loadedmodule_map;
+	boost::mutex						loadedmodule_map_mutex;
 
 	schedule_module_control();
 	schedule_module_control( const schedule_module_control& );
@@ -44,11 +44,11 @@ public:
 	bool	load_module( const std::string&	modulename );
 	void	unload_module( const std::string&	modulename );
 
-	schedule_module_base*	module_new(
+	schedule_module_base*	module_create(
 								std::string& modulename,
 								logger_func_type	inlog,
 								replication_pay_memory_func_type	inpaymemory );
-	void	module_delete( schedule_module_base* module_ptr );
+	void	module_destroy( schedule_module_base* module_ptr );
 };
 
 #endif//SCHEDULE_MODULE_CONTROL

@@ -11,7 +11,7 @@ protected:
 	// l7vsd_mainthread										main_thread;
 	boost::asio::io_service&								dispatcher;
 	boost::asio::local::stream_protocol::acceptor		acceptor_;
-	void	handle_accept( boost::shared_ptr<l7vs_command_session>, const boost::system::error_code& );
+	void	handle_accept( boost::shared_ptr<command_session>, const boost::system::error_code& );
 public:
 	command_receiver(	boost::asio::io_service& io_service, const std::string& file ) 
 		:	dispatcher( io_service ),

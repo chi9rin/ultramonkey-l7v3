@@ -12,17 +12,18 @@
 
 namespace l7vsd{
 
-class	l7vs_command_session : public boost::enable_shared_from_this<session>{
+class	command_session : public boost::enable_shared_from_this<session>{
 protected:
 	//l7vsd_main_thread								main_thread;
 	boost::asio:local::stream_protocol::socket	unixsocket;
-	boost::array<char, MAX_BUFFER_SIZE> 			command_buffer;
+	boost::array<char, MAX_BUFFER_SIZE> 		command_buffer;
 	boost::array<char, MAX_BUFFER_SIZE>			response_buffer;
-	l7vs_command_session(){}
+
+	command_session(){}
 	void	handle_read( const boost::system::error_code&, size_t );
 	void	handle_write( const boost::system::error_code& );
 public:
-	l7vs_command_session( boost::asio::io_service& io_service ) : unixsocket( io_service );
+	command_session( boost::asio::io_service& io_service ) : unixsocket( io_service );
 	boost::asio::local::stream_protocol::socket&	socket(){ return unixsocket; }
 	void	start();
 };
