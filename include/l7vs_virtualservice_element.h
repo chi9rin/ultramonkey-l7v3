@@ -39,14 +39,15 @@ public:
 	long long				sorry_maxconnection;
 	boost::asio::ip::tcp::endpoint
 							sorry_endpoint;
-	std::string			sorry_uri;
-	unsigned long long	qos_service;
-	unsigned long long	qos_client;
+	bool					sorry_flag;
+	unsigned long long		qos_upstream;
+	unsigned long long		qos_downstream;
 	
 	virtualservice_element() :	udpmode(false),
-				qos_service(0LL),
-				qos_client(0LL),
-				sorry_maxconnection(0LL){}
+				sorry_maxconnection(0LL),
+				sorry_flag(false),
+				qos_upstream(0),
+				os_downstream(0){}
 				
 	virtualservice_element( const virtualservice_element& in )
 			:	udpmode( in.udpmode ),
@@ -56,9 +57,9 @@ public:
 				schedule_module_name( in.schedule_module_name ),
 				sorry_maxconnection( in.sorry_maxconnection ),
 				sorry_endpoint( in.sorry_endpoint ),
-				sorry_uri( in.sorry_uri ),
-				qos_service( in.qos_service ),
-				qos_client( in.qos_client ){
+				sorry_flag( in.sorry_flag ),
+				qos_upstream( in.qos_upstream ),
+				qos_downstream( in.qos_downstream ){
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
 			protocol_args.push_back( str );
@@ -76,9 +77,9 @@ public:
 		schedule_module_name = in.schedule_module_name;
 		sorry_maxconnection = in.sorry_maxconnection;
 		sorry_endpoint = in.sorry_endpoint;
-		sorry_uri = in.sorry_uri;
-		qos_service = in.qos_service;
-		qos_client = in.qos_client;
+		sorry_flag = in.sorry_flag;
+		qos_upstream = in.qos_upstream;
+		qos_downstream = in.qos_downstream;
 		
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
@@ -96,9 +97,9 @@ public:
 				elem1.udp_recv_endpoint == elem2.udp_recv_endpoint &&
 				elem1.protocol_module_name == elem2.protocol_module_name &&
 				elem1.sorry_maxconnection == elem2.sorry_maxconnection &&
-				elem1.sorry_uri == elem2.sorry_uri &&
-				elem1.qos_service == elem2.qos_service &&
-				elem1.qos_client == elem2.qos_client ){
+				elem1.sorry_flag == elem2.sorry_flag &&
+				elem1.qos_upstream == elem2.qos_upstream &&
+				elem1.qos_downstream == elem2.qos_downstream ){
 				if( elem1.realserver_vector.size() != elem2.realserver_vector.size() ) return false;
 				for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 					if( elem1.realserver_vector[i] != elem2.realserver_vector[i] ) return false;	
@@ -114,9 +115,9 @@ public:
 				elem1.udp_recv_endpoint != elem2.udp_recv_endpoint ||
 				elem1.protocol_module_name != elem2.protocol_module_name ||
 				elem1.sorry_maxconnection != elem2.sorry_maxconnection ||
-				elem1.sorry_uri != elem2.sorry_uri ||
-				elem1.qos_service != elem2.qos_service ||
-				elem1.qos_client != elem2.qos_client ){
+				elem1.sorry_flag != elem2.sorry_flag ||
+				elem1.qos_upstream != elem2.qos_upstream ||
+				elem1.qos_downstream != elem2.qos_downstream ){
 				if( elem1.realserver_vector.size() == elem2.realserver_vector.size() ){
 					for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 						if( elem1.realserver_vector[i] == elem2.realserver_vector[i] ) return false;
