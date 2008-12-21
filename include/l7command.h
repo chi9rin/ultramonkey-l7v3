@@ -50,14 +50,18 @@ public:
 		CMD_PARAMETER,          //!< Parameter command(-P, --parameter)
 		CMD_HELP,               //!< Help command(-h, --help)
 	};
+	enum	REPLICATION_CODE_TAG{
+		REP_START = 0,			// !< REPLICATION START COMMAND
+		REP_STOP,				// !< REPLICATION STOP COMMAND
+		REP_FORCE,				// !< REPLICATION FORCE COMMAND
+		REP_DUMP				// !< REPLICATION DUMP COMMAND
+	};
 
 	COMMAND_CODE_TAG			command;
-	bool						list_numeric_flag;
 	virtualservice_element		vs_element;
+	REPLICATION_CODE_TAG		replication_command;
 	LOG_CATEGORY_TAG			log_category;
 	LOG_LEVEL_TAG				log_level;
-	bool						category_all_flag;
-	bool						start_replication_flag;
 	PARAMETER_COMPONENT_TAG		reload_param;
 	l7vsadm_request() :		command( CMD_NONE ),
 								list_numeric_flag( false ),
@@ -71,7 +75,7 @@ private:
 	friend class	boost::serialization::access;
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
 		ar & command;
-		ar & list_numeric_flag;
+		ar & replication_command;
 		ar & vs_element;
 		ar & log_category;
 		ar & log_level;
