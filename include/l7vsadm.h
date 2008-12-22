@@ -48,6 +48,7 @@ protected:
 		option_func_map_type	option_vs_dic;
 		bool	option_vs_flag_parsr( int&, int, char*[] );
 		bool	option_vs_target_parse( int&, int, char*[] );
+		bool	option_vs_module_parse( int&, int, char*[] );
 		bool	option_vs_scheduler_parse( int&, int, char*[] );
 		bool	option_vs_upper_parse( int&, int, char*[] );
 		bool	option_vs_bypass_parse( int&, int, char*[] );

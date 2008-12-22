@@ -50,8 +50,9 @@ public:
 		CMD_PARAMETER,          //!< Parameter command(-P, --parameter)
 		CMD_HELP,               //!< Help command(-h, --help)
 	};
-	enum	REPLICATION_CODE_TAG{
-		REP_START = 0,			// !< REPLICATION START COMMAND
+	enum	REPLICATION_COMMAND_TAG{
+		REP_NONE = 0,
+		REP_START				// !< REPLICATION START COMMAND
 		REP_STOP,				// !< REPLICATION STOP COMMAND
 		REP_FORCE,				// !< REPLICATION FORCE COMMAND
 		REP_DUMP				// !< REPLICATION DUMP COMMAND
@@ -63,10 +64,10 @@ public:
 	LOG_CATEGORY_TAG			log_category;
 	LOG_LEVEL_TAG				log_level;
 	PARAMETER_COMPONENT_TAG		reload_param;
-	l7vsadm_request() :		command( CMD_NONE ),
-								list_numeric_flag( false ),
-								category_all_flag( false ),
-								start_replication_flag( false ),
+	PARAMETER_COMPONENT_TAG		snmp_log_category;
+	LOG_LEVEL_TAG				snmp_log_level;
+	l7vsadm_request() :			command( CMD_NONE ),
+								replication_command( REP_NONE ),
 								log_category( LOG_CAT_NONE ),
 								log_level( LOG_LV_NONE ),
 								snmp_log_category( LOG_CAT_NONE ),
@@ -75,13 +76,12 @@ private:
 	friend class	boost::serialization::access;
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
 		ar & command;
-		ar & replication_command;
 		ar & vs_element;
+		ar & replication_command;
 		ar & log_category;
 		ar & log_level;
-		ar & category_all_flag;
-		ar & start_replication_flag;
-		ar & reload_param;
+		ar & snmp_log_category;
+		ar & snmp_log_level;
 	}
 };
 
