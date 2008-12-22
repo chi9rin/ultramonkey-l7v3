@@ -12,7 +12,8 @@
 #define	MODULE_BASE_H
 
 
-namespace l7vsd{
+namespace l7vsd
+{
 
 class module_base
 {

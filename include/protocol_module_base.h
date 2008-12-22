@@ -18,7 +18,8 @@
 #include "module_base.h"
 #include "realserver.h"
 
-namespace l7vsd{
+namespace l7vsd
+{
 
 class protocol_module_base : public module_base{
 public:
@@ -48,7 +49,8 @@ public:
 	};
 
 	//this class is POD
-	struct check_message_result{
+	struct check_message_result
+	{
 		bool		flag;
 		std::string	message;
 		bool		operator==( const check_message& in ){ return flag == in.flag; }
@@ -68,25 +70,30 @@ protected:
 														rs_list_itr_func_type,
 														rs_list_itr_func_type,
 														rs_list_itr_func_type ) >	schedule;
-	boost::function< void( boost::thread::id,boost::thread::id ) >	schedul_session_initialize;
-	boost::function< void( boost::thread::id,boost::thread::id ) >	schedul_session_finalize;
-	boost::function< void( void ) >	schedul_table_lock;
-	boost::function< void( void ) >	schedul_table_unlock;
+
+	virtual	boost::function< void ( void ) > rs_list_lock;
+	virtual	boost::function< void ( void ) > rs_list_unlock;
+
+	boost::function< void( void ) >	replication_area_lock;
+	boost::function< void( void ) >	replication_area_unlock;
 public:
 
 	protocol_module_base(
+							boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
+						) : logger( inlog ) = 0;
+							
+	virtual ~protocol_module_base() = 0;
+
+	virtual	initialize(
 							rs_list_itr_func_type	inlist_begin,
 							rs_list_itr_func_type	inlist_end,
 							rs_list_itr_func_type	inlist_next,
-							boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
+							boost::function< void( void ) >	inlist_lock,
+							boost::function< void( void ) >	inlist_unlock
 							boost::function< void ( std::string&, unsigned int* ) >  inreplication_pay_memory
-						) : rs_list_begin( inlist_begin ),
-							rs_list_end( inlist_end ),
-							rs_list_ned( inlist_next ),
-							logger( inlog ),
-							replication_pay_memory( inreplication_pay_memory ) = 0;
-							
-	virtual ~protocol_module_base() = 0;
+						) = 0;
+
+	virtual	finalize();
 
 	// event function
 	virtual	bool	is_use_sorry() = 0;
@@ -94,44 +101,31 @@ public:
 
 	virtual	void	handle_rslist_update() = 0;
 
-	virtual	boost::function< void ( void ) > rs_list_lock;
-	virtual	boost::function< void ( void ) > rs_list_unlock;
+	virtual	check_message_result	set_parameter( const std::vector<std::string>& args ) = 0;
+	virtual	check_message_result	add_parameter( const std::vector<std::string>& args ) = 0;
 
-	virtual	void	set_parameter( const std::vector<std::string>& args ) = 0;
-	virtual	void	add_parameter( const std::vector<std::string>& args ) = 0;
-
-	virtual	void	handle_sorry_enable() = 0;
-	virtual	void	handle_sorry_disable() = 0;
-
-	virtual	void	handle_session_initialize(
-									const boost::thread::id upthread_id,
-									const boost::thread::id down_thread_id ) = 0;
-	virtual	void	handle_session_finalize(
-									const boost::thread::id up_thread_id,
-									const boost::thread::id down_thread_id ) = 0;
-
-	void	register_schedule_handle_schedule(
+	virtual	void	register_schedule(
 									boost::function< boost::asio::ip::basic_endpoint&(
 																const boost::thread::id,
 																const boost::thread::id,
 																rs_list_itr_func_type,
 																rs_list_itr_func_type,
 																rs_list_itr_func_type ) > inschedule 
-											)  : schedule( inschedule )= 0;
+											) = 0;
 
-	void	register_schedule_handle_session_initialize(
-									boost::function< void( const boost::thread::id, const boost::thread::id ) > ininitialize ) : schedul_session_initialize( ininitialize ) = 0;
+	virtual	void	register_replication_area_lock(
+									boost::function< void( void ) > inlock_func ) = 0;
 
-	void	register_schedule_handle_session_finalize(
-									boost::function< void( const boost::thread::id, const boost::thread::id ) > finalize) :schedul_session_finalize( infinalize ) = 0;
-
-	void	register_schedule_table_lock(
-									boost::function< void( void ) > intable_lock ) : schedule_table_lock( intable_lock ) = 0;
-
-	void	register_schedule_table_unlock(
-									boost::function< void( void ) > intable_unlock ) : schedule_table_unlock( intable_unlock ) = 0;
+	virtual	void	register_replication_area_unlock(
+									boost::function< void( void ) > inunlock_func ) = 0;
 
 	//use in upstream_thread
+	virtual	EVENT_TAG	handle_session_initialize(
+									const boost::thread::id upthread_id,
+									const boost::thread::id down_thread_id ) = 0;
+	virtual	EVENT_TAG	handle_session_finalize(
+									const boost::thread::id up_thread_id,
+									const boost::thread::id down_thread_id ) = 0;
 	virtual	EVENT_TAG	handle_accept(
 									const boost::thread::id thread_id ) = 0;
 
@@ -149,7 +143,8 @@ public:
 									const boost::array<char,MAX_BFFER_SIZE>& sendbuffer ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_connection_fail(
-									const boost::thread::id thread_id ) = 0;
+									const boost::thread::id thread_id,
+									const boost::asio::ip::basic_endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_send(
 									const boost::thread::id thread_id ) = 0;
@@ -193,6 +188,10 @@ public:
 	virtual	EVENT_TAG	handle_client_disconnect(
 									const boost::thread::id thread_id ) = 0;
 	
+	virtual	EVENT_TAG	handle_sorry_enable( const boost::thread::id upthread_id ) = 0;
+
+	virtual	EVENT_TAG	handle_sorry_disable( const boost::thread::id upthread_id ) = 0;
+
 	virtual	EVENT_TAG	handle_realserver_disconnect(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;

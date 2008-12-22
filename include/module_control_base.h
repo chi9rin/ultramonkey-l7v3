@@ -14,6 +14,9 @@
 #include<string>
 #include<map>
 
+namespace l7vsd
+{
+
 class	module_control_base
 {
 protected:
@@ -29,4 +32,5 @@ public:
 	virtual	void	unload_module( const std::string&	modulename ) = 0;
 };
 
+};
 #endif//MODULE_CONTROL_BASE

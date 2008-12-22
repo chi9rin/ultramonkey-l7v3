@@ -21,13 +21,10 @@ protected:
 	boost::function< void ( const std::string&, unsigned int* ) > replication_pay_memory;
 public:
 	schedule_module_base(	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
-							boost::function< void ( std::string&, unsigned int* ) >  inreplication_pay_memory
-							) : logger( inlog ),
-								replication_pay_memory( inreplication_pay_memory ) = 0;
+							) : logger( inlog ) = 0;
 	virtual	~schedule_module_base() = 0;
 
-	virtual	boost::function<void(void)>	table_lock;
-	virtual	boost::function<void(void)>	table_unlock;
+	virtual	void	initialize( replication_pay_memory );
 
 	virtual	boost::asio::ip::basic_endpoint&	handle_schedule(
 									boost::thread::id	thread_id,
@@ -35,13 +32,6 @@ public:
 									boost::function< std::list<realserver>::iterator (void)> inlist_end,
 									boost::function< std::list<realserver>::iterator (void)> inlist next ) = 0;
 
-	virtual	handle_session_initialize(
-									const boost::thread::id upthread_id,
-									const boost::thread::id down_thread_id ) = 0;
-
-	virtual	handle_session_finalize(
-									const boost::thread::id upthread_id,
-									const boost::thread::id down_thread_id ) = 0;
 };
 
 };	//namespace l7vsd

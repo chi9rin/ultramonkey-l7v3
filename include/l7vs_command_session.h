@@ -10,6 +10,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 
+#include "l7command.h"
+
 namespace l7vsd{
 
 class	command_session : public boost::enable_shared_from_this<session>{
@@ -18,6 +20,8 @@ protected:
 	boost::asio:local::stream_protocol::socket	unixsocket;
 	boost::array<char, MAX_BUFFER_SIZE> 		command_buffer;
 	boost::array<char, MAX_BUFFER_SIZE>			response_buffer;
+	l7vsadm_request								request_;
+	l7vsd										parent;
 
 	command_session(){}
 	void	handle_read( const boost::system::error_code&, size_t );
