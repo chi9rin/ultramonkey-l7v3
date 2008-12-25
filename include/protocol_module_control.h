@@ -20,24 +20,22 @@
 namespace l7vsd
 {
 
-class	protocol_module_control : public module_control_base
-{
+class	protocol_module_control : public module_control_base{
 public:
 	typedef	list<realserver>	realserverlist_type;
 	typedef	boost::function< realserverlist_type::iretarot( void ) >	rs_list_itr_func_type;
 	typedef	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) >	logger_func_type;
 	typedef	boost::function< void ( std::string&, unsigned int* ) >				replication_pay_memory_func_type;
 
-	struct	loadmodule_info
-	{
+	struct	protocol_module_info{
 		unsigned int	ref_count;
-		protocol_module_base*	(*module_create)(logger_func_type);
-		void					(*module_restroy)(protocol_module_base*);
+		boost::function<protocol_module_base*(logger_func_type)>	create_func;
+		boost::function<void(protocol_module_base*)>				destroy_func;
 	};
 
 protected:
-	std::map<std::string,loadmodule_info>	loadmodule_map;
-	boost::mutex							loadmodule_map_mutex;
+	std::map<std::string,protocol_module_info>	loadmodule_map;
+	boost::mutex								loadmodule_map_mutex;
 
 	protocol_module_control();
 	protocol_module_control( const protocol_module_control& );
@@ -46,18 +44,9 @@ protected:
 public:
 	static protocol_module_control&	getInstance();
 
-	bool	load_module( const std::string& );
-	void	unload_module( const std::string& );
-
-	protocol_module_base*	create_module(
-								std::string& modulename,
-								rs_list_itr_func_type	rslist_begin,
-								rs_list_itr_func_type	rslist_end,
-								rs_list_itr_func_type	rslist_next,
-								logger_func_type		inlog,
-								replication_pay_memory_func_type	inpaymemory );
-	void	destroy_module( protocol_module_base* module_ptr );
+	protocol_module_base*	load_module( const std::string& modulename, logger_func_type inlog );
+	void					unload_module( const std::string& modulename, protocol_module_base* module_ptr );
 };
 
-};
+};	//namespace l7vsd
 #endif//PROTOCOL_MODULE_CONTROL

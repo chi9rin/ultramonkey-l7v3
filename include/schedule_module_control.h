@@ -22,19 +22,21 @@ namespace l7vsd
 class	schedule_module_control : public module_control_base
 {
 public:
-	typedef	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) >	logger_func_type;
-	typedef	boost::function< void ( std::string&, unsigned int* ) >				replication_pay_memory_func_type;
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int log_id, const std::string ) >
+										logger_func_type;
+	typedef	boost::function< void ( std::string&, unsigned int* ) >
+										replication_pay_memory_func_type;
 
-	struct	module_info
+	struct	schedule_module_info
 	{
 		unsigned int	ref_count;
-		schedule_module_base*	(*module_create)(logger_func_type);
-		void					(*module_restroy)(protocol_module_base*);
+		boost::function<schedule_module_base*(logger_func_type)>	create_func;
+		boost::function<void(schedule_module_base*)>				destroy_func;
 	};
 
 protected:
-	std::map<std::string,module_info>	loadmodule_map;
-	boost::mutex						loadmodule_map_mutex;
+	std::map<std::string,schedule_module_info>	loadmodule_map;
+	boost::mutex								loadmodule_map_mutex;
 
 	schedule_module_control();
 	schedule_module_control( const schedule_module_control& );
@@ -43,15 +45,9 @@ protected:
 public:
 	static schedule_module_control&	getInstance();
 
-	bool	load_module( const std::string&	modulename );
-	void	unload_module( const std::string&	modulename );
-
-	schedule_module_base*	create_module(
-								std::string& modulename,
-								logger_func_type	inlog,
-								replication_pay_memory_func_type	inpaymemory );
-	void	destroy_module( schedule_module_base* module_ptr );
+	schedule_module_base*	load_module( const std::string&	modulename, logger_func_type inlog );
+	void					unload_module( const std::string& modulename, schedule_module_base* module_ptr );
 };
 
-};
+};	//namespace l7vsd
 #endif//SCHEDULE_MODULE_CONTROL
