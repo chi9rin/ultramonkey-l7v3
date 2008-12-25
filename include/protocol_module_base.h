@@ -40,7 +40,7 @@ public:
 		CLIENT_CONNECTION_CHECK,
 		CLIENT_SEND,
 		//COMMON Status
-		CLIENT_RESPOND_SEND,
+		CLIENT_RESPONSE_SEND,
 		REALSERVER_DISCONNECT,
 		SORRYSERVER_DISCONNECT,
 		CLIENT_DISCONNECT,
@@ -101,8 +101,8 @@ public:
 
 	virtual	void	handle_rslist_update() = 0;
 
-	virtual	check_message_result	set_parameter( const std::vector<std::string>& args ) = 0;
-	virtual	check_message_result	add_parameter( const std::vector<std::string>& args ) = 0;
+	virtual	check_message_result&	set_parameter( const std::vector<std::string>& args ) = 0;
+	virtual	check_message_result&	add_parameter( const std::vector<std::string>& args ) = 0;
 
 	virtual	void	register_schedule(
 									boost::function< boost::asio::ip::basic_endpoint&(
@@ -176,6 +176,9 @@ public:
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
 									const int recvlen ) = 0;
 	
+	virtual	EVENT_TAG	handle_response_send_inform(
+									const boost::thread::id thread_id );
+
 	virtual EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::basic_endpoint & recv_endpoint,

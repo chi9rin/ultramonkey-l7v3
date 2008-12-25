@@ -21,13 +21,13 @@ protected:
 	boost::array<char, MAX_BUFFER_SIZE> 		command_buffer;
 	boost::array<char, MAX_BUFFER_SIZE>			response_buffer;
 	l7vsadm_request								request_;
-	l7vsd										parent;
+	l7vsd&										vsd;
 
 	command_session(){}
 	void	handle_read( const boost::system::error_code&, size_t );
 	void	handle_write( const boost::system::error_code& );
 public:
-	command_session( boost::asio::io_service& io_service ) : unixsocket( io_service );
+	command_session( boost::asio::io_service& io_service, l7vsd& parent ) : unixsocket( io_service ), vsd( parent );
 	boost::asio::local::stream_protocol::socket&	socket(){ return unixsocket; }
 	void	start();
 };

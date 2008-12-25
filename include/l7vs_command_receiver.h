@@ -11,14 +11,15 @@ protected:
 	// l7vsd_mainthread								main_thread;
 	boost::asio::io_service&						dispatcher;
 	boost::asio::local::stream_protocol::acceptor	acceptor_;
-	l7vsd											parent;
+	l7vsd&											vsd;
 
 	void	handle_accept( boost::shared_ptr<command_session>, const boost::system::error_code& );
 
 public:
-	command_receiver(	boost::asio::io_service& io_service, const std::string& file ) 
+	command_receiver(	boost::asio::io_service& io_service, const std::string& file, l7vsd& parent ) 
 		:	dispatcher( io_service ),
-			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) );
+			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) ),
+			vsd( parent );
 	~command_receiver();
 };
 
