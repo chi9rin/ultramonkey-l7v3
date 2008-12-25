@@ -1,13 +1,13 @@
 #ifndef	L7VS_COMMAND_RECIVER_H
 #define	L7VS_COMMAND_RECIVER_H
 
+#include <boost/utility.hpp>
 #include "l7vs_command_session.h"
 
 namespace l7vsd{
 
-class	command_receiver{
+class	command_receiver : private boost::noncopyable{
 protected:
-	command_receiver(){}
 	// l7vsd_mainthread								main_thread;
 	boost::asio::io_service&						dispatcher;
 	boost::asio::local::stream_protocol::acceptor	acceptor_;
