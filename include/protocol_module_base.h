@@ -83,11 +83,11 @@ protected:
 							replication_pay_memory;
 
 	//scheduler_method
-	boost::function< boost::asio::ip::basic_endpoint(	const boost::thread::id,
-														const boost::thread::id,
-														rs_list_itr_func_type,
-														rs_list_itr_func_type,
-														rs_list_itr_func_type ) >	schedule;
+	boost::function< boost::asio::ip::tcp::endpoint ( const boost::thread::id,
+													  const boost::thread::id,
+													  rs_list_itr_func_type,
+													  rs_list_itr_func_type,
+													  rs_list_itr_func_type ) > schedule;
 
 	// realserver list lock function object
 	boost::function< void () >	rs_list_lock;
