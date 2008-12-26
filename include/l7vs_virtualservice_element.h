@@ -18,7 +18,7 @@
 #include <boost/foreach.hpp>
 #include "l7vs_realserver_element.h"
 
-namespace l7vsd{
+namespace l7vs{
 
 // virtual service element includes.
 class	virtualservice_element{
@@ -140,5 +140,5 @@ public:
 
 
 
-};			//namespace l7vsd
+}			//namespace l7vsd
 #endif		//L7VS_VIRTUALSERVICE_COMMAND_ELEMENT

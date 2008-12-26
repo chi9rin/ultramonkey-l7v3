@@ -12,7 +12,7 @@
 #define	L7VS_REALSERVER_ELEMENT_H
 #include <boost/asio.hpp>
 
-namespace l7vsd{
+namespace l7vs{
 
 class	realserver_element{
 public:
@@ -48,5 +48,5 @@ public:
 	}
 };
 
-};	//namespace l7vsd
+}	//namespace l7vsd
 #endif	//L7VS_REALSERVER_ELEMENT

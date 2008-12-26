@@ -12,7 +12,7 @@
 
 #include "l7command.h"
 
-namespace l7vsd{
+namespace l7vs{
 
 class	command_session : public boost::enable_shared_from_this<session>{
 protected:

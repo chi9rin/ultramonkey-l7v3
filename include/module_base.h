@@ -11,6 +11,7 @@
 #ifndef	MODULE_BASE_H
 #define	MODULE_BASE_H
 
+#include <string>
 
 namespace l7vs{
 
@@ -22,7 +23,7 @@ public:
 	virtual ~module_base() = 0;
 	virtual	bool	is_tcp() = 0;
 	virtual	bool	is_udp() = 0;
-	virtual	std::strung&	get_name(){return string;};
+	virtual	std::string&	get_name(){return name;};
 };
 
 }	//namespace l7vsd

@@ -24,7 +24,7 @@
 #include "l7vs_realserver_element.h"
 #include "l7vs_virtualservice_command_element.h"
 
-namespace l7vsd{
+namespace l7vs{
 //
 //	l7vsadm -> l7vsd request data class
 //	

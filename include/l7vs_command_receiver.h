@@ -4,7 +4,7 @@
 #include <boost/utility.hpp>
 #include "l7vs_command_session.h"
 
-namespace l7vsd{
+namespace l7vs{
 
 class	command_receiver : private boost::noncopyable{
 protected:

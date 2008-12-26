@@ -18,8 +18,7 @@
 #include "module_base.h"
 #include "realserver.h"
 
-namespace l7vsd
-{
+namespace l7vs{
 
 class protocol_module_base : public module_base {
 public:
@@ -219,6 +218,6 @@ public:
 //	virtual	EVENT_TAG	handle_event( const pthread_t thread_id, EVENT_TAG prev_status,  ) = 0;
 };
 
-}; // namespace l7vsd
+} // namespace l7vsd
 
 #endif	//PROTOCOL_MODULE_BASE_H
