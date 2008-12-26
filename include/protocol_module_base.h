@@ -23,7 +23,8 @@ namespace l7vsd
 
 class protocol_module_base : public module_base {
 public:
-	typedef	list<realserver>	realserverlist_type;
+	//
+	typedef	std::list<realserver>	realserverlist_type;
 	typedef	boost::function< realserverlist_type::iretarot( void ) >
 								rs_list_itr_func_type;
 	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
@@ -34,25 +35,25 @@ public:
 	enum	EVENT_TAG
 	{
 		//use in upstream_thread
-		CLIENT_RECV = 0,
-		REALSERVER_SELECT,
-		REALSERVER_CONNECT,
-		REALSERVER_SEND,
-		SORRYSERVER_SELECT,
-		SORRYSERVER_CONNECT,
-		SORRYSERVER_SEND,
+		CLIENT_RECV = 0,			// !< Receive from Client
+		REALSERVER_SELECT,			// !< Select RealServer
+		REALSERVER_CONNECT,			// !< Connect to RealServer
+		REALSERVER_SEND,			// !< Send message to RealServer
+		SORRYSERVER_SELECT,			// !< Select SorryServer
+		SORRYSERVER_CONNECT,		// !< Connect to SorryServer
+		SORRYSERVER_SEND,			// !< Send message to SorryServer
 		//use in downstream_thread
-		REALSERVER_RECV,
-		SORRYSERVER_RECV,
-		CLIENT_CONNECTION_CHECK,
-		CLIENT_SEND,
+		REALSERVER_RECV,			// !< Receive from RealServer
+		SORRYSERVER_RECV,			// !< Receive from SorryServer
+		CLIENT_CONNECTION_CHECK,	// !< Check ClientConnection available 
+		CLIENT_SEND,				// !< Send message to Client
 		//COMMON Status
-		CLIENT_RESPONSE_SEND,
-		REALSERVER_DISCONNECT,
-		SORRYSERVER_DISCONNECT,
-		CLIENT_DISCONNECT,
-		FINALIZE,
-		STOP
+		CLIENT_RESPONSE_SEND,		// !< Send UML7response message to Client
+		REALSERVER_DISCONNECT,		// !< Disconnect RealServerConnection
+		SORRYSERVER_DISCONNECT,		// !< Disconnect SorryServerConnection
+		CLIENT_DISCONNECT,			// !< Disconnect ClientConnection
+		FINALIZE,					// !< Do finalize
+		STOP						// !< Stop SessionThread
 	};
 
 	//this class is POD
