@@ -24,7 +24,7 @@ class protocol_module_base : public module_base {
 public:
 	//
 	typedef	std::list<realserver>	realserverlist_type;
-	typedef	boost::function< realserverlist_type::iretarot( void ) >
+	typedef	boost::function< realserverlist_type::iterator( void ) >
 								rs_list_itr_func_type;
 	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
 								logger_func_type;
@@ -59,8 +59,10 @@ public:
 	struct check_message_result{
 		bool		flag;
 		std::string	message;
-		bool		operator==( const check_message& in ){ return flag == in.flag && message == in.message; }
-		bool		operator!=( const check_message& in ){ return flag != in.flag || message != in.message; }
+		bool		operator==( const check_message_result& in )
+								{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
+		bool		operator!=( const check_message_result& in )
+								{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
 		check_message_result() : flag(false){}
 	};
 protected:
@@ -81,16 +83,16 @@ protected:
 							replication_pay_memory;
 
 	//scheduler_method
-	boost::function< boost::asio::ip::basic_endpoint&(	const boost::thread::id,
+	boost::function< boost::asio::ip::basic_endpoint(	const boost::thread::id,
 														const boost::thread::id,
 														rs_list_itr_func_type,
 														rs_list_itr_func_type,
 														rs_list_itr_func_type ) >	schedule;
 
 	// realserver list lock function object
-	virtual	boost::function< void ( void ) > rs_list_lock;
+	boost::function< void () >	rs_list_lock;
 	// realserver list unlock function object
-	virtual	boost::function< void ( void ) > rs_list_unlock;
+	boost::function< void( void ) >	rs_list_unlock;
 
 	// replication area lock function object
 	boost::function< void( void ) >	replication_area_lock;
