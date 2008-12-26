@@ -26,6 +26,10 @@ public:
 	typedef	list<realserver>	realserverlist_type;
 	typedef	boost::function< realserverlist_type::iretarot( void ) >
 								rs_list_itr_func_type;
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
+								logger_func_type;
+	typedef	boost::function< void ( const std::string&, unsigned int* ) >
+								replicationpaymemory_func_type;
 
 	enum	EVENT_TAG
 	{
@@ -71,10 +75,9 @@ protected:
 	rs_list_itr_func_type	rs_list_next;
 
 	// logger method
-	boost::function< void ( const LOG_LEVEL_TAG, const std::string) >
-							logger;
+	logger_func_type		logger;
 	// replication memory peyment method
-	boost::function< void ( const std::string&, unsigned int* ) >
+	replicationpaymemory_func_type
 							replication_pay_memory;
 
 	//scheduler_method
@@ -96,9 +99,7 @@ protected:
 
 public:
 
-	protocol_module_base(
-							boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
-						) : logger( inlog ) = 0;
+	protocol_module_base( logger_func_type inlog ) : logger( inlog ) = 0;
 							
 	virtual ~protocol_module_base() = 0;
 
@@ -107,8 +108,8 @@ public:
 							rs_list_itr_func_type	inlist_end,
 							rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock
-							boost::function< void ( std::string&, unsigned int* ) >  inreplication_pay_memory
+							boost::function< void( void ) >	inlist_unlock,
+							replicationpaymemory_func_type  inreplication_pay_memory
 						) = 0;
 
 	virtual	finalize();
@@ -122,14 +123,7 @@ public:
 	virtual	check_message_result&	set_parameter( const std::vector<std::string>& args ) = 0;
 	virtual	check_message_result&	add_parameter( const std::vector<std::string>& args ) = 0;
 
-	virtual	void	register_schedule(
-									boost::function< boost::asio::ip::basic_endpoint&(
-																const boost::thread::id,
-																const boost::thread::id,
-																rs_list_itr_func_type,
-																rs_list_itr_func_type,
-																rs_list_itr_func_type ) > inschedule 
-											) = 0;
+	virtual	void	register_schedule( schedule inschedule ) = 0;
 
 	virtual	void	register_replication_area_lock(
 									boost::function< void( void ) > inlock_func ) = 0;
