@@ -60,6 +60,10 @@ public:
 
 	config_message_result reload_parameter(PARAMETER_COMPONENT_TAG in_reload_param);
 
+	int send_mibcollection(l7vs_mibrequest_message* payload);
+	int send_trap(std::string message);
+
+
 	void start();
 
 protected:
