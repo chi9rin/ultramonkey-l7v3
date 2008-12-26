@@ -11,17 +11,13 @@
 #ifndef MODULE_CONTROL_BASE
 #define MODULE_CONTROL_BASE
 
-#include<string>
-#include<map>
+#include	<string>
 
-namespace l7vsd
-{
+namespace l7vs{
 
-class	module_control_base
-{
+class	module_control_base{
 protected:
 	std::string	modulefile_path;
-
 	module_control_base(){}
 	virtual	~module_control_base() = 0;
 	virtual	operator=( const module_control_base& ) = 0;
@@ -32,5 +28,5 @@ public:
 	virtual	void	unload_module( const std::string&	modulename ) = 0;
 };
 
-};
+}	// namespace l7vs
 #endif//MODULE_CONTROL_BASE

@@ -12,11 +12,9 @@
 #define	MODULE_BASE_H
 
 
-namespace l7vsd
-{
+namespace l7vs{
 
-class module_base
-{
+class module_base{
 protected:
 	std::string	name;
 public:
@@ -24,9 +22,9 @@ public:
 	virtual ~module_base() = 0;
 	virtual	bool	is_tcp() = 0;
 	virtual	bool	is_udp() = 0;
-	virtual	std::strung&	get_name(){return &string;};
+	virtual	std::strung&	get_name(){return string;};
 };
 
-};	//namespace l7vsd
+}	//namespace l7vsd
 
 #endif //MODULE_BASE_H

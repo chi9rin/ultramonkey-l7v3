@@ -21,10 +21,11 @@
 namespace l7vsd
 {
 
-class protocol_module_base : public module_base{
+class protocol_module_base : public module_base {
 public:
 	typedef	list<realserver>	realserverlist_type;
-	typedef	boost::function< realserverlist_type::iretarot( void ) > rs_list_itr_func_type;
+	typedef	boost::function< realserverlist_type::iretarot( void ) >
+								rs_list_itr_func_type;
 
 	enum	EVENT_TAG
 	{
@@ -51,20 +52,30 @@ public:
 	};
 
 	//this class is POD
-	struct check_message_result
-	{
+	struct check_message_result{
 		bool		flag;
 		std::string	message;
-		bool		operator==( const check_message& in ){ return flag == in.flag; }
-		bool		operator!=( const check_message& in ){ return flag != in.flag; }
+		bool		operator==( const check_message& in ){ return flag == in.flag && message == in.message; }
+		bool		operator!=( const check_message& in ){ return flag != in.flag || message != in.message; }
+		check_message_result() : flag(false){}
 	};
 protected:
+	// this methos from session class event
+	//
+
+	// realserver list iterator begin method
 	rs_list_itr_func_type	rs_list_begin;
+	// realserver list iterator end method
 	rs_list_itr_func_type	rs_list_end;
+	// realserver list iterator next method
 	rs_list_itr_func_type	rs_list_next;
 
-	boost::function< void ( const LOG_LEVEL_TAG, const std::string) >	logger;
-	boost::function< void ( const std::string&, unsigned int* ) > replication_pay_memory;
+	// logger method
+	boost::function< void ( const LOG_LEVEL_TAG, const std::string) >
+							logger;
+	// replication memory peyment method
+	boost::function< void ( const std::string&, unsigned int* ) >
+							replication_pay_memory;
 
 	//scheduler_method
 	boost::function< boost::asio::ip::basic_endpoint&(	const boost::thread::id,
@@ -73,11 +84,16 @@ protected:
 														rs_list_itr_func_type,
 														rs_list_itr_func_type ) >	schedule;
 
+	// realserver list lock function object
 	virtual	boost::function< void ( void ) > rs_list_lock;
+	// realserver list unlock function object
 	virtual	boost::function< void ( void ) > rs_list_unlock;
 
+	// replication area lock function object
 	boost::function< void( void ) >	replication_area_lock;
+	// replication area unlock function object
 	boost::function< void( void ) >	replication_area_unlock;
+
 public:
 
 	protocol_module_base(
