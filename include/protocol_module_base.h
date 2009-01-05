@@ -13,6 +13,7 @@
 #define	PROTOCOL_MODULE_BASE_H
 
 #include <boost/asio.hpp>
+#include <boost/asio/ip/basic_endpoint.hpp>
 #include <boost/function.hpp>
 #include "logger_enum.h"
 #include "module_base.h"
@@ -30,9 +31,18 @@ public:
 								logger_func_type;
 	typedef	boost::function< void ( const std::string&, unsigned int* ) >
 								replicationpaymemory_func_type;
+	typedef	boost::function< boost::asio::ip::tcp::endpoint& ( const boost::thread::id,
+													   const boost::thread::id,
+													   rs_list_itr_func_type,
+													   rs_list_itr_func_type,
+													   rs_list_itr_func_type ) >	tcp_schedule_func_type;
+	typedef	boost::function< boost::asio::ip::udp::endpoint& ( const boost::thread::id,
+													   const boost::thread::id,
+													   rs_list_itr_func_type,
+													   rs_list_itr_func_type,
+													   rs_list_itr_func_type ) >	udp_schedule_func_type;
 
-	enum	EVENT_TAG
-	{
+	enum	EVENT_TAG{
 		//use in upstream_thread
 		CLIENT_RECV = 0,			// !< Receive from Client
 		REALSERVER_SELECT,			// !< Select RealServer
@@ -51,6 +61,7 @@ public:
 		REALSERVER_DISCONNECT,		// !< Disconnect RealServerConnection
 		SORRYSERVER_DISCONNECT,		// !< Disconnect SorryServerConnection
 		CLIENT_DISCONNECT,			// !< Disconnect ClientConnection
+		REALSERVER_CLOSE,			// !< Close socket(RealServer side)
 		FINALIZE,					// !< Do finalize
 		STOP						// !< Stop SessionThread
 	};
@@ -83,14 +94,11 @@ protected:
 							replication_pay_memory;
 
 	//scheduler_method
-	boost::function< boost::asio::ip::tcp::endpoint ( const boost::thread::id,
-													  const boost::thread::id,
-													  rs_list_itr_func_type,
-													  rs_list_itr_func_type,
-													  rs_list_itr_func_type ) > schedule;
+	tcp_schedule_func_type		schedule_tcp;
+	udp_schedule_func_type		schedule_udp;
 
 	// realserver list lock function object
-	boost::function< void () >	rs_list_lock;
+	boost::function< void( void ) >	rs_list_lock;
 	// realserver list unlock function object
 	boost::function< void( void ) >	rs_list_unlock;
 
@@ -101,11 +109,11 @@ protected:
 
 public:
 
-	protocol_module_base( logger_func_type inlog ) : logger( inlog ) = 0;
+	protocol_module_base( logger_func_type inlog ) : logger( inlog ) {};
 							
-	virtual ~protocol_module_base() = 0;
+	virtual	~protocol_module_base() = 0;
 
-	virtual	initialize(
+	virtual	void	initialize(
 							rs_list_itr_func_type	inlist_begin,
 							rs_list_itr_func_type	inlist_end,
 							rs_list_itr_func_type	inlist_next,
@@ -114,7 +122,7 @@ public:
 							replicationpaymemory_func_type  inreplication_pay_memory
 						) = 0;
 
-	virtual	finalize();
+	virtual	void	finalize();
 
 	// event function
 	virtual	bool	is_use_sorry() = 0;
@@ -125,7 +133,8 @@ public:
 	virtual	check_message_result&	set_parameter( const std::vector<std::string>& args ) = 0;
 	virtual	check_message_result&	add_parameter( const std::vector<std::string>& args ) = 0;
 
-	virtual	void	register_schedule( schedule inschedule ) = 0;
+	virtual	void	register_schedule( tcp_schedule_func_type inschedule ) = 0;
+	virtual	void	register_schedule( udp_schedule_func_type inschedule ) = 0;
 
 	virtual	void	register_replication_area_lock(
 									boost::function< void( void ) > inlock_func ) = 0;
@@ -150,22 +159,28 @@ public:
 
 	virtual	EVENT_TAG	handle_realserver_select(
 									const boost::thread::id thread_id,
-									boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;
+									boost::asio::ip::tcp::endpoint& rs_endpoint ) = 0;
+	virtual	EVENT_TAG	handle_realserver_select(
+									const boost::thread::id thread_id,
+									boost::asio::ip::udp::endpoint& rs_endpoint ) = 0;
 
 	virtual	EVENT_TAG	handle_realserver_connect(
 									const boost::thread::id thread_id,
-									const boost::array<char,MAX_BFFER_SIZE>& sendbuffer ) = 0;
+									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::basic_endpoint ) = 0;
+									const boost::asio::ip::tcp::endpoint ) = 0;
+	virtual	EVENT_TAG	handle_realserver_connection_fail(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::udp::endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_send(
 									const boost::thread::id thread_id ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_select(
 									const boost::thread::id thread_id,
-									boost::asio::ip::basic_endpoint & sorry_endpoint ) = 0;
+									boost::asio::ip::tcp::endpoint & sorry_endpoint ) = 0;
 
 	virtual	EVENT_TAG	handle_sorryserver_connect(
 									const boost::thread::id thread_id,
@@ -180,13 +195,18 @@ public:
 	//use in downstream_thread
 	virtual	EVENT_TAG	handle_realserver_recv(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::basic_endpoint & rs_endpoint,
+									const boost::asio::ip::tcp::endpoint & rs_endpoint,
+									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
+									const int recvlen ) = 0;
+	virtual	EVENT_TAG	handle_realserver_recv(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::udp::endpoint & rs_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
 									const int recvlen ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_recv(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::basic_endpoint & sorry_endpoint,
+									const boost::asio::ip::tcp::endpoint & sorry_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
 									const int recvlen ) = 0;
 	
@@ -195,7 +215,7 @@ public:
 
 	virtual EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::basic_endpoint & recv_endpoint,
+									const boost::asio::ip::tcp::endpoint & recv_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
 
 	virtual	EVENT_TAG	handle_client_send(
@@ -211,11 +231,15 @@ public:
 
 	virtual	EVENT_TAG	handle_realserver_disconnect(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::basic_endpoint & rs_endpoint ) = 0;
+									const boost::asio::ip::tcp::endpoint & rs_endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_disconnect(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::basic_endpoint & sorry_endpoint ) = 0;
+									const boost::asio::ip::tcp::endpoint & sorry_endpoint ) = 0;
+
+	virtual	EVENT_TAG	handle_realserver_close(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::udp::endpoint & rs_endpoint ) = 0;
 
 //	virtual	EVENT_TAG	handle_event( const pthread_t thread_id, EVENT_TAG prev_status,  ) = 0;
 };
