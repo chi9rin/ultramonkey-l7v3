@@ -15,6 +15,7 @@
 #include	<boost/thread.hpp>
 #include	<boost/noncopyable.hpp>
 #include	"logger.h"
+#include	"module_control_base.h"
 #include	"protocol_module_base.h"
 
 namespace l7vs{
@@ -22,7 +23,7 @@ namespace l7vs{
 // protocol module control class is load protocol module from shared object file.
 // many virtual service class used protocol module instance.
 // but, shared object load is once. and unload when vitual service refarence count is zero.
-class	protocol_module_control : public module_control_base : public boost::noncopyable{
+class	protocol_module_control : public module_control_base, private boost::noncopyable{
 public:
 
 	// logger function object typedef
@@ -33,13 +34,13 @@ public:
 								create_func_type;
 	// module destroy function object typedef
 	typedef	boost::function< void ( protocol_module_base* ) >
-								destroy_func;
+								destroy_func_type;
 	
 	// protocol module information structure.
 	struct	protocol_module_info{
 		unsigned int		ref_count;			// refarence count
 		create_func_type	create_func;		// create function object
-		destroy_func		destroy_func;		// destroy function object
+		destroy_func_type	destroy_func;		// destroy function object
 		protocol_module_info() : ref_count(0) {}	// constractor
 	};
 
@@ -62,7 +63,7 @@ public:
 	// unload module function.
 	void					unload_module(	const std::string& modulename,
 											protocol_module_base* module_ptr );
-}
+};
 
-};	//namespace l7vsd
+}	//namespace l7vs
 #endif//PROTOCOL_MODULE_CONTROL

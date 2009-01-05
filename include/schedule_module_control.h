@@ -24,8 +24,6 @@ class	schedule_module_control : public module_control_base
 public:
 	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int log_id, const std::string ) >
 										logger_func_type;
-	typedef	boost::function< void ( std::string&, unsigned int* ) >
-										replication_pay_memory_func_type;
 
 	struct	schedule_module_info
 	{

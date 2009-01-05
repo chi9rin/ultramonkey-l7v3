@@ -16,21 +16,31 @@ namespace l7vsd{
 
 class schedule_module_base
 {
-protected:
-	boost::function< void ( const LOG_LEVEL_TAG, const std::string) >	logger;
-	boost::function< void ( const std::string&, unsigned int* ) > replication_pay_memory;
 public:
-	schedule_module_base(	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) > inlog,
-							) : logger( inlog ) = 0;
+	//logger function type
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
+									logger_func_type;
+	//replication_pay_memory function type
+	typedef	boost::function< void ( const std::string&, unsigned int* ) >
+									replicationpaymemory_func_type;
+	//
+	typedef	boost::function< std::list<realserver>::iterator (void)>
+									rslist_iterator_type;
+protected:
+	logger_func_type				logger;
+	replicationpaymemory_func_type	replication_pay_memory;
+public:
+	schedule_module_base( logger_func_type inlog ) : logger( inlog ) = 0;
 	virtual	~schedule_module_base() = 0;
 
-	virtual	void	initialize( replication_pay_memory );
+	virtual	void	initialize( replicationpaymemory_func_type inpaymemory_func );
 
 	virtual	boost::asio::ip::basic_endpoint&	handle_schedule(
-									boost::thread::id	thread_id,
-									boost::function< std::list<realserver>::iterator (void)> inlist_begin,
-									boost::function< std::list<realserver>::iterator (void)> inlist_end,
-									boost::function< std::list<realserver>::iterator (void)> inlist next ) = 0;
+										boost::thread::id		thread_id,
+										rslist_iterator_type	inlist_begin,
+										rslist_iterator_type	inlist_end,
+										rslist_iterator_type	inlist next
+									) = 0;
 
 };
 
