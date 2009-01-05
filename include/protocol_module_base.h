@@ -118,19 +118,18 @@ public:
 							rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock,
-							replicationpaymemory_func_type  inreplication_pay_memory
-						) = 0;
+							replicationpaymemory_func_type  inreplication_pay_memory ) = 0;
 
-	virtual	void	finalize();
+	virtual	void	finalize() = 0;
 
 	// event function
 	virtual	bool	is_use_sorry() = 0;
-	virtual	check_message_result&	check_parameter( const std::vector<std::string>& args ) const = 0;
+	virtual	check_message_result	check_parameter( const std::vector<std::string>& args ) = 0;
 
 	virtual	void	handle_rslist_update() = 0;
 
-	virtual	check_message_result&	set_parameter( const std::vector<std::string>& args ) = 0;
-	virtual	check_message_result&	add_parameter( const std::vector<std::string>& args ) = 0;
+	virtual	check_message_result	set_parameter( const std::vector<std::string>& args ) = 0;
+	virtual	check_message_result	add_parameter( const std::vector<std::string>& args ) = 0;
 
 	virtual	void	register_schedule( tcp_schedule_func_type inschedule ) = 0;
 	virtual	void	register_schedule( udp_schedule_func_type inschedule ) = 0;
@@ -210,7 +209,7 @@ public:
 									const int recvlen ) = 0;
 	
 	virtual	EVENT_TAG	handle_response_send_inform(
-									const boost::thread::id thread_id );
+									const boost::thread::id thread_id ) = 0;
 
 	virtual EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
