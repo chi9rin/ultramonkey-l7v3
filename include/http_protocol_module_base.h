@@ -17,13 +17,13 @@ class http_protocol_module_base : public protocol_module_base {
 protected:
 
 	// http function
-	int	check_http_method(
+	int		check_http_method(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len );
-	int	check_http_version(
+	int		check_http_version(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len );
-	int	check_status_code(
+	int		check_status_code(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len );
 	bool	find_uri(
