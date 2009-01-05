@@ -13,7 +13,6 @@
 #define	PROTOCOL_MODULE_BASE_H
 
 #include <boost/asio.hpp>
-#include <boost/asio/ip/basic_endpoint.hpp>
 #include <boost/function.hpp>
 #include "logger_enum.h"
 #include "module_base.h"

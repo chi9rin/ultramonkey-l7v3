@@ -11,8 +11,13 @@
 #ifndef	SCHEDULE_MODULE_BASE_H
 #define	SCHEDULE_MODULE_BASE_H
 
+#include <boost/asio.hpp>
+#include <boost/function.hpp>
+#include "logger_enum.h"
+#include "module_base.h"
+#include "realserver.h"
 
-namespace l7vsd{
+namespace l7vs{
 
 class schedule_module_base
 {
@@ -30,20 +35,29 @@ protected:
 	logger_func_type				logger;
 	replicationpaymemory_func_type	replication_pay_memory;
 public:
-	schedule_module_base( logger_func_type inlog ) : logger( inlog ) = 0;
+	schedule_module_base( logger_func_type inlog ) : logger( inlog ) {};
 	virtual	~schedule_module_base() = 0;
 
 	virtual	void	initialize( replicationpaymemory_func_type inpaymemory_func );
 
-	virtual	boost::asio::ip::basic_endpoint&	handle_schedule(
+	virtual	void	handle_schedule(
 										boost::thread::id		thread_id,
 										rslist_iterator_type	inlist_begin,
 										rslist_iterator_type	inlist_end,
-										rslist_iterator_type	inlist next
+										rslist_iterator_type	inlist_next,
+										boost::asio::ip::tcp::endpoint&	outendpoint
+									) = 0;
+
+	virtual	void	handle_schedule(
+										boost::thread::id		thread_id,
+										rslist_iterator_type	inlist_begin,
+										rslist_iterator_type	inlist_end,
+										rslist_iterator_type	inlist_next,
+										boost::asio::ip::udp::endpoint&	outendpoint
 									) = 0;
 
 };
 
-};	//namespace l7vsd
+}	//namespace l7vs
 
 #endif //SCHEDULE_MODULE_BASE_H
