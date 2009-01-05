@@ -26,17 +26,17 @@ protected:
 	int	check_status_code(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len );
-	int	find_uri(
+	bool	find_uri(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len,
 								int& uri_offset,
 								int& uri_len );
-	int	find_status_code(
+	bool	find_status_code(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len,
 								int& status_code_offset,
 								int& status_code_len );
-	int	find_http_header(
+	bool	find_http_header(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len,
 								int& http_header_offset,
