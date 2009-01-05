@@ -12,6 +12,7 @@
 #ifndef	PROTOCOL_MODULE_BASE_H
 #define	PROTOCOL_MODULE_BASE_H
 
+#include <boost/thread.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include "logger_enum.h"
@@ -30,16 +31,20 @@ public:
 								logger_func_type;
 	typedef	boost::function< void ( const std::string&, unsigned int* ) >
 								replicationpaymemory_func_type;
-	typedef	boost::function< boost::asio::ip::tcp::endpoint& ( const boost::thread::id,
-													   const boost::thread::id,
-													   rs_list_itr_func_type,
-													   rs_list_itr_func_type,
-													   rs_list_itr_func_type ) >	tcp_schedule_func_type;
-	typedef	boost::function< boost::asio::ip::udp::endpoint& ( const boost::thread::id,
-													   const boost::thread::id,
-													   rs_list_itr_func_type,
-													   rs_list_itr_func_type,
-													   rs_list_itr_func_type ) >	udp_schedule_func_type;
+	typedef	boost::function< void (		const boost::thread::id,
+										const boost::thread::id,
+										rs_list_itr_func_type,
+										rs_list_itr_func_type,
+										rs_list_itr_func_type,
+										boost::asio::ip::tcp::endpoint& ) >
+								tcp_schedule_func_type;
+	typedef	boost::function< void (		const boost::thread::id,
+										const boost::thread::id,
+										rs_list_itr_func_type,
+										rs_list_itr_func_type,
+										rs_list_itr_func_type,
+										boost::asio::ip::udp::endpoint& ) >
+								udp_schedule_func_type;
 
 	enum	EVENT_TAG{
 		//use in upstream_thread
@@ -147,8 +152,8 @@ public:
 	virtual	EVENT_TAG	handle_session_finalize(
 									const boost::thread::id up_thread_id,
 									const boost::thread::id down_thread_id ) = 0;
-	virtual	EVENT_TAG	handle_accept(
-									const boost::thread::id thread_id ) = 0;
+
+	virtual	EVENT_TAG	handle_accept( const boost::thread::id thread_id ) = 0;
 
 	virtual	EVENT_TAG	handle_client_recv(
 									const boost::thread::id thread_id,
@@ -187,8 +192,7 @@ public:
 	virtual	EVENT_TAG	handle_sorryserver_connection_fail(
 									const boost::thread::id thread_id ) = 0;
 	
-	virtual	EVENT_TAG	handle_sorryserver_send(
-									const boost::thread::id thread_id ) = 0;
+	virtual	EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id ) = 0;
 
 	//use in downstream_thread
 	virtual	EVENT_TAG	handle_realserver_recv(
@@ -216,8 +220,7 @@ public:
 									const boost::asio::ip::tcp::endpoint & recv_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
 
-	virtual	EVENT_TAG	handle_client_send(
-									const boost::thread::id thread_id ) = 0;
+	virtual	EVENT_TAG	handle_client_send( const boost::thread::id thread_id ) = 0;
 
 	//use in upstream/downstream thread
 	virtual	EVENT_TAG	handle_client_disconnect(

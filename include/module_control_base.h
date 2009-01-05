@@ -22,8 +22,6 @@ protected:
 public:
 	virtual	void	initialize( const std::string& infile_path ) = 0;
 	virtual	void	finalize() = 0;
-	virtual	bool	load_module( const std::string&	modulename ) = 0;
-	virtual	void	unload_module( const std::string& modulename ) = 0;
 };
 
 }	// namespace l7vs

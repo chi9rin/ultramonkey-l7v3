@@ -1,6 +1,6 @@
 //
-//	@file	protocol_module_base.h
-//	@brief	shared object protocol module absctract class
+//	@file	schedule_module_base.h
+//	@brief	shared object schedule module absctract class
 //
 //	copyright (c) sdy corporation. 2008
 //	mail: h dot okada at sdy dot co dot jp
@@ -20,9 +20,9 @@
 
 namespace l7vs{
 
-
-
-
+// schedule module control class is load schedule module from shared object file.
+// many virtual service class used schedule module instance.
+// but, shared object load is once. and unload when vitual service refarence count is zero.
 class	schedule_module_control : public module_control_base, private boost::noncopyable{
 public:
 	// logger function object typedef

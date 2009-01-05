@@ -13,6 +13,7 @@
 
 #include	<string>
 #include	<boost/thread.hpp>
+#include	<boost/asio.hpp>
 #include	<boost/noncopyable.hpp>
 #include	"logger.h"
 #include	"module_control_base.h"
@@ -52,9 +53,14 @@ protected:
 	name_module_info_map	loadmodule_map;
 	// this mutex used loadmodule_map read/write/change.
 	boost::mutex			loadmodule_map_mutex;
+
 public:
 	// instance getter function.
 	static protocol_module_control&	getInstance();
+	// initialize
+	void	initialize( const std::string& infile_path );
+	// finalize
+	void	finalize();
 	// load module function
 	protocol_module_base*	load_module(	const	std::string& modulename,
 											logger_func_type inlog );
