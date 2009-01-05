@@ -39,6 +39,8 @@ protected:
 	bool	find_http_header(
 								const boost::array<char,MAX_BUFFER_SIZE>& buffer,
 								const int buffer_len,
+								const boost::array<char,MAX_BUFFER_SIZE>& http_header_name,
+								const int http_header_name_len,
 								int& http_header_offset,
 								int& http_header_len );
 
