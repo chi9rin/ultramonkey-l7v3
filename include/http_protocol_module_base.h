@@ -48,7 +48,7 @@ public:
 
 	http_protocol_module_base( logger_func_type inlog ) : logger( inlog );
 							
-	virtual	~http_protocol_module_base();
+	virtual	~http_protocol_module_base() = 0;
 
 };
 
