@@ -27,7 +27,7 @@ public:
 										 send_byte( in.send_byte ){}
 
 	realserver& operator=( const realserver& rs ){
-		realserver::operator= (rs);
+		realserver_element::operator= (rs);
 		nactive = rs.nactive;
 		ninact = rs.ninact;
 		send_byte = rs.send_byte;
