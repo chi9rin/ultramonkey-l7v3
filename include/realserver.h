@@ -10,7 +10,7 @@
 //
 #ifndef	L7VS_REALSERVER_H
 #define	L7VS_REALSERVER_H
-#include "l7vs_realserver_element.h"
+#include "realserver_element.h"
 
 namespace l7vs{
 
