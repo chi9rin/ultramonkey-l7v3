@@ -29,7 +29,13 @@ public:
 	typedef	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) >
 								logger_func_type;
 	// module create function object typedef
-	typedef	boost::function< schedule_module_base* ( logger_func_type ) >
+	typedef	boost::function< schedule_module_base*  (
+											getloglevel_func_type,
+											logger_func_type,
+											logger_func_type,
+											logger_func_type,
+											logger_func_type,
+											logger_func_type ) >
 								create_func_type;
 	// module destroy function object typedef
 	typedef	boost::function< void ( schedule_module_base* ) >
@@ -57,8 +63,13 @@ public:
 	// instance getter function.
 	static schedule_module_control&	getInstance();
 	// load module function
-	schedule_module_base*	load_module(	const std::string&	modulename, 
-											logger_func_type inlog );
+	schedule_module_base*	load_module(	const std::string&	,
+											getloglevel_func_type,
+											logger_func_type,
+											logger_func_type,
+											logger_func_type,
+											logger_func_type,
+											logger_func_type );
 	// unload module function.
 	void					unload_module(	const std::string& modulename, 
 											schedule_module_base* module_ptr );

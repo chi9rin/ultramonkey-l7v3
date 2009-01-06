@@ -4,7 +4,7 @@ namespace l7vs{
 
 class	protocol_module_test1 : public protocol_module_base{
 public:
-	protocol_module_test1( logger_func_type inlog );
+	protocol_module_test1();
 	~protocol_module_test1();
 
 	void	initialize(
@@ -12,9 +12,20 @@ public:
 							rs_list_itr_func_type	inlist_end,
 							rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock,
-							replicationpaymemory_func_type  inreplication_pay_memory
-						);
+							boost::function< void( void ) >	inlist_unlock );
+
+	void	init_logger_functions(
+							getloglevel_func_type	ingetloglevel,
+							logger_func_type		inputLogFatal,
+							logger_func_type		inputLogError,
+							logger_func_type		inputLogWarn,
+							logger_func_type		inputLogInfo,
+							logger_func_type		inputLogDebug );
+
+	void	init_replication_functions(
+							replicationpaymemory_func_type  inreplication_pay_memory,
+							boost::function< void( void ) > inlock_func,
+							boost::function< void( void ) > inunlock_func );
 
 	void	finalize();
 
@@ -141,7 +152,7 @@ public:
 									const boost::asio::ip::udp::endpoint & rs_endpoint ){return STOP;};
 };
 
-protocol_module_test1::protocol_module_test1( protocol_module_base::logger_func_type inlog ) : protocol_module_base( inlog )
+protocol_module_test1::protocol_module_test1() : protocol_module_base()
 {
 	name = "test1";
 }
@@ -154,9 +165,22 @@ protocol_module_test1::initialize(
 							protocol_module_base::rs_list_itr_func_type	inlist_end,
 							protocol_module_base::rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock,
-							protocol_module_base::replicationpaymemory_func_type  inreplication_pay_memory
-						){}
+							boost::function< void( void ) >	inlist_unlock ){}
+
+void
+protocol_module_test1::init_logger_functions(
+							getloglevel_func_type	ingetloglevel,
+							logger_func_type		inputLogFatal,
+							logger_func_type		inputLogError,
+							logger_func_type		inputLogWarn,
+							logger_func_type		inputLogInfo,
+							logger_func_type		inputLogDebug ){}
+
+void
+protocol_module_test1::init_replication_functions(
+							replicationpaymemory_func_type  inreplication_pay_memory,
+							boost::function< void( void ) > inlock_func,
+							boost::function< void( void ) > inunlock_func ){}
 
 void	finalize(){}
 
@@ -374,8 +398,8 @@ protocol_module_test1::handle_sorryserver_disconnect(
 }
 
 extern "C" l7vs::protocol_module_base*
-create_module( l7vs::protocol_module_base::logger_func_type in ){
-	return (new l7vs::protocol_module_test1( in ));
+create_module(){
+	return (new l7vs::protocol_module_test1());
 }
 
 extern "C" void

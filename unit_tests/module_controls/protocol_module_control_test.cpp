@@ -9,10 +9,18 @@ using namespace boost::unit_test;
 
 //test case1.
 void	protocol_module_control_test(){
+//	l7vs::protocol_module_base*		protomod = NULL;
 	l7vs::protocol_module_control& control = l7vs::protocol_module_control::getInstance();
+	//call load_module before initialize
+//	try{
+//		protomod = control.module_load();
+//	}
+//	catch(...){
+//	}
+
+	//test initialize and finalize
 	control.initialize( "./" );
 	control.finalize();
-	control.initialize( NULL );
 
 }
 

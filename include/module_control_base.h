@@ -15,6 +15,10 @@
 
 namespace l7vs{
 
+class	module_control_error : public std::exception {
+
+};
+
 class	module_control_base{
 protected:
 	std::string	modulefile_path;

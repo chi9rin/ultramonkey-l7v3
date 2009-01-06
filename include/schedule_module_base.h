@@ -32,11 +32,18 @@ public:
 	typedef	boost::function< std::list<realserver>::iterator (void)>
 									rslist_iterator_type;
 protected:
-	logger_func_type				logger;
+
+	//! replication paymemory function object
 	replicationpaymemory_func_type	replication_pay_memory;
+
+	//! replication area lock function object
+	boost::function< void( void ) >	replication_area_lock;
+	//! replication area unlock function object
+	boost::function< void( void ) >	replication_area_unlock;
+
 public:
-	schedule_module_base( logger_func_type inlog ) : logger( inlog ) {};
-	virtual	~schedule_module_base() = 0;
+	schedule_module_base() : logger() {};
+	virtual	~schedule_module_base(){};
 
 	virtual	void	initialize( replicationpaymemory_func_type inpaymemory_func );
 

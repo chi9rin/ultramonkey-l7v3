@@ -12,9 +12,20 @@ public:
 							rs_list_itr_func_type	inlist_end,
 							rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock,
-							replicationpaymemory_func_type  inreplication_pay_memory
-						);
+							boost::function< void( void ) >	inlist_unlock );
+
+	void	init_logger_functions(
+							getloglevel_func_type	ingetloglevel,
+							logger_func_type		inputLogFatal,
+							logger_func_type		inputLogError,
+							logger_func_type		inputLogWarn,
+							logger_func_type		inputLogInfo,
+							logger_func_type		inputLogDebug );
+
+	void	init_replication_functions(
+							replicationpaymemory_func_type  inreplication_pay_memory,
+							boost::function< void( void ) > inlock_func,
+							boost::function< void( void ) > inunlock_func );
 
 	void	finalize();
 
@@ -143,14 +154,31 @@ protocol_module_test2::initialize(
 							protocol_module_base::rs_list_itr_func_type	inlist_end,
 							protocol_module_base::rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock,
-							protocol_module_base::replicationpaymemory_func_type  inreplication_pay_memory
-						){}
+							boost::function< void( void ) >	inlist_unlock ){}
 
-void	finalize(){}
+void
+protocol_module_test2::init_logger_functions(
+							getloglevel_func_type	ingetloglevel,
+							logger_func_type		inputLogFatal,
+							logger_func_type		inputLogError,
+							logger_func_type		inputLogWarn,
+							logger_func_type		inputLogInfo,
+							logger_func_type		inputLogDebug ){}
 
-bool	is_tcp(){ return false; }
-bool	is_udp(){ return true; }
+void
+protocol_module_test2::init_replication_functions(
+							replicationpaymemory_func_type  inreplication_pay_memory,
+							boost::function< void( void ) > inlock_func,
+							boost::function< void( void ) > inunlock_func ){}
+
+void
+protocol_module_test2::finalize(){}
+
+bool
+protocol_module_test2::is_tcp(){ return false; }
+bool
+protocol_module_test2::is_udp(){ return true; }
+
 bool
 protocol_module_test2::is_use_sorry(){ return false; }
 

@@ -27,6 +27,8 @@ public:
 	typedef	std::list<realserver>	realserverlist_type;
 	typedef	boost::function< realserverlist_type::iterator( void ) >
 								rs_list_itr_func_type;
+	typedef	boost::function< LOG_LEVEL_TAG(void) >
+								getloglevel_func_type;
 	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
 								logger_func_type;
 	typedef	boost::function< void ( const std::string&, unsigned int* ) >
@@ -91,12 +93,6 @@ protected:
 	// realserver list iterator next method
 	rs_list_itr_func_type	rs_list_next;
 
-	// logger method
-	logger_func_type		logger;
-	// replication memory peyment method
-	replicationpaymemory_func_type
-							replication_pay_memory;
-
 	//scheduler_method
 	tcp_schedule_func_type		schedule_tcp;
 	udp_schedule_func_type		schedule_udp;
@@ -106,24 +102,18 @@ protected:
 	// realserver list unlock function object
 	boost::function< void( void ) >	rs_list_unlock;
 
-	// replication area lock function object
-	boost::function< void( void ) >	replication_area_lock;
-	// replication area unlock function object
-	boost::function< void( void ) >	replication_area_unlock;
-
 public:
 
-	protocol_module_base( logger_func_type inlog ) : logger( inlog ) {};
-							
-	virtual	~protocol_module_base() = 0;
+	protocol_module_base(){};
+
+	virtual	~protocol_module_base(){};
 
 	virtual	void	initialize(
 							rs_list_itr_func_type	inlist_begin,
 							rs_list_itr_func_type	inlist_end,
 							rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock,
-							replicationpaymemory_func_type  inreplication_pay_memory ) = 0;
+							boost::function< void( void ) >	inlist_unlock ) = 0;
 
 	virtual	void	finalize() = 0;
 
@@ -138,12 +128,6 @@ public:
 
 	virtual	void	register_schedule( tcp_schedule_func_type inschedule ) = 0;
 	virtual	void	register_schedule( udp_schedule_func_type inschedule ) = 0;
-
-	virtual	void	register_replication_area_lock(
-									boost::function< void( void ) > inlock_func ) = 0;
-
-	virtual	void	register_replication_area_unlock(
-									boost::function< void( void ) > inunlock_func ) = 0;
 
 	//use in upstream_thread
 	virtual	EVENT_TAG	handle_session_initialize(

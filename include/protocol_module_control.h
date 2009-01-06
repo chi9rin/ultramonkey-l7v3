@@ -26,11 +26,14 @@ namespace l7vs{
 // but, shared object load is once. and unload when vitual service refarence count is zero.
 class	protocol_module_control : public module_control_base, private boost::noncopyable{
 public:
+	//! getloglevel function object typedef
+	typedef	boost::function< LOG_LEVEL_TAG( void ) >
+								getloglevel_func_type;
 	//! logger function object typedef
-	typedef	boost::function< void ( const LOG_LEVEL_TAG, const std::string ) >
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
 								logger_func_type;
 	//! module create function object typedef
-	typedef	boost::function< protocol_module_base* ( logger_func_type ) >
+	typedef	boost::function< protocol_module_base* ( void ) >
 								create_func_type;
 	//! module destroy function object typedef
 	typedef	boost::function< void ( protocol_module_base* ) >
@@ -62,8 +65,7 @@ public:
 	//! finalize
 	void	finalize();
 	//! load module function
-	protocol_module_base*	load_module(	const	std::string& modulename,
-											logger_func_type inlog );
+	protocol_module_base*	load_module( const std::string& );
 	//! unload module function.
 	void					unload_module(	const std::string& modulename,
 											protocol_module_base* module_ptr );

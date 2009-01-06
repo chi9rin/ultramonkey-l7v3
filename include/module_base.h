@@ -16,14 +16,51 @@
 namespace l7vs{
 
 class module_base{
+public:
+	typedef	boost::function< LOG_LEVEL_TAG(void) >
+								getloglevel_func_type;
+	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
+								logger_func_type;
+	typedef	boost::function< void ( const std::string&, unsigned int* ) >
+								replicationpaymemory_func_type;
 protected:
+	//! module name string
 	std::string	name;
+
+	//! logger method
+	getloglevel_func_type			getloglevel;
+	logger_func_type				putLogFatal;
+	logger_func_type				putLogError;
+	logger_func_type				putLogWarn;
+	logger_func_type				putLogInfo;
+	logger_func_type				putLogDebug;
+
+	//! replication memory peyment method
+	replicationpaymemory_func_type	replication_pay_memory;
+
+	//! replication area lock function object
+	boost::function< void( void ) >	replication_area_lock;
+	//! replication area unlock function object
+	boost::function< void( void ) >	replication_area_unlock;
+
 public:
 	module_base(){}
 	virtual ~module_base() = 0;
 	virtual	bool	is_tcp() = 0;
 	virtual	bool	is_udp() = 0;
 	virtual	std::string&	get_name(){return name;};
+	virtual	void	init_logger_functions(
+							getloglevel_func_type	ingetloglevel,
+							logger_func_type		inputLogFatal,
+							logger_func_type		inputLogError,
+							logger_func_type		inputLogWarn,
+							logger_func_type		inputLogInfo,
+							logger_func_type		inputLogDebug ) = 0; 
+	virtual	void	init_replication_functions(
+							replicationpaymemory_func_type  inreplication_pay_memory,
+							boost::function< void( void ) > inlock_func,
+							boost::function< void( void ) > inunlock_func ) = 0;
+
 };
 
 }	//namespace l7vsd

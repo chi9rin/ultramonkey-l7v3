@@ -32,6 +32,9 @@ protocol_module_control::getInstance(){
  */
 void
 protocol_module_control::initialize( const std::string& infile_path ){
+	if( &infile_path != NULL ){
+		module_control_base::modulefile_path	= infile_path;
+	}
 }
 
 /*!
@@ -52,8 +55,7 @@ protocol_module_control::finalize(){
  * @return  pointer for protocol_module_base class instance
  */
 protocol_module_base*
-protocol_module_control::load_module(	const	std::string& modulename,
-											logger_func_type inlog ){
+protocol_module_control::load_module( const	std::string& modulename ){
 	return NULL;
 }
 
