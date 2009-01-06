@@ -175,9 +175,6 @@ public:
 	virtual	EVENT_TAG	handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint ) = 0;
-	virtual	EVENT_TAG	handle_realserver_connection_fail(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::udp::endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_send(
 									const boost::thread::id thread_id ) = 0;
