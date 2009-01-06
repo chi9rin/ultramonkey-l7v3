@@ -54,7 +54,7 @@ protocol_module_control::finalize(){
 protocol_module_base*
 protocol_module_control::load_module(	const	std::string& modulename,
 											logger_func_type inlog ){
-
+	return NULL;
 }
 
 /*!

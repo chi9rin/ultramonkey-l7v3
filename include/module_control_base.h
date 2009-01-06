@@ -19,6 +19,7 @@ class	module_control_base{
 protected:
 	std::string	modulefile_path;
 	module_control_base(){}
+	virtual	~module_control_base(){};
 public:
 	virtual	void	initialize( const std::string& infile_path ) = 0;
 	virtual	void	finalize() = 0;

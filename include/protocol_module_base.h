@@ -163,9 +163,12 @@ public:
 	virtual	EVENT_TAG	handle_realserver_select(
 									const boost::thread::id thread_id,
 									boost::asio::ip::tcp::endpoint& rs_endpoint ) = 0;
+
 	virtual	EVENT_TAG	handle_realserver_select(
 									const boost::thread::id thread_id,
-									boost::asio::ip::udp::endpoint& rs_endpoint ) = 0;
+									boost::asio::ip::udp::endpoint& rs_endpoint,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									int& datalen ) = 0;
 
 	virtual	EVENT_TAG	handle_realserver_connect(
 									const boost::thread::id thread_id,
@@ -197,18 +200,18 @@ public:
 	virtual	EVENT_TAG	handle_realserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & rs_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const int recvlen ) = 0;
 	virtual	EVENT_TAG	handle_realserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint & rs_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const int recvlen ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & sorry_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const int recvlen ) = 0;
 	
 	virtual	EVENT_TAG	handle_response_send_inform(
@@ -216,7 +219,13 @@ public:
 
 	virtual EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & recv_endpoint,
+									boost::asio::ip::tcp::endpoint & cl_endpoint,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									int& datalen ) = 0;
+
+	virtual	EVENT_TAG	handle_client_select(
+									const boost::thread::id thread_id,
+									boost::asio::ip::udp::endpoint& rs_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
 									int& datalen ) = 0;
 

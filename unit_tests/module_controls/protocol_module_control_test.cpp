@@ -1,8 +1,9 @@
-#define	MAX_BUFFER_SIZE	(65535)
-
 
 #include <boost/test/included/unit_test.hpp>
-#include "../../src/protocol_module_control.cpp"
+#include "protocol_module_control.h"
+//#include "../../src/protocol_module_control.cpp"
+
+class	l7vs::protocol_module_control;
 
 using namespace boost::unit_test;
 
@@ -25,3 +26,4 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	return 0;
 }
+

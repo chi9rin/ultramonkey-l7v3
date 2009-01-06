@@ -3,9 +3,9 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= module_control_ut
+TARGET		= protomod_test1.so protomod_test2.so module_control_ut
 CPP			= g++
-CPPFLAGS	= -g -Wall -Werror -pthread -O0
+CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include \
@@ -16,18 +16,31 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
-SRCS		=	protocol_module_control_test.cpp
+SRCS		=	\
+			../../src/protocol_module_control.cpp \
+				protocol_module_control_test.cpp
+
+SRC_M1		=	protocol_module_test1.cpp
+
+.SUFFIX:	.cpp .o
+.cpp.o:
+		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 OBJS		= $(SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS)
-	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
+protomod_test1.so:
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o protomod_test1.so
+
+protomod_test2.so:
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o protomod_test2.so
+
+module_control_ut: $(OBJS)
+	$(CPP) $(INCLUDES) -o module_control_ut $(OBJS) $(LIBS)
+
+#$(TARGET):	$(OBJS)
+#	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(TARGET) $(OBJS)
-
-.cpp.o:
-	$(CPP) $(CFLAGS) $(INCLUDES) -c $<
-
