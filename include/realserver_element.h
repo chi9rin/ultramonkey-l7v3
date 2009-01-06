@@ -1,5 +1,5 @@
 //
-//	@file	l7vs_realserver_element.h
+//	@file	realserver_element.h
 //	@brief	realserver data prototype
 //
 //	copyright (c) sdy corporation. 2008
@@ -8,8 +8,8 @@
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
-#ifndef	L7VS_REALSERVER_ELEMENT_H
-#define	L7VS_REALSERVER_ELEMENT_H
+#ifndef	REALSERVER_ELEMENT_H
+#define	REALSERVER_ELEMENT_H
 #include <boost/asio.hpp>
 
 namespace l7vs{
@@ -49,4 +49,4 @@ public:
 };
 
 }	//namespace l7vsd
-#endif	//L7VS_REALSERVER_ELEMENT
+#endif	//REALSERVER_ELEMENT

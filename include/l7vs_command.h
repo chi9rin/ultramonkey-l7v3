@@ -9,8 +9,8 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 
-#ifndef	L7COMMAND_H
-#define	L7COMMAND_H
+#ifndef	L7VS_COMMAND_H
+#define	L7VS_COMMAND_H
 
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
@@ -21,8 +21,7 @@
 #include "logger_enum.h"
 #include "parameter_enum.h"
 #include "l7vs_replication.h"
-#include "l7vs_realserver_element.h"
-#include "l7vs_virtualservice_command_element.h"
+#include "virtualservice_element.h"
 
 namespace l7vs{
 //
@@ -52,7 +51,7 @@ public:
 	};
 	enum	REPLICATION_COMMAND_TAG{
 		REP_NONE = 0,
-		REP_START				// !< REPLICATION START COMMAND
+		REP_START,				// !< REPLICATION START COMMAND
 		REP_STOP,				// !< REPLICATION STOP COMMAND
 		REP_FORCE,				// !< REPLICATION FORCE COMMAND
 		REP_DUMP				// !< REPLICATION DUMP COMMAND
@@ -60,11 +59,11 @@ public:
 
 	COMMAND_CODE_TAG			command;
 	virtualservice_element		vs_element;
-	REPLICATION_CODE_TAG		replication_command;
+	REPLICATION_COMMAND_TAG		replication_command;
 	LOG_CATEGORY_TAG			log_category;
 	LOG_LEVEL_TAG				log_level;
 	PARAMETER_COMPONENT_TAG		reload_param;
-	PARAMETER_COMPONENT_TAG		snmp_log_category;
+	LOG_CATEGORY_TAG			snmp_log_category;
 	LOG_LEVEL_TAG				snmp_log_level;
 	l7vsadm_request() :			command( CMD_NONE ),
 								replication_command( REP_NONE ),
@@ -117,7 +116,7 @@ public:
 	
 	std::string				message;
 	
-	std::list< l7vs_virtualservice_element >
+	std::list< virtualservice_element >
 							virtualservice_status_list;
 	
 	REPLICATION_MODE_TAG	replication_mode_status;

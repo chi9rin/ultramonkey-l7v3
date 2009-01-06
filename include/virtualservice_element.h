@@ -9,14 +9,12 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 
-#ifndef	L7VS_VIRTUALSERVICE_COMMAND_ELEMENT
-#define	L7VS_VIRTUALSERVICE_COMMAND_ELEMENT
+#ifndef	VIRTUALSERVICE_COMMAND_ELEMENT
+#define	VIRTUALSERVICE_COMMAND_ELEMENT
 
 #include <vector>
-#include <string>
-#include <boost/asio.hpp>
 #include <boost/foreach.hpp>
-#include "l7vs_realserver_element.h"
+#include "realserver_element.h"
 
 namespace l7vs{
 
@@ -47,7 +45,7 @@ public:
 				sorry_maxconnection(0LL),
 				sorry_flag(false),
 				qos_upstream(0),
-				os_downstream(0){}
+				qos_downstream(0){}
 				
 	virtualservice_element( const virtualservice_element& in )
 			:	udpmode( in.udpmode ),
