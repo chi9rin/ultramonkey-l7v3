@@ -169,7 +169,8 @@ public:
 
 	virtual	EVENT_TAG	handle_realserver_connect(
 									const boost::thread::id thread_id,
-									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									int& datalen ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
@@ -187,7 +188,8 @@ public:
 
 	virtual	EVENT_TAG	handle_sorryserver_connect(
 									const boost::thread::id thread_id,
-									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									int& datalen ) = 0;
 
 	virtual	EVENT_TAG	handle_sorryserver_connection_fail(
 									const boost::thread::id thread_id ) = 0;
@@ -218,7 +220,8 @@ public:
 	virtual EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & recv_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& sendbuffer ) = 0;
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									int& datalen ) = 0;
 
 	virtual	EVENT_TAG	handle_client_send( const boost::thread::id thread_id ) = 0;
 
