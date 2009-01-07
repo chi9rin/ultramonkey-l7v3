@@ -5,7 +5,7 @@
 #
 TARGET		= protomod_test1.so protomod_test2.so module_control_ut
 CPP			= g++
-CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DMAX_BUFFER_SIZE=65535
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include \
