@@ -62,14 +62,12 @@ protected:
 public:
 	// instance getter function.
 	static schedule_module_control&	getInstance();
+	//! initialize
+	void	initialize( const std::string& infile_path );
+	//! finalize
+	void	finalize();
 	// load module function
-	schedule_module_base*	load_module(	const std::string&	,
-											getloglevel_func_type,
-											logger_func_type,
-											logger_func_type,
-											logger_func_type,
-											logger_func_type,
-											logger_func_type );
+	schedule_module_base*	load_module( const std::string& modulename );
 	// unload module function.
 	void					unload_module(	const std::string& modulename, 
 											schedule_module_base* module_ptr );

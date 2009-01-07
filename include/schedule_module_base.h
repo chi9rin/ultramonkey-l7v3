@@ -45,7 +45,7 @@ public:
 	schedule_module_base() : logger() {};
 	virtual	~schedule_module_base(){};
 
-	virtual	void	initialize( replicationpaymemory_func_type inpaymemory_func );
+	virtual	void	initialize();
 
 	virtual	void	handle_schedule(
 										boost::thread::id		thread_id,

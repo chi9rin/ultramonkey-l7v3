@@ -93,14 +93,14 @@ protected:
 	// realserver list iterator next method
 	rs_list_itr_func_type	rs_list_next;
 
-	//scheduler_method
-	tcp_schedule_func_type		schedule_tcp;
-	udp_schedule_func_type		schedule_udp;
-
 	// realserver list lock function object
 	boost::function< void( void ) >	rs_list_lock;
 	// realserver list unlock function object
 	boost::function< void( void ) >	rs_list_unlock;
+
+	//scheduler_method
+	tcp_schedule_func_type		schedule_tcp;
+	udp_schedule_func_type		schedule_udp;
 
 public:
 
@@ -119,12 +119,12 @@ public:
 
 	// event function
 	virtual	bool	is_use_sorry() = 0;
+
 	virtual	check_message_result	check_parameter( const std::vector<std::string>& args ) = 0;
-
-	virtual	void	handle_rslist_update() = 0;
-
 	virtual	check_message_result	set_parameter( const std::vector<std::string>& args ) = 0;
 	virtual	check_message_result	add_parameter( const std::vector<std::string>& args ) = 0;
+
+	virtual	void	handle_rslist_update() = 0;
 
 	virtual	void	register_schedule( tcp_schedule_func_type inschedule ) = 0;
 	virtual	void	register_schedule( udp_schedule_func_type inschedule ) = 0;
@@ -161,14 +161,14 @@ public:
 	
 	virtual	EVENT_TAG	handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint ) = 0;
+									const boost::asio::ip::tcp::endpoint& rs_endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_realserver_send(
 									const boost::thread::id thread_id ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_select(
 									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint & sorry_endpoint ) = 0;
+									boost::asio::ip::tcp::endpoint& sorry_endpoint ) = 0;
 
 	virtual	EVENT_TAG	handle_sorryserver_connect(
 									const boost::thread::id thread_id,
@@ -176,25 +176,26 @@ public:
 									int& datalen ) = 0;
 
 	virtual	EVENT_TAG	handle_sorryserver_connection_fail(
-									const boost::thread::id thread_id ) = 0;
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id ) = 0;
 
 	//use in downstream_thread
 	virtual	EVENT_TAG	handle_realserver_recv(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & rs_endpoint,
+									const boost::asio::ip::tcp::endpoint& rs_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const int recvlen ) = 0;
 	virtual	EVENT_TAG	handle_realserver_recv(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::udp::endpoint & rs_endpoint,
+									const boost::asio::ip::udp::endpoint& rs_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const int recvlen ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_recv(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & sorry_endpoint,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const int recvlen ) = 0;
 	
@@ -203,13 +204,12 @@ public:
 
 	virtual EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint & cl_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
 									int& datalen ) = 0;
 
 	virtual	EVENT_TAG	handle_client_select(
 									const boost::thread::id thread_id,
-									boost::asio::ip::udp::endpoint& rs_endpoint,
+									boost::asio::ip::udp::endpoint& cl_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
 									int& datalen ) = 0;
 
@@ -225,15 +225,15 @@ public:
 
 	virtual	EVENT_TAG	handle_realserver_disconnect(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & rs_endpoint ) = 0;
+									const boost::asio::ip::tcp::endpoint& rs_endpoint ) = 0;
 	
 	virtual	EVENT_TAG	handle_sorryserver_disconnect(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & sorry_endpoint ) = 0;
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint ) = 0;
 
 	virtual	EVENT_TAG	handle_realserver_close(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::udp::endpoint & rs_endpoint ) = 0;
+									const boost::asio::ip::udp::endpoint& rs_endpoint ) = 0;
 
 //	virtual	EVENT_TAG	handle_event( const pthread_t thread_id, EVENT_TAG prev_status,  ) = 0;
 };

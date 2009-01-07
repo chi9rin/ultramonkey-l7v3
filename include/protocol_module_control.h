@@ -65,7 +65,7 @@ public:
 	//! finalize
 	void	finalize();
 	//! load module function
-	protocol_module_base*	load_module( const std::string& );
+	protocol_module_base*	load_module( const std::string& modulename );
 	//! unload module function.
 	void					unload_module(	const std::string& modulename,
 											protocol_module_base* module_ptr );
