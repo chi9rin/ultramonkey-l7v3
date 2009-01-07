@@ -33,14 +33,6 @@ public:
 									rslist_iterator_type;
 protected:
 
-	//! replication paymemory function object
-	replicationpaymemory_func_type	replication_pay_memory;
-
-	//! replication area lock function object
-	boost::function< void( void ) >	replication_area_lock;
-	//! replication area unlock function object
-	boost::function< void( void ) >	replication_area_unlock;
-
 public:
 	schedule_module_base() : logger() {};
 	virtual	~schedule_module_base(){};
