@@ -74,7 +74,7 @@ public:
 	
 	EVENT_TAG	handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint );
+									const boost::asio::ip::tcp::endpoint& rs_endpoint );
 	
 	EVENT_TAG	handle_realserver_send( const boost::thread::id thread_id );
 	
@@ -88,7 +88,8 @@ public:
 									int& datalen );
 
 	EVENT_TAG	handle_sorryserver_connection_fail(
-									const boost::thread::id thread_id );
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint );
 	
 	EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id );
 
@@ -109,7 +110,6 @@ public:
 
 	EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint & recv_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
 									int& datalen );
 
@@ -276,7 +276,7 @@ protocol_module_test1::handle_realserver_connect(
 protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint )
+									const boost::asio::ip::tcp::endpoint& rs_endpoint )
 {
 	return STOP;
 }
@@ -306,7 +306,8 @@ protocol_module_test1::handle_sorryserver_connect(
 
 protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_sorryserver_connection_fail(
-									const boost::thread::id thread_id )
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint )
 {
 	return STOP;
 }
@@ -347,7 +348,6 @@ protocol_module_test1::handle_response_send_inform( const boost::thread::id thre
 protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_client_connection_check(
 									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint & recv_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
 									int& datalen )
 {

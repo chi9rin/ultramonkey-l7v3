@@ -4,7 +4,7 @@ namespace l7vs{
 
 class	protocol_module_test2 : public protocol_module_base{
 public:
-	protocol_module_test2( logger_func_type inlog );
+	protocol_module_test2();
 	~protocol_module_test2();
 
 	void	initialize(
@@ -127,7 +127,6 @@ public:
 									const int recvlen ){return STOP;}
 	EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint & cl_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
 									int& datalen ){return STOP;}
 	EVENT_TAG	handle_sorry_enable( const boost::thread::id upthread_id ){return STOP;}
@@ -141,7 +140,7 @@ public:
 									const boost::asio::ip::tcp::endpoint & sorry_endpoint ){return STOP;}
 };
 
-protocol_module_test2::protocol_module_test2( protocol_module_base::logger_func_type inlog ) : protocol_module_base( inlog )
+protocol_module_test2::protocol_module_test2() : protocol_module_base()
 {
 	name = "test1";
 }
@@ -306,8 +305,8 @@ protocol_module_test2::handle_realserver_close(
 }
 
 extern "C" l7vs::protocol_module_base*
-create_module( l7vs::protocol_module_base::logger_func_type in ){
-	return (new l7vs::protocol_module_test2( in ));
+create_module(){
+	return (new l7vs::protocol_module_test2());
 }
 
 extern "C" void
