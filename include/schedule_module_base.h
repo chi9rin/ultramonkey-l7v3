@@ -34,7 +34,7 @@ public:
 protected:
 
 public:
-	schedule_module_base() : logger() {};
+	schedule_module_base() {};
 	virtual	~schedule_module_base(){};
 
 	virtual	void	initialize();
