@@ -17,8 +17,7 @@ protected:
 		WAIT	= 0,
 		RUNNING,
 		EXIT
-	};
-
+ 	};
 	thread_ptr			upthread;
 	thread_ptr			downthread;
 	state_tag			upthread_state;
@@ -31,7 +30,10 @@ protected:
 	void				upstream_run();
 	void				downstream_run();
 public:
-	session_thread_control( session_ptr );
+	session_thread_control( session_ptr ptr ) : session( ptr ), upthread_state( WAIT ), downthread_state( WAIT ){
+		upthread.reset( new boost::thread( boost::bind( &session_thread_control::upstream_run, this ) ) );
+		downthread.reset( new boost::thread( boost::bind( &session_thread_control::downstream_run, this ) ) );
+	}
 	~session_thread_control(){}
 	session_ptr		get_session(){	return session; }
 	void			startupstream();	// virtualserviceのmapに入れるときにstartを呼ぶ
@@ -41,11 +43,10 @@ public:
 	void			join();		// 全てのthreadを停止状態にするときにjoin()を呼ぶ
 };
 
-
 void	session_thread_control::upstream_run(){
 	state_tag	state;
 	{
-		boost::mutex::scoped_lock( downthread_condition_mutex );
+		boost::mutex::scoped_lock( upthread_condition_mutex );
 		state = upthread_state;
 	}
 	for(;;){
@@ -53,7 +54,6 @@ void	session_thread_control::upstream_run(){
 			boost::mutex::scoepd_lock	lock( upthread_condition_mutex );
 			upstream_condition.wait( lock );
 			boost::mutex::scoped_lock( upthread_condition_mutex ){
-				upthread_state = RUNNNING;
 			}
 		}
 		else if( state == EXIT ){
@@ -61,10 +61,6 @@ void	session_thread_control::upstream_run(){
 		}
 		else{	//state RUNNING
 			session_ptr->up_thread_run();
-			{
-				boost::mutex::scoped_lock	lock( upthread_condition_mutex );
-				upthread_state = WAIT;
-			}
 		}
 		{
 			boost::mutex::scoped_lock	lock( upthread_condition_mutex );
@@ -72,8 +68,35 @@ void	session_thread_control::upstream_run(){
 		}
 	}
 }
+void	session_thread_control::downstream_run(){
+	state_tag	state;
+	{
+		boost::mutex::scoped_lock( downthread_condition_mutex );
+		state = downthread_state;
+	}
+	for(;;){
+		if( state == WAIT ){
+			boost::mutex::scoepd_lock	lock( downthread_condition_mutex );
+			downstream_condition.wait( lock );
+			boost::mutex::scoped_lock( downthread_condition_mutex ){
+			}
+		}
+		else if( state == EXIT ){
+			break;
+		}
+		else{	//state RUNNING
+			session_ptr->down_thread_run();
+		}
+		{
+			boost::mutex::scoped_lock	lock( downthread_condition_mutex );
+			state = downthread_state;
+		}
+	}
+}
 
 void	session_thread_control::startupstream(){
+	boost::mutex::scoped_lock( downthread_condition_mutex );
+	upthread_state = RUNNING;
 	upthread_condition.notify_all();
 }
 
@@ -81,13 +104,23 @@ void	session_thread_control::stopupstream(){
 	boost::mutex::scoped_lock	lock( upthread_condition_mutex );
 	upthread_state = WAIT;
 }
+void	session_thread_control::startdownstream(){
+	boost::mutex::scoped_lock( downthread_condition_mutex );
+	downthread_state = RUNNING;
+	downthread_condition.notify_all();
+}
 
-
+void	session_thread_control::stopupstream(){
+	boost::mutex::scoped_lock	lock( downthread_condition_mutex );
+	downthread_state = WAIT;
+}
 void	session_thread_control::join(){
 	boost::mutex::scoped_lock	uplock( upthread_condition_mutex );
-	boost::mutex::scoped_lock	downlock( downthread_condition_mutex );
 	upthread_state = EXIT;
+	upthread_condition.notify_all();
+	boost::mutex::scoped_lock	downlock( downthread_condition_mutex );
 	downthread_state = EXIT;
+	downthread_condition.notify_all();
 }
 
 
