@@ -1,7 +1,7 @@
 #ifndef	SESSION_THRAED_CONTROL_H
 #define	SESSION_THREAD_CONTROL_H
 #include <boost/thread.hpp>
-#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include "session.h"
