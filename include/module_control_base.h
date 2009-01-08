@@ -15,7 +15,14 @@
 
 namespace l7vs{
 
-class	module_control_error : public std::exception {
+class	module_control_bad_alloc : public std::bad_alloc {
+public:
+//	module_control_bad_alloc( ) : std::bad_alloc( ){
+		
+//	}
+};
+
+class	module_control_error : public std::logic_error {
 
 };
 
