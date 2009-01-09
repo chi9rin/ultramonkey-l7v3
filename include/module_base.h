@@ -49,6 +49,7 @@ public:
 	virtual	bool	is_tcp() = 0;
 	virtual	bool	is_udp() = 0;
 	virtual	std::string&	get_name(){return name;};
+
 	virtual	void	init_logger_functions(
 							getloglevel_func_type	ingetloglevel,
 							logger_func_type		inputLogFatal,
@@ -56,10 +57,16 @@ public:
 							logger_func_type		inputLogWarn,
 							logger_func_type		inputLogInfo,
 							logger_func_type		inputLogDebug ) = 0; 
+
 	virtual	void	init_replication_functions(
 							replicationpaymemory_func_type  inreplication_pay_memory,
 							boost::function< void( void ) > inlock_func,
 							boost::function< void( void ) > inunlock_func ) = 0;
+
+	//replication用インターフェイス
+	//これが呼ばれたら、replication領域にデータを書き込む
+	//注意：内部でループは不要です。メソッドが呼ばれたら1回データ書き込みを行う
+	//　　　タイマー制御はvirtual_serviceで行う。
 	virtual	void	replication_interrupt() = 0;
 };
 
