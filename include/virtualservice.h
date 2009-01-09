@@ -82,7 +82,6 @@ protected:
 	void						write_replicate_data();
 
 public:
-
 	bool						operator==( const virtualservice_tcp& );
 	bool						operator==( const virtualservice_element& ); 
 
@@ -95,6 +94,55 @@ public:
 	void						run();
 	void						stop();
 //	void						pause();
+
+	void						set_session_stop_inform( boost::thread::id thread_id );
+};
+
+class	virtualservice_udp : private boost::noncopyable, public virtualservice_base{
+protected:
+	void						rs_list_lock();
+	void						rs_list_unlock();
+	void						write_replicate_data();
+
+public:
+	bool						operator==( const virtualservice_tcp& );
+	bool						operator==( const virtualservice_element& ); 
+
+	void						initialize();
+	void						finalize();
+
+	void						set_element( virtualservice_element& );
+	void						mod_element( virtualservice_element& );
+
+	void						run();
+	void						stop();
+//	void						pause();
+};
+
+class	virtual_service{
+protected:
+	boost::shared_ptr<virtualservice_base>	vs;
+public:
+	virtual_service( virtualservice_element& element ){
+		if( element.udpmode )
+			vs = dynamic_cast<virtualservice_base*>( new virtualservice_tcp() );
+		else
+			vs = dynamic_cast<virtualservice_base*>( new virtualservice_udp() );
+	}
+	
+	bool		operator==( const virtualservice_tcp& in ){ return vs->operator==( in ); }
+	bool		operator==( const virtualservice_element& in ){ return vs->operator==( in ); } 
+
+	void		initialize(){ vs->initialize(); }
+	void		finalize(){ vs->finalize(); }
+
+	void		set_element( virtualservice_element& in ){ vs->set_element( in ); }
+	void		mod_element( virtualservice_element& in ){ vs->mod_element( in ); }
+	virtualservice_element&		get_element(){ return vs->get_element(); }
+
+	void		run(){ vs->run(); }
+	void		stop(){ vs->stop(); }
+//	void		pause(){ vs->pause(); }
 };
 
 }
