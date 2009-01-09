@@ -60,7 +60,7 @@ public:
 							replicationpaymemory_func_type  inreplication_pay_memory,
 							boost::function< void( void ) > inlock_func,
 							boost::function< void( void ) > inunlock_func ) = 0;
-
+	virtual	void	replication_interrupt() = 0;
 };
 
 }	//namespace l7vsd
