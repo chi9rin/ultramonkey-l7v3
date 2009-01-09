@@ -65,8 +65,10 @@ public:
 
 	//replication用インターフェイス
 	//これが呼ばれたら、replication領域にデータを書き込む
-	//注意：内部でループは不要です。メソッドが呼ばれたら1回データ書き込みを行う
-	//　　　タイマー制御はvirtual_serviceで行う。
+	//注意：内部でループは不要です。
+	//　　　ループとタイマー制御はvirtual_serviceで行います。
+	//　　　virtual_serviceは設定時間に1回replication_interruptをCallします。
+	//　　　replication_interrupt呼ばれたら1回データ書き込みを行います。
 	virtual	void	replication_interrupt() = 0;
 };
 
