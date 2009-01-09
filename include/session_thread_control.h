@@ -53,8 +53,6 @@ void	session_thread_control::upstream_run(){
 		if( state == WAIT ){
 			boost::mutex::scoepd_lock	lock( upthread_condition_mutex );
 			upstream_condition.wait( lock );
-			boost::mutex::scoped_lock( upthread_condition_mutex ){
-			}
 		}
 		else if( state == EXIT ){
 			break;
@@ -62,10 +60,8 @@ void	session_thread_control::upstream_run(){
 		else{	//state RUNNING
 			session_ptr->up_thread_run();
 		}
-		{
 			boost::mutex::scoped_lock	lock( upthread_condition_mutex );
 			state = upthread_state;
-		}
 	}
 }
 void	session_thread_control::downstream_run(){
@@ -78,8 +74,6 @@ void	session_thread_control::downstream_run(){
 		if( state == WAIT ){
 			boost::mutex::scoepd_lock	lock( downthread_condition_mutex );
 			downstream_condition.wait( lock );
-			boost::mutex::scoped_lock( downthread_condition_mutex ){
-			}
 		}
 		else if( state == EXIT ){
 			break;
@@ -87,32 +81,30 @@ void	session_thread_control::downstream_run(){
 		else{	//state RUNNING
 			session_ptr->down_thread_run();
 		}
-		{
-			boost::mutex::scoped_lock	lock( downthread_condition_mutex );
-			state = downthread_state;
-		}
+		boost::mutex::scoped_lock	lock( downthread_condition_mutex );
+		state = downthread_state;
 	}
 }
 
 void	session_thread_control::startupstream(){
 	boost::mutex::scoped_lock( downthread_condition_mutex );
-	upthread_state = RUNNING;
+	if( upthread_state != EXIT ) upthread_state = RUNNING;
 	upthread_condition.notify_all();
 }
 
 void	session_thread_control::stopupstream(){
 	boost::mutex::scoped_lock	lock( upthread_condition_mutex );
-	upthread_state = WAIT;
+	if( upthrad_state != EXIT ) upthread_state = WAIT;
 }
 void	session_thread_control::startdownstream(){
 	boost::mutex::scoped_lock( downthread_condition_mutex );
-	downthread_state = RUNNING;
+	if( downthread_state != EXIT ) downthread_state = RUNNING;
 	downthread_condition.notify_all();
 }
 
 void	session_thread_control::stopupstream(){
 	boost::mutex::scoped_lock	lock( downthread_condition_mutex );
-	downthread_state = WAIT;
+	if( downthread_state != EXIT ) downthread_state = WAIT;
 }
 void	session_thread_control::join(){
 	boost::mutex::scoped_lock	uplock( upthread_condition_mutex );
@@ -123,7 +115,5 @@ void	session_thread_control::join(){
 	downthread_condition.notify_all();
 }
 
-
 }//	namespace l7vs
-
 #endif	//SESSION_THREAD_CONTROL_H
