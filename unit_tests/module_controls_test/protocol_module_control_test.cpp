@@ -13,12 +13,7 @@ using namespace boost::unit_test;
 
 //test case1.
 void	protocol_module_control_test(){
-	//============================================
-	//protocol_module_control
-	//1
-	//getInstanceメソッドのテスト
-	//getInstanceによって取得したcontrolとcontrol_2のインスタンスが同一であることを確認する。 
-	//============================================
+	// unit_test[1]  getInstanceメソッドのテスト
 	l7vs::protocol_module_control& control = l7vs::protocol_module_control::getInstance();
 	l7vs::protocol_module_control& control_2 = l7vs::protocol_module_control::getInstance();
 
@@ -29,14 +24,7 @@ void	protocol_module_control_test(){
 	control.finalize();
 
 
-	//============================================
-	//protocol_module_control
-	//2
-	//load_moduleメソッドのテスト(正常系その１)
-	//ProtocolModuleクラスのインスタンスが取得できること
-	//例外が発生しないこと
-	//指定したモジュール名と取得したモジュール名が同じこと 
-	//============================================
+	// unit_test[2]  load_moduleメソッドのテスト(正常系その１)
 	control.initialize( "./" );
 	l7vs::protocol_module_base*		protomod = NULL;
 	try{
@@ -52,6 +40,7 @@ void	protocol_module_control_test(){
 
 //test case2
 void	protocol_module_control_test_thread(){
+	// unit_test[3]  テスト
 
 }
 
