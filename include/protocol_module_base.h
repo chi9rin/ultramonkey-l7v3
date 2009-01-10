@@ -60,6 +60,7 @@ public:
 		//use in downstream_thread
 		REALSERVER_RECV,			// !< Receive from RealServer
 		SORRYSERVER_RECV,			// !< Receive from SorryServer
+		CLIENT_SELECT,				// !< Select Client
 		CLIENT_CONNECTION_CHECK,	// !< Check ClientConnection available 
 		CLIENT_SEND,				// !< Send message to Client
 		//COMMON Status
