@@ -14,26 +14,37 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include "realserver.h"
 #include "virtualservice_element.h"
-#include "replication.h"
+//#include "replication.h"
+#include "protocol_module_base.h"
+#include "schedule_module_base.h"
+//#include "session_thread_control.h"
+
+#define	SESSION_POOL_NUM	256
 
 namespace l7vs{
 
-struct	vs_element_result{
+struct	vs_operation_result{
 	bool			flag;
 	std::string		message;
-	vs_element_result() : flag(true), message(""){}
-	bool	operator==( const vs_element_result& in )
+	vs_operation_result() : flag(true), message(""){}
+	bool	operator==( const vs_operation_result& in )
 				{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
-	bool	operator!=( const vs_element_result& in )
+	bool	operator!=( const vs_operation_result& in )
 				{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
 };
 
-class	virtualservice_base{
+class	virtualservice_base : boost::noncopyable{
 protected:
+	const	l7vs::l7vsd&		vsd;
+	const	l7vs::replication&	rep;
+
 	boost::asio::io_service		dispatcher;
 
 	virtualservice_element		element;
@@ -47,97 +58,129 @@ protected:
 	virtual	void				rs_list_lock();
 	virtual	void				rs_list_unlock();
 
-	virtual	void				write_replicate_data();
+	virtual	void				replication_interrupt();
 
-	virtualservice_base(){};
-	virtual	~virtualservice_base(){};
+	virtualservice_base(	const l7vs::l7vsd& invsd,
+							const l7vs::replication& inrep,
+							const virtualservice_element& inelement)
+												 : vsd( invsd ), rep( inrep ), element( inelement ) {};
 public:
-	virtual	bool				operator==( const virtualservice_element& ); 
+	virtual	~virtualservice_base(){};
 
-	virtual	void				initialize();
-	virtual	void				finalize();
+	virtual	bool				operator==( const virtualservice_base& );
+	virtual	bool				operator!=( const virtualservice_base& );
 
-	virtual	vs_element_result	set_element( virtualservice_element& );
-	virtual	vs_element_result	mod_element( virtualservice_element& );
+	virtual	vs_operation_result	set_virtualservce( virtualservice_element& );
+	virtual	vs_operation_result	edit_virtualservce( virtualservice_element& );
+	virtual	vs_operation_result	add_realserver( virtualservice_element& );
+	virtual	vs_operation_result	edit_realserver( virtualservice_element& );
+	virtual	vs_operation_result	del_realserver( virtualservice_element& );
 	virtualservice_element&		get_element(){ return element; }
 
 	virtual	void				run();
 	virtual	void				stop();
 //	virtual	void				pause();
+
+	virtual	void				connection_active( const boost::asio::ip::tcp::endpoint& );
+	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& );
+	virtual	void				release_session( boost::thread::id thread_id );
 };
 
-class	virtualservice_tcp : private boost::noncopyable, public virtualservice_base{
+class	virtualservice_tcp : public virtualservice_base{
 protected:
-	boost::asio::local::stream_protocol::acceptor
+	boost::shared_ptr<boost::asio::ip::tcp::acceptor>
 								acceptor_;
-
-	void						rs_list_lock();
-	void						rs_list_unlock();
 
 	std::map<boost::thread::id,session_thread_control>
 								pool_sessions;
 	std::map<boost::thread::id,session_thread_control>
 								active_sessions;
 
-	void						write_replicate_data();
+	void						rs_list_lock();
+	void						rs_list_unlock();
 
+	void						replication_interrupt();
+
+	virtualservice_tcp&	operator=( const virtualservice_tcp& ){}
 public:
-	bool						operator==( const virtualservice_tcp& );
-	bool						operator==( const virtualservice_element& ); 
+	virtualservice_tcp(		const l7vs::l7vsd& invsd,
+							const l7vs::replication& inrep,
+							const virtualservice_element& inelement);
+	~virtualservice_tcp();
 
-	void						initialize();
-	void						finalize();
+	bool						operator==( const virtualservice_base& );
+	bool						operator!=( const virtualservice_base& );
 
-	void						set_element( virtualservice_element& );
-	void						mod_element( virtualservice_element& );
+	vs_operation_result			set_virtualservce( virtualservice_element& );
+	vs_operation_result			edit_virtualservce( virtualservice_element& );
+
+	vs_operation_result			add_realserver( virtualservice_element& );
+	vs_operation_result			edit_realserver( virtualservice_element& );
+	vs_operation_result			del_realserver( virtualservice_element& );
 
 	void						run();
 	void						stop();
 //	void						pause();
 
-	void						set_session_stop_inform( boost::thread::id thread_id );
+	void						connection_active( const boost::asio::ip::tcp::endpoint& );
+	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
+	void						release_session( boost::thread::id thread_id );
 };
 
-class	virtualservice_udp : private boost::noncopyable, public virtualservice_base{
+class	virtualservice_udp : public virtualservice_base{
 protected:
 	void						rs_list_lock();
 	void						rs_list_unlock();
-	void						write_replicate_data();
 
+	void						replication_interrupt();
+
+	virtualservice_udp&	operator=( const virtualservice_udp& ){}
 public:
-	bool						operator==( const virtualservice_tcp& );
-	bool						operator==( const virtualservice_element& ); 
+	virtualservice_udp(		const l7vs::l7vsd& invsd,
+							const l7vs::replication& inrep,
+							const virtualservice_element& inelement);
+	~virtualservice_udp();
 
-	void						initialize();
-	void						finalize();
+	bool						operator==( const virtualservice_base& );
+	bool						operator!=( const virtualservice_base& );
 
-	void						set_element( virtualservice_element& );
-	void						mod_element( virtualservice_element& );
+	vs_operation_result			set_virtualservce( virtualservice_element& );
+	vs_operation_result			edit_virtualservce( virtualservice_element& );
+
+	vs_operation_result			add_realserver( virtualservice_element& );
+	vs_operation_result			edit_realserver( virtualservice_element& );
+	vs_operation_result			del_realserver( virtualservice_element& );
 
 	void						run();
 	void						stop();
 //	void						pause();
+
+	void		connection_active( const boost::asio::ip::tcp::endpoint& );
+	void		connection_inactive( const boost::asio::ip::tcp::endpoint& );
+	void		release_session( boost::thread::id thread_id );
 };
 
 class	virtual_service{
 protected:
 	boost::shared_ptr<virtualservice_base>	vs;
 public:
-	virtual_service( virtualservice_element& element ){
-		if( element.udpmode )
-			vs = dynamic_cast<virtualservice_base*>( new virtualservice_tcp() );
+	virtual_service(	const l7vs::l7vsd& invsd,
+						const l7vs::replication& inrep,
+						const virtualservice_element& inelement ){
+		if( inelement.udpmode )
+			vs = boost::shared_ptr<virtualservice_base>(
+					dynamic_cast<virtualservice_base*>( new virtualservice_udp( invsd, inrep, inelement ) ) );
 		else
-			vs = dynamic_cast<virtualservice_base*>( new virtualservice_udp() );
+			vs = boost::shared_ptr<virtualservice_base>(
+					dynamic_cast<virtualservice_base*>( new virtualservice_tcp( invsd, inrep, inelement ) ) );
+	}
+	~virtual_service(){
 	}
 	
-	bool		operator==( const virtualservice_tcp& in ){ return vs->operator==( in ); }
-	bool		operator==( const virtualservice_element& in ){ return vs->operator==( in ); } 
+	bool		operator==( const virtualservice_base& in ){ return vs->operator==( in ); }
 
-	void		initialize(){ vs->initialize(); }
-	void		finalize(){ vs->finalize(); }
-
-	void		set_element( virtualservice_element& in ){ vs->set_element( in ); }
-	void		mod_element( virtualservice_element& in ){ vs->mod_element( in ); }
+	void		set_virtualservce( virtualservice_element& in ){ vs->set_virtualservce( in ); }
+	void		edit_virtualservce( virtualservice_element& in ){ vs->edit_virtualservce( in ); }
 	virtualservice_element&		get_element(){ return vs->get_element(); }
 
 	void		run(){ vs->run(); }

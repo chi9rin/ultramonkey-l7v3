@@ -119,7 +119,7 @@ void	session_thread_control::downstream_run(){
 // start upstream function.
 //
 void	session_thread_control::startupstream(){
-	boost::mutex::scoped_lock( downthread_condition_mutex );	//upstream state lock
+	boost::mutex::scoped_lock( upthread_condition_mutex );	//upstream state lock
 	if( upthread_state != EXIT ) upthread_state = RUNNING;		// upthread state update.[RUNNING] -> alive mode
 	upthread_condition.notify_all();							// conditionwait upstreamthread is run.
 }
