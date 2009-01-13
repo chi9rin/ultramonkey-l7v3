@@ -18,10 +18,10 @@ namespace l7vs{
 class schedule_module_least_connection : public schedule_module_base
 {
 public:
-	schedule_module_least_connection() {};
-	~schedule_module_least_connection() {};
+	schedule_module_least_connection();
+	~schedule_module_least_connection();
 
-	void	initialize() {};
+	void	initialize();
 
 	void	init_logger_functions(
 							getloglevel_func_type	ingetloglevel,
@@ -51,6 +51,13 @@ public:
 							rslist_iterator_type	inlist_end,
 							rslist_iterator_type	inlist_next,
 							boost::asio::ip::tcp::endpoint&	outendpoint );
+
+	void	handle_schedule(
+							boost::thread::id		thread_id,
+							rslist_iterator_type	inlist_begin,
+							rslist_iterator_type	inlist_end,
+							rslist_iterator_type	inlist_next,
+							boost::asio::ip::udp::endpoint&	outendpoint ) {};
 
 };
 

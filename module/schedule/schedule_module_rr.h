@@ -21,10 +21,10 @@ protected:
 	boost::asio::ip::tcp::endpoint	tcp_endpoint ;
 	boost::asio::ip::udp::endpoint	udp_endpoint ;
 public:
-	schedule_module_round_robin() {};
-	~schedule_module_round_robin() {};
+	schedule_module_round_robin();
+	~schedule_module_round_robin();
 
-	void	initialize() {};
+	void	initialize();
 
 	void	init_logger_functions(
 							getloglevel_func_type	ingetloglevel,

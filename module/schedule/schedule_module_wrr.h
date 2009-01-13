@@ -28,10 +28,10 @@ protected:
 		wrr_weights() : currentWeight(0), maxWeight(0), gcd(0) {}
 	} vs_weights;
 public:
-	schedule_module_weighted_round_robin() {};
-	~schedule_module_weighted_round_robin() {};
+	schedule_module_weighted_round_robin();
+	~schedule_module_weighted_round_robin();
 
-	void	initialize() {};
+	void	initialize();
 
 	void	init_logger_functions(
 							getloglevel_func_type	ingetloglevel,
