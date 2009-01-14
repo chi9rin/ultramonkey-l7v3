@@ -26,7 +26,7 @@
 #include "schedule_module_base.h"
 //#include "session_thread_control.h"
 
-#define	SESSION_POOL_NUM	256
+#define	SESSION_POOL_NUM_DEFAULT	256
 
 namespace l7vs{
 
@@ -40,50 +40,118 @@ struct	vs_operation_result{
 				{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
 };
 
+struct	vs_replication_header{
+	unsigned long long	id;
+	unsigned long long	udpmode;
+	unsigned char		address[16];
+	unsigned long long	port;
+	unsigned long long	datasize;
+};
+
+struct	vs_replication_body{
+	unsigned long long	sorry_maxconnection;
+	unsigned char		sorry_address[16];
+	unsigned long long	sorry_port;
+	unsigned long long	sorry_flag;
+	unsigned long long	qos_up;
+	unsigned long long	qos_down;
+};
+
+struct	vs_replication_data{
+	vs_replication_header	header;
+	vs_replication_body		body;
+};
+
 class	virtualservice_base : boost::noncopyable{
+public:
+	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;
 protected:
 	const	l7vs::l7vsd&		vsd;
 	const	l7vs::replication&	rep;
 
 	boost::asio::io_service		dispatcher;
+	boost::asio::deadline_timer	vs_timer;
 
 	virtualservice_element		element;
 
 	protocol_module_base*		protomod;
 	schedule_module_base*		schedmod;
-
-	std::vector<realserver>		rs_list;
+	std::list<realserver>		rs_list;
+	std::list<boost::mutex>		rs_mutex;
 	boost::mutex				rs_list_mutex;
 	unsigned int				rs_list_ref_count;
-	virtual	void				rs_list_lock();
-	virtual	void				rs_list_unlock();
+	boost::mutex				rs_list_ref_count_mutex;
+	virtual	void				rs_list_lock() = 0;
+	virtual	void				rs_list_unlock() = 0;
 
-	virtual	void				replication_interrupt();
+	unsigned long long			recvsize_up;
+	unsigned long long			sendsize_up;
+	unsigned long long			recvsize_down;
+	unsigned long long			sendsize_down;
+
+	unsigned long long			throughput_up;
+	unsigned long long			throughput_down;
+
+	virtual	void				handle_replication_interrupt( const boost::system::error_code& ) = 0;
+	virtual	bool				read_replicationdata( vs_replication_data& ) = 0;
+
+	virtual	void				handle_protomod_replication( const boost::system::error_code& ) = 0;
+	virtual	void				handle_schedmod_replication( const boost::system::error_code& ) = 0;
+
+	virtual	void				handle_accept(	const session_thread_control_ptr,
+												const boost::system::error_code& ) = 0;
 
 	virtualservice_base(	const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
 							const virtualservice_element& inelement)
-												 : vsd( invsd ), rep( inrep ), element( inelement ) {};
+												 :	vsd( invsd ),
+													rep( inrep ),
+													element( inelement ),
+													rep_timer( dispatcher ) {};
 public:
 	virtual	~virtualservice_base(){};
 
-	virtual	bool				operator==( const virtualservice_base& );
-	virtual	bool				operator!=( const virtualservice_base& );
+	virtual	vs_operation_result	initialize() = 0:
+	virtual	vs_operation_result	finalize() = 0;
 
-	virtual	vs_operation_result	set_virtualservce( virtualservice_element& );
-	virtual	vs_operation_result	edit_virtualservce( virtualservice_element& );
-	virtual	vs_operation_result	add_realserver( virtualservice_element& );
-	virtual	vs_operation_result	edit_realserver( virtualservice_element& );
-	virtual	vs_operation_result	del_realserver( virtualservice_element& );
+	virtual	bool				operator==( const virtualservice_base& ) = 0;
+	virtual	bool				operator!=( const virtualservice_base& ) = 0;
+
+	virtual	vs_operation_result	set_virtualservce( virtualservice_element& ) = 0;
+	virtual	vs_operation_result	edit_virtualservce( virtualservice_element& ) = 0;
+	virtual	vs_operation_result	add_realserver( virtualservice_element& ) = 0;
+	virtual	vs_operation_result	edit_realserver( virtualservice_element& ) = 0;
+	virtual	vs_operation_result	del_realserver( virtualservice_element& ) = 0;
 	virtualservice_element&		get_element(){ return element; }
 
-	virtual	void				run();
-	virtual	void				stop();
+	virtual	void				run() = 0;
+	virtual	void				stop() = 0;
 //	virtual	void				pause();
 
-	virtual	void				connection_active( const boost::asio::ip::tcp::endpoint& );
-	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& );
-	virtual	void				release_session( boost::thread::id thread_id );
+	virtual	void				connection_active( const boost::asio::ip::tcp::endpoint& ) = 0;
+	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& ) = 0;
+	virtual	void				release_session( boost::thread::id thread_id ) = 0;
+
+	virtual	unsigned long long	get_qos_upstream() = 0;
+	virtual	unsigned long long	get_qos_downstream() = 0;
+	virtual	unsigned long long	get_throughput_upstream() = 0;
+	virtual	unsigned long long	get_throughput_downstream() = 0;
+
+	unsigned long long			recvsize_up;
+	boost::mutex				recvsize_up_mutex;
+	unsigned long long			sendsize_up;
+	boost::mutex				sendsize_up_mutex;
+	unsigned long long			recvsize_down;
+	boost::mutex				recvsize_down_mutex;
+	unsigned long long			sendsize_down;
+	boost::mutex				sendsize_down_mutex;
+	virtual	void				update_up_recv_size( unsigned long long	datasize ) = 0;
+	virtual	void				update_up_send_size( unsigned long long	datasize ) = 0;
+	virtual	void				update_down_recv_size( unsigned long long	datasize ) = 0;
+	virtual	void				update_down_size_size( unsigned long long	datasize ) = 0;
+
+	
+	virtual	void				handle_throughput_update( const boost::asio::ip::tcp::endpoint& ) = 0;
 };
 
 class	virtualservice_tcp : public virtualservice_base{
@@ -99,14 +167,20 @@ protected:
 	void						rs_list_lock();
 	void						rs_list_unlock();
 
-	void						replication_interrupt();
+	void						handle_replication_interrupt();
+	bool						read_replicationdata( vs_replication_data& );
 
-	virtualservice_tcp&	operator=( const virtualservice_tcp& ){}
+	void						handle_accept(	const session_thread_control_ptr,
+												const boost::system::error_code& );
+
 public:
 	virtualservice_tcp(		const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
 							const virtualservice_element& inelement);
 	~virtualservice_tcp();
+
+	vs_operation_result			initialize():
+	vs_operation_result			finalize();
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
@@ -132,14 +206,20 @@ protected:
 	void						rs_list_lock();
 	void						rs_list_unlock();
 
-	void						replication_interrupt();
+	void						handle_replication_interrupt();
+	bool						read_replicationdata( vs_replication_data& );
 
-	virtualservice_udp&	operator=( const virtualservice_udp& ){}
+	void						handle_accept(	const session_thread_control_ptr,
+												const boost::system::error_code& );
+
 public:
 	virtualservice_udp(		const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
 							const virtualservice_element& inelement);
 	~virtualservice_udp();
+
+	vs_operation_result			initialize():
+	vs_operation_result			finalize();
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );

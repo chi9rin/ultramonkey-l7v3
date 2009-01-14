@@ -25,6 +25,7 @@ class	session_thread_control : private boost::noncopyable{
 public:
 	typedef	boost::shared_ptr< boost::thread >	thread_ptr;		//! shared_ptr thread typedef
 	typedef	boost::shared_ptr< session >		session_ptr;	//! shared_ptr session typedef
+	typedef	boost::thread::id					thread_id_type;	//! thread id typedef
 protected:
 	enum	state_tag{	//! upthread and down thread state enum
 		WAIT	= 0,	//! thread pooling mode
@@ -65,6 +66,10 @@ public:
 	void			stopdownstream();
 	//! all thread destory function.
 	void			join();
+	//! upstream-thread id getter
+	thread_id_type	get_upthread_id(){ return upthread.get_id(); }
+	//! downstream-thread id getter
+	thread_id_type	get_downthread_id(){ return downthread.get_id(); }
 };
 
 //
@@ -86,6 +91,7 @@ void	session_thread_control::upstream_run(){
 		}
 		else{	//state RUNNING
 			session_ptr->up_thread_run();	//session upstream thread looping.
+			stopupstream();
 		}
 		boost::mutex::scoped_lock	lock( upthread_condition_mutex );	// upstream state lock
 		state = upthread_state;	//thread local state is update.
@@ -110,6 +116,7 @@ void	session_thread_control::downstream_run(){
 		}
 		else{	//state RUNNING
 			session_ptr->down_thread_run();//session downstream thread looping.
+			stopdownstream();
 		}
 		boost::mutex::scoped_lock	lock( downthread_condition_mutex );	//downstream state lock
 		state = downthread_state;	// thread local sate is update.
