@@ -62,5 +62,5 @@ public:
 };
 
 
-}	//namespace l7vsd
+}	//namespace l7vs
 #endif	//L7VS_REALSERVER
