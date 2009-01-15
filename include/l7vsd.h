@@ -11,65 +11,75 @@
 #include "logger/logger.h"
 #include "parameter/parameter.h"
 
-namespace l7vsd{
+namespace l7vs{
+
+//! l7vsd main class
 class l7vsd{
 public:
-	struct config_message_result{
+	typedef shared_ptr< command_receiver >	command_receiver_ptr;	//! shared_ptr command_receiver typedef
+	typedef shared_ptr< replication >		replication_ptr;		//! shared_ptr replication typedef
+	typedef shared_ptr< snmp_bridge >		snmp_bridge_ptr;		//! shared_ptr snmp_bridge typedef
+
+	typedef std::list< virtual_service >	vs_list_type;			//! virtual_service list typedef
+	
+	struct l7vsd_operation_result{
 		bool	flag;
 		std::string	message;
-		bool	operator==( const config_message_result& in ){ return flag == in.flag; }
-		bool	operator!=( const config_message_result& in ){ return flag != in.flag; }
+		l7vsd_operation_result() : flag(true), message(""){}
+		bool	operator==( const l7vsd_operation_result& in )
+				{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
+		bool	operator!=( const l7vsd_operation_result& in )
+				{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
 	};
 
 protected:
-	thread_pool tp;
-	boost::asio::io_service dispatcher;
+	boost::thread_group			vs_threads;			//! virtual_service thread group
+	boost::asio::io_service		dispatcher;			//! dispatcher
 
-	std::list<virtual_service> virtual_service_list;
+	vs_list_type				vs_list;			//! virtual_service list
 
-	shared_ptr<command_receiver> command_receiever_;
-	shared_ptr<replication> replication_;
-	shared_ptr<snmp_bridge> snmp_bridge_;
+	command_receiver_ptr		cmd_receiver;		//! command_receiver ptr
+	replication_ptr				repli;				//! replication ptr
+	snmp_bridge_ptr				bridge;				//! snmp_bridge ptr
+
+	vs_list_type::iterator		search_vslist( virtualservice_element& );	//! vs_list search function
 
 public:
-	config_message_result list_virtual_service(std::vector<virtualservice_element>& out_vslist);
+	l7vsd_operation_result		list_virtual_service( std::vector<virtualservice_element>&  );	//! virtual_service list command
 
-	config_message_result add_virtual_service(virtualservice_element in_vselement);
-	config_message_result del_virtual_service(virtualservice_element in_vselement);
-	config_message_result edit_virtual_service(virtualservice_element in_vselement);
+	l7vsd_operation_result		add_virtual_service( const virtualservice_element& );	//! virtual_service add command
+	l7vsd_operation_result		del_virtual_service( const virtualservice_element& );	//! virtual_service del command
+	l7vsd_operation_result		edit_virtual_service( const virtualservice_element& );	//! virtual_service edit command
 
-	config_message_result add_real_server(virtualservice_element in_vselement, realserver_element in_rselemnt);
-	config_message_result del_real_server(virtualservice_element in_vselement, realserver_element in_rselement);
-	config_message_result edit_real_server(virtualservice_element in_vselement, realserver_element in_rselement);
+	l7vsd_operation_result		add_real_server( const virtualservice_element& );	//! real_server add command
+	l7vsd_operation_result		del_real_server( const virtualservice_element& );	//! real_server del command
+	l7vsd_operation_result		edit_real_server( const virtualservice_element& );	//! real_server edit command
 
-	config_message_result flush_virtual_service();
+	l7vsd_operation_result		flush_virtual_service();	//! all virtual_service delete command
 
-	config_message_result get_replication_info(REPLICATION_MODE_TAG& out_status);
-	config_message_result set_replication(bool start_replication_flag);
-	config_message_result replication_dump_memory();
-	config_message_result replication_compulsorily();
+	l7vsd_operation_result		get_replication_info( REPLICATION_MODE_TAG& );	//! get replication info command
+	l7vsd_operation_result		start_replication();		//! start replication command
+	l7vsd_operation_result		stop_replication();			//! stop replication command
+	l7vsd_operation_result		dump_replication_memory();	//! dump replication memory command
+	l7vsd_operation_result		force_replicate();			//! force replicate command
 
-	config_message_result get_log_level(LOG_CATEGORY_TAG in_log_category, LOG_LEVEL_TAG& out_log_level);
-	config_message_result set_log_level(LOG_CATEGORY_TAG in_log_category, LOG_LEVEL_TAG in_log_level);
-	config_message_result set_log_level_all(LOG_LEVEL_TAG in_log_level);
+	l7vsd_operation_result		get_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG& );		//! get loglevel command
+	l7vsd_operation_result		set_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG );	//! set loglevel command
+	l7vsd_operation_result		set_log_level_all( const LOG_LEVEL_TAG );						//! set all category loglevel command
 
-	config_message_result get_snmp_connect_status(int& out_status);
-	config_message_result get_snmp_log_level(LOG_CATEGORY_TAG in_log_category, LOG_LEVEL_TAG& out_log_level);
-	config_message_result set_snmp_log_level(LOG_CATEGORY_TAG in_log_category, LOG_LEVEL_TAG in_log_level);
-	config_message_result set_snmp_log_level_all(LOG_LEVEL_TAG in_log_level);
+	l7vsd_operation_result		get_snmp_connect_status( int& );									//! get snmp connect status command
+	l7vsd_operation_result		get_snmp_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG& );		//! get snmp loglevel command
+	l7vsd_operation_result		set_snmp_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG );	//! set snmp loglevel command
+	l7vsd_operation_result		set_snmp_log_level_all( const LOG_LEVEL_TAG );						//! set snmp all loglevel command
 
-	config_message_result reload_parameter(PARAMETER_COMPONENT_TAG in_reload_param);
+	l7vsd_operation_result		reload_parameter( const PARAMETER_COMPONENT_TAG );	//! reload component parameter command
 
-	int send_mibcollection(l7vs_mibrequest_message* payload);
-	int send_trap(std::string message);
-
-
-	void start();
+	void						run();		//! l7vsd run method
 
 protected:
-	bool is_exit_requested();
+	bool						is_exit_requested();		//! check if exit requested
 
 };
 
-}	//namespace l7vsd
+}	//namespace l7vs
 #endif	//L7VSD_H
