@@ -1,6 +1,6 @@
 //
-//	@file	protocol_module_control.h
-//	@brief	control load/unload shared object protocol module
+//!	@file	protocol_module_control.h
+//!	@brief	control load/unload shared object protocol module
 //
 //	copyright (c) sdy corporation. 2008
 //	mail: h dot okada at sdy dot co dot jp
@@ -21,9 +21,11 @@
 
 namespace l7vs{
 
-// protocol module control class is load protocol module from shared object file.
-// many virtual service class used protocol module instance.
-// but, shared object load is once. and unload when vitual service refarence count is zero.
+//
+//!	@class	protocol_module_control	
+//! @brief	protocol module control class is load protocol module from shared object file.
+//! @brief	many virtual service class used protocol module instance.
+//! @brief	but, shared object load is once. and unload when vitual service refarence count is zero.
 class	protocol_module_control : public module_control_base, private boost::noncopyable{
 public:
 	//! getloglevel function object typedef
@@ -38,13 +40,14 @@ public:
 	//! module destroy function object typedef
 	typedef	boost::function< void ( protocol_module_base* ) >
 								destroy_func_type;
-	
-	//! protocol module information structure.
+
+	//! @struct	protocol_module_information
+	//! @brief	protocol module information structure.
 	struct	protocol_module_info{
-		unsigned int		ref_count;			// refarence count
-		create_func_type	create_func;		// create function object
-		destroy_func_type	destroy_func;		// destroy function object
-		protocol_module_info() : ref_count(0) {}	// constractor
+		unsigned int		ref_count;				//!< refarence count
+		create_func_type	create_func;			//!< create function object
+		destroy_func_type	destroy_func;			//!< destroy function object
+		protocol_module_info() : ref_count(0) {}	//!< constractor
 	};
 
 	//! name module map type typedef
@@ -61,14 +64,17 @@ public:
 	//! instance getter function.
 	static protocol_module_control&	getInstance();
 	//! initialize
+	//! @param[in]	shared object file path
 	void	initialize( const std::string& infile_path );
 	//! finalize
 	void	finalize();
 	//! load module function
+	//! @param[in]	protocol module name
+	//!	@return		protocol module pointer
 	protocol_module_base*	load_module( const std::string& modulename );
 	//! unload module function.
-	void					unload_module(	const std::string& modulename,
-											protocol_module_base* module_ptr );
+	//!	@param[in]	module ptr
+	void	unload_module( protocol_module_base* module_ptr );
 };
 
 }	//namespace l7vs

@@ -1,6 +1,6 @@
 //
-//	@file	l7vscommand.h
-//	@brief	l7vsadm and l7vsd connection data prototype
+//!	@file	l7vscommand.h
+//!	@brief	l7vsadm and l7vsd connection data prototype
 //
 //	copyright (c) sdy corporation. 2008
 //	mail: n dot nakai at sdy dot co dot jp
@@ -25,12 +25,11 @@
 
 namespace l7vs{
 //
-//	l7vsadm -> l7vsd request data class
-//	
-//
+//! @class l7vsadm_request
+//! @brief	l7vsadm -> l7vsd request data class
 class	l7vsadm_request{
 public:
-	// command lists
+	//! @enum COMMAND_CODE_TAG	request command code enum
 	enum	COMMAND_CODE_TAG{
 		CMD_NONE = 0,
 		CMD_LIST,               //!< List command(-l,--list)
@@ -49,22 +48,25 @@ public:
 		CMD_PARAMETER,          //!< Parameter command(-P, --parameter)
 		CMD_HELP,               //!< Help command(-h, --help)
 	};
+
+	//! @enum REPLICATION_COMMAND_TAG	replication request command enum
 	enum	REPLICATION_COMMAND_TAG{
 		REP_NONE = 0,
-		REP_START,				// !< REPLICATION START COMMAND
-		REP_STOP,				// !< REPLICATION STOP COMMAND
-		REP_FORCE,				// !< REPLICATION FORCE COMMAND
-		REP_DUMP				// !< REPLICATION DUMP COMMAND
+		REP_START,				//!< REPLICATION START COMMAND
+		REP_STOP,				//!< REPLICATION STOP COMMAND
+		REP_FORCE,				//!< REPLICATION FORCE COMMAND
+		REP_DUMP				//!< REPLICATION DUMP COMMAND
 	};
 
-	COMMAND_CODE_TAG			command;
-	virtualservice_element		vs_element;
-	REPLICATION_COMMAND_TAG		replication_command;
-	LOG_CATEGORY_TAG			log_category;
-	LOG_LEVEL_TAG				log_level;
-	PARAMETER_COMPONENT_TAG		reload_param;
-	LOG_CATEGORY_TAG			snmp_log_category;
-	LOG_LEVEL_TAG				snmp_log_level;
+	COMMAND_CODE_TAG			command;				//!< request command
+	virtualservice_element		vs_element;				//!< use VS mode and RealServer mode
+	REPLICATION_COMMAND_TAG		replication_command;	//!< use replication command mode
+	LOG_CATEGORY_TAG			log_category;			//!< use log change mode. target log category
+	LOG_LEVEL_TAG				log_level;				//!< use log level change mode target category log level
+	PARAMETER_COMPONENT_TAG		reload_param;			//!< set reload param mode
+	LOG_CATEGORY_TAG			snmp_log_category;		//!< use snmp mode. target change log category 
+	LOG_LEVEL_TAG				snmp_log_level;			//!< use snmp mode. target log category change to log level
+	//! constractor
 	l7vsadm_request() :			command( CMD_NONE ),
 								replication_command( REP_NONE ),
 								log_category( LOG_CAT_NONE ),
@@ -72,7 +74,10 @@ public:
 								snmp_log_category( LOG_CAT_NONE ),
 								snmp_log_level( LOG_LV_NONE ){}
 private:
-	friend class	boost::serialization::access;
+	friend class	boost::serialization::access;		//!< serializable access class is friend.
+	//! serializable function
+	//! @param[in]	archiver class from boost serializable
+	//! @param[in]	version use boost serializable
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
 		ar & command;
 		ar & vs_element;
@@ -85,59 +90,61 @@ private:
 };
 
 //
-// l7vsd -> l7vsadm data class
-//
-
+//! @class	l7vsd_response
+//! @brief	l7vsd -> l7vsadm data class
 class	l7vsd_response{
 public:
-	enum	COMMAND_RESPONSE_CODE{
-		RESPONSE_NONE = 0,
-		RESPONSE_OK,
-		RESPONSE_LIST_ERROR,
-		RESPONSE_LIST_VERBOSE_ERROR,
-		RESPONSE_LIST_KEY_ERROR,
-		RESPONSE_ADD_VS_ERROR,
-		RESPONSE_DEL_VS_ERROR,
-		RESPONSE_EDIT_VS_ERROR,
-		RESPONSE_FLUSH_VS_ERROR,
-		RESPONSE_ADD_RS_ERROR,
-		RESPONSE_DEL_RS_ERROR,
-		RESPONSE_EDIT_RS_ERROR,
-		RESPONSE_REPLICATION_ERROR,
-		RESPONSE_LOG_ERROR,
-		RESPONSE_SNMP_ERROR,
-		RESPONSE_PARAMETER_ERROR,
-		RESPONSE_HELP_ERROR
-	};
+	enum	COMMAND_RESPONSE_CODE{	//!<	response command code enum
+		RESPONSE_NONE = 0,			//!<	none
+		RESPONSE_OK,				//!<	request execute ok
+		RESPONSE_LIST_ERROR,		//!<	list request error
+		RESPONSE_LIST_VERBOSE_ERROR,//!<	list verbose request error
+		RESPONSE_LIST_KEY_ERROR,	//!<	list key request error
+		RESPONSE_ADD_VS_ERROR,		//!<	virtual service add error
+		RESPONSE_DEL_VS_ERROR,		//!<	virtual service delete error
+		RESPONSE_EDIT_VS_ERROR,		//!<	virtual service edit error
+		RESPONSE_FLUSH_VS_ERROR,	//!<	virtual service clear error
+		RESPONSE_ADD_RS_ERROR,		//!<	realserver add error
+		RESPONSE_DEL_RS_ERROR,		//!<	realserver delete error
+		RESPONSE_EDIT_RS_ERROR,		//!<	realserver edit error
+		RESPONSE_REPLICATION_ERROR,	//!<	replication error
+		RESPONSE_LOG_ERROR,			//!<	logger error
+		RESPONSE_SNMP_ERROR,		//!<	snmpagent error
+		RESPONSE_PARAMETER_ERROR,	//!<	parameter error
+
 	l7vsadm_request::COMMAND_CODE_TAG
-							code;
+							code;	//!<	request command.
 	
-	bool					status;
+	COMMAND_RESPONSE_CODE	status;	//!<	return status.
 	
-	std::string				message;
+	std::string				message;//!<	error message
 	
 	std::list< virtualservice_element >
-							virtualservice_status_list;
+							virtualservice_status_list;//!< virtual service lists
 	
-	REPLICATION_MODE_TAG	replication_mode_status;
+	REPLICATION_MODE_TAG	replication_mode_status;//!< replication status.
 	
 	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
-							log_status_list;
+							log_status_list;	//!< log cateogries statuses.
 							
-	bool					snmp_connection_status;
+	bool					snmp_connection_status;	//!< snmp connection status
 	
 	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
-							snmp_log_status_list;
+							snmp_log_status_list;	//!< snmp log statuses
 	
-	unsigned long long		total_bps;
-	unsigned long long		total_client_recv_byte;
-	unsigned long long		total_client_send_byte;
-	unsigned long long		total_realserver_recv_byte;
-	unsigned long long		total_realserver_send_byte;
+	unsigned long long		total_bps;					//!< l7vsd's total bit par sec
+	unsigned long long		total_client_recv_byte;		//!< l7vsd's total client recive bytes
+	unsigned long long		total_client_send_byte;		//!< l7vsd's total client send bytes
+	unsigned long long		total_realserver_recv_byte;	//!< l7vsd's total realserver recive bytes
+	unsigned long long		total_realserver_send_byte;	//!< l7vsd's total realserver send bytes
 	std::vector<virtualservice_element>
-							virtualservice_vec;	
+							virtualservice_vec;			//!< virtualservice lists
 private:
-	friend class	boost::serialization::access;
+	friend class	boost::serialization::access;		//! friend boost serializable class
+	//! serializable
+	//! @brief using boost serialiable. class serializable function.
+	//! @param[in]	archive
+	//! @param[in]	version
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
 		ar & code;
 		ar & status;

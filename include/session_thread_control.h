@@ -1,6 +1,6 @@
 //
-//	@file	session thread controler.
-//	@brief	session used 2 threads. thread pooling unit is 2 thread control.
+//!	@file	session thread controler.
+//!	@brief	session used 2 threads. thread pooling unit is 2 thread control.
 //
 //	copyright (c) sdy corporation. 2009
 //	mail: n dot nakai at sdy dot co dot jp
@@ -18,16 +18,16 @@
 
 namespace l7vs{
 
-//
-//	session thread pooling utility class.
-//
+//!
+//!	@brief	session thread pooling utility class.
+//! @class	session_thread_control is session thread pool utirity.
 class	session_thread_control : private boost::noncopyable{
 public:
 	typedef	boost::shared_ptr< boost::thread >	thread_ptr;		//! shared_ptr thread typedef
 	typedef	boost::shared_ptr< session >		session_ptr;	//! shared_ptr session typedef
 	typedef	boost::thread::id					thread_id_type;	//! thread id typedef
 protected:
-	enum	state_tag{	//! upthread and down thread state enum
+	enum	state_tag{	//! @enum state_tag upthread and down thread state enum
 		WAIT	= 0,	//! thread pooling mode
 		RUNNING,		//! thread running mode
 		EXIT			//! thread exit mode
@@ -45,6 +45,7 @@ protected:
 	void				downstream_run();			//! downstream thread bind function
 public:
 	//! constractor.
+	//! @param session_ptr	session class shared ptr
 	session_thread_control( session_ptr ptr ) :
 			session( ptr ),
 			upthread_state( WAIT ),
@@ -55,6 +56,7 @@ public:
 	//! destractor
 	~session_thread_control(){}
 	//! session shared ptr getter
+	//! @return session shared ptr
 	session_ptr		get_session(){	return session; }
 	//! upstream thread start function
 	void			startupstream();
@@ -67,13 +69,15 @@ public:
 	//! all thread destory function.
 	void			join();
 	//! upstream-thread id getter
+	//! @return thread_id_type	upstream thread id
 	thread_id_type	get_upthread_id(){ return upthread.get_id(); }
 	//! downstream-thread id getter
+	//! @return thread_id_type	downstream thread id
 	thread_id_type	get_downthread_id(){ return downthread.get_id(); }
 };
 
 //
-//	upstream thread bind function.
+//!	@brief upstream thread bind function.
 //
 void	session_thread_control::upstream_run(){
 	state_tag	state;
@@ -98,7 +102,7 @@ void	session_thread_control::upstream_run(){
 	}
 }
 //
-// downstream thread bind function,
+//! @brief	downstream thread bind function,
 //
 void	session_thread_control::downstream_run(){
 	state_tag	state;
@@ -123,7 +127,7 @@ void	session_thread_control::downstream_run(){
 	}
 }
 //
-// start upstream function.
+//! @brief	start upstream function.
 //
 void	session_thread_control::startupstream(){
 	boost::mutex::scoped_lock( upthread_condition_mutex );	//upstream state lock
@@ -131,14 +135,14 @@ void	session_thread_control::startupstream(){
 	upthread_condition.notify_all();							// conditionwait upstreamthread is run.
 }
 //
-// stop upstream function
+//! @brief	stop upstream function
 //
 void	session_thread_control::stopupstream(){
 	boost::mutex::scoped_lock	lock( upthread_condition_mutex );	// upstream state lock
 	if( upthrad_state != EXIT ) upthread_state = WAIT;				// upthread state is update [WAIT] -> pooling mode
 }
 //
-// start downstream function
+//! @brief	start downstream function
 //
 void	session_thread_control::startdownstream(){
 	boost::mutex::scoped_lock( downthread_condition_mutex );		// downstream state lock
@@ -146,14 +150,14 @@ void	session_thread_control::startdownstream(){
 	downthread_condition.notify_all();								// condition wait thread is run.
 }
 //
-// stop downstream function.
+//! @brief	stop downstream function.
 //
 void	session_thread_control::stopdownstream(){
 	boost::mutex::scoped_lock	lock( downthread_condition_mutex );	// downstream state lock
 	if( downthread_state != EXIT ) downthread_state = WAIT;			// downstream state is update [WAIT] -> pooling mode
 }
 //
-//	upstream and downstream threads finished function
+//!	@brief	upstream and downstream threads finished function
 //
 void	session_thread_control::join(){
 	boost::mutex::scoped_lock	uplock( upthread_condition_mutex );	//upstream state lock
