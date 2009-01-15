@@ -41,10 +41,10 @@ struct	vs_operation_result{
 };
 
 struct	vs_replication_header{
-	unsigned long long	id;
 	unsigned long long	udpmode;
 	unsigned char		address[16];
 	unsigned long long	port;
+	unsigned long long	bodytype;
 	unsigned long long	datasize;
 };
 
@@ -81,27 +81,29 @@ protected:
 	boost::mutex				rs_list_mutex;
 	unsigned int				rs_list_ref_count;
 	boost::mutex				rs_list_ref_count_mutex;
-	virtual	void				rs_list_lock() = 0;
-	virtual	void				rs_list_unlock() = 0;
 
 	unsigned long long			recvsize_up;
+	unsigned long long			current_up_recvsize;
 	boost::mutex				recvsize_up_mutex;
 	unsigned long long			sendsize_up;
 	boost::mutex				sendsize_up_mutex;
 	unsigned long long			recvsize_down;
+	unsigned long long			current_down_recvsize;
 	boost::mutex				recvsize_down_mutex;
 	unsigned long long			sendsize_down;
 	boost::mutex				sendsize_down_mutex;
 
+	unsigned long long			last_calc_time;
 	unsigned long long			throughput_up;
 	unsigned long long			throughput_down;
 
 	virtual	void				handle_replication_interrupt( const boost::system::error_code& ) = 0;
 	virtual	bool				read_replicationdata( vs_replication_data& ) = 0;
 
-	virtual	void				handle_protomod_replication( const boost::system::error_code& ) = 0;
-	virtual	void				handle_schedmod_replication( const boost::system::error_code& ) = 0;
+	void						handle_protomod_replication( const boost::system::error_code& );
+	void						handle_schedmod_replication( const boost::system::error_code& );
 
+	void						handle_throughput_update( const boost::system::error_code& );
 public:
 	virtualservice_base(	const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
@@ -118,6 +120,9 @@ public:
 	virtual	bool				operator==( const virtualservice_base& ) = 0;
 	virtual	bool				operator!=( const virtualservice_base& ) = 0;
 
+	virtual	void				rs_list_lock() = 0;
+	virtual	void				rs_list_unlock() = 0;
+
 	virtual	vs_operation_result	set_virtualservce( virtualservice_element& ) = 0;
 	virtual	vs_operation_result	edit_virtualservce( virtualservice_element& ) = 0;
 	virtual	vs_operation_result	add_realserver( virtualservice_element& ) = 0;
@@ -133,18 +138,15 @@ public:
 	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& ) = 0;
 	virtual	void				release_session( boost::thread::id thread_id ) = 0;
 
-	virtual	unsigned long long	get_qos_upstream() = 0;
-	virtual	unsigned long long	get_qos_downstream() = 0;
-	virtual	unsigned long long	get_throughput_upstream() = 0;
-	virtual	unsigned long long	get_throughput_downstream() = 0;
+	unsigned long long			get_qos_upstream(){ return element.qos_upstream; }
+	unsigned long long			get_qos_downstream(){ return element.qos_downstream; }
+	unsigned long long			get_throughput_upstream(){ return throughput_up; }
+	unsigned long long			get_throughput_downstream(){ return throughput_down; }
 
-	virtual	void				update_up_recv_size( unsigned long long	datasize ) = 0;
-	virtual	void				update_up_send_size( unsigned long long	datasize ) = 0;
-	virtual	void				update_down_recv_size( unsigned long long	datasize ) = 0;
-	virtual	void				update_down_size_size( unsigned long long	datasize ) = 0;
-
-	
-	virtual	void				handle_throughput_update( const boost::asio::ip::tcp::endpoint& ) = 0;
+	void						update_up_recv_size( unsigned long long	datasize );
+	void						update_up_send_size( unsigned long long	datasize );
+	void						update_down_recv_size( unsigned long long	datasize );
+	void						update_down_send_size( unsigned long long	datasize );
 };
 
 class	virtualservice_tcp : public virtualservice_base{
