@@ -85,9 +85,13 @@ protected:
 	virtual	void				rs_list_unlock() = 0;
 
 	unsigned long long			recvsize_up;
+	boost::mutex				recvsize_up_mutex;
 	unsigned long long			sendsize_up;
+	boost::mutex				sendsize_up_mutex;
 	unsigned long long			recvsize_down;
+	boost::mutex				recvsize_down_mutex;
 	unsigned long long			sendsize_down;
+	boost::mutex				sendsize_down_mutex;
 
 	unsigned long long			throughput_up;
 	unsigned long long			throughput_down;
@@ -98,17 +102,14 @@ protected:
 	virtual	void				handle_protomod_replication( const boost::system::error_code& ) = 0;
 	virtual	void				handle_schedmod_replication( const boost::system::error_code& ) = 0;
 
-	virtual	void				handle_accept(	const session_thread_control_ptr,
-												const boost::system::error_code& ) = 0;
-
+public:
 	virtualservice_base(	const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
 							const virtualservice_element& inelement)
 												 :	vsd( invsd ),
 													rep( inrep ),
 													element( inelement ),
-													rep_timer( dispatcher ) {};
-public:
+													vs_timer( dispatcher ) {};
 	virtual	~virtualservice_base(){};
 
 	virtual	vs_operation_result	initialize() = 0:
@@ -137,14 +138,6 @@ public:
 	virtual	unsigned long long	get_throughput_upstream() = 0;
 	virtual	unsigned long long	get_throughput_downstream() = 0;
 
-	unsigned long long			recvsize_up;
-	boost::mutex				recvsize_up_mutex;
-	unsigned long long			sendsize_up;
-	boost::mutex				sendsize_up_mutex;
-	unsigned long long			recvsize_down;
-	boost::mutex				recvsize_down_mutex;
-	unsigned long long			sendsize_down;
-	boost::mutex				sendsize_down_mutex;
 	virtual	void				update_up_recv_size( unsigned long long	datasize ) = 0;
 	virtual	void				update_up_send_size( unsigned long long	datasize ) = 0;
 	virtual	void				update_down_recv_size( unsigned long long	datasize ) = 0;
@@ -155,14 +148,14 @@ public:
 };
 
 class	virtualservice_tcp : public virtualservice_base{
+public:
+	typedef	std::map<boost::thread::id,session_thread_control>	session_map_type;
 protected:
-	boost::shared_ptr<boost::asio::ip::tcp::acceptor>
+	boost::asio::ip::tcp::acceptor
 								acceptor_;
 
-	std::map<boost::thread::id,session_thread_control>
-								pool_sessions;
-	std::map<boost::thread::id,session_thread_control>
-								active_sessions;
+	session_map_type			pool_sessions;
+	session_map_type			active_sessions;
 
 	void						rs_list_lock();
 	void						rs_list_unlock();
@@ -203,14 +196,13 @@ public:
 
 class	virtualservice_udp : public virtualservice_base{
 protected:
+	udp_session					session;
+	
 	void						rs_list_lock();
 	void						rs_list_unlock();
 
 	void						handle_replication_interrupt();
 	bool						read_replicationdata( vs_replication_data& );
-
-	void						handle_accept(	const session_thread_control_ptr,
-												const boost::system::error_code& );
 
 public:
 	virtualservice_udp(		const l7vs::l7vsd& invsd,
