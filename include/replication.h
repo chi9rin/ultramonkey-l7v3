@@ -8,8 +8,8 @@
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
-#ifndef L7VS_REPLICATION_H
-#define L7VS_REPLICATION_H
+#ifndef REPLICATION_H
+#define REPLICATION_H
 
 #include <string>
 #include <map>
@@ -162,4 +162,4 @@ protected:
 
 }	//namespace l7vs
 
-#endif	//L7VS_REPLICATION_H
+#endif	//REPLICATION_H

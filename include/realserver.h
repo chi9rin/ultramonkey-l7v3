@@ -8,8 +8,8 @@
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
-#ifndef	L7VS_REALSERVER_H
-#define	L7VS_REALSERVER_H
+#ifndef	REALSERVER_H
+#define	REALSERVER_H
 #include "realserver_element.h"
 
 namespace l7vs{
@@ -63,4 +63,4 @@ public:
 
 
 }	//namespace l7vs
-#endif	//L7VS_REALSERVER
+#endif	//REALSERVER_H
