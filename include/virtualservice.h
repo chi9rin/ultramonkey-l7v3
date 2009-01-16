@@ -147,6 +147,11 @@ public:
 	void						update_up_send_size( unsigned long long	datasize );
 	void						update_down_recv_size( unsigned long long	datasize );
 	void						update_down_send_size( unsigned long long	datasize );
+	
+	boost::shared_ptr<protocol_module_base>
+								get_protocol_module();
+	boost::shared_ptr<schedule_module_base>
+								get_schedule_module();
 };
 
 class	virtualservice_tcp : public virtualservice_base{
