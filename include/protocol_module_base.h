@@ -109,7 +109,7 @@ protected:
 
 public:
 	//! constractor
-	protocol_module_base(){};
+	protocol_module_base( std::string in_modulename ) : module_base( in_modulename ){};
 	//! destractor
 	virtual	~protocol_module_base(){};
 	//! initialize function. called from module control. module loaded call

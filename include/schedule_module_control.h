@@ -69,8 +69,7 @@ public:
 	// load module function
 	schedule_module_base*	load_module( const std::string& modulename );
 	// unload module function.
-	void					unload_module(	const std::string& modulename, 
-											schedule_module_base* module_ptr );
+	void					unload_module( schedule_module_base* module_ptr );
 };
 
 }	//namespace l7vs

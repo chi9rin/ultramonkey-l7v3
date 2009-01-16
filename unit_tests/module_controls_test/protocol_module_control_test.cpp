@@ -17,6 +17,9 @@ void	protocol_module_control_test(){
 	l7vs::protocol_module_control& control = l7vs::protocol_module_control::getInstance();
 	l7vs::protocol_module_control& control_2 = l7vs::protocol_module_control::getInstance();
 
+	//Compile Error
+	//l7vs::protocol_module_control	control_a;
+
 	BOOST_CHECK_EQUAL( &control, &control_2 );
 
 	//test initialize and finalize
@@ -26,14 +29,26 @@ void	protocol_module_control_test(){
 
 	// unit_test[2]  load_moduleメソッドのテスト(正常系その１)
 	control.initialize( "./" );
-	l7vs::protocol_module_base*		protomod = NULL;
+	l7vs::protocol_module_base*		protomod1 = NULL;
 	try{
-		protomod = control.load_module( PM1 );
+		protomod1 = control.load_module( PM1 );
 	}
 	catch(...){
 		BOOST_ERROR( "exception : load_module" );
 	}
-	BOOST_CHECK( NULL != protomod );
+	BOOST_CHECK( NULL != protomod1 );
+//	BOOST_CHECK_EQUAL( PM1, protomod.get_name() );
+
+	// unit_test[2]  load_moduleメソッドのテスト(正常系その１)
+	control.initialize( "./" );
+	l7vs::protocol_module_base*		protomod2 = NULL;
+	try{
+		protomod2 = control.load_module( PM2 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
+	BOOST_CHECK( NULL != protomod2 );
 //	BOOST_CHECK_EQUAL( PM1, protomod.get_name() );
 
 }

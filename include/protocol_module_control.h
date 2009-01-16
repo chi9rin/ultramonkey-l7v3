@@ -26,7 +26,7 @@ namespace l7vs{
 //! @brief	protocol module control class is load protocol module from shared object file.
 //! @brief	many virtual service class used protocol module instance.
 //! @brief	but, shared object load is once. and unload when vitual service refarence count is zero.
-class	protocol_module_control : public module_control_base, private boost::noncopyable{
+class	protocol_module_control : public module_control_base{
 public:
 	//! getloglevel function object typedef
 	typedef	boost::function< LOG_LEVEL_TAG( void ) >
@@ -60,6 +60,7 @@ protected:
 	//! this mutex used loadmodule_map read/write/change.
 	boost::mutex			loadmodule_map_mutex;
 
+	protocol_module_control(){}
 public:
 	//! instance getter function.
 	static protocol_module_control&	getInstance();

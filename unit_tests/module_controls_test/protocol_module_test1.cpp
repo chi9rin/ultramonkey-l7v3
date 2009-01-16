@@ -14,19 +14,6 @@ public:
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock );
 
-	void	init_logger_functions(
-							getloglevel_func_type	ingetloglevel,
-							logger_func_type		inputLogFatal,
-							logger_func_type		inputLogError,
-							logger_func_type		inputLogWarn,
-							logger_func_type		inputLogInfo,
-							logger_func_type		inputLogDebug );
-
-	void	init_replication_functions(
-							replicationpaymemory_func_type  inreplication_pay_memory,
-							boost::function< void( void ) > inlock_func,
-							boost::function< void( void ) > inunlock_func );
-
 	void	finalize();
 
 	bool	is_tcp();
@@ -47,6 +34,8 @@ public:
 	void	register_replication_area_unlock(
 									boost::function< void( void ) > inunlock_func );
 
+	void	replication_interrupt(){}
+
 	//use in upstream_thread
 	EVENT_TAG	handle_session_initialize(
 									const boost::thread::id upthread_id,
@@ -61,7 +50,7 @@ public:
 	EVENT_TAG	handle_client_recv(
 									const boost::thread::id thread_id,
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-									const int recvlen );
+									const size_t recvlen );
 
 	EVENT_TAG	handle_realserver_select(
 									const boost::thread::id thread_id,
@@ -70,7 +59,7 @@ public:
 	EVENT_TAG	handle_realserver_connect(
 									const boost::thread::id thread_id,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen );
+									size_t& datalen );
 	
 	EVENT_TAG	handle_realserver_connection_fail(
 									const boost::thread::id thread_id,
@@ -85,7 +74,7 @@ public:
 	EVENT_TAG	handle_sorryserver_connect(
 									const boost::thread::id thread_id,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen );
+									size_t& datalen );
 
 	EVENT_TAG	handle_sorryserver_connection_fail(
 									const boost::thread::id thread_id,
@@ -98,20 +87,20 @@ public:
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & rs_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-									const int recvlen );
+									const size_t recvlen );
 	
 	EVENT_TAG	handle_sorryserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & sorry_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-									const int recvlen );
+									const size_t recvlen );
 	
 	EVENT_TAG	handle_response_send_inform( const boost::thread::id thread_id );
 
 	EVENT_TAG	handle_client_connection_check(
 									const boost::thread::id thread_id,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen );
+									size_t& datalen );
 
 	EVENT_TAG	handle_client_send( const boost::thread::id thread_id );
 
@@ -136,25 +125,24 @@ public:
 									const boost::thread::id thread_id,
 									boost::asio::ip::udp::endpoint& rs_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen ){return STOP;}
+									size_t& datalen ){return STOP;}
 	EVENT_TAG	handle_realserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint & rs_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-									const int recvlen ){return STOP;}
+									const size_t recvlen ){return STOP;}
 	EVENT_TAG	handle_client_select(
 									const boost::thread::id thread_id,
 									boost::asio::ip::udp::endpoint& rs_endpoint,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen ){return STOP;}
+									size_t& datalen ){return STOP;}
 	EVENT_TAG	handle_realserver_close(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint & rs_endpoint ){return STOP;};
 };
 
-protocol_module_test1::protocol_module_test1() : protocol_module_base()
+protocol_module_test1::protocol_module_test1() : protocol_module_base( "test1" )
 {
-	name = "test1";
 }
 
 protocol_module_test1::~protocol_module_test1(){}
@@ -166,21 +154,6 @@ protocol_module_test1::initialize(
 							protocol_module_base::rs_list_itr_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock ){}
-
-void
-protocol_module_test1::init_logger_functions(
-							getloglevel_func_type	ingetloglevel,
-							logger_func_type		inputLogFatal,
-							logger_func_type		inputLogError,
-							logger_func_type		inputLogWarn,
-							logger_func_type		inputLogInfo,
-							logger_func_type		inputLogDebug ){}
-
-void
-protocol_module_test1::init_replication_functions(
-							replicationpaymemory_func_type  inreplication_pay_memory,
-							boost::function< void( void ) > inlock_func,
-							boost::function< void( void ) > inunlock_func ){}
 
 void	finalize(){}
 
@@ -251,7 +224,7 @@ protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_client_recv(
 									const boost::thread::id thread_id,
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-									const int recvlen )
+									const size_t recvlen )
 {
 	return STOP;
 }
@@ -268,7 +241,7 @@ protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_realserver_connect(
 									const boost::thread::id thread_id,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen )
+									size_t& datalen )
 {
 	return STOP;
 }
@@ -299,7 +272,7 @@ protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_sorryserver_connect(
 									const boost::thread::id thread_id,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen )
+									size_t& datalen )
 {
 	return STOP;
 }
@@ -324,7 +297,7 @@ protocol_module_test1::handle_realserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & rs_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-									const int recvlen )
+									const size_t recvlen )
 {
 	return STOP;
 }
@@ -334,7 +307,7 @@ protocol_module_test1::handle_sorryserver_recv(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint & sorry_endpoint,
 									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-									const int recvlen )
+									const size_t recvlen )
 {
 	return STOP;
 }
@@ -349,7 +322,7 @@ protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_client_connection_check(
 									const boost::thread::id thread_id,
 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									int& datalen )
+									size_t& datalen )
 {
 	return STOP;
 }
@@ -399,7 +372,7 @@ protocol_module_test1::handle_sorryserver_disconnect(
 
 extern "C" l7vs::protocol_module_base*
 create_module(){
-	return (new l7vs::protocol_module_test1());
+	return dynamic_cast<l7vs::protocol_module_base*>(new l7vs::protocol_module_test1());
 }
 
 extern "C" void

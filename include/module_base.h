@@ -30,7 +30,7 @@ public:
 	typedef	boost::function< void ( const std::string&, unsigned int* ) >
 								replicationpaymemory_func_type;
 protected:
-	std::string						name;				//!< module name string
+	std::string						name;			//!< module name string
 	getloglevel_func_type			getloglevel;	//!< get loglevel function object
 	logger_func_type				putLogFatal;	//!< fatal log output function object
 	logger_func_type				putLogError;	//!< error log output function object
@@ -63,7 +63,7 @@ public:
 	virtual	bool	is_udp() = 0;
 	//! module name getter
 	//! @return module name
-	virtual	std::string&	get_name() const {return name;};
+	const std::string&	get_name() { return name; }
 
 	//! logger function setter
 	//! @param[in]	loglevel get function object
@@ -72,7 +72,7 @@ public:
 	//!	@param[in]	warn log output function object
 	//!	@param[in]	info log output function object
 	//! @param[in]	debug log output function object
-	virtual	void	init_logger_functions(
+	void	init_logger_functions(
 							getloglevel_func_type	ingetloglevel,
 							logger_func_type		inputLogFatal,
 							logger_func_type		inputLogError,
@@ -91,7 +91,7 @@ public:
 	//! @param[in]	replication pay memory function object
 	//! @param[in]	replication lock function object
 	//! @param[in]	replication unlock undontion object
-	virtual	void	init_replication_functions(
+	void	init_replication_functions(
 							replicationpaymemory_func_type  inreplication_pay_memory,
 							boost::function< void( void ) > inlock_func,
 							boost::function< void( void ) > inunlock_func ){

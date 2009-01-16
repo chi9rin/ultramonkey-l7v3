@@ -67,8 +67,7 @@ protocol_module_control::load_module( const	std::string& modulename ){
  * @return  void
  */
 void
-protocol_module_control::unload_module(	const std::string& modulename,
-											protocol_module_base* module_ptr ){
+protocol_module_control::unload_module( protocol_module_base* module_ptr ){
 }
 
 }
