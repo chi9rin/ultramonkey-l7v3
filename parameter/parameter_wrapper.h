@@ -16,47 +16,37 @@
 
 namespace l7vs{
 
-/*!
- * check whether integer data exists.
- * @param[in]	comp	section TAG
- * @param[in]	*key	key string
- * @return	true = exist setting value / false = non exist setting value
- */
-inline bool parameter_is_int_exist(const PARAMETER_COMPONENT_TAG comp, const char* key){
+
+//
+//! get integer data.
+//! @param[in]	ection TAG
+//! @param[in]	key string
+//! @param[out]	errorflag
+//! @return	value
+inline int parameter_get_int_value(const PARAMETER_COMPONENT_TAG comp, const char* key, int& flag ){
 	Parameter	param;
-	return param.isIntExist( comp, key );
+	Parameter::error_code	err;
+	int ret = param.getIntValue(comp, key, err);
+	if( err )	flag = -1;
+	else		flag = 0;
+	return ret;
 }
 
-/*!
- * check whether integer data exists.
- * @param[in]	comp	section TAG
- * @param[in]	key		key string
- * @return	true = exist setting value / false = non exist setting value*/
-inline bool parameter_is_int_exist( const PARAMETER_COMPONENT_TAG comp, const std::string key ){
-	Parameter	param;
-	return param.isIntExist( comp, key );
-*/
+//
+//! get charactor data
+//!	@param[in]	section Tag
+//! @param[in]	key string
+//!	@param[out]	outputstring
+//!	@param[in]	output buffer len
+//!	@return	0	success
+//! @return -1	not found key string
+//! @return -2	buffer is short
+inline int parameter_get_char_value(	const PARAMETER_COMPONENT_TAG	comp,
+										const char* key,
+										char*	tartetstr,
+										const size_t len ){
 
-/*!
- * check whether character data exists.
- * @param[in]	comp	section TAG
- * @param[in]	*key	key string
- * @return	true = exist setting value / false = non exist setting value
- */
-inline bool parameter_is_char_exist(const PARAMETER_COMPONENT_TAG comp, const char* key){
-	Parameter	param;
-	return param.isStringExist(comp, key));
-}
-
-/*!
- * get integer data.
- * @param[in]	comp	section TAG
- * @param[in]	*key	key string
- * @return	value
- */
-inline int parameter_get_int_value(const PARAMETER_COMPONENT_TAG comp, const char* key){
-	Parameter	param;
-	return l7vs::Parameter::getInstance().getIntValue(comp, key);
+	return 0;
 }
 
 }	//namespace l7vs
