@@ -61,8 +61,6 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD,		//!< logcategory is virtualservice thread
 	LOG_CAT_L7VSD_SESSION_THREAD,			//!< logcategory is session thread
 	LOG_CAT_L7VSD_MODULE,					//!< logcategory is module controler
-	LOG_CAT_L7VSD_SCHEDULE,					//!< logcategory is schedule module( caution! module_controller bind )
-	LOG_CAT_L7VSD_PROTOCOL,					//!< logcategory is protocol module( caution! module_controller bind )
 	LOG_CAT_L7VSD_REPLICATION,				//!< logcategory is replication
 	LOG_CAT_L7VSD_PARAMTER,					//!< logcategory is parameter
 	LOG_CAT_L7VSD_LOGGER,					//!< logcategory is logger
@@ -74,13 +72,15 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_SYSTEM_SIGNAL,			//!< logcategory is systemcall signal
 	LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT,		//!< logcategory is systemcall env
 
+	LOG_CAT_PROTOCOL						//!< logcategory is protocol.
+	LOG_CAT_SCHEDULE						//!< logcategory is schedule
+
 	LOG_CAT_L7VSADM_PARSE,					//!< logcategory is parse
 	LOG_CAT_L7VSADM_OPERATE,				//!< logcategory is operate
 	LOG_CAT_l7VSADM_CONFIG_RESULT,			//!< logcategory is configure
 	LOG_CAT_L7VSADM_COMMON,					//!< logcategory is other
 	LOG_CAT_L7VSADM_LOGGER,					//!< logcategory is logger
 	LOG_CAT_L7VSADM_PARAMETER,				//!< logcategory is parameter
-	LOG_CAT_L7VSADM_PROTOCOL,				//!< logcategory is protocol module
 	LOG_CAT_L7VSADM_MODULE,					//!< logcategory is module control
 
 	LOG_CAT_SNMPAGENT_START_STOP,			//!< logcategory is snmpagent main
