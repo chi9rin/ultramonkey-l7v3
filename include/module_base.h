@@ -24,7 +24,7 @@ public:
 	typedef	boost::function< LOG_LEVEL_TAG(void) >
 								getloglevel_func_type;
 	//! log output function object type
-	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string&) >
+	typedef	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >
 								logger_func_type;
 	//! replication payment memory function object type
 	typedef	boost::function< void ( const std::string&, unsigned int* ) >
