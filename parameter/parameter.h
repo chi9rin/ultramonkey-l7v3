@@ -24,6 +24,20 @@ namespace l7vs{
 //! @brief	set key to get value.
 class Parameter{
 public:
+
+	//! @class	error_code
+	//!	@brief	getValue error
+	//! @brief	this class is POD
+	class	error_code{
+	protected:
+		bool	flag;	//!<	errorcode_flag
+	public:
+		error_code() : flag(false){}
+		bool	operator==( const bool in ){ return ( flag == in )}
+		bool	operator!=( const bool in ){ return ( flag != in )}
+		void	set_flag( bool in ){ flag = in; }
+	};
+
 	Parameter();							//!< default constractor
 	~Parameter();							//!< default destractor
 
@@ -33,31 +47,19 @@ public:
 	//!	@return false failer file read
 	bool	rereadFile(const PARAMETER_COMPONENT_TAG);
 
-	//! paramter cateogry int value exist
-	//! @param[in]	paramtercategory
-	//!	@param[in]	parameterkey
-	//! @return true parameter key is intvalue alive.
-	//! @return false parameter key is intvalue not alive
-	bool	isIntExist(	const PARAMETER_COMPONENT_TAG, const std::string&);
-
-	//! parameter category string value exist
-	//! @param[in]	paramatercategory
-	//!	@param[in]	parametekey
-	//! @return true parameter key is string value alive
-	//!	@return false parameter key is string value not alive
-	bool	isStringExist(	const PARAMETER_COMPONENT_TAG, const std::string&);
-
 	//! parameter int value getter
 	//! @param[in]	parametercategory
 	//!	@param[in]	parameter key
+	//! @param[out]	error code
 	//!	@return	intvalue
-	int		getIntValue(const PARAMETER_COMPONENT_TAG, const std::string&);
+	int		get_int_value(const PARAMETER_COMPONENT_TAG, const std::string&, const error_code& );
 
 	//! parameter string value getter
 	//! @param[in]	parametercategory
 	//!	@param[in]	parameter key
+	//! @param[out] error code
 	//!	@return	string value
-	std::string	getStringValue(const PARAMETER_COMPONENT_TAG, const std::string&);
+	std::string	get_string_value(const PARAMETER_COMPONENT_TAG, const std::string&, const error_code& );
 };
 
 }	//namespace l7vs
