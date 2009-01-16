@@ -41,14 +41,14 @@ protected:
 	//! serch uri function
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
-	//! @param size_t&				uri posission
+	//! @param size_t&				uri offset
 	//! @param size_t&				uri length
 	//! @return bool				find is true. not find is false
 	bool	find_uri(	const char*, const size_t, size_t&, size_t&);
 	//! serch status function
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
-	//! @param size_t&				status posission
+	//! @param size_t&				status offset
 	//! @param size_t&				status length
 	//! @return bool				find is true. not find is false
 	bool	find_status_code(	const char*, const size_t, size_t&, size_t& );
@@ -56,7 +56,7 @@ protected:
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
 	//! @param const string&		header name
-	//! @param size_t&				header posission
+	//! @param size_t&				header offset
 	//! @param size_t&				header length
 	//! @return bool				find is true. not find is false
 	bool	find_http_header(	const char*, const size_t, const string&, size_t&, size_t& );
