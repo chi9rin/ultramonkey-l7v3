@@ -18,8 +18,7 @@ LOG_CATEGORY_TAG param_cat = LOG_CAT_L7VSD_PARAMETER;
 /*!
  * Constructor of Parameter class
  */
-l7vs::Parameter::Parameter()
-{
+l7vs::Parameter::Parameter(){
 	if( !ParameterImpl::getInstance().init() ){
 		LOGGER_PUT_LOG_FATAL( param_cat, 1, "Parameter initialize failure" );
 		switch( param_cat ){
@@ -35,8 +34,7 @@ l7vs::Parameter::Parameter()
 /*!
  * Destructor of Parameter class
  */
-l7vs::Parameter::~Parameter()
-{
+l7vs::Parameter::~Parameter(){
 }
 
 /*!
@@ -45,8 +43,7 @@ l7vs::Parameter::~Parameter()
  * @return	true = success read file / false = failure read file
  */
 bool
-l7vs::Parameter::rereadFile(PARAMETER_COMPONENT_TAG comp)
-{
+l7vs::Parameter::rereadFile(PARAMETER_COMPONENT_TAG comp){
 	return ParameterImpl::getInstance().rereadFile(comp);
 }
 
@@ -57,8 +54,7 @@ l7vs::Parameter::rereadFile(PARAMETER_COMPONENT_TAG comp)
  * @return	true = exist setting value / false = non exist setting value
  */
 bool
-l7vs::Parameter::isIntExist(const PARAMETER_COMPONENT_TAG comp, const std::string& key)
-{
+l7vs::Parameter::isIntExist(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
 	return ParameterImpl::getInstance().isIntExist(comp, key);
 }
 
@@ -69,8 +65,7 @@ l7vs::Parameter::isIntExist(const PARAMETER_COMPONENT_TAG comp, const std::strin
  * @return	true = exist setting value / false = non exist setting value
  */
 bool
-l7vs::Parameter::isStringExist(const PARAMETER_COMPONENT_TAG comp, const std::string& key)
-{
+l7vs::Parameter::isStringExist(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
 	return ParameterImpl::getInstance().isStringExist(comp, key);
 }
 
@@ -81,8 +76,7 @@ l7vs::Parameter::isStringExist(const PARAMETER_COMPONENT_TAG comp, const std::st
  * @return	value
  */
 int
-l7vs::Parameter::getIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key)
-{
+l7vs::Parameter::getIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
 	return ParameterImpl::getInstance().getIntValue(comp, key);
 }
 
@@ -93,19 +87,7 @@ l7vs::Parameter::getIntValue(const PARAMETER_COMPONENT_TAG comp, const std::stri
  * @return	value
  */
 std::string
-l7vs::Parameter::getStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key)
-{
+l7vs::Parameter::getStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
 	return ParameterImpl::getInstance().getStringValue(comp, key);
-}
-
-/*!
- * set-parameter function pointer relates component-tag
- * @param[in]	comp	section TAG
- * @param[in]	p_func	function pointer
- */
-void
-l7vs::Parameter::registerFunctionPointer(const PARAMETER_COMPONENT_TAG comp, void(*p_func)())
-{
-	ParameterImpl::getInstance().registerFunctionPointer(comp, p_func);
 }
 

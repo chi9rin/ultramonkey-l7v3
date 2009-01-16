@@ -23,7 +23,8 @@ namespace l7vs{
  * @return	true = exist setting value / false = non exist setting value
  */
 inline bool parameter_is_int_exist(const PARAMETER_COMPONENT_TAG comp, const char* key){
-	return Parameter::getInstance().isIntExist(comp, key));
+	Parameter	param;
+	return param.isIntExist( comp, key );
 }
 
 /*!
@@ -32,7 +33,8 @@ inline bool parameter_is_int_exist(const PARAMETER_COMPONENT_TAG comp, const cha
  * @param[in]	key		key string
  * @return	true = exist setting value / false = non exist setting value*/
 inline bool parameter_is_int_exist( const PARAMETER_COMPONENT_TAG comp, const std::string key ){
-	return Parameter::getInstance().isIntExist(comp,key));
+	Parameter	param;
+	return param.isIntExist( comp, key );
 */
 
 /*!
@@ -42,7 +44,8 @@ inline bool parameter_is_int_exist( const PARAMETER_COMPONENT_TAG comp, const st
  * @return	true = exist setting value / false = non exist setting value
  */
 inline bool parameter_is_char_exist(const PARAMETER_COMPONENT_TAG comp, const char* key){
-	return Parameter::getInstance().isStringExist(comp, key));
+	Parameter	param;
+	return param.isStringExist(comp, key));
 }
 
 /*!
@@ -51,36 +54,12 @@ inline bool parameter_is_char_exist(const PARAMETER_COMPONENT_TAG comp, const ch
  * @param[in]	*key	key string
  * @return	value
  */
-inline int parameter_get_int_value(const PARAMETER_COMPONENT_TAG comp, const char* key)
-{
+inline int parameter_get_int_value(const PARAMETER_COMPONENT_TAG comp, const char* key){
+	Parameter	param;
 	return l7vs::Parameter::getInstance().getIntValue(comp, key);
 }
 
-/*!
- * get character data.
- * @param[in]	comp	section TAG
- * @param[in]	*key	key string
- * @return	value
- */
-inline const char* parameter_get_char_value(const PARAMETER_COMPONENT_TAG comp, const char* key)
-{
-	return (l7vs::Parameter::getInstance().getStringValue(comp, key)).c_str();
-}
-
-/*!
- * reload config file
- * @param[in]	comp	section TAG
- * @return	0 = success read file / -1 = failure read file
- */
-inline int parameter_reread_file(const PARAMETER_COMPONENT_TAG comp)
-{
-	if (l7vs::Parameter::getInstance().rereadFile(comp)) {
-		return 0;
-	}
-	return -1;
-}
-
-};	//namespace l7vs
+}	//namespace l7vs
 
 #endif	//PARAMETER_WRAPPER
 
