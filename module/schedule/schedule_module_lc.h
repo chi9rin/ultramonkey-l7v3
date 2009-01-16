@@ -1,6 +1,6 @@
 //
 //	@file	schedule_module_lc.h
-//	@brief	shared object schedule module abstract class
+//	@brief	shared object schedule module class
 //
 //	copyright (c) xxx corporation. 2008
 //	mail: 
@@ -18,11 +18,20 @@ namespace l7vs{
 class schedule_module_least_connection : public schedule_module_base
 {
 public:
+	//!	constractor
 	schedule_module_least_connection();
+	//! destractor
 	~schedule_module_least_connection();
 
+	//!	initialize function
 	void	initialize();
 
+	//! handle schedule called then schedule function for TCP/IP endpoint
+	//! @param[in]	thread id
+	//! @param[in]	list iterator first function object
+	//!	@param[in]	list iterator last function object
+	//!	@param[in]	list iterator next function object
+	//! @param[out]	scheduled TCP/IP endpoint
 	void	handle_schedule(
 							boost::thread::id		thread_id,
 							rslist_iterator_type	inlist_begin,
@@ -30,6 +39,12 @@ public:
 							rslist_iterator_type	inlist_next,
 							boost::asio::ip::tcp::endpoint&	outendpoint );
 
+	//! handle schedule calles then schedule function for UDP endpoint
+	//! @param[in]	thread id
+	//! @param[in]	list iterator first function object
+	//!	@param[in]	list iterator last function object
+	//!	@param[in]	list iterator next function object
+	//! @param[out]	scheduled UDP endpoint
 	void	handle_schedule(
 							boost::thread::id		thread_id,
 							rslist_iterator_type	inlist_begin,
