@@ -33,28 +33,6 @@ public:
 
 	void	initialize();
 
-	void	init_logger_functions(
-							getloglevel_func_type	ingetloglevel,
-							logger_func_type		inputLogFatal,
-							logger_func_type		inputLogError,
-							logger_func_type		inputLogWarn,
-							logger_func_type		inputLogInfo,
-							logger_func_type		inputLogDebug ) :
-							getloglevel( ingetloglevel ),
-							putLogFatal( inputLogFatal ),
-							putLogError( inputLogError ),
-							putLogWarn( inputLogWarn ),
-							putLogInfo( inputLogInfo ),
-							putLogDebug( inputLogDebug ) {};
-
-	void	init_replication_functions(
-							replicationpaymemory_func_type  inreplication_pay_memory,
-							boost::function< void( void ) > inlock_func,
-							boost::function< void( void ) > inunlock_func ) :
-							replication_pay_memory( inreplication_pay_memory ),
-							replication_area_lock( inlock_func ),
-							replication_area_unlock( inunlock_func ) {};
-
 	void	handle_schedule(
 							boost::thread::id		thread_id,
 							rslist_iterator_type	inlist_begin,
