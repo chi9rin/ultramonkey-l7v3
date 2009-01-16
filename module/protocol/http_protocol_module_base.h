@@ -14,50 +14,58 @@
 namespace l7vs{
 
 class http_protocol_module_base : public protocol_module_base {
-public:
-	typedef	boost::array<char, MAX_BUFFER_SIZE>	contenor_type;
 protected:
+	//! @enum	CHECK_RESULT_TAG
+	//! @brief	check tag is return to http protocol module.
+	enum	CHECK_RESULT_TAG{
+		CHECK_OK = 0,			//!< check ok
+		CHECK_NG,				//!< check ng
+		CHECK_INPOSSIBLE		//!< check inpossible
+	};
+
 	//! check http method function
-	//! @param const contenor_type	buffer
-	//! @param const int			length
-	//! @return bool				http_protocol is true, no http_protocol is false 
-	bool	check_http_method(	const contenor_type&, const int ) const;
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @return CHECK_RESULT_TAG	http method is valid
+	CHECK_RESULT_TAG	check_http_method(	const char*, const size_t ) const;
 	//! check http version function
-	//! @param const contenor_type	buffer
-	//! @param const int			length
-	//! @return	double 				http version 1.0 or 1.1
-	double	check_http_version(	const contenor_type&, const int ) const;
-	//! ch1eck http status code function
-	//! @param const contenor_type	buffer
-	//! @param const int			length
-	//! @return	bool				status code is nomal or error
-	bool		check_status_code(	const contenor_type&, const int );
-	//! check serch uri function
-	//! @param const contenor_type	buffer
-	//! @param const int			length
-	//! @param int& uri length
-	//! @return contenor_type::iterator	url head pos. not find url is contenor_type::end()
-	contenor_type::iterator	find_uri( const contenor_type&, const int, int&);
-	//! check serch status function
-	//! @param const contenor_type	buffer
-	//! @param const int			length
-	//! @param int& status code length
-	//! @return contenor_type::iterator status pos. not find status is contenor_type::end()
-	contenor_type::iterator find_status_code(	const contenor_type&, const int, int& );
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @return	CHECK_RESULT_TAG 	http version 1.0 or 1.1
+	CHECK_RESULT_TAG	check_http_version(	const char*, const size_t ) const;
+	//! check http status code function
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @return	CHECK_RESULT_TAG	status code is nomal or error
+	CHECK_RESULT_TAG	check_status_code(	const char*, const size_t ) const;
+	//! serch uri function
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @param size_t&				uri posission
+	//! @param size_t&				uri length
+	//! @return bool				find is true. not find is false
+	bool	find_uri(	const char*, const size_t, size_t&, size_t&);
+	//! serch status function
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @param size_t&				status posission
+	//! @param size_t&				status length
+	//! @return bool				find is true. not find is false
+	bool	find_status_code(	const char*, const size_t, size_t&, size_t& );
 	//! serch http header
-	//! @param const contenor_type	buffer
-	//! @param const int			length
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
 	//! @param const string&		header name
-	//! @param int&  int			header_length
-	//! @return contenor_type::iterator http header pos. not find status is contenor_type::end()
-	contenor_type::iterator find_http_header(	const contenor_type&, const int, const string&, int& );
+	//! @param size_t&				header posission
+	//! @param size_t&				header length
+	//! @return bool				find is true. not find is false
+	bool	find_http_header(	const char*, const size_t, const string&, size_t&, size_t& );
 
 public:
 	//! constractor
-	//! @param logger_func_type		logger_function object
-	http_protocol_module_base( logger_func_type inlog ) : logger( inlog );
+	http_protocol_module_base(){};
 	//! destractor
-	virtual	~http_protocol_module_base() = 0;
+	virtual	~http_protocol_module_base(){};
 };
 
 } // namespace l7vsd
