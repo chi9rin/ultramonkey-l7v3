@@ -33,6 +33,13 @@ namespace l7vs{
 //! @brief Logger creation class.
 //! @brief this class create Logger Inmlement class and mediate function.
 class Logger{
+protected:
+	LOG_CATEGORY_TAG	scopedLogCategory;
+	unsigned int		scopedLogId;
+	std::string			scopedLogMessage;
+	char*				scopedLogFile;
+	int					scopedLogLine;
+
 public:
 	//! default constructor creates implement class.
 	Logger();
@@ -62,7 +69,7 @@ public:
 	//!	@param[in]	loglevel
 	//!	@return true	success loglevel change
 	//!	@return	false	failer loglevel change
-	bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
+	static bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
 
 	//! output fatal log.
 	//! @param[in]	Log output category tag
@@ -70,7 +77,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	void putLogFatal( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	static void putLogFatal( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
 	//! output error log.
 	//! @param[in]	Log output category tag
@@ -78,7 +85,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	void putLogError(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	static void putLogError(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
 	//! output warn log.
 	//! @param[in]	Log output category tag
@@ -86,7 +93,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	void putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	static void putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
 	//! output info log.
 	//! @param[in]	Log output category tag
@@ -94,7 +101,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	void putLogInfo(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	static void putLogInfo(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
 	//! output debug log.
 	//! @param[in]	Log output category tag
@@ -102,7 +109,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	void putLogDebug(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	static void putLogDebug(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 };
 
 }	//namespace l7vs

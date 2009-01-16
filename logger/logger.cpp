@@ -31,10 +31,27 @@
  * @param   void
  * @return  void
  */
-l7vs::Logger::Logger()
-{
+l7vs::Logger::Logger(){
 	if (!LoggerImpl::getInstance().init()) {
 		exit(1);
+	}
+}
+
+//! log output constractor
+//! scoped log output( Logger destractor output log)
+//! @param[in]	Log output category tag
+//! @param[in]	log id
+//! @param[in]	log message
+//!	@param[in]	filename	(=__FILE__)
+//! @param[in]	lineno		(=__LINE__)
+l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::string& msg, const char* file, int line){
+	if (LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory)){
+		LoggerImpl::getInstance().putLogDebug(
+			scopedLogCategory,
+			scopedLogId,
+			"Function in : "scopedLogMessage,
+			scopedLogFile,
+			scopedLogLine);
 	}
 }
 
@@ -43,8 +60,15 @@ l7vs::Logger::Logger()
  * @param   void
  * @return  void
  */
-l7vs::Logger::~Logger()
-{
+l7vs::Logger::~Logger(){
+	if (LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory)){
+		LoggerImpl::getInstance().putLogDebug(
+			scopedLogCategory,
+			scopedLogId,
+			"Function out : " + scopedLogMessage,
+			scopedLogFile,
+			scopedLogLine);
+	}
 }
 
 /*!
