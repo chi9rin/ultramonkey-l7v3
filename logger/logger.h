@@ -1,4 +1,4 @@
-/*
+/*!
  * @file  logger.h
  * @brief logger module creation class.
  *
@@ -22,61 +22,89 @@
  *
  **********************************************************************/
 
-#ifndef __LOGGER_H__
-#define __LOGGER_H__
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include <string>
 #include <logger_enum.h>
+namespace l7vs{
 
-#define BUF_LEN (4096)
-#define DEBUG_STR_LEN (4096)
+//! @class Logger
+//! @brief Logger creation class.
+//! @brief this class create Logger Inmlement class and mediate function.
+class Logger{
+public:
+	//! default constructor creates implement class.
+	Logger();
 
-namespace l7vs
-{
-	/*!
-	 *  Logger creation class.
-	 *  this class create Logger Inmlement class and mediate function.
-	 */
-	class Logger
-	{
-	public:
-		//! default constructor creates implement class.
-		Logger();
-		//! destructor.
-		~Logger();
-		/*!
-		 * returns single instance.
-		 *
-		 * @param   void
-		 * @return  instance
-		 */		
-		static Logger& getInstance() {
-			return instance;
-		}
-		//! load Configuration.
-		void loadConf();
-		//! retrieve category's log level.
-		LOG_LEVEL_TAG getLogLevel(LOG_CATEGORY_TAG cat);
-		//! set category's log level.
-		bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
-		//! output fatal log.
-		void putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
-		//! output error log.
-		void putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
-		//! output warn log.
-		void putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
-		//! output info log.
-		void putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
-		//! output debug log.
-		void putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line);
+	//! log output constractor
+	//! scoped log output( Logger destractor output log)
+	//! @param[in]	Log output category tag
+	//! @param[in]	log id
+	//! @param[in]	log message
+	//!	@param[in]	filename	(=__FILE__)
+	//! @param[in]	lineno		(=__LINE__)
+	Logger( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
-	protected:
-		/*!
-		 * static instance initialize before main. 
-		 * instance will defined in main program.
-		 */
-		static Logger instance;
-	};
+	//! destructor.(output log then use log output constractor)
+	~Logger();
+
+	//! load Configuration.
+	void loadConf();
+
+	//! retrieve category's log level.
+	//! @param[in]	logcategory
+	//! @return		loglevel
+	static LOG_LEVEL_TAG getLogLevel( LOG_CATEGORY_TAG );
+
+	//! set category's log level.
+	//!	@param[in]	logcategory
+	//!	@param[in]	loglevel
+	//!	@return true	success loglevel change
+	//!	@return	false	failer loglevel change
+	bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
+
+	//! output fatal log.
+	//! @param[in]	Log output category tag
+	//! @param[in]	log id
+	//! @param[in]	log message
+	//!	@param[in]	filename	(=__FILE__)
+	//! @param[in]	lineno		(=__LINE__)
+	void putLogFatal( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+
+	//! output error log.
+	//! @param[in]	Log output category tag
+	//! @param[in]	log id
+	//! @param[in]	log message
+	//!	@param[in]	filename	(=__FILE__)
+	//! @param[in]	lineno		(=__LINE__)
+	void putLogError(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+
+	//! output warn log.
+	//! @param[in]	Log output category tag
+	//! @param[in]	log id
+	//! @param[in]	log message
+	//!	@param[in]	filename	(=__FILE__)
+	//! @param[in]	lineno		(=__LINE__)
+	void putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+
+	//! output info log.
+	//! @param[in]	Log output category tag
+	//! @param[in]	log id
+	//! @param[in]	log message
+	//!	@param[in]	filename	(=__FILE__)
+	//! @param[in]	lineno		(=__LINE__)
+	void putLogInfo(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+
+	//! output debug log.
+	//! @param[in]	Log output category tag
+	//! @param[in]	log id
+	//! @param[in]	log message
+	//!	@param[in]	filename	(=__FILE__)
+	//! @param[in]	lineno		(=__LINE__)
+	void putLogDebug(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+};
+
 }	//namespace l7vs
 
-#endif	//__LOGGER_H__
+#endif	//LOGGER_H
