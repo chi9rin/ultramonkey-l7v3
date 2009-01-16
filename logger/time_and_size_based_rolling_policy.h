@@ -27,7 +27,7 @@
 
 #include <log4cxx/portability.h>
 #include "strict_time_based_rolling_policy.h"
-#include "logger_enum.h"
+#include "logger_rotation_enum.h"
 
 namespace log4cxx {
 	namespace rolling {

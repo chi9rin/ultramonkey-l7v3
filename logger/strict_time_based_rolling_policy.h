@@ -29,7 +29,7 @@
 #include <log4cxx/rolling/rollingpolicybase.h>
 #include <log4cxx/rolling/triggeringpolicy.h>
 #include <log4cxx/rolling/fixedwindowrollingpolicy.h>
-#include "logger_enum.h"
+#include "logger_rotation_enum.h"
 
 namespace log4cxx {
 	namespace rolling {
