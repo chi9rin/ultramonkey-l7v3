@@ -36,6 +36,15 @@ public:
 	//!	initialize function
 	void	initialize();
 
+	//! tcp protocol support check
+	//! @return tcp support is true
+	//! @return tcp not-support is false
+	bool	is_tcp();
+	//! udp protocol support check
+	//! @return udp support is true
+	//! @return udp not-support is false
+	bool	is_udp();
+
 	//! handle schedule called then schedule function for TCP/IP endpoint
 	//! @param[in]	thread id
 	//! @param[in]	list iterator first function object
@@ -61,6 +70,10 @@ public:
 							rslist_iterator_type	inlist_end,
 							rslist_iterator_type	inlist_next,
 							boost::asio::ip::udp::endpoint&	outendpoint );
+
+	//! replication interval interrrupt
+	//! timer thread call this function. from virtualservice.
+	void	replication_interrupt();
 
 protected:
 	int		sched_wrr_service_init(
