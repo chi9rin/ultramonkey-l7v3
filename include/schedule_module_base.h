@@ -36,7 +36,7 @@ public:
 									rslist_iterator_func_type;
 public:
 	//!	constractor
-	schedule_module_base() {};
+	schedule_module_base( std::string in_modulename ) : module_base( in_modulename ) {};
 	//! destractor
 	virtual	~schedule_module_base(){};
 	//!	initialize function
