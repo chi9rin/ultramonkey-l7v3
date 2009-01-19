@@ -78,9 +78,9 @@ protected:
 	schedule_module_base*		schedmod;
 	std::list<realserver>		rs_list;
 	std::list<boost::mutex>		rs_mutex;
-	boost::mutex				rs_list_mutex;
 	unsigned int				rs_list_ref_count;
 	boost::mutex				rs_list_ref_count_mutex;
+	boost::mutex				rs_list_ref_count_inc_mutex;
 
 	unsigned long long			recvsize_up;
 	unsigned long long			current_up_recvsize;
