@@ -25,7 +25,7 @@
 #ifndef LOGGER_IMPL_H
 #define LOGGER_IMPL_H
 
-#include <sttream>
+#include <sstream>
 #include <map>
 #include <log4cxx/logger.h>
 #include <log4cxx/level.h>
@@ -37,9 +37,21 @@
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
 
-#define LOGGER_LEVEL_NUM (6)
+#if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
+#define LOGGER_PROCESS_VSD
+#endif
+
+#if defined(LOGGER_PROCESS_VSD)
+#define LOGGER_PROCESS_ID "VSD"
+#elif defined(LOGGER_PROCESS_ADM)
+#define LOGGER_PROCESS_ID "ADM"
+#else
+#define LOGGER_PROCESS_ID "SNM"
+#endif
+
 #define LOGGER_NULL "/dev/null"
 
+#define LOGGER_LEVEL_NUM (6)
 
 namespace log4cxx
 {
@@ -98,7 +110,7 @@ public:
 		category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 
 		try {
-			log4cxx::Logger::getLogger(categoryname_itr->second)->setLevel(levelTable[level));
+			log4cxx::Logger::getLogger(categoryname_itr->second)->setLevel(levelTable[level]);
 		}
 		catch (const std::exception& ex) {
 			return false;
@@ -129,8 +141,9 @@ public:
 		% message.c_str()
 		% hostname;
 	try {
-			log4cxx::Logger::getLogger(categoryTable[cat])->forcedLog(	log4cxx::Level::getFatal(),
-																		buf,
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
+			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getFatal(),
+																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
 		}
 		catch (const std::exception& ex) {
@@ -164,8 +177,9 @@ public:
 			% message.c_str()
 			% hostname;
 		try {
-			log4cxx::Logger::getLogger(categoryTable[cat])->forcedLog(	log4cxx::Level::getError(),
-																		buf,
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
+			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getError(),
+																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
 		}
 		catch (const std::exception& ex) {
@@ -190,18 +204,19 @@ public:
 										const std::string& message,
 										const char *file,
 										int line){
-		stringstream buf;
+		std::stringstream buf;
 		buf << boost::format( "%s%d%03d%04d %s %s" )
 			% LOGGER_PROCESS_ID
 			% LOG_LV_WARN
 			% cat
 			% message_id
 			% message.c_str()
-			% hostname);
+			% hostname;
 		try {
-			log4cxx::Logger::getLogger(categoryTable[cat])->forcedLog(	log4cxx::Level::getWarn(),
-																		buf,
-																		og4cxx::spi::LocationInfo(file, "", line));
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
+			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getWarn(),
+																		buf.str(),
+																		log4cxx::spi::LocationInfo(file, "", line));
 		}
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
@@ -225,8 +240,8 @@ public:
 										const std::string& message,
 										const char *file,
 										int line){
-		stringstream	buf;
-		buff << boost::format( "%s%d%03d%04d %s %s" )
+		std::stringstream	buf;
+		buf << boost::format( "%s%d%03d%04d %s %s" )
 			% LOGGER_PROCESS_ID
 			% LOG_LV_INFO
 			% cat
@@ -234,8 +249,9 @@ public:
 			% message.c_str()
 			% hostname;
 		try {
-			log4cxx::Logger::getLogger(categoryTable[cat])->forcedLog(	log4cxx::Level::getInfo(),
-																		buf,
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
+			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getInfo(),
+																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
 		}
 		catch (const std::exception& ex) {
@@ -268,8 +284,9 @@ public:
 			% message
 			% hostname;
 		try {
-			log4cxx::Logger::getLogger(categoryTable[cat])->forcedLog(	log4cxx::Level::getDebug(),
-																		buf, log4cxx::spi::LocationInfo(file,"", line));
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
+			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getDebug(),
+																		buf.str(), log4cxx::spi::LocationInfo(file,"", line));
 		}
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
@@ -280,7 +297,7 @@ public:
 
 protected:
 	//! default constructor initialize member variables.
-	LoggerImpl() : initialized(false){}
+	LoggerImpl();
 
 	//! cpoy constructor disable
 	LoggerImpl( const LoggerImpl& ){}
@@ -294,11 +311,12 @@ protected:
 	}
 
 	//! if error occured, switch appenders to syslogappender and fileappender(/dev/console)
-	virtual void errorConf	unsigned int messageId,
+	virtual void errorConf(	unsigned int messageId,
 							const std::string& errorMessage,
 							const char* file,
 							int line);
-	virtual void logic_error( std::string& );
+
+	virtual void logic_error( const unsigned int, const std::string&, const char*, const unsigned int);
 
 	//! log4cxx::LevelPtr to LOG_LEVEL_TAG transrator
 	virtual inline LOG_LEVEL_TAG toLevelTag(const log4cxx::LevelPtr level){
@@ -327,36 +345,41 @@ protected:
 	//! hostname
 	std::string hostname;
 
+	log4cxx::LevelPtr levelTable[LOGGER_LEVEL_NUM];
+
 	//! category - loglevel hash map
-	category_map_type		category_level_map;
+	category_level_map_type	category_level_map;
 	//! category string -> logcateogry hash map
-	name_category_map_type	name_category_map_type;
+	name_category_map_type	name_category_map;
 	//! log_category -> category string hash map
-	category_name_map_type	category_name_map_type;
+	category_name_map_type	category_name_map;
 
 	struct appender_property{
-		std::string 	log_filename_key;			// parameter logfile key
-		std::string		log_filename_value;			// logfile value
-		std::string 	rotation_key;				// parameter rotation timing key
-		LOG_ROTATION_TAG							// rotation timing
-						rotation_value;
-		std::string 	max_backup_index_key;		// parameter backup maximam number key
-		unsigned int	max_backup_index_value;		// backup maximam number
-		std::string 	max_file_size_key;			// parameter maximam backup size key
+		std::string 	log_filename_key;			//!< parameter logfile key
+		std::string		log_filename_value;			//!< parameter logfile value
+		std::string 	rotation_key;				//!< parameter rotation kind key
+		LOG_ROTATION_TAG
+						rotation_value;				//!< parameter rotation kind value
+		std::string 	max_backup_index_key;		//!< parameter backup maximam number key
+		unsigned int	max_backup_index_value;		//!< parameter backup maximam number value
+		std::string 	max_file_size_key;			//!< parameter maximam backup size key
 		unsigned long long
-						 	max_file_size_value;	// maximam backup size
-		std::string		rotation_timing_key;		// parameter rotation timing key
+						 	max_file_size_value;	//!< parameter maximam backup size value
+		std::string		rotation_timing_key;		//!< parameter rotation timing key
 		LOG_ROTATION_TIMING_TAG
-						rotation_timing_value;		// rotation timing
-		logile_property() :							// constractor
-			rotation(LOG_ROT_SIZE),
-			maxBackupIndex(0),
-			maxFileSize(0),
-			rotationTiming(LOG_TIM_YEAR),
+						rotation_timing_value;		//!< parameter rotation timing value
+
+		std::string		rotation_timing_value_key;	//!< parameter rotation timing value key
+		std::string		rotation_timing_value_value;	//!< parameter rotation timing value value
+		appender_property() :							//!< constractor
+			rotation_value(LOG_ROT_SIZE),
+			max_backup_index_value(0),
+			max_file_size_value(0),
+			rotation_timing_value(LOG_TIM_YEAR)
 		{}
 	};
-	logfile_property	nomal_log_property;
-	logfile_property	access_log_property;
+	appender_property	normal_log_property;
+	appender_property	access_log_property;
 };
 
 }	//namespace l7vs

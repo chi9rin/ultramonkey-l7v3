@@ -42,12 +42,7 @@ protected:
 
 public:
 	//! default constructor creates implement class.
-	Logger() :
-			scopedLogCategory(LOG_CAT_LOGGER),
-			scopedLogId(0),
-			scopedLogMessage("Logger Constructor"),
-			scopedLogFile(__FILE__),
-			scopedLogline(__LINE__);
+	Logger();
 
 	//! log output constractor
 	//! scoped log output( Logger destractor output log)
@@ -56,12 +51,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::string& msg, const char* file, int line) :
-			scopedLogCategory(cat),
-			scopedLogId(id),
-			scopedLogMessage(msg),
-			scopedLogFile(file),
-			scopedLogLine(line);
+	Logger( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int);
 
 	//! destructor.(output log then use log output constractor)
 	~Logger();

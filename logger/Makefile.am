@@ -13,4 +13,5 @@ liblogger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.cpp
 
 liblogger_a_CPPFLAGS	= -O2 -g -I../include -I../parameter \
+			-DLOGGER_PROCESS_VSD \
 			-DVERSION=\"$(VERSION)\"

@@ -58,10 +58,15 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_NETWORK_BANDWIDTH,		//!< logcategory is bps
 	LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION,	//!< logcategory is connection count 
 	LOG_CAT_L7VSD_MAINTHREAD,				//!< logcategory is mainthread
+	LOG_CAT_L7VSD_VIRTUALSERVICE,			//!< logcategory is virtualservice
 	LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD,		//!< logcategory is virtualservice thread
+	LOG_CAT_L7VSD_SESSION,					//!< logcategory is session
 	LOG_CAT_L7VSD_SESSION_THREAD,			//!< logcategory is session thread
+	LOG_CAT_L7VSD_REALSERVER,				//!< logcategory is realserver
+	LOG_CAT_L7VSD_SORRYSERVER,				//!< logcategory is sollyserver
 	LOG_CAT_L7VSD_MODULE,					//!< logcategory is module controler
 	LOG_CAT_L7VSD_REPLICATION,				//!< logcategory is replication
+	LOG_CAT_L7VSD_REPLICATION_SENDTHREAD,	//!< logcategory is replication send thread
 	LOG_CAT_L7VSD_PARAMTER,					//!< logcategory is parameter
 	LOG_CAT_L7VSD_LOGGER,					//!< logcategory is logger
 	LOG_CAT_L7VSD_COMMAND,					//!< logcategory is command reciver
@@ -97,7 +102,7 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_SSLPROXY_SERVER,				//!< logcategory is snmpproxy server
 	LOG_CAT_SSLPROXY_SESSION,				//!< logcategory is snmpproxy session
 	LOG_CAT_SSLPROXY_CONNECTION,			//!< logcategory is snmpproxy connection
-	LOG_CAT_END								//!< end of logcategory
+	LOG_CAT_END,								//!< end of logcategory
 };
 
 
