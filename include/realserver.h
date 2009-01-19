@@ -10,14 +10,19 @@
 //
 #ifndef	REALSERVER_H
 #define	REALSERVER_H
-#include "realserver_element.h"
+
+#include	<boost/thread.hpp>
+#include	"realserver_element.h"
 
 namespace l7vs{
 
 class	realserver : public realserver_element{
+protected:
+	int				nactive;
+	int				ninact;
+	boost::mutex	active_mutex;
+	boost::mutex	inact_mutex;
 public:
-	int	nactive;
-	int	ninact;
 	unsigned long long	send_byte;
 
 	realserver() : nactive(0), ninact(0), send_byte(0LL){}
@@ -59,6 +64,13 @@ public:
 		if( rselem1.tcp_endpoint != rselem2.tcp_endpoint ) return false;
 		return rselem1.weight < rselem2.weight;
 	}
+
+	int		increment_active();
+	int		decrement_active();
+	int		increment_inact();
+	int		get_active(int& out_active);
+	int		get_inact(int& out_inact);
+
 };
 
 
