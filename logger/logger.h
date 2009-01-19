@@ -34,15 +34,20 @@ namespace l7vs{
 //! @brief this class create Logger Inmlement class and mediate function.
 class Logger{
 protected:
-	LOG_CATEGORY_TAG	scopedLogCategory;
-	unsigned int		scopedLogId;
-	std::string			scopedLogMessage;
-	char*				scopedLogFile;
-	int					scopedLogLine;
+	const LOG_CATEGORY_TAG	scopedLogCategory;
+	const unsigned int		scopedLogId;
+	const std::string		scopedLogMessage;
+	const char*				scopedLogFile;
+	const int				scopedLogLine;
 
 public:
 	//! default constructor creates implement class.
-	Logger();
+	Logger() :
+			scopedLogCategory(LOG_CAT_LOGGER),
+			scopedLogId(0),
+			scopedLogMessage("Logger Constructor"),
+			scopedLogFile(__FILE__),
+			scopedLogline(__LINE__);
 
 	//! log output constractor
 	//! scoped log output( Logger destractor output log)
@@ -51,7 +56,12 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	Logger( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::string& msg, const char* file, int line) :
+			scopedLogCategory(cat),
+			scopedLogId(id),
+			scopedLogMessage(msg),
+			scopedLogFile(file),
+			scopedLogLine(line);
 
 	//! destructor.(output log then use log output constractor)
 	~Logger();

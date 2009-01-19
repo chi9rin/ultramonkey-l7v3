@@ -30,19 +30,19 @@ namespace l7vs{
 //!	@enum	LOG_ROTATION_TAG
 //!	@brief	Rotation kind enumeration
 enum LOG_ROTATION_TAG {
-	LOG_ROT_SIZE,		//! rotate by filesize
-	LOG_ROT_DATE,		//! rotate by date
-	LOG_ROT_DATESIZE	//! rotate by date and filesize
+	LOG_ROT_SIZE,		//!< rotate by filesize
+	LOG_ROT_DATE,		//!< rotate by date
+	LOG_ROT_DATESIZE	//!< rotate by date and filesize
 };
 
 //!	@enum	LOG_ROTATION_TAG
 //!	@brief	RotationTiming enumeration
 enum LOG_ROTATION_TIMING_TAG {
-	LOG_TIM_YEAR,		//! rotate yearly
-	LOG_TIM_MONTH,		//!	rotate monthly
-	LOG_TIM_WEEK,		//! rotate weekly
-	LOG_TIM_DATE,		//! rotate daily
-	LOG_TIM_HOUR		//! rotate hourly
+	LOG_TIM_YEAR,		//!< rotate yearly
+	LOG_TIM_MONTH,		//!< rotate monthly
+	LOG_TIM_WEEK,		//!< rotate weekly
+	LOG_TIM_DATE,		//!< rotate daily
+	LOG_TIM_HOUR		//!< rotate hourly
 };
 
 }	//namespace l7vs
