@@ -14,6 +14,22 @@
 
 namespace l7vs{
 
+namespace parameter{
+
+//! @class	error_code
+//!	@brief	getValue error
+//! @brief	this class is POD
+class	error_code{
+protected:
+	bool	flag;	//!<	errorcode_flag
+public:
+	error_code() : flag(false){}
+	bool	operator==( const bool in ){ return ( flag == in ); }
+	bool	operator!=( const bool in ){ return ( flag != in ); }
+	void	set_flag( bool in ){ flag = in; }
+};
+}	//namespace parameter
+
 //! @enum	PARAMTER_COMPONENT_TAG
 //!	@brief	parameter key tags
 enum PARAMETER_COMPONENT_TAG {

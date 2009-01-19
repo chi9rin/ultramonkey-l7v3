@@ -14,52 +14,61 @@
 #define PARAMETER_IMPL_H
 
 #include "parameter_enum.h"
-#include <iostream>
 #include <string>
 #include <map>
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/thread.hpp>
+
+namespace l7vs{
 
 
-namespace l7vs
-{
-	struct	component{
-		std::string	section;
-		void		(*function)();
-		component(){ section = ""; function = NULL;}
-		component( std::string str, void (*p_func)() ){ section = str; function = p_func;}
-		component& operator=(const component& in_comp){ section = in_comp.section; function = in_comp.function;return *this;}
-	};
-	class ParameterImpl
-	{
-	private:
-		std::string	removebrank( const std::string& );
-		bool	readParameterFile( const std::string& );
-		bool	isNumeric( const std::string& );
+class ParameterImpl : private boost::noncopyable {
+protected:
+	//! 1st parse maps
+	std::multimap<std::string,std::string>	preparse;
+	//! parameter data of string
+	std::map<std::string, std::string>		stringMap;
+	//! parameter data of int
+	std::map<std::string, int>				intMap;
+	//! read / write mutex
+	boost::mutex							param_mutex;
+	//! componenttag to section name map
+	std::map< PARAMETER_COMPONENT_TAG, std::string >
+											tag_section_table_map;
+public:
+	//! instansgetter
+	//! @return instance
+	static ParameterImpl & get_instance(){
+		boost::mutex::scoped_lock( param_mutex );
+		static ParameterImpl instance;
+		return instance;
+	}
+	//! initialize
+	//! @return true success
+	//! @return false failer
+	bool	init();
 
-		std::multimap<std::string,std::string>	preparse;
+	//! target component read
+	//!	@param[in]	component tag
+	//! @return false failer
+	//! @return true success
+	bool	read_file( const PARAMETER_COMPONENT_TAG );
 
-		std::map<PARAMETER_COMPONENT_TAG, component>	compTable;
-		std::map<std::string, std::string>	stringMap;
-		std::map<std::string, int>		intMap;
+	//! int value getter
+	//! @param[in]	component tag
+	//! @param[in]	keystring
+	//! @param[out]	errorcode
+	//! @return		int value
+	int	get_int( const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
 
-	protected:
-		ParameterImpl();
-		ParameterImpl( const ParameterImpl& );
-		ParameterImpl& operator=( const ParameterImpl& );
+	//! string value getter
+	//! @param[in]	component tag
+	//! @param[in]	keystring
+	//! @param[out]	errorcode
+	//! @return		string value
+	std::string	get_string( const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
+};
 
-	public:
-		static ParameterImpl & getInstance(){
-			static ParameterImpl instance;
-			return instance;
-		}
-		bool	init();
-		bool	rereadFile( const PARAMETER_COMPONENT_TAG );
-	
-		bool	isIntExist( const PARAMETER_COMPONENT_TAG, const std::string& );
-		bool	isStringExist( const PARAMETER_COMPONENT_TAG, const std::string& );
-		int	getIntValue( const PARAMETER_COMPONENT_TAG, const std::string& );
-		std::string	getStringValue( const PARAMETER_COMPONENT_TAG, const std::string& );
-
-		void	registerFunctionPointer( const PARAMETER_COMPONENT_TAG, void (*)() );
-	};
 }
 #endif	//__PARAMETER_IMPL_H__

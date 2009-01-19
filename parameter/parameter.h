@@ -24,20 +24,6 @@ namespace l7vs{
 //! @brief	set key to get value.
 class Parameter{
 public:
-
-	//! @class	error_code
-	//!	@brief	getValue error
-	//! @brief	this class is POD
-	class	error_code{
-	protected:
-		bool	flag;	//!<	errorcode_flag
-	public:
-		error_code() : flag(false){}
-		bool	operator==( const bool in ){ return ( flag == in )}
-		bool	operator!=( const bool in ){ return ( flag != in )}
-		void	set_flag( bool in ){ flag = in; }
-	};
-
 	Parameter();							//!< default constractor
 	~Parameter();							//!< default destractor
 
@@ -52,14 +38,14 @@ public:
 	//!	@param[in]	parameter key
 	//! @param[out]	error code
 	//!	@return	intvalue
-	int		get_int_value(const PARAMETER_COMPONENT_TAG, const std::string&, const error_code& );
+	int		get_int_value(const PARAMETER_COMPONENT_TAG, const std::string&, const parameter::error_code& );
 
 	//! parameter string value getter
 	//! @param[in]	parametercategory
 	//!	@param[in]	parameter key
 	//! @param[out] error code
 	//!	@return	string value
-	std::string	get_string_value(const PARAMETER_COMPONENT_TAG, const std::string&, const error_code& );
+	std::string	get_string_value(const PARAMETER_COMPONENT_TAG, const std::string&, const parameter::error_code& );
 };
 
 }	//namespace l7vs

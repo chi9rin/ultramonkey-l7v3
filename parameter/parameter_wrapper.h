@@ -13,19 +13,20 @@
 #define PARAMETER_WRAPPER
 
 #include "parameter.h"
+#include <cstring>
 
 namespace l7vs{
 
 
 //
 //! get integer data.
-//! @param[in]	ection TAG
+//! @param[in]	section TAG
 //! @param[in]	key string
 //! @param[out]	errorflag
 //! @return	value
 inline int parameter_get_int_value(const PARAMETER_COMPONENT_TAG comp, const char* key, int& flag ){
 	Parameter	param;
-	Parameter::error_code	err;
+	paramter::error_code	err;
 	int ret = param.getIntValue(comp, key, err);
 	if( err )	flag = -1;
 	else		flag = 0;
@@ -43,9 +44,14 @@ inline int parameter_get_int_value(const PARAMETER_COMPONENT_TAG comp, const cha
 //! @return -2	buffer is short
 inline int parameter_get_char_value(	const PARAMETER_COMPONENT_TAG	comp,
 										const char* key,
-										char*	tartetstr,
+										char*	targetstr,
 										const size_t len ){
-
+	Parameter	param;
+	parameter::error_code	err;
+	std::string	ret = param.get_string_value( comp, key, err );
+	if( err ) return -1;
+	if( ret.size() > len ) return -2;
+	std::strncopy( targetstr, ret.c_str(), ret.size(), len );
 	return 0;
 }
 

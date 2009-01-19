@@ -25,7 +25,6 @@ l7vs::Parameter::Parameter(){
 		case LOG_CAT_L7VSADM_PARAMETER:
 			break;
 		default:
-//			throw 1;	//don't throw exception at singleton constructor...
 			exit(1);
 		}
 	}
@@ -42,42 +41,21 @@ l7vs::Parameter::~Parameter(){
  * @param[in]   comp    section TAG
  * @return	true = success read file / false = failure read file
  */
-bool
-l7vs::Parameter::rereadFile(PARAMETER_COMPONENT_TAG comp){
+bool l7vs::Parameter::rereadFile(PARAMETER_COMPONENT_TAG comp){
 	return ParameterImpl::getInstance().rereadFile(comp);
 }
 
-/*!
- * check whether integer data exists.
- * @param[in]	comp	section TAG
- * @param[in]	key	key string
- * @return	true = exist setting value / false = non exist setting value
- */
-bool
-l7vs::Parameter::isIntExist(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
-	return ParameterImpl::getInstance().isIntExist(comp, key);
-}
-
-/*!
- * check whether character data exists.
- * @param[in]	comp	section TAG
- * @param[in]	key	key string
- * @return	true = exist setting value / false = non exist setting value
- */
-bool
-l7vs::Parameter::isStringExist(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
-	return ParameterImpl::getInstance().isStringExist(comp, key);
-}
 
 /*!
  * get integer data.
  * @param[in]	comp	section TAG
  * @param[in]	key	key string
- * @return	value
+ * @return		value
  */
-int
-l7vs::Parameter::getIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
-	return ParameterImpl::getInstance().getIntValue(comp, key);
+int l7vs::Parameter::getIntValue(	const l7vs::PARAMETER_COMPONENT_TAG comp,
+									const std::string& key,
+									l7vs::parameter::error_code& err ){
+	return ParameterImpl::getInstance().getIntValue(comp, key, err);
 }
 
 /*!
@@ -86,8 +64,8 @@ l7vs::Parameter::getIntValue(const PARAMETER_COMPONENT_TAG comp, const std::stri
  * @param[in]	key	key string
  * @return	value
  */
-std::string
-l7vs::Parameter::getStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
-	return ParameterImpl::getInstance().getStringValue(comp, key);
+std::string l7vs::Parameter::getStringValue(	const l7vs::PARAMETER_COMPONENT_TAG comp,
+												const std::string& key
+												l7vs::parameter::error_code& err ){
+	return ParameterImpl::getInstance().getStringValue(comp, key, err);
 }
-
