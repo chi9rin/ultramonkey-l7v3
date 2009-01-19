@@ -33,9 +33,8 @@
  * @param   category that want to know
  * @return  log level
  */
-inline	enum LOG_LEVEL_TAG logger_get_log_level(const enum LOG_CATEGORY_TAG cat)
-{
-	return l7vs::Logger::getInstance().getLogLevel(cat);
+inline	l7vs::LOG_LEVEL_TAG logger_get_log_level(const l7vs::LOG_CATEGORY_TAG cat){
+	return l7vs::Logger::getLogLevel(cat);
 }
 
 /*!
@@ -46,9 +45,8 @@ inline	enum LOG_LEVEL_TAG logger_get_log_level(const enum LOG_CATEGORY_TAG cat)
  * @retval  0  succeed
  * @retval  -1 failed
  */
-inline int	logger_set_log_level(const enum LOG_CATEGORY_TAG cat, const enum LOG_LEVEL_TAG level)
-{
-	if (l7vs::Logger::getInstance().setLogLevel(cat, level)) {
+inline int	logger_set_log_level(const l7vs::LOG_CATEGORY_TAG cat, const l7vs::LOG_LEVEL_TAG level){
+	if (l7vs::Logger::setLogLevel(cat, level)) {
 		return 0;
 	}
 	return -1;
@@ -64,9 +62,8 @@ inline int	logger_set_log_level(const enum LOG_CATEGORY_TAG cat, const enum LOG_
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_fatal(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
-{
-	l7vs::Logger::getInstance().putLogFatal(cat, message_id, message, file, line);
+inline	void	logger_put_log_fatal(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+	l7vs::Logger::putLogFatal(cat, message_id, message, file, line);
 }
 
 /*!
@@ -79,9 +76,8 @@ inline	void	logger_put_log_fatal(const enum LOG_CATEGORY_TAG cat, const unsigned
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_error(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
-{
-	l7vs::Logger::getInstance().putLogError(cat, message_id, message, file, line);
+inline	void	logger_put_log_error(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+	l7vs::Logger::putLogError(cat, message_id, message, file, line);
 }
 
 /*!
@@ -94,9 +90,8 @@ inline	void	logger_put_log_error(const enum LOG_CATEGORY_TAG cat, const unsigned
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_warn(const enum LOG_CATEGORY_TAG cat, const unsigned int  message_id, char* file, int line, const char* message)
-{
-	l7vs::Logger::getInstance().putLogWarn(cat, message_id, message, file, line);
+inline	void	logger_put_log_warn(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int  message_id, char* file, int line, const char* message){
+	l7vs::Logger::putLogWarn(cat, message_id, message, file, line);
 }
 
 /*!
@@ -109,9 +104,8 @@ inline	void	logger_put_log_warn(const enum LOG_CATEGORY_TAG cat, const unsigned 
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_info(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
-{
-	l7vs::Logger::getInstance().putLogInfo(cat, message_id, message, file, line);
+inline	void	logger_put_log_info(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+	l7vs::Logger::putLogInfo(cat, message_id, message, file, line);
 }
 
 /*!
@@ -124,9 +118,8 @@ inline	void	logger_put_log_info(const enum LOG_CATEGORY_TAG cat, const unsigned 
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_debug(const enum LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message)
-{
-	l7vs::Logger::getInstance().putLogDebug(cat, message_id, message, file, line);
+inline	void	logger_put_log_debug(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+	l7vs::Logger::putLogDebug(cat, message_id, message, file, line);
 }
 
 #define LOGGER_PUT_LOG_FATAL(cat, message_id, message, arg...) { \
