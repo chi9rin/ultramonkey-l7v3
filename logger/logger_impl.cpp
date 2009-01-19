@@ -163,6 +163,11 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 	name_category_map["l7vsd_network.num_connection"] = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
 	category_name_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = "l7vsd_network.num_connection";
 
+	// l7vsd network access log category initialize
+	category_level_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_network.access"] = LOG_CAT_L7VSD_NETWORK_ACCESS;
+	category_name_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = "l7vsd_network.access";
+
 	// l7vsd mainthread category initialize
 	category_level_map[LOG_CAT_L7VSD_MAINTHREAD] = LOG_LV_DEBUG;
 	name_category_map["l7vsd_mainthread"] = LOG_CAT_L7VSD_MAINTHREAD;
@@ -361,14 +366,17 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 
 
 void l7vs::LoggerImpl::logic_error( const unsigned int logno, const std::string& str, const char* file , const unsigned int line){
-#if	defined(LOGGER_PROCESS_ADM)
+#if	defined(LOGGER_PROCESS_VSD)
 	putLogError( l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line );
 #elif defined(LOGGER_PROCESS_ADM)
 	putLogError( l7vs::LOG_CAT_L7VSADM_LOGGER,logno, str, file, line );
 #elif defined(LOGGER_PROCESS_SNM)
 	putLogError( l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line );
+#elif defined(LOGGER_PROCESS_SSL)
+	putLogError( l7vs::LOG_CAT_SSLPROXY_LOGGER, logno, str, file, line );
 #else
 	throw std::logic_error( str );
+
 #endif
 }
 
@@ -469,12 +477,14 @@ void l7vs::LoggerImpl::errorConf(	unsigned int message_id,
 		std::stringstream	buf;
 		LOG_CATEGORY_TAG	log_category;
 
-#if	defined(LOGGER_PROCESS_ADM)
+#if	defined(LOGGER_PROCESS_VSD)
 		log_category = LOG_CAT_L7VSD_LOGGER;
 #elif defined(LOGGER_PROCESS_ADM)
 		log_category = LOG_CAT_L7VSADM_LOGGER;
 #elif defined(LOGGER_PROCESS_SNM)
 		log_category = LOG_CAT_SNMPAGENT_LOGGER;
+#elif defined(LOGGER_PROCESS_SSL)
+		log_category = LOG_CAT_SSLPROXY_LOGGER;
 #else
 		log_category = LOG_CAT_L7VSD_LOGGER;
 #endif
@@ -947,28 +957,39 @@ void l7vs::LoggerImpl::loadConf(){
 
 	// appender setting
 	try {
+		log4cxx::helpers::Pool pool;
 		// reset current configuration
 		log4cxx::LogManager::resetConfiguration();
 
 		log4cxx::LayoutPtr layout =
 			new log4cxx::PatternLayout(LOGGER_LAYOUT);
 
-
-/*
 		for( category_level_map_type::iterator cat_itr = category_level_map.begin();
 			 cat_itr != category_level_map.end();
 			 ++cat_itr ){
 
-#if defined(LOGGER_PROCESS_VSD)
-			if (cat_itr)
+			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr->first );
+			log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( name_itr->second );
+			if (0 == cat_logger) {
+				throw std::logic_error("getLogger Failed.");
+			}
 
-				log4cxx::LoggerPtr normal_logger = log4cxx::Logger::getLogger(categoryTable[catnum]);
-				if (0 == catlogger) {
-					throw std::logic_error("getLogger Failed.");
-				}
-
+#if	defined(LOGGER_PROCESS_VSD)
+			if( cat_itr->first == LOG_CAT_L7VSD_NETWORK_ACCESS )
+				property = access_log_property;
+			else
+				property = normal_log_property;
 #elif defined(LOGGER_PROCESS_ADM)
+			property = normal_log_property;
+#elif defined(LOGGER_PROCESS_SNM)
+			property = normal_log_property;
+#elif defined(LOGGER_PROCESS_SSL)
+			if( cat_itr->first == LOG_CAT_SSLPROXY_CONNECTION )
+				property = access_log_property;
+			else
+				property = normal_log_property;
 #else
+			property = normal_log_property;
 #endif
 
 			switch (property.rotation_value) {
@@ -982,11 +1003,11 @@ void l7vs::LoggerImpl::loadConf(){
 					fixedRollingPolicy->setMinIndex(1);
 		
 					// setting maxIndex
-					fixedRollingPolicy->setMaxIndex(maxBackupIndex);
+					fixedRollingPolicy->setMaxIndex(property.max_backup_index_value);
 	
 					// setting FileNamePattern
 					std::ostringstream sizeFile;
-					sizeFile << logFilename << "." << LOGGER_FILE_PATTERN;
+					sizeFile << property.log_filename_value << "." << LOGGER_FILE_PATTERN;
 					fixedRollingPolicy->setFileNamePattern(sizeFile.str());
 		
 					// create SizeBasedTriggeringPolicy
@@ -994,7 +1015,7 @@ void l7vs::LoggerImpl::loadConf(){
 						new log4cxx::rolling::SizeBasedTriggeringPolicy();
 	
 					// setting maxFileSize
-					sizeTriggeringPolicy->setMaxFileSize(maxFileSize);
+					sizeTriggeringPolicy->setMaxFileSize(property.max_file_size_value);
 		
 					// create RollingFileAppender
 					log4cxx::rolling::RollingFileAppenderPtr sizeAppender =
@@ -1010,13 +1031,13 @@ void l7vs::LoggerImpl::loadConf(){
 					sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
 	
 					// set Log Filename
-					sizeAppender->setFile(logFilename, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					sizeAppender->setFile(property.log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 		
 					// activate appender options
 					sizeAppender->activateOptions(pool);
 		
 					// add size_base_appender to CategoryLogger
-					catlogger->addAppender(sizeAppender);
+					cat_logger->addAppender(sizeAppender);
 	
 					break;
 				}
@@ -1030,18 +1051,18 @@ void l7vs::LoggerImpl::loadConf(){
 					strictRollingPolicy->setMinIndex(1);
 		
 					// setting maxIndex
-					strictRollingPolicy->setMaxIndex(maxBackupIndex);
+					strictRollingPolicy->setMaxIndex(property.max_backup_index_value);
 	
 					// setting FileNamePattern
 					std::ostringstream dateFile;
-					dateFile << logFilename << "." << LOGGER_FILE_PATTERN;
+					dateFile << property.log_filename_value << "." << LOGGER_FILE_PATTERN;
 					strictRollingPolicy->setFileNamePattern(dateFile.str());
 	
 					// setting Rotation Timing
-					strictRollingPolicy->setRotationTiming(rotationTiming);
+					strictRollingPolicy->setRotationTiming(property.rotation_timing_value);
 		
 					// setting Rotation Timing Value
-					strictRollingPolicy->setRotationTimingValue(rotationTimingValue);
+					strictRollingPolicy->setRotationTimingValue(property.rotation_timing_value_value);
 		
 					//create RollingFileAppender
 					log4cxx::rolling::RollingFileAppenderPtr dateAppender =
@@ -1054,13 +1075,13 @@ void l7vs::LoggerImpl::loadConf(){
 					dateAppender->setRollingPolicy(strictRollingPolicy);
 		
 					// set Log Filename
-					dateAppender->setFile(logFilename, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					dateAppender->setFile(property.log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 		
 					// activate appender options
 					dateAppender->activateOptions(pool);
 		
 					// add date_based_appender to CategoryLogger
-					catlogger->addAppender(dateAppender);
+					cat_logger->addAppender(dateAppender);
 	
 					break;
 				}
@@ -1074,21 +1095,21 @@ void l7vs::LoggerImpl::loadConf(){
 					timeSizeRollingPolicy->setMinIndex(1);
 		
 					// setting maxIndex
-					timeSizeRollingPolicy->setMaxIndex(maxBackupIndex);
+					timeSizeRollingPolicy->setMaxIndex(property.max_backup_index_value);
 	
 					// setting FileNamePattern
 					std::ostringstream dateSizeFile;
-					dateSizeFile << logFilename << "." << LOGGER_FILE_PATTERN;
+					dateSizeFile << property.log_filename_value << "." << LOGGER_FILE_PATTERN;
 					timeSizeRollingPolicy->setFileNamePattern(dateSizeFile.str());
 		
 					// setting Rotation Timing
-					timeSizeRollingPolicy->setRotationTiming(rotationTiming);
+					timeSizeRollingPolicy->setRotationTiming(property.rotation_timing_value);
 		
 					// setting Rotation Timing Value
-					timeSizeRollingPolicy->setRotationTimingValue(rotationTimingValue);
+					timeSizeRollingPolicy->setRotationTimingValue(property.rotation_timing_value_value);
 		
 					// setting MaxFileSize
-					timeSizeRollingPolicy->setMaxFileSize(maxFileSize);
+					timeSizeRollingPolicy->setMaxFileSize(property.max_file_size_value);
 		
 					// create Rolling FileAppender
 					log4cxx::rolling::RollingFileAppenderPtr dateSizeAppender =
@@ -1101,71 +1122,70 @@ void l7vs::LoggerImpl::loadConf(){
 					dateSizeAppender->setRollingPolicy(timeSizeRollingPolicy);
 		
 					// set Log Filename
-					dateSizeAppender->setFile(logFilename, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					dateSizeAppender->setFile(property.log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 		
 					// activate appender options
 					dateSizeAppender->activateOptions(pool);
 		
 					// add time_and_size_based_appender to CategoryLogger
-					catlogger->addAppender(dateSizeAppender);
+					cat_logger->addAppender(dateSizeAppender);
 				}
-			}
-		}
+			}	//switch
 
-		//set default log level
-		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
-			log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
-		}
+			parameter::error_code ec;
 
-		//get category level
-		for (LOG_CATEGORY_TAG cat = LOG_CAT_NONE; cat < LOG_CAT_END; ++cat) {
-			if (cat == LOG_CAT_NONE) continue;
-			if (l7vs::Parameter::getInstance().isStringExist(PARAM_COMP_LOGGER, categoryTable[cat])) {
-				std::string levelStr = l7vs::Parameter::getInstance().get_string_value(PARAM_COMP_LOGGER, categoryTable[cat]);
+			LOG_CATEGORY_TAG	log_category;
+
+#if	defined(LOGGER_PROCESS_VSD)
+			log_category = LOG_CAT_L7VSD_LOGGER;
+#elif defined(LOGGER_PROCESS_ADM)
+			log_category = LOG_CAT_L7VSADM_LOGGER;
+#elif defined(LOGGER_PROCESS_SNM)
+			log_category = LOG_CAT_SNMPAGENT_LOGGER;
+#elif defined(LOGGER_PROCESS_SSL)
+			log_category = LOG_CAT_SSLPROXY_LOGGER;
+#else
+			log_category = LOG_CAT_L7VSD_LOGGER;
+#endif
+
+			std::string levelStr = param.get_string_value(PARAM_COMP_LOGGER, name_itr->second, ec);
+			if( ec == false ) {
 				if ("debug" == levelStr) {
-					categoryLevel[cat] = log4cxx::Level::getDebug();
-					log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+					cat_itr->second = LOG_LV_DEBUG;
 				}
 				else if ("info" == levelStr) {
-					categoryLevel[cat] = log4cxx::Level::getInfo();
-					log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+					cat_itr->second = LOG_LV_INFO;
 				}
 				else if ("warn" == levelStr) {
-					categoryLevel[cat] = log4cxx::Level::getWarn();
-					log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+					cat_itr->second = LOG_LV_WARN;
 				}
 				else if ("error" == levelStr) {
-					categoryLevel[cat] = log4cxx::Level::getError();
-					log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+					cat_itr->second = LOG_LV_ERROR;
 				}
 				else if ("fatal" == levelStr) {
-					categoryLevel[cat] = log4cxx::Level::getFatal();
-					log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+					cat_itr->second = LOG_LV_FATAL;
 				}
 				else {
 					std::ostringstream oss;
-					oss << "Invalid Log Category Setting : " << categoryTable[cat];
-					if (LOG_LV_WARN >= this->getLogLevel(loggerCategory)) {
-						this->putLogWarn(loggerCategory,2, oss.str(), __FILE__, __LINE__);
+					oss << "Invalid Log Category Setting : " << name_itr->second;
+
+					if (LOG_LV_WARN >= this->getLogLevel(log_category)) {
+						this->putLogWarn(log_category,2, oss.str(), __FILE__, __LINE__);
 					}
-					categoryLevel[cat] = log4cxx::Level::getInfo();
-					log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+					cat_itr->second = LOG_LV_INFO;
 				}
+				cat_logger->setLevel(levelTable[cat_itr->second]);
 			}
 			else {
 				std::ostringstream oss;
-				oss << "Not Exist Log Category Setting : " << categoryTable[cat];
-				if (LOG_LV_WARN >= this->getLogLevel(loggerCategory)) {
-					this->putLogWarn(loggerCategory,3, oss.str(), __FILE__, __LINE__);
+				oss << "Not Exist Log Category Setting : " << name_itr->second;
+				if (LOG_LV_WARN >= this->getLogLevel(log_category)) {
+					this->putLogWarn(log_category,3, oss.str(), __FILE__, __LINE__);
 				}
-				categoryLevel[cat] = log4cxx::Level::getInfo();
-				log4cxx::Logger::getLogger(categoryTable[cat])->setLevel(categoryLevel[cat]);
+				cat_itr->second = LOG_LV_INFO;
+				cat_logger->setLevel(levelTable[cat_itr->second]);
 			}
-		}
-
-		*/
-
-
+		}	//for
 	}
 	catch (const std::exception& e) {
 		std::ostringstream oss;

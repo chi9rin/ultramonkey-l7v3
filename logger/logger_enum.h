@@ -56,7 +56,8 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_NETWORK,					//!< logcategory is network
 	LOG_CAT_L7VSD_NETWORK_QOS,				//!< logcategory is QoS
 	LOG_CAT_L7VSD_NETWORK_BANDWIDTH,		//!< logcategory is bps
-	LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION,	//!< logcategory is connection count 
+	LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION,	//!< logcategory is connection count
+	LOG_CAT_L7VSD_NETWORK_ACCESS,			//!< logcategory is access log
 	LOG_CAT_L7VSD_MAINTHREAD,				//!< logcategory is mainthread
 	LOG_CAT_L7VSD_VIRTUALSERVICE,			//!< logcategory is virtualservice
 	LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD,		//!< logcategory is virtualservice thread
