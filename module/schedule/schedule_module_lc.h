@@ -50,7 +50,7 @@ public:
 							rslist_iterator_type	inlist_begin,
 							rslist_iterator_type	inlist_end,
 							rslist_iterator_type	inlist_next,
-							boost::asio::ip::udp::endpoint&	outendpoint ) {};
+							boost::asio::ip::udp::endpoint&	outendpoint );
 
 };
 
