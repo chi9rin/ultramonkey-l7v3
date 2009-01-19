@@ -40,7 +40,7 @@ public:
 	//! destractor
 	virtual	~schedule_module_base(){};
 	//!	initialize function
-	virtual	void	initialize();
+	virtual	void	initialize() = 0;
 	//! handle schedule called then schedule function for TCP/IP endpoint
 	//! @param[in]	thread id
 	//! @param[in]	list iterator first function object
