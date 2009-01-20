@@ -16,6 +16,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 
 #ifndef PARAMETER_FILE
 	#define PARAMETER_FILE "/etc/l7vs/l7vs.cf"
@@ -53,6 +54,7 @@ bool	l7vs::ParameterImpl::init(){
 	tag_section_table_map[PARAM_COMP_LOGGER]		= "logger";
 	tag_section_table_map[PARAM_COMP_L7VSADM]		= "l7vsadm";
 	tag_section_table_map[PARAM_COMP_SNMPAGENT]		= "snmpagent";
+	tag_section_table_map[PARAM_COMP_SSLPROXY]		= "sslproxy";
 	//read all parameters
 	retbool	= read_file( PARAM_COMP_ALL );
 
@@ -65,47 +67,56 @@ bool	l7vs::ParameterImpl::init(){
 //! @return false read false
 bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 
-	typedef std::vector< std::string> split_vector_type;
+	typedef std::vector< std::string > 				split_vector_type;
+	typedef	std::pair< std::string, int > 			int_pair_type;
+	typedef	std::pair< std::string, std::string >	string_pair_type;
 
 	boost::mutex::scoped_lock( parameter_mutex );
-	std::string	line;
+	std::string		line;
 	std::ifstream	ifs( PARAMETER_FILE );
-	std::map< std::string, std::string >	string_map;
-	std::map< std::string, int >			int_map;
+	string_map_type	string_map;
+	int_map_type	int_map;
 
 	if( !ifs ) return false;	// don't open config files.
 
+	std::string	section_string;
 	while( std::getline( ifs, line ) ){
-		std::string	section_string;
-		boost::algorithm::trim( line );	// triming
-		if( line.size() == 0 ) break;		// zero line skip
-		if( line[0] == '#' ) break;		// comment line skip
+		boost::algorithm::trim( line );		// triming
+		if( line.size() == 0 ) continue;	// zero line skip
+		if( line[0] == '#' ) continue;		// comment line skip
+		std::string::size_type	pos = line.find( '#' );	// comment is clear
+		if( pos != std::string::npos ) line = line.substr( 0, pos );
+
 		split_vector_type split_vec;
 		boost::algorithm::split( split_vec, line, boost::algorithm::is_any_of( "=" ) );
 		if( split_vec.size() == 1 ){ // section
-			if( split_vec[0].at(0) == '[' && split_vec[0].at( split_vec[0].size() ) == ']' )
-				section_string = split_vec[0].substr( 1, split_vec[0].size() - 1 );
+			if( split_vec[0].at(0) == '[' && split_vec[0].at( split_vec[0].size()-1 ) == ']' )
+				section_string = split_vec[0].substr( 1, split_vec[0].size() - 2 );
 			else return false;
 		}
 		else if( split_vec.size() == 2 ){ // split_vec[0] = key, split_vec[1]=value
-			boost::algorithm::trim( split_vec[0] );
-			boost::algorithm::trim( split_vec[1] );
-			std::string	key = section_string;
+			if( section_string.size() == 0 ){
+				//error
+				return false;
+			}
+			boost::algorithm::trim( split_vec[0] ); //trim keys
+			boost::algorithm::trim( split_vec[1] ); //trim values
+			std::string	key = section_string;//create section.key
 			key += ".";
 			key += split_vec[0];
-			if( split_vec[1].at(0) =- '\"' && split_vec[1].at( split_vec[1].size()-1 ) == '\"' ){
-				std::string strvalue = split_vec[1].substr( 1, split_vec[0].size() -1 );
-				std::pair< std::map< std::string, std::string>::iterator, bool > ret =
-					string_map.insert( std::pair<std::string, std::string>( key, strvalue ) );
+			if( split_vec[1].at(0) == '\"' && split_vec[1].at( split_vec[1].size()-1 ) == '\"' ){ //string value
+				std::string strvalue = split_vec[1].substr( 1, split_vec[1].size()-2 ); //erase double cautation
+				std::pair< string_map_type::iterator, bool > ret =
+					string_map.insert( string_pair_type( key, strvalue ) );	//tmp map insert
 				if( !ret.second ){	//insert error
 					//hogehoge
 				}
 			}
-			else{
+			else{	// int value
 				try{
 					int	intvalue = boost::lexical_cast<int>( split_vec[1] );
-					std::pair< std::map<std::string, int>::iterator, bool > ret =
-						int_map.insert( std::pair<std::string,int>( key, intvalue ) );
+					std::pair< int_map_type::iterator, bool > ret =
+						int_map.insert( int_pair_type( key, intvalue ) ); // tmp map insert
 					if( !ret.second ){
 						//map insert error!
 					}
@@ -121,6 +132,64 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 	}
 
 	//convert temporaly map to global map.
+	if( comp == PARAM_COMP_ALL ){
+		intMap.clear();
+		BOOST_FOREACH( int_pair_type p, int_map ){ // all temp int map copy
+			intMap.insert( p );
+		}
+		stringMap.clear();
+		BOOST_FOREACH( string_pair_type p, string_map ){ //all temp string map copy
+			stringMap.insert( p );
+		}
+	}
+	else if( comp == PARAM_COMP_NOCAT ){	// comp error!
+		return false;
+	}
+	else{
+		std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator section_itr = tag_section_table_map.find( comp );
+		std::string section = section_itr->second;
+		for( int_map_type::iterator itr = intMap.begin();
+			 itr != intMap.end();
+			 ++itr ){
+			split_vector_type split_vec;
+			boost::algorithm::split( split_vec, itr->first, boost::algorithm::is_any_of( "." ) );
+			if( split_vec[0] == section ){
+				intMap.erase( itr );
+				itr = intMap.begin();
+			}
+		}
+		BOOST_FOREACH( int_pair_type p, int_map ){
+			split_vector_type	split_vec;
+			boost::algorithm::split( split_vec, p.first, boost::algorithm::is_any_of( "." ) );
+			if( split_vec[0] == section ){
+				std::pair< int_map_type::iterator, bool >	ret = intMap.insert( p );
+				if( !ret.second ){
+					//insert error
+				}
+			}
+		}
+
+		for( string_map_type::iterator itr = stringMap.begin();
+			 itr != stringMap.end();
+			 ++itr ){
+			split_vector_type split_vec;
+			boost::algorithm::split( split_vec, itr->first, boost::algorithm::is_any_of( "." ) );
+			if( split_vec[0] == section ){
+				stringMap.erase( itr );
+				itr = stringMap.begin();
+			}
+		}
+		BOOST_FOREACH( string_pair_type p, string_map ){
+			split_vector_type	split_vec;
+			boost::algorithm::split( split_vec, p.first, boost::algorithm::is_any_of( "." ) );
+			if( split_vec[0] == section ){
+				std::pair< string_map_type::iterator, bool >	ret = stringMap.insert( p );
+				if( !ret.second ){
+					//insert error
+				}
+			}
+		}
+	}
 	return true;
 }
 
@@ -135,7 +204,7 @@ int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 									l7vs::parameter::error_code& err ){
 	boost::mutex::scoped_lock( param_mutex );
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
-	std::map<std::string, int>::iterator intmap_iterator = intMap.find( section_table_iterator->second + "." + key );
+	int_map_type::iterator intmap_iterator = intMap.find( section_table_iterator->second + "." + key );
 	if( intmap_iterator != intMap.end() )
 			return intmap_iterator->second;
 	else
@@ -155,7 +224,7 @@ std::string	l7vs::ParameterImpl::get_string( const l7vs::PARAMETER_COMPONENT_TAG
 											 l7vs::parameter::error_code& err ){
 	boost::mutex::scoped_lock( param_mutex );
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
-	std::map<std::string, std::string>::iterator strmap_iterator = stringMap.find( section_table_iterator->second + "." + key );
+	string_map_type::iterator strmap_iterator = stringMap.find( section_table_iterator->second + "." + key );
 	if( strmap_iterator != stringMap.end() )
 		return strmap_iterator->second;
 	else

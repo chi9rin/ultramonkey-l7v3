@@ -25,12 +25,13 @@ namespace l7vs{
 
 class ParameterImpl : private boost::noncopyable {
 protected:
-	//! 1st parse maps
-	std::multimap<std::string,std::string>	preparse;
+	typedef	std::map< std::string, int >			int_map_type;
+	typedef	std::map< std::string, std::string >	string_map_type;
+
 	//! parameter data of string
-	std::map<std::string, std::string>		stringMap;
+	string_map_type							stringMap;
 	//! parameter data of int
-	std::map<std::string, int>				intMap;
+	int_map_type							intMap;
 	//! read / write mutex
 	boost::mutex							param_mutex;
 	//! componenttag to section name map

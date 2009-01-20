@@ -24,8 +24,12 @@ protected:
 	bool	flag;	//!<	errorcode_flag
 public:
 	error_code() : flag(false){}
-	bool	operator==( const bool in ){ return ( flag == in ); }
-	bool	operator!=( const bool in ){ return ( flag != in ); }
+	bool	operator==( const bool in )const { return ( flag == in ); }
+	bool	operator!=( const bool in )const { return ( flag != in ); }
+	bool	operator!() const { return !flag; }
+	typedef void (*unspecified_bool_type)();
+	static void unspecified_bool_true() {}
+	operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; }
 	void	set_flag( bool in ){ flag = in; }
 };
 }	//namespace parameter
@@ -35,15 +39,16 @@ public:
 enum PARAMETER_COMPONENT_TAG {
 	PARAM_COMP_NOCAT = 0,		//!< parameter category is none
 	PARAM_COMP_ALL,				//!< parameter category is all(caution! this category used l7vsadm and command)
-	PARAM_COMP_L7VSD,			//!< parameter category is l7vsd
-	PARAM_COMP_COMMAND,			//!< parameter category is command
-	PARAM_COMP_SESSION,			//!< parameter category is session
-	PARAM_COMP_VIRTUALSERVICE,	//!< parameter category is virtualservice
-	PARAM_COMP_MODULE,			//!< parameter category is module control
-	PARAM_COMP_REPLICATION,		//!< parameter category is replication
-	PARAM_COMP_LOGGER,			//!< parameter category is logger
-	PARAM_COMP_L7VSADM,			//!< parameter category is l7vsadm
-	PARAM_COMP_SNMPAGENT		//!< parameter category is snmpagent
+	PARAM_COMP_L7VSD,			//!< parameter category l7vsd
+	PARAM_COMP_COMMAND,			//!< parameter category command
+	PARAM_COMP_SESSION,			//!< parameter category session
+	PARAM_COMP_VIRTUALSERVICE,	//!< parameter category virtualservice
+	PARAM_COMP_MODULE,			//!< parameter category module control
+	PARAM_COMP_REPLICATION,		//!< parameter category replication
+	PARAM_COMP_LOGGER,			//!< parameter category logger
+	PARAM_COMP_L7VSADM,			//!< parameter category l7vsadm
+	PARAM_COMP_SNMPAGENT,		//!< parameter category snmpagent
+	PARAM_COMP_SSLPROXY			//!< parameter category sslproxy
 };
 
 }	//namespace l7vsd
