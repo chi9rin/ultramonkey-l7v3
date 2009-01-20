@@ -20,7 +20,6 @@ l7vs::LOG_CATEGORY_TAG param_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;
  */
 l7vs::Parameter::Parameter(){
 	if( !ParameterImpl::get_instance().init() ){
-		
 		Logger::putLogFatal( param_cat, 1, "Parameter initialize failure", __FILE__, __LINE__ );
 		switch( param_cat ){
 		case LOG_CAT_L7VSADM_PARAMETER:
@@ -43,7 +42,7 @@ l7vs::Parameter::~Parameter(){
  * @return	true = success read file / false = failure read file
  */
 bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp){
-	ParameterImpl	impl;
+	ParameterImpl&	impl = ParameterImpl::get_instance();
 	return impl.read_file( comp );
 }
 
@@ -57,7 +56,7 @@ bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp){
 int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 								const std::string& key,
 								l7vs::parameter::error_code& err ){
-	ParameterImpl	impl;
+	ParameterImpl&	impl = ParameterImpl::get_instance();
 	return impl.get_int( comp, key, err );
 }
 
@@ -70,6 +69,6 @@ int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG comp,
 												const std::string& key,
 												l7vs::parameter::error_code& err ){
-	ParameterImpl	impl;
+	ParameterImpl&	impl = ParameterImpl::get_instance();
 	return impl.get_string( comp, key, err );
 }

@@ -37,6 +37,8 @@ protected:
 	//! componenttag to section name map
 	std::map< PARAMETER_COMPONENT_TAG, std::string >
 											tag_section_table_map;
+	ParameterImpl(){}
+	~ParameterImpl(){}
 public:
 	//! instansgetter
 	//! @return instance

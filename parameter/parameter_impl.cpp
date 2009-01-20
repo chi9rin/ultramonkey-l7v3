@@ -34,12 +34,16 @@
 	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;
 #endif
 
+static bool	init_flag = false;
+
 //
 //! Initialize ParameterImpl class
 //!	@return	true	success
 //! @return false	failer
 bool	l7vs::ParameterImpl::init(){
+	boost::mutex::scoped_lock( param_mutex );
 	bool	retbool = true;
+	if( init_flag ) return true;
 	//clrear map objects
 	tag_section_table_map.clear();
 	stringMap.clear();
@@ -58,6 +62,7 @@ bool	l7vs::ParameterImpl::init(){
 	//read all parameters
 	retbool	= read_file( PARAM_COMP_ALL );
 
+	init_flag = true;
 	return	retbool;
 }
 
