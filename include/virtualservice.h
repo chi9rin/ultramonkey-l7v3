@@ -19,6 +19,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include "stub.h"
+
 #include "realserver.h"
 #include "virtualservice_element.h"
 //#include "replication.h"
@@ -153,7 +155,8 @@ public:
 
 class	virtualservice_tcp : public virtualservice_base{
 public:
-	typedef	std::map<boost::thread::id,boost::shared_ptr<session_thread_control>>	session_map_type;
+	typedef	std::map< boost::thread::id, boost::shared_ptr<session_thread_control> >
+								session_map_type;
 protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
