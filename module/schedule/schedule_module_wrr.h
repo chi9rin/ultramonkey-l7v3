@@ -11,7 +11,7 @@
 #ifndef	SCHEDULE_MODULE_WRR_H
 #define	SCHEDULE_MODULE_WRR_H
 
-#include "schedule_module_base.h"
+#include "schedule_module_wrr.h"
 
 namespace l7vs{
 
@@ -22,7 +22,7 @@ protected:
 	boost::asio::ip::udp::endpoint	udp_endpoint ;
 
 	struct wrr_weights {
-	    int currentWeight;  /*! Current Weight */
+		int currentWeight;  /*! Current Weight */
     	int maxWeight;      /*! Max of Weight */
     	int gcd;            /*! GCD of RealServer list */
 		wrr_weights() : currentWeight(0), maxWeight(0), gcd(0) {}
@@ -52,10 +52,10 @@ public:
 	//!	@param[in]	list iterator next function object
 	//! @param[out]	scheduled TCP/IP endpoint
 	void	handle_schedule(
-							boost::thread::id		thread_id,
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next,
+							boost::thread::id					thread_id,
+							rslist_iterator_func_type		inlist_begin,
+							rslist_iterator_func_type		inlist_end,
+							rslist_iterator_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&	outendpoint );
 
 	//! handle schedule calles then schedule function for UDP endpoint
@@ -65,10 +65,10 @@ public:
 	//!	@param[in]	list iterator next function object
 	//! @param[out]	scheduled UDP endpoint
 	void	handle_schedule(
-							boost::thread::id		thread_id,
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next,
+							boost::thread::id					thread_id,
+							rslist_iterator_func_type		inlist_begin,
+							rslist_iterator_func_type		inlist_end,
+							rslist_iterator_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&	outendpoint );
 
 	//! replication interval interrrupt
@@ -77,18 +77,18 @@ public:
 
 protected:
 	int		sched_wrr_service_init(
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next );
+							rslist_iterator_func_type	inlist_begin,
+							rslist_iterator_func_type	inlist_end,
+							rslist_iterator_func_type	inlist_next );
 	int		sched_wrr_getMaxWeight(
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next );
+							rslist_iterator_func_type	inlist_begin,
+							rslist_iterator_func_type	inlist_end,
+							rslist_iterator_func_type	inlist_next );
 	int		sched_wrr_gcd( int a, int b );
 	int		sched_wrr_getGCD(
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next );
+							rslist_iterator_func_type	inlist_begin,
+							rslist_iterator_func_type	inlist_end,
+							rslist_iterator_func_type	inlist_next );
 	
 };
 

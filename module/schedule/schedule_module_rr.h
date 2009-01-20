@@ -45,10 +45,10 @@ public:
 	//!	@param[in]	list iterator next function object
 	//! @param[out]	scheduled TCP/IP endpoint
 	void	handle_schedule(
-							boost::thread::id		thread_id,
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next,
+							boost::thread::id					thread_id,
+							rslist_iterator_func_type		inlist_begin,
+							rslist_iterator_func_type		inlist_end,
+							rslist_iterator_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&	outendpoint );
 
 	//! handle schedule calles then schedule function for UDP endpoint
@@ -58,10 +58,10 @@ public:
 	//!	@param[in]	list iterator next function object
 	//! @param[out]	scheduled UDP endpoint
 	void	handle_schedule(
-							boost::thread::id		thread_id,
-							rslist_iterator_type	inlist_begin,
-							rslist_iterator_type	inlist_end,
-							rslist_iterator_type	inlist_next,
+							boost::thread::id					thread_id,
+							rslist_iterator_func_type		inlist_begin,
+							rslist_iterator_func_type		inlist_end,
+							rslist_iterator_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&	outendpoint );
 
 	//! replication interval interrrupt
