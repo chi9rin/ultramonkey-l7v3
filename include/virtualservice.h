@@ -19,11 +19,15 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#include "stub.h"
+// #ifdef DEBUG
+// #include "stub.h"
+// #else
+// #include "l7vsd.h"
+// #include "replication.h"
+// #endif
 
 #include "realserver.h"
 #include "virtualservice_element.h"
-//#include "replication.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 #include "session_thread_control.h"

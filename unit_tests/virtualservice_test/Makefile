@@ -5,7 +5,7 @@
 #
 TARGET		= virtualservice_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535
+CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include \
