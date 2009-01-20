@@ -540,13 +540,8 @@ void l7vs::LoggerImpl::loadConf(){
 		// filename check
 
 		parameter::error_code ec;
-		parameter::error_code ec_false;
-		ec_false.set_flag(false);
-		parameter::error_code ec_true;
-		ec_true.set_flag(true);
-
 		property.log_filename_value = param.get_string(PARAM_COMP_LOGGER, property.log_filename_key, ec);
-		if( ec == true ){
+		if( ec ){
 			std::stringstream	ss;
 			ss << "Not exist logfilename_key : " << property.log_filename_key;
 			logic_error( 7, ss.str(), __FILE__, __LINE__ );
@@ -554,7 +549,7 @@ void l7vs::LoggerImpl::loadConf(){
 	
 		// get rotation
 		std::string rotationStr = param.get_string(PARAM_COMP_LOGGER, property.rotation_key, ec);
-		if( ec == false ){
+		if( !ec ){
 			if ("size" == rotationStr) property.rotation_value = LOG_ROT_SIZE;
 			else if ("date" == rotationStr) property.rotation_value = LOG_ROT_DATE;
 			else if ("datesize" == rotationStr) property.rotation_value = LOG_ROT_DATESIZE;
@@ -570,7 +565,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 		// get max backup index
 		std::string maxBackupIndexStr = param.get_string( PARAM_COMP_LOGGER, property.max_backup_index_key, ec );
-		if( ec == false ) {
+		if( !ec ) {
 			try {
 				property.max_backup_index_value = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
 			}
@@ -599,7 +594,7 @@ void l7vs::LoggerImpl::loadConf(){
 			// get max file size
 			std::string maxFileSizeStr;
 			maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property.max_file_size_key, ec);
-			if( ec == true )	logic_error( 8, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
+			if( ec )	logic_error( 8, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
 			
 			std::string size_val;
 			std::string last_str = maxFileSizeStr.substr(maxFileSizeStr.length() - 1, 1);
@@ -644,7 +639,7 @@ void l7vs::LoggerImpl::loadConf(){
 		if(LOG_ROT_DATE == property.rotation_value || LOG_ROT_DATESIZE == property.rotation_value) {
 			// get rotation timing
 			std::string rotationTimingStr = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_key, ec);
-			if( ec == false ){
+			if( !ec ){
 				if ("year" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_YEAR;
 				else if ("month" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_MONTH;
 				else if ("week" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_WEEK;
@@ -656,7 +651,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 			if(LOG_TIM_YEAR == property.rotation_timing_value ){
 				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
-				if( ec == false ){
+				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
 					int month = 0;
@@ -742,7 +737,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 			if (LOG_TIM_MONTH == property.rotation_timing_value ) {
 				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
-				if( ec == false ){
+				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
 					int date = 0;
@@ -811,7 +806,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 			if(LOG_TIM_WEEK == property.rotation_timing_value ){
 				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
-				if( ec == false ){
+				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
 					int week = 0;
@@ -881,7 +876,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 			if(LOG_TIM_DATE == property.rotation_timing_value){
 				std::string ret =param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
-				if( ec == false ){
+				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
 					int hour = 0;
@@ -929,7 +924,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 			if(LOG_TIM_HOUR == property.rotation_timing_value) {
 				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
-				if( ec == false ){
+				if( !ec ){
 					// minute
 					int minute = 0;
 					try {
@@ -1149,7 +1144,7 @@ void l7vs::LoggerImpl::loadConf(){
 #endif
 
 			std::string levelStr = param.get_string(PARAM_COMP_LOGGER, name_itr->second, ec);
-			if( ec == false ) {
+			if( !ec ) {
 				if ("debug" == levelStr) {
 					cat_itr->second = LOG_LV_DEBUG;
 				}
