@@ -8,8 +8,8 @@
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
-#ifndef	L7VS_COMMAND_SESSION_H
-#define	L7VS_COMMAND_SESSION_H
+#ifndef	COMMAND_SESSION_H
+#define	COMMAND_SESSION_H
 
 #ifndef	MAX_BUFFER_SIZE
 	#define	MAX_BUFFER_SIZE (65535)
@@ -20,7 +20,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 
-#include "l7command.h"
+#include "l7_command.h"
 
 namespace l7vs{
 

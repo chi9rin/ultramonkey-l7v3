@@ -1,26 +1,34 @@
 #ifndef	L7VSD_H
 #define L7VSD_H
 
+#include <string>
 #include <list>
 #include <vector>
-#include "l7vs_command_receiver.h"
-#include "l7vs_virtual_service_command_element.h"
-#include "l7vs_virtual_service.h"
-#include "l7vs_realserver_element.h"
-#include "l7vs_realserver.h"
-#include "logger/logger.h"
-#include "parameter/parameter.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+#include <boost/asio.hpp>
+#include "command_receiver.h"
+#include "virtualservice_element.h"
+#include "virtualservice.h"
+#include "realserver_element.h"
+#include "realserver.h"
+#include "replication.h"
+#include "snmpbridge.h"
+#include "protocol_module_control.h"
+#include "schedule_module_control.h"
+#include "logger.h"
+#include "parameter.h"
 
 namespace l7vs{
 
 //! l7vsd main class
 class l7vsd{
 public:
-	typedef shared_ptr< command_receiver >	command_receiver_ptr;	//!< shared_ptr command_receiver typedef
-	typedef shared_ptr< replication >		replication_ptr;		//!< shared_ptr replication typedef
-	typedef shared_ptr< snmp_bridge >		snmp_bridge_ptr;		//!< shared_ptr snmp_bridge typedef
+	typedef boost::shared_ptr< command_receiver >	command_receiver_ptr;	//!< shared_ptr command_receiver typedef
+	typedef boost::shared_ptr< replication >		replication_ptr;		//!< shared_ptr replication typedef
+	typedef boost::shared_ptr< snmpbridge >			snmpbridge_ptr;			//!< shared_ptr snmp_bridge typedef
 
-	typedef std::list< virtual_service >	vs_list_type;			//!< virtual_service list typedef
+	typedef std::list< virtualservice >				vs_list_type;			//!< virtual_service list typedef
 	
 	struct l7vsd_operation_result{
 		bool	flag;
@@ -38,9 +46,9 @@ protected:
 
 	vs_list_type				vs_list;			//!< virtual_service list
 
-	command_receiver_ptr		cmd_receiver;		//!< command_receiver ptr
-	replication_ptr				repli;				//!< replication ptr
-	snmp_bridge_ptr				bridge;				//!< snmp_bridge ptr
+	command_receiver_ptr		receiver;			//!< command_receiver ptr
+	replication_ptr				rep;				//!< replication ptr
+	snmpbridge_ptr				bridge;				//!< snmp_bridge ptr
 
 	vs_list_type::iterator		search_vslist( virtualservice_element& );	//!< vs_list search function
 
@@ -57,7 +65,7 @@ public:
 
 	l7vsd_operation_result		flush_virtual_service();	//!< all virtual_service delete command
 
-	l7vsd_operation_result		get_replication_info( REPLICATION_MODE_TAG& );	//!< get replication info command
+	l7vsd_operation_result		get_replication_info( replication::REPLICATION_MODE_TAG& );	//!< get replication info command
 	l7vsd_operation_result		start_replication();		//!< start replication command
 	l7vsd_operation_result		stop_replication();			//!< stop replication command
 	l7vsd_operation_result		dump_replication_memory();	//!< dump replication memory command

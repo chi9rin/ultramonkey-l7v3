@@ -1,22 +1,25 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <errno.h>
+#include "logger.h"
+#include "parameter.h"
 #include "l7vsd.h"
 
-static void sig_exit_handler(int sig);
-static int set_sighandler(int sig, void (*handler)(int));
-static int set_sighandlers();
-static void usage(FILE* p);
+static void	sig_exit_handler(int sig);
+static int	set_sighandler(int sig, void (*handler)(int));
+static int	set_sighandlers();
+static void	usage(FILE* p);
+static int	l7vsd_main( int, char* );
 
-static bool exit_requested = false;
-static int received_sig = 0;
+static bool	exit_requested = false;
+static int	received_sig = 0;
 
-namespace l7vsd{
+namespace l7vs{
 
-l7vs::Logger l7vs::Logger::instance;
-l7vs::Parameter l7vs::Parameter::instance;
+Logger logger_instance;
+Parameter parameter_instance;
 
-void l7vsd::start() {
+void l7vsd::run() {
 
 }
 
@@ -77,15 +80,14 @@ static void usage(FILE* p) {
 
 }
 
-#ifndef	TEST_CASE
-int main( int argc, char* argv[] ){
+int l7vsd_main( int argc, char* argv[] ){
 	try{
 		if (0 > set_sighandlers()) {
 			exit(-1);
 		}
 
-		l7vsd::l7vsd l7vsd_;
-		l7vsd_.start();
+		l7vs::l7vsd vsd;
+		vsd.run();
 
 
 	}
@@ -94,6 +96,9 @@ int main( int argc, char* argv[] ){
 	}
 	return 0;
 }
-#else
-int main(){ return 0;}
+
+#ifndef	TEST_CASE
+int main( int argc, char* argv[] ){
+	return l7vsd_main( argc, argv );
+}
 #endif	//TEST_CASE

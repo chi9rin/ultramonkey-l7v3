@@ -8,11 +8,11 @@
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
-#ifndef	L7VS_COMMAND_RECIVER_H
-#define	L7VS_COMMAND_RECIVER_H
+#ifndef	COMMAND_RECEIVER_H
+#define	COMMAND_RECEIVER_H
 
 #include <boost/utility.hpp>
-#include "l7vs_command_session.h"
+#include "command_session.h"
 
 namespace l7vs{
 //!	@class	command_receiver
@@ -46,4 +46,4 @@ public:
 };
 
 };	//namespace l7vsd
-#endif	//L7VS_COMMAND_RECIVER_H
+#endif	//COMMAND_RECEIVER_H
