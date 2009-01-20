@@ -130,7 +130,7 @@ void	impl_get_int_test(){
 	param_impl_test&		impl = param_impl_test::get_instance();
 	l7vs::parameter::error_code	err;
 	// unit_test[21] integer file read check
-	BOOST_CHECK_EQUAL( impl.init(), true );
+	BOOST_CHECK_EQUAL( impl.read_file( l7vs::PARAM_COMP_ALL ), true );
 	// unit_test[22] zero value check
 	int ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "zero_value", err );
 	BOOST_CHECK_EQUAL( ret , zero_value );
@@ -149,7 +149,7 @@ void	impl_get_int_test(){
 	// unit_test[27] no key error check
 	ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "no_key_value", err );
 	BOOST_CHECK_EQUAL( ret, 0 );
-  	BOOST_CHECK_EQUAL( err, false );
+  	BOOST_CHECK_EQUAL( err, true );
 
 	unlink( PARAMETER_FILE );
 }
@@ -158,10 +158,11 @@ void	impl_get_string_test(){
 	l7vs::parameter::error_code	err;
 	std::string		str_value = "strvalue";
 	std::string		zero_str_value = "";
-	std::string		long_str_value = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+*-/!$%&'()~=~~|";
+	std::string		long_str_value = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+*-/!$%&'()~|";
 	std::string		space_str_value = "sample is not report ";
 
 	std::ofstream	ofs( PARAMETER_FILE );
+	ofs << "[l7vsd]\n";
 	ofs << "str_value = \"" << str_value << "\"\n";
 	ofs << "zero_str_value=\"" << zero_str_value << "\"\n";
 	ofs << "long_str_value= \"" << long_str_value << "\"\n";
@@ -170,9 +171,10 @@ void	impl_get_string_test(){
 
 	param_impl_test&		impl = param_impl_test::get_instance();
 	// unit_test[28] integer file read check
-	BOOST_CHECK_EQUAL( impl.init(), true );
+	BOOST_CHECK_EQUAL( impl.read_file( l7vs::PARAM_COMP_ALL ), true );
 	// unit_test[29] str value check
 	std::string ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "str_value", err );
+	BOOST_CHECK_EQUAL( err, false );
 	BOOST_CHECK_EQUAL( ret, str_value );
 	// unit_test[30] zero size string test
 	ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "zero_str_value", err );
@@ -186,14 +188,14 @@ void	impl_get_string_test(){
 	// unit_test[33] string no key test
 	ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "no_key_value", err );
 	BOOST_CHECK_EQUAL( ret, std::string("") );
- 	BOOST_CHECK_EQUAL( err, false );
+ 	BOOST_CHECK_EQUAL( err, true );
 	unlink( PARAMETER_FILE );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	// create unit test suite
-	test_suite* ts = BOOST_TEST_SUITE( "l7vsadm" );
+	test_suite* ts = BOOST_TEST_SUITE( "parameter_impl" );
 	ts->add( BOOST_TEST_CASE( &impl_init_test ) );
 	ts->add( BOOST_TEST_CASE( &impl_get_int_test ) );
 	ts->add( BOOST_TEST_CASE( &impl_get_string_test ) );
