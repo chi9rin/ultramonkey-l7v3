@@ -1,6 +1,6 @@
 //
 //	@file	virtualservice.h
-//	@brief	VirtualService class
+//	@brief	VirtualService interface class
 //
 //	copyright (c) sdy corporation. 2008
 //	mail: h dot okada at sdy dot co dot jp
@@ -18,6 +18,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+
+#include "stub.h"
 
 #include "realserver.h"
 #include "virtualservice_element.h"
@@ -107,11 +109,7 @@ protected:
 public:
 	virtualservice_base(	const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
-							const virtualservice_element& inelement)
-												 :	vsd( invsd ),
-													rep( inrep ),
-													element( inelement ),
-													vs_timer( dispatcher ) {};
+							const virtualservice_element& inelement);
 	virtual	~virtualservice_base(){};
 
 	virtual	vs_operation_result	initialize() = 0;
@@ -139,10 +137,10 @@ public:
 	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& ) = 0;
 	virtual	void				release_session( const boost::thread::id thread_id ) = 0;
 
-	unsigned long long			get_qos_upstream(){ return element.qos_upstream; }
-	unsigned long long			get_qos_downstream(){ return element.qos_downstream; }
-	unsigned long long			get_throughput_upstream(){ return throughput_up; }
-	unsigned long long			get_throughput_downstream(){ return throughput_down; }
+	unsigned long long			get_qos_upstream();
+	unsigned long long			get_qos_downstream();
+	unsigned long long			get_throughput_upstream();
+	unsigned long long			get_throughput_downstream();
 
 	void						update_up_recv_size( unsigned long long	datasize );
 	void						update_up_send_size( unsigned long long	datasize );
@@ -150,9 +148,9 @@ public:
 	void						update_down_send_size( unsigned long long	datasize );
 	
 	boost::shared_ptr<protocol_module_base>
-								get_protocol_module(){ return protomod; }
+								get_protocol_module();
 	boost::shared_ptr<schedule_module_base>
-								get_schedule_module(){ return schedmod; }
+								get_schedule_module();
 };
 
 class	virtualservice_tcp : public virtualservice_base{
@@ -245,63 +243,47 @@ protected:
 public:
 	virtual_service(	const l7vs::l7vsd& invsd,
 						const l7vs::replication& inrep,
-						const virtualservice_element& inelement ){
-		if( inelement.udpmode )
-			vs = boost::shared_ptr<virtualservice_base>(
-					dynamic_cast<virtualservice_base*>( new virtualservice_udp( invsd, inrep, inelement ) ) );
-		else
-			vs = boost::shared_ptr<virtualservice_base>(
-					dynamic_cast<virtualservice_base*>( new virtualservice_tcp( invsd, inrep, inelement ) ) );
-	}
-	~virtual_service(){
-	}
+						const virtualservice_element& inelement );
+	~virtual_service();
 	
-	vs_operation_result			initialize(){ return vs->initialize(); }
-	vs_operation_result			finalize(){ return vs->finalize(); }
+	vs_operation_result			initialize();
+	vs_operation_result			finalize();
 
-	bool						operator==( const virtualservice_base& in ){ return vs->operator==( in ); }
-	bool						operator!=( const virtualservice_base& in ){ return vs->operator!=( in ); }
+	bool						operator==( const virtualservice_base& in );
+	bool						operator!=( const virtualservice_base& in );
 
-	vs_operation_result			set_virtualservce( virtualservice_element& in ){ vs->set_virtualservce( in ); }
-	vs_operation_result			edit_virtualservce( virtualservice_element& in ){ vs->edit_virtualservce( in ); }
+	vs_operation_result			set_virtualservce( virtualservice_element& in );
+	vs_operation_result			edit_virtualservce( virtualservice_element& in );
 
-	vs_operation_result			add_realserver( virtualservice_element& in ){ vs->add_realserver( in ); }
-	vs_operation_result			edit_realserver( virtualservice_element& in ){ vs->edit_realserver( in ); }
-	vs_operation_result			del_realserver( virtualservice_element& in ){ vs->del_realserver( in ); }
+	vs_operation_result			add_realserver( virtualservice_element& in );
+	vs_operation_result			edit_realserver( virtualservice_element& in );
+	vs_operation_result			del_realserver( virtualservice_element& in );
 
-	virtualservice_element&		get_element(){ return vs->get_element(); }
+	virtualservice_element&		get_element();
 
-	void						run(){ vs->run(); }
-	void						stop(){ vs->stop(); }
+	void						run();
+	void						stop();
 
-	void		connection_active( const boost::asio::ip::tcp::endpoint& in ){ vs->connection_active( in ); }
-	void		connection_inactive( const boost::asio::ip::tcp::endpoint& in ){ vs->connection_inactive( in ); }
-	void		release_session( boost::thread::id thread_id ){ vs->release_session( thread_id ); }
+	void		connection_active( const boost::asio::ip::tcp::endpoint& in );
+	void		connection_inactive( const boost::asio::ip::tcp::endpoint& in );
+	void		release_session( boost::thread::id thread_id );
 
-	unsigned long long			get_qos_upstream(){ return vs->get_qos_upstream(); }
-	unsigned long long			get_qos_downstream(){ return vs->get_qos_downstream(); }
-	unsigned long long			get_throughput_upstream(){ return vs->get_throughput_upstream(); }
-	unsigned long long			get_throughput_downstream(){ return vs->get_throughput_downstream(); }
+	unsigned long long			get_qos_upstream();
+	unsigned long long			get_qos_downstream();
+	unsigned long long			get_throughput_upstream();
+	unsigned long long			get_throughput_downstream();
 
-	void						update_up_recv_size( unsigned long long	datasize ){
-		vs->update_up_recv_size( datasize );
-	}
-	void						update_up_send_size( unsigned long long	datasize ){
-		vs->update_up_send_size( datasize );
-	}
-	void						update_down_recv_size( unsigned long long	datasize ){
-		vs->update_down_recv_size( datasize );
-	}
-	void						update_down_send_size( unsigned long long	datasize ){
-		vs->update_down_send_size( datasize );
-	}
+	void						update_up_recv_size( unsigned long long	datasize );
+	void						update_up_send_size( unsigned long long	datasize );
+	void						update_down_recv_size( unsigned long long	datasize );
+	void						update_down_send_size( unsigned long long	datasize );
 	
 	boost::shared_ptr<protocol_module_base>
-								get_protocol_module(){ return vs->get_protocol_module(); }
+								get_protocol_module();
 	boost::shared_ptr<schedule_module_base>
-								get_schedule_module(){ return vs->get_schedule_module(); }
+								get_schedule_module();
 };
 
-}
+}	//namespace l7vs
 
 #endif//VIRTUALSERVICE_H
