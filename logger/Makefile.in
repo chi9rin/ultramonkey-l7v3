@@ -46,13 +46,36 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
-liblogger_a_AR = $(AR) $(ARFLAGS)
-liblogger_a_LIBADD =
-am_liblogger_a_OBJECTS = liblogger_a-logger.$(OBJEXT) \
-	liblogger_a-logger_impl.$(OBJEXT) \
-	liblogger_a-strict_time_based_rolling_policy.$(OBJEXT) \
-	liblogger_a-time_and_size_based_rolling_policy.$(OBJEXT)
-liblogger_a_OBJECTS = $(am_liblogger_a_OBJECTS)
+libl7vsadm_logger_a_AR = $(AR) $(ARFLAGS)
+libl7vsadm_logger_a_LIBADD =
+am_libl7vsadm_logger_a_OBJECTS = libl7vsadm_logger_a-logger.$(OBJEXT) \
+	libl7vsadm_logger_a-logger_impl.$(OBJEXT) \
+	libl7vsadm_logger_a-strict_time_based_rolling_policy.$(OBJEXT) \
+	libl7vsadm_logger_a-time_and_size_based_rolling_policy.$(OBJEXT)
+libl7vsadm_logger_a_OBJECTS = $(am_libl7vsadm_logger_a_OBJECTS)
+libl7vsd_logger_a_AR = $(AR) $(ARFLAGS)
+libl7vsd_logger_a_LIBADD =
+am_libl7vsd_logger_a_OBJECTS = libl7vsd_logger_a-logger.$(OBJEXT) \
+	libl7vsd_logger_a-logger_impl.$(OBJEXT) \
+	libl7vsd_logger_a-strict_time_based_rolling_policy.$(OBJEXT) \
+	libl7vsd_logger_a-time_and_size_based_rolling_policy.$(OBJEXT)
+libl7vsd_logger_a_OBJECTS = $(am_libl7vsd_logger_a_OBJECTS)
+libsnmpagent_logger_a_AR = $(AR) $(ARFLAGS)
+libsnmpagent_logger_a_LIBADD =
+am_libsnmpagent_logger_a_OBJECTS =  \
+	libsnmpagent_logger_a-logger.$(OBJEXT) \
+	libsnmpagent_logger_a-logger_impl.$(OBJEXT) \
+	libsnmpagent_logger_a-strict_time_based_rolling_policy.$(OBJEXT) \
+	libsnmpagent_logger_a-time_and_size_based_rolling_policy.$(OBJEXT)
+libsnmpagent_logger_a_OBJECTS = $(am_libsnmpagent_logger_a_OBJECTS)
+libsslproxy_logger_a_AR = $(AR) $(ARFLAGS)
+libsslproxy_logger_a_LIBADD =
+am_libsslproxy_logger_a_OBJECTS =  \
+	libsslproxy_logger_a-logger.$(OBJEXT) \
+	libsslproxy_logger_a-logger_impl.$(OBJEXT) \
+	libsslproxy_logger_a-strict_time_based_rolling_policy.$(OBJEXT) \
+	libsslproxy_logger_a-time_and_size_based_rolling_policy.$(OBJEXT)
+libsslproxy_logger_a_OBJECTS = $(am_libsslproxy_logger_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -65,8 +88,12 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(liblogger_a_SOURCES)
-DIST_SOURCES = $(liblogger_a_SOURCES)
+SOURCES = $(libl7vsadm_logger_a_SOURCES) $(libl7vsd_logger_a_SOURCES) \
+	$(libsnmpagent_logger_a_SOURCES) \
+	$(libsslproxy_logger_a_SOURCES)
+DIST_SOURCES = $(libl7vsadm_logger_a_SOURCES) \
+	$(libl7vsd_logger_a_SOURCES) $(libsnmpagent_logger_a_SOURCES) \
+	$(libsslproxy_logger_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -150,10 +177,11 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-noinst_LIBRARIES = liblogger.a
+noinst_LIBRARIES = libl7vsd_logger.a libl7vsadm_logger.a libsnmpagent_logger.a libsslproxy_logger.a 
 AUTOMAKE_OPTIONS = foreign
-liblogger_a_SOURCES = \
+libl7vsd_logger_a_SOURCES = \
 			logger_enum.h \
+			logger_rotation_enum.h \
 			logger.h \
 			logger_impl.h \
 			logger.cpp \
@@ -163,8 +191,56 @@ liblogger_a_SOURCES = \
 			time_and_size_based_rolling_policy.h \
 			time_and_size_based_rolling_policy.cpp
 
-liblogger_a_CPPFLAGS = -O2 -g -I../include -I../parameter \
+libl7vsd_logger_a_CPPFLAGS = -O2 -g -I../include -I../parameter \
 			-DLOGGER_PROCESS_VSD \
+			-DVERSION=\"$(VERSION)\"
+
+libl7vsadm_logger_a_SOURCES = \
+			logger_enum.h \
+			logger_rotation_enum.h \
+			logger.h \
+			logger_impl.h \
+			logger.cpp \
+			logger_impl.cpp \
+			strict_time_based_rolling_policy.h \
+			strict_time_based_rolling_policy.cpp \
+			time_and_size_based_rolling_policy.h \
+			time_and_size_based_rolling_policy.cpp
+
+libl7vsadm_logger_a_CPPFLAGS = -O2 -g -I../include -I../parameter \
+			-DLOGGER_PROCESS_ADM \
+			-DVERSION=\"$(VERSION)\"
+
+libsnmpagent_logger_a_SOURCES = \
+			logger_enum.h \
+			logger_rotation_enum.h \
+			logger.h \
+			logger_impl.h \
+			logger.cpp \
+			logger_impl.cpp \
+			strict_time_based_rolling_policy.h \
+			strict_time_based_rolling_policy.cpp \
+			time_and_size_based_rolling_policy.h \
+			time_and_size_based_rolling_policy.cpp
+
+libsnmpagent_logger_a_CPPFLAGS = -O2 -g -I../include -I../snmpagent -I../parameter \
+			-DLOGGER_PROCESS_SNM \
+			-DVERSION=\"$(VERSION)\"
+
+libsslproxy_logger_a_SOURCES = \
+			logger_enum.h \
+			logger_rotation_enum.h \
+			logger.h \
+			logger_impl.h \
+			logger.cpp \
+			logger_impl.cpp \
+			strict_time_based_rolling_policy.h \
+			strict_time_based_rolling_policy.cpp \
+			time_and_size_based_rolling_policy.h \
+			time_and_size_based_rolling_policy.cpp
+
+libsslproxy_logger_a_CPPFLAGS = -O2 -g -I../include -I../parameter \
+			-DLOGGER_PROCESS_SSL \
 			-DVERSION=\"$(VERSION)\"
 
 all: all-am
@@ -203,10 +279,22 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-liblogger.a: $(liblogger_a_OBJECTS) $(liblogger_a_DEPENDENCIES) 
-	-rm -f liblogger.a
-	$(liblogger_a_AR) liblogger.a $(liblogger_a_OBJECTS) $(liblogger_a_LIBADD)
-	$(RANLIB) liblogger.a
+libl7vsadm_logger.a: $(libl7vsadm_logger_a_OBJECTS) $(libl7vsadm_logger_a_DEPENDENCIES) 
+	-rm -f libl7vsadm_logger.a
+	$(libl7vsadm_logger_a_AR) libl7vsadm_logger.a $(libl7vsadm_logger_a_OBJECTS) $(libl7vsadm_logger_a_LIBADD)
+	$(RANLIB) libl7vsadm_logger.a
+libl7vsd_logger.a: $(libl7vsd_logger_a_OBJECTS) $(libl7vsd_logger_a_DEPENDENCIES) 
+	-rm -f libl7vsd_logger.a
+	$(libl7vsd_logger_a_AR) libl7vsd_logger.a $(libl7vsd_logger_a_OBJECTS) $(libl7vsd_logger_a_LIBADD)
+	$(RANLIB) libl7vsd_logger.a
+libsnmpagent_logger.a: $(libsnmpagent_logger_a_OBJECTS) $(libsnmpagent_logger_a_DEPENDENCIES) 
+	-rm -f libsnmpagent_logger.a
+	$(libsnmpagent_logger_a_AR) libsnmpagent_logger.a $(libsnmpagent_logger_a_OBJECTS) $(libsnmpagent_logger_a_LIBADD)
+	$(RANLIB) libsnmpagent_logger.a
+libsslproxy_logger.a: $(libsslproxy_logger_a_OBJECTS) $(libsslproxy_logger_a_DEPENDENCIES) 
+	-rm -f libsslproxy_logger.a
+	$(libsslproxy_logger_a_AR) libsslproxy_logger.a $(libsslproxy_logger_a_OBJECTS) $(libsslproxy_logger_a_LIBADD)
+	$(RANLIB) libsslproxy_logger.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -214,10 +302,22 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblogger_a-logger.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblogger_a-logger_impl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger_impl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-logger_impl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -233,61 +333,229 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-liblogger_a-logger.o: logger.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-logger.o -MD -MP -MF "$(DEPDIR)/liblogger_a-logger.Tpo" -c -o liblogger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-logger.Tpo" "$(DEPDIR)/liblogger_a-logger.Po"; else rm -f "$(DEPDIR)/liblogger_a-logger.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='liblogger_a-logger.o' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-logger.o: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-logger.o -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-logger.Tpo" -c -o libl7vsadm_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-logger.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libl7vsadm_logger_a-logger.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp
 
-liblogger_a-logger.obj: logger.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-logger.obj -MD -MP -MF "$(DEPDIR)/liblogger_a-logger.Tpo" -c -o liblogger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-logger.Tpo" "$(DEPDIR)/liblogger_a-logger.Po"; else rm -f "$(DEPDIR)/liblogger_a-logger.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='liblogger_a-logger.obj' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-logger.obj: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-logger.obj -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-logger.Tpo" -c -o libl7vsadm_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-logger.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libl7vsadm_logger_a-logger.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`
 
-liblogger_a-logger_impl.o: logger_impl.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-logger_impl.o -MD -MP -MF "$(DEPDIR)/liblogger_a-logger_impl.Tpo" -c -o liblogger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-logger_impl.Tpo" "$(DEPDIR)/liblogger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/liblogger_a-logger_impl.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='liblogger_a-logger_impl.o' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-logger_impl.o: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-logger_impl.o -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Tpo" -c -o libl7vsadm_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libl7vsadm_logger_a-logger_impl.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp
 
-liblogger_a-logger_impl.obj: logger_impl.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-logger_impl.obj -MD -MP -MF "$(DEPDIR)/liblogger_a-logger_impl.Tpo" -c -o liblogger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-logger_impl.Tpo" "$(DEPDIR)/liblogger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/liblogger_a-logger_impl.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='liblogger_a-logger_impl.obj' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-logger_impl.obj: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-logger_impl.obj -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Tpo" -c -o libl7vsadm_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libl7vsadm_logger_a-logger_impl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`
 
-liblogger_a-strict_time_based_rolling_policy.o: strict_time_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-strict_time_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Tpo" -c -o liblogger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='liblogger_a-strict_time_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-strict_time_based_rolling_policy.o: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-strict_time_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libl7vsadm_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libl7vsadm_logger_a-strict_time_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp
 
-liblogger_a-strict_time_based_rolling_policy.obj: strict_time_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-strict_time_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Tpo" -c -o liblogger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/liblogger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='liblogger_a-strict_time_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-strict_time_based_rolling_policy.obj: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-strict_time_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libl7vsadm_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libl7vsadm_logger_a-strict_time_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`
 
-liblogger_a-time_and_size_based_rolling_policy.o: time_and_size_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-time_and_size_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Tpo" -c -o liblogger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='liblogger_a-time_and_size_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-time_and_size_based_rolling_policy.o: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-time_and_size_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libl7vsadm_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libl7vsadm_logger_a-time_and_size_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp
 
-liblogger_a-time_and_size_based_rolling_policy.obj: time_and_size_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT liblogger_a-time_and_size_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Tpo" -c -o liblogger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/liblogger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='liblogger_a-time_and_size_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+libl7vsadm_logger_a-time_and_size_based_rolling_policy.obj: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsadm_logger_a-time_and_size_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libl7vsadm_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libl7vsadm_logger_a-time_and_size_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblogger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o liblogger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsadm_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsadm_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`
+
+libl7vsd_logger_a-logger.o: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-logger.o -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-logger.Tpo" -c -o libl7vsd_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-logger.Tpo" "$(DEPDIR)/libl7vsd_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libl7vsd_logger_a-logger.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp
+
+libl7vsd_logger_a-logger.obj: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-logger.obj -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-logger.Tpo" -c -o libl7vsd_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-logger.Tpo" "$(DEPDIR)/libl7vsd_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libl7vsd_logger_a-logger.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`
+
+libl7vsd_logger_a-logger_impl.o: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-logger_impl.o -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Tpo" -c -o libl7vsd_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Tpo" "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libl7vsd_logger_a-logger_impl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp
+
+libl7vsd_logger_a-logger_impl.obj: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-logger_impl.obj -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Tpo" -c -o libl7vsd_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Tpo" "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libl7vsd_logger_a-logger_impl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`
+
+libl7vsd_logger_a-strict_time_based_rolling_policy.o: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-strict_time_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libl7vsd_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libl7vsd_logger_a-strict_time_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp
+
+libl7vsd_logger_a-strict_time_based_rolling_policy.obj: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-strict_time_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libl7vsd_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libl7vsd_logger_a-strict_time_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`
+
+libl7vsd_logger_a-time_and_size_based_rolling_policy.o: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-time_and_size_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libl7vsd_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libl7vsd_logger_a-time_and_size_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp
+
+libl7vsd_logger_a-time_and_size_based_rolling_policy.obj: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libl7vsd_logger_a-time_and_size_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libl7vsd_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libl7vsd_logger_a-time_and_size_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libl7vsd_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libl7vsd_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`
+
+libsnmpagent_logger_a-logger.o: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-logger.o -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-logger.Tpo" -c -o libsnmpagent_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-logger.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libsnmpagent_logger_a-logger.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp
+
+libsnmpagent_logger_a-logger.obj: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-logger.obj -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-logger.Tpo" -c -o libsnmpagent_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-logger.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libsnmpagent_logger_a-logger.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`
+
+libsnmpagent_logger_a-logger_impl.o: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-logger_impl.o -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Tpo" -c -o libsnmpagent_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libsnmpagent_logger_a-logger_impl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp
+
+libsnmpagent_logger_a-logger_impl.obj: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-logger_impl.obj -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Tpo" -c -o libsnmpagent_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libsnmpagent_logger_a-logger_impl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`
+
+libsnmpagent_logger_a-strict_time_based_rolling_policy.o: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-strict_time_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libsnmpagent_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libsnmpagent_logger_a-strict_time_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp
+
+libsnmpagent_logger_a-strict_time_based_rolling_policy.obj: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-strict_time_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libsnmpagent_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libsnmpagent_logger_a-strict_time_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`
+
+libsnmpagent_logger_a-time_and_size_based_rolling_policy.o: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-time_and_size_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libsnmpagent_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libsnmpagent_logger_a-time_and_size_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp
+
+libsnmpagent_logger_a-time_and_size_based_rolling_policy.obj: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsnmpagent_logger_a-time_and_size_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libsnmpagent_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libsnmpagent_logger_a-time_and_size_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`
+
+libsslproxy_logger_a-logger.o: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" -c -o libsslproxy_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libsslproxy_logger_a-logger.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp
+
+libsslproxy_logger_a-logger.obj: logger.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" -c -o libsslproxy_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libsslproxy_logger_a-logger.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`
+
+libsslproxy_logger_a-logger_impl.o: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger_impl.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" -c -o libsslproxy_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libsslproxy_logger_a-logger_impl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp
+
+libsslproxy_logger_a-logger_impl.obj: logger_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger_impl.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" -c -o libsslproxy_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libsslproxy_logger_a-logger_impl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`
+
+libsslproxy_logger_a-strict_time_based_rolling_policy.o: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-strict_time_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libsslproxy_logger_a-strict_time_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp
+
+libsslproxy_logger_a-strict_time_based_rolling_policy.obj: strict_time_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-strict_time_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libsslproxy_logger_a-strict_time_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`
+
+libsslproxy_logger_a-time_and_size_based_rolling_policy.o: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-time_and_size_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libsslproxy_logger_a-time_and_size_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp
+
+libsslproxy_logger_a-time_and_size_based_rolling_policy.obj: time_and_size_based_rolling_policy.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-time_and_size_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libsslproxy_logger_a-time_and_size_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
