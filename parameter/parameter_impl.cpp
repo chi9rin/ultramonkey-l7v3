@@ -12,7 +12,7 @@
 #include <fstream>
 #include <stdexcept>
 #include "parameter_impl.h"
-#include "logger_wrapper.h"
+#include "logger_enum.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -21,18 +21,16 @@
 	#define PARAMETER_FILE "/etc/l7vs/l7vs.cf"
 #endif //PARAMETER_FILE
 
-#define	LINE_LENGTH	4096
-
 #if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
 	#define LOGGER_PROCESS_VSD
 #endif
 
 #ifdef  LOGGER_PROCESS_SNM
-	LOG_CATEGORY_TAG parameter_cat = LOG_CAT_SNMPAGENT_PARAMETER;
+	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_SNMPAGENT_PARAMETER;
 #elif   LOGGER_PROCESS_ADM
-	LOG_CATEGORY_TAG parameter_cat = LOG_CAT_L7VSADM_PARAMETER;
+	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_L7VSADM_PARAMETER;
 #else
-	LOG_CATEGORY_TAG parameter_cat = LOG_CAT_L7VSD_PARAMETER;
+	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;
 #endif
 
 //
@@ -56,30 +54,16 @@ bool	l7vs::ParameterImpl::init(){
 	tag_section_table_map[PARAM_COMP_L7VSADM]		= "l7vsadm";
 	tag_section_table_map[PARAM_COMP_SNMPAGENT]		= "snmpagent";
 	//read all parameters
-	retbool	= rereadFile( PARAM_COMP_ALL );
+	retbool	= read_file( PARAM_COMP_ALL );
 
 	return	retbool;
-}
-
-
-//! checks that an argument is a numeric.
-//! @param[in]	const std::string
-//! @return		is numeric = true / not numeric = false
-bool	l7vs::ParameterImpl::isNumeric(const std::string& val){
-	try {
-		boost::lexical_cast<int>(val);
-	}
-	catch (boost::bad_lexical_cast& ex) {
-		return false;
-	}
-	return true;
 }
 
 //! read config file
 //! @param[in]	COMPONENT TAG
 //! @return true read success
 //! @return false read false
-bool	l7vs::ParameterImpl::read_file( const PARAMETER_CONPONENT_TAG comp ){
+bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 
 	typedef std::vector< std::string> split_vector_type;
 
@@ -91,13 +75,13 @@ bool	l7vs::ParameterImpl::read_file( const PARAMETER_CONPONENT_TAG comp ){
 
 	if( !ifs ) return false;	// don't open config files.
 
-	while( std::getline( ifs, buffer ) ){
+	while( std::getline( ifs, line ) ){
 		std::string	section_string;
-		boost::algorithm::trim( buffer );	// triming
-		if( buffer.size() == 0 ) break;		// zero line skip
-		if( buffer[0] == '#' ) break;		// comment line skip
-		sprit_vector_type split_vec;
-		boost::algorithm::split( split_vec, buffer, boost::algorithm::is_any_of( "=" ) );
+		boost::algorithm::trim( line );	// triming
+		if( line.size() == 0 ) break;		// zero line skip
+		if( line[0] == '#' ) break;		// comment line skip
+		split_vector_type split_vec;
+		boost::algorithm::split( split_vec, line, boost::algorithm::is_any_of( "=" ) );
 		if( split_vec.size() == 1 ){ // section
 			if( split_vec[0].at(0) == '[' && split_vec[0].at( split_vec[0].size() ) == ']' )
 				section_string = split_vec[0].substr( 1, split_vec[0].size() - 1 );
@@ -111,14 +95,22 @@ bool	l7vs::ParameterImpl::read_file( const PARAMETER_CONPONENT_TAG comp ){
 			key += split_vec[0];
 			if( split_vec[1].at(0) =- '\"' && split_vec[1].at( split_vec[1].size()-1 ) == '\"' ){
 				std::string strvalue = split_vec[1].substr( 1, split_vec[0].size() -1 );
-				strin_gmap.insert( key, strvalue );
+				std::pair< std::map< std::string, std::string>::iterator, bool > ret =
+					string_map.insert( std::pair<std::string, std::string>( key, strvalue ) );
+				if( !ret.second ){	//insert error
+					//hogehoge
+				}
 			}
 			else{
 				try{
 					int	intvalue = boost::lexical_cast<int>( split_vec[1] );
-					int_map.insert( key, intvalue );
+					std::pair< std::map<std::string, int>::iterator, bool > ret =
+						int_map.insert( std::pair<std::string,int>( key, intvalue ) );
+					if( !ret.second ){
+						//map insert error!
+					}
 				}
-				catch( boost::bad_lexica_cast& cast ){
+				catch( boost::bad_lexical_cast& cast ){
 					return false;
 				}
 			}
@@ -133,32 +125,40 @@ bool	l7vs::ParameterImpl::read_file( const PARAMETER_CONPONENT_TAG comp ){
 }
 
 
-/*!
- * get a integer parameter
- * @param[in]	PARAMETER_COMPONENT_TAG
- * @param[in]	const std::string
+//! get a integer parameter
+//! @param[in]	PARAMETER_COMPONENT_TAG
+//! @param[in]	const std::string
+//!	@param[out]	error code
+//! @return		integer value
+int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
+									const std::string& key,
+									l7vs::parameter::error_code& err ){
+	boost::mutex::scoped_lock( param_mutex );
+	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
+	std::map<std::string, int>::iterator intmap_iterator = intMap.find( section_table_iterator->second + "." + key );
+	if( intmap_iterator != intMap.end() )
+			return intmap_iterator->second;
+	else
+		err.set_flag( true );
 
- * @return		integer
- */
-int	l7vs::ParameterImpl::getIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key){
-	std::string comp_key = compTable[comp].section + "." + key;
-	return intMap.find( comp_key )->second;
+	return 0;
 }
 
-/*!
- * get a string parameter
- * @param[in]	PARAMETER_COMPONENT_TAG
- * @param[in]	const std::string
- * @return		std::string
- */
-std::string	l7vs::ParameterImpl::getStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key)
-{
-	std::string	retstr = "";
-	std::string	comp_key = compTable[comp].section + "." + key;
-	std::map<std::string,std::string>::iterator it = stringMap.find( comp_key );
-	if( it != stringMap.end() )
-		retstr = stringMap.find( comp_key )->second;
-	return	retstr;
+//! get a string parameter
+//! @param[in]	PARAMETER_COMPONENT_TAG
+//! @param[in]	const std::string
+//! @param[out]	error code
+//! @return		string value
+
+std::string	l7vs::ParameterImpl::get_string( const l7vs::PARAMETER_COMPONENT_TAG comp,
+											 const std::string& key,
+											 l7vs::parameter::error_code& err ){
+	boost::mutex::scoped_lock( param_mutex );
+	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
+	std::map<std::string, std::string>::iterator strmap_iterator = stringMap.find( section_table_iterator->second + "." + key );
+	if( strmap_iterator != stringMap.end() )
+		return strmap_iterator->second;
+	else
+		err.set_flag( true );
+	return std::string("");
 }
-
-

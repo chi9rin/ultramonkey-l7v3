@@ -31,21 +31,21 @@ public:
 	//! @param[in] parameter conponent tag
 	//! @return true success file read
 	//!	@return false failer file read
-	bool	rereadFile(const PARAMETER_COMPONENT_TAG);
+	bool	read_file(const PARAMETER_COMPONENT_TAG);
 
 	//! parameter int value getter
 	//! @param[in]	parametercategory
 	//!	@param[in]	parameter key
 	//! @param[out]	error code
 	//!	@return	intvalue
-	int		get_int_value(const PARAMETER_COMPONENT_TAG, const std::string&, const parameter::error_code& );
+	int		get_int(const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
 
 	//! parameter string value getter
 	//! @param[in]	parametercategory
 	//!	@param[in]	parameter key
 	//! @param[out] error code
 	//!	@return	string value
-	std::string	get_string_value(const PARAMETER_COMPONENT_TAG, const std::string&, const parameter::error_code& );
+	std::string	get_string(const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
 };
 
 }	//namespace l7vs
