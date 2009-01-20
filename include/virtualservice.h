@@ -19,8 +19,6 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#include "stub.h"
-
 #include "realserver.h"
 #include "virtualservice_element.h"
 //#include "replication.h"
