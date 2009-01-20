@@ -1,0 +1,16 @@
+#ifndef	REPLICATION_H
+#define	REPLICATION_H
+namespace	l7vs{
+class	replication{
+public:
+	enum REPLICATION_MODE_TAG{
+		REPLICATION_OUT = 0,
+		REPLICATION_SINGLE,
+		REPLICATION_MASTER,
+		REPLICATION_SLAVE,
+		REPLICATION_MASTER_STOP,
+		REPLICATION_SLAVE_STOP
+	};
+};
+}	//namespace	l7vs
+#endif	//REPLICATION_H
