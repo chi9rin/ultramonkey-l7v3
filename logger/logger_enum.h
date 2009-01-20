@@ -68,7 +68,7 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_MODULE,					//!< logcategory is module controler
 	LOG_CAT_L7VSD_REPLICATION,				//!< logcategory is replication
 	LOG_CAT_L7VSD_REPLICATION_SENDTHREAD,	//!< logcategory is replication send thread
-	LOG_CAT_L7VSD_PARAMTER,					//!< logcategory is parameter
+	LOG_CAT_L7VSD_PARAMETER,				//!< logcategory is parameter
 	LOG_CAT_L7VSD_LOGGER,					//!< logcategory is logger
 	LOG_CAT_L7VSD_COMMAND,					//!< logcategory is command reciver
 	LOG_CAT_L7VSD_START_STOP,				//!< logcategory is main function used

@@ -214,9 +214,9 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 	category_name_map[LOG_CAT_L7VSD_REPLICATION] = "l7vsd_replication";
 
 	//l7vsd parameter category initialize
-	category_level_map[LOG_CAT_L7VSD_PARAMTER] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_parameter"] = LOG_CAT_L7VSD_PARAMTER;
-	category_name_map[LOG_CAT_L7VSD_PARAMTER] = "l7vsd_parameter";
+	category_level_map[LOG_CAT_L7VSD_PARAMETER] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_parameter"] = LOG_CAT_L7VSD_PARAMETER;
+	category_name_map[LOG_CAT_L7VSD_PARAMETER] = "l7vsd_parameter";
 
 	//l7vsd logger category initialize
 	category_level_map[LOG_CAT_L7VSD_LOGGER] = LOG_LV_DEBUG;
