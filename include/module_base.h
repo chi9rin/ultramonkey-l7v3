@@ -49,7 +49,7 @@ protected:
 public:
 	//! constractor
 	module_base( std::string in_modulename ){
-		name = "module_base";
+		name = in_modulename;
 	}
 	//! destractor
 	virtual ~module_base() = 0;
