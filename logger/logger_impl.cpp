@@ -545,7 +545,7 @@ void l7vs::LoggerImpl::loadConf(){
 		parameter::error_code ec_true;
 		ec_true.set_flag(true);
 
-		property.log_filename_value = param.get_string_value(PARAM_COMP_LOGGER, property.log_filename_key, ec);
+		property.log_filename_value = param.get_string(PARAM_COMP_LOGGER, property.log_filename_key, ec);
 		if( ec == true ){
 			std::stringstream	ss;
 			ss << "Not exist logfilename_key : " << property.log_filename_key;
@@ -553,7 +553,7 @@ void l7vs::LoggerImpl::loadConf(){
 		}
 	
 		// get rotation
-		std::string rotationStr = param.get_string_value(PARAM_COMP_LOGGER, property.rotation_key, ec);
+		std::string rotationStr = param.get_string(PARAM_COMP_LOGGER, property.rotation_key, ec);
 		if( ec == false ){
 			if ("size" == rotationStr) property.rotation_value = LOG_ROT_SIZE;
 			else if ("date" == rotationStr) property.rotation_value = LOG_ROT_DATE;
@@ -569,7 +569,7 @@ void l7vs::LoggerImpl::loadConf(){
 		}
 
 		// get max backup index
-		std::string maxBackupIndexStr = param.get_string_value( PARAM_COMP_LOGGER, property.max_backup_index_key, ec );
+		std::string maxBackupIndexStr = param.get_string( PARAM_COMP_LOGGER, property.max_backup_index_key, ec );
 		if( ec == false ) {
 			try {
 				property.max_backup_index_value = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
@@ -598,7 +598,7 @@ void l7vs::LoggerImpl::loadConf(){
 		if (LOG_ROT_SIZE == property.rotation_value || LOG_ROT_DATESIZE == property.rotation_value) {
 			// get max file size
 			std::string maxFileSizeStr;
-			maxFileSizeStr = param.get_string_value(PARAM_COMP_LOGGER, property.max_file_size_key, ec);
+			maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property.max_file_size_key, ec);
 			if( ec == true )	logic_error( 8, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
 			
 			std::string size_val;
@@ -643,7 +643,7 @@ void l7vs::LoggerImpl::loadConf(){
 		// get rotation timing
 		if(LOG_ROT_DATE == property.rotation_value || LOG_ROT_DATESIZE == property.rotation_value) {
 			// get rotation timing
-			std::string rotationTimingStr = param.get_string_value(PARAM_COMP_LOGGER, property.rotation_timing_key, ec);
+			std::string rotationTimingStr = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_key, ec);
 			if( ec == false ){
 				if ("year" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_YEAR;
 				else if ("month" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_MONTH;
@@ -655,7 +655,7 @@ void l7vs::LoggerImpl::loadConf(){
 			else{	logic_error( 15, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);}
 
 			if(LOG_TIM_YEAR == property.rotation_timing_value ){
-				std::string ret = param.get_string_value(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
 				if( ec == false ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -741,7 +741,7 @@ void l7vs::LoggerImpl::loadConf(){
 		
 
 			if (LOG_TIM_MONTH == property.rotation_timing_value ) {
-				std::string ret = param.get_string_value(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
 				if( ec == false ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -810,7 +810,7 @@ void l7vs::LoggerImpl::loadConf(){
 			}
 
 			if(LOG_TIM_WEEK == property.rotation_timing_value ){
-				std::string ret = param.get_string_value(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
 				if( ec == false ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -880,7 +880,7 @@ void l7vs::LoggerImpl::loadConf(){
 			}
 
 			if(LOG_TIM_DATE == property.rotation_timing_value){
-				std::string ret =param.get_string_value(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+				std::string ret =param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
 				if( ec == false ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -928,7 +928,7 @@ void l7vs::LoggerImpl::loadConf(){
 			}
 
 			if(LOG_TIM_HOUR == property.rotation_timing_value) {
-				std::string ret = param.get_string_value(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
 				if( ec == false ){
 					// minute
 					int minute = 0;
@@ -1148,7 +1148,7 @@ void l7vs::LoggerImpl::loadConf(){
 			log_category = LOG_CAT_L7VSD_LOGGER;
 #endif
 
-			std::string levelStr = param.get_string_value(PARAM_COMP_LOGGER, name_itr->second, ec);
+			std::string levelStr = param.get_string(PARAM_COMP_LOGGER, name_itr->second, ec);
 			if( ec == false ) {
 				if ("debug" == levelStr) {
 					cat_itr->second = LOG_LV_DEBUG;
