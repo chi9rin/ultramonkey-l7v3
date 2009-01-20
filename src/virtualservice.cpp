@@ -26,6 +26,9 @@ void	virtualservice_base::handle_protomod_replication( const boost::system::erro
 void	virtualservice_base::handle_schedmod_replication( const boost::system::error_code& ){}
 void	virtualservice_base::handle_throughput_update( const boost::system::error_code& ){}
 
+void	virtualservice_base::rs_list_lock(){}
+void	virtualservice_base::rs_list_unlock(){}
+
 unsigned long long	virtualservice_base::get_qos_upstream(){ return element.qos_upstream; }
 unsigned long long	virtualservice_base::get_qos_downstream(){ return element.qos_downstream; }
 unsigned long long	virtualservice_base::get_throughput_upstream(){ return throughput_up; }
@@ -61,9 +64,6 @@ vs_operation_result		virtualservice_tcp::finalize(){ vs_operation_result ret; re
 
 bool	virtualservice_tcp::operator==( const virtualservice_base& in ){ return true; }
 bool	virtualservice_tcp::operator!=( const virtualservice_base& in ){ return true; }
-
-void	virtualservice_tcp::rs_list_lock(){}
-void	virtualservice_tcp::rs_list_unlock(){}
 
 vs_operation_result		virtualservice_tcp::set_virtualservce( const virtualservice_element& in ){
 	vs_operation_result ret;
@@ -116,9 +116,6 @@ vs_operation_result		virtualservice_udp::finalize(){
 
 bool	virtualservice_udp::operator==( const virtualservice_base& in ){ return true; }
 bool	virtualservice_udp::operator!=( const virtualservice_base& in ){ return true; }
-
-void	virtualservice_udp::rs_list_lock(){}
-void	virtualservice_udp::rs_list_unlock(){}
 
 vs_operation_result		virtualservice_udp::set_virtualservce( const virtualservice_element& in ){
 	vs_operation_result ret;

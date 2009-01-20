@@ -116,8 +116,8 @@ public:
 	virtual	bool				operator==( const virtualservice_base& ) = 0;
 	virtual	bool				operator!=( const virtualservice_base& ) = 0;
 
-	virtual	void				rs_list_lock() = 0;
-	virtual	void				rs_list_unlock() = 0;
+	void						rs_list_lock();
+	void						rs_list_unlock();
 
 	virtual	vs_operation_result	set_virtualservce( const virtualservice_element& ) = 0;
 	virtual	vs_operation_result	edit_virtualservce( const virtualservice_element& ) = 0;
@@ -153,7 +153,7 @@ public:
 
 class	virtualservice_tcp : public virtualservice_base{
 public:
-	typedef	std::map<boost::thread::id,session_thread_control>	session_map_type;
+	typedef	std::map<boost::thread::id,boost::shared_ptr<session_thread_control>>	session_map_type;
 protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
@@ -178,9 +178,6 @@ public:
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
-
-	void						rs_list_lock();
-	void						rs_list_unlock();
 
 	vs_operation_result			set_virtualservce( const virtualservice_element& );
 	vs_operation_result			edit_virtualservce( const virtualservice_element& );
@@ -216,9 +213,6 @@ public:
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
-
-	void						rs_list_lock();
-	void						rs_list_unlock();
 
 	vs_operation_result			set_virtualservce( const virtualservice_element& );
 	vs_operation_result			edit_virtualservce( const virtualservice_element& );
