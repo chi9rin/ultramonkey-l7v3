@@ -74,8 +74,8 @@ protected:
 
 	virtualservice_element		element;
 
-	protocol_module_base*		protomod;
-	schedule_module_base*		schedmod;
+	boost::shared_ptr<protocol_module_base>	protomod;
+	boost::shared_ptr<schedule_module_base>	schedmod;
 	std::list<realserver>		rs_list;
 	std::list<boost::mutex>		rs_mutex;
 	unsigned int				rs_list_ref_count;
@@ -114,7 +114,7 @@ public:
 													vs_timer( dispatcher ) {};
 	virtual	~virtualservice_base(){};
 
-	virtual	vs_operation_result	initialize() = 0:
+	virtual	vs_operation_result	initialize() = 0;
 	virtual	vs_operation_result	finalize() = 0;
 
 	virtual	bool				operator==( const virtualservice_base& ) = 0;
@@ -123,20 +123,21 @@ public:
 	virtual	void				rs_list_lock() = 0;
 	virtual	void				rs_list_unlock() = 0;
 
-	virtual	vs_operation_result	set_virtualservce( virtualservice_element& ) = 0;
-	virtual	vs_operation_result	edit_virtualservce( virtualservice_element& ) = 0;
-	virtual	vs_operation_result	add_realserver( virtualservice_element& ) = 0;
-	virtual	vs_operation_result	edit_realserver( virtualservice_element& ) = 0;
-	virtual	vs_operation_result	del_realserver( virtualservice_element& ) = 0;
+	virtual	vs_operation_result	set_virtualservce( const virtualservice_element& ) = 0;
+	virtual	vs_operation_result	edit_virtualservce( const virtualservice_element& ) = 0;
+
+	virtual	vs_operation_result	add_realserver( const virtualservice_element& ) = 0;
+	virtual	vs_operation_result	edit_realserver( const virtualservice_element& ) = 0;
+	virtual	vs_operation_result	del_realserver( const virtualservice_element& ) = 0;
+
 	virtualservice_element&		get_element(){ return element; }
 
 	virtual	void				run() = 0;
 	virtual	void				stop() = 0;
-//	virtual	void				pause();
 
 	virtual	void				connection_active( const boost::asio::ip::tcp::endpoint& ) = 0;
 	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& ) = 0;
-	virtual	void				release_session( boost::thread::id thread_id ) = 0;
+	virtual	void				release_session( const boost::thread::id thread_id ) = 0;
 
 	unsigned long long			get_qos_upstream(){ return element.qos_upstream; }
 	unsigned long long			get_qos_downstream(){ return element.qos_downstream; }
@@ -149,9 +150,9 @@ public:
 	void						update_down_send_size( unsigned long long	datasize );
 	
 	boost::shared_ptr<protocol_module_base>
-								get_protocol_module();
+								get_protocol_module(){ return protomod; }
 	boost::shared_ptr<schedule_module_base>
-								get_schedule_module();
+								get_schedule_module(){ return schedmod; }
 };
 
 class	virtualservice_tcp : public virtualservice_base{
@@ -164,10 +165,7 @@ protected:
 	session_map_type			pool_sessions;
 	session_map_type			active_sessions;
 
-	void						rs_list_lock();
-	void						rs_list_unlock();
-
-	void						handle_replication_interrupt();
+	void						handle_replication_interrupt( const boost::system::error_code& );
 	bool						read_replicationdata( vs_replication_data& );
 
 	void						handle_accept(	const session_thread_control_ptr,
@@ -179,36 +177,35 @@ public:
 							const virtualservice_element& inelement);
 	~virtualservice_tcp();
 
-	vs_operation_result			initialize():
+	vs_operation_result			initialize();
 	vs_operation_result			finalize();
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
 
-	vs_operation_result			set_virtualservce( virtualservice_element& );
-	vs_operation_result			edit_virtualservce( virtualservice_element& );
+	void						rs_list_lock();
+	void						rs_list_unlock();
 
-	vs_operation_result			add_realserver( virtualservice_element& );
-	vs_operation_result			edit_realserver( virtualservice_element& );
-	vs_operation_result			del_realserver( virtualservice_element& );
+	vs_operation_result			set_virtualservce( const virtualservice_element& );
+	vs_operation_result			edit_virtualservce( const virtualservice_element& );
+
+	vs_operation_result			add_realserver( const virtualservice_element& );
+	vs_operation_result			edit_realserver( const virtualservice_element& );
+	vs_operation_result			del_realserver( const virtualservice_element& );
 
 	void						run();
 	void						stop();
-//	void						pause();
 
 	void						connection_active( const boost::asio::ip::tcp::endpoint& );
 	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
-	void						release_session( boost::thread::id thread_id );
+	void						release_session( const boost::thread::id thread_id );
 };
 
 class	virtualservice_udp : public virtualservice_base{
 protected:
 	udp_session					session;
-	
-	void						rs_list_lock();
-	void						rs_list_unlock();
 
-	void						handle_replication_interrupt();
+	void						handle_replication_interrupt( const boost::system::error_code& );
 	bool						read_replicationdata( vs_replication_data& );
 
 public:
@@ -217,26 +214,29 @@ public:
 							const virtualservice_element& inelement);
 	~virtualservice_udp();
 
-	vs_operation_result			initialize():
+
+	vs_operation_result			initialize();
 	vs_operation_result			finalize();
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
 
-	vs_operation_result			set_virtualservce( virtualservice_element& );
-	vs_operation_result			edit_virtualservce( virtualservice_element& );
+	void						rs_list_lock();
+	void						rs_list_unlock();
 
-	vs_operation_result			add_realserver( virtualservice_element& );
-	vs_operation_result			edit_realserver( virtualservice_element& );
-	vs_operation_result			del_realserver( virtualservice_element& );
+	vs_operation_result			set_virtualservce( const virtualservice_element& );
+	vs_operation_result			edit_virtualservce( const virtualservice_element& );
+
+	vs_operation_result			add_realserver( const virtualservice_element& );
+	vs_operation_result			edit_realserver( const virtualservice_element& );
+	vs_operation_result			del_realserver( const virtualservice_element& );
 
 	void						run();
 	void						stop();
-//	void						pause();
 
-	void		connection_active( const boost::asio::ip::tcp::endpoint& );
-	void		connection_inactive( const boost::asio::ip::tcp::endpoint& );
-	void		release_session( boost::thread::id thread_id );
+	void						connection_active( const boost::asio::ip::tcp::endpoint& );
+	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
+	void						release_session( const boost::thread::id thread_id );
 };
 
 class	virtual_service{
@@ -256,15 +256,50 @@ public:
 	~virtual_service(){
 	}
 	
-	bool		operator==( const virtualservice_base& in ){ return vs->operator==( in ); }
+	vs_operation_result			initialize(){ return vs->initialize(); }
+	vs_operation_result			finalize(){ return vs->finalize(); }
 
-	void		set_virtualservce( virtualservice_element& in ){ vs->set_virtualservce( in ); }
-	void		edit_virtualservce( virtualservice_element& in ){ vs->edit_virtualservce( in ); }
+	bool						operator==( const virtualservice_base& in ){ return vs->operator==( in ); }
+	bool						operator!=( const virtualservice_base& in ){ return vs->operator!=( in ); }
+
+	vs_operation_result			set_virtualservce( virtualservice_element& in ){ vs->set_virtualservce( in ); }
+	vs_operation_result			edit_virtualservce( virtualservice_element& in ){ vs->edit_virtualservce( in ); }
+
+	vs_operation_result			add_realserver( virtualservice_element& in ){ vs->add_realserver( in ); }
+	vs_operation_result			edit_realserver( virtualservice_element& in ){ vs->edit_realserver( in ); }
+	vs_operation_result			del_realserver( virtualservice_element& in ){ vs->del_realserver( in ); }
+
 	virtualservice_element&		get_element(){ return vs->get_element(); }
 
-	void		run(){ vs->run(); }
-	void		stop(){ vs->stop(); }
-//	void		pause(){ vs->pause(); }
+	void						run(){ vs->run(); }
+	void						stop(){ vs->stop(); }
+
+	void		connection_active( const boost::asio::ip::tcp::endpoint& in ){ vs->connection_active( in ); }
+	void		connection_inactive( const boost::asio::ip::tcp::endpoint& in ){ vs->connection_inactive( in ); }
+	void		release_session( boost::thread::id thread_id ){ vs->release_session( thread_id ); }
+
+	unsigned long long			get_qos_upstream(){ return vs->get_qos_upstream(); }
+	unsigned long long			get_qos_downstream(){ return vs->get_qos_downstream(); }
+	unsigned long long			get_throughput_upstream(){ return vs->get_throughput_upstream(); }
+	unsigned long long			get_throughput_downstream(){ return vs->get_throughput_downstream(); }
+
+	void						update_up_recv_size( unsigned long long	datasize ){
+		vs->update_up_recv_size( datasize );
+	}
+	void						update_up_send_size( unsigned long long	datasize ){
+		vs->update_up_send_size( datasize );
+	}
+	void						update_down_recv_size( unsigned long long	datasize ){
+		vs->update_down_recv_size( datasize );
+	}
+	void						update_down_send_size( unsigned long long	datasize ){
+		vs->update_down_send_size( datasize );
+	}
+	
+	boost::shared_ptr<protocol_module_base>
+								get_protocol_module(){ return vs->get_protocol_module(); }
+	boost::shared_ptr<schedule_module_base>
+								get_schedule_module(){ return vs->get_schedule_module(); }
 };
 
 }
