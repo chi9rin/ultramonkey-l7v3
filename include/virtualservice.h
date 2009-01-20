@@ -26,7 +26,7 @@
 //#include "replication.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
-//#include "session_thread_control.h"
+#include "session_thread_control.h"
 
 #define	SESSION_POOL_NUM_DEFAULT	256
 
