@@ -32,18 +32,21 @@ protected:
 	string_map_type							stringMap;
 	//! parameter data of int
 	int_map_type							intMap;
+	//! create mutex
+	boost::mutex							create_mutex;
 	//! read / write mutex
 	boost::mutex							param_mutex;
 	//! componenttag to section name map
 	std::map< PARAMETER_COMPONENT_TAG, std::string >
 											tag_section_table_map;
+	//! constractor
 	ParameterImpl(){}
+	//! destractor
 	~ParameterImpl(){}
 public:
 	//! instansgetter
 	//! @return instance
 	static ParameterImpl & get_instance(){
-		boost::mutex::scoped_lock( param_mutex );
 		static ParameterImpl instance;
 		return instance;
 	}

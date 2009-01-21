@@ -10,13 +10,13 @@
 
 #include <vector>
 #include <fstream>
-#include <stdexcept>
 #include "parameter_impl.h"
 #include "logger_enum.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
+#include <boost/function.hpp>
 
 #ifndef PARAMETER_FILE
 	#define PARAMETER_FILE "/etc/l7vs/l7vs.cf"
@@ -34,21 +34,19 @@
 	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;
 #endif
 
-static bool	init_flag = false;
+static bool	create_map_flag = false;
 
 //
 //! Initialize ParameterImpl class
 //!	@return	true	success
 //! @return false	failer
 bool	l7vs::ParameterImpl::init(){
-	boost::mutex::scoped_lock( param_mutex );
-	bool	retbool = true;
-	if( init_flag ) return true;
-	//clrear map objects
+	boost::mutex::scoped_lock	lock( create_mutex );
+	if( create_map_flag ) return true;
+
 	tag_section_table_map.clear();
 	stringMap.clear();
 	intMap.clear();
-
 	tag_section_table_map[PARAM_COMP_L7VSD] 		= "l7vsd";
 	tag_section_table_map[PARAM_COMP_COMMAND] 		= "command"; 
 	tag_section_table_map[PARAM_COMP_SESSION]		= "session";
@@ -59,11 +57,11 @@ bool	l7vs::ParameterImpl::init(){
 	tag_section_table_map[PARAM_COMP_L7VSADM]		= "l7vsadm";
 	tag_section_table_map[PARAM_COMP_SNMPAGENT]		= "snmpagent";
 	tag_section_table_map[PARAM_COMP_SSLPROXY]		= "sslproxy";
-	//read all parameters
-	retbool	= read_file( PARAM_COMP_ALL );
+	create_map_flag	= read_file( PARAM_COMP_ALL );
 
-	init_flag = true;
-	return	retbool;
+	std::cout << "paramter_impl::init()" << std::endl;
+
+	return	create_map_flag;
 }
 
 //! read config file
@@ -76,7 +74,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 	typedef	std::pair< std::string, int > 			int_pair_type;
 	typedef	std::pair< std::string, std::string >	string_pair_type;
 
-	boost::mutex::scoped_lock( parameter_mutex );
+	boost::mutex::scoped_lock	lock( param_mutex );
 	std::string		line;
 	std::ifstream	ifs( PARAMETER_FILE );
 	string_map_type	string_map;
@@ -207,7 +205,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 									const std::string& key,
 									l7vs::parameter::error_code& err ){
-	boost::mutex::scoped_lock( param_mutex );
+	boost::mutex::scoped_lock	lock( param_mutex );
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
 	int_map_type::iterator intmap_iterator = intMap.find( section_table_iterator->second + "." + key );
 	if( intmap_iterator != intMap.end() )
@@ -227,7 +225,7 @@ int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 std::string	l7vs::ParameterImpl::get_string( const l7vs::PARAMETER_COMPONENT_TAG comp,
 											 const std::string& key,
 											 l7vs::parameter::error_code& err ){
-	boost::mutex::scoped_lock( param_mutex );
+	boost::mutex::scoped_lock	lock( param_mutex );
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
 	string_map_type::iterator strmap_iterator = stringMap.find( section_table_iterator->second + "." + key );
 	if( strmap_iterator != stringMap.end() )
