@@ -34,9 +34,9 @@
 l7vs::Logger::Logger() :
 	scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
 	scopedLogId(0),
-	scopedLogMessage(""),
-	scopedLogFile(""),
-	scopedLogLine(0){
+	scopedLogMessage("LoggerConstructor"),
+	scopedLogFile(__FILE__),
+	scopedLogLine(__LINE__){
 	if (!LoggerImpl::getInstance().init()) {
 		exit(1);
 	}
@@ -72,14 +72,12 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
  */
 l7vs::Logger::~Logger(){
 	if (LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory)){
-		if( 0 != scopedLogId ){
-			LoggerImpl::getInstance().putLogDebug(
-				scopedLogCategory,
-				scopedLogId,
-				"Function out : " + scopedLogMessage,
-				scopedLogFile,
-				scopedLogLine);
-		}
+		LoggerImpl::getInstance().putLogDebug(
+			scopedLogCategory,
+			scopedLogId,
+			"Function out : " + scopedLogMessage,
+			scopedLogFile,
+			scopedLogLine);
 	}
 }
 
