@@ -93,7 +93,7 @@ public:
 	//! @param[in]	log message
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
-	void static putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+	static void putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
 	//! output info log.
 	//! @param[in]	Log output category tag

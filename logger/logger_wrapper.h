@@ -34,7 +34,7 @@
  * @return  log level
  */
 inline	l7vs::LOG_LEVEL_TAG logger_get_log_level(const l7vs::LOG_CATEGORY_TAG cat){
-	return l7vs::Logger::logger.getLogLevel(cat);
+	return l7vs::Logger::getLogLevel(cat);
 }
 
 /*!

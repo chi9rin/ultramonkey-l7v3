@@ -34,7 +34,7 @@
 l7vs::Logger::Logger() :
 	scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
 	scopedLogId(0),
-	scopedLogMessage("LoggerConstructor"),
+	scopedLogMessage("Logger Constructor"),
 	scopedLogFile(__FILE__),
 	scopedLogLine(__LINE__){
 	if (!LoggerImpl::getInstance().init()) {
