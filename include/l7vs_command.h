@@ -110,7 +110,8 @@ public:
 		RESPONSE_REPLICATION_ERROR,	//!<	replication error
 		RESPONSE_LOG_ERROR,			//!<	logger error
 		RESPONSE_SNMP_ERROR,		//!<	snmpagent error
-		RESPONSE_PARAMETER_ERROR,	//!<	parameter error
+		RESPONSE_PARAMETER_ERROR	//!<	parameter error
+	};
 
 	l7vsadm_request::COMMAND_CODE_TAG
 							code;	//!<	request command.

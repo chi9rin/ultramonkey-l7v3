@@ -20,17 +20,18 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 
-#include "l7_command.h"
+#include "l7vs_command.h"
+#include "l7vsd.h"
 
 namespace l7vs{
 
 //!	@class	command_session
 //!	@brief	l7vsadm message session class
-class	command_session : public boost::enable_shared_from_this<session>{
+class	command_session : public boost::enable_shared_from_this< command_session >{
 protected:
 	//l7vsd_main_thread								main_thread;
 	//! unix domain socket
-	boost::asio:local::stream_protocol::socket	unixsocket;
+	boost::asio::local::stream_protocol::socket	unixsocket;
 	//!	l7vsadm request data
 	l7vsadm_request								request_data;
 	//!	l7vsd response data
@@ -38,7 +39,7 @@ protected:
 	//!	l7vsd refferecne
 	l7vsd&										vsd;
 	//!	command to handler map
-	std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<l7vsd::config_message_result(void)>>
+	std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<l7vsd::l7vsd_operation_result(void)> >
 												command_handler_map;
 
 	//! @brief default constructor
@@ -57,7 +58,7 @@ public:
 	//!	@brief		constructor
 	//!	@param[in]	io_service
 	//!	@param[in]	l7vsd refernce
-	command_session( boost::asio::io_service& io_service, l7vsd& parent ) : unixsocket( io_service ), vsd( parent );
+	command_session( boost::asio::io_service&, l7vsd& );
 
 	//!	@brief		return unixsocket
 	boost::asio::local::stream_protocol::socket&	socket(){ return unixsocket; }

@@ -13,6 +13,7 @@
 
 #include <boost/utility.hpp>
 #include "command_session.h"
+#include "l7vsd.h"
 
 namespace l7vs{
 //!	@class	command_receiver
@@ -37,10 +38,8 @@ public:
 	//!	@param[in]	io_service
 	//!	@param[in]	socket file
 	//!	@param[in]	l7vsd refernce
-	command_receiver(	boost::asio::io_service& io_service, const std::string& file, l7vsd& parent ) 
-		:	dispatcher( io_service ),
-			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) ),
-			vsd( parent );
+	command_receiver(	boost::asio::io_service&, const std::string&, l7vsd& );
+
 	//!	@brief		destructor
 	~command_receiver();
 };
