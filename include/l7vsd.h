@@ -22,7 +22,7 @@
 namespace l7vs{
 
 //! l7vsd main class
-class l7vsd{
+class l7vsd : private boost::noncopyable{
 public:
 	typedef boost::shared_ptr< command_receiver >	command_receiver_ptr;	//!< shared_ptr command_receiver typedef
 	typedef boost::shared_ptr< replication >		replication_ptr;		//!< shared_ptr replication typedef

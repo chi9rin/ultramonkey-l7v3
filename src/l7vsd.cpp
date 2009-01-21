@@ -25,26 +25,24 @@ void l7vsd::run() {
 
 };// namespace l7vsd
 
-static void sig_exit_handler(int sig) {
+static void sig_exit_handler( int sig ){
 	received_sig = sig;
 	exit_requested = true;
 }
 
-static int set_sighandler(int sig, void (*handler)(int)) {
-	struct sigaction act;
-	int ret;
+static int set_sighandler( int sig, void ( *handler )( int ) ){
+	struct	sigaction act;
+	int		ret;
 
-	ret = sigaction(sig, NULL, &act);
-	if (ret < 0) {
-		//LOGGER_PUT_LOG_ERROR(LOG_CAT_L7VSD_SYSTEM_SIGNAL,1, "sigaction on signal %d failed", sig);
+	ret = sigaction( sig, NULL, &act );
+	if( 0 > ret ){
 		return ret;
 	}
 	act.sa_flags &= ~SA_RESETHAND;
 	act.sa_handler = handler;
 
-	ret = sigaction(sig, &act, NULL);
-	if (ret < 0) {
-		//LOGGER_PUT_LOG_ERROR(LOG_CAT_L7VSD_SYSTEM_SIGNAL,2, "sigaction on signal %d failed", sig);
+	ret = sigaction( sig, &act, NULL );
+	if( 0 > ret ){
 		return ret;
 	}
 
@@ -62,26 +60,30 @@ static int set_sighandlers() {
 		}											\
 	} while (0)
 
-	SET_SIGHANDLER(SIGHUP,	sig_exit_handler);
-	SET_SIGHANDLER(SIGINT,	sig_exit_handler);
-	SET_SIGHANDLER(SIGQUIT,	sig_exit_handler);
-	SET_SIGHANDLER(SIGTERM,	sig_exit_handler);
-	SET_SIGHANDLER(SIGUSR1,	SIG_IGN);
-	SET_SIGHANDLER(SIGUSR2,	SIG_IGN);
-	SET_SIGHANDLER(SIGALRM,	SIG_IGN);
-	SET_SIGHANDLER(SIGCHLD,	SIG_IGN);
+	SET_SIGHANDLER( SIGHUP,		sig_exit_handler );
+	SET_SIGHANDLER( SIGINT,		sig_exit_handler );
+	SET_SIGHANDLER( SIGQUIT,	sig_exit_handler );
+	SET_SIGHANDLER( SIGTERM,	sig_exit_handler );
+	SET_SIGHANDLER( SIGUSR1,	SIG_IGN );
+	SET_SIGHANDLER( SIGUSR2,	SIG_IGN );
+	SET_SIGHANDLER( SIGALRM,	SIG_IGN );
+	SET_SIGHANDLER( SIGCHLD,	SIG_IGN );
 
 #undef SET_SIGHANDLER
 
     return 0;
 }
 
-static void usage(FILE* p) {
+static void usage( FILE* p ){
 
 }
 
 int l7vsd_main( int argc, char* argv[] ){
 	try{
+		l7vs::Logger	logger_instance;
+		l7vs::Parameter	parameter_instance;
+		
+
 		if (0 > set_sighandlers()) {
 			exit(-1);
 		}
@@ -89,10 +91,9 @@ int l7vsd_main( int argc, char* argv[] ){
 		l7vs::l7vsd vsd;
 		vsd.run();
 
-
 	}
 	catch( ... ){
-
+		return -1;
 	}
 	return 0;
 }
