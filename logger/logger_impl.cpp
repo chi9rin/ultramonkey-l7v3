@@ -391,7 +391,7 @@ void l7vs::LoggerImpl::logic_error( const unsigned int logno, const std::string&
 bool l7vs::LoggerImpl::init(){
 	using namespace log4cxx;
 	int ret = 0;
-	if (initialized) return false;
+	if (initialized) return true;
 
 	try {
 		// set loot logger
