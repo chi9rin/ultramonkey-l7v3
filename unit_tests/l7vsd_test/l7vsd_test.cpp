@@ -2,10 +2,15 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-#include "logger_enum.h"
-#include "logger_stub.h"
-#include "parameter_enum.h"
-#include "parameter_stub.h"
+
+//#include "logger_enum.h"
+//#include "logger_stub.h"
+#include "logger.h"
+
+//#include "parameter_enum.h"
+//#include "parameter_stub.h"
+#include "parameter.h"
+
 #include "command_receiver_stub.h"
 #include "virtualservice_stub.h"
 //#include "virtualservice_element_stub.h"
@@ -279,6 +284,13 @@ void	test_handler(int sig){
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	test_suite* ts = BOOST_TEST_SUITE( "l7vsd class test" );
+
+	l7vs::Logger logger_instance;
+	l7vs::Parameter param;
+	logger_instance.loadConf();
+	
+	logger_instance.putLogFatal( l7vs::LOG_CAT_L7VSD_NETWORK, 1, "Parameter initialize failure", __FILE__, __LINE__ );
+
 	ts->add( BOOST_TEST_CASE( &list_virtual_service_test ) );
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
