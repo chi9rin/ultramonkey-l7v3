@@ -39,7 +39,7 @@ public:
 		return *this;
 	}
 
-	virtual ~realserver(){}
+	~realserver(){}
 
 	friend	bool	operator==( const realserver& rs1, const realserver& rs2 ){
 		realserver& rselem1 = const_cast<realserver&>( rs1 );
