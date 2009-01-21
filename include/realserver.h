@@ -65,11 +65,11 @@ public:
 		return rselem1.weight < rselem2.weight;
 	}
 
-	int		increment_active();
-	int		decrement_active();
-	int		increment_inact();
-	int		get_active(int& out_active);
-	int		get_inact(int& out_inact);
+	void	increment_active();
+	void	decrement_active();
+	void	increment_inact();
+	int		get_active();
+	int		get_inact();
 
 };
 
