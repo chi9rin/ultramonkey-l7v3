@@ -8,9 +8,9 @@
 #include "parameter_stub.h"
 #include "command_receiver_stub.h"
 #include "virtualservice_stub.h"
-#include "virtualservice_element_stub.h"
+//#include "virtualservice_element_stub.h"
 #include "realserver_stub.h"
-#include "realserver_element_stub.h"
+//#include "realserver_element_stub.h"
 #include "replication_stub.h"
 #include "snmpbridge_stub.h"
 #include "protocol_module_control_stub.h"
@@ -28,13 +28,47 @@ int			arg_sig_test_handler = 0;		//test_handlerの引数(sig)
 
 class	l7vsd_test	:public	l7vs::l7vsd {
 public:
-	static void	constractor_test();
+	vslist_type&	get_vslist(){ return vslist; }
 
 };
 
 //--tests--
 
-void	l7vsd_test::constractor_test(){
+void	list_virtual_service_test(){
+	l7vsd_test	vsd_test;
+
+	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice );
+	boost::shared_ptr< l7vs::virtualservice > vs2( new l7vs::virtualservice );
+	vs1->element.protocol_module_name = "cinsert";
+	vs2->element.protocol_module_name = "url";
+
+	vsd_test.get_vslist().push_back(vs1);
+	vsd_test.get_vslist().push_back(vs2);
+
+	//virtualservice_element elem1;
+	//virtualservice_element elem2;
+
+	l7vs::l7vsd::l7vsd_operation_result	res;
+	l7vs::l7vsd::vsvec_type	vs_vector;
+
+	res = vsd_test.list_virtual_service(vs_vector);
+	// unit_test[1] list_virtual_service 正常系 戻り値確認
+	BOOST_CHECK_EQUAL(res.flag, true);
+	// unit_test[1] list_virtual_service 正常系 vs_vector確認
+	BOOST_CHECK_EQUAL(vs_vector.size(), 2);
+	BOOST_CHECK_EQUAL(vs_vector[0].protocol_module_name, "cinsert");
+	BOOST_CHECK_EQUAL(vs_vector[1].protocol_module_name, "url");
+
+
+	vsd_test.get_vslist().clear();
+	vs_vector.clear();
+
+	res = vsd_test.list_virtual_service(vs_vector);
+	// unit_test[1] list_virtual_service 正常系２(vslistが空) 戻り値確認
+	BOOST_CHECK_EQUAL(res.flag, true);
+	// unit_test[1] list_virtual_service 正常系２(vslistが空) vs_vector確認
+	BOOST_CHECK_EQUAL(vs_vector.size(), 0);
+
 
 }
 
@@ -245,7 +279,7 @@ void	test_handler(int sig){
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	test_suite* ts = BOOST_TEST_SUITE( "l7vsd class test" );
-	ts->add( BOOST_TEST_CASE( &l7vsd_test::constractor_test ) );
+	ts->add( BOOST_TEST_CASE( &list_virtual_service_test ) );
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
 	ts->add( BOOST_TEST_CASE( &set_sighandler_test ) );

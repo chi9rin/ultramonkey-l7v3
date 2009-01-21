@@ -1,8 +1,8 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "logger.h"
-#include "parameter.h"
+#include <boost/shared_ptr.hpp>
+
 #include "l7vsd.h"
 
 static void	sig_exit_handler(int sig);
@@ -16,8 +16,20 @@ static int	received_sig = 0;
 
 namespace l7vs{
 
-Logger logger_instance;
-Parameter parameter_instance;
+l7vsd::l7vsd_operation_result	l7vsd::list_virtual_service( vsvec_type& out_vslist ){
+	l7vsd_operation_result	res;
+
+	boost::mutex::scoped_lock( command_mutex );
+	boost::mutex::scoped_lock( vslist_mutex );
+
+	for( vslist_type::iterator itr = vslist.begin();
+		 itr != vslist.end();
+		 ++itr ){
+		out_vslist.push_back( (*itr)->get_element() );
+	}
+	return res;
+}
+
 
 void l7vsd::run() {
 

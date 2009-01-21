@@ -19,6 +19,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
+#include <boost/function.hpp>
 
 #include "l7vs_command.h"
 #include "l7vsd.h"
@@ -43,7 +44,7 @@ protected:
 												command_handler_map;
 
 	//! @brief default constructor
-	command_session(){}
+	command_session();
 
 	//!	@brief		read handler
 	//!	@param[in]	error code

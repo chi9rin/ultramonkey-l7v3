@@ -28,8 +28,9 @@ public:
 	typedef boost::shared_ptr< replication >		replication_ptr;		//!< shared_ptr replication typedef
 	typedef boost::shared_ptr< snmpbridge >			snmpbridge_ptr;			//!< shared_ptr snmp_bridge typedef
 
-	typedef std::list< virtualservice >				vs_list_type;			//!< virtual_service list typedef
-	
+	typedef std::list< boost::shared_ptr< virtualservice > >	vslist_type;	//!< virtual service list typedef
+	typedef std::vector< virtualservice_element >				vsvec_type;		//!< virtual service element vector type
+
 	struct l7vsd_operation_result{
 		bool	flag;
 		std::string	message;
@@ -44,16 +45,19 @@ protected:
 	boost::thread_group			vs_threads;			//!< virtual_service thread group
 	boost::asio::io_service		dispatcher;			//!< dispatcher
 
-	vs_list_type				vs_list;			//!< virtual_service list
+	vslist_type					vslist;				//!< virtual_service list
 
 	command_receiver_ptr		receiver;			//!< command_receiver ptr
 	replication_ptr				rep;				//!< replication ptr
 	snmpbridge_ptr				bridge;				//!< snmp_bridge ptr
 
-	vs_list_type::iterator		search_vslist( virtualservice_element& );	//!< vs_list search function
+	boost::mutex				command_mutex;		//!< command execute mutex
+	boost::mutex				vslist_mutex;		//!< virtual service list mutex
+
+	vslist_type::iterator		search_vslist( virtualservice_element& );	//!< vs_list search function
 
 public:
-	l7vsd_operation_result		list_virtual_service( std::vector<virtualservice_element>&  );	//!< virtual_service list command
+	l7vsd_operation_result		list_virtual_service( vsvec_type&  );	//!< virtual_service list command
 
 	l7vsd_operation_result		add_virtual_service( const virtualservice_element& );	//!< virtual_service add command
 	l7vsd_operation_result		del_virtual_service( const virtualservice_element& );	//!< virtual_service del command
