@@ -413,7 +413,11 @@ bool l7vs::LoggerImpl::init(){
 			 itr != category_level_map.end();
 			 ++itr ){
 			category_name_map_type::iterator name_itr = category_name_map.find( itr->first );
-			Logger::getLogger( name_itr->second )->setLevel( itr->second );
+
+			LoggerPtr temp = Logger::getLogger( name_itr->second );
+ 			temp->setLevel( levelTable[itr->second] );
+
+			//Logger::getLogger( name_itr->second )->setLevel( levelTable[itr->second] );
 		}
 
 	}
@@ -534,25 +538,25 @@ void l7vs::LoggerImpl::loadConf(){
 	//get normal log filename
 	Parameter param;
 
-	appender_property& property = normal_log_property;
+	appender_property* property = &normal_log_property;
 
 	for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
 		// filename check
 
 		parameter::error_code ec;
-		property.log_filename_value = param.get_string(PARAM_COMP_LOGGER, property.log_filename_key, ec);
+		property->log_filename_value = param.get_string(PARAM_COMP_LOGGER, property->log_filename_key, ec);
 		if( ec ){
 			std::stringstream	ss;
-			ss << "Not exist logfilename_key : " << property.log_filename_key;
+			ss << "Not exist logfilename_key : " << property->log_filename_key;
 			logic_error( 7, ss.str(), __FILE__, __LINE__ );
 		}
 	
 		// get rotation
-		std::string rotationStr = param.get_string(PARAM_COMP_LOGGER, property.rotation_key, ec);
+		std::string rotationStr = param.get_string(PARAM_COMP_LOGGER, property->rotation_key, ec);
 		if( !ec ){
-			if ("size" == rotationStr) property.rotation_value = LOG_ROT_SIZE;
-			else if ("date" == rotationStr) property.rotation_value = LOG_ROT_DATE;
-			else if ("datesize" == rotationStr) property.rotation_value = LOG_ROT_DATESIZE;
+			if ("size" == rotationStr) property->rotation_value = LOG_ROT_SIZE;
+			else if ("date" == rotationStr) property->rotation_value = LOG_ROT_DATE;
+			else if ("datesize" == rotationStr) property->rotation_value = LOG_ROT_DATESIZE;
 			else {
 				std::stringstream	ss;
 				ss << "Invalid Log Rotation Setting : " << rotationStr;
@@ -564,22 +568,22 @@ void l7vs::LoggerImpl::loadConf(){
 		}
 
 		// get max backup index
-		std::string maxBackupIndexStr = param.get_string( PARAM_COMP_LOGGER, property.max_backup_index_key, ec );
+		std::string maxBackupIndexStr = param.get_string( PARAM_COMP_LOGGER, property->max_backup_index_key, ec );
 		if( !ec ) {
 			try {
-				property.max_backup_index_value = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
+				property->max_backup_index_value = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
 			}
 			catch (const boost::bad_lexical_cast& bc) {
 				std::stringstream	ss;
 				ss << "Invalid MaxBackupIndex Value : " << maxBackupIndexStr << ".";
 				throw std::logic_error( ss.str() );
 			}
-			if (LOGGER_BACKUP_INDEX_LOWER_LIMIT > property.max_backup_index_value) {
+			if (LOGGER_BACKUP_INDEX_LOWER_LIMIT > property->max_backup_index_value) {
 				std::stringstream ss;
 				ss << "Max Backup Index must at least " << LOGGER_BACKUP_INDEX_LOWER_LIMIT << ".";
 				throw std::logic_error( ss.str() );
 			}
-			if (LOGGER_BACKUP_INDEX_LIMIT < property.max_backup_index_value) {
+			if (LOGGER_BACKUP_INDEX_LIMIT < property->max_backup_index_value) {
 				std::stringstream ss;
 				ss << "Max Backup Index must at most " << LOGGER_BACKUP_INDEX_LIMIT << ".";
 				throw std::logic_error( ss.str() );
@@ -590,10 +594,10 @@ void l7vs::LoggerImpl::loadConf(){
 		}
 
 		// get max filesize check
-		if (LOG_ROT_SIZE == property.rotation_value || LOG_ROT_DATESIZE == property.rotation_value) {
+		if (LOG_ROT_SIZE == property->rotation_value || LOG_ROT_DATESIZE == property->rotation_value) {
 			// get max file size
 			std::string maxFileSizeStr;
-			maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property.max_file_size_key, ec);
+			maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property->max_file_size_key, ec);
 			if( ec )	logic_error( 8, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
 			
 			std::string size_val;
@@ -605,29 +609,29 @@ void l7vs::LoggerImpl::loadConf(){
 				size_val = maxFileSizeStr;
 				
 			try {
-				property.max_file_size_value = boost::lexical_cast<size_t>(size_val);
+				property->max_file_size_value = boost::lexical_cast<size_t>(size_val);
 			}
 			catch (const boost::bad_lexical_cast& bc){
 				logic_error( 9, "Invalid FileSize Value.", __FILE__, __LINE__ );
 			}
 	
 			if ("K" == last_str) {
-				if ((ULLONG_MAX / 1024) < property.max_file_size_value){
+				if ((ULLONG_MAX / 1024) < property->max_file_size_value){
 						logic_error( 10, "Invalid FileSize Value.", __FILE__, __LINE__);
 				}
-				property.max_file_size_value = property.max_file_size_value * 1024;
+				property->max_file_size_value = property->max_file_size_value * 1024;
 			}
 			else if ("M" == last_str) {
-				if ((ULLONG_MAX / 1024 / 1024) < property.max_file_size_value)
+				if ((ULLONG_MAX / 1024 / 1024) < property->max_file_size_value)
 					logic_error( 11, "Invalid FileSize Value.", __FILE__, __LINE__);
-				property.max_file_size_value = property.max_file_size_value * 1024 * 1024;
+				property->max_file_size_value = property->max_file_size_value * 1024 * 1024;
 			}
 			else if ("G" == last_str) {
-				if ((ULLONG_MAX / 1024 / 1024 / 1024) < property.max_file_size_value)
+				if ((ULLONG_MAX / 1024 / 1024 / 1024) < property->max_file_size_value)
 					logic_error( 12, "Invalid FileSize Value.", __FILE__, __LINE__);
-				property.max_file_size_value = property.max_file_size_value * 1024 * 1024 * 1024;
+				property->max_file_size_value = property->max_file_size_value * 1024 * 1024 * 1024;
 			}
-			if (LOGGER_FILESIZE_LOWER_LIMIT > property.max_file_size_value){
+			if (LOGGER_FILESIZE_LOWER_LIMIT > property->max_file_size_value){
 				int limit = LOGGER_FILESIZE_LOWER_LIMIT;
 				std::ostringstream oss;
 				oss << "FileSize must at least " << limit << " bytes.";
@@ -636,21 +640,21 @@ void l7vs::LoggerImpl::loadConf(){
 		}
 
 		// get rotation timing
-		if(LOG_ROT_DATE == property.rotation_value || LOG_ROT_DATESIZE == property.rotation_value) {
+		if(LOG_ROT_DATE == property->rotation_value || LOG_ROT_DATESIZE == property->rotation_value) {
 			// get rotation timing
-			std::string rotationTimingStr = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_key, ec);
+			std::string rotationTimingStr = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_key, ec);
 			if( !ec ){
-				if ("year" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_YEAR;
-				else if ("month" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_MONTH;
-				else if ("week" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_WEEK;
-				else if ("date" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_DATE;
-				else if ("hour" == rotationTimingStr) property.rotation_timing_value = LOG_TIM_HOUR;
+				if ("year" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_YEAR;
+				else if ("month" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_MONTH;
+				else if ("week" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_WEEK;
+				else if ("date" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_DATE;
+				else if ("hour" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_HOUR;
 				else logic_error(14, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
 			}
 			else{	logic_error( 15, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);}
 
-			if(LOG_TIM_YEAR == property.rotation_timing_value ){
-				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+			if(LOG_TIM_YEAR == property->rotation_timing_value ){
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
 				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -726,7 +730,7 @@ void l7vs::LoggerImpl::loadConf(){
 						<< std::setfill('0') << std::setw(2) << hour
 						<< std::setfill('0') << std::setw(2) << minute;
 					
-					property.rotation_timing_value_value = oss.str();
+					property->rotation_timing_value_value = oss.str();
 
 				}
 				else {
@@ -735,8 +739,8 @@ void l7vs::LoggerImpl::loadConf(){
 			}
 		
 
-			if (LOG_TIM_MONTH == property.rotation_timing_value ) {
-				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+			if (LOG_TIM_MONTH == property->rotation_timing_value ) {
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
 				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -796,7 +800,7 @@ void l7vs::LoggerImpl::loadConf(){
 						<< std::setfill('0') << std::setw(2) << hour
 						<< std::setfill('0') << std::setw(2) << minute;
 					
-					property.rotation_timing_value_value = oss.str();
+					property->rotation_timing_value_value = oss.str();
 	
 				}
 				else{
@@ -804,8 +808,8 @@ void l7vs::LoggerImpl::loadConf(){
 				}
 			}
 
-			if(LOG_TIM_WEEK == property.rotation_timing_value ){
-				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+			if(LOG_TIM_WEEK == property->rotation_timing_value ){
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
 				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -867,15 +871,15 @@ void l7vs::LoggerImpl::loadConf(){
 						<< std::setfill('0') << std::setw(2) << hour
 						<< std::setfill('0') << std::setw(2) << minute;
 	
-					property.rotation_timing_value_value = oss.str();
+					property->rotation_timing_value_value = oss.str();
 				}
 				else{
 					logic_error( 45, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
 				}
 			}
 
-			if(LOG_TIM_DATE == property.rotation_timing_value){
-				std::string ret =param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+			if(LOG_TIM_DATE == property->rotation_timing_value){
+				std::string ret =param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
 				if( !ec ){
 					std::string::size_type fpos = 0;
 					std::string::size_type rpos = 0;
@@ -915,15 +919,15 @@ void l7vs::LoggerImpl::loadConf(){
 					oss << std::setfill('0') << std::setw(2) << hour
 						<< std::setfill('0') << std::setw(2) << minute;
 	
-					property.rotation_timing_value_value = oss.str();
+					property->rotation_timing_value_value = oss.str();
 				}
 				else{
 					logic_error( 51, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
 				}
 			}
 
-			if(LOG_TIM_HOUR == property.rotation_timing_value) {
-				std::string ret = param.get_string(PARAM_COMP_LOGGER, property.rotation_timing_value_key, ec);
+			if(LOG_TIM_HOUR == property->rotation_timing_value) {
+				std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
 				if( !ec ){
 					// minute
 					int minute = 0;
@@ -941,13 +945,14 @@ void l7vs::LoggerImpl::loadConf(){
 					std::ostringstream oss;
 					oss << std::setfill('0') << std::setw(2) << minute;
 					
-					property.rotation_timing_value_value = oss.str();
+					property->rotation_timing_value_value = oss.str();
 				}
 				else {
 					logic_error( 54, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
 				}
 			}
 		}
+		property = &access_log_property;
 	}		//for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
 
 	// appender setting
@@ -971,23 +976,23 @@ void l7vs::LoggerImpl::loadConf(){
 
 #if	defined(LOGGER_PROCESS_VSD)
 			if( cat_itr->first == LOG_CAT_L7VSD_NETWORK_ACCESS )
-				property = access_log_property;
+				property = &access_log_property;
 			else
-				property = normal_log_property;
+				property = &normal_log_property;
 #elif defined(LOGGER_PROCESS_ADM)
-			property = normal_log_property;
+			property = &normal_log_property;
 #elif defined(LOGGER_PROCESS_SNM)
-			property = normal_log_property;
+			property = &normal_log_property;
 #elif defined(LOGGER_PROCESS_SSL)
 			if( cat_itr->first == LOG_CAT_SSLPROXY_CONNECTION )
-				property = access_log_property;
+				property = &access_log_property;
 			else
-				property = normal_log_property;
+				property = &normal_log_property;
 #else
-			property = normal_log_property;
+			property = &normal_log_property;
 #endif
 
-			switch (property.rotation_value) {
+			switch (property->rotation_value) {
 			case LOG_ROT_SIZE:
 				{
 					// create FixedWindcd owRollingPolicy
@@ -998,11 +1003,11 @@ void l7vs::LoggerImpl::loadConf(){
 					fixedRollingPolicy->setMinIndex(1);
 		
 					// setting maxIndex
-					fixedRollingPolicy->setMaxIndex(property.max_backup_index_value);
+					fixedRollingPolicy->setMaxIndex(property->max_backup_index_value);
 	
 					// setting FileNamePattern
 					std::ostringstream sizeFile;
-					sizeFile << property.log_filename_value << "." << LOGGER_FILE_PATTERN;
+					sizeFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
 					fixedRollingPolicy->setFileNamePattern(sizeFile.str());
 		
 					// create SizeBasedTriggeringPolicy
@@ -1010,7 +1015,7 @@ void l7vs::LoggerImpl::loadConf(){
 						new log4cxx::rolling::SizeBasedTriggeringPolicy();
 	
 					// setting maxFileSize
-					sizeTriggeringPolicy->setMaxFileSize(property.max_file_size_value);
+					sizeTriggeringPolicy->setMaxFileSize(property->max_file_size_value);
 		
 					// create RollingFileAppender
 					log4cxx::rolling::RollingFileAppenderPtr sizeAppender =
@@ -1026,7 +1031,7 @@ void l7vs::LoggerImpl::loadConf(){
 					sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
 	
 					// set Log Filename
-					sizeAppender->setFile(property.log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 		
 					// activate appender options
 					sizeAppender->activateOptions(pool);
@@ -1046,18 +1051,18 @@ void l7vs::LoggerImpl::loadConf(){
 					strictRollingPolicy->setMinIndex(1);
 		
 					// setting maxIndex
-					strictRollingPolicy->setMaxIndex(property.max_backup_index_value);
+					strictRollingPolicy->setMaxIndex(property->max_backup_index_value);
 	
 					// setting FileNamePattern
 					std::ostringstream dateFile;
-					dateFile << property.log_filename_value << "." << LOGGER_FILE_PATTERN;
+					dateFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
 					strictRollingPolicy->setFileNamePattern(dateFile.str());
 	
 					// setting Rotation Timing
-					strictRollingPolicy->setRotationTiming(property.rotation_timing_value);
+					strictRollingPolicy->setRotationTiming(property->rotation_timing_value);
 		
 					// setting Rotation Timing Value
-					strictRollingPolicy->setRotationTimingValue(property.rotation_timing_value_value);
+					strictRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
 		
 					//create RollingFileAppender
 					log4cxx::rolling::RollingFileAppenderPtr dateAppender =
@@ -1070,7 +1075,7 @@ void l7vs::LoggerImpl::loadConf(){
 					dateAppender->setRollingPolicy(strictRollingPolicy);
 		
 					// set Log Filename
-					dateAppender->setFile(property.log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 		
 					// activate appender options
 					dateAppender->activateOptions(pool);
@@ -1090,21 +1095,21 @@ void l7vs::LoggerImpl::loadConf(){
 					timeSizeRollingPolicy->setMinIndex(1);
 		
 					// setting maxIndex
-					timeSizeRollingPolicy->setMaxIndex(property.max_backup_index_value);
+					timeSizeRollingPolicy->setMaxIndex(property->max_backup_index_value);
 	
 					// setting FileNamePattern
 					std::ostringstream dateSizeFile;
-					dateSizeFile << property.log_filename_value << "." << LOGGER_FILE_PATTERN;
+					dateSizeFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
 					timeSizeRollingPolicy->setFileNamePattern(dateSizeFile.str());
 		
 					// setting Rotation Timing
-					timeSizeRollingPolicy->setRotationTiming(property.rotation_timing_value);
+					timeSizeRollingPolicy->setRotationTiming(property->rotation_timing_value);
 		
 					// setting Rotation Timing Value
-					timeSizeRollingPolicy->setRotationTimingValue(property.rotation_timing_value_value);
+					timeSizeRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
 		
 					// setting MaxFileSize
-					timeSizeRollingPolicy->setMaxFileSize(property.max_file_size_value);
+					timeSizeRollingPolicy->setMaxFileSize(property->max_file_size_value);
 		
 					// create Rolling FileAppender
 					log4cxx::rolling::RollingFileAppenderPtr dateSizeAppender =
@@ -1117,7 +1122,7 @@ void l7vs::LoggerImpl::loadConf(){
 					dateSizeAppender->setRollingPolicy(timeSizeRollingPolicy);
 		
 					// set Log Filename
-					dateSizeAppender->setFile(property.log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 		
 					// activate appender options
 					dateSizeAppender->activateOptions(pool);
@@ -1169,7 +1174,7 @@ void l7vs::LoggerImpl::loadConf(){
 					}
 					cat_itr->second = LOG_LV_INFO;
 				}
-				cat_logger->setLevel(levelTable[cat_itr->second]);
+				cat_logger->setLevel( levelTable[cat_itr->second] );
 			}
 			else {
 				std::ostringstream oss;
@@ -1178,7 +1183,7 @@ void l7vs::LoggerImpl::loadConf(){
 					this->putLogWarn(log_category,3, oss.str(), __FILE__, __LINE__);
 				}
 				cat_itr->second = LOG_LV_INFO;
-				cat_logger->setLevel(levelTable[cat_itr->second]);
+				cat_logger->setLevel( levelTable[cat_itr->second] );
 			}
 		}	//for
 	}
