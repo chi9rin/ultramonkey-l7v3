@@ -1,6 +1,6 @@
 #define	TEST_CASE
 
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "logger_enum.h"
 #include "logger_stub.h"

@@ -11,6 +11,7 @@
 #ifndef	COMMAND_RECEIVER_H
 #define	COMMAND_RECEIVER_H
 
+#include <boost/asio.hpp>
 #include <boost/utility.hpp>
 #include "command_session.h"
 #include "l7vsd.h"

@@ -1,9 +1,9 @@
 #
 #
-#	Makefile for l7vsd unit test frameworks.
+#	Makefile for command_receiver unit test frameworks.
 #
 #
-TARGET		= l7vsd_ut
+TARGET		= command_receiver_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -pthread
 INCLUDES	=	-I../../logger \
@@ -16,7 +16,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
-			l7vsd_test.cpp
+			command_receiver_test.cpp
 
 .SUFFIX:	.cpp .o
 .cpp.o:

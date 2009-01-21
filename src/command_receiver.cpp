@@ -18,13 +18,13 @@ namespace	l7vs{
 //!	@param[in]	l7vsd refernce
 command_receiver::command_receiver( boost::asio::io_service& io_service, const std::string& file, l7vsd& parent )
 		:	dispatcher( io_service ),
-			acceptor( io_service, boost::asio::local::stream_protocol::endpoint( file ) ),
+			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) ),
 			vsd( parent ){
 
 }
 
 //!	@brief		destructor
-~command_receiver(){
+command_receiver::~command_receiver(){
 }
 
 //!	@brief		accept handler
