@@ -8,44 +8,44 @@ using namespace boost::unit_test;
 
 //test case1.
 void	realserver_test(){
-	// unit_test[1]  $B%3%s%9%H%i%/%?$N%F%9%H(B
+	// unit_test[1]  コンストラクタのテスト
 	l7vs::realserver	server1;
-	// unit_test[2]  $B%3%T!<%3%s%9%H%i%/%?$N%F%9%H(B
+	// unit_test[2]  コピーコンストラクタのテスト
 	l7vs::realserver	server2( server1 );
 
-	// unit_test[3]  $BHf3S%*%Z%l!<%?$N%F%9%H(B
+	// unit_test[3]  比較オペレータのテスト
 	BOOST_CHECK( server1 == server2 );
 
-	// unit_test[4]  $BH]Dj%*%Z%l!<%?$N%F%9%H(B
+	// unit_test[4]  否定オペレータのテスト
 	server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.87" ), 22 ) ;
 
 	BOOST_CHECK( server1 != server2 );
 
-	// unit_test[5]  $B%3%T!<%*%Z%l!<%?$N%F%9%H(B
+	// unit_test[5]  コピーオペレータのテスト
 	server2 = server1 ;
 
 	BOOST_CHECK( server1 == server2 );
 
-	// unit_test[6]  $BBg>.Hf3S%*%Z%l!<%?$N%F%9%H(B
+	// unit_test[6]  大小比較オペレータのテスト
 	server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.86" ), 21 ) ;
 
 	BOOST_CHECK( server1 < server2 );
 
-	// unit_test[7]  $B@\B3?t<hF@%a%=%C%I$N%F%9%H(B
+	// unit_test[7]  接続数取得メソッドのテスト
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
-	// unit_test[8]  $B@ZCG?t<hF@%a%=%C%I$N%F%9%H(B
+	// unit_test[8]  切断数取得メソッドのテスト
 	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
 
-	// unit_test[9]  $B@\B3?t%$%s%/%j%a%s%H%a%=%C%I$N%F%9%H(B
+	// unit_test[9]  接続数インクリメントメソッドのテスト
 	server1.increment_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 1 );
 
-	// unit_test[10]  $B@\B3?t%G%/%j%a%s%H%a%=%C%I$N%F%9%H(B
+	// unit_test[10]  接続数デクリメントメソッドのテスト
 	server1.decrement_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
-	// unit_test[11]  $B@ZCG?t%$%s%/%j%a%s%H%a%=%C%I$N%F%9%H(B
+	// unit_test[11]  切断数インクリメントメソッドのテスト
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 }
