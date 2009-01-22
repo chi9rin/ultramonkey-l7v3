@@ -11,7 +11,7 @@
 #ifndef	SCHEDULE_MODULE_LC_H
 #define	SCHEDULE_MODULE_LC_H
 
-#include "schedule_module_lc.h"
+#include "schedule_module_base.h"
 
 namespace l7vs{
 
