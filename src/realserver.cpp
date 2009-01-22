@@ -15,19 +15,25 @@ namespace l7vs{
 void	realserver::increment_active(){
 	boost::mutex::scoped_lock( active_mutex );
 
-	nactive++;
+	if ( nactive < INT_MAX ){
+		nactive++;
+	}
 }
 
 void	realserver::decrement_active(){
 	boost::mutex::scoped_lock( active_mutex );
 
-	nactive--;
+	if ( nactive > 0 ){
+		nactive--;
+	}
 }
 
 void	realserver::increment_inact(){
 	boost::mutex::scoped_lock( inact_mutex );
 
-	ninact++;
+	if ( ninact < INT_MAX ){
+		ninact++;
+	}
 }
 
 int		realserver::get_active(){
