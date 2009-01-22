@@ -49,7 +49,9 @@ public:
 	//! @brief	event tag is return to session.
 	enum	EVENT_TAG{
 		//use in upstream_thread
-		CLIENT_RECV = 0,			//!< Receive from Client
+		INITIALIZE = 0,				//!< Do Initialize
+		ACCEPT,						//!< Accept to Client
+		CLIENT_RECV,				//!< Receive from Client
 		REALSERVER_SELECT,			//!< Select RealServer
 		REALSERVER_CONNECT,			//!< Connect to RealServer
 		REALSERVER_SEND,			//!< Send message to RealServer
@@ -165,7 +167,7 @@ public:
 	//! @param[in]	downstream thread id
 	//! @return		session use EVENT mode.
 	virtual	EVENT_TAG	handle_session_initialize(
-									const boost::thread::id upthread_id,
+									const boost::thread::id up_thread_id,
 									const boost::thread::id down_thread_id ) = 0;
 
 	//! called from session finalize use in upstream thread.
@@ -343,12 +345,12 @@ public:
 	//! call from sorry mode event. use upstream thread and downstream thread
 	//! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )	
 	//! @return 	session use EVENT mode
-	virtual	EVENT_TAG	handle_sorry_enable( const boost::thread::id upthread_id ) = 0;
+	virtual	EVENT_TAG	handle_sorry_enable( const boost::thread::id thread_id ) = 0;
 
 	//! call from sorry mode disable. use upstream thread and downstream thread.
 	//! @param[in]	upstream and downstream thread id( check! one thread one event )
 	//! @return 	session use EVENT mode
-	virtual	EVENT_TAG	handle_sorry_disable( const boost::thread::id upthread_id ) = 0;
+	virtual	EVENT_TAG	handle_sorry_disable( const boost::thread::id thread_id ) = 0;
 
 	//! call from realserver disconnect. use upstream thread and downstream thread
 	//! @param[in]	upstream and downstream thread id( check! one thread one event )
