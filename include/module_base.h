@@ -101,8 +101,8 @@ public:
 	void	init_replication_functions(
 							replicationpaymemory_func_type  inreplication_pay_memory,
 							boost::function< void( void ) > inlock_func,
-							boost::function< void( void ) > inunlock_func
-							const boost::asio::ip::tcp::endpoint& invirtual_service_endpoint_tcp
+							boost::function< void( void ) > inunlock_func,
+							const boost::asio::ip::tcp::endpoint& invirtual_service_endpoint_tcp,
 							const boost::asio::ip::udp::endpoint& invirtual_service_endpoint_udp ){
 		replication_pay_memory = inreplication_pay_memory;
 		replication_area_lock = inlock_func;
