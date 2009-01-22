@@ -6,7 +6,7 @@ MAX_BUFFER_SIZE		= @l7vs_max_buffer_size@
 PARAMETER_FILE		= @l7vs_config@
 L7VS_SBINDIR		= @sbindir@
 
-l7vsd_CFLAGS		= \
+l7vsd_CPPFLAGS		= \
 			-O2 -g -Wall -Werror \
 			-I../include \
 			-I../logger \
@@ -51,7 +51,7 @@ l7vsd_LDADD	= \
 			-lboost_thread-gcc41-mt \
 			-lboost_system-gcc41-mt
 
-l7vsadm_CFLAGS	= \
+l7vsadm_CPPFLAGS	= \
 			-O2 -g -Wall -Werror \
 			-I../include \
 			-I../logger \

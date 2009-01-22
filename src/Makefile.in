@@ -49,12 +49,13 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
-am_l7vsadm_OBJECTS = protocol_module_control.$(OBJEXT) \
-	l7vsadm.$(OBJEXT)
+am_l7vsadm_OBJECTS = l7vsadm-protocol_module_control.$(OBJEXT) \
+	l7vsadm-l7vsadm.$(OBJEXT)
 l7vsadm_OBJECTS = $(am_l7vsadm_OBJECTS)
 l7vsadm_DEPENDENCIES = ../logger/libl7vsadm_logger.a \
 	../parameter/libl7vsadm_parameter.a
-am_l7vsd_OBJECTS = l7vsd.$(OBJEXT) protocol_module_control.$(OBJEXT) \
+am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
+	l7vsd-protocol_module_control.$(OBJEXT) \
 	l7vsd-snmpbridge.$(OBJEXT)
 l7vsd_OBJECTS = $(am_l7vsd_OBJECTS)
 l7vsd_DEPENDENCIES = ../logger/libl7vsd_logger.a \
@@ -192,7 +193,7 @@ CONFIG_SOCK_PATH = @l7vsadm_sockdir@
 MAX_BUFFER_SIZE = @l7vs_max_buffer_size@
 PARAMETER_FILE = @l7vs_config@
 L7VS_SBINDIR = @sbindir@
-l7vsd_CFLAGS = \
+l7vsd_CPPFLAGS = \
 			-O2 -g -Wall -Werror \
 			-I../include \
 			-I../logger \
@@ -237,7 +238,7 @@ l7vsd_LDADD = \
 			-lboost_thread-gcc41-mt \
 			-lboost_system-gcc41-mt
 
-l7vsadm_CFLAGS = \
+l7vsadm_CPPFLAGS = \
 			-O2 -g -Wall -Werror \
 			-I../include \
 			-I../logger \
@@ -338,10 +339,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-l7vsadm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-protocol_module_control.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-l7vsd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-protocol_module_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-snmpbridge.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_module_control.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -365,18 +367,18 @@ distclean-compile:
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 l7vsd-snmpbridge.o: snmpbridge.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(l7vsd_CFLAGS) $(CFLAGS) -MT l7vsd-snmpbridge.o -MD -MP -MF "$(DEPDIR)/l7vsd-snmpbridge.Tpo" -c -o l7vsd-snmpbridge.o `test -f 'snmpbridge.c' || echo '$(srcdir)/'`snmpbridge.c; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT l7vsd-snmpbridge.o -MD -MP -MF "$(DEPDIR)/l7vsd-snmpbridge.Tpo" -c -o l7vsd-snmpbridge.o `test -f 'snmpbridge.c' || echo '$(srcdir)/'`snmpbridge.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/l7vsd-snmpbridge.Tpo" "$(DEPDIR)/l7vsd-snmpbridge.Po"; else rm -f "$(DEPDIR)/l7vsd-snmpbridge.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='snmpbridge.c' object='l7vsd-snmpbridge.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(l7vsd_CFLAGS) $(CFLAGS) -c -o l7vsd-snmpbridge.o `test -f 'snmpbridge.c' || echo '$(srcdir)/'`snmpbridge.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o l7vsd-snmpbridge.o `test -f 'snmpbridge.c' || echo '$(srcdir)/'`snmpbridge.c
 
 l7vsd-snmpbridge.obj: snmpbridge.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(l7vsd_CFLAGS) $(CFLAGS) -MT l7vsd-snmpbridge.obj -MD -MP -MF "$(DEPDIR)/l7vsd-snmpbridge.Tpo" -c -o l7vsd-snmpbridge.obj `if test -f 'snmpbridge.c'; then $(CYGPATH_W) 'snmpbridge.c'; else $(CYGPATH_W) '$(srcdir)/snmpbridge.c'; fi`; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT l7vsd-snmpbridge.obj -MD -MP -MF "$(DEPDIR)/l7vsd-snmpbridge.Tpo" -c -o l7vsd-snmpbridge.obj `if test -f 'snmpbridge.c'; then $(CYGPATH_W) 'snmpbridge.c'; else $(CYGPATH_W) '$(srcdir)/snmpbridge.c'; fi`; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/l7vsd-snmpbridge.Tpo" "$(DEPDIR)/l7vsd-snmpbridge.Po"; else rm -f "$(DEPDIR)/l7vsd-snmpbridge.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='snmpbridge.c' object='l7vsd-snmpbridge.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(l7vsd_CFLAGS) $(CFLAGS) -c -o l7vsd-snmpbridge.obj `if test -f 'snmpbridge.c'; then $(CYGPATH_W) 'snmpbridge.c'; else $(CYGPATH_W) '$(srcdir)/snmpbridge.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o l7vsd-snmpbridge.obj `if test -f 'snmpbridge.c'; then $(CYGPATH_W) 'snmpbridge.c'; else $(CYGPATH_W) '$(srcdir)/snmpbridge.c'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -398,6 +400,62 @@ l7vsd-snmpbridge.obj: snmpbridge.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+l7vsadm-protocol_module_control.o: protocol_module_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-protocol_module_control.o -MD -MP -MF "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo" -c -o l7vsadm-protocol_module_control.o `test -f 'protocol_module_control.cpp' || echo '$(srcdir)/'`protocol_module_control.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo" "$(DEPDIR)/l7vsadm-protocol_module_control.Po"; else rm -f "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocol_module_control.cpp' object='l7vsadm-protocol_module_control.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-protocol_module_control.o `test -f 'protocol_module_control.cpp' || echo '$(srcdir)/'`protocol_module_control.cpp
+
+l7vsadm-protocol_module_control.obj: protocol_module_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-protocol_module_control.obj -MD -MP -MF "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo" -c -o l7vsadm-protocol_module_control.obj `if test -f 'protocol_module_control.cpp'; then $(CYGPATH_W) 'protocol_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/protocol_module_control.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo" "$(DEPDIR)/l7vsadm-protocol_module_control.Po"; else rm -f "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocol_module_control.cpp' object='l7vsadm-protocol_module_control.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-protocol_module_control.obj `if test -f 'protocol_module_control.cpp'; then $(CYGPATH_W) 'protocol_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/protocol_module_control.cpp'; fi`
+
+l7vsadm-l7vsadm.o: l7vsadm.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-l7vsadm.o -MD -MP -MF "$(DEPDIR)/l7vsadm-l7vsadm.Tpo" -c -o l7vsadm-l7vsadm.o `test -f 'l7vsadm.cpp' || echo '$(srcdir)/'`l7vsadm.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsadm-l7vsadm.Tpo" "$(DEPDIR)/l7vsadm-l7vsadm.Po"; else rm -f "$(DEPDIR)/l7vsadm-l7vsadm.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7vsadm.cpp' object='l7vsadm-l7vsadm.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-l7vsadm.o `test -f 'l7vsadm.cpp' || echo '$(srcdir)/'`l7vsadm.cpp
+
+l7vsadm-l7vsadm.obj: l7vsadm.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-l7vsadm.obj -MD -MP -MF "$(DEPDIR)/l7vsadm-l7vsadm.Tpo" -c -o l7vsadm-l7vsadm.obj `if test -f 'l7vsadm.cpp'; then $(CYGPATH_W) 'l7vsadm.cpp'; else $(CYGPATH_W) '$(srcdir)/l7vsadm.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsadm-l7vsadm.Tpo" "$(DEPDIR)/l7vsadm-l7vsadm.Po"; else rm -f "$(DEPDIR)/l7vsadm-l7vsadm.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7vsadm.cpp' object='l7vsadm-l7vsadm.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-l7vsadm.obj `if test -f 'l7vsadm.cpp'; then $(CYGPATH_W) 'l7vsadm.cpp'; else $(CYGPATH_W) '$(srcdir)/l7vsadm.cpp'; fi`
+
+l7vsd-l7vsd.o: l7vsd.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-l7vsd.o -MD -MP -MF "$(DEPDIR)/l7vsd-l7vsd.Tpo" -c -o l7vsd-l7vsd.o `test -f 'l7vsd.cpp' || echo '$(srcdir)/'`l7vsd.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-l7vsd.Tpo" "$(DEPDIR)/l7vsd-l7vsd.Po"; else rm -f "$(DEPDIR)/l7vsd-l7vsd.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7vsd.cpp' object='l7vsd-l7vsd.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-l7vsd.o `test -f 'l7vsd.cpp' || echo '$(srcdir)/'`l7vsd.cpp
+
+l7vsd-l7vsd.obj: l7vsd.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-l7vsd.obj -MD -MP -MF "$(DEPDIR)/l7vsd-l7vsd.Tpo" -c -o l7vsd-l7vsd.obj `if test -f 'l7vsd.cpp'; then $(CYGPATH_W) 'l7vsd.cpp'; else $(CYGPATH_W) '$(srcdir)/l7vsd.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-l7vsd.Tpo" "$(DEPDIR)/l7vsd-l7vsd.Po"; else rm -f "$(DEPDIR)/l7vsd-l7vsd.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7vsd.cpp' object='l7vsd-l7vsd.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-l7vsd.obj `if test -f 'l7vsd.cpp'; then $(CYGPATH_W) 'l7vsd.cpp'; else $(CYGPATH_W) '$(srcdir)/l7vsd.cpp'; fi`
+
+l7vsd-protocol_module_control.o: protocol_module_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-protocol_module_control.o -MD -MP -MF "$(DEPDIR)/l7vsd-protocol_module_control.Tpo" -c -o l7vsd-protocol_module_control.o `test -f 'protocol_module_control.cpp' || echo '$(srcdir)/'`protocol_module_control.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-protocol_module_control.Tpo" "$(DEPDIR)/l7vsd-protocol_module_control.Po"; else rm -f "$(DEPDIR)/l7vsd-protocol_module_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocol_module_control.cpp' object='l7vsd-protocol_module_control.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-protocol_module_control.o `test -f 'protocol_module_control.cpp' || echo '$(srcdir)/'`protocol_module_control.cpp
+
+l7vsd-protocol_module_control.obj: protocol_module_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-protocol_module_control.obj -MD -MP -MF "$(DEPDIR)/l7vsd-protocol_module_control.Tpo" -c -o l7vsd-protocol_module_control.obj `if test -f 'protocol_module_control.cpp'; then $(CYGPATH_W) 'protocol_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/protocol_module_control.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-protocol_module_control.Tpo" "$(DEPDIR)/l7vsd-protocol_module_control.Po"; else rm -f "$(DEPDIR)/l7vsd-protocol_module_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocol_module_control.cpp' object='l7vsd-protocol_module_control.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-protocol_module_control.obj `if test -f 'protocol_module_control.cpp'; then $(CYGPATH_W) 'protocol_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/protocol_module_control.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
