@@ -19,6 +19,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include "error_code.h"
 #include "session_thread_control.h"
 #include "tcp_session.h"
 #include "udp_session.h"
@@ -40,20 +41,6 @@ namespace l7vs{
 class	virtualservice_base : boost::noncopyable{
 public:
 	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;
-	struct	vs_operation_result{
-		bool			flag;
-		std::string		message;
-		vs_operation_result() : flag(true), message(""){}
-		bool	operator==( const vs_operation_result& in )
-					{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
-		bool	operator!=( const vs_operation_result& in )
-					{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
-		bool	operator!() const
-					{ return !flag; }
-		typedef void (*unspecified_bool_type)();
-		static void unspecified_bool_true() {}
-		operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; }
-	};
 protected:
 	struct	vs_replication_header{
 		unsigned long long	udpmode;
@@ -116,13 +103,13 @@ protected:
 
 	void						handle_throughput_update( const boost::system::error_code& );
 public:
-	virtualservice_base(	const l7vs::l7vsd& invsd,
-							const l7vs::replication& inrep,
-							const virtualservice_element& inelement);
+	virtualservice_base(	const l7vs::l7vsd&,
+							const l7vs::replication&,
+							const virtualservice_element& );
 	virtual	~virtualservice_base(){};
 
-	virtual	vs_operation_result	initialize() = 0;
-	virtual	vs_operation_result	finalize() = 0;
+	virtual	void	initialize( error_code& ) = 0;
+	virtual	void	finalize( error_code& ) = 0;
 
 	virtual	bool				operator==( const virtualservice_base& ) = 0;
 	virtual	bool				operator!=( const virtualservice_base& ) = 0;
@@ -130,12 +117,12 @@ public:
 	void						rs_list_lock();
 	void						rs_list_unlock();
 
-	virtual	vs_operation_result	set_virtualservice( const virtualservice_element& ) = 0;
-	virtual	vs_operation_result	edit_virtualserivce( const virtualservice_element& ) = 0;
+	virtual	void				set_virtualservice( const virtualservice_element&, error_code& ) = 0;
+	virtual	void				edit_virtualserivce( const virtualservice_element&, error_code& ) = 0;
 
-	virtual	vs_operation_result	add_realserver( const virtualservice_element& ) = 0;
-	virtual	vs_operation_result	edit_realserver( const virtualservice_element& ) = 0;
-	virtual	vs_operation_result	del_realserver( const virtualservice_element& ) = 0;
+	virtual	void				add_realserver( const virtualservice_element&, error_code& ) = 0;
+	virtual	void				edit_realserver( const virtualservice_element&, error_code& ) = 0;
+	virtual	void				del_realserver( const virtualservice_element&, error_code& ) = 0;
 
 	virtualservice_element&		get_element(){ return element; }
 
@@ -144,17 +131,17 @@ public:
 
 	virtual	void				connection_active( const boost::asio::ip::tcp::endpoint& ) = 0;
 	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& ) = 0;
-	virtual	void				release_session( const boost::thread::id thread_id ) = 0;
+	virtual	void				release_session( const boost::thread::id ) = 0;
 
 	unsigned long long			get_qos_upstream();
 	unsigned long long			get_qos_downstream();
 	unsigned long long			get_throughput_upstream();
 	unsigned long long			get_throughput_downstream();
 
-	void						update_up_recv_size( unsigned long long	datasize );
-	void						update_up_send_size( unsigned long long	datasize );
-	void						update_down_recv_size( unsigned long long	datasize );
-	void						update_down_send_size( unsigned long long	datasize );
+	void						update_up_recv_size( unsigned long long );
+	void						update_up_send_size( unsigned long long );
+	void						update_down_recv_size( unsigned long long );
+	void						update_down_send_size( unsigned long long );
 	
 	boost::shared_ptr<protocol_module_base>
 								get_protocol_module();
@@ -180,37 +167,30 @@ protected:
 												const boost::system::error_code& );
 
 public:
-	virtualservice_tcp(		const l7vs::l7vsd& invsd,
-							const l7vs::replication& inrep,
-							const virtualservice_element& inelement);
+	virtualservice_tcp(		const l7vs::l7vsd&,
+							const l7vs::replication&,
+							const virtualservice_element& );
 	~virtualservice_tcp();
 
-	virtualservice_base::vs_operation_result
-								initialize();
-	virtualservice_base::vs_operation_result
-								finalize();
+	void						initialize( error_code& );
+	void						finalize( error_code& );
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
 
-	virtualservice_base::vs_operation_result
-								set_virtualservice( const virtualservice_element& );
-	virtualservice_base::vs_operation_result
-								edit_virtualserivce( const virtualservice_element& );
+	void						set_virtualservice( const virtualservice_element&, error_code& );
+	void						edit_virtualserivce( const virtualservice_element&, error_code& );
 
-	virtualservice_base::vs_operation_result
-								add_realserver( const virtualservice_element& );
-	virtualservice_base::vs_operation_result
-								edit_realserver( const virtualservice_element& );
-	virtualservice_base::vs_operation_result
-								del_realserver( const virtualservice_element& );
+	void						add_realserver( const virtualservice_element&, error_code& );
+	void						edit_realserver( const virtualservice_element&, error_code& );
+	void						del_realserver( const virtualservice_element&, error_code& );
 
 	void						run();
 	void						stop();
 
 	void						connection_active( const boost::asio::ip::tcp::endpoint& );
 	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
-	void						release_session( const boost::thread::id thread_id );
+	void						release_session( const boost::thread::id );
 };
 
 class	virtualservice_udp : public virtualservice_base{
@@ -221,87 +201,73 @@ protected:
 	bool						read_replicationdata( vs_replication_data& );
 
 public:
-	virtualservice_udp(		const l7vs::l7vsd& invsd,
-							const l7vs::replication& inrep,
-							const virtualservice_element& inelement);
+	virtualservice_udp(		const l7vs::l7vsd&,
+							const l7vs::replication&,
+							const virtualservice_element& );
 	~virtualservice_udp();
 
 
-	virtualservice_base::vs_operation_result
-								initialize();
-	virtualservice_base::vs_operation_result
-								finalize();
+	void						initialize( error_code& );
+	void						finalize( error_code& );
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
 
-	virtualservice_base::vs_operation_result
-								set_virtualservice( const virtualservice_element& );
-	virtualservice_base::vs_operation_result
-								edit_virtualserivce( const virtualservice_element& );
+	void						set_virtualservice( const virtualservice_element&, error_code& );
+	void						edit_virtualserivce( const virtualservice_element&, error_code& );
 
-	virtualservice_base::vs_operation_result
-								add_realserver( const virtualservice_element& );
-	virtualservice_base::vs_operation_result
-								edit_realserver( const virtualservice_element& );
-	virtualservice_base::vs_operation_result
-								del_realserver( const virtualservice_element& );
+	void						add_realserver( const virtualservice_element&, error_code& );
+	void						edit_realserver( const virtualservice_element&, error_code& );
+	void						del_realserver( const virtualservice_element&, error_code& );
 
 	void						run();
 	void						stop();
 
 	void						connection_active( const boost::asio::ip::tcp::endpoint& );
 	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
-	void						release_session( const boost::thread::id thread_id );
+	void						release_session( const boost::thread::id );
 };
 
 class	virtual_service{
 protected:
 	boost::shared_ptr<virtualservice_base>	vs;
 public:
-	virtual_service(	const l7vs::l7vsd& invsd,
-						const l7vs::replication& inrep,
-						const virtualservice_element& inelement );
+	virtual_service(	const l7vs::l7vsd& ,
+						const l7vs::replication& ,
+						const virtualservice_element& );
 	~virtual_service();
 	
-	virtualservice_base::vs_operation_result
-								initialize();
-	virtualservice_base::vs_operation_result
-								finalize();
+	void						initialize( error_code& );
+	void						finalize( error_code& );
 
-	bool						operator==( const virtualservice_base& in );
-	bool						operator!=( const virtualservice_base& in );
+	bool						operator==( const virtualservice_base& );
+	bool						operator!=( const virtualservice_base& );
 
-	virtualservice_base::vs_operation_result
-								set_virtualservice( const virtualservice_element& in );
-	virtualservice_base::vs_operation_result
-								edit_virtualservice( const virtualservice_element& in );
+	void						set_virtualservice( const virtualservice_element& , error_code& );
+	void						edit_virtualserivce( const virtualservice_element& , error_code& );
 
-	virtualservice_base::vs_operation_result
-								add_realserver( const virtualservice_element& in );
-	virtualservice_base::vs_operation_result
-								edit_realserver( const virtualservice_element& in );
-	virtualservice_base::vs_operation_result
-								del_realserver( const virtualservice_element& in );
+	void						add_realserver( const virtualservice_element& , error_code& );
+	void						edit_realserver( const virtualservice_element& , error_code& );
+	void						del_realserver( const virtualservice_element& , error_code& );
 
 	virtualservice_element&		get_element();
 
 	void						run();
 	void						stop();
 
-	void		connection_active( const boost::asio::ip::tcp::endpoint& in );
-	void		connection_inactive( const boost::asio::ip::tcp::endpoint& in );
-	void		release_session( const boost::thread::id thread_id );
+	void		connection_active( const boost::asio::ip::tcp::endpoint&  );
+	void		connection_inactive( const boost::asio::ip::tcp::endpoint&  );
+	void		release_session( const boost::thread::id );
 
 	unsigned long long			get_qos_upstream();
 	unsigned long long			get_qos_downstream();
 	unsigned long long			get_throughput_upstream();
 	unsigned long long			get_throughput_downstream();
 
-	void						update_up_recv_size( unsigned long long	datasize );
-	void						update_up_send_size( unsigned long long	datasize );
-	void						update_down_recv_size( unsigned long long	datasize );
-	void						update_down_send_size( unsigned long long	datasize );
+	void						update_up_recv_size( unsigned long long );
+	void						update_up_send_size( unsigned long long );
+	void						update_down_recv_size( unsigned long long );
+	void						update_down_send_size( unsigned long long );
 	
 	boost::shared_ptr<protocol_module_base>
 								get_protocol_module();

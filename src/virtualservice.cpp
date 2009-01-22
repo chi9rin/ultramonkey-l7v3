@@ -59,36 +59,31 @@ bool	virtualservice_tcp::read_replicationdata( vs_replication_data& out ){ retur
 void	virtualservice_tcp::handle_accept(	const session_thread_control_ptr in_session,
 											const boost::system::error_code& in_error ){}
 
-virtualservice_base::vs_operation_result		virtualservice_tcp::initialize(){
-	virtualservice_base::vs_operation_result ret; return ret;
+void	virtualservice_tcp::initialize( error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_tcp::finalize(){
-	virtualservice_base::vs_operation_result ret; return ret;
+void		virtualservice_tcp::finalize( error_code& err ){
+	err.setter( true, "" );
 }
 
 bool	virtualservice_tcp::operator==( const virtualservice_base& in ){ return true; }
 bool	virtualservice_tcp::operator!=( const virtualservice_base& in ){ return true; }
 
-virtualservice_base::vs_operation_result		virtualservice_tcp::set_virtualservice( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_tcp::set_virtualservice( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_tcp::edit_virtualserivce( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_tcp::edit_virtualserivce( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
 
-virtualservice_base::vs_operation_result		virtualservice_tcp::add_realserver( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_tcp::add_realserver( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_tcp::edit_realserver( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_tcp::edit_realserver( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_tcp::del_realserver( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_tcp::del_realserver( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
 
 void	virtualservice_tcp::run(){}
@@ -109,38 +104,31 @@ virtualservice_udp::~virtualservice_udp(){}
 void	virtualservice_udp::handle_replication_interrupt( const boost::system::error_code& in ){}
 bool	virtualservice_udp::read_replicationdata( vs_replication_data& out ){ return true; }
 
-virtualservice_base::vs_operation_result		virtualservice_udp::initialize(){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_udp::initialize( error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_udp::finalize(){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void		virtualservice_udp::finalize( error_code& err ){
+	err.setter( true, "" );
 }
 
 bool	virtualservice_udp::operator==( const virtualservice_base& in ){ return true; }
 bool	virtualservice_udp::operator!=( const virtualservice_base& in ){ return true; }
 
-virtualservice_base::vs_operation_result		virtualservice_udp::set_virtualservice( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_udp::set_virtualservice( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_udp::edit_virtualserivce( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_udp::edit_virtualserivce( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
 
-virtualservice_base::vs_operation_result		virtualservice_udp::add_realserver( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_udp::add_realserver( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_udp::edit_realserver( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_udp::edit_realserver( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
-virtualservice_base::vs_operation_result		virtualservice_udp::del_realserver( const virtualservice_element& in ){
-	virtualservice_base::vs_operation_result ret;
-	return ret;
+void	virtualservice_udp::del_realserver( const virtualservice_element& in, error_code& err ){
+	err.setter( true, "" );
 }
 
 void	virtualservice_udp::run(){}
@@ -164,27 +152,27 @@ virtual_service::virtual_service(	const l7vs::l7vsd& invsd,
 virtual_service::~virtual_service(){
 }
 	
-virtualservice_base::vs_operation_result		virtual_service::initialize(){ return vs->initialize(); }
-virtualservice_base::vs_operation_result		virtual_service::finalize(){ return vs->finalize(); }
+void	virtual_service::initialize( error_code& err ){ vs->initialize( err ); }
+void	virtual_service::finalize( error_code& err ){ vs->finalize( err ); }
 
-bool		virtual_service::operator==( const virtualservice_base& in ){ return vs->operator==( in ); }
-bool		virtual_service::operator!=( const virtualservice_base& in ){ return vs->operator!=( in ); }
+bool	virtual_service::operator==( const virtualservice_base& in ){ return vs->operator==( in ); }
+bool	virtual_service::operator!=( const virtualservice_base& in ){ return vs->operator!=( in ); }
 
-virtualservice_base::vs_operation_result		virtual_service::set_virtualservice( const virtualservice_element& in ){
-	vs->set_virtualservice( in );
+void	virtual_service::set_virtualservice( const virtualservice_element& in, error_code& err ){
+	vs->set_virtualservice( in, err );
 }
-virtualservice_base::vs_operation_result		virtual_service::edit_virtualservice( const virtualservice_element& in ){
-	vs->edit_virtualservice( in );
+void	virtual_service::edit_virtualserivce( const virtualservice_element& in, error_code& err ){
+	vs->edit_virtualserivce( in, err );
 }
 
-virtualservice_base::vs_operation_result		virtual_service::add_realserver( const virtualservice_element& in ){
-	vs->add_realserver( in );
+void	virtual_service::add_realserver( const virtualservice_element& in, error_code& err ){
+	vs->add_realserver( in, err );
 }
-virtualservice_base::vs_operation_result		virtual_service::edit_realserver( const virtualservice_element& in ){
-	vs->edit_realserver( in );
+void	virtual_service::edit_realserver( const virtualservice_element& in, error_code& err ){
+	vs->edit_realserver( in, err );
 }
-virtualservice_base::vs_operation_result		virtual_service::del_realserver( const virtualservice_element& in ){
-	vs->del_realserver( in );
+void	virtual_service::del_realserver( const virtualservice_element& in, error_code& err ){
+	vs->del_realserver( in, err );
 }
 
 virtualservice_element&	virtual_service::get_element(){ return vs->get_element(); }
