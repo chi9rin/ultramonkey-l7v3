@@ -17,11 +17,11 @@ namespace l7vs{
 //! @brief	this class is POD
 class	error_code{
 protected:
-	bool		flag;	//!<	errorcode_flag
-	std::string	msg;
+	bool		flag;	//!<	errorcode flag
+	std::string	msg;	//!<	errorcode message
 public:
 	error_code() : flag(false){}	//!< constractor
-	//! copy constractor
+	//! setter constractor
 	//! @param[in]	flags
 	//! @param[in]	error message
 	error_code( const bool inflg, const std::string& instr ){
