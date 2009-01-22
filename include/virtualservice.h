@@ -1,6 +1,6 @@
 //
-//	@file	virtualservice.h
-//	@brief	VirtualService interface class
+//!	@file	virtualservice.h
+//!	@brief	VirtualService interface class
 //
 //	copyright (c) sdy corporation. 2008
 //	mail: h dot okada at sdy dot co dot jp
@@ -19,59 +19,64 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-// #ifdef DEBUG
-// #include "stub.h"
-// #else
-// #include "l7vsd.h"
-// #include "replication.h"
-// #endif
-
-#include "realserver.h"
+#include "session_thread_control.h"
+#include "tcp_session.h"
+#include "udp_session.h"
 #include "virtualservice_element.h"
+
+//#include "stub.h"
+
+#include "l7vsd.h"
+#include "realserver.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
-#include "session_thread_control.h"
+#include "replication.h"
 
 #define	SESSION_POOL_NUM_DEFAULT	256
 
 namespace l7vs{
 
-struct	vs_operation_result{
-	bool			flag;
-	std::string		message;
-	vs_operation_result() : flag(true), message(""){}
-	bool	operator==( const vs_operation_result& in )
-				{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
-	bool	operator!=( const vs_operation_result& in )
-				{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
-};
-
-struct	vs_replication_header{
-	unsigned long long	udpmode;
-	unsigned char		address[16];
-	unsigned long long	port;
-	unsigned long long	bodytype;
-	unsigned long long	datasize;
-};
-
-struct	vs_replication_body{
-	unsigned long long	sorry_maxconnection;
-	unsigned char		sorry_address[16];
-	unsigned long long	sorry_port;
-	unsigned long long	sorry_flag;
-	unsigned long long	qos_up;
-	unsigned long long	qos_down;
-};
-
-struct	vs_replication_data{
-	vs_replication_header	header;
-	vs_replication_body		body;
-};
 
 class	virtualservice_base : boost::noncopyable{
 public:
 	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;
+	struct	vs_operation_result{
+		bool			flag;
+		std::string		message;
+		vs_operation_result() : flag(true), message(""){}
+		bool	operator==( const vs_operation_result& in )
+					{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
+		bool	operator!=( const vs_operation_result& in )
+					{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
+		bool	operator!() const
+					{ return !flag; }
+		typedef void (*unspecified_bool_type)();
+		static void unspecified_bool_true() {}
+		operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; }
+	};
 protected:
+	struct	vs_replication_header{
+		unsigned long long	udpmode;
+		unsigned char		address[16];
+		unsigned long long	port;
+		unsigned long long	bodytype;
+		unsigned long long	datasize;
+	};
+	
+	struct	vs_replication_body{
+		unsigned long long	sorry_maxconnection;
+		unsigned char		sorry_address[16];
+		unsigned long long	sorry_port;
+		unsigned long long	sorry_flag;
+		unsigned long long	qos_up;
+		unsigned long long	qos_down;
+	};
+	
+	struct	vs_replication_data{
+		vs_replication_header	header;
+		vs_replication_body		body;
+	};
+
 	const	l7vs::l7vsd&		vsd;
 	const	l7vs::replication&	rep;
 
@@ -125,8 +130,8 @@ public:
 	void						rs_list_lock();
 	void						rs_list_unlock();
 
-	virtual	vs_operation_result	set_virtualservce( const virtualservice_element& ) = 0;
-	virtual	vs_operation_result	edit_virtualservce( const virtualservice_element& ) = 0;
+	virtual	vs_operation_result	set_virtualservice( const virtualservice_element& ) = 0;
+	virtual	vs_operation_result	edit_virtualserivce( const virtualservice_element& ) = 0;
 
 	virtual	vs_operation_result	add_realserver( const virtualservice_element& ) = 0;
 	virtual	vs_operation_result	edit_realserver( const virtualservice_element& ) = 0;
@@ -180,18 +185,25 @@ public:
 							const virtualservice_element& inelement);
 	~virtualservice_tcp();
 
-	vs_operation_result			initialize();
-	vs_operation_result			finalize();
+	virtualservice_base::vs_operation_result
+								initialize();
+	virtualservice_base::vs_operation_result
+								finalize();
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
 
-	vs_operation_result			set_virtualservce( const virtualservice_element& );
-	vs_operation_result			edit_virtualservce( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								set_virtualservice( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								edit_virtualserivce( const virtualservice_element& );
 
-	vs_operation_result			add_realserver( const virtualservice_element& );
-	vs_operation_result			edit_realserver( const virtualservice_element& );
-	vs_operation_result			del_realserver( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								add_realserver( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								edit_realserver( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								del_realserver( const virtualservice_element& );
 
 	void						run();
 	void						stop();
@@ -215,18 +227,25 @@ public:
 	~virtualservice_udp();
 
 
-	vs_operation_result			initialize();
-	vs_operation_result			finalize();
+	virtualservice_base::vs_operation_result
+								initialize();
+	virtualservice_base::vs_operation_result
+								finalize();
 
 	bool						operator==( const virtualservice_base& );
 	bool						operator!=( const virtualservice_base& );
 
-	vs_operation_result			set_virtualservce( const virtualservice_element& );
-	vs_operation_result			edit_virtualservce( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								set_virtualservice( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								edit_virtualserivce( const virtualservice_element& );
 
-	vs_operation_result			add_realserver( const virtualservice_element& );
-	vs_operation_result			edit_realserver( const virtualservice_element& );
-	vs_operation_result			del_realserver( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								add_realserver( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								edit_realserver( const virtualservice_element& );
+	virtualservice_base::vs_operation_result
+								del_realserver( const virtualservice_element& );
 
 	void						run();
 	void						stop();
@@ -245,18 +264,25 @@ public:
 						const virtualservice_element& inelement );
 	~virtual_service();
 	
-	vs_operation_result			initialize();
-	vs_operation_result			finalize();
+	virtualservice_base::vs_operation_result
+								initialize();
+	virtualservice_base::vs_operation_result
+								finalize();
 
 	bool						operator==( const virtualservice_base& in );
 	bool						operator!=( const virtualservice_base& in );
 
-	vs_operation_result			set_virtualservce( virtualservice_element& in );
-	vs_operation_result			edit_virtualservce( virtualservice_element& in );
+	virtualservice_base::vs_operation_result
+								set_virtualservice( const virtualservice_element& in );
+	virtualservice_base::vs_operation_result
+								edit_virtualservice( const virtualservice_element& in );
 
-	vs_operation_result			add_realserver( virtualservice_element& in );
-	vs_operation_result			edit_realserver( virtualservice_element& in );
-	vs_operation_result			del_realserver( virtualservice_element& in );
+	virtualservice_base::vs_operation_result
+								add_realserver( const virtualservice_element& in );
+	virtualservice_base::vs_operation_result
+								edit_realserver( const virtualservice_element& in );
+	virtualservice_base::vs_operation_result
+								del_realserver( const virtualservice_element& in );
 
 	virtualservice_element&		get_element();
 
@@ -265,7 +291,7 @@ public:
 
 	void		connection_active( const boost::asio::ip::tcp::endpoint& in );
 	void		connection_inactive( const boost::asio::ip::tcp::endpoint& in );
-	void		release_session( boost::thread::id thread_id );
+	void		release_session( const boost::thread::id thread_id );
 
 	unsigned long long			get_qos_upstream();
 	unsigned long long			get_qos_downstream();

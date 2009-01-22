@@ -6,10 +6,12 @@
 TARGET		= stc_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535
-INCLUDES	=	-I../../logger \
+INCLUDES	=	\
+				-I./ \
+				-I../../logger \
 				-I../../parameter \
-				-I../../include \
-				-I../../src
+				-I../../src \
+				-I../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt
