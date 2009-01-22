@@ -74,8 +74,8 @@ void	list_virtual_service_test(){
 	l7vs::replication	rep(io);
 	l7vs::virtualservice_element	e;
 
-	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice( vsd_test, rep, e ) );
-	boost::shared_ptr< l7vs::virtualservice > vs2( new l7vs::virtualservice( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtual_service > vs1( new l7vs::virtual_service( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtual_service > vs2( new l7vs::virtual_service( vsd_test, rep, e ) );
 	vs1->element.protocol_module_name = "cinsert";
 	vs2->element.protocol_module_name = "url";
 
@@ -200,8 +200,8 @@ void	search_vslist_test(){
 	l7vs::replication	rep( io );
 	l7vs::virtualservice_element	e;
 
-	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice( vsd_test, rep, e ) );
-	boost::shared_ptr< l7vs::virtualservice > vs2( new l7vs::virtualservice( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtual_service > vs1( new l7vs::virtual_service( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtual_service > vs2( new l7vs::virtual_service( vsd_test, rep, e ) );
 
 	vs1->element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
 	vs2->element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
@@ -235,8 +235,8 @@ void	search_vslist_test(){
 	}
 
 	//udpmode
-	boost::shared_ptr< l7vs::virtualservice > vs3( new l7vs::virtualservice( vsd_test, rep, e ) );
-	boost::shared_ptr< l7vs::virtualservice > vs4( new l7vs::virtualservice( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtual_service > vs3( new l7vs::virtual_service( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtual_service > vs4( new l7vs::virtual_service( vsd_test, rep, e ) );
 
 	vs3->element.udpmode = true;
 	vs4->element.udpmode = true;
