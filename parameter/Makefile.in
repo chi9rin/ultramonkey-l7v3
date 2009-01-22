@@ -65,6 +65,13 @@ am_libsnmpagent_parameter_a_OBJECTS =  \
 	libsnmpagent_parameter_a-parameter_impl.$(OBJEXT)
 libsnmpagent_parameter_a_OBJECTS =  \
 	$(am_libsnmpagent_parameter_a_OBJECTS)
+libsslproxy_parameter_a_AR = $(AR) $(ARFLAGS)
+libsslproxy_parameter_a_LIBADD =
+am_libsslproxy_parameter_a_OBJECTS =  \
+	libsslproxy_parameter_a-parameter.$(OBJEXT) \
+	libsslproxy_parameter_a-parameter_impl.$(OBJEXT)
+libsslproxy_parameter_a_OBJECTS =  \
+	$(am_libsslproxy_parameter_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -79,10 +86,12 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libl7vsadm_parameter_a_SOURCES) \
 	$(libl7vsd_parameter_a_SOURCES) \
-	$(libsnmpagent_parameter_a_SOURCES)
+	$(libsnmpagent_parameter_a_SOURCES) \
+	$(libsslproxy_parameter_a_SOURCES)
 DIST_SOURCES = $(libl7vsadm_parameter_a_SOURCES) \
 	$(libl7vsd_parameter_a_SOURCES) \
-	$(libsnmpagent_parameter_a_SOURCES)
+	$(libsnmpagent_parameter_a_SOURCES) \
+	$(libsslproxy_parameter_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -166,7 +175,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-noinst_LIBRARIES = libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a
+noinst_LIBRARIES = libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a libsslproxy_parameter.a
 AUTOMAKE_OPTIONS = foreign
 libl7vsd_parameter_a_SOURCES = \
 				parameter_enum.h \
@@ -175,7 +184,7 @@ libl7vsd_parameter_a_SOURCES = \
 				parameter.cpp \
 				parameter_impl.cpp
 
-libl7vsd_parameter_a_CPPFLAGS = -O2 -g -I../../include -I../logger \
+libl7vsd_parameter_a_CPPFLAGS = -O2 -g -I../include -I../logger \
 				  -DLOGGER_PROCESS_VSD \
                                   -DVERSION=\"$(VERSION)\"
 
@@ -186,7 +195,7 @@ libl7vsadm_parameter_a_SOURCES = \
 				parameter.cpp \
 				parameter_impl.cpp
 
-libl7vsadm_parameter_a_CPPFLAGS = -O2 -g -I../../include -I../logger \
+libl7vsadm_parameter_a_CPPFLAGS = -O2 -g -I../include -I../logger \
 				  -DLOGGER_PROCESS_ADM \
 				  -DVERSION=\"$(VERSION)\"
 
@@ -197,9 +206,19 @@ libsnmpagent_parameter_a_SOURCES = \
 				parameter.cpp \
 				parameter_impl.cpp
 
-libsnmpagent_parameter_a_CPPFLAGS = -O2 -g -I../../include -I../logger \
+libsnmpagent_parameter_a_CPPFLAGS = -O2 -g -I../include -I../logger \
 					  -DLOGGER_PROCESS_SNM \
                                           -DVERSION=\"$(VERSION)\"
+
+libsslproxy_parameter_a_SOURCES = \
+				parameter_enum.h \
+				parameter.h \
+				parameter_impl.h \
+				parameter.cpp \
+				parameter_impl.cpp
+
+libsslproxy_parameter_a_CPPFLAGS = -O2 -g -I ../include -I../logger \
+						-DLOGGER_PROCESS_SSL -DVERSION=\"$(VERSION)\"
 
 all: all-am
 
@@ -249,6 +268,10 @@ libsnmpagent_parameter.a: $(libsnmpagent_parameter_a_OBJECTS) $(libsnmpagent_par
 	-rm -f libsnmpagent_parameter.a
 	$(libsnmpagent_parameter_a_AR) libsnmpagent_parameter.a $(libsnmpagent_parameter_a_OBJECTS) $(libsnmpagent_parameter_a_LIBADD)
 	$(RANLIB) libsnmpagent_parameter.a
+libsslproxy_parameter.a: $(libsslproxy_parameter_a_OBJECTS) $(libsslproxy_parameter_a_DEPENDENCIES) 
+	-rm -f libsslproxy_parameter.a
+	$(libsslproxy_parameter_a_AR) libsslproxy_parameter.a $(libsslproxy_parameter_a_OBJECTS) $(libsslproxy_parameter_a_LIBADD)
+	$(RANLIB) libsslproxy_parameter.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -262,6 +285,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_parameter_a-parameter_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_parameter_a-parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_parameter_a-parameter_impl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_parameter_a-parameter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -360,6 +385,34 @@ libsnmpagent_parameter_a-parameter_impl.obj: parameter_impl.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter_impl.cpp' object='libsnmpagent_parameter_a-parameter_impl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_parameter_a-parameter_impl.obj `if test -f 'parameter_impl.cpp'; then $(CYGPATH_W) 'parameter_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter_impl.cpp'; fi`
+
+libsslproxy_parameter_a-parameter.o: parameter.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter.o -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" -c -o libsslproxy_parameter_a-parameter.o `test -f 'parameter.cpp' || echo '$(srcdir)/'`parameter.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter.cpp' object='libsslproxy_parameter_a-parameter.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter.o `test -f 'parameter.cpp' || echo '$(srcdir)/'`parameter.cpp
+
+libsslproxy_parameter_a-parameter.obj: parameter.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" -c -o libsslproxy_parameter_a-parameter.obj `if test -f 'parameter.cpp'; then $(CYGPATH_W) 'parameter.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter.cpp' object='libsslproxy_parameter_a-parameter.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter.obj `if test -f 'parameter.cpp'; then $(CYGPATH_W) 'parameter.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter.cpp'; fi`
+
+libsslproxy_parameter_a-parameter_impl.o: parameter_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter_impl.o -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" -c -o libsslproxy_parameter_a-parameter_impl.o `test -f 'parameter_impl.cpp' || echo '$(srcdir)/'`parameter_impl.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter_impl.cpp' object='libsslproxy_parameter_a-parameter_impl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter_impl.o `test -f 'parameter_impl.cpp' || echo '$(srcdir)/'`parameter_impl.cpp
+
+libsslproxy_parameter_a-parameter_impl.obj: parameter_impl.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter_impl.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" -c -o libsslproxy_parameter_a-parameter_impl.obj `if test -f 'parameter_impl.cpp'; then $(CYGPATH_W) 'parameter_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter_impl.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter_impl.cpp' object='libsslproxy_parameter_a-parameter_impl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter_impl.obj `if test -f 'parameter_impl.cpp'; then $(CYGPATH_W) 'parameter_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter_impl.cpp'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)

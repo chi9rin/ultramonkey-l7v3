@@ -11,12 +11,13 @@
 #include <vector>
 #include <fstream>
 #include "parameter_impl.h"
-#include "logger_enum.h"
+#include "logger.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
+#include <boost/format.hpp>
 
 #ifndef PARAMETER_FILE
 	#define PARAMETER_FILE "/etc/l7vs/l7vs.cf"
@@ -27,11 +28,13 @@
 #endif
 
 #ifdef  LOGGER_PROCESS_SNM
-	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_SNMPAGENT_PARAMETER;
+	l7vs::LOG_CATEGORY_TAG logcat = l7vs::LOG_CAT_SSLPROXY_PARAMETER;
+#elif	LOGGER_PROCESS_SNM
+	l7vs::LOG_CATEGORY_TAG logcat = l7vs::LOG_CAT_SNMPAGENT_PARAMETER;
 #elif   LOGGER_PROCESS_ADM
-	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_L7VSADM_PARAMETER;
+	l7vs::LOG_CATEGORY_TAG logcat = l7vs::LOG_CAT_L7VSADM_PARAMETER;
 #else
-	l7vs::LOG_CATEGORY_TAG parameter_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;
+	l7vs::LOG_CATEGORY_TAG logcat = l7vs::LOG_CAT_L7VSD_PARAMETER;
 #endif
 
 static bool	create_map_flag = false;
@@ -58,9 +61,6 @@ bool	l7vs::ParameterImpl::init(){
 	tag_section_table_map[PARAM_COMP_SNMPAGENT]		= "snmpagent";
 	tag_section_table_map[PARAM_COMP_SSLPROXY]		= "sslproxy";
 	create_map_flag	= read_file( PARAM_COMP_ALL );
-
-	std::cout << "paramter_impl::init()" << std::endl;
-
 	return	create_map_flag;
 }
 
@@ -95,11 +95,18 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 		if( split_vec.size() == 1 ){ // section
 			if( split_vec[0].at(0) == '[' && split_vec[0].at( split_vec[0].size()-1 ) == ']' )
 				section_string = split_vec[0].substr( 1, split_vec[0].size() - 2 );
-			else return false;
+			else{
+				boost::format	formatter( "section tag false : %1%" );
+				formatter % split_vec[0];
+				Logger::putLogFatal( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+				return false;
+			}
 		}
 		else if( split_vec.size() == 2 ){ // split_vec[0] = key, split_vec[1]=value
 			if( section_string.size() == 0 ){
-				//error
+				boost::format	formatter("don't match first section. key = %1%, value = %2%" );
+				formatter % split_vec[0] % split_vec[1];
+				Logger::putLogFatal( logcat, 0, formatter.str(), __FILE__, __LINE__ );
 				return false;
 			}
 			boost::algorithm::trim( split_vec[0] ); //trim keys
@@ -112,7 +119,9 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 				std::pair< string_map_type::iterator, bool > ret =
 					string_map.insert( string_pair_type( key, strvalue ) );	//tmp map insert
 				if( !ret.second ){	//insert error
-					//hogehoge
+					boost::format	formatter( "section.key is duplicate. section.key = %1%, value = %2%" );
+					formatter % key % strvalue;
+					Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
 				}
 			}
 			else{	// int value
@@ -121,16 +130,22 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 					std::pair< int_map_type::iterator, bool > ret =
 						int_map.insert( int_pair_type( key, intvalue ) ); // tmp map insert
 					if( !ret.second ){
-						//map insert error!
+						boost::format	formatter( "section.key is duplicate. section.key = %1%, value = %2%" );
+						formatter % key % intvalue;
+						Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
 					}
 				}
 				catch( boost::bad_lexical_cast& cast ){
-					return false;
+					boost::format	formatter( "value is not numeric : %1%" );
+					formatter % split_vec[1];
+					Logger::putLogFatal( logcat, 0, formatter.str() , __FILE__, __LINE__ );
 				}
 			}
 		}
 		else{
-			return false;
+			boost::format	formatter( "line is not support line = %1%" );
+			formatter % line;
+			Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
 		}
 	}
 
@@ -146,7 +161,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 		}
 	}
 	else if( comp == PARAM_COMP_NOCAT ){	// comp error!
-		return false;
+		Logger::putLogError( logcat, 0, "parameter_component_none is not suport", __FILE__, __LINE__ );
 	}
 	else{
 		std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator section_itr = tag_section_table_map.find( comp );
@@ -167,7 +182,9 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 			if( split_vec[0] == section ){
 				std::pair< int_map_type::iterator, bool >	ret = intMap.insert( p );
 				if( !ret.second ){
-					//insert error
+					boost::format	formatter( "not insert key = %1%, value = %2% " );
+					formatter % p.first % p.second;
+					Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
 				}
 			}
 		}
@@ -188,7 +205,9 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 			if( split_vec[0] == section ){
 				std::pair< string_map_type::iterator, bool >	ret = stringMap.insert( p );
 				if( !ret.second ){
-					//insert error
+					boost::format	formatter( "not insert key = %1%, value = %2% " );
+					formatter % p.first % p.second;
+					Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
 				}
 			}
 		}
