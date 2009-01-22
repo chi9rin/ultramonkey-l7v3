@@ -300,10 +300,10 @@ protected:
 	LoggerImpl();
 
 	//! cpoy constructor disable
-	LoggerImpl( const LoggerImpl& ){}
+	LoggerImpl( const LoggerImpl& );
 
 	//! operator= disable
-	LoggerImpl& operator=( const LoggerImpl& ){}
+	LoggerImpl& operator=( const LoggerImpl& );
 
 	//! LOG_LEVEL_TAG to log4cxx::LevelPtr transrator
 	virtual inline const log4cxx::LevelPtr toLevel(LOG_LEVEL_TAG level)	{
@@ -345,7 +345,7 @@ protected:
 	//! hostname
 	std::string hostname;
 
-	log4cxx::LevelPtr levelTable[LOGGER_LEVEL_NUM];
+	log4cxx::Level* levelTable[LOGGER_LEVEL_NUM];
 
 	//! category - loglevel hash map
 	category_level_map_type	category_level_map;
