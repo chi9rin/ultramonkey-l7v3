@@ -55,7 +55,7 @@ bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp){
  */
 int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 								const std::string& key,
-								l7vs::parameter::error_code& err ){
+								l7vs::error_code& err ){
 	ParameterImpl&	impl = ParameterImpl::get_instance();
 	return impl.get_int( comp, key, err );
 }
@@ -68,7 +68,7 @@ int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
  */
 std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG comp,
 												const std::string& key,
-												l7vs::parameter::error_code& err ){
+												l7vs::error_code& err ){
 	ParameterImpl&	impl = ParameterImpl::get_instance();
 	return impl.get_string( comp, key, err );
 }

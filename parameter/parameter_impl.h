@@ -14,6 +14,7 @@
 #define PARAMETER_IMPL_H
 
 #include "parameter_enum.h"
+#include "error_code.h"
 #include <string>
 #include <map>
 #include <boost/function.hpp>
@@ -66,14 +67,14 @@ public:
 	//! @param[in]	keystring
 	//! @param[out]	errorcode
 	//! @return		int value
-	int	get_int( const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
+	int	get_int( const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
 
 	//! string value getter
 	//! @param[in]	component tag
 	//! @param[in]	keystring
 	//! @param[out]	errorcode
 	//! @return		string value
-	std::string	get_string( const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
+	std::string	get_string( const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
 };
 
 }

@@ -15,6 +15,7 @@
 
 #include <string>
 #include "parameter_enum.h"
+#include "error_code.h"
 
 namespace l7vs{
 
@@ -38,14 +39,14 @@ public:
 	//!	@param[in]	parameter key
 	//! @param[out]	error code
 	//!	@return	intvalue
-	int		get_int(const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
+	int		get_int(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
 
 	//! parameter string value getter
 	//! @param[in]	parametercategory
 	//!	@param[in]	parameter key
 	//! @param[out] error code
 	//!	@return	string value
-	std::string	get_string(const PARAMETER_COMPONENT_TAG, const std::string&, parameter::error_code& );
+	std::string	get_string(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
 };
 
 }	//namespace l7vs

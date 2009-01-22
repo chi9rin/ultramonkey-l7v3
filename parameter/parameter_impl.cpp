@@ -223,14 +223,14 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 //! @return		integer value
 int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 									const std::string& key,
-									l7vs::parameter::error_code& err ){
+									l7vs::error_code& err ){
 	boost::mutex::scoped_lock	lock( param_mutex );
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
 	int_map_type::iterator intmap_iterator = intMap.find( section_table_iterator->second + "." + key );
 	if( intmap_iterator != intMap.end() )
 			return intmap_iterator->second;
 	else
-		err.set_flag( true );
+		err.setter( true, "don't find key" );
 
 	return 0;
 }
@@ -243,13 +243,13 @@ int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 
 std::string	l7vs::ParameterImpl::get_string( const l7vs::PARAMETER_COMPONENT_TAG comp,
 											 const std::string& key,
-											 l7vs::parameter::error_code& err ){
+											 l7vs::error_code& err ){
 	boost::mutex::scoped_lock	lock( param_mutex );
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
 	string_map_type::iterator strmap_iterator = stringMap.find( section_table_iterator->second + "." + key );
 	if( strmap_iterator != stringMap.end() )
 		return strmap_iterator->second;
 	else
-		err.set_flag( true );
+		err.setter( true, "don't find key" );
 	return std::string("");
 }
