@@ -48,7 +48,7 @@ void	thread_test1(){
 void	thread3(){
 	l7vs::ParameterImpl& impl = l7vs::ParameterImpl::get_instance();
 	for( size_t i = 0 ; i < 100; ++i ){
-		l7vs::parameter::error_code err;
+		l7vs::error_code err;
 		std::string	str = impl.get_string( l7vs::PARAM_COMP_L7VSD, "sample_value", err );
 		BOOST_CHECK_EQUAL( err, false );
 		BOOST_CHECK_EQUAL( str, "sample" );

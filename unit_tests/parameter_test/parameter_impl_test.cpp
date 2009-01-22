@@ -128,7 +128,7 @@ void	impl_get_int_test(){
 	ofs.close();
 
 	param_impl_test&		impl = param_impl_test::get_instance();
-	l7vs::parameter::error_code	err;
+	l7vs::error_code	err;
 	// unit_test[21] integer file read check
 	BOOST_CHECK_EQUAL( impl.read_file( l7vs::PARAM_COMP_ALL ), true );
 	// unit_test[22] zero value check
@@ -155,7 +155,7 @@ void	impl_get_int_test(){
 }
 
 void	impl_get_string_test(){
-	l7vs::parameter::error_code	err;
+	l7vs::error_code	err;
 	std::string		str_value = "strvalue";
 	std::string		zero_str_value = "";
 	std::string		long_str_value = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+*-/!$%&'()~|";
