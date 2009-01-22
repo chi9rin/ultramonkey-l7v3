@@ -13,7 +13,8 @@ libl7vsd_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.h \
 			time_and_size_based_rolling_policy.cpp
 
-libl7vsd_logger_a_CPPFLAGS	= -O2 -g -I../include -I../parameter \
+libl7vsd_logger_a_CPPFLAGS	= \
+			-O2 -g -Wall -Werror -pthread -I../include -I../parameter \
 			-DLOGGER_PROCESS_VSD \
 			-DVERSION=\"$(VERSION)\"
 
@@ -29,7 +30,8 @@ libl7vsadm_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.h \
 			time_and_size_based_rolling_policy.cpp
 
-libl7vsadm_logger_a_CPPFLAGS	= -O2 -g -I../include -I../parameter \
+libl7vsadm_logger_a_CPPFLAGS	= \
+			-O2 -g -Wall -Werror -pthread -I../include -I../parameter \
 			-DLOGGER_PROCESS_ADM \
 			-DVERSION=\"$(VERSION)\"
 
@@ -45,7 +47,8 @@ libsnmpagent_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.h \
 			time_and_size_based_rolling_policy.cpp
 
-libsnmpagent_logger_a_CPPFLAGS	= -O2 -g -I../include -I../snmpagent -I../parameter \
+libsnmpagent_logger_a_CPPFLAGS	= \
+			-O2 -g -Wall -Werror -pthread -I../include -I../parameter \
 			-DLOGGER_PROCESS_SNM \
 			-DVERSION=\"$(VERSION)\"
 
@@ -61,6 +64,7 @@ libsslproxy_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.h \
 			time_and_size_based_rolling_policy.cpp
 
-libsslproxy_logger_a_CPPFLAGS	= -O2 -g -I../include -I../parameter \
+libsslproxy_logger_a_CPPFLAGS	= \
+			-O2 -g -Wall -Werror -pthread -I../include -I../parameter \
 			-DLOGGER_PROCESS_SSL \
 			-DVERSION=\"$(VERSION)\"
