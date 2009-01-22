@@ -57,7 +57,7 @@ public:
 		name = in_modulename;
 	}
 	//! destractor
-	virtual ~module_base() = 0;
+	virtual ~module_base(){}
 	//! tcp protocol support check
 	//! @return tcp support is true
 	//! @return tcp not-support is false
