@@ -1,6 +1,7 @@
 #define	TEST_CASE
 
 #include <boost/test/included/unit_test.hpp>
+#include <boost/thread.hpp>
 
 #include "logger_wrapper.h"
 
@@ -26,27 +27,55 @@
 
 using namespace boost::unit_test_framework;
 
+// test class
+class	l7vsd_test	:public	l7vs::l7vsd {
+public:
+	vslist_type&	get_vslist(){ return vslist; }
+	boost::thread_group&	get_tg(){ return vs_threads; }
+	vslist_type::iterator	search_vslist( l7vs::virtualservice_element& in_elem ){
+		return l7vsd::search_vslist( in_elem );
+	}
+	void	set_replication( boost::shared_ptr< l7vs::replication > inrep ){
+		rep = inrep;
+	}
+
+};
+
 //test_handler
 void		test_handler(int sig);
 
 int			call_count_test_handler = 0;	//test_handlerの呼出回数
 int			arg_sig_test_handler = 0;		//test_handlerの引数(sig)
 
-class	l7vsd_test	:public	l7vs::l7vsd {
-public:
-	vslist_type&	get_vslist(){ return vslist; }
 
-};
+//util
+template< typename InternetProtocol >
+boost::asio::ip::basic_endpoint< InternetProtocol > string_to_endpoint( std::string str ){
+	std::string::size_type pos = str.find( ":" );
+	std::string	hostname = str.substr( 0, pos );
+	std::string	portname = str.substr( pos+1, str.length() );
+	boost::asio::io_service		io_service;
+	typename InternetProtocol::resolver				resolver(io_service);
+	typename InternetProtocol::resolver::query		query( hostname, portname );
+	typename InternetProtocol::resolver::iterator	end;
+	typename InternetProtocol::resolver::iterator	itr = resolver.resolve( query );
+	if( itr == end ) return typename InternetProtocol::endpoint();
+	return *itr;
+}
 
 //--tests--
 
 void	list_virtual_service_test(){
 	BOOST_MESSAGE( "----- list_virtual_service_test start -----" );
 
-	l7vsd_test	vsd_test;
+	l7vsd_test			vsd_test;
 
-	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice );
-	boost::shared_ptr< l7vs::virtualservice > vs2( new l7vs::virtualservice );
+	boost::asio::io_service	io;
+	l7vs::replication	rep(io);
+	l7vs::virtualservice_element	e;
+
+	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtualservice > vs2( new l7vs::virtualservice( vsd_test, rep, e ) );
 	vs1->element.protocol_module_name = "cinsert";
 	vs2->element.protocol_module_name = "url";
 
@@ -72,21 +101,177 @@ void	list_virtual_service_test(){
 	vs_vector.clear();
 
 	res = vsd_test.list_virtual_service(vs_vector);
-	// unit_test[1] list_virtual_service 正常系２(vslistが空) 戻り値確認
+	// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) 戻り値確認
 	BOOST_CHECK_EQUAL(res.flag, true);
-	// unit_test[1] list_virtual_service 正常系２(vslistが空) vs_vector確認
+	// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) vs_vector確認
 	BOOST_CHECK_EQUAL(vs_vector.size(), 0);
 
 	BOOST_MESSAGE( "----- list_virtual_service_test end -----" );
 
 }
 
+void	add_virtual_service_test(){
+	BOOST_MESSAGE( "----- add_virtual_service_test start -----" );
+
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	l7vs::virtualservice_element	elem;
+	elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+
+	l7vs::l7vsd::l7vsd_operation_result	res;
+
+// 正常系
+	res = vsd_test.add_virtual_service( elem );
+	// unit_test[1] add_virtual_service 正常系 戻り値確認
+	BOOST_CHECK_EQUAL( res.flag, true );
+	// unit_test[1] add_virtual_service 正常系 vslist数確認
+	BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 1);
+	{
+		// unit_test[1] add_virtual_service 正常系 vslist内容確認
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.get_vslist().begin();
+		BOOST_CHECK( (*itr)->get_element() == elem );
+		// unit_test[1] add_virtual_service 正常系 initialize確認
+		BOOST_CHECK_EQUAL( (*itr)->initialize_called, true );
+		// unit_test[1] add_virtual_service 正常系 set_virtualservice確認
+		BOOST_CHECK_EQUAL( (*itr)->set_virtualservice_called, true );
+		// unit_test[1] add_virtual_service 正常系 run確認
+		vsd_test.get_tg().join_all();
+		BOOST_CHECK_EQUAL( (*itr)->run_called, true );
+	}
+	// unit_test[1] add_virtual_service 正常系 replication switch_to_master確認
+	BOOST_CHECK_EQUAL( rep->switch_to_master_called, true );
+
+// 正常系２
+	l7vs::virtualservice_element	elem2;
+	elem2.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+	rep->switch_to_master_called = false;
+
+	res = vsd_test.add_virtual_service( elem2 );
+	// unit_test[1] add_virtual_service 正常系２(vs2個め) 戻り値確認
+	BOOST_CHECK_EQUAL( res.flag, true );
+	// unit_test[1] add_virtual_service 正常系２(vs2個め) vslist数確認
+	BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 2);
+	{
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) vslist内容確認
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.get_vslist().begin();
+		++itr;
+		BOOST_CHECK( (*itr)->get_element() == elem2 );
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) initialize確認
+		BOOST_CHECK_EQUAL( (*itr)->initialize_called, true );
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) set_virtualservice確認
+		BOOST_CHECK_EQUAL( (*itr)->set_virtualservice_called, true );
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) run確認
+		vsd_test.get_tg().join_all();
+		BOOST_CHECK_EQUAL( (*itr)->run_called, true );
+	}
+	// unit_test[1] add_virtual_service 正常系２(vs2個め) replication switch_to_master確認
+	BOOST_CHECK_EQUAL( rep->switch_to_master_called, false );
+
+//異常系
+	// unit_test[1] add_virtual_service 異常系(既に同じvsがある場合) 戻り値確認
+	l7vs::virtualservice_element	elem3;
+	elem3.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+	res = vsd_test.add_virtual_service( elem3 );
+	BOOST_CHECK_EQUAL( res.flag, false );
+
+	// unit_test[1] add_virtual_service 異常系２(replicaitonがnullの場合) 戻り値確認
+	l7vsd_test			vsd_test2;
+	res = vsd_test2.add_virtual_service( elem );
+	BOOST_CHECK_EQUAL( res.flag, false );
+
+	// unit_test[1] add_virtual_service 異常系３(initialize失敗) 戻り値確認
+
+	// unit_test[1] add_virtual_service 異常系４(set_virtualservice失敗) 戻り値確認
+
+	BOOST_MESSAGE( "----- add_virtual_service_test end -----" );
+
+}
+
 void	search_vslist_test(){
 	BOOST_MESSAGE( "----- search_vslist_test start -----" );
-	l7vsd_test	vsd_test;
+	l7vsd_test			vsd_test;
 
-	
+	boost::asio::io_service	io;
+	l7vs::replication	rep( io );
+	l7vs::virtualservice_element	e;
 
+	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtualservice > vs2( new l7vs::virtualservice( vsd_test, rep, e ) );
+
+	vs1->element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+	vs2->element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+
+	vsd_test.get_vslist().push_back(vs1);
+	vsd_test.get_vslist().push_back(vs2);
+
+	// unit_test[1] search_vslist 正常系 戻り値確認
+	{
+		l7vs::virtualservice_element	elem;
+		elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.search_vslist( elem );
+		BOOST_CHECK( (*itr)->get_element() == elem );
+	}
+
+	// unit_test[1] search_vslist 正常系２(見付からない場合) 戻り値確認
+	{
+		l7vs::virtualservice_element	elem;
+		elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "30.30.30.30:7777" );
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.search_vslist( elem );
+		BOOST_CHECK( itr == vsd_test.get_vslist().end() );
+	}
+
+	// unit_test[1] search_vslist 正常系３(vslistが空の場合) 戻り値確認
+	vsd_test.get_vslist().clear();
+	{
+		l7vs::virtualservice_element	elem;
+		elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.search_vslist( elem );
+		BOOST_CHECK( itr == vsd_test.get_vslist().end() );
+	}
+
+	//udpmode
+	boost::shared_ptr< l7vs::virtualservice > vs3( new l7vs::virtualservice( vsd_test, rep, e ) );
+	boost::shared_ptr< l7vs::virtualservice > vs4( new l7vs::virtualservice( vsd_test, rep, e ) );
+
+	vs3->element.udpmode = true;
+	vs4->element.udpmode = true;
+	vs3->element.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( "40.40.40.40:6666" );
+	vs4->element.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( "50.50.50.50:5555" );
+
+	vsd_test.get_vslist().push_back(vs3);
+	vsd_test.get_vslist().push_back(vs4);
+	// unit_test[1] search_vslist 正常系４(udpmodeのとき) 戻り値確認
+	{
+		l7vs::virtualservice_element	elem;
+		elem.udpmode = true;
+		elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( "40.40.40.40:6666" );
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.search_vslist( elem );
+		BOOST_CHECK( (*itr)->get_element() == elem );
+	}
+
+	// unit_test[1] search_vslist 正常系５(udpmodeで見付からない場合) 戻り値確認
+	{
+		l7vs::virtualservice_element	elem;
+		elem.udpmode = true;
+		elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( "60.60.60.60:4444" );
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.search_vslist( elem );
+		BOOST_CHECK( itr == vsd_test.get_vslist().end() );
+	}
+
+	// unit_test[1] search_vslist 正常系６(udpmodeでvslistが空の場合) 戻り値確認
+	vsd_test.get_vslist().clear();
+	{
+		l7vs::virtualservice_element	elem;
+		elem.udpmode = true;
+		elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( "40.40.40.40:6666" );
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.search_vslist( elem );
+		BOOST_CHECK( itr == vsd_test.get_vslist().end() );
+	}
 
 	BOOST_MESSAGE( "----- search_vslist_test end -----" );
 
@@ -101,10 +286,8 @@ void	sig_exit_handler_test(){
 	//sig_exit_handler実行
 	sig_exit_handler(15);
 	// unit_test[1] sig_exit_handler 通常値 received_sig確認
-	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(received_sig, 15);
 	// unit_test[1] sig_exit_handler 通常値 exit_requested確認
-	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(exit_requested, 1);
 
 	//境界値で試験
@@ -113,10 +296,8 @@ void	sig_exit_handler_test(){
 	//sig_exit_handler実行
 	sig_exit_handler(INT_MAX);
 	// unit_test[1] sig_exit_handler 境界値 received_sig確認
-	std::cout << "3----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(received_sig, INT_MAX);
 	// unit_test[1] sig_exit_handler 境界値 exit_requested確認
-	std::cout << "4----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(exit_requested, 1);
 
 	//限界値で試験
@@ -125,10 +306,8 @@ void	sig_exit_handler_test(){
 	//sig_exit_handler実行
 	sig_exit_handler(INT_MAX + 1);
 	// unit_test[1] sig_exit_handler 限界値 received_sig確認
-	std::cout << "5----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(received_sig, INT_MAX + 1);
 	// unit_test[1] sig_exit_handler 限界値 exit_requested確認
-	std::cout << "6----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(exit_requested, 1);
 
 	BOOST_MESSAGE( "----- sig_exit_handler test end -----" );
@@ -147,16 +326,13 @@ void	set_sighandler_test(){
 	//set_sighandler実行
 	ret = set_sighandler(SIGUSR1, test_handler);
 	// unit_test[1] set_sighandler 正常系 返り値確認
-	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(ret, 0);
 
 	//SIGUSR1の設定を再度取得する
 	ret = sigaction(SIGUSR1, NULL, &act);
 	// unit_test[1] set_sighander 正常系 handler確認
-	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(act.sa_handler, test_handler);
 	//　unit_test[1] set_sighander 正常系 flags確認
-	std::cout << "3----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(act.sa_flags | ~SA_RESETHAND, ~SA_RESETHAND);
 
 
@@ -164,15 +340,12 @@ void	set_sighandler_test(){
 	//set_sighandler実行
 	ret = set_sighandler(SIGUSR1, NULL);
 	// unit_test[1] set_sighandler 正常系２(handler NULL) 返り値確認
-	std::cout << "4----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(ret, 0);
 	//SIGUSR1の設定を再度取得する
 	ret = sigaction(SIGUSR1, NULL, &act);
 	// unit_test[1] set_sighandler 正常系２(handler NULL) handler確認
-	std::cout << "5----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(act.sa_handler, (void (*)(int))NULL);
 	//　unit_test[1] set_sighander 正常系２(handler NULL) flags確認
-	std::cout << "6----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(act.sa_flags | ~SA_RESETHAND, ~SA_RESETHAND);
 
 
@@ -180,7 +353,6 @@ void	set_sighandler_test(){
 	//set_sighandler実行
 	ret = set_sighandler(0, test_handler);
 	// unit_test[1] set_sighandler 異常系(signal 0) 返り値確認
-	std::cout << "7----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(ret, -1);
 
 	
@@ -188,7 +360,6 @@ void	set_sighandler_test(){
 	//set_sighandler実行
 	ret = set_sighandler(INT_MAX, test_handler);
 	// unit_test[1] set_sighandler 異常系(signal 境界値) 返り値確認
-	std::cout << "8----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(ret, -1);
 
 
@@ -196,7 +367,6 @@ void	set_sighandler_test(){
 	//set_sighandler実行
 	ret = set_sighandler(INT_MAX + 1, test_handler);
 	// unit_test[1] set_sighandler 異常系(signal 限界値) 返り値確認
-	std::cout << "9----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(ret, -1);
 
 
@@ -226,7 +396,6 @@ void	set_sighandlers_test(){
 	//set_sighandlers実行
 	ret = set_sighandlers();
 	// unit_test[1] set_sighandlers 正常系 返り値確認
-	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(ret, 0);
 	//signalの設定を再度取得する
 	ret = sigaction(SIGHUP, NULL, &act[0]);
@@ -238,7 +407,6 @@ void	set_sighandlers_test(){
 	ret = sigaction(SIGALRM, NULL, &act[6]);
 	ret = sigaction(SIGCHLD, NULL, &act[7]);
 	// unit_test[1] set_sighandlers 正常系 SIGHUP handler確認
-	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL(act[0].sa_handler, sig_exit_handler);
 	// unit_test[1] set_sighandlers 正常系 SIGINT handler確認
 	BOOST_CHECK_EQUAL(act[1].sa_handler, sig_exit_handler);
@@ -273,15 +441,12 @@ void	usage_test(){
 
 	//正常系
 	// unit_test[1] usage 正常系 stdout出力確認
-	std::cout << "1----------------------------------------" << std::endl;
 	usage(stdout);
 	// unit_test[1] usage 正常系 stderr出力確認
-	std::cout << "2----------------------------------------" << std::endl;
 	usage(stderr);
 
 	//異常系
 	// unit_test[1] usage 異常系 null出力確認
-	std::cout << "3----------------------------------------" << std::endl;
 	usage(NULL);
 
 	BOOST_MESSAGE( "----- usage test end -----" );
@@ -302,16 +467,16 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	l7vs::Logger logger_instance;
 	l7vs::Parameter param;
 	logger_instance.loadConf();
-	
-	logger_instance.putLogFatal( l7vs::LOG_CAT_L7VSD_NETWORK, 1, "Parameter initialize failure", __FILE__, __LINE__ );
 
 	ts->add( BOOST_TEST_CASE( &list_virtual_service_test ) );
+	ts->add( BOOST_TEST_CASE( &search_vslist_test ) );
+	ts->add( BOOST_TEST_CASE( &add_virtual_service_test ) );
+
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
 	ts->add( BOOST_TEST_CASE( &set_sighandler_test ) );
 	ts->add( BOOST_TEST_CASE( &set_sighandlers_test ) );
 	ts->add( BOOST_TEST_CASE( &usage_test ) );
-
 
 	framework::master_test_suite().add( ts );
 

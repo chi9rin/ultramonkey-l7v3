@@ -54,7 +54,8 @@ protected:
 	boost::mutex				command_mutex;		//!< command execute mutex
 	boost::mutex				vslist_mutex;		//!< virtual service list mutex
 
-	vslist_type::iterator		search_vslist( virtualservice_element& );	//!< vs_list search function
+	virtual	vslist_type::iterator
+								search_vslist( const virtualservice_element& );	//!< vs_list search function
 
 public:
 	l7vsd_operation_result		list_virtual_service( vsvec_type&  );	//!< virtual_service list command
@@ -89,7 +90,7 @@ public:
 	void						run();		//!< l7vsd run method
 
 protected:
-	bool						is_exit_requested();		//!< check if exit requested
+	bool				is_exit_requested();		//!< check if exit requested
 
 };
 
