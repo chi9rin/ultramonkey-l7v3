@@ -9,7 +9,8 @@ CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I./ \
-				-I../../src
+				-I../../src \
+				-I../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt
