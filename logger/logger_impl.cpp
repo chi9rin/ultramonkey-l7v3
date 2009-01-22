@@ -150,23 +150,23 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 
 	// l7vsd network qos category initialize
 	category_level_map[LOG_CAT_L7VSD_NETWORK_QOS] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_network.qos"] = LOG_CAT_L7VSD_NETWORK_QOS;
-	category_name_map[LOG_CAT_L7VSD_NETWORK_QOS] = "l7vsd_network.qos";
+	name_category_map["l7vsd_network_qos"] = LOG_CAT_L7VSD_NETWORK_QOS;
+	category_name_map[LOG_CAT_L7VSD_NETWORK_QOS] = "l7vsd_network_qos";
 
 	// l7vsd network bandwidth category initialize
 	category_level_map[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_network.bandwidth"] = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
-	category_name_map[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = "l7vsd_network.bandwidth";
+	name_category_map["l7vsd_network_bandwidth"] = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
+	category_name_map[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = "l7vsd_network_bandwidth";
 
 	// l7vsd network nu_connection category initialize
 	category_level_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_network.num_connection"] = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
-	category_name_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = "l7vsd_network.num_connection";
+	name_category_map["l7vsd_network_num_connection"] = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
+	category_name_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = "l7vsd_network_num_connection";
 
 	// l7vsd network access log category initialize
 	category_level_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_network.access"] = LOG_CAT_L7VSD_NETWORK_ACCESS;
-	category_name_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = "l7vsd_network.access";
+	name_category_map["l7vsd_network_access"] = LOG_CAT_L7VSD_NETWORK_ACCESS;
+	category_name_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = "l7vsd_network_access";
 
 	// l7vsd mainthread category initialize
 	category_level_map[LOG_CAT_L7VSD_MAINTHREAD] = LOG_LV_DEBUG;
@@ -212,6 +212,11 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 	category_level_map[LOG_CAT_L7VSD_REPLICATION] = LOG_LV_DEBUG;
 	name_category_map["l7vsd_replication"] = LOG_CAT_L7VSD_REPLICATION;
 	category_name_map[LOG_CAT_L7VSD_REPLICATION] = "l7vsd_replication";
+
+	//l7vsd replication send thread category initialize
+	category_level_map[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_replication_sendthread"] = LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
+	category_name_map[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD] = "l7vsd_replication_sendthread";
 
 	//l7vsd parameter category initialize
 	category_level_map[LOG_CAT_L7VSD_PARAMETER] = LOG_LV_DEBUG;
@@ -390,8 +395,7 @@ void l7vs::LoggerImpl::logic_error( const unsigned int logno, const std::string&
  */
 bool l7vs::LoggerImpl::init(){
 	using namespace log4cxx;
-	int ret = 0;
-	if (initialized) return false;
+	if (initialized) return true;
 
 	try {
 		// set loot logger
@@ -400,6 +404,7 @@ bool l7vs::LoggerImpl::init(){
 
 		//create layout
 		LayoutPtr layout = new PatternLayout(LOGGER_LAYOUT);
+
 		//create Syslog appender from layout
 		net::SyslogAppenderPtr syslogAppender =	new net::SyslogAppender(layout, net::SyslogAppender::getFacility(LOGGER_SYSLOG_FACILITY));
 		root->addAppender(syslogAppender);
@@ -414,10 +419,10 @@ bool l7vs::LoggerImpl::init(){
 			 ++itr ){
 			category_name_map_type::iterator name_itr = category_name_map.find( itr->first );
 
-			LoggerPtr temp = Logger::getLogger( name_itr->second );
- 			temp->setLevel( levelTable[itr->second] );
+			//LoggerPtr temp = Logger::getLogger( name_itr->second );
+ 			//temp->setLevel( levelTable[itr->second] );
 
-			//Logger::getLogger( name_itr->second )->setLevel( levelTable[itr->second] );
+			Logger::getLogger( name_itr->second )->setLevel( levelTable[itr->second] );
 		}
 
 	}
@@ -427,7 +432,10 @@ bool l7vs::LoggerImpl::init(){
 		errorConf(6, oss.str(), __FILE__, __LINE__);
 		return false;
 	}
-	char	buff[HOST_NAME_MAX];	
+
+	// get hostname
+	int		ret = 0;
+	char	buff[HOST_NAME_MAX];
 	ret = gethostname(buff, HOST_NAME_MAX);
 	hostname = buff;
 
@@ -1132,6 +1140,23 @@ void l7vs::LoggerImpl::loadConf(){
 				}
 			}	//switch
 
+			//default log level settting
+			cat_itr->second = LOG_LV_INFO;
+			cat_logger->setLevel( levelTable[cat_itr->second] );
+
+		}	//for (category logger setteing)
+
+		//category level setting
+		for( category_level_map_type::iterator cat_itr = category_level_map.begin();
+			 cat_itr != category_level_map.end();
+			 ++cat_itr ){
+
+			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr->first );
+			log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( name_itr->second );
+			if (0 == cat_logger) {
+				throw std::logic_error("getLogger Failed.");
+			}
+
 			parameter::error_code ec;
 
 			LOG_CATEGORY_TAG	log_category;
@@ -1185,7 +1210,8 @@ void l7vs::LoggerImpl::loadConf(){
 				cat_itr->second = LOG_LV_INFO;
 				cat_logger->setLevel( levelTable[cat_itr->second] );
 			}
-		}	//for
+		}	//for (category level setting)
+
 	}
 	catch (const std::exception& e) {
 		std::ostringstream oss;
