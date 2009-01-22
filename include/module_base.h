@@ -27,7 +27,7 @@ public:
 	typedef	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >
 								logger_func_type;
 	//! replication payment memory function object type
-	typedef	boost::function< void ( const std::string&, unsigned int* ) >
+	typedef	boost::function< void* ( const std::string&, unsigned int* ) >
 								replicationpaymemory_func_type;
 protected:
 	std::string						name;			//!< module name string
@@ -45,6 +45,11 @@ protected:
 	boost::function< void( void ) >	replication_area_lock;
 	//! replication area unlock function object
 	boost::function< void( void ) >	replication_area_unlock;
+
+	//! virtual service endpoint tcp
+	boost::asio::ip::tcp::endpoint virtual_service_endpoint_tcp;
+	//! virtual service endpoint udp
+	boost::asio::ip::udp::endpoint virtual_service_endpoint_udp;
 
 public:
 	//! constractor
@@ -91,13 +96,19 @@ public:
 	//! @param[in]	replication pay memory function object
 	//! @param[in]	replication lock function object
 	//! @param[in]	replication unlock undontion object
+	//! @param[in]	virtual service endpoint tcp
+	//! @param[in]	virtual service endpoint udp
 	void	init_replication_functions(
 							replicationpaymemory_func_type  inreplication_pay_memory,
 							boost::function< void( void ) > inlock_func,
-							boost::function< void( void ) > inunlock_func ){
+							boost::function< void( void ) > inunlock_func
+							const boost::asio::ip::tcp::endpoint& invirtual_service_endpoint_tcp
+							const boost::asio::ip::udp::endpoint& invirtual_service_endpoint_udp ){
 		replication_pay_memory = inreplication_pay_memory;
 		replication_area_lock = inlock_func;
 		replication_area_unlock = inunlock_func;
+		virtual_service_endpoint_tcp = invirtual_service_endpoint_tcp;
+		virtual_service_endpoint_udp = invirtual_service_endpoint_udp;
 	}
 
 	//replication用インターフェイス
