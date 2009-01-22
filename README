@@ -1,9 +1,17 @@
-About SSLproxy
+About UltraMonkey-L7
 ---------------------------------------------------------------------------
 
 Welcome
 =======
-    SSLproxy is a opensource SSL proxy server software for UltraMonkey-L7.
+    UltraMonkey-L7 is a opensource layer-7 load balancing software.
+    
+
+    <<< Notes concerning the use of this software package >>>
+
+    Due to a possible conflict with an U.S. patent owned by F5 Networks,
+    the use of the cookie-based persistence module included in this package
+    is restricted to Japan.
+
 
 System requirements
 ===================
@@ -15,20 +23,31 @@ System requirements
 
        Memory : 2 GB(recommended)
 
-    Libraries : openssl(0.9.8b or higher), boost(1.36.0 or higher),
-                perl, apache log4cxx(0.10 or higher)
+    Libraries : log4cxx(C++LoggingLibraries) boost(C++TemplateLibraries)
+    
 
 License
 =======
 
-    SSLproxy is distributed using LGPL License.
+    UltraMonkey-L7 is distributed using LGPL License.
+
+
+Release plan in the future
+==========================
+
+    - Mar. 2008
+       * cookie-based persistence module: passive mode, etc...
+       * GUI administration tool
+       * more useful health monitors(log, SNMP, etc...)
 
 
 About UltraMonkey-L7 Project
 ============================
 
-    To get more information about SSLproxy, please visit our 
-    UltraMonkey-L7 project Web Site.
+    To get more information about UltraMonkey-L7, please visit our project
+    Web Site.
 
          Project Web Site - http://ultramonkey-l7.sourceforge.jp/
       Software repository - http://sourceforge.jp/projects/ultramonkey-l7/
+
+

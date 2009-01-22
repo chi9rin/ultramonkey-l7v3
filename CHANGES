@@ -1,0 +1,71 @@
+[Xxx. xx 2009] 3.0.0-0 Shinya TAKEBAYASHI
+  - Impliment MultiThread Arch. using boost asio and boost thread library.
+  - Impliment IPv6 protocol logic.
+  - Impliment UDP protocol logic.
+  - Impliment SorryURI support.
+  - Change l7vsadm - l7vsd protocol DGRAM to STREAM. and DATA serialized from boost serializable.
+  - Change epoll api to MultpThread session control.
+  - Change protocol and schedule module arch. module event driven model.
+  - Change Using one virtualservice is one accept endpoint.
+  - Change URL protocol module is multi url support.
+  - Fixed algorithm for logger. ( log mode serch logic added. and MultiThread fix. )
+  - Fixed algorithm for parameter. ( using boost algorithm template. and MulthThread fix. )
+  - 
+
+[Dec. 17 2008] 2.1.0-0 Shinya TAKEBAYASHI
+  - Added option for FAST SCHEDULE to sessionless module
+    Establishing connection when client connection was established.
+  - Implimented access logger ( CLIENT -DESTINATION mapping )
+  - Optimized event listener.
+  - Fixed algorithms for some check type.
+  - "Checkout" has been enabled.
+  - Created "man" page.(Japanese(UTF-8) only ;))
+  - Impliment flow control logic(sever).
+  - Eliminated flow control logic(client).
+
+[May. 26 2008] 2.0.0-0 Shinya TAKEBAYASHI
+  - Changed logger library( vanessa_logger -> log4cxx)
+  - Implemented configuration function(using configuration file: /etc/l7vs\l7vs.cf)
+  - Implemented replication system(forHA clustering)
+  - Added new protocol module(sessionless - Layer-4 LB like module)
+
+[Dec. 11 2007] 1.0.0-1 Shinya TAKEBAYASHI
+  - Implemented blocking mode switching function
+
+
+[Oct. 11 2007] 1.0.0-0 Shinya TAKEBAYASHI
+  - Change liblary from GLib1.2 to GLib2.0 (memory leak fix)
+  - Change from select() to epoll ET.
+  - Change bloking mode to non-blocking mode(recv() and send()).
+  - Change from service conn list to service conn hash.
+  - Change from iomux-list to hash-map and available list.
+  - Add QoS Control.
+  - Add Weighted Round-Robin scheduler.
+  - Add real server weight.
+  - Fixed some bugs.
+
+    * Following members helped us. Thanks!
+
+      Hideaki KONDO
+      Shunji FUKUSHIMA
+      Norihisa NAKAI
+      Hajime OKADA
+      Akira TAKAMARU
+      Hiroyuki BAN
+      Toru MORISHITA
+      Kouhei TANUMA
+      Tetsuya TAKATSURU
+      Masahiro SAKAMOTO
+      Yumi KITANI
+
+
+[May. 9 2007] 0.6.0-0 Shinya TAKEBAYASHI
+  - Extended maximum client connections.
+  - Fixed some bugs.
+
+[Feb. 19, 2007] 0.5.0-3 Shinya TAKEBAYASHI
+  - Fixed syntax errors.(umagent/umagent.c, umagent/Makefile)
+
+[Dec. 26, 2006] 0.5.0-2 Takahiro Kurosawa / Hideaki Kondo
+  - Rewrote to fix bug about Segmentation Fault.(conn.c)
+

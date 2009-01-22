@@ -23,14 +23,14 @@ class	error_code{
 protected:
 	bool	flag;	//!<	errorcode_flag
 public:
-	error_code() : flag(false){}
-	bool	operator==( const bool in )const { return ( flag == in ); }
-	bool	operator!=( const bool in )const { return ( flag != in ); }
-	bool	operator!() const { return !flag; }
-	typedef void (*unspecified_bool_type)();
-	static void unspecified_bool_true() {}
-	operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; }
-	void	set_flag( bool in ){ flag = in; }
+	error_code() : flag(false){}	//!< constractor
+	bool	operator==( const bool in )const { return ( flag == in ); } //!< operator== orverload
+	bool	operator!=( const bool in )const { return ( flag != in ); } //!< operator!= orverload
+	bool	operator!() const { return !flag; } //!< operator! orverload
+	typedef void (*unspecified_bool_type)();	//!< if return function
+	static void unspecified_bool_true() {}		//!< if true orverload function
+	operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; } //!< if() orverload
+	void	set_flag( bool in ){ flag = in; } //!< flag setter
 };
 }	//namespace parameter
 

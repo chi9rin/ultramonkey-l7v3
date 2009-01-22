@@ -9,18 +9,22 @@ AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_CC
+AC_PROG_LIBTOOL
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 
 # Checks for libraries.
+AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(log4cxx, main, :,
 	[AC_MSG_ERROR( l7vsd require log4cxx library. )] )
 AC_CHECK_LIB(rt, main, :,
 	[AC_MSG_ERROR( l7vsd require rt library. )] )
+AC_CHECK_LIB(boost_thread-gcc41-mt, main, :,
+	[AC_MSG_ERROR( l7vsd require boost library. )] )
+AC_CHECK_LIB(boost_system-gcc41-mt, main, :,
+	[AC_MSG_ERROR( l7vsd require boost library. )] )
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h unistd.h])
@@ -45,15 +49,54 @@ else
 	AC_SUBST( libdir, [/usr/lib] )
 fi
 
+AC_ARG_WITH(
+	l7vs-moddir,
+	[	--with-l7vs-moddir=DIR	l7vs module is to be installed in DIR.
+								[default=LIBDIR/l7vs] ],
+	[	l7vs_moddir-"$withval" ],
+	[	l7vs_moddir="${libdir}/l7vs" ]
+)
+
+AC_ARG_WITH(
+	l7vsadm-sockdir,
+	[	--with-l7vsadm-sockdir=DIR	l7vsadm sockfile PATH.
+									[default=/var/run/l7vs] ],
+	[	l7vsadm_sockdir="$withval" ],
+	[	l7vsadm_sockdir="/var/run/l7vs" ]
+)
+
+AC_ARG_WITH(
+	l7vs-buffer-size,
+	[	--wigh-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
+									[default=4096] ],
+	[	l7vs_max_buffer_size="$withval" ],
+	[	l7vs_max_buffer_size=4096 ]
+)
+
+AC_ARG_WITH(
+	l7vs-config-dir,
+	[	--with-l7vs-config-dir=DIR	l7vs configfile PATH.
+									[default=/etc/l7vs/l7vs.cf] ],
+	[	l7vs_config="$withval" ],
+	[	l7vs_config="/etc/l7vs/l7vs.cf"	]
+)
+
 AC_SUBST(CC,g++)
 AC_SUBST(exec_prefix, [/usr] )
-#AC_CONFIG_FILES([parameter/Makefile]
-#		[logger/Makefile]
-#		[module/schedule/Makefile]
-#		[module/protocol/Makefile]
-#		[Makefile]
-#		[src/Makefile])
+AC_SUBST(l7vsadm_sockdir)
+AC_SUBST(l7vs_moddir)
+AC_SUBST(l7vs_max_buffer_size)
+AC_SUBST(l7vs_config)
+AC_SUBST(MANDIR)
+AC_SUBST(snmpagent_libs)
+
 AC_CONFIG_FILES([parameter/Makefile]
-		[logger/Makefile]
-		[Makefile])
+                [logger/Makefile]
+                [module/Makefile]
+                [module/schedule/Makefile]
+                [module/protocol/Makefile]
+                [src/Makefile]
+                [Makefile]
+                [conf/Makefile])
+
 AC_OUTPUT(l7vsd.spec)

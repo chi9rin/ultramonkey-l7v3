@@ -21,6 +21,6 @@
 #
 ######################################################################
 
-SUBDIRS = logger parameter
+SUBDIRS = logger parameter src module 
 AUTOMAKE_OPTIONS = foreign
 
