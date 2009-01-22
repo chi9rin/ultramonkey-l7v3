@@ -38,6 +38,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
+#include "error_code.h"
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
 #include "logger_impl.h"
@@ -551,7 +552,7 @@ void l7vs::LoggerImpl::loadConf(){
 	for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
 		// filename check
 
-		parameter::error_code ec;
+		l7vs::error_code ec;
 		property->log_filename_value = param.get_string(PARAM_COMP_LOGGER, property->log_filename_key, ec);
 		if( ec ){
 			std::stringstream	ss;
@@ -1157,7 +1158,7 @@ void l7vs::LoggerImpl::loadConf(){
 				throw std::logic_error("getLogger Failed.");
 			}
 
-			parameter::error_code ec;
+			l7vs::error_code ec;
 
 			LOG_CATEGORY_TAG	log_category;
 
