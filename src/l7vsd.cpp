@@ -66,26 +66,26 @@ l7vsd::l7vsd_operation_result	l7vsd::add_virtual_service( const virtualservice_e
 			return res;
 		}
 		// create virtualservice
-		boost::shared_ptr< virtualservice >
-			vsptr( new virtualservice( *this, *rep, in_vselement ) );
+		boost::shared_ptr< virtual_service >
+			vsptr( new virtual_service( *this, *rep, in_vselement ) );
 
-		virtualservice::vs_operation_result	vsres;
+		virtualservice_base::vs_operation_result	vsres;
 		// vs initialize
 		vsres = vsptr->initialize();
-		if( !vsres.flag ){
+		if( !vsres ){
 			res.flag = false;
 			res.message = vsres.message;
 			return res;
 		}
 		// set virtualservice
 		vsres = vsptr->set_virtualservice( in_vselement );
-		if( !vsres.flag ){
+		if( !vsres ){
 			res.flag = false;
 			res.message = vsres.message;
 			return res;
 		}
 		// create thread and run
-		vs_threads.create_thread( boost::bind( &virtualservice::run, vsptr ) );
+		vs_threads.create_thread( boost::bind( &virtual_service::run, vsptr ) );
 
 		// add to vslist
 		vslist.push_back( vsptr );

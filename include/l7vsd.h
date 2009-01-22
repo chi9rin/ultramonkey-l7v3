@@ -28,17 +28,22 @@ public:
 	typedef boost::shared_ptr< replication >		replication_ptr;		//!< shared_ptr replication typedef
 	typedef boost::shared_ptr< snmpbridge >			snmpbridge_ptr;			//!< shared_ptr snmp_bridge typedef
 
-	typedef std::list< boost::shared_ptr< virtualservice > >	vslist_type;	//!< virtual service list typedef
+	typedef std::list< boost::shared_ptr< virtual_service > >	vslist_type;	//!< virtual service list typedef
 	typedef std::vector< virtualservice_element >				vsvec_type;		//!< virtual service element vector type
 
 	struct l7vsd_operation_result{
-		bool	flag;
+		bool		flag;
 		std::string	message;
 		l7vsd_operation_result() : flag(true), message(""){}
 		bool	operator==( const l7vsd_operation_result& in )
 				{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
 		bool	operator!=( const l7vsd_operation_result& in )
 				{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
+		bool	operator!() const
+					{ return !flag; }
+		typedef void (*unspecified_bool_type)();
+		static void unspecified_bool_true() {}
+		operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; }
 	};
 
 protected:
