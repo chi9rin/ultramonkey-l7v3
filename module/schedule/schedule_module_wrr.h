@@ -11,7 +11,7 @@
 #ifndef	SCHEDULE_MODULE_WRR_H
 #define	SCHEDULE_MODULE_WRR_H
 
-#include "schedule_module_wrr.h"
+#include "schedule_module_base.h"
 
 namespace l7vs{
 
