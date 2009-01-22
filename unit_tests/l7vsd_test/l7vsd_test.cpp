@@ -2,6 +2,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
+#include "logger_wrapper.h"
 
 //#include "logger_enum.h"
 //#include "logger_stub.h"
@@ -40,6 +41,8 @@ public:
 //--tests--
 
 void	list_virtual_service_test(){
+	BOOST_MESSAGE( "----- list_virtual_service_test start -----" );
+
 	l7vsd_test	vsd_test;
 
 	boost::shared_ptr< l7vs::virtualservice > vs1( new l7vs::virtualservice );
@@ -74,9 +77,20 @@ void	list_virtual_service_test(){
 	// unit_test[1] list_virtual_service 正常系２(vslistが空) vs_vector確認
 	BOOST_CHECK_EQUAL(vs_vector.size(), 0);
 
+	BOOST_MESSAGE( "----- list_virtual_service_test end -----" );
 
 }
 
+void	search_vslist_test(){
+	BOOST_MESSAGE( "----- search_vslist_test start -----" );
+	l7vsd_test	vsd_test;
+
+	
+
+
+	BOOST_MESSAGE( "----- search_vslist_test end -----" );
+
+}
 
 void	sig_exit_handler_test(){
 	BOOST_MESSAGE( "----- sig_exit_handler test start -----" );
