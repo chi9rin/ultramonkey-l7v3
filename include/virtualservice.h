@@ -25,13 +25,12 @@
 #include "udp_session.h"
 #include "virtualservice_element.h"
 
-#include "stub.h"
+//#include "stub.h"
 
-//#include "l7vsd.h"
+#include "l7vsd.h"
 #include "realserver.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
-//#include "replication.h"
 
 #define	SESSION_POOL_NUM_DEFAULT	256
 
