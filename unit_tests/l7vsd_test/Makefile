@@ -3,13 +3,9 @@
 #	Makefile for l7vsd unit test frameworks.
 #
 #
-LOGGER		= libtest_logger.a
-PARAMETER	= ligtest_parameter.a
-AR			= ar
-ARFLAGS		= cru
 TARGET		= l7vsd_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread
+CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include
@@ -20,29 +16,26 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
+LOGGER		= libtest_logger.a
+PARAMETER	= ligtest_parameter.a
+AR			= ar
+ARFLAGS		= cru
+
+
 SRCS		=	\
 			l7vsd_test.cpp
 
 PARAMETER_SRCS	=	\
-			../../parameter/parameter_enum.h \
-			../../parameter/parameter.h \
-			../../parameter/parameter_impl.h \
 			../../parameter/parameter.cpp \
 			../../parameter/parameter_impl.cpp
 
 LOGGER_SRCS	=	\
-			../../logger_enum.h \
-			../../logger_rotation_enum.h \
-			../../logger.h \
-			../../logger_impl.h \
-			../../logger.cpp \
-			../../logger_impl.cpp \
-			../../strict_time_based_rolling_policy.h \
-			../../strict_time_based_rolling_policy.cpp \
-			../../time_and_size_based_rolling_policy.h \
-			../../time_and_size_based_rolling_policy.cpp
+			../../logger/logger.cpp \
+			../../logger/logger_impl.cpp \
+			../../logger/strict_time_based_rolling_policy.cpp \
+			../../logger/time_and_size_based_rolling_policy.cpp
 
-.SUFFIX:	.cpp .o
+.SUFFIXES:	.o .cpp
 .cpp.o:
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
@@ -52,14 +45,15 @@ LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS)
+$(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS) $(PARAMETER) $(LOGGER)
 
 $(PARAMETER):	$(PARAMETER_OBJS)
-	$(AR) $(ARFLAGS) -o $@ $(PARAMETER_OBJS)
+	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
 
 $(LOGGER):	$(LOGGER_OBJS)
-	$(AR) $(ARFLAGS) -o $@ $(LOGGER_OBJS)
+	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS)
+

@@ -3,6 +3,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread.hpp>
 
+#include "error_code.h"
 #include "logger_wrapper.h"
 
 //#include "logger_enum.h"
@@ -85,26 +86,34 @@ void	list_virtual_service_test(){
 	//virtualservice_element elem1;
 	//virtualservice_element elem2;
 
-	l7vs::l7vsd::l7vsd_operation_result	res;
-	l7vs::l7vsd::vsvec_type	vs_vector;
-
-	res = vsd_test.list_virtual_service(vs_vector);
-	// unit_test[1] list_virtual_service 正常系 戻り値確認
-	BOOST_CHECK_EQUAL(res.flag, true);
-	// unit_test[1] list_virtual_service 正常系 vs_vector確認
-	BOOST_CHECK_EQUAL(vs_vector.size(), 2);
-	BOOST_CHECK_EQUAL(vs_vector[0].protocol_module_name, "cinsert");
-	BOOST_CHECK_EQUAL(vs_vector[1].protocol_module_name, "url");
-
+	//正常系
+	{
+		l7vs::error_code	err;
+		l7vs::l7vsd::vsvec_type	vs_vector;
+	
+		vsd_test.list_virtual_service( vs_vector, err );
+		// unit_test[1] list_virtual_service 正常系 エラーコード確認
+		BOOST_CHECK( !err );
+		// unit_test[1] list_virtual_service 正常系 vs_vector数確認
+		BOOST_CHECK_EQUAL( vs_vector.size(), 2U );
+		// unit_test[1] list_virtual_service 正常系 vs_vector内容確認
+		BOOST_CHECK_EQUAL( vs_vector[0].protocol_module_name, "cinsert" );
+		BOOST_CHECK_EQUAL( vs_vector[1].protocol_module_name, "url" );
+	}
 
 	vsd_test.get_vslist().clear();
-	vs_vector.clear();
 
-	res = vsd_test.list_virtual_service(vs_vector);
-	// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) 戻り値確認
-	BOOST_CHECK_EQUAL(res.flag, true);
-	// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) vs_vector確認
-	BOOST_CHECK_EQUAL(vs_vector.size(), 0);
+	//正常系２
+	{
+		l7vs::error_code	err;
+		l7vs::l7vsd::vsvec_type	vs_vector;
+
+		vsd_test.list_virtual_service( vs_vector, err );
+		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) エラーコード確認
+		BOOST_CHECK( !err );
+		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) vs_vector数確認
+		BOOST_CHECK_EQUAL( vs_vector.size(), 0U );
+	}
 
 	BOOST_MESSAGE( "----- list_virtual_service_test end -----" );
 
@@ -120,18 +129,17 @@ void	add_virtual_service_test(){
 									rep( new l7vs::replication(io) );
 	vsd_test.set_replication( rep );
 
-	l7vs::virtualservice_element	elem;
-	elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
-
-	l7vs::l7vsd::l7vsd_operation_result	res;
-
 // 正常系
-	res = vsd_test.add_virtual_service( elem );
-	// unit_test[1] add_virtual_service 正常系 戻り値確認
-	BOOST_CHECK_EQUAL( res.flag, true );
-	// unit_test[1] add_virtual_service 正常系 vslist数確認
-	BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 1);
 	{
+		l7vs::virtualservice_element	elem;
+		elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem, err );
+		// unit_test[1] add_virtual_service 正常系 エラーコード確認
+		BOOST_CHECK( !err );
+		// unit_test[1] add_virtual_service 正常系 vslist数確認
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 1U );
 		// unit_test[1] add_virtual_service 正常系 vslist内容確認
 		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.get_vslist().begin();
 		BOOST_CHECK( (*itr)->get_element() == elem );
@@ -142,21 +150,23 @@ void	add_virtual_service_test(){
 		// unit_test[1] add_virtual_service 正常系 run確認
 		vsd_test.get_tg().join_all();
 		BOOST_CHECK_EQUAL( (*itr)->run_called, true );
+		// unit_test[1] add_virtual_service 正常系 replication switch_to_master確認
+		BOOST_CHECK_EQUAL( rep->switch_to_master_called, true );
 	}
-	// unit_test[1] add_virtual_service 正常系 replication switch_to_master確認
-	BOOST_CHECK_EQUAL( rep->switch_to_master_called, true );
 
-// 正常系２
-	l7vs::virtualservice_element	elem2;
-	elem2.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
 	rep->switch_to_master_called = false;
 
-	res = vsd_test.add_virtual_service( elem2 );
-	// unit_test[1] add_virtual_service 正常系２(vs2個め) 戻り値確認
-	BOOST_CHECK_EQUAL( res.flag, true );
-	// unit_test[1] add_virtual_service 正常系２(vs2個め) vslist数確認
-	BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 2);
+// 正常系２
 	{
+		l7vs::virtualservice_element	elem2;
+		elem2.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem2, err );
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) エラーコード確認
+		BOOST_CHECK( !err );
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) vslist数確認
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 2U );
 		// unit_test[1] add_virtual_service 正常系２(vs2個め) vslist内容確認
 		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.get_vslist().begin();
 		++itr;
@@ -168,21 +178,31 @@ void	add_virtual_service_test(){
 		// unit_test[1] add_virtual_service 正常系２(vs2個め) run確認
 		vsd_test.get_tg().join_all();
 		BOOST_CHECK_EQUAL( (*itr)->run_called, true );
+		// unit_test[1] add_virtual_service 正常系２(vs2個め) replication switch_to_master確認
+		BOOST_CHECK_EQUAL( rep->switch_to_master_called, false );
 	}
-	// unit_test[1] add_virtual_service 正常系２(vs2個め) replication switch_to_master確認
-	BOOST_CHECK_EQUAL( rep->switch_to_master_called, false );
 
 //異常系
-	// unit_test[1] add_virtual_service 異常系(既に同じvsがある場合) 戻り値確認
-	l7vs::virtualservice_element	elem3;
-	elem3.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
-	res = vsd_test.add_virtual_service( elem3 );
-	BOOST_CHECK_EQUAL( res.flag, false );
+	// unit_test[1] add_virtual_service 異常系(既に同じvsがある場合) エラーコード確認
+	{
+		l7vs::virtualservice_element	elem3;
+		elem3.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem3, err );
+		BOOST_CHECK( err );
+	}
 
 	// unit_test[1] add_virtual_service 異常系２(replicaitonがnullの場合) 戻り値確認
-	l7vsd_test			vsd_test2;
-	res = vsd_test2.add_virtual_service( elem );
-	BOOST_CHECK_EQUAL( res.flag, false );
+	{
+		l7vsd_test			vsd_test2;
+		l7vs::virtualservice_element	elem;
+		elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+
+		l7vs::error_code err;
+		vsd_test2.add_virtual_service( elem, err );
+		BOOST_CHECK( err );
+	}
 
 	// unit_test[1] add_virtual_service 異常系３(initialize失敗) 戻り値確認
 

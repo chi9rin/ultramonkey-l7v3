@@ -25,7 +25,8 @@ public:
 				:	receive_io( inreceive_io ),
 					switch_to_master_called(false) {} ;
 
-	int							initialize()	{}
+	int							initialize()
+	{ return 0; }
 	void						finalize()	{}
 	void						switch_to_master()	{ switch_to_master_called = true; }
 	void						switch_to_slave()	{}

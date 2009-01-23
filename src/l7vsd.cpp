@@ -14,13 +14,14 @@
 #include <boost/shared_ptr.hpp>
 
 #include "l7vsd.h"
+#include "error_code.h"
 
 // grobal function prototype
 static void	sig_exit_handler(int sig);
 static int	set_sighandler(int sig, void (*handler)(int));
 static int	set_sighandlers();
 static void	usage(FILE* p);
-static int	l7vsd_main( int, char* );
+int	l7vsd_main( int, char** );
 
 // grobal variables
 static bool	exit_requested = false;
@@ -28,12 +29,13 @@ static int	received_sig = 0;
 
 namespace l7vs{
 
+//! destractor
+l7vsd::~l7vsd(){}
+
 //! virtual_service list command
 //! @param[out]	arry of vs_element
 //! @return		l7vsd_operation_result
-l7vsd::l7vsd_operation_result	l7vsd::list_virtual_service( vsvec_type& out_vslist ){
-	l7vsd_operation_result	res;
-
+void	l7vsd::list_virtual_service( vsvec_type& out_vslist, error_code& err ){
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -43,15 +45,12 @@ l7vsd::l7vsd_operation_result	l7vsd::list_virtual_service( vsvec_type& out_vslis
 		 ++itr ){
 		out_vslist.push_back( (*itr)->get_element() );
 	}
-	return res;
 }
 
 //! virtual_service add command
 //! @param[in]	vs_element
 //! @return		l7vsd_operation_result
-l7vsd::l7vsd_operation_result	l7vsd::add_virtual_service( const virtualservice_element& in_vselement ){
-	l7vsd_operation_result	res;
-
+void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -61,29 +60,21 @@ l7vsd::l7vsd_operation_result	l7vsd::add_virtual_service( const virtualservice_e
 			std::string msg("replication pointer is null.");
 			Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
 	
-			res.flag = false;
-			res.message = msg;
-			return res;
+			err.setter( true, msg );
+			return;
 		}
 		// create virtualservice
 		boost::shared_ptr< virtual_service >
 			vsptr( new virtual_service( *this, *rep, in_vselement ) );
 
-		virtualservice_base::vs_operation_result	vsres;
 		// vs initialize
-		vsres = vsptr->initialize();
-		if( !vsres ){
-			res.flag = false;
-			res.message = vsres.message;
-			return res;
-		}
+		vsptr->initialize( err );
+		if( err )	return;
+
 		// set virtualservice
-		vsres = vsptr->set_virtualservice( in_vselement );
-		if( !vsres ){
-			res.flag = false;
-			res.message = vsres.message;
-			return res;
-		}
+		vsptr->set_virtualservice( in_vselement, err );
+		if( err )	return;
+
 		// create thread and run
 		vs_threads.create_thread( boost::bind( &virtual_service::run, vsptr ) );
 
@@ -99,29 +90,27 @@ l7vsd::l7vsd_operation_result	l7vsd::add_virtual_service( const virtualservice_e
 		std::string msg("virtual service already exist.");
 		Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
 
-		res.flag = false;
-		res.message = msg;
-		return res;
+		err.setter( true, msg );
+		return;
 	}
-	return res;
 }
 
 //! virtual_service del command
 //! @param[in]	vs_element
 //! @return		l7vsd_operation_result
-l7vsd::l7vsd_operation_result	l7vsd::del_virtual_service( const virtualservice_element& in_vselement ){
+void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
 }
 
 //! virtual_service edit command
 //! @param[in]	vs_element
 //! @return		l7vsd_operation_result
-l7vsd::l7vsd_operation_result	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement ){
+void	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
 }
 
 //! real_server add command
 //! @param[in]	vs_element
 //! @return		l7vsd_operation_result
-l7vsd::l7vsd_operation_result	l7vsd::add_real_server( const virtualservice_element& in_vselement ){
+void	l7vsd::add_real_server( const virtualservice_element& in_vselement, error_code& err ){
 }
 
 //! vs_list search function

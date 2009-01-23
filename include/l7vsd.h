@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
+#include "error_code.h"
 #include "command_receiver.h"
 #include "virtualservice_element.h"
 #include "virtualservice.h"
@@ -31,20 +32,7 @@ public:
 	typedef std::list< boost::shared_ptr< virtual_service > >	vslist_type;	//!< virtual service list typedef
 	typedef std::vector< virtualservice_element >				vsvec_type;		//!< virtual service element vector type
 
-	struct l7vsd_operation_result{
-		bool		flag;
-		std::string	message;
-		l7vsd_operation_result() : flag(true), message(""){}
-		bool	operator==( const l7vsd_operation_result& in )
-				{ return ( ( flag == in.flag ) && ( message == in.message ) ); }
-		bool	operator!=( const l7vsd_operation_result& in )
-				{ return ( ( flag != in.flag ) || ( message != in.message ) ); }
-		bool	operator!() const
-					{ return !flag; }
-		typedef void (*unspecified_bool_type)();
-		static void unspecified_bool_true() {}
-		operator unspecified_bool_type() const { return flag == 0 ? 0 : unspecified_bool_true; }
-	};
+	virtual	~l7vsd();
 
 protected:
 	boost::thread_group			vs_threads;			//!< virtual_service thread group
@@ -63,39 +51,39 @@ protected:
 								search_vslist( const virtualservice_element& );	//!< vs_list search function
 
 public:
-	l7vsd_operation_result		list_virtual_service( vsvec_type&  );	//!< virtual_service list command
+	void	list_virtual_service( vsvec_type&, error_code&  );	//!< virtual_service list command
 
-	l7vsd_operation_result		add_virtual_service( const virtualservice_element& );	//!< virtual_service add command
-	l7vsd_operation_result		del_virtual_service( const virtualservice_element& );	//!< virtual_service del command
-	l7vsd_operation_result		edit_virtual_service( const virtualservice_element& );	//!< virtual_service edit command
+	void	add_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service add command
+	void	del_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service del command
+	void	edit_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service edit command
 
-	l7vsd_operation_result		add_real_server( const virtualservice_element& );	//!< real_server add command
-	l7vsd_operation_result		del_real_server( const virtualservice_element& );	//!< real_server del command
-	l7vsd_operation_result		edit_real_server( const virtualservice_element& );	//!< real_server edit command
+	void	add_real_server( const virtualservice_element&, error_code& );	//!< real_server add command
+	void	del_real_server( const virtualservice_element&, error_code& );	//!< real_server del command
+	void	edit_real_server( const virtualservice_element&, error_code& );	//!< real_server edit command
 
-	l7vsd_operation_result		flush_virtual_service();	//!< all virtual_service delete command
+	void	flush_virtual_service( error_code& );	//!< all virtual_service delete command
 
-	l7vsd_operation_result		get_replication_info( replication::REPLICATION_MODE_TAG& );	//!< get replication info command
-	l7vsd_operation_result		start_replication();		//!< start replication command
-	l7vsd_operation_result		stop_replication();			//!< stop replication command
-	l7vsd_operation_result		dump_replication_memory();	//!< dump replication memory command
-	l7vsd_operation_result		force_replicate();			//!< force replicate command
+	void	get_replication_info( replication::REPLICATION_MODE_TAG&, error_code& );	//!< get replication info command
+	void	start_replication( error_code& );				//!< start replication command
+	void	stop_replication( error_code& );				//!< stop replication command
+	void	dump_replication_memory( error_code& );			//!< dump replication memory command
+	void	force_replicate( error_code& );					//!< force replicate command
 
-	l7vsd_operation_result		get_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG& );		//!< get loglevel command
-	l7vsd_operation_result		set_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG );	//!< set loglevel command
-	l7vsd_operation_result		set_log_level_all( const LOG_LEVEL_TAG );						//!< set all category loglevel command
+	void	get_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get loglevel command
+	void	set_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set loglevel command
+	void	set_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set all category loglevel command
 
-	l7vsd_operation_result		get_snmp_connect_status( int& );									//!< get snmp connect status command
-	l7vsd_operation_result		get_snmp_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG& );		//!< get snmp loglevel command
-	l7vsd_operation_result		set_snmp_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG );	//!< set snmp loglevel command
-	l7vsd_operation_result		set_snmp_log_level_all( const LOG_LEVEL_TAG );						//!< set snmp all loglevel command
+	void	get_snmp_connect_status( int&, error_code& );									//!< get snmp connect status command
+	void	get_snmp_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get snmp loglevel command
+	void	set_snmp_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set snmp loglevel command
+	void	set_snmp_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set snmp all loglevel command
 
-	l7vsd_operation_result		reload_parameter( const PARAMETER_COMPONENT_TAG );	//!< reload component parameter command
+	void	reload_parameter( const PARAMETER_COMPONENT_TAG, error_code& );	//!< reload component parameter command
 
-	void						run();		//!< l7vsd run method
+	void	run();		//!< l7vsd run method
 
 protected:
-	bool				is_exit_requested();		//!< check if exit requested
+	bool	is_exit_requested();		//!< check if exit requested
 
 };
 
