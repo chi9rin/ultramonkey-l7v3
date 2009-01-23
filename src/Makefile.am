@@ -39,10 +39,32 @@ l7vsd_SOURCES	=	\
 			../include/session_thread_control.h \
 			../include/virtualservice.h \
 			../include/virtualservice_element.h \
+			../include/data_buff_base.h \
+			../include/session_result_message.h \
+			../include/tcp_data.h \
+			../include/tcp_socket.h \
+			../include/tcp_realserver_connetc_socket_list.h \
+			../include/tcp_thread_message.h \
+			../include/tcp_thread_message_que.h \
+			../include/tcp_session.h \
+			../include/udp_data.h \
+			../include/udp_request.h \
+			../include/udp_request_thread_control.h \
+			../include/udp_session.h \
 			l7vsd.cpp \
 			protocol_module_control.cpp \
-			snmpbridge.c
-
+			snmpbridge.c \
+			data_buff_base.cpp \
+			tcp_data.cpp \
+			tcp_socket.cpp \
+			tcp_realserver_connect_socket_list.cpp \
+			tcp_thread_message.cpp \
+			tcp_thread_message_que.cpp \
+			udp_data.cpp \
+			udp_request_thread_control.cpp \
+			udp_request.cpp \
+			tcp_session.cpp \
+			udp_session.cpp
 l7vsd_LDADD	= \
 			../logger/libl7vsd_logger.a \
 			../parameter/libl7vsd_parameter.a \
