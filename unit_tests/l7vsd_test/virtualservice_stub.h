@@ -15,9 +15,28 @@ public:
 	virtualservice_element		element;
 
 	//for stub
-	bool	initialize_called;
-	bool	set_virtualservice_called;
-	bool	run_called;
+			bool	initialize_called;
+	static	bool	initialize_fail;
+			bool	set_virtualservice_called;
+	static	bool	set_virtualservice_fail;
+			bool	edit_virtualservice_called;
+	static	bool	edit_virtualservice_fail;
+
+			bool	add_realserver_called;
+	static	bool	add_realserver_fail;
+			bool	edit_realserver_called;
+	static	bool	edit_realserver_fail;
+			bool	del_realserver_called;
+	static	bool	del_realserver_fail;
+
+	static	bool	finalize_called;
+	static	bool	finalize_fail;
+	static	bool	stop_called;
+
+			bool	run_called;
+
+
+
 
 //function
 	virtual_service(	const l7vs::l7vsd& ,
@@ -25,17 +44,24 @@ public:
 						const virtualservice_element& )
 				:	initialize_called(false),
 					set_virtualservice_called(false),
+					edit_virtualservice_called(false),
+					add_realserver_called(false),
+					edit_realserver_called(false),
+					del_realserver_called(false),
 					run_called(false)
 				{}
 
 	~virtual_service()	{}
 
-	void						initialize( error_code& )
+	void						initialize( error_code& err )
 	{
 		initialize_called = true;
+		if( initialize_fail )	err.setter( true, "initialize_fail!" );
 	}
-	void						finalize( error_code& )
+	void						finalize( error_code& err )
 	{
+		finalize_called = true;
+		if( finalize_fail )	err.setter( true, "finalize_fail!" );
 	}
 	
 
@@ -43,26 +69,39 @@ public:
 //	bool						operator!=( const virtualservice_base& );
 
 
-	void						set_virtualservice( const virtualservice_element& in, error_code& ec )
+	void						set_virtualservice( const virtualservice_element& in, error_code& err )
 	{
 		element = in;
 		set_virtualservice_called = true;
+		if( set_virtualservice_fail )	err.setter( true, "set_virtualservice_fail!" );
 	}
 
-	void						edit_virtualserivce( const virtualservice_element& , error_code& )
+	void						edit_virtualservice( const virtualservice_element& in, error_code& err )
 	{
+		element = in;
+		edit_virtualservice_called = true;
+		if( edit_virtualservice_fail )	err.setter( true, "edit_virtualservice_fail!" );
 	}
 
-	void						add_realserver( const virtualservice_element& , error_code& )
+	void						add_realserver( const virtualservice_element& in, error_code& err )
 	{
+		element = in;
+		add_realserver_called = true;
+		if( add_realserver_fail )	err.setter( true, "add_realserver_fail!" );
 	}
 
-	void						edit_realserver( const virtualservice_element& , error_code& )
+	void						edit_realserver( const virtualservice_element& in, error_code& err )
 	{
+		element = in;
+		edit_realserver_called = true;
+		if( edit_realserver_fail )	err.setter( true, "edit_realserver_fail!" );
 	}
 
-	void						del_realserver( const virtualservice_element& , error_code& )
+	void						del_realserver( const virtualservice_element& in, error_code& err )
 	{
+		element = in;
+		del_realserver_called = true;
+		if( del_realserver_fail )	err.setter( true, "del_realserver_fail!" );
 	}
 
 	virtualservice_element&		get_element()
@@ -71,7 +110,7 @@ public:
 	void						run()
 	{ run_called = true; }
 	void						stop()
-	{}
+	{ stop_called = true; }
 
 // 	void		connection_active( const boost::asio::ip::tcp::endpoint& in );
 // 	void		connection_inactive( const boost::asio::ip::tcp::endpoint& in );
@@ -97,5 +136,18 @@ public:
 // 								get_schedule_module();
 
 };
+
+bool	virtual_service::initialize_fail(false);
+bool	virtual_service::set_virtualservice_fail(false);
+bool	virtual_service::edit_virtualservice_fail(false);
+
+bool	virtual_service::add_realserver_fail(false);
+bool	virtual_service::edit_realserver_fail(false);
+bool	virtual_service::del_realserver_fail(false);
+
+bool	virtual_service::finalize_called(false);
+bool	virtual_service::finalize_fail(false);
+bool	virtual_service::stop_called(false);
+
 }	//namespace	l7vs
 #endif	//VIRTUALSERVICE_H

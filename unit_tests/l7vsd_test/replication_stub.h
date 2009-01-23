@@ -18,18 +18,26 @@ public:
 //variable
 	boost::asio::io_service&				receive_io;
 	bool	switch_to_master_called;
-
+	bool	switch_to_slave_called;
 
 //function
 	replication(	boost::asio::io_service& inreceive_io )
 				:	receive_io( inreceive_io ),
-					switch_to_master_called(false) {} ;
+					switch_to_master_called(false),
+					switch_to_slave_called(false)
+	{};
 
 	int							initialize()
 	{ return 0; }
+
 	void						finalize()	{}
-	void						switch_to_master()	{ switch_to_master_called = true; }
-	void						switch_to_slave()	{}
+
+	void						switch_to_master()
+	{ switch_to_master_called = true; }
+
+	void						switch_to_slave()
+	{ switch_to_slave_called = true; }
+
 	void*						pay_memory( std::string& inid, unsigned int& outsize );
 	void						dump_memory();
 	void						start();

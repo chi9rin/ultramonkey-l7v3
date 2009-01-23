@@ -34,7 +34,7 @@ l7vsd::~l7vsd(){}
 
 //! virtual_service list command
 //! @param[out]	arry of vs_element
-//! @return		l7vsd_operation_result
+//! @param[out]	error_code
 void	l7vsd::list_virtual_service( vsvec_type& out_vslist, error_code& err ){
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
@@ -49,7 +49,7 @@ void	l7vsd::list_virtual_service( vsvec_type& out_vslist, error_code& err ){
 
 //! virtual_service add command
 //! @param[in]	vs_element
-//! @return		l7vsd_operation_result
+//! @param[out]	error_code
 void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
@@ -82,7 +82,7 @@ void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, err
 		vslist.push_back( vsptr );
 
 		// when first vs, replication switch to master
-		if( 1 == vslist.size() ){
+		if( 1U == vslist.size() ){
 			rep->switch_to_master();
 		}
 	}
@@ -97,25 +97,125 @@ void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, err
 
 //! virtual_service del command
 //! @param[in]	vs_element
-//! @return		l7vsd_operation_result
+//! @param[out]	error_code
 void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// vs stop
+		(*vsitr)->stop();
+		// vs finalize
+		(*vsitr)->finalize( err );
+		// remove from vslist
+		vslist.remove( *vsitr );
+
+		// when first vs, replication switch to slave
+		if( 0U == vslist.size() ){
+			rep->switch_to_slave();
+		}
+	}
+	else {
+		std::string msg("virtual service not found.");
+		Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+
+		err.setter( true, msg );
+		return;
+	}
 }
 
 //! virtual_service edit command
 //! @param[in]	vs_element
-//! @return		l7vsd_operation_result
+//! @param[out]	error_code
 void	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// edit virtualservice
+		(*vsitr)->edit_virtualservice( in_vselement, err );
+		if( err )	return;
+	}
+	else {
+		std::string msg("virtual service not found.");
+		Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+
+		err.setter( true, msg );
+		return;
+	}
 }
 
 //! real_server add command
 //! @param[in]	vs_element
-//! @return		l7vsd_operation_result
+//! @param[out]	error_code
 void	l7vsd::add_real_server( const virtualservice_element& in_vselement, error_code& err ){
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// add realserver
+		(*vsitr)->add_realserver( in_vselement, err );
+		if( err )	return;
+	}
+	else {
+		std::string msg("virtual service not found.");
+		Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+
+		err.setter( true, msg );
+		return;
+	}
+}
+
+//! real_server del command
+//! @param[in]	vs_element
+//! @param[out]	error_code
+void	l7vsd::del_real_server( const virtualservice_element& in_vselement, error_code& err ){
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// del realserver
+		(*vsitr)->del_realserver( in_vselement, err );
+		if( err )	return;
+	}
+	else {
+		std::string msg("virtual service not found.");
+		Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+
+		err.setter( true, msg );
+		return;
+	}
+}
+
+//! real_server edit command
+//! @param[in]	vs_element
+//! @param[out]	error_code
+void	l7vsd::edit_real_server( const virtualservice_element& in_vselement, error_code& err ){
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// del realserver
+		(*vsitr)->edit_realserver( in_vselement, err );
+		if( err )	return;
+	}
+	else {
+		std::string msg("virtual service not found.");
+		Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+
+		err.setter( true, msg );
+		return;
+	}
 }
 
 //! vs_list search function
 //! @param[in]	vs_element
-//! @return		vslist iterator
+//! @param[out]	error_code
 l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element& in_vselement ){
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();

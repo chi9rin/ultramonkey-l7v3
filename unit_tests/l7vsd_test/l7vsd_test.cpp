@@ -205,12 +205,259 @@ void	add_virtual_service_test(){
 	}
 
 	// unit_test[1] add_virtual_service 異常系３(initialize失敗) 戻り値確認
+	{
+		l7vs::virtualservice_element	elem4;
+		elem4.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "30.30.30.30:7777" );
+		l7vs::virtual_service::initialize_fail = true;
+
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem4, err );
+		BOOST_CHECK( err );
+
+		l7vs::virtual_service::initialize_fail = false;
+	}
 
 	// unit_test[1] add_virtual_service 異常系４(set_virtualservice失敗) 戻り値確認
+	{
+		l7vs::virtualservice_element	elem5;
+		elem5.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "40.40.40.40:6666" );
+		l7vs::virtual_service::set_virtualservice_fail = true;
+
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem5, err );
+		BOOST_CHECK( err );
+
+		l7vs::virtual_service::set_virtualservice_fail = false;
+	}
 
 	BOOST_MESSAGE( "----- add_virtual_service_test end -----" );
+}
+
+void	del_virtual_service_test(){
+	BOOST_MESSAGE( "----- del_virtual_service_test start -----" );
+
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	l7vs::virtualservice_element	elem;
+	elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+	l7vs::virtualservice_element	elem2;
+	elem2.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+
+// prepare vslist
+	{
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem, err );
+		vsd_test.add_virtual_service( elem2, err );
+	}
+
+// normal case
+	{
+		l7vs::virtual_service::stop_called = false;
+		l7vs::virtual_service::finalize_called = false;
+		l7vs::virtual_service::finalize_fail = false;
+
+		l7vs::error_code err;
+		vsd_test.del_virtual_service( elem, err );
+		// unit_test[1] del_virtual_service 正常系 エラーコード確認
+		BOOST_CHECK( !err );
+		// unit_test[1] del_virtual_service 正常系 vslistの数確認
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 1U );
+		// unit_test[1] del_virtual_service 正常系 stop確認
+		BOOST_CHECK_EQUAL( l7vs::virtual_service::stop_called, true );
+		// unit_test[1] del_virtual_service 正常系 finalize確認
+		BOOST_CHECK_EQUAL( l7vs::virtual_service::finalize_called, true );
+		// unit_test[1] del_virtual_service 正常系 replication switch_to_slave確認
+		BOOST_CHECK_EQUAL( rep->switch_to_slave_called, false );
+
+		l7vs::virtual_service::stop_called = false;
+		l7vs::virtual_service::finalize_called = false;
+		l7vs::virtual_service::finalize_fail = false;
+
+		vsd_test.del_virtual_service( elem2, err );
+		// unit_test[1] del_virtual_service 正常系２(最後のvs削除) エラーコード確認
+		BOOST_CHECK( !err );
+		// unit_test[1] del_virtual_service 正常系２(最後のvs削除) vslistの数確認
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 0U );
+		// unit_test[1] del_virtual_service 正常系２(最後のvs削除) stop確認
+		BOOST_CHECK_EQUAL( l7vs::virtual_service::stop_called, true );
+		// unit_test[1] del_virtual_service 正常系２(最後のvs削除) finalize確認
+		BOOST_CHECK_EQUAL( l7vs::virtual_service::finalize_called, true );
+		// unit_test[1] del_virtual_service 正常系２(最後のvs削除) replication switch_to_slave確認
+		BOOST_CHECK_EQUAL( rep->switch_to_slave_called, true );
+
+		l7vs::virtual_service::stop_called = false;
+		l7vs::virtual_service::finalize_called = false;
+		l7vs::virtual_service::finalize_fail = false;
+	}
+
+// error case 1
+	{
+		l7vs::error_code err;
+		vsd_test.del_virtual_service( elem, err );
+
+		// unit_test[1] del_virtual_service error_case 1(vslist empty) error_code check
+		BOOST_CHECK( err );
+		// unit_test[1] del_virtual_service error_case 1(vslist empty) vslist num check
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 0U );
+
+		l7vs::virtual_service::stop_called = false;
+		l7vs::virtual_service::finalize_called = false;
+		l7vs::virtual_service::finalize_fail = false;
+	}
+
+// vslist prepare
+	{
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem, err );
+	}
+
+// error case 2
+	{
+		l7vs::virtualservice_element	elem3;
+		elem3.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "30.30.30.30:7777" );
+
+		l7vs::error_code err;
+		vsd_test.del_virtual_service( elem3, err );
+		// unit_test[1] del_virtual_service 異常系(該当するvsが無い) エラーコード確認
+		BOOST_CHECK( err );
+		// unit_test[1] del_virtual_service 異常系(該当するvsが無い) vslistの数確認
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 1U );
+
+		l7vs::virtual_service::stop_called = false;
+		l7vs::virtual_service::finalize_called = false;
+		l7vs::virtual_service::finalize_fail = false;
+	}
+
+// error case 3
+	{
+		l7vs::virtual_service::finalize_fail = true;
+
+		l7vs::error_code err;
+		vsd_test.del_virtual_service( elem, err );
+		// unit_test[1] del_virtual_service 異常系２(finalizeでエラー) エラーコード確認
+		BOOST_CHECK( err );
+		// unit_test[1] del_virtual_service 異常系２(finalizeでエラー) vslistの数確認
+		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 0U );
+
+		l7vs::virtual_service::stop_called = false;
+		l7vs::virtual_service::finalize_called = false;
+		l7vs::virtual_service::finalize_fail = false;
+	}
+
+	BOOST_MESSAGE( "----- del_virtual_service_test end -----" );
 
 }
+
+void	edit_virtual_service_test(){
+	BOOST_MESSAGE( "----- edit_virtual_service_test start -----" );
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	l7vs::virtualservice_element	elem;
+	elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+
+// prepare vslist
+	{
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem, err );
+	}
+
+// normal case
+	{
+		l7vs::error_code err;
+		vsd_test.edit_virtual_service( elem, err );
+		// unit_test[1] edit_virtual_service normal_case erro_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] edit_virtual_service normal_case edit_virtual_service call check
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.get_vslist().begin();
+		BOOST_CHECK_EQUAL( (*itr)->edit_virtualservice_called, true );
+	}
+// error case
+	{
+		l7vs::virtual_service::edit_virtualservice_fail = true;
+
+		l7vs::error_code err;
+		vsd_test.edit_virtual_service( elem, err );
+		// unit_test[1] edit_virtual_service error_case(vs::edit_virtualservice fail) erro_code check
+		BOOST_CHECK( err );
+		l7vs::virtual_service::edit_virtualservice_fail = false;
+	}
+
+	{
+		l7vs::virtualservice_element	elem2;
+		elem2.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+
+		l7vs::error_code err;
+		vsd_test.edit_virtual_service( elem2, err );
+		// unit_test[1] edit_virtual_service error_case(no target vs found) erro_code check
+		BOOST_CHECK( err );
+	}
+
+	BOOST_MESSAGE( "----- edit_virtual_service_test end -----" );
+}
+
+void	add_real_server_test(){
+	BOOST_MESSAGE( "----- add_real_server_test start -----" );
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	l7vs::virtualservice_element	elem;
+	elem.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "10.10.10.10:9999" );
+
+// prepare vslist
+	{
+		l7vs::error_code err;
+		vsd_test.add_virtual_service( elem, err );
+	}
+
+// normal case
+	{
+		l7vs::error_code err;
+		vsd_test.add_real_server( elem, err );
+		// unit_test[1] add_real_server normal_case erro_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] add_real_server normal_case edit_virtual_service call check
+		l7vs::l7vsd::vslist_type::iterator itr = vsd_test.get_vslist().begin();
+		BOOST_CHECK_EQUAL( (*itr)->add_realserver_called, true );
+	}
+// error case
+	{
+		l7vs::virtual_service::add_realserver_fail = true;
+
+		l7vs::error_code err;
+		vsd_test.add_real_server( elem, err );
+		// unit_test[1] add_real_server error_case(vs::add_realserver fail) erro_code check
+		BOOST_CHECK( err );
+		l7vs::virtual_service::add_realserver_fail = false;
+	}
+
+	{
+		l7vs::virtualservice_element	elem2;
+		elem2.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( "20.20.20.20:8888" );
+
+		l7vs::error_code err;
+		vsd_test.add_real_server( elem2, err );
+		// unit_test[1] add_real_server error_case(no target vs found) erro_code check
+		BOOST_CHECK( err );
+	}
+
+	BOOST_MESSAGE( "----- add_real_server_test end -----" );
+}
+
+
 
 void	search_vslist_test(){
 	BOOST_MESSAGE( "----- search_vslist_test start -----" );
@@ -491,6 +738,11 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &list_virtual_service_test ) );
 	ts->add( BOOST_TEST_CASE( &search_vslist_test ) );
 	ts->add( BOOST_TEST_CASE( &add_virtual_service_test ) );
+	ts->add( BOOST_TEST_CASE( &del_virtual_service_test ) );
+	ts->add( BOOST_TEST_CASE( &edit_virtual_service_test ) );
+	ts->add( BOOST_TEST_CASE( &add_real_server_test ) );
+
+
 
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
