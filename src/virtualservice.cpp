@@ -72,7 +72,7 @@ bool	virtualservice_tcp::operator!=( const virtualservice_base& in ){ return tru
 void	virtualservice_tcp::set_virtualservice( const virtualservice_element& in, error_code& err ){
 	err.setter( true, "" );
 }
-void	virtualservice_tcp::edit_virtualserivce( const virtualservice_element& in, error_code& err ){
+void	virtualservice_tcp::edit_virtualservice( const virtualservice_element& in, error_code& err ){
 	err.setter( true, "" );
 }
 
@@ -117,7 +117,7 @@ bool	virtualservice_udp::operator!=( const virtualservice_base& in ){ return tru
 void	virtualservice_udp::set_virtualservice( const virtualservice_element& in, error_code& err ){
 	err.setter( true, "" );
 }
-void	virtualservice_udp::edit_virtualserivce( const virtualservice_element& in, error_code& err ){
+void	virtualservice_udp::edit_virtualservice( const virtualservice_element& in, error_code& err ){
 	err.setter( true, "" );
 }
 
@@ -161,8 +161,8 @@ bool	virtual_service::operator!=( const virtualservice_base& in ){ return vs->op
 void	virtual_service::set_virtualservice( const virtualservice_element& in, error_code& err ){
 	vs->set_virtualservice( in, err );
 }
-void	virtual_service::edit_virtualserivce( const virtualservice_element& in, error_code& err ){
-	vs->edit_virtualserivce( in, err );
+void	virtual_service::edit_virtualservice( const virtualservice_element& in, error_code& err ){
+	vs->edit_virtualservice( in, err );
 }
 
 void	virtual_service::add_realserver( const virtualservice_element& in, error_code& err ){

@@ -25,13 +25,13 @@
 #include "udp_session.h"
 #include "virtualservice_element.h"
 
-//#include "stub.h"
+#include "stub.h"
 
-#include "l7vsd.h"
+//#include "l7vsd.h"
 #include "realserver.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
-#include "replication.h"
+//#include "replication.h"
 
 #define	SESSION_POOL_NUM_DEFAULT	256
 
@@ -118,7 +118,7 @@ public:
 	void						rs_list_unlock();
 
 	virtual	void				set_virtualservice( const virtualservice_element&, error_code& ) = 0;
-	virtual	void				edit_virtualserivce( const virtualservice_element&, error_code& ) = 0;
+	virtual	void				edit_virtualservice( const virtualservice_element&, error_code& ) = 0;
 
 	virtual	void				add_realserver( const virtualservice_element&, error_code& ) = 0;
 	virtual	void				edit_realserver( const virtualservice_element&, error_code& ) = 0;
@@ -179,7 +179,7 @@ public:
 	bool						operator!=( const virtualservice_base& );
 
 	void						set_virtualservice( const virtualservice_element&, error_code& );
-	void						edit_virtualserivce( const virtualservice_element&, error_code& );
+	void						edit_virtualservice( const virtualservice_element&, error_code& );
 
 	void						add_realserver( const virtualservice_element&, error_code& );
 	void						edit_realserver( const virtualservice_element&, error_code& );
@@ -214,7 +214,7 @@ public:
 	bool						operator!=( const virtualservice_base& );
 
 	void						set_virtualservice( const virtualservice_element&, error_code& );
-	void						edit_virtualserivce( const virtualservice_element&, error_code& );
+	void						edit_virtualservice( const virtualservice_element&, error_code& );
 
 	void						add_realserver( const virtualservice_element&, error_code& );
 	void						edit_realserver( const virtualservice_element&, error_code& );
@@ -244,7 +244,7 @@ public:
 	bool						operator!=( const virtualservice_base& );
 
 	void						set_virtualservice( const virtualservice_element& , error_code& );
-	void						edit_virtualserivce( const virtualservice_element& , error_code& );
+	void						edit_virtualservice( const virtualservice_element& , error_code& );
 
 	void						add_realserver( const virtualservice_element& , error_code& );
 	void						edit_realserver( const virtualservice_element& , error_code& );
