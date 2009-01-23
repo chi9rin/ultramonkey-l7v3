@@ -56,7 +56,15 @@ l7vsadm_DEPENDENCIES = ../logger/libl7vsadm_logger.a \
 	../parameter/libl7vsadm_parameter.a
 am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
 	l7vsd-protocol_module_control.$(OBJEXT) \
-	l7vsd-snmpbridge.$(OBJEXT)
+	l7vsd-snmpbridge.$(OBJEXT) l7vsd-data_buff_base.$(OBJEXT) \
+	l7vsd-tcp_data.$(OBJEXT) l7vsd-tcp_socket.$(OBJEXT) \
+	l7vsd-tcp_realserver_connect_socket_list.$(OBJEXT) \
+	l7vsd-tcp_thread_message.$(OBJEXT) \
+	l7vsd-tcp_thread_message_que.$(OBJEXT) \
+	l7vsd-udp_data.$(OBJEXT) \
+	l7vsd-udp_request_thread_control.$(OBJEXT) \
+	l7vsd-udp_request.$(OBJEXT) l7vsd-tcp_session.$(OBJEXT) \
+	l7vsd-udp_session.$(OBJEXT)
 l7vsd_OBJECTS = $(am_l7vsd_OBJECTS)
 l7vsd_DEPENDENCIES = ../logger/libl7vsd_logger.a \
 	../parameter/libl7vsd_parameter.a
@@ -226,9 +234,32 @@ l7vsd_SOURCES = \
 			../include/session_thread_control.h \
 			../include/virtualservice.h \
 			../include/virtualservice_element.h \
+			../include/data_buff_base.h \
+			../include/session_result_message.h \
+			../include/tcp_data.h \
+			../include/tcp_socket.h \
+			../include/tcp_realserver_connetc_socket_list.h \
+			../include/tcp_thread_message.h \
+			../include/tcp_thread_message_que.h \
+			../include/tcp_session.h \
+			../include/udp_data.h \
+			../include/udp_request.h \
+			../include/udp_request_thread_control.h \
+			../include/udp_session.h \
 			l7vsd.cpp \
 			protocol_module_control.cpp \
-			snmpbridge.c
+			snmpbridge.c \
+			data_buff_base.cpp \
+			tcp_data.cpp \
+			tcp_socket.cpp \
+			tcp_realserver_connect_socket_list.cpp \
+			tcp_thread_message.cpp \
+			tcp_thread_message_que.cpp \
+			udp_data.cpp \
+			udp_request_thread_control.cpp \
+			udp_request.cpp \
+			tcp_session.cpp \
+			udp_session.cpp
 
 l7vsd_LDADD = \
 			../logger/libl7vsd_logger.a \
@@ -341,9 +372,20 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-l7vsadm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-protocol_module_control.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-data_buff_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-l7vsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-protocol_module_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-snmpbridge.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_session.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_thread_message.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_thread_message_que.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_request.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_request_thread_control.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_session.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -456,6 +498,160 @@ l7vsd-protocol_module_control.obj: protocol_module_control.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocol_module_control.cpp' object='l7vsd-protocol_module_control.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-protocol_module_control.obj `if test -f 'protocol_module_control.cpp'; then $(CYGPATH_W) 'protocol_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/protocol_module_control.cpp'; fi`
+
+l7vsd-data_buff_base.o: data_buff_base.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-data_buff_base.o -MD -MP -MF "$(DEPDIR)/l7vsd-data_buff_base.Tpo" -c -o l7vsd-data_buff_base.o `test -f 'data_buff_base.cpp' || echo '$(srcdir)/'`data_buff_base.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-data_buff_base.Tpo" "$(DEPDIR)/l7vsd-data_buff_base.Po"; else rm -f "$(DEPDIR)/l7vsd-data_buff_base.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_buff_base.cpp' object='l7vsd-data_buff_base.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-data_buff_base.o `test -f 'data_buff_base.cpp' || echo '$(srcdir)/'`data_buff_base.cpp
+
+l7vsd-data_buff_base.obj: data_buff_base.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-data_buff_base.obj -MD -MP -MF "$(DEPDIR)/l7vsd-data_buff_base.Tpo" -c -o l7vsd-data_buff_base.obj `if test -f 'data_buff_base.cpp'; then $(CYGPATH_W) 'data_buff_base.cpp'; else $(CYGPATH_W) '$(srcdir)/data_buff_base.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-data_buff_base.Tpo" "$(DEPDIR)/l7vsd-data_buff_base.Po"; else rm -f "$(DEPDIR)/l7vsd-data_buff_base.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_buff_base.cpp' object='l7vsd-data_buff_base.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-data_buff_base.obj `if test -f 'data_buff_base.cpp'; then $(CYGPATH_W) 'data_buff_base.cpp'; else $(CYGPATH_W) '$(srcdir)/data_buff_base.cpp'; fi`
+
+l7vsd-tcp_data.o: tcp_data.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_data.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_data.Tpo" -c -o l7vsd-tcp_data.o `test -f 'tcp_data.cpp' || echo '$(srcdir)/'`tcp_data.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_data.Tpo" "$(DEPDIR)/l7vsd-tcp_data.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_data.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_data.cpp' object='l7vsd-tcp_data.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_data.o `test -f 'tcp_data.cpp' || echo '$(srcdir)/'`tcp_data.cpp
+
+l7vsd-tcp_data.obj: tcp_data.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_data.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_data.Tpo" -c -o l7vsd-tcp_data.obj `if test -f 'tcp_data.cpp'; then $(CYGPATH_W) 'tcp_data.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_data.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_data.Tpo" "$(DEPDIR)/l7vsd-tcp_data.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_data.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_data.cpp' object='l7vsd-tcp_data.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_data.obj `if test -f 'tcp_data.cpp'; then $(CYGPATH_W) 'tcp_data.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_data.cpp'; fi`
+
+l7vsd-tcp_socket.o: tcp_socket.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_socket.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_socket.Tpo" -c -o l7vsd-tcp_socket.o `test -f 'tcp_socket.cpp' || echo '$(srcdir)/'`tcp_socket.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_socket.Tpo" "$(DEPDIR)/l7vsd-tcp_socket.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_socket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_socket.cpp' object='l7vsd-tcp_socket.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_socket.o `test -f 'tcp_socket.cpp' || echo '$(srcdir)/'`tcp_socket.cpp
+
+l7vsd-tcp_socket.obj: tcp_socket.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_socket.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_socket.Tpo" -c -o l7vsd-tcp_socket.obj `if test -f 'tcp_socket.cpp'; then $(CYGPATH_W) 'tcp_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_socket.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_socket.Tpo" "$(DEPDIR)/l7vsd-tcp_socket.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_socket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_socket.cpp' object='l7vsd-tcp_socket.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_socket.obj `if test -f 'tcp_socket.cpp'; then $(CYGPATH_W) 'tcp_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_socket.cpp'; fi`
+
+l7vsd-tcp_realserver_connect_socket_list.o: tcp_realserver_connect_socket_list.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_realserver_connect_socket_list.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo" -c -o l7vsd-tcp_realserver_connect_socket_list.o `test -f 'tcp_realserver_connect_socket_list.cpp' || echo '$(srcdir)/'`tcp_realserver_connect_socket_list.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo" "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_realserver_connect_socket_list.cpp' object='l7vsd-tcp_realserver_connect_socket_list.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_realserver_connect_socket_list.o `test -f 'tcp_realserver_connect_socket_list.cpp' || echo '$(srcdir)/'`tcp_realserver_connect_socket_list.cpp
+
+l7vsd-tcp_realserver_connect_socket_list.obj: tcp_realserver_connect_socket_list.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_realserver_connect_socket_list.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo" -c -o l7vsd-tcp_realserver_connect_socket_list.obj `if test -f 'tcp_realserver_connect_socket_list.cpp'; then $(CYGPATH_W) 'tcp_realserver_connect_socket_list.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_realserver_connect_socket_list.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo" "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_realserver_connect_socket_list.cpp' object='l7vsd-tcp_realserver_connect_socket_list.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_realserver_connect_socket_list.obj `if test -f 'tcp_realserver_connect_socket_list.cpp'; then $(CYGPATH_W) 'tcp_realserver_connect_socket_list.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_realserver_connect_socket_list.cpp'; fi`
+
+l7vsd-tcp_thread_message.o: tcp_thread_message.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_thread_message.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_thread_message.Tpo" -c -o l7vsd-tcp_thread_message.o `test -f 'tcp_thread_message.cpp' || echo '$(srcdir)/'`tcp_thread_message.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_thread_message.Tpo" "$(DEPDIR)/l7vsd-tcp_thread_message.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_thread_message.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_thread_message.cpp' object='l7vsd-tcp_thread_message.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_thread_message.o `test -f 'tcp_thread_message.cpp' || echo '$(srcdir)/'`tcp_thread_message.cpp
+
+l7vsd-tcp_thread_message.obj: tcp_thread_message.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_thread_message.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_thread_message.Tpo" -c -o l7vsd-tcp_thread_message.obj `if test -f 'tcp_thread_message.cpp'; then $(CYGPATH_W) 'tcp_thread_message.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_thread_message.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_thread_message.Tpo" "$(DEPDIR)/l7vsd-tcp_thread_message.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_thread_message.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_thread_message.cpp' object='l7vsd-tcp_thread_message.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_thread_message.obj `if test -f 'tcp_thread_message.cpp'; then $(CYGPATH_W) 'tcp_thread_message.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_thread_message.cpp'; fi`
+
+l7vsd-tcp_thread_message_que.o: tcp_thread_message_que.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_thread_message_que.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" -c -o l7vsd-tcp_thread_message_que.o `test -f 'tcp_thread_message_que.cpp' || echo '$(srcdir)/'`tcp_thread_message_que.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" "$(DEPDIR)/l7vsd-tcp_thread_message_que.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_thread_message_que.cpp' object='l7vsd-tcp_thread_message_que.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_thread_message_que.o `test -f 'tcp_thread_message_que.cpp' || echo '$(srcdir)/'`tcp_thread_message_que.cpp
+
+l7vsd-tcp_thread_message_que.obj: tcp_thread_message_que.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_thread_message_que.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" -c -o l7vsd-tcp_thread_message_que.obj `if test -f 'tcp_thread_message_que.cpp'; then $(CYGPATH_W) 'tcp_thread_message_que.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_thread_message_que.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" "$(DEPDIR)/l7vsd-tcp_thread_message_que.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_thread_message_que.cpp' object='l7vsd-tcp_thread_message_que.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_thread_message_que.obj `if test -f 'tcp_thread_message_que.cpp'; then $(CYGPATH_W) 'tcp_thread_message_que.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_thread_message_que.cpp'; fi`
+
+l7vsd-udp_data.o: udp_data.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_data.o -MD -MP -MF "$(DEPDIR)/l7vsd-udp_data.Tpo" -c -o l7vsd-udp_data.o `test -f 'udp_data.cpp' || echo '$(srcdir)/'`udp_data.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_data.Tpo" "$(DEPDIR)/l7vsd-udp_data.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_data.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_data.cpp' object='l7vsd-udp_data.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_data.o `test -f 'udp_data.cpp' || echo '$(srcdir)/'`udp_data.cpp
+
+l7vsd-udp_data.obj: udp_data.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_data.obj -MD -MP -MF "$(DEPDIR)/l7vsd-udp_data.Tpo" -c -o l7vsd-udp_data.obj `if test -f 'udp_data.cpp'; then $(CYGPATH_W) 'udp_data.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_data.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_data.Tpo" "$(DEPDIR)/l7vsd-udp_data.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_data.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_data.cpp' object='l7vsd-udp_data.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_data.obj `if test -f 'udp_data.cpp'; then $(CYGPATH_W) 'udp_data.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_data.cpp'; fi`
+
+l7vsd-udp_request_thread_control.o: udp_request_thread_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_request_thread_control.o -MD -MP -MF "$(DEPDIR)/l7vsd-udp_request_thread_control.Tpo" -c -o l7vsd-udp_request_thread_control.o `test -f 'udp_request_thread_control.cpp' || echo '$(srcdir)/'`udp_request_thread_control.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_request_thread_control.Tpo" "$(DEPDIR)/l7vsd-udp_request_thread_control.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_request_thread_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_request_thread_control.cpp' object='l7vsd-udp_request_thread_control.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_request_thread_control.o `test -f 'udp_request_thread_control.cpp' || echo '$(srcdir)/'`udp_request_thread_control.cpp
+
+l7vsd-udp_request_thread_control.obj: udp_request_thread_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_request_thread_control.obj -MD -MP -MF "$(DEPDIR)/l7vsd-udp_request_thread_control.Tpo" -c -o l7vsd-udp_request_thread_control.obj `if test -f 'udp_request_thread_control.cpp'; then $(CYGPATH_W) 'udp_request_thread_control.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_request_thread_control.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_request_thread_control.Tpo" "$(DEPDIR)/l7vsd-udp_request_thread_control.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_request_thread_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_request_thread_control.cpp' object='l7vsd-udp_request_thread_control.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_request_thread_control.obj `if test -f 'udp_request_thread_control.cpp'; then $(CYGPATH_W) 'udp_request_thread_control.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_request_thread_control.cpp'; fi`
+
+l7vsd-udp_request.o: udp_request.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_request.o -MD -MP -MF "$(DEPDIR)/l7vsd-udp_request.Tpo" -c -o l7vsd-udp_request.o `test -f 'udp_request.cpp' || echo '$(srcdir)/'`udp_request.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_request.Tpo" "$(DEPDIR)/l7vsd-udp_request.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_request.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_request.cpp' object='l7vsd-udp_request.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_request.o `test -f 'udp_request.cpp' || echo '$(srcdir)/'`udp_request.cpp
+
+l7vsd-udp_request.obj: udp_request.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_request.obj -MD -MP -MF "$(DEPDIR)/l7vsd-udp_request.Tpo" -c -o l7vsd-udp_request.obj `if test -f 'udp_request.cpp'; then $(CYGPATH_W) 'udp_request.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_request.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_request.Tpo" "$(DEPDIR)/l7vsd-udp_request.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_request.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_request.cpp' object='l7vsd-udp_request.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_request.obj `if test -f 'udp_request.cpp'; then $(CYGPATH_W) 'udp_request.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_request.cpp'; fi`
+
+l7vsd-tcp_session.o: tcp_session.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_session.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_session.Tpo" -c -o l7vsd-tcp_session.o `test -f 'tcp_session.cpp' || echo '$(srcdir)/'`tcp_session.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_session.Tpo" "$(DEPDIR)/l7vsd-tcp_session.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_session.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_session.cpp' object='l7vsd-tcp_session.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_session.o `test -f 'tcp_session.cpp' || echo '$(srcdir)/'`tcp_session.cpp
+
+l7vsd-tcp_session.obj: tcp_session.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_session.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_session.Tpo" -c -o l7vsd-tcp_session.obj `if test -f 'tcp_session.cpp'; then $(CYGPATH_W) 'tcp_session.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_session.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_session.Tpo" "$(DEPDIR)/l7vsd-tcp_session.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_session.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_session.cpp' object='l7vsd-tcp_session.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_session.obj `if test -f 'tcp_session.cpp'; then $(CYGPATH_W) 'tcp_session.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_session.cpp'; fi`
+
+l7vsd-udp_session.o: udp_session.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_session.o -MD -MP -MF "$(DEPDIR)/l7vsd-udp_session.Tpo" -c -o l7vsd-udp_session.o `test -f 'udp_session.cpp' || echo '$(srcdir)/'`udp_session.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_session.Tpo" "$(DEPDIR)/l7vsd-udp_session.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_session.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_session.cpp' object='l7vsd-udp_session.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_session.o `test -f 'udp_session.cpp' || echo '$(srcdir)/'`udp_session.cpp
+
+l7vsd-udp_session.obj: udp_session.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_session.obj -MD -MP -MF "$(DEPDIR)/l7vsd-udp_session.Tpo" -c -o l7vsd-udp_session.obj `if test -f 'udp_session.cpp'; then $(CYGPATH_W) 'udp_session.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_session.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-udp_session.Tpo" "$(DEPDIR)/l7vsd-udp_session.Po"; else rm -f "$(DEPDIR)/l7vsd-udp_session.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='udp_session.cpp' object='l7vsd-udp_session.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-udp_session.obj `if test -f 'udp_session.cpp'; then $(CYGPATH_W) 'udp_session.cpp'; else $(CYGPATH_W) '$(srcdir)/udp_session.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
