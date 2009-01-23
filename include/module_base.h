@@ -12,6 +12,10 @@
 #define	MODULE_BASE_H
 
 #include <string>
+#include <boost/asio.hpp>
+#include <boost/function.hpp>
+
+#include "logger.h"
 
 namespace l7vs{
 
