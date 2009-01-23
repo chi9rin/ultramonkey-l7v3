@@ -59,11 +59,11 @@ protected:
 	//! @param size_t&				header offset
 	//! @param size_t&				header length
 	//! @return bool				find is true. not find is false
-	bool	find_http_header(	const char*, const size_t, const string&, size_t&, size_t& );
+	bool	find_http_header(	const char*, const size_t, const std::string&, size_t&, size_t& );
 
 public:
 	//! constractor
-	http_protocol_module_base(){};
+	http_protocol_module_base( std::string in_modulename ) : protocol_module_base( in_modulename ){};
 	//! destractor
 	virtual	~http_protocol_module_base(){};
 };
