@@ -1,19 +1,26 @@
+//
+//!	@file	store_mibdata.cpp
+//!	@brief	net-snmp mibdata stored source
+//
+//	copyright(c) sdy corporation.2008
+//	mail: h.okada at sdy.co.jp
+//	Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
+//
+//	Distributed under the Boost Software License, Version 1.0. (See accompanying
+//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #include "store_mibdata.h"
 
-vsdata*
-l7ag_store_mibdata::getVS_first_data_point()
-{
+vsdata*	l7ag_store_mibdata::getVS_first_data_point(){
     return &vsdatalist.front();
 }
 
-std::vector<vsdata>::iterator
-l7ag_store_mibdata::getVS_first_data_iterator(){
+std::vector<vsdata>::iterator	l7ag_store_mibdata::getVS_first_data_iterator(){
     return vsdatalist.begin();
 }
 
-vsdata*
-l7ag_store_mibdata::getVS_data_point(std::vector<vsdata>::iterator in_it)
-{
+vsdata*	l7ag_store_mibdata::getVS_data_point(std::vector<vsdata>::iterator in_it){
     if (vsdatalist.end() == in_it) {
         return NULL;
     }
@@ -25,24 +32,18 @@ l7ag_store_mibdata::getVS_data_point(std::vector<vsdata>::iterator in_it)
     return NULL;
 }
 
-std::size_t
-l7ag_store_mibdata::getVSdatacount()
-{
+std::size_t	l7ag_store_mibdata::getVSdatacount(){
     return vsdatalist.size();
 }
 
-vsdata*
-l7ag_store_mibdata::getVSmibdata(std::size_t n)
-{
+vsdata*	l7ag_store_mibdata::getVSmibdata(std::size_t n){
     if (vsdatalist.size() <= n) {
         return NULL;
     }
     return &vsdatalist[n];
 }
 
-vsdata*
-l7ag_store_mibdata::updateVSmibdata(std::size_t n, l7ag_mibdata_payload_vs* in_data)
-{
+vsdata*	l7ag_store_mibdata::updateVSmibdata(std::size_t n, l7ag_mibdata_payload_vs* in_data){
     oid   index[1];
     netsnmp_table_row *row;
 
@@ -50,7 +51,7 @@ l7ag_store_mibdata::updateVSmibdata(std::size_t n, l7ag_mibdata_payload_vs* in_d
         return NULL;
     }
     if (in_data == NULL) {
-        for (int i = vsdatalist.size(); i > n; i--) {
+        for (size_t i = vsdatalist.size(); i > n; i--) {
             index[0] = i;
             row = netsnmp_table_data_get_from_oid(vs_table_set->table, index, 1);
             netsnmp_table_dataset_remove_and_delete_row(vs_table_set, row);
@@ -143,9 +144,7 @@ l7ag_store_mibdata::updateVSmibdata(std::size_t n, l7ag_mibdata_payload_vs* in_d
     return &vsdatalist[n];
 }
 
-bool
-l7ag_store_mibdata::addVSmibdata(l7ag_mibdata_payload_vs* in_data)
-{
+bool	l7ag_store_mibdata::addVSmibdata(l7ag_mibdata_payload_vs* in_data){
     oid   index[1];
     netsnmp_table_row *row;
     vsdata    data;
@@ -239,12 +238,10 @@ l7ag_store_mibdata::addVSmibdata(l7ag_mibdata_payload_vs* in_data)
     return true;
 }
 
-void
-l7ag_store_mibdata::clearVSmibdata()
-{
+void	l7ag_store_mibdata::clearVSmibdata(){
     oid   index[1];
     netsnmp_table_row *row;
-    for (int i = 1; i <= vsdatalist.size(); i++) {
+    for (size_t i = 1; i <= vsdatalist.size(); i++) {
         index[0] = i;
         row = netsnmp_table_data_get_from_oid(vs_table_set->table, index, 1);
         netsnmp_table_dataset_remove_and_delete_row(vs_table_set, row);
@@ -252,19 +249,15 @@ l7ag_store_mibdata::clearVSmibdata()
     vsdatalist.clear();
 }
 
-rsdata*
-l7ag_store_mibdata::getRS_first_data_point()
-{
+rsdata*	l7ag_store_mibdata::getRS_first_data_point(){
     return &rsdatalist.front();
 }
 
-rsdata*
-l7ag_store_mibdata::getRS_data_point(std::vector<rsdata>::iterator in_it)
-{
+rsdata*	l7ag_store_mibdata::getRS_data_point(std::vector<rsdata>::iterator in_it){
     if (rsdatalist.end() == in_it) {
         return NULL;
     }
-    for (unsigned int i = 0; i < rsdatalist.size(); i++) {
+    for (size_t i = 0; i < rsdatalist.size(); i++) {
         if (rsdatalist[i].index == in_it->index) {
             return &rsdatalist[i];
         }
@@ -273,30 +266,22 @@ l7ag_store_mibdata::getRS_data_point(std::vector<rsdata>::iterator in_it)
     return NULL;
 }
 
-std::vector<rsdata>::iterator
-l7ag_store_mibdata::getRS_first_data_iterator()
-{
+std::vector<rsdata>::iterator	l7ag_store_mibdata::getRS_first_data_iterator(){
     return rsdatalist.begin();
 }
 
-std::size_t
-l7ag_store_mibdata::getRSdatacount()
-{
+std::size_t	l7ag_store_mibdata::getRSdatacount(){
     return rsdatalist.size();
 }
 
-rsdata*
-l7ag_store_mibdata::getRSmibdata(std::size_t n)
-{
+rsdata*	l7ag_store_mibdata::getRSmibdata(std::size_t n){
     if (rsdatalist.size() <= n) {
         return NULL;
     }
     return &rsdatalist[n];
 }
 
-rsdata*
-l7ag_store_mibdata::updateRSmibdata(std::size_t n, l7ag_mibdata_payload_rs* in_data)
-{
+rsdata*	l7ag_store_mibdata::updateRSmibdata(std::size_t n, l7ag_mibdata_payload_rs* in_data){
     oid   index[1];
     netsnmp_table_row *row;
 
@@ -304,7 +289,7 @@ l7ag_store_mibdata::updateRSmibdata(std::size_t n, l7ag_mibdata_payload_rs* in_d
         return NULL;
     }
     if (in_data == NULL) {
-        for (int i = rsdatalist.size(); i > n; i--) {
+        for (size_t i = rsdatalist.size(); i > n; i--) {
             index[0] = i;
             row = netsnmp_table_data_get_from_oid(rs_table_set->table, index, 1);
             netsnmp_table_dataset_remove_and_delete_row(rs_table_set, row);
@@ -349,9 +334,7 @@ l7ag_store_mibdata::updateRSmibdata(std::size_t n, l7ag_mibdata_payload_rs* in_d
     return &rsdatalist[n];
 }
 
-bool
-l7ag_store_mibdata::addRSmibdata(l7ag_mibdata_payload_rs* in_data)
-{
+bool	l7ag_store_mibdata::addRSmibdata(l7ag_mibdata_payload_rs* in_data){
     oid   index[1];
     netsnmp_table_row *row;
     rsdata data;
@@ -398,12 +381,10 @@ l7ag_store_mibdata::addRSmibdata(l7ag_mibdata_payload_rs* in_data)
     return true;
 }
 
-void
-l7ag_store_mibdata::clearRSmibdata()
-{
+void	l7ag_store_mibdata::clearRSmibdata(){
     oid   index[1];
     netsnmp_table_row *row;
-    for (int i = 1; i <= rsdatalist.size(); i++) {
+    for (size_t i = 1; i <= rsdatalist.size(); i++) {
         index[0] = i;
         row = netsnmp_table_data_get_from_oid(rs_table_set->table, index, 1);
         netsnmp_table_dataset_remove_and_delete_row(rs_table_set, row);
@@ -411,95 +392,77 @@ l7ag_store_mibdata::clearRSmibdata()
     rsdatalist.clear();
 }
 
-l7vsd_log_level*
-l7ag_store_mibdata::getVsdLogmibdata()
-{
+l7vsd_log_level*	l7ag_store_mibdata::getVsdLogmibdata(){
     return &vsd_log;
 }
 
-l7vsadm_log_level*
-l7ag_store_mibdata::getVsadmLogmibdata()
-{
+l7vsadm_log_level*	l7ag_store_mibdata::getVsadmLogmibdata(){
     return &adm_log;
 }
 
-l7snmpagent_log_level*
-l7ag_store_mibdata::getAgentLogmibdata()
-{
+l7snmpagent_log_level*	l7ag_store_mibdata::getAgentLogmibdata(){
     return &snmp_log;
 }
 
-l7_status*
-l7ag_store_mibdata::getStatmibdata()
-{
+l7_status*	l7ag_store_mibdata::getStatmibdata(){
     return &status;
 }
 
-void
-l7ag_store_mibdata::clearVsdLogmibdata()
-{
-    vsd_log.network                 = LOG_LV_NONE;
-    vsd_log.networkBandwidth        = LOG_LV_NONE;
-    vsd_log.networkNumConnection    = LOG_LV_NONE;
-    vsd_log.networkQoS              = LOG_LV_NONE;
-    vsd_log.virtualService          = LOG_LV_NONE;
-    vsd_log.realServer              = LOG_LV_NONE;
-    vsd_log.realServerBalancing     = LOG_LV_NONE;
-    vsd_log.sorryServer             = LOG_LV_NONE;
-    vsd_log.replication             = LOG_LV_NONE;
-    vsd_log.startStop               = LOG_LV_NONE;
-    vsd_log.system                  = LOG_LV_NONE;
-    vsd_log.systemMemory            = LOG_LV_NONE;
-    vsd_log.systemSocket            = LOG_LV_NONE;
-    vsd_log.systemSignal            = LOG_LV_NONE;
-    vsd_log.environment             = LOG_LV_NONE;
-    vsd_log.environmentParameter    = LOG_LV_NONE;
-    vsd_log.logger                  = LOG_LV_NONE;
-    vsd_log.parameter               = LOG_LV_NONE;
-    vsd_log.event                   = LOG_LV_NONE;
-    vsd_log.schedule                = LOG_LV_NONE;
-    vsd_log.program                 = LOG_LV_NONE;
-    vsd_log.protocol                = LOG_LV_NONE;
-    vsd_log.module                  = LOG_LV_NONE;
+void	l7ag_store_mibdata::clearVsdLogmibdata(){
+    vsd_log.network                 = l7vs::LOG_LV_NONE;
+    vsd_log.networkBandwidth        = l7vs::LOG_LV_NONE;
+    vsd_log.networkNumConnection    = l7vs::LOG_LV_NONE;
+    vsd_log.networkQoS              = l7vs::LOG_LV_NONE;
+    vsd_log.virtualService          = l7vs::LOG_LV_NONE;
+    vsd_log.realServer              = l7vs::LOG_LV_NONE;
+    vsd_log.realServerBalancing     = l7vs::LOG_LV_NONE;
+    vsd_log.sorryServer             = l7vs::LOG_LV_NONE;
+    vsd_log.replication             = l7vs::LOG_LV_NONE;
+    vsd_log.startStop               = l7vs::LOG_LV_NONE;
+    vsd_log.system                  = l7vs::LOG_LV_NONE;
+    vsd_log.systemMemory            = l7vs::LOG_LV_NONE;
+    vsd_log.systemSocket            = l7vs::LOG_LV_NONE;
+    vsd_log.systemSignal            = l7vs::LOG_LV_NONE;
+    vsd_log.environment             = l7vs::LOG_LV_NONE;
+    vsd_log.environmentParameter    = l7vs::LOG_LV_NONE;
+    vsd_log.logger                  = l7vs::LOG_LV_NONE;
+    vsd_log.parameter               = l7vs::LOG_LV_NONE;
+    vsd_log.event                   = l7vs::LOG_LV_NONE;
+    vsd_log.schedule                = l7vs::LOG_LV_NONE;
+    vsd_log.program                 = l7vs::LOG_LV_NONE;
+    vsd_log.protocol                = l7vs::LOG_LV_NONE;
+    vsd_log.module                  = l7vs::LOG_LV_NONE;
 }
 
-void
-l7ag_store_mibdata::clearVsadmLogmibdata()
-{
-    adm_log.parse           = LOG_LV_NONE;
-    adm_log.operate         = LOG_LV_NONE;
-    adm_log.communicate     = LOG_LV_NONE;
-    adm_log.configResult    = LOG_LV_NONE;
-    adm_log.common          = LOG_LV_NONE;
-    adm_log.logger          = LOG_LV_NONE;
-    adm_log.parameter       = LOG_LV_NONE;
-    adm_log.protocol        = LOG_LV_NONE;
-    adm_log.module          = LOG_LV_NONE;
+void	l7ag_store_mibdata::clearVsadmLogmibdata(){
+    adm_log.parse           = l7vs::LOG_LV_NONE;
+    adm_log.operate         = l7vs::LOG_LV_NONE;
+    adm_log.communicate     = l7vs::LOG_LV_NONE;
+    adm_log.configResult    = l7vs::LOG_LV_NONE;
+    adm_log.common          = l7vs::LOG_LV_NONE;
+    adm_log.logger          = l7vs::LOG_LV_NONE;
+    adm_log.parameter       = l7vs::LOG_LV_NONE;
+    adm_log.protocol        = l7vs::LOG_LV_NONE;
+    adm_log.module          = l7vs::LOG_LV_NONE;
 }
 
-void
-l7ag_store_mibdata::clearAgentLogmibdata()
-{
-    snmp_log.startStop      = LOG_LV_NONE;
-    snmp_log.managerReceive = LOG_LV_NONE;
-    snmp_log.managerSend    = LOG_LV_NONE;
-    snmp_log.l7vsdReceive   = LOG_LV_NONE;
-    snmp_log.l7vsdSend      = LOG_LV_NONE;
-    snmp_log.logger         = LOG_LV_NONE;
-    snmp_log.parameter      = LOG_LV_NONE;
+void	l7ag_store_mibdata::clearAgentLogmibdata(){
+    snmp_log.startStop      = l7vs::LOG_LV_NONE;
+    snmp_log.managerReceive = l7vs::LOG_LV_NONE;
+    snmp_log.managerSend    = l7vs::LOG_LV_NONE;
+    snmp_log.l7vsdReceive   = l7vs::LOG_LV_NONE;
+    snmp_log.l7vsdSend      = l7vs::LOG_LV_NONE;
+    snmp_log.logger         = l7vs::LOG_LV_NONE;
+    snmp_log.parameter      = l7vs::LOG_LV_NONE;
 }
 
-void
-l7ag_store_mibdata::clearStatmibdata()
-{
+void	l7ag_store_mibdata::clearStatmibdata(){
     memset(&status.message, 0, DISPLAYSTRING_LEN);
     status.snmpAgent    = UNKNOWN; 
-    status.replication  = REPLICATION_OUT;
+//	status.replication  = l7vs::replication::REPLICATION_OUT;
 }
 
-void
-l7ag_store_mibdata::setVsdLogmibdata(l7vsd_log_level log)
-{
+void	l7ag_store_mibdata::setVsdLogmibdata(l7vsd_log_level log){
     vsd_log.network                 = log.network;
     vsd_log.networkBandwidth        = log.networkBandwidth;
     vsd_log.networkNumConnection    = log.networkNumConnection;
@@ -525,9 +488,7 @@ l7ag_store_mibdata::setVsdLogmibdata(l7vsd_log_level log)
     vsd_log.module                  = log.module;
 }
 
-void
-l7ag_store_mibdata::setVsadmLogmibdata(l7vsadm_log_level log)
-{
+void	l7ag_store_mibdata::setVsadmLogmibdata(l7vsadm_log_level log){
     adm_log.parse           = log.parse;
     adm_log.operate         = log.operate;
     adm_log.communicate     = log.communicate;
@@ -539,9 +500,7 @@ l7ag_store_mibdata::setVsadmLogmibdata(l7vsadm_log_level log)
     adm_log.module          = log.module;
 }
 
-void
-l7ag_store_mibdata::setAgentLogmibdata(l7snmpagent_log_level log)
-{
+void	l7ag_store_mibdata::setAgentLogmibdata(l7snmpagent_log_level log){
     snmp_log.startStop      = log.startStop;
     snmp_log.managerReceive = log.managerReceive;
     snmp_log.managerSend    = log.managerSend;
@@ -551,22 +510,16 @@ l7ag_store_mibdata::setAgentLogmibdata(l7snmpagent_log_level log)
     snmp_log.parameter      = log.parameter;
 }
 
-void
-l7ag_store_mibdata::setStatmibdata(l7_status stat)
-{
+void	l7ag_store_mibdata::setStatmibdata(l7_status stat){
     memcpy(&status.message, &stat.message, strnlen(stat.message, DISPLAYSTRING_LEN));
     status.snmpAgent    = stat.snmpAgent; 
-    status.replication  = stat.replication;
+// 	status.replication  = stat.replication;
 }
 
-void
-l7ag_store_mibdata::setVsTableSet(netsnmp_table_data_set* table_set)
-{
+void	l7ag_store_mibdata::setVsTableSet(netsnmp_table_data_set* table_set){
     vs_table_set = table_set;
 }
 
-void
-l7ag_store_mibdata::setRsTableSet(netsnmp_table_data_set* table_set)
-{
+void	l7ag_store_mibdata::setRsTableSet(netsnmp_table_data_set* table_set){
     rs_table_set = table_set;
 }

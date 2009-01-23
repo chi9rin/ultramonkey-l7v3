@@ -1,13 +1,12 @@
 #include <signal.h>
+#include <sstream>
+#include <string>
 
-#include "logger_wrapper.h"
-#include "parameter_wrapper.h"
+#include "logger.h"
+#include "parameter.h"
 #include "subagent.h"
 
 using namespace l7vs;
-
-Logger      Logger::instance;
-Parameter   Parameter::instance;
 
 l7ag_subagent* subagent;
 
@@ -48,26 +47,25 @@ set_sighandler(int sig, void (*handler)(int))
 static int
 set_sighandlers()
 {
-    if( LOG_LV_DEBUG == logger_get_log_level( LOG_CAT_SNMPAGENT_START_STOP ) ){
-        char debugstr[DEBUG_STR_LEN];
-        sprintf( debugstr, "in_function set_sighandler()" );
-        LOGGER_PUT_LOG_DEBUG( LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr );
+	l7vs::Logger	logger;
+    if( LOG_LV_DEBUG == logger.getLogLevel( l7vs::LOG_CAT_SNMPAGENT_START_STOP ) ){
+        std::string debugstr( "in_function set_sighandler()" );
+        logger.putLogDebug( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr, __FILE__, __LINE__ );
     }
 
     int ret;
 
-#define SET_SIGHANDLER(sig, handler)                                            \
-    do {                                                                        \
-        ret = set_sighandler((sig), (handler));                                 \
-        if (ret < 0) {                                                          \
-            if (LOG_LV_DEBUG == logger_get_log_level(LOG_CAT_L7VSD_PROGRAM)) {  \
-                LOGGER_PUT_LOG_DEBUG(LOG_CAT_L7VSD_PROGRAM, 0,                  \
-                    "out_function: static int set_sighandlers(void) "           \
-                    "return_value: %d",                                         \
-                    ret);                                                       \
-            }                                                                   \
-            return ret;                                                         \
-        }                                                                       \
+#define SET_SIGHANDLER(sig, handler)                                                                    \
+    do {                                                                                                \
+        ret = set_sighandler((sig), (handler));                                                         \
+        if (ret < 0) {                                                                                  \
+			if (LOG_LV_DEBUG == logger.getLogLevel(l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL)) {            \
+				std::ostringstream str; \
+				str << "out_function: static int set_sighandlers(void) return_value: " << ret; \
+				logger.putLogDebug(l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL, 0, str.str(), __FILE__, __LINE__ );      \
+            }                                                                                           \
+            return ret;                                                                                 \
+        }                                                                                               \
     } while (0)
 
     SET_SIGHANDLER( SIGHUP,  handler_sig_exit );
@@ -81,10 +79,9 @@ set_sighandlers()
 
 #undef SET_SIGHANDLER
 
-    if( LOG_LV_DEBUG == logger_get_log_level( LOG_CAT_SNMPAGENT_START_STOP ) ){
-        char debugstr[DEBUG_STR_LEN];
-        sprintf( debugstr, "out_function set_sighandler()" );
-        LOGGER_PUT_LOG_DEBUG( LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr );
+    if( LOG_LV_DEBUG == logger.getLogLevel( l7vs::LOG_CAT_SNMPAGENT_START_STOP ) ){
+        std::string debugstr( "out_function set_sighandler()" );
+        logger.putLogDebug( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr, __FILE__, __LINE__ );
     }
     return 0;
 }
@@ -97,12 +94,13 @@ set_sighandlers()
 int
 main(int argc, char* argv[])
 {
-    LOGGER_PUT_LOG_INFO( LOG_CAT_SNMPAGENT_START_STOP, 0, "start l7snmpagent" );
+	l7vs::Logger	logger;
+    logger.putLogInfo( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, "start l7snmpagent", __FILE__, __LINE__ );
 
-    if( LOG_LV_DEBUG == logger_get_log_level( LOG_CAT_SNMPAGENT_START_STOP ) ){
-        char debugstr[DEBUG_STR_LEN];
+    if( LOG_LV_DEBUG == logger.getLogLevel( l7vs::LOG_CAT_SNMPAGENT_START_STOP ) ){
+        std::string debugstr;
         // TODO set debugstr
-        LOGGER_PUT_LOG_DEBUG( LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr );
+        logger.putLogDebug( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr, __FILE__, __LINE__ );
     }
 
     set_sighandlers();
@@ -117,7 +115,7 @@ main(int argc, char* argv[])
         // TODO error log
     }
 
-    LOGGER_PUT_LOG_INFO( LOG_CAT_SNMPAGENT_START_STOP, 0, "stop l7snmpagent" );
+    logger.putLogInfo( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, "stop l7snmpagent", __FILE__, __LINE__ );
 
     delete subagent;
     subagent = NULL;

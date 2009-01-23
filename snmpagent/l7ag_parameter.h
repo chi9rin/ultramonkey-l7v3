@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "logger_wrapper.h"
+#include "logger.h"
 
 struct	l7ag_parameter{
 	std::string	nic;
@@ -12,7 +12,7 @@ struct	l7ag_parameter{
 	int		portno;
 	int		interval;
 	int		status;    // TODO remove status
-	std::map<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>	loglevel;
+	std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>	loglevel;
 };
 
 #endif	//__L7AG_PARAMETER_H__

@@ -14,7 +14,7 @@ class l7ag_subagent
 {
 private:
     l7ag_parameter snmpparam;
-    std::map<std::string,LOG_LEVEL_TAG> levelstring_map;
+    std::map<std::string,l7vs::LOG_LEVEL_TAG> levelstring_map;
 
     bool            stop_flag;
     THREAD_STAT_TAG stat;           // TODO no need? set only STOP. no read.

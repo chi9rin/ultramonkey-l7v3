@@ -16,8 +16,6 @@
 #define SLEEPNANOTIME       (1000000)
 #define DISPATCH_LOOP_COUNT (10)
 
-static int debbb = 0; //TODO
-
 /*!
  *
  */
@@ -275,7 +273,8 @@ l7ag_dispatcher::process_mib_collect_response_rs( void* p_data ){
  */
 void
 l7ag_dispatcher::change_loglevel( unsigned long long category, unsigned long long loglevel ){
-    logger_set_log_level( static_cast<l7vs::LOG_CATEGORY_TAG>(category), static_cast<l7vs::LOG_LEVEL_TAG>(loglevel) );
+	l7vs::Logger	logger;
+	logger.setLogLevel( static_cast<l7vs::LOG_CATEGORY_TAG>(category), static_cast<l7vs::LOG_LEVEL_TAG>(loglevel) );
 }
 
 /*!
@@ -283,7 +282,8 @@ l7ag_dispatcher::change_loglevel( unsigned long long category, unsigned long lon
  */
 void
 l7ag_dispatcher::reload_configure(){
-    parameter_reread_file( l7vs::PARAM_COMP_SNMPAGENT );
+	l7vs::Parameter		parameter;
+	parameter.read_file( l7vs::PARAM_COMP_SNMPAGENT );
 }
 
 void

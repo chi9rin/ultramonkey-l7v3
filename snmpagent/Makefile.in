@@ -206,11 +206,12 @@ l7snmpagent_SOURCES = \
 				subagent.cpp \
 				l7snmpagent.cpp 
 
-l7snmpagent_CPPFLAGS = -O2 -Wall -Werror -g -I../include -I../logger -I../parameter -I/usr/include/ucd-snmp -DLOGGER_PROCESS_SNM
+l7snmpagent_CPPFLAGS = -O2 -Wall -Werror -g -pthread -I../include -I../logger -I../parameter -I/usr/include/ucd-snmp -DLOGGER_PROCESS_SNM
 l7snmpagent_LDADD = \
 				../logger/libsnmpagent_logger.a \
 				../parameter/libsnmpagent_parameter.a \
 				-llog4cxx \
+				-lboost_thread-gcc41-mt \
 				$(SNMPAGENT_OPTS) \
 				-lrt
 

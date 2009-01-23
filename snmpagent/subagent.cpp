@@ -1,7 +1,8 @@
 #include <sstream>
 #include <sys/time.h>
 
-#include "parameter_wrapper.h"
+#include "error_code.h"
+#include "parameter.h"
 #include "subagent.h"
 #include "netsnmp_bridge.h"
 
@@ -111,34 +112,31 @@ l7ag_subagent::stop()
 void
 l7ag_subagent::reload_config()
 {
+	l7vs::Parameter		param;
+	l7vs::error_code	err;
     //パラメータの読み込み
     //NIC
-    if( parameter_is_char_exist( PARAM_COMP_SNMPAGENT, "nic" ) ){
-        snmpparam.nic = parameter_get_char_value( PARAM_COMP_SNMPAGENT, "nic" );
-    }else{
-        snmpparam.nic = NIC_DEFAULT;
-    }
+	snmpparam.nic = param.get_string( l7vs::PARAM_COMP_SNMPAGENT, "nic", err );
+	if( err ){
+		snmpparam.nic = NIC_DEFAULT;
+	}
     //EndPoint
-    if( parameter_is_char_exist( PARAM_COMP_SNMPAGENT, "ip_addr" ) ){
-        snmpparam.address = parameter_get_char_value( PARAM_COMP_SNMPAGENT, "ip_addr" );
-    }else{
+	snmpparam.address = param.get_string( l7vs::PARAM_COMP_SNMPAGENT, "ip_addr", err );
+	if( err ){
         snmpparam.address = ADDR_DEFAULT;
     }
-    if( parameter_is_int_exist( PARAM_COMP_SNMPAGENT, "port" ) ){
-        snmpparam.portno = parameter_get_int_value( PARAM_COMP_SNMPAGENT, "port" );
-    }else{
+	snmpparam.portno = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "port", err );
+	if( err ){
         snmpparam.portno = PORT_DEFAULT;
     }
     //RequestInterval
-    if( parameter_is_int_exist( PARAM_COMP_SNMPAGENT, "interval" ) ){
-        snmpparam.interval = parameter_get_int_value( PARAM_COMP_SNMPAGENT, "interval" );
-    }else{
+	snmpparam.interval = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "interval", err );
+	if( err ){
         snmpparam.interval = INTERVAL_DEFAULT;
     }
     //status
-    if( parameter_is_int_exist( PARAM_COMP_SNMPAGENT, "status" ) ){
-        snmpparam.status = parameter_get_int_value( PARAM_COMP_SNMPAGENT, "status" );
-    }else{
+	snmpparam.status = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "status", err );
+	if( err ){
         snmpparam.status = 0;
     }
 
@@ -149,49 +147,87 @@ l7ag_subagent::reload_config()
 void
 l7ag_subagent::load_loglevel()
 {
+	l7vs::Parameter		param;
+	l7vs::error_code	err;
+	std::string			tmpstr;
     //log level 取得
     snmpparam.loglevel.clear();
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_start_stop" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_START_STOP, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_start_stop" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_START_STOP, LOG_LV_INFO) );
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_start_stop", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_START_STOP,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_START_STOP,
+			l7vs::LOG_LV_INFO) );
+	}
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_manager_receive", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,
+			l7vs::LOG_LV_INFO ) );
+	}
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_manager_send", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND,
+			l7vs::LOG_LV_INFO ) );
+	}
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_l7vsd_receive", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,
+			l7vs::LOG_LV_INFO ) );
+	}
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_l7vsd_send", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND,
+			l7vs::LOG_LV_INFO ) );
     }
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_manager_receive" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_MANAGER_RECEIVE, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_manager_receive" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_MANAGER_RECEIVE, LOG_LV_INFO ) );
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_logger", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_LOGGER,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_LOGGER,
+			l7vs::LOG_LV_INFO ) );
     }
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_manager_send" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_MANAGER_SEND, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_manager_send" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_MANAGER_SEND, LOG_LV_INFO ) );
-    }
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_l7vsd_receive" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_L7VSD_RECEIVE, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_l7vsd_receive" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_L7VSD_RECEIVE, LOG_LV_INFO ) );
-    }
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_l7vsd_send" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_L7VSD_SEND, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_l7vsd_send" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_L7VSD_SEND, LOG_LV_INFO ) );
-    }
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_logger" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_LOGGER, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_logger" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_LOGGER, LOG_LV_INFO ) );
-    }
-    //
-    if( parameter_is_char_exist( PARAM_COMP_LOGGER, "snmpagent_parameter" ) ){
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_PARAMETER, levelstring_map[parameter_get_char_value( PARAM_COMP_LOGGER, "snmpagent_parameter" )] ) );
-    }else{
-        snmpparam.loglevel.insert( std::pair<LOG_CATEGORY_TAG,LOG_LEVEL_TAG>( LOG_CAT_SNMPAGENT_PARAMETER, LOG_LV_INFO ) );
+
+	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_parameter", err );
+	if( !err ){
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_PARAMETER,
+			levelstring_map[tmpstr] ) );
+	}else{
+		snmpparam.loglevel.insert(
+			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_PARAMETER,
+			l7vs::LOG_LV_INFO ) );
     }
 }
 
@@ -199,9 +235,9 @@ void
 l7ag_subagent::loglevelmap_init(){
     //loglevelのテーブル作成
     levelstring_map.clear();
-    levelstring_map.insert( std::pair<std::string,LOG_LEVEL_TAG>("debug",LOG_LV_DEBUG) );
-    levelstring_map.insert( std::pair<std::string,LOG_LEVEL_TAG>("info",LOG_LV_INFO) );
-    levelstring_map.insert( std::pair<std::string,LOG_LEVEL_TAG>("warn",LOG_LV_WARN) );
-    levelstring_map.insert( std::pair<std::string,LOG_LEVEL_TAG>("error",LOG_LV_ERROR) );
-    levelstring_map.insert( std::pair<std::string,LOG_LEVEL_TAG>("fatal",LOG_LV_FATAL) );
+    levelstring_map.insert( std::pair<std::string,l7vs::LOG_LEVEL_TAG>("debug",l7vs::LOG_LV_DEBUG) );
+    levelstring_map.insert( std::pair<std::string,l7vs::LOG_LEVEL_TAG>("info",l7vs::LOG_LV_INFO) );
+    levelstring_map.insert( std::pair<std::string,l7vs::LOG_LEVEL_TAG>("warn",l7vs::LOG_LV_WARN) );
+    levelstring_map.insert( std::pair<std::string,l7vs::LOG_LEVEL_TAG>("error",l7vs::LOG_LV_ERROR) );
+    levelstring_map.insert( std::pair<std::string,l7vs::LOG_LEVEL_TAG>("fatal",l7vs::LOG_LV_FATAL) );
 }

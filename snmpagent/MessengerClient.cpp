@@ -27,7 +27,7 @@ MessengerClient::run( void* inClass ) {
         }
 
         if (msgClPtr->connect()) {
-            size_t recvsize = recv( msgClPtr->socketfd, &buffer, READBUFSIZE, 0 );
+            ssize_t recvsize = recv( msgClPtr->socketfd, &buffer, READBUFSIZE, 0 );
             if (recvsize == -1) {
                 if (EAGAIN != errno) {
                     // TODO error

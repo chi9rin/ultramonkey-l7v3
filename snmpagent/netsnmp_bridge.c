@@ -367,7 +367,7 @@ handle_um7LogVsdNetwork(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->network,
-                                 sizeof(LOG_LEVEL_TAG)  );
+                                 sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -391,7 +391,7 @@ handle_um7LogVsdNetworkBandwidth(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->networkBandwidth,
-                                 sizeof(LOG_LEVEL_TAG)  );
+                                 sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -416,7 +416,7 @@ handle_um7LogVsdNetworkNumConnection(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->networkNumConnection,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -441,7 +441,7 @@ handle_um7LogVsdNetworkQoS(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->networkQoS,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -466,7 +466,7 @@ handle_um7LogVsdVirtualService(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->virtualService,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -491,7 +491,7 @@ handle_um7LogVsdRealServer(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->realServer,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -516,7 +516,7 @@ handle_um7LogVsdRealServerBalancing(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->realServerBalancing,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -541,7 +541,7 @@ handle_um7LogVsdSorryServer(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->sorryServer,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -566,7 +566,7 @@ handle_um7LogVsdReplication(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->replication,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -591,7 +591,7 @@ handle_um7LogVsdStartStop(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->startStop,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -616,7 +616,7 @@ handle_um7LogVsdSystem(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->system,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -640,7 +640,7 @@ handle_um7LogVsdSystemMemory(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->systemMemory,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -665,7 +665,7 @@ handle_um7LogVsdSystemSocket(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->systemSocket,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -690,7 +690,7 @@ handle_um7LogVsdSystemSignal(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->systemSignal,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -715,7 +715,7 @@ handle_um7LogVsdEnvironment(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->environment,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -740,7 +740,7 @@ handle_um7LogVsdEnvironmentParameter(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->environmentParameter,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -765,7 +765,7 @@ handle_um7LogVsdLogger(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->logger,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -789,7 +789,7 @@ handle_um7LogVsdParameter(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->parameter,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -814,7 +814,7 @@ handle_um7LogVsdEvent(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->event,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -838,7 +838,7 @@ handle_um7LogVsdSchedule(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->schedule,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -863,7 +863,7 @@ handle_um7LogVsdProgram(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->program,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -887,7 +887,7 @@ handle_um7LogVsdProtocol(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->protocol,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -912,7 +912,7 @@ handle_um7LogVsdModule(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->module,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -936,7 +936,7 @@ handle_um7LogVsadmParse(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->parse,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -960,7 +960,7 @@ handle_um7LogVsadmOperate(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->operate,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -985,7 +985,7 @@ handle_um7LogVsadmCommunicate(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->communicate,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1010,7 +1010,7 @@ handle_um7LogVsadmConfigResult(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->configResult,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1035,7 +1035,7 @@ handle_um7LogVsadmCommon(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->common,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1060,7 +1060,7 @@ handle_um7LogVsadmLogger(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->logger,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1085,7 +1085,7 @@ handle_um7LogVsadmParameter(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->parameter,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1110,7 +1110,7 @@ handle_um7LogVsadmProtocol(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->protocol,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1135,7 +1135,7 @@ handle_um7LogVsadmModule(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->module,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1160,7 +1160,7 @@ handle_um7LogSnmpStartStop(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->startStop,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1185,7 +1185,7 @@ handle_um7LogSnmpManagerReceive(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->managerReceive,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1210,7 +1210,7 @@ handle_um7LogSnmpManagerSend(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->managerSend,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1235,7 +1235,7 @@ handle_um7LogSnmpL7vsdReceive(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->l7vsdReceive,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1260,7 +1260,7 @@ handle_um7LogSnmpL7vsdSend(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->l7vsdSend,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1285,7 +1285,7 @@ handle_um7LogSnmpLogger(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->logger,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1309,7 +1309,7 @@ handle_um7LogSnmpParameter(netsnmp_mib_handler *handler,
     case MODE_GET:
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &log->parameter,
-                                  sizeof(LOG_LEVEL_TAG)  );
+                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
         break;
 
     default:
@@ -1352,13 +1352,13 @@ handle_um7StatReplication(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info *reqinfo,
                           netsnmp_request_info *requests)
 {
-    struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
+//     struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
 
     switch (reqinfo->mode) {
     case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+/*        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
                                  (u_char *) &stat->replication,
-                                  sizeof(REPLICATION_MODE_TAG)  );
+                                  sizeof(REPLICATION_MODE_TAG)  );*/
         break;
 
     default:
@@ -1575,8 +1575,8 @@ send_um7StateAlert_trap()
     netsnmp_variable_list *var_list = NULL;
     oid             um7StateAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 1 };
-    oid             um7StatReplication_oid[] =
-        { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 2, 0 };
+/*    oid             um7StatReplication_oid[] =
+        { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 2, 0 };*/
     oid             um7StatSnmpAgent_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 3, 0 };
 
@@ -1590,11 +1590,11 @@ send_um7StateAlert_trap()
                               sizeof(um7StateAlert_oid));
 
     struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
-    snmp_varlist_add_variable(&var_list,
+/*    snmp_varlist_add_variable(&var_list,
                               um7StatReplication_oid,
                               OID_LENGTH(um7StatReplication_oid),
                               ASN_INTEGER, (u_char*) &stat->replication,
-                              sizeof(REPLICATION_MODE_TAG));
+                              sizeof(REPLICATION_MODE_TAG));*/
     snmp_varlist_add_variable(&var_list,
                               um7StatSnmpAgent_oid,
                               OID_LENGTH(um7StatSnmpAgent_oid),
@@ -1621,10 +1621,10 @@ send_um7VirtualServiceAlert_trap()
     netsnmp_variable_list *var_list = NULL;
     oid             um7VirtualServiceAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 2 };
-    oid             um7VirtualServiceTable_oid[] =
-        { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 0 };
-    oid             um7RealServerTable_oid[] =
-        { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 2, 0 };
+//     oid             um7VirtualServiceTable_oid[] =
+//         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 0 };
+//     oid             um7RealServerTable_oid[] =
+//         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 2, 0 };
 
     /*
      * Set the snmpTrapOid.0 value
@@ -1711,8 +1711,8 @@ send_um7LogLevelAlert_trap()
     netsnmp_variable_list *var_list = NULL;
     oid             um7LogLevelAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 4 };
-    oid             um7LogLevel_oid[] =
-        { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, /* insert index here */  };
+//     oid             um7LogLevel_oid[] =
+//         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, /* insert index here */  };
 
     /*
      * Set the snmpTrapOid.0 value
@@ -1927,7 +1927,7 @@ getL7vsdData(unsigned int clientreg, void *clientarg) {
     if (!clientarg) return;
     MessengerClient* message = (MessengerClient*) clientarg;
 
-    unsigned long long buf_size = sizeof(struct l7ag_message_header)
+    long long buf_size = sizeof(struct l7ag_message_header)
                                 + sizeof(struct l7ag_payload_header)
                                 + sizeof(struct l7ag_mibrequest_message);
     char* sendbuf = (char*) calloc(1, buf_size);
