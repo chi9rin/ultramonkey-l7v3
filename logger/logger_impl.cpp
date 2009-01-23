@@ -42,7 +42,7 @@
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
 #include "logger_impl.h"
-#include "parameter.h"
+#include "parameter_impl.h"
 #include "strict_time_based_rolling_policy.h"
 #include "time_and_size_based_rolling_policy.h"
 
@@ -529,6 +529,8 @@ void l7vs::LoggerImpl::loadConf(){
 	using namespace log4cxx;
 	using namespace l7vs;
 
+	ParameterImpl& param = ParameterImpl::get_instance();
+
 	// Connection category Logger setting.
 	normal_log_property.log_filename_key				= LOGGER_LOG_FILENAME_KEY;
 	normal_log_property.rotation_key					= LOGGER_ROTATION_KEY;
@@ -545,8 +547,6 @@ void l7vs::LoggerImpl::loadConf(){
 	access_log_property.rotation_timing_value_key		= LOGGER_CONN_ROTATION_TIMING_VALUE_KEY;
 
 	//get normal log filename
-	Parameter param;
-
 	appender_property* property = &normal_log_property;
 
 	for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
