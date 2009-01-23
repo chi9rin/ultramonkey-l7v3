@@ -49,32 +49,19 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_l7snmpagent_OBJECTS = l7snmpagent-dispatch_message.$(OBJEXT) \
-	l7snmpagent-l7ag_socket.$(OBJEXT) \
-	l7snmpagent-interproccom.$(OBJEXT) \
-	l7snmpagent-proc_mibcollectmessage.$(OBJEXT) \
-	l7snmpagent-proc_settingrequest.$(OBJEXT) \
-	l7snmpagent-proc_trapsendrequest.$(OBJEXT) \
-	l7snmpagent-queue_sendtrap.$(OBJEXT) \
+am_l7snmpagent_OBJECTS = l7snmpagent-MessengerClient.$(OBJEXT) \
+	l7snmpagent-dispatcher.$(OBJEXT) \
 	l7snmpagent-store_mibdata.$(OBJEXT) \
+	l7snmpagent-netsnmp_bridge.$(OBJEXT) \
 	l7snmpagent-subagent.$(OBJEXT) \
-	l7snmpagent-watch_l7vsd.$(OBJEXT) \
 	l7snmpagent-l7snmpagent.$(OBJEXT)
 l7snmpagent_OBJECTS = $(am_l7snmpagent_OBJECTS)
 am__DEPENDENCIES_1 =
-l7snmpagent_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../logger/libsnmpagent_logger.a ../parameter/libparameter.a
+l7snmpagent_DEPENDENCIES = ../logger/libsnmpagent_logger.a \
+	../parameter/libsnmpagent_parameter.a $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CXXFLAGS) $(CXXFLAGS)
-CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
@@ -83,6 +70,14 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(l7snmpagent_SOURCES)
 DIST_SOURCES = $(l7snmpagent_SOURCES)
 ETAGS = etags
@@ -117,11 +112,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GLIB_CFLAGS = @GLIB_CFLAGS@
-GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
-GLIB_LIBS = @GLIB_LIBS@
-GLIB_MKENUMS = @GLIB_MKENUMS@
-GOBJECT_QUERY = @GOBJECT_QUERY@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -133,6 +123,7 @@ LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MANDIR = @MANDIR@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -141,7 +132,6 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -179,7 +169,8 @@ host_vendor = @host_vendor@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
-l7vs_maxvs = @l7vs_maxvs@
+l7vs_config = @l7vs_config@
+l7vs_max_buffer_size = @l7vs_max_buffer_size@
 l7vs_moddir = @l7vs_moddir@
 l7vsadm_sockdir = @l7vsadm_sockdir@
 libdir = @libdir@
@@ -192,48 +183,41 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
+SNMPAGENT_OPTS = @snmpagent_libs@
 l7snmpagent_SOURCES = \
 				../logger/logger_wrapper.h \
 				../parameter/parameter_wrapper.h \
-				UltraMonkeyL7.h \
-				dispatch_message.h \
-				interproccom.h \
-				l7ag_socket.h \
-				proc_mibcollectmessage.h \
-				proc_settingrequest.h \
-				proc_trapsendrequest.h \
-				queue_sendtrap.h \
+				lockedqueue.h \
+				QueueContainer.h \
+				MessengerClient.h \
+				dispatcher.h \
 				store_mibdata.h \
+				netsnmp_bridge.h \
 				subagent.h \
 				tag_threadstat.h \
-				tag_trapid.h \
-				watch_l7vsd.h \
-				dispatch_message.cpp \
-				l7ag_socket.cpp \
-				interproccom.cpp \
-				proc_mibcollectmessage.cpp \
-				proc_settingrequest.cpp \
-				proc_trapsendrequest.cpp \
-				queue_sendtrap.cpp \
+				MessengerClient.cpp \
+				dispatcher.cpp \
 				store_mibdata.cpp \
+				netsnmp_bridge.c \
 				subagent.cpp \
-				watch_l7vsd.cpp \
 				l7snmpagent.cpp 
 
-l7snmpagent_CPPFLAGS = -O2 -g -I../../include -I../logger -I../parameter -DLOGGER_PROCESS_SNM -DVERSION=\"$(VERSION)\"
-l7snmpagent_LDADD = $(GLIB_LIBS) \
+l7snmpagent_CPPFLAGS = -O2 -Wall -Werror -g -I../include -I../logger -I../parameter -I/usr/include/ucd-snmp -DLOGGER_PROCESS_SNM
+l7snmpagent_LDADD = \
 				../logger/libsnmpagent_logger.a \
-				../parameter/libparameter.a \
+				../parameter/libsnmpagent_parameter.a \
 				-llog4cxx \
+				$(SNMPAGENT_OPTS) \
 				-lrt
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cpp .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -301,17 +285,47 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-dispatch_message.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-interproccom.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-l7ag_socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-MessengerClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-dispatcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-l7snmpagent.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-proc_settingrequest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-queue_sendtrap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-netsnmp_bridge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-store_mibdata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-subagent.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7snmpagent-watch_l7vsd.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+l7snmpagent-netsnmp_bridge.o: netsnmp_bridge.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT l7snmpagent-netsnmp_bridge.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Tpo" -c -o l7snmpagent-netsnmp_bridge.o `test -f 'netsnmp_bridge.c' || echo '$(srcdir)/'`netsnmp_bridge.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Tpo" "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Po"; else rm -f "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='netsnmp_bridge.c' object='l7snmpagent-netsnmp_bridge.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o l7snmpagent-netsnmp_bridge.o `test -f 'netsnmp_bridge.c' || echo '$(srcdir)/'`netsnmp_bridge.c
+
+l7snmpagent-netsnmp_bridge.obj: netsnmp_bridge.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT l7snmpagent-netsnmp_bridge.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Tpo" -c -o l7snmpagent-netsnmp_bridge.obj `if test -f 'netsnmp_bridge.c'; then $(CYGPATH_W) 'netsnmp_bridge.c'; else $(CYGPATH_W) '$(srcdir)/netsnmp_bridge.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Tpo" "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Po"; else rm -f "$(DEPDIR)/l7snmpagent-netsnmp_bridge.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='netsnmp_bridge.c' object='l7snmpagent-netsnmp_bridge.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o l7snmpagent-netsnmp_bridge.obj `if test -f 'netsnmp_bridge.c'; then $(CYGPATH_W) 'netsnmp_bridge.c'; else $(CYGPATH_W) '$(srcdir)/netsnmp_bridge.c'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -334,103 +348,33 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-l7snmpagent-dispatch_message.o: dispatch_message.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-dispatch_message.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-dispatch_message.Tpo" -c -o l7snmpagent-dispatch_message.o `test -f 'dispatch_message.cpp' || echo '$(srcdir)/'`dispatch_message.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-dispatch_message.Tpo" "$(DEPDIR)/l7snmpagent-dispatch_message.Po"; else rm -f "$(DEPDIR)/l7snmpagent-dispatch_message.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dispatch_message.cpp' object='l7snmpagent-dispatch_message.o' libtool=no @AMDEPBACKSLASH@
+l7snmpagent-MessengerClient.o: MessengerClient.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-MessengerClient.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-MessengerClient.Tpo" -c -o l7snmpagent-MessengerClient.o `test -f 'MessengerClient.cpp' || echo '$(srcdir)/'`MessengerClient.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-MessengerClient.Tpo" "$(DEPDIR)/l7snmpagent-MessengerClient.Po"; else rm -f "$(DEPDIR)/l7snmpagent-MessengerClient.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MessengerClient.cpp' object='l7snmpagent-MessengerClient.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-dispatch_message.o `test -f 'dispatch_message.cpp' || echo '$(srcdir)/'`dispatch_message.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-MessengerClient.o `test -f 'MessengerClient.cpp' || echo '$(srcdir)/'`MessengerClient.cpp
 
-l7snmpagent-dispatch_message.obj: dispatch_message.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-dispatch_message.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-dispatch_message.Tpo" -c -o l7snmpagent-dispatch_message.obj `if test -f 'dispatch_message.cpp'; then $(CYGPATH_W) 'dispatch_message.cpp'; else $(CYGPATH_W) '$(srcdir)/dispatch_message.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-dispatch_message.Tpo" "$(DEPDIR)/l7snmpagent-dispatch_message.Po"; else rm -f "$(DEPDIR)/l7snmpagent-dispatch_message.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dispatch_message.cpp' object='l7snmpagent-dispatch_message.obj' libtool=no @AMDEPBACKSLASH@
+l7snmpagent-MessengerClient.obj: MessengerClient.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-MessengerClient.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-MessengerClient.Tpo" -c -o l7snmpagent-MessengerClient.obj `if test -f 'MessengerClient.cpp'; then $(CYGPATH_W) 'MessengerClient.cpp'; else $(CYGPATH_W) '$(srcdir)/MessengerClient.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-MessengerClient.Tpo" "$(DEPDIR)/l7snmpagent-MessengerClient.Po"; else rm -f "$(DEPDIR)/l7snmpagent-MessengerClient.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MessengerClient.cpp' object='l7snmpagent-MessengerClient.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-dispatch_message.obj `if test -f 'dispatch_message.cpp'; then $(CYGPATH_W) 'dispatch_message.cpp'; else $(CYGPATH_W) '$(srcdir)/dispatch_message.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-MessengerClient.obj `if test -f 'MessengerClient.cpp'; then $(CYGPATH_W) 'MessengerClient.cpp'; else $(CYGPATH_W) '$(srcdir)/MessengerClient.cpp'; fi`
 
-l7snmpagent-l7ag_socket.o: l7ag_socket.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-l7ag_socket.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-l7ag_socket.Tpo" -c -o l7snmpagent-l7ag_socket.o `test -f 'l7ag_socket.cpp' || echo '$(srcdir)/'`l7ag_socket.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-l7ag_socket.Tpo" "$(DEPDIR)/l7snmpagent-l7ag_socket.Po"; else rm -f "$(DEPDIR)/l7snmpagent-l7ag_socket.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7ag_socket.cpp' object='l7snmpagent-l7ag_socket.o' libtool=no @AMDEPBACKSLASH@
+l7snmpagent-dispatcher.o: dispatcher.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-dispatcher.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-dispatcher.Tpo" -c -o l7snmpagent-dispatcher.o `test -f 'dispatcher.cpp' || echo '$(srcdir)/'`dispatcher.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-dispatcher.Tpo" "$(DEPDIR)/l7snmpagent-dispatcher.Po"; else rm -f "$(DEPDIR)/l7snmpagent-dispatcher.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dispatcher.cpp' object='l7snmpagent-dispatcher.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-l7ag_socket.o `test -f 'l7ag_socket.cpp' || echo '$(srcdir)/'`l7ag_socket.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-dispatcher.o `test -f 'dispatcher.cpp' || echo '$(srcdir)/'`dispatcher.cpp
 
-l7snmpagent-l7ag_socket.obj: l7ag_socket.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-l7ag_socket.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-l7ag_socket.Tpo" -c -o l7snmpagent-l7ag_socket.obj `if test -f 'l7ag_socket.cpp'; then $(CYGPATH_W) 'l7ag_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/l7ag_socket.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-l7ag_socket.Tpo" "$(DEPDIR)/l7snmpagent-l7ag_socket.Po"; else rm -f "$(DEPDIR)/l7snmpagent-l7ag_socket.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7ag_socket.cpp' object='l7snmpagent-l7ag_socket.obj' libtool=no @AMDEPBACKSLASH@
+l7snmpagent-dispatcher.obj: dispatcher.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-dispatcher.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-dispatcher.Tpo" -c -o l7snmpagent-dispatcher.obj `if test -f 'dispatcher.cpp'; then $(CYGPATH_W) 'dispatcher.cpp'; else $(CYGPATH_W) '$(srcdir)/dispatcher.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-dispatcher.Tpo" "$(DEPDIR)/l7snmpagent-dispatcher.Po"; else rm -f "$(DEPDIR)/l7snmpagent-dispatcher.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dispatcher.cpp' object='l7snmpagent-dispatcher.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-l7ag_socket.obj `if test -f 'l7ag_socket.cpp'; then $(CYGPATH_W) 'l7ag_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/l7ag_socket.cpp'; fi`
-
-l7snmpagent-interproccom.o: interproccom.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-interproccom.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-interproccom.Tpo" -c -o l7snmpagent-interproccom.o `test -f 'interproccom.cpp' || echo '$(srcdir)/'`interproccom.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-interproccom.Tpo" "$(DEPDIR)/l7snmpagent-interproccom.Po"; else rm -f "$(DEPDIR)/l7snmpagent-interproccom.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='interproccom.cpp' object='l7snmpagent-interproccom.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-interproccom.o `test -f 'interproccom.cpp' || echo '$(srcdir)/'`interproccom.cpp
-
-l7snmpagent-interproccom.obj: interproccom.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-interproccom.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-interproccom.Tpo" -c -o l7snmpagent-interproccom.obj `if test -f 'interproccom.cpp'; then $(CYGPATH_W) 'interproccom.cpp'; else $(CYGPATH_W) '$(srcdir)/interproccom.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-interproccom.Tpo" "$(DEPDIR)/l7snmpagent-interproccom.Po"; else rm -f "$(DEPDIR)/l7snmpagent-interproccom.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='interproccom.cpp' object='l7snmpagent-interproccom.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-interproccom.obj `if test -f 'interproccom.cpp'; then $(CYGPATH_W) 'interproccom.cpp'; else $(CYGPATH_W) '$(srcdir)/interproccom.cpp'; fi`
-
-l7snmpagent-proc_mibcollectmessage.o: proc_mibcollectmessage.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-proc_mibcollectmessage.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Tpo" -c -o l7snmpagent-proc_mibcollectmessage.o `test -f 'proc_mibcollectmessage.cpp' || echo '$(srcdir)/'`proc_mibcollectmessage.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Tpo" "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Po"; else rm -f "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='proc_mibcollectmessage.cpp' object='l7snmpagent-proc_mibcollectmessage.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-proc_mibcollectmessage.o `test -f 'proc_mibcollectmessage.cpp' || echo '$(srcdir)/'`proc_mibcollectmessage.cpp
-
-l7snmpagent-proc_mibcollectmessage.obj: proc_mibcollectmessage.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-proc_mibcollectmessage.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Tpo" -c -o l7snmpagent-proc_mibcollectmessage.obj `if test -f 'proc_mibcollectmessage.cpp'; then $(CYGPATH_W) 'proc_mibcollectmessage.cpp'; else $(CYGPATH_W) '$(srcdir)/proc_mibcollectmessage.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Tpo" "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Po"; else rm -f "$(DEPDIR)/l7snmpagent-proc_mibcollectmessage.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='proc_mibcollectmessage.cpp' object='l7snmpagent-proc_mibcollectmessage.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-proc_mibcollectmessage.obj `if test -f 'proc_mibcollectmessage.cpp'; then $(CYGPATH_W) 'proc_mibcollectmessage.cpp'; else $(CYGPATH_W) '$(srcdir)/proc_mibcollectmessage.cpp'; fi`
-
-l7snmpagent-proc_settingrequest.o: proc_settingrequest.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-proc_settingrequest.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-proc_settingrequest.Tpo" -c -o l7snmpagent-proc_settingrequest.o `test -f 'proc_settingrequest.cpp' || echo '$(srcdir)/'`proc_settingrequest.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-proc_settingrequest.Tpo" "$(DEPDIR)/l7snmpagent-proc_settingrequest.Po"; else rm -f "$(DEPDIR)/l7snmpagent-proc_settingrequest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='proc_settingrequest.cpp' object='l7snmpagent-proc_settingrequest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-proc_settingrequest.o `test -f 'proc_settingrequest.cpp' || echo '$(srcdir)/'`proc_settingrequest.cpp
-
-l7snmpagent-proc_settingrequest.obj: proc_settingrequest.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-proc_settingrequest.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-proc_settingrequest.Tpo" -c -o l7snmpagent-proc_settingrequest.obj `if test -f 'proc_settingrequest.cpp'; then $(CYGPATH_W) 'proc_settingrequest.cpp'; else $(CYGPATH_W) '$(srcdir)/proc_settingrequest.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-proc_settingrequest.Tpo" "$(DEPDIR)/l7snmpagent-proc_settingrequest.Po"; else rm -f "$(DEPDIR)/l7snmpagent-proc_settingrequest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='proc_settingrequest.cpp' object='l7snmpagent-proc_settingrequest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-proc_settingrequest.obj `if test -f 'proc_settingrequest.cpp'; then $(CYGPATH_W) 'proc_settingrequest.cpp'; else $(CYGPATH_W) '$(srcdir)/proc_settingrequest.cpp'; fi`
-
-l7snmpagent-proc_trapsendrequest.o: proc_trapsendrequest.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-proc_trapsendrequest.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Tpo" -c -o l7snmpagent-proc_trapsendrequest.o `test -f 'proc_trapsendrequest.cpp' || echo '$(srcdir)/'`proc_trapsendrequest.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Tpo" "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Po"; else rm -f "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='proc_trapsendrequest.cpp' object='l7snmpagent-proc_trapsendrequest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-proc_trapsendrequest.o `test -f 'proc_trapsendrequest.cpp' || echo '$(srcdir)/'`proc_trapsendrequest.cpp
-
-l7snmpagent-proc_trapsendrequest.obj: proc_trapsendrequest.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-proc_trapsendrequest.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Tpo" -c -o l7snmpagent-proc_trapsendrequest.obj `if test -f 'proc_trapsendrequest.cpp'; then $(CYGPATH_W) 'proc_trapsendrequest.cpp'; else $(CYGPATH_W) '$(srcdir)/proc_trapsendrequest.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Tpo" "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Po"; else rm -f "$(DEPDIR)/l7snmpagent-proc_trapsendrequest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='proc_trapsendrequest.cpp' object='l7snmpagent-proc_trapsendrequest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-proc_trapsendrequest.obj `if test -f 'proc_trapsendrequest.cpp'; then $(CYGPATH_W) 'proc_trapsendrequest.cpp'; else $(CYGPATH_W) '$(srcdir)/proc_trapsendrequest.cpp'; fi`
-
-l7snmpagent-queue_sendtrap.o: queue_sendtrap.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-queue_sendtrap.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-queue_sendtrap.Tpo" -c -o l7snmpagent-queue_sendtrap.o `test -f 'queue_sendtrap.cpp' || echo '$(srcdir)/'`queue_sendtrap.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-queue_sendtrap.Tpo" "$(DEPDIR)/l7snmpagent-queue_sendtrap.Po"; else rm -f "$(DEPDIR)/l7snmpagent-queue_sendtrap.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='queue_sendtrap.cpp' object='l7snmpagent-queue_sendtrap.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-queue_sendtrap.o `test -f 'queue_sendtrap.cpp' || echo '$(srcdir)/'`queue_sendtrap.cpp
-
-l7snmpagent-queue_sendtrap.obj: queue_sendtrap.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-queue_sendtrap.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-queue_sendtrap.Tpo" -c -o l7snmpagent-queue_sendtrap.obj `if test -f 'queue_sendtrap.cpp'; then $(CYGPATH_W) 'queue_sendtrap.cpp'; else $(CYGPATH_W) '$(srcdir)/queue_sendtrap.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-queue_sendtrap.Tpo" "$(DEPDIR)/l7snmpagent-queue_sendtrap.Po"; else rm -f "$(DEPDIR)/l7snmpagent-queue_sendtrap.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='queue_sendtrap.cpp' object='l7snmpagent-queue_sendtrap.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-queue_sendtrap.obj `if test -f 'queue_sendtrap.cpp'; then $(CYGPATH_W) 'queue_sendtrap.cpp'; else $(CYGPATH_W) '$(srcdir)/queue_sendtrap.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-dispatcher.obj `if test -f 'dispatcher.cpp'; then $(CYGPATH_W) 'dispatcher.cpp'; else $(CYGPATH_W) '$(srcdir)/dispatcher.cpp'; fi`
 
 l7snmpagent-store_mibdata.o: store_mibdata.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-store_mibdata.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-store_mibdata.Tpo" -c -o l7snmpagent-store_mibdata.o `test -f 'store_mibdata.cpp' || echo '$(srcdir)/'`store_mibdata.cpp; \
@@ -459,20 +403,6 @@ l7snmpagent-subagent.obj: subagent.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='subagent.cpp' object='l7snmpagent-subagent.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-subagent.obj `if test -f 'subagent.cpp'; then $(CYGPATH_W) 'subagent.cpp'; else $(CYGPATH_W) '$(srcdir)/subagent.cpp'; fi`
-
-l7snmpagent-watch_l7vsd.o: watch_l7vsd.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-watch_l7vsd.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-watch_l7vsd.Tpo" -c -o l7snmpagent-watch_l7vsd.o `test -f 'watch_l7vsd.cpp' || echo '$(srcdir)/'`watch_l7vsd.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-watch_l7vsd.Tpo" "$(DEPDIR)/l7snmpagent-watch_l7vsd.Po"; else rm -f "$(DEPDIR)/l7snmpagent-watch_l7vsd.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='watch_l7vsd.cpp' object='l7snmpagent-watch_l7vsd.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-watch_l7vsd.o `test -f 'watch_l7vsd.cpp' || echo '$(srcdir)/'`watch_l7vsd.cpp
-
-l7snmpagent-watch_l7vsd.obj: watch_l7vsd.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-watch_l7vsd.obj -MD -MP -MF "$(DEPDIR)/l7snmpagent-watch_l7vsd.Tpo" -c -o l7snmpagent-watch_l7vsd.obj `if test -f 'watch_l7vsd.cpp'; then $(CYGPATH_W) 'watch_l7vsd.cpp'; else $(CYGPATH_W) '$(srcdir)/watch_l7vsd.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7snmpagent-watch_l7vsd.Tpo" "$(DEPDIR)/l7snmpagent-watch_l7vsd.Po"; else rm -f "$(DEPDIR)/l7snmpagent-watch_l7vsd.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='watch_l7vsd.cpp' object='l7snmpagent-watch_l7vsd.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7snmpagent-watch_l7vsd.obj `if test -f 'watch_l7vsd.cpp'; then $(CYGPATH_W) 'watch_l7vsd.cpp'; else $(CYGPATH_W) '$(srcdir)/watch_l7vsd.cpp'; fi`
 
 l7snmpagent-l7snmpagent.o: l7snmpagent.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7snmpagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7snmpagent-l7snmpagent.o -MD -MP -MF "$(DEPDIR)/l7snmpagent-l7snmpagent.Tpo" -c -o l7snmpagent-l7snmpagent.o `test -f 'l7snmpagent.cpp' || echo '$(srcdir)/'`l7snmpagent.cpp; \
