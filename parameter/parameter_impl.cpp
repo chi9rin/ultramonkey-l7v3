@@ -80,7 +80,10 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 	string_map_type	string_map;
 	int_map_type	int_map;
 
-	if( !ifs ) return false;	// don't open config files.
+	if( !ifs ){
+		Logger::putLogFatal( logcat, 0, "CONFIG FILE NOT OPEN : " PARAMETER_FILE , __FILE__, __LINE__ );
+		return false;	// don't open config files.
+	}
 
 	std::string	section_string;
 	while( std::getline( ifs, line ) ){
@@ -251,5 +254,6 @@ std::string	l7vs::ParameterImpl::get_string( const l7vs::PARAMETER_COMPONENT_TAG
 		return strmap_iterator->second;
 	else
 		err.setter( true, "don't find key" );
+
 	return std::string("");
 }
