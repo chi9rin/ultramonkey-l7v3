@@ -1,5 +1,7 @@
 #define	TEST_CASE
 
+#include <dlfcn.h>
+
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread.hpp>
 
@@ -33,6 +35,10 @@ class	l7vsd_test	:public	l7vs::l7vsd {
 public:
 	vslist_type&	get_vslist(){ return vslist; }
 	boost::thread_group&	get_tg(){ return vs_threads; }
+
+	bool&	get_help() { return help; }
+	bool&	get_debug() { return debug; }
+
 	vslist_type::iterator	search_vslist( l7vs::virtualservice_element& in_elem ){
 		return l7vsd::search_vslist( in_elem );
 	}
@@ -42,9 +48,19 @@ public:
 
 };
 
-//test_handler
+// stub glibc functions
+static int		(*org_daemon)(int nochdir, int noclose) = NULL;
+int				daemon_ret = 0;
+
+int	daemon( int nochdir, int noclose ){
+	std::cout << "daemon" << std::endl;
+	return daemon_ret;
+}
+
+// test_handler
 void		test_handler(int sig);
 
+// flags
 int			call_count_test_handler = 0;	//test_handlerの呼出回数
 int			arg_sig_test_handler = 0;		//test_handlerの引数(sig)
 
@@ -746,6 +762,77 @@ void	search_vslist_test(){
 
 }
 
+
+
+void	run_test(){
+	BOOST_MESSAGE( "----- run test start -----" );
+	l7vsd_test			vsd_test;
+
+// normal case
+	{
+		daemon_ret = 0;
+	
+		int		argc	= 1;
+		char*	argv[]	= { "l7vsd_test" };
+	
+		exit_requested = true;
+		int ret = vsd_test.run( argc, argv );
+		//boost::thread	thd( boost::bind( &l7vsd_test::run, &vsd_test, argc, argv ) );
+		exit_requested = false;
+	
+		// unit_test[1] l7vsd::run normal case return value check
+		BOOST_CHECK_EQUAL( ret, 0 );
+		// unit_test[1] l7vsd::run normal case help mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_help(), false );
+		// unit_test[1] l7vsd::run normal case debug mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_help(), false );
+		vsd_test.get_help() = false;
+		vsd_test.get_help() = false;
+	}
+
+// normal case 2(help mode )
+	{
+		int		argc	= 2;
+		char*	argv[]	= { "l7vsd_test", "-h" };
+	
+		exit_requested = true;
+		int ret = vsd_test.run( argc, argv );
+		exit_requested = false;
+	
+		// unit_test[1] l7vsd::run normal case 2(help mode) return value check
+		BOOST_CHECK_EQUAL( ret, 0 );
+		// unit_test[1] l7vsd::run normal case 2(help mode) help mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_help(), true );
+		// unit_test[1] l7vsd::run normal case 2(help mode) debug mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_debug(), false );
+		vsd_test.get_help() = false;
+		vsd_test.get_debug() = false;
+	}
+
+// normal case 3(debug mode)
+	{
+		int		argc	= 2;
+		char*	argv[]	= { "l7vsd_test", "-d" };
+	
+		exit_requested = true;
+		int ret = vsd_test.run( argc, argv );
+		exit_requested = false;
+	
+		// unit_test[1] l7vsd::run normal case 3(debug mode) return value check
+		BOOST_CHECK_EQUAL( ret, 0 );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) delp mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_help(), false );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) debug mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
+		vsd_test.get_help() = false;
+		vsd_test.get_debug() = false;
+	}
+
+
+	BOOST_MESSAGE( "----- run test end -----" );
+
+}
+
 void	sig_exit_handler_test(){
 	BOOST_MESSAGE( "----- sig_exit_handler test start -----" );
 
@@ -930,6 +1017,8 @@ void	test_handler(int sig){
 
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
+	//glibc function alias
+	org_daemon = (int (*)(int, int)) dlsym(RTLD_NEXT, "daemon");
 
 	test_suite* ts = BOOST_TEST_SUITE( "l7vsd class test" );
 
@@ -948,6 +1037,9 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &flush_virtual_service_test ) );
 
 
+
+
+	ts->add( BOOST_TEST_CASE( &run_test ) );
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
 	ts->add( BOOST_TEST_CASE( &set_sighandler_test ) );

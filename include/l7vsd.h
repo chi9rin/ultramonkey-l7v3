@@ -94,7 +94,7 @@ public:
 
 	void	reload_parameter( const PARAMETER_COMPONENT_TAG, error_code& );	//!< reload component parameter command
 
-	void	run( int, char*[] );		//!< l7vsd run method
+	int		run( int, char*[] );		//!< l7vsd run method
 
 	void	release_virtual_service( const virtualservice_element& )	const;		//!< virtualservice release from vslist
 

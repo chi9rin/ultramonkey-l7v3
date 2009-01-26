@@ -298,26 +298,23 @@ void	l7vsd::release_virtual_service( const virtualservice_element& in_vselement 
 }
 
 //! l7vsd run method
-void	l7vsd::run( int argc, char* argv[] ) {
+int	l7vsd::run( int argc, char* argv[] ) {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::run", __FILE__, __LINE__ );
 
 	// check options
 	int error_pos(0);
 	if( !check_options( argc, argv, error_pos ) ){
 		std::stringstream buf;
-		buf << boost::format( "%s: unknown option: %s\n" )
-			% argv[0]
-			% argv[error_pos];
-
+		buf << "l7vsd: unknown option: " << argv[ error_pos ] << "\n";
 		std::cerr << buf << std::endl;
 		std::cerr << usage() << std::endl;
-		return;
+		return -1;
 	}
 
 	// help mode ?
 	if( help ){
 		std::cout << usage() <<std::endl;
-		return;
+		return 0;
 	}
 
 	// debug mode ?
@@ -327,7 +324,7 @@ void	l7vsd::run( int argc, char* argv[] ) {
 			std::stringstream buf;
 			buf << "daemon() failed: " << strerror( errno );
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
-			return;
+			return -1;
 		}
 	}
 
@@ -335,14 +332,13 @@ void	l7vsd::run( int argc, char* argv[] ) {
 
 	//receiver
 	receiver = command_receiver_ptr( new command_receiver( dispatcher, file, *this ) );
-	
 
 	// main loop
 	for(;;){
 		if( exit_requested )	break;
 		dispatcher.poll();
 	}
-
+	return 0;
 }
 
 bool	l7vsd::check_options( int argc, char* argv[], int& error_pos ){
@@ -377,7 +373,7 @@ bool	l7vsd::parse_debug(int& pos, int argc, char* argv[] ){
 std::string	l7vsd::usage(){
 	std::stringstream	stream;
 	stream <<
-	"Usage: %s [-d] [-h]\n"
+	"Usage: l7vsd [-d] [-h]\n"
 	"   -d    --debug        run in debug mode (in foreground)\n"
 	"   -h    --help         print this help messages and exit\n"
 	<< std::endl;
@@ -442,21 +438,22 @@ static int set_sighandlers() {
 
 //! l7vsd main function
 int l7vsd_main( int argc, char* argv[] ){
+	int ret = 0;
 	try{
 		l7vs::Logger	logger_instance;
 		l7vs::Parameter	parameter_instance;
 		logger_instance.loadConf();
 
-		if ( 0 > set_sighandlers() )	exit(-1);
+		if ( 0 > set_sighandlers() )	return -1;
 
 		l7vs::l7vsd vsd;
-		vsd.run( argc, argv );
+		ret =  vsd.run( argc, argv );
 
 	}
 	catch( ... ){
 		return -1;
 	}
-	return 0;
+	return ret;
 }
 
 #ifndef	TEST_CASE
