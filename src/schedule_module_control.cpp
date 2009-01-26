@@ -1,6 +1,6 @@
 //
-//	@file	protocol_module_control.cpp
-//	@brief	control load/unload shared object protocol module
+//	@file	schedule_module_control.cpp
+//	@brief	control load/unload shared object schedule module
 //
 //	copyright (c) sdy corporation. 2008
 //	mail: h dot okada at sdy dot co dot jp
@@ -9,7 +9,7 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 #include	<dlfcn.h>
-#include	"protocol_module_control.h"
+#include	"schedule_module_control.h"
 
 #define L7VS_MODULE_INITFN "create_module"
 #define L7VS_MODULE_FINIFN "destroy_module"
@@ -21,9 +21,9 @@ namespace l7vs{
  * @param   void
  * @return  instance
  */
-protocol_module_control&
-protocol_module_control::getInstance(){
-	static	protocol_module_control	instance;
+schedule_module_control&
+schedule_module_control::getInstance(){
+	static	schedule_module_control	instance;
 	return	instance;
 }
 
@@ -34,7 +34,7 @@ protocol_module_control::getInstance(){
  * @return  void
  */
 void
-protocol_module_control::initialize( const std::string& infile_path ){
+schedule_module_control::initialize( const std::string& infile_path ){
 	if( &infile_path != NULL ){
 		module_control_base::modulefile_path	= infile_path;
 	}
@@ -47,7 +47,7 @@ protocol_module_control::initialize( const std::string& infile_path ){
  * @return  void
  */
 void
-protocol_module_control::finalize(){
+schedule_module_control::finalize(){
 }
 
 /*!
@@ -55,12 +55,12 @@ protocol_module_control::finalize(){
  *
  * @param   modulename
  * @param   loggingfunction
- * @return  pointer for protocol_module_base class instance
+ * @return  pointer for schedule_module_base class instance
  */
-protocol_module_base*
-protocol_module_control::load_module( const	std::string& modulename ){
+schedule_module_base*
+schedule_module_control::load_module( const	std::string& modulename ){
 	dlerror();
-	protocol_module_base* return_value = NULL;
+	schedule_module_base* return_value = NULL;
 	boost::mutex::scoped_lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( modulename );
 //	std::cout << "load_module_name> " << modulename << std::endl;//debug
@@ -68,35 +68,40 @@ protocol_module_control::load_module( const	std::string& modulename ){
 		std::string load_module_name = modulefile_path + modulename + ".so";
 //		std::cout << "dlopen module_name> " << load_module_name.c_str() << std::endl;//debug
 		void* h = dlopen( load_module_name.c_str(), RTLD_LAZY );
+//		std::cout << "dlopen = " << h << std::endl;//debug
 		if( h == NULL ){
-//			std::cout << "dlopen NULL" << std::endl;//debug
 			return NULL;
 		}
 		dlerror();
-		protocol_module_base* (*create_func)(void);
-		void (*destroy_func)(protocol_module_base*);
+		schedule_module_base* (*create_func)(void);
+		void (*destroy_func)(schedule_module_base*);
 
-		*(protocol_module_base**) (&create_func) = (protocol_module_base*)dlsym( h, L7VS_MODULE_INITFN );
+		*(schedule_module_base**) (&create_func) = (schedule_module_base*)dlsym( h, L7VS_MODULE_INITFN );
 		if( create_func == NULL ){
+//			std::cout << "create_func NULL" << std::endl;//debug
 			dlclose(h);
 			return NULL;
 		}
 		dlerror();
 		*(void**) (&destroy_func) = dlsym( h, L7VS_MODULE_FINIFN );
 		if( destroy_func == NULL ){
+//			std::cout << "destroy_func NULL" << std::endl;//debug
 			dlclose(h);
 			return NULL;
 		}
-		protocol_module_control::protocol_module_info module_info;
+		schedule_module_control::schedule_module_info module_info;
 		module_info.handle = h;
 		module_info.create_func = create_func;
+//		std::cout << "create_func = " << module_info.create_func << std::endl;//debug
 		module_info.destroy_func = destroy_func;
-		loadmodule_map.insert( std::pair< std::string, protocol_module_control::protocol_module_info >( modulename, module_info ) );
+//		std::cout << "destroy_func = " << module_info.destroy_func << std::endl;//debug
+		loadmodule_map.insert( std::pair< std::string, schedule_module_control::schedule_module_info >( modulename, module_info ) );
 		it = loadmodule_map.find( modulename );
 	}
 	it->second.ref_count++;
 //	std::cout << "ref_count = " << it->second.ref_count << std::endl;//debug
 	return_value = it->second.create_func();
+//	std::cout << "return_value = " << return_value << std::endl;//debug
 	return return_value;
 }
 
@@ -104,15 +109,16 @@ protocol_module_control::load_module( const	std::string& modulename ){
  * unload shared object.
  *
  * @param   modulename
- * @param   pointer for protocol_module_base class instance
+ * @param   pointer for schedule_module_base class instance
  * @return  void
  */
 void
-protocol_module_control::unload_module( protocol_module_base* module_ptr ){
+schedule_module_control::unload_module( schedule_module_base* module_ptr ){
 	dlerror();
 	if( module_ptr == NULL ){
 		return;
 	}
+//	std::cout << module_ptr << std::endl;//debug
 
 	std::string unload_module_name = module_ptr->get_name();
 //	std::cout << "unload_module_name= " << module_ptr->get_name() << std::endl;//debug
