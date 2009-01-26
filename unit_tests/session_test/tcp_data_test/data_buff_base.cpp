@@ -26,7 +26,7 @@ namespace l7vs{
 
 	//! initialize
 	void data_buff_base::initialize(){
-		 = true;
+		b_initialize_call_chk = true;
 	}
 
 	//! set data
