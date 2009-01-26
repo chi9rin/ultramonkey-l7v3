@@ -8,6 +8,8 @@ using namespace boost::unit_test;
 
 //test case1.
 void	realserver_test(){
+	int	loop;
+
 	// unit_test[1]  コンストラクタのテスト
 	l7vs::realserver	server1;
 	// unit_test[2]  コピーコンストラクタのテスト
@@ -45,9 +47,25 @@ void	realserver_test(){
 	server1.decrement_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
-	// unit_test[11]  切断数インクリメントメソッドのテスト
+	// unit_test[11]  接続数インクリメントメソッドのテスト２
+	for ( loop = 0 ; loop < INT_MAX ; loop++ ){
+		server1.increment_active();
+	}
+	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+
+	// unit_test[12]  接続数デクリメントメソッドのテスト２
+	server1.decrement_active();
+	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+
+	// unit_test[13]  切断数インクリメントメソッドのテスト
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
+
+	// unit_test[14]  切断数インクリメントメソッドのテスト２
+	for ( loop = server1.get_inact() ; loop < INT_MAX ; loop++ ){
+		server1.increment_inact();
+	}
+	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
