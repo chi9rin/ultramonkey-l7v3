@@ -32,7 +32,9 @@ public:
 	typedef	boost::function< void ( const std::string&, unsigned int* ) >
 									replicationpaymemory_func_type;
 	//! realserver list iterator type
-	typedef	boost::function< std::list<realserver>::iterator (void)>
+	typedef	std::list<l7vs::realserver>
+									rslist_type;
+	typedef	boost::function< rslist_type::iterator (void)>
 									rslist_iterator_func_type;
 public:
 	//!	constractor
