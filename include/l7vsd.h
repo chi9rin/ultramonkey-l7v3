@@ -82,6 +82,8 @@ public:
 
 	void	run();		//!< l7vsd run method
 
+	void	release_virtual_service( const virtualservice_element& );		//!< virtualservice release from vslist
+
 protected:
 	bool	is_exit_requested();		//!< check if exit requested
 
