@@ -16,26 +16,39 @@
 #include "l7vsd.h"
 #include "error_code.h"
 
-// grobal function prototype
+// global function prototype
 static void	sig_exit_handler(int sig);
 static int	set_sighandler(int sig, void (*handler)(int));
 static int	set_sighandlers();
-static void	usage(FILE* p);
 int	l7vsd_main( int, char** );
 
-// grobal variables
+// global variables
 static bool	exit_requested = false;
 static int	received_sig = 0;
 
 namespace l7vs{
 
-//! destractor
+//! constructor
+l7vsd::l7vsd()
+	:	help(false),
+		debug(false){
+
+	option_dic["-h"]		= boost::bind( &l7vsd::parse_help, this, _1, _2, _3 );
+	option_dic["--help"]	= boost::bind( &l7vsd::parse_help, this, _1, _2, _3 );
+	option_dic["-d"]		= boost::bind( &l7vsd::parse_debug, this, _1, _2, _3 );
+	option_dic["--debug"]	= boost::bind( &l7vsd::parse_debug, this, _1, _2, _3 );
+
+}
+
+//! destructor
 l7vsd::~l7vsd(){}
 
 //! virtual_service list command
 //! @param[out]	arry of vs_element
 //! @param[out]	error_code
 void	l7vsd::list_virtual_service( vsvec_type& out_vslist, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::list_virtual_service", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -51,6 +64,8 @@ void	l7vsd::list_virtual_service( vsvec_type& out_vslist, error_code& err ){
 //! @param[in]	vs_element
 //! @param[out]	error_code
 void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::add_virtual_service", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -99,6 +114,8 @@ void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, err
 //! @param[in]	vs_element
 //! @param[out]	error_code
 void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::del_virtual_service", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -108,8 +125,6 @@ void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, err
 		(*vsitr)->stop();
 		// vs finalize
 		(*vsitr)->finalize( err );
-		// remove from vslist
-		vslist.remove( *vsitr );
 
 		// when first vs, replication switch to slave
 		if( 0U == vslist.size() ){
@@ -129,6 +144,8 @@ void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, err
 //! @param[in]	vs_element
 //! @param[out]	error_code
 void	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::edit_virtual_service", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -151,6 +168,8 @@ void	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement, er
 //! @param[in]	vs_element
 //! @param[out]	error_code
 void	l7vsd::add_real_server( const virtualservice_element& in_vselement, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::add_real_server", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -173,6 +192,8 @@ void	l7vsd::add_real_server( const virtualservice_element& in_vselement, error_c
 //! @param[in]	vs_element
 //! @param[out]	error_code
 void	l7vsd::del_real_server( const virtualservice_element& in_vselement, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::del_real_server", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -195,6 +216,8 @@ void	l7vsd::del_real_server( const virtualservice_element& in_vselement, error_c
 //! @param[in]	vs_element
 //! @param[out]	error_code
 void	l7vsd::edit_real_server( const virtualservice_element& in_vselement, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::edit_real_server", __FILE__, __LINE__ );
+
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
@@ -213,10 +236,47 @@ void	l7vsd::edit_real_server( const virtualservice_element& in_vselement, error_
 	}
 }
 
+//! virtual_service flush command
+//! @param[out]	error_code
+void	l7vsd::flush_virtual_service( error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::flush_virtual_service", __FILE__, __LINE__ );
+
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	// all virtualservice stop and finalize
+	for(;;){
+		vslist_type::iterator itr = vslist.begin();
+		if(vslist.end() == itr){
+			break;
+		}
+		else{
+			// vs stop
+			(*itr)->stop();
+			// vs finalize
+			(*itr)->finalize( err );
+		}
+	}	
+
+	// join virtualservice threads
+	vs_threads.join_all();
+
+	// replication switch to slave
+	rep->switch_to_slave();
+}
+
+
+
+
+
+
+
 //! vs_list search function
 //! @param[in]	vs_element
 //! @param[out]	error_code
-l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element& in_vselement ){
+l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element& in_vselement ) const {
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::search_vslist", __FILE__, __LINE__ );
+
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
@@ -225,9 +285,103 @@ l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element&
 	return vslist.end();
 }
 
-//! l7vsd run method
-void l7vsd::run() {
+//! virtualservice release from vslist
+//! @param[in]	vs_element
+void	l7vsd::release_virtual_service( const virtualservice_element& in_vselement ) const {
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::release_virtual_service", __FILE__, __LINE__ );
 
+	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// remove from vslist
+		vslist.remove( *vsitr );
+	}
+}
+
+//! l7vsd run method
+void	l7vsd::run( int argc, char* argv[] ) {
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::run", __FILE__, __LINE__ );
+
+	// check options
+	int error_pos(0);
+	if( !check_options( argc, argv, error_pos ) ){
+		std::stringstream buf;
+		buf << boost::format( "%s: unknown option: %s\n" )
+			% argv[0]
+			% argv[error_pos];
+
+		std::cerr << buf << std::endl;
+		std::cerr << usage() << std::endl;
+		return;
+	}
+
+	// help mode ?
+	if( help ){
+		std::cout << usage() <<std::endl;
+		return;
+	}
+
+	// debug mode ?
+	if( !debug ){
+		int ret = daemon( 0, 0 );
+		if( 0 > ret ){
+			std::stringstream buf;
+			buf << "daemon() failed: " << strerror( errno );
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+			return;
+		}
+	}
+
+	std::string file;
+
+	//receiver
+	receiver = command_receiver_ptr( new command_receiver( dispatcher, file, *this ) );
+	
+
+	// main loop
+	for(;;){
+		if( exit_requested )	break;
+		dispatcher.poll();
+	}
+
+}
+
+bool	l7vsd::check_options( int argc, char* argv[], int& error_pos ){
+	for( int pos = 1; pos < argc; ++pos ){	// check options.
+		parse_opt_map_type::iterator itr = option_dic.find( argv[pos] );
+		if( itr != option_dic.end() ){	// find option
+			if( ! itr->second( pos, argc, argv ) ) return false;	// option function execute.
+		}
+		else{	// don't find option function.
+			error_pos = pos;
+			return false;
+		}
+	}
+	return true;
+
+}
+
+bool	l7vsd::parse_help(int& pos, int argc, char* argv[] ){
+	++pos;
+	help = true;		//help_mode flag on
+	return true;
+}
+
+bool	l7vsd::parse_debug(int& pos, int argc, char* argv[] ){
+	++pos;
+	debug = true;		//debug_mode flag on
+	return true;
+}
+
+//! create usage
+//! @return		usage string
+std::string	l7vsd::usage(){
+	std::stringstream	stream;
+	stream <<
+	"Usage: %s [-d] [-h]\n"
+	"   -d    --debug        run in debug mode (in foreground)\n"
+	"   -h    --help         print this help messages and exit\n"
+	<< std::endl;
+	return stream.str();
 }
 
 };// namespace l7vsd
@@ -286,25 +440,17 @@ static int set_sighandlers() {
     return 0;
 }
 
-//! display usage
-//! @param[in]	file pointer
-static void usage( FILE* p ){
-
-}
-
 //! l7vsd main function
 int l7vsd_main( int argc, char* argv[] ){
 	try{
 		l7vs::Logger	logger_instance;
 		l7vs::Parameter	parameter_instance;
-		
+		logger_instance.loadConf();
 
-		if (0 > set_sighandlers()) {
-			exit(-1);
-		}
+		if ( 0 > set_sighandlers() )	exit(-1);
 
 		l7vs::l7vsd vsd;
-		vsd.run();
+		vsd.run( argc, argv );
 
 	}
 	catch( ... ){

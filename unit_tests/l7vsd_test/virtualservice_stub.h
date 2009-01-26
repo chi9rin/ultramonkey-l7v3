@@ -1,6 +1,7 @@
 #ifndef	VIRTUALSERVICE_H
 #define	VIRTUALSERVICE_H
 
+#include <iostream>
 #include "virtualservice_element.h"
 #include "replication_stub.h"
 #include "boost/thread.hpp"
@@ -12,6 +13,7 @@ class	virtual_service{
 public:
 
 //variable
+	const	l7vs::l7vsd&		vsd;
 	virtualservice_element		element;
 
 	//for stub
@@ -39,10 +41,11 @@ public:
 
 
 //function
-	virtual_service(	const l7vs::l7vsd& ,
+	virtual_service(	const l7vs::l7vsd& in_vsd,
 						const l7vs::replication& ,
 						const virtualservice_element& )
-				:	initialize_called(false),
+				:	vsd( in_vsd ),
+					initialize_called(false),
 					set_virtualservice_called(false),
 					edit_virtualservice_called(false),
 					add_realserver_called(false),
@@ -51,18 +54,20 @@ public:
 					run_called(false)
 				{}
 
-	~virtual_service()	{}
+	~virtual_service()
+				{}
 
 	void						initialize( error_code& err )
 	{
 		initialize_called = true;
 		if( initialize_fail )	err.setter( true, "initialize_fail!" );
 	}
-	void						finalize( error_code& err )
-	{
-		finalize_called = true;
-		if( finalize_fail )	err.setter( true, "finalize_fail!" );
-	}
+	void						finalize( error_code& err );
+// 	{
+// 		finalize_called = true;
+// 		vsd.release_virtual_service( element );
+// 		if( finalize_fail )	err.setter( true, "finalize_fail!" );
+// 	}
 	
 
 //	bool						operator==( const virtualservice_base& );
@@ -137,17 +142,6 @@ public:
 
 };
 
-bool	virtual_service::initialize_fail(false);
-bool	virtual_service::set_virtualservice_fail(false);
-bool	virtual_service::edit_virtualservice_fail(false);
-
-bool	virtual_service::add_realserver_fail(false);
-bool	virtual_service::edit_realserver_fail(false);
-bool	virtual_service::del_realserver_fail(false);
-
-bool	virtual_service::finalize_called(false);
-bool	virtual_service::finalize_fail(false);
-bool	virtual_service::stop_called(false);
 
 }	//namespace	l7vs
 #endif	//VIRTUALSERVICE_H

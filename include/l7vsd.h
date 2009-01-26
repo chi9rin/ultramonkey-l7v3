@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
+#include <boost/format.hpp>
 #include "error_code.h"
 #include "command_receiver.h"
 #include "virtualservice_element.h"
@@ -32,13 +33,14 @@ public:
 	typedef std::list< boost::shared_ptr< virtual_service > >	vslist_type;	//!< virtual service list typedef
 	typedef std::vector< virtualservice_element >				vsvec_type;		//!< virtual service element vector type
 
-	virtual	~l7vsd();
+	l7vsd();				//!< constructor
+	virtual	~l7vsd();		//!< destructor
 
 protected:
 	boost::thread_group			vs_threads;			//!< virtual_service thread group
 	boost::asio::io_service		dispatcher;			//!< dispatcher
 
-	vslist_type					vslist;				//!< virtual_service list
+	mutable	vslist_type			vslist;				//!< virtual_service list
 
 	command_receiver_ptr		receiver;			//!< command_receiver ptr
 	replication_ptr				rep;				//!< replication ptr
@@ -48,7 +50,19 @@ protected:
 	boost::mutex				vslist_mutex;		//!< virtual service list mutex
 
 	virtual	vslist_type::iterator
-								search_vslist( const virtualservice_element& );	//!< vs_list search function
+								search_vslist( const virtualservice_element& )	const;	//!< vs_list search function
+
+	bool						help;				//!< help mode
+	bool						debug;				//!< debug mode
+
+	//! option parse function object type.
+	typedef	boost::function< bool ( int&, int, char*[] ) >
+			parse_opt_func_type;
+	//! option string - parse function object map type
+	typedef	std::map< std::string, parse_opt_func_type >
+			parse_opt_map_type;
+	//! list option function map dictionary.
+	parse_opt_map_type	option_dic;
 
 public:
 	void	list_virtual_service( vsvec_type&, error_code&  );	//!< virtual_service list command
@@ -80,12 +94,18 @@ public:
 
 	void	reload_parameter( const PARAMETER_COMPONENT_TAG, error_code& );	//!< reload component parameter command
 
-	void	run();		//!< l7vsd run method
+	void	run( int, char*[] );		//!< l7vsd run method
 
-	void	release_virtual_service( const virtualservice_element& );		//!< virtualservice release from vslist
+	void	release_virtual_service( const virtualservice_element& )	const;		//!< virtualservice release from vslist
 
 protected:
 	bool	is_exit_requested();		//!< check if exit requested
+
+	bool	parse_help( int&, int, char*[] );		//!< parse help func
+	bool	parse_debug( int&, int, char*[] );		//!< parse debug func
+
+	bool	check_options( int, char*[], int& );		//!< check option func
+	std::string	usage();				//!< make usage message
 
 };
 

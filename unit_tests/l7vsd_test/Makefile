@@ -23,6 +23,7 @@ ARFLAGS		= cru
 
 
 SRCS		=	\
+			virtualservice_stub.cpp \
 			l7vsd_test.cpp
 
 PARAMETER_SRCS	=	\
