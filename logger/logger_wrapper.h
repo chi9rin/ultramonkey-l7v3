@@ -123,28 +123,24 @@ inline	void	logger_put_log_debug(const l7vs::LOG_CATEGORY_TAG cat, const unsigne
 }
 
 #define LOGGER_PUT_LOG_FATAL(cat, message_id, message, arg...) { \
-	if (LOG_LV_FATAL >= logger_get_log_level(cat)) { \
 	char buf[BUF_LEN]; \
 	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_fatal(cat, message_id, __FILE__, __LINE__, buf); }}
+	logger_put_log_fatal(cat, message_id, __FILE__, __LINE__, buf); }
 	
 #define LOGGER_PUT_LOG_ERROR(cat, message_id, message, arg...) { \
-	if (LOG_LV_ERROR >= logger_get_log_level(cat)) { \
 	char buf[BUF_LEN]; \
 	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_error(cat, message_id, __FILE__, __LINE__, buf); }}
+	logger_put_log_error(cat, message_id, __FILE__, __LINE__, buf); }
 
 #define LOGGER_PUT_LOG_WARN(cat, message_id, message, arg...) { \
-	if (LOG_LV_WARN >= logger_get_log_level(cat)) { \
 	char buf[BUF_LEN]; \
 	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_warn(cat, message_id, __FILE__, __LINE__, buf); }}
+	logger_put_log_warn(cat, message_id, __FILE__, __LINE__, buf); }
 
 #define LOGGER_PUT_LOG_INFO(cat, message_id, message, arg...) { \
-	if (LOG_LV_INFO >= logger_get_log_level(cat)) { \
 	char buf[BUF_LEN]; \
 	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_info(cat, message_id, __FILE__, __LINE__, buf); }}
+	logger_put_log_info(cat, message_id, __FILE__, __LINE__, buf); }
 
 #define LOGGER_PUT_LOG_DEBUG(cat, message_id, message, arg...) { \
 	char buf[BUF_LEN]; \

@@ -136,12 +136,12 @@ l7vs::LoggerImpl& l7vs::LoggerImpl::getInstance(){
 
 
 l7vs::LoggerImpl::LoggerImpl() : initialized(false){
-	levelTable[LOG_LV_NONE]		= log4cxx::Level::getDebug();
-	levelTable[LOG_LV_DEBUG]	= log4cxx::Level::getDebug();
-	levelTable[LOG_LV_INFO]		= log4cxx::Level::getInfo();
-	levelTable[LOG_LV_WARN]		= log4cxx::Level::getWarn();
-	levelTable[LOG_LV_ERROR]	= log4cxx::Level::getError();
-	levelTable[LOG_LV_FATAL]	= log4cxx::Level::getFatal();
+	levelTable[LOG_LV_NONE]		= log4cxx::Level::DEBUG_INT;
+	levelTable[LOG_LV_DEBUG]	= log4cxx::Level::DEBUG_INT;
+	levelTable[LOG_LV_INFO]		= log4cxx::Level::INFO_INT;
+	levelTable[LOG_LV_WARN]		= log4cxx::Level::WARN_INT;
+	levelTable[LOG_LV_ERROR]	= log4cxx::Level::ERROR_INT;
+	levelTable[LOG_LV_FATAL]	= log4cxx::Level::FATAL_INT;
 
 #if	defined(LOGGER_PROCESS_VSD)
 	// l7vsd network category initialize
@@ -264,6 +264,16 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 	name_category_map["l7vsd_system_enviroment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
 	category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_enviroment";
 
+	//l7vsd protocol module category initialize
+	category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_protocol"] = LOG_CAT_PROTOCOL;
+	category_name_map[LOG_CAT_PROTOCOL] = "l7vsd_protocol";
+
+	//l7vsd schedule module category initialize
+	category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_schedule"] = LOG_CAT_SCHEDULE;
+	category_name_map[LOG_CAT_SCHEDULE] = "l7vsd_schedule";
+
 #elif defined(LOGGER_PROCESS_ADM)
 	//l7vsadm parse category initialize
 	category_level_map[LOG_CAT_L7VSADM_PARSE] = LOG_LV_DEBUG;
@@ -299,6 +309,16 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 	category_level_map[LOG_CAT_L7VSADM_MODULE] = LOG_LV_DEBUG;
 	name_category_map["l7vsadm_module"] = LOG_CAT_L7VSADM_MODULE;
 	category_name_map[LOG_CAT_L7VSADM_MODULE] = "l7vsadm_module";
+
+	//l7vsadm protocol module category initialize
+	category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_DEBUG;
+	name_category_map["l7vsadm_protocol"] = LOG_CAT_PROTOCOL;
+	category_name_map[LOG_CAT_PROTOCOL] = "l7vsadm_protocol";
+
+	//l7vsadm schedule module category initialize
+	category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_DEBUG;
+	name_category_map["l7vsadm_schedule"] = LOG_CAT_SCHEDULE;
+	category_name_map[LOG_CAT_SCHEDULE] = "l7vsadm_schedule";
 
 #elif defined(LOGGER_PROCESS_SNM)
 	//snmpagent start stop category initialize
@@ -419,11 +439,7 @@ bool l7vs::LoggerImpl::init(){
 			 itr != category_level_map.end();
 			 ++itr ){
 			category_name_map_type::iterator name_itr = category_name_map.find( itr->first );
-
-			//LoggerPtr temp = Logger::getLogger( name_itr->second );
- 			//temp->setLevel( levelTable[itr->second] );
-
-			Logger::getLogger( name_itr->second )->setLevel( levelTable[itr->second] );
+			Logger::getLogger( name_itr->second )->setLevel( log4cxx::Level::toLevel( levelTable[itr->second] ) );
 		}
 
 	}
@@ -1143,7 +1159,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 			//default log level settting
 			cat_itr->second = LOG_LV_INFO;
-			cat_logger->setLevel( levelTable[cat_itr->second] );
+			cat_logger->setLevel( log4cxx::Level::getInfo() );
 
 		}	//for (category logger setteing)
 
@@ -1200,7 +1216,7 @@ void l7vs::LoggerImpl::loadConf(){
 					}
 					cat_itr->second = LOG_LV_INFO;
 				}
-				cat_logger->setLevel( levelTable[cat_itr->second] );
+				cat_logger->setLevel( log4cxx::Level::toLevel( levelTable[cat_itr->second] ) );
 			}
 			else {
 				std::ostringstream oss;
@@ -1209,7 +1225,7 @@ void l7vs::LoggerImpl::loadConf(){
 					this->putLogWarn(log_category,3, oss.str(), __FILE__, __LINE__);
 				}
 				cat_itr->second = LOG_LV_INFO;
-				cat_logger->setLevel( levelTable[cat_itr->second] );
+				cat_logger->setLevel( log4cxx::Level::getInfo() );
 			}
 		}	//for (category level setting)
 

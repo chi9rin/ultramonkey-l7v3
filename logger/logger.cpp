@@ -117,7 +117,8 @@ bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level)
  */
 void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
 {
-	LoggerImpl::getInstance().putLogFatal(cat, message_id, message, file, line);
+	if ( LOG_LV_FATAL >= getLogLevel( cat ) )
+		LoggerImpl::getInstance().putLogFatal(cat, message_id, message, file, line);
 }
 
 /*!
@@ -132,7 +133,8 @@ void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_
  */
 void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
 {
-	LoggerImpl::getInstance().putLogError(cat, message_id, message, file, line);
+	if ( LOG_LV_ERROR >= getLogLevel( cat ) )
+		LoggerImpl::getInstance().putLogError(cat, message_id, message, file, line);
 }
 
 /*!
@@ -147,7 +149,8 @@ void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_
  */
 void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
 {
-	LoggerImpl::getInstance().putLogWarn(cat, message_id, message, file, line);
+	if ( LOG_LV_WARN >= getLogLevel( cat ) )
+		LoggerImpl::getInstance().putLogWarn(cat, message_id, message, file, line);
 }
 
 /*!
@@ -162,7 +165,8 @@ void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_i
  */
 void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
 {
-	LoggerImpl::getInstance().putLogInfo(cat, message_id, message, file, line);
+	if ( LOG_LV_INFO >= getLogLevel( cat ) )
+		LoggerImpl::getInstance().putLogInfo(cat, message_id, message, file, line);
 }
 
 /*!

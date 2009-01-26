@@ -110,7 +110,7 @@ public:
 		category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 
 		try {
-			log4cxx::Logger::getLogger(categoryname_itr->second)->setLevel(levelTable[level]);
+			log4cxx::Logger::getLogger(categoryname_itr->second)->setLevel( log4cxx::Level::toLevel( levelTable[level] ) );
 		}
 		catch (const std::exception& ex) {
 			return false;
@@ -132,15 +132,34 @@ public:
 										const std::string& message,
 										const char *file,
 										int line){
-	std::stringstream buf;
-	buf << boost::format( "%s%d%03d%04d %s %s" )
-		% LOGGER_PROCESS_ID
-		% LOG_LV_FATAL
-		% cat
-		% message_id
-		% message.c_str()
-		% hostname;
-	try {
+		std::stringstream buf;
+		switch( cat ){
+		case	LOG_CAT_PROTOCOL:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_FATAL
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		case	LOG_CAT_SCHEDULE:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "SM"
+				% LOG_LV_FATAL
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		default:
+			buf << boost::format( "%s%d%03d%04d %s %s" )
+				% LOGGER_PROCESS_ID
+				% LOG_LV_FATAL
+				% cat
+				% message_id
+				% message.c_str()
+				% hostname;
+		}
+		try {
 			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getFatal(),
 																		buf.str(),
@@ -169,13 +188,32 @@ public:
 										const char *file,
 										int line){
 		std::stringstream	buf;
-		buf << boost::format( "%s%d%03d%04d %s %s" )
-			% LOGGER_PROCESS_ID
-			% LOG_LV_ERROR
-			% cat
-			% message_id
-			% message.c_str()
-			% hostname;
+		switch( cat ){
+		case	LOG_CAT_PROTOCOL:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_ERROR
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		case	LOG_CAT_SCHEDULE:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "SM"
+				% LOG_LV_ERROR
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		default:
+			buf << boost::format( "%s%d%03d%04d %s %s" )
+				% LOGGER_PROCESS_ID
+				% LOG_LV_ERROR
+				% cat
+				% message_id
+				% message.c_str()
+				% hostname;
+		}
 		try {
 			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getError(),
@@ -205,13 +243,32 @@ public:
 										const char *file,
 										int line){
 		std::stringstream buf;
-		buf << boost::format( "%s%d%03d%04d %s %s" )
-			% LOGGER_PROCESS_ID
-			% LOG_LV_WARN
-			% cat
-			% message_id
-			% message.c_str()
-			% hostname;
+		switch( cat ){
+		case	LOG_CAT_PROTOCOL:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_WARN
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		case	LOG_CAT_SCHEDULE:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "SM"
+				% LOG_LV_WARN
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		default:
+			buf << boost::format( "%s%d%03d%04d %s %s" )
+				% LOGGER_PROCESS_ID
+				% LOG_LV_WARN
+				% cat
+				% message_id
+				% message.c_str()
+				% hostname;
+		}
 		try {
 			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getWarn(),
@@ -241,13 +298,32 @@ public:
 										const char *file,
 										int line){
 		std::stringstream	buf;
-		buf << boost::format( "%s%d%03d%04d %s %s" )
-			% LOGGER_PROCESS_ID
-			% LOG_LV_INFO
-			% cat
-			% message_id
-			% message.c_str()
-			% hostname;
+		switch( cat ){
+		case	LOG_CAT_PROTOCOL:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_INFO
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		case	LOG_CAT_SCHEDULE:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "SM"
+				% LOG_LV_INFO
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		default:
+			buf << boost::format( "%s%d%03d%04d %s %s" )
+				% LOGGER_PROCESS_ID
+				% LOG_LV_INFO
+				% cat
+				% message_id
+				% message.c_str()
+				% hostname;
+		}
 		try {
 			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getInfo(),
@@ -276,13 +352,32 @@ public:
 										const char *file,
 										int line){
 		std::stringstream	buf;
-		buf << boost::format( "%s%d%03d%04d %s %s" )
-			% LOGGER_PROCESS_ID
-			% LOG_LV_DEBUG
-			% cat
-			% message_id
-			% message
-			% hostname;
+		switch( cat ){
+		case	LOG_CAT_PROTOCOL:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_DEBUG
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		case	LOG_CAT_SCHEDULE:
+			buf << boost::format( "%s%d%06d %s %s" )
+				% "SM"
+				% LOG_LV_DEBUG
+				% message_id
+				% message.c_str()
+				% hostname;
+			break;
+		default:
+			buf << boost::format( "%s%d%03d%04d %s %s" )
+				% LOGGER_PROCESS_ID
+				% LOG_LV_DEBUG
+				% cat
+				% message_id
+				% message.c_str()
+				% hostname;
+		}
 		try {
 			category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getDebug(),
@@ -307,7 +402,7 @@ protected:
 
 	//! LOG_LEVEL_TAG to log4cxx::LevelPtr transrator
 	virtual inline const log4cxx::LevelPtr toLevel(LOG_LEVEL_TAG level)	{
-		return levelTable[level];
+		return log4cxx::Level::toLevel( levelTable[level] );
 	}
 
 	//! if error occured, switch appenders to syslogappender and fileappender(/dev/console)
@@ -345,7 +440,8 @@ protected:
 	//! hostname
 	std::string hostname;
 
-	log4cxx::Level* levelTable[LOGGER_LEVEL_NUM];
+	//log4cxx::Level* levelTable[LOGGER_LEVEL_NUM];
+	int	levelTable[LOGGER_LEVEL_NUM];
 
 	//! category - loglevel hash map
 	category_level_map_type	category_level_map;
