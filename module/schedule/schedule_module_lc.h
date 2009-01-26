@@ -42,7 +42,7 @@ public:
 	//!	@param[in]	list iterator next function object
 	//! @param[out]	scheduled TCP/IP endpoint
 	void	handle_schedule(
-							boost::thread::id					thread_id,
+							boost::thread::id				thread_id,
 							rslist_iterator_func_type		inlist_begin,
 							rslist_iterator_func_type		inlist_end,
 							rslist_iterator_func_type		inlist_next,
@@ -55,7 +55,7 @@ public:
 	//!	@param[in]	list iterator next function object
 	//! @param[out]	scheduled UDP endpoint
 	void	handle_schedule(
-							boost::thread::id					thread_id,
+							boost::thread::id				thread_id,
 							rslist_iterator_func_type		inlist_begin,
 							rslist_iterator_func_type		inlist_end,
 							rslist_iterator_func_type		inlist_next,
