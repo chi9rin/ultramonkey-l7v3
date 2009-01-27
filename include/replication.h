@@ -154,7 +154,7 @@ protected:
 	void						sock_fini();
 	unsigned long long			make_serial();
 	int							send_data( struct replication_data* indata );
-	int							recv_data( struct replication_data* indata );
+	int							recv_data( struct replication_data* outdata );
 	void						releaserpl();
 	void						releasecmp();
 	void						releasesrf();
