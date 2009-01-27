@@ -84,7 +84,7 @@ void	schedule_module_test(){
 	BOOST_MESSAGE( "unit_test[6]\n" );
 	BOOST_CHECK_EQUAL( true, schedule_module_rr->is_udp() );
 
-	boost::thread::id								thread_id;
+	boost::thread::id							thread_id;
 	l7vs::schedule_module_base::rslist_type		rs_list;
 	l7vs::realserver	server1, server2, server3, server4;
 
@@ -162,6 +162,9 @@ void	schedule_module_test(){
 	BOOST_MESSAGE( "unit_test[14]\n" );
 	boost::asio::ip::udp::endpoint endpoint4 ;
 
+	rslist_begin.clear();
+	rslist_end.clear();
+
 	endpoint2 = endpoint4 ;
 
 	schedule_module_rr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
@@ -169,8 +172,8 @@ void	schedule_module_test(){
 
 	// unit_test[15]  handle_schedule(udp)メソッドのテスト２
 	BOOST_MESSAGE( "unit_test[15]\n" );
-//	rslist_begin = boost::bind( &list_begin, &rs_list );
-//	rslist_end = boost::bind( &list_end, &rs_list );
+	rslist_begin = boost::bind( &list_begin, &rs_list );
+	rslist_end = boost::bind( &list_end, &rs_list );
 
 	schedule_module_rr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( endpoint4 == endpoint2 );
