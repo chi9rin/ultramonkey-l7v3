@@ -123,7 +123,9 @@ public:
 		REPLICATION_SLAVE_STOP
 	};
 
-	replication( boost::asio::io_service& inreceive_io ) : receive_io( inreceive_io ) {} ;
+	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
+															replication_receive_socket( receive_io ),
+															replication_send_socket( send_io ) {} ;
 	~replication();
 
 	int							initialize();
