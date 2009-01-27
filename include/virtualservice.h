@@ -25,9 +25,7 @@
 #include "udp_session.h"
 #include "virtualservice_element.h"
 
-#include "stub.h"
-
-//#include "l7vsd.h"
+#include "l7vsd.h"
 #include "realserver.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
@@ -36,6 +34,8 @@
 
 namespace l7vs{
 
+class	l7vsd;
+class	replication;
 class	session_thread_control;
 
 class	virtualservice_base : boost::noncopyable{
