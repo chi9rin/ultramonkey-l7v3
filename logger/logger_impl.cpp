@@ -286,9 +286,9 @@ l7vs::LoggerImpl::LoggerImpl() : initialized(false){
 	category_name_map[LOG_CAT_L7VSADM_OPERATE] = "l7vsadm_operate";
 
 	//l7vsadm config result category initialize
-	category_level_map[LOG_CAT_l7VSADM_CONFIG_RESULT] = LOG_LV_DEBUG;
-	name_category_map["l7vsadm_config_result"] = LOG_CAT_l7VSADM_CONFIG_RESULT;
-	category_name_map[LOG_CAT_l7VSADM_CONFIG_RESULT] = "l7vsadm_config_result";
+	category_level_map[LOG_CAT_L7VSADM_CONFIG_RESULT] = LOG_LV_DEBUG;
+	name_category_map["l7vsadm_config_result"] = LOG_CAT_L7VSADM_CONFIG_RESULT;
+	category_name_map[LOG_CAT_L7VSADM_CONFIG_RESULT] = "l7vsadm_config_result";
 
 	//l7vsadm common category initialize
 	category_level_map[LOG_CAT_L7VSADM_COMMON] = LOG_LV_DEBUG;
