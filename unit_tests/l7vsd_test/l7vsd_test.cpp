@@ -765,11 +765,22 @@ void	search_vslist_test(){
 
 
 void	run_test(){
-	BOOST_MESSAGE( "----- run test start -----" );
+	BOOST_MESSAGE( "----- run test_start -----" );
 	l7vsd_test			vsd_test;
 
 // normal case
 	{
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
+
 		daemon_ret = 0;
 	
 		int		argc	= 1;
@@ -788,6 +799,34 @@ void	run_test(){
 		BOOST_CHECK_EQUAL( vsd_test.get_help(), false );
 		vsd_test.get_help() = false;
 		vsd_test.get_help() = false;
+
+		// unit_test[1] l7vsd::run normal case protocol_module_control initialize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case protocol_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case schedule_module_control initilize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case schedule_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case replication initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case replication finalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case snmpbridge initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case snmpbridge finalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, true );
+
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
 	}
 
 // normal case 2(help mode )
@@ -807,6 +846,34 @@ void	run_test(){
 		BOOST_CHECK_EQUAL( vsd_test.get_debug(), false );
 		vsd_test.get_help() = false;
 		vsd_test.get_debug() = false;
+
+		// unit_test[1] l7vsd::run normal case 2(help mode) protocol_module_control initialize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) protocol_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::finalize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) schedule_module_control initilize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) schedule_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::finalize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) replication initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) replication finalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::finalize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) snmpbridge initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 2(help mode) snmpbridge finalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, false );
+
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
 	}
 
 // normal case 3(debug mode)
@@ -826,11 +893,144 @@ void	run_test(){
 		BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
 		vsd_test.get_help() = false;
 		vsd_test.get_debug() = false;
+
+		// unit_test[1] l7vsd::run normal case 3(debug mode) protocol_module_control initialize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) protocol_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) schedule_module_control initilize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) schedule_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) replication initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) replication finalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) snmpbridge initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case 3(debug mode) snmpbridge finalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, true );
+
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
 	}
 
+// normal case 4(help and debug mode)
+	{
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsd_test", "-d", "-h" };
+	
+		exit_requested = true;
+		int ret = vsd_test.run( argc, argv );
+		exit_requested = false;
+	
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) return value check
+		BOOST_CHECK_EQUAL( ret, 0 );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) delp mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_help(), true );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) debug mode check
+		BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
+		vsd_test.get_help() = false;
+		vsd_test.get_debug() = false;
 
-	BOOST_MESSAGE( "----- run test end -----" );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) protocol_module_control initialize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) protocol_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::finalize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) schedule_module_control initilize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) schedule_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::finalize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) replication initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) replication finalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::finalize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) snmpbridge initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, false );
+		// unit_test[1] l7vsd::run normal case 4(help and debug mode) snmpbridge finalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, false );
 
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
+	}
+
+	BOOST_MESSAGE( "----- run_test end -----" );
+}
+
+void	l7vsd_main_test(){
+	BOOST_MESSAGE( "----- l7vsd_main_test start -----" );
+
+// normal case
+	{
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
+
+		daemon_ret = 0;
+	
+		int		argc	= 1;
+		char*	argv[]	= { "l7vsd_test" };
+	
+		exit_requested = true;
+		int ret = l7vsd_main( argc, argv );
+		exit_requested = false;
+	
+		// unit_test[1] l7vsd::run normal case return value check
+		BOOST_CHECK_EQUAL( ret, 0 );
+
+		// unit_test[1] l7vsd::run normal case protocol_module_control initialize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case protocol_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case schedule_module_control initilize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case schedule_module_control finalize call check
+		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case replication initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case replication finalize call check
+		BOOST_CHECK_EQUAL( l7vs::replication::finalize_called, true );
+		// unit_test[1] l7vsd::run normal case snmpbridge initilalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, true );
+		// unit_test[1] l7vsd::run normal case snmpbridge finalize call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, true );
+
+		l7vs::protocol_module_control::initialize_called = false;
+		l7vs::protocol_module_control::finalize_called = false;
+		l7vs::schedule_module_control::initialize_called = false;
+		l7vs::schedule_module_control::finalize_called = false;
+		l7vs::replication::initialize_called = false;
+		l7vs::replication::initialize_fail = false;
+		l7vs::replication::finalize_called = false;
+		l7vs::snmpbridge::initialize_called = false;
+		l7vs::snmpbridge::initialize_fail = false;
+		l7vs::snmpbridge::finalize_called = false;
+	}
+
+	BOOST_MESSAGE( "----- l7vsd_main_test end -----" );
 }
 
 void	sig_exit_handler_test(){
@@ -1040,6 +1240,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 
 	ts->add( BOOST_TEST_CASE( &run_test ) );
+	ts->add( BOOST_TEST_CASE( &l7vsd_main_test ) );
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
 	ts->add( BOOST_TEST_CASE( &set_sighandler_test ) );

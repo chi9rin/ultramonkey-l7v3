@@ -20,6 +20,11 @@ public:
 	bool	switch_to_master_called;
 	bool	switch_to_slave_called;
 
+	static	bool	initialize_called;
+	static	bool	initialize_fail;
+
+	static	bool	finalize_called;
+
 //function
 	replication(	boost::asio::io_service& inreceive_io )
 				:	receive_io( inreceive_io ),
@@ -28,9 +33,14 @@ public:
 	{};
 
 	int							initialize()
-	{ return 0; }
+	{
+		initialize_called = true;
+		if(initialize_fail)	return -1;
+		return 0;
+	}
 
-	void						finalize()	{}
+	void						finalize()
+	{ finalize_called = true; }
 
 	void						switch_to_master()
 	{ switch_to_master_called = true; }
@@ -52,5 +62,6 @@ public:
 	int							unlock( std::string& inid );
 	int							refer_lock_mutex( std::string& inid, boost::mutex& outmutex );
 };	//class
+
 }	//namespace	l7vs
 #endif	//REPLICATION_H

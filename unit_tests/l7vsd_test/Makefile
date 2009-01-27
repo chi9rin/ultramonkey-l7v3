@@ -4,6 +4,7 @@
 #
 #
 TARGET		= l7vsd_ut
+TARGET2		= l7vsd_thread
 CPP			= g++
 CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../logger \
@@ -23,8 +24,13 @@ ARFLAGS		= cru
 
 
 SRCS		=	\
-			virtualservice_stub.cpp \
+			stub.cpp \
 			l7vsd_test.cpp
+
+SRCS2		=	\
+			stub.cpp \
+			l7vsd_thread_test.cpp
+
 
 PARAMETER_SRCS	=	\
 			../../parameter/parameter.cpp \
@@ -41,13 +47,17 @@ LOGGER_SRCS	=	\
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 OBJS		= $(SRCS:.cpp=.o)
+OBJS2		= $(SRCS2:.cpp=.o)
 PARAMETER_OBJS	= $(PARAMETER_SRCS:.cpp=.o)
 LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
-all:	$(TARGET)
+all:	$(TARGET) $(TARGET2)
 
 $(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS) $(PARAMETER) $(LOGGER)
+
+$(TARGET2):	$(OBJS2) $(PARAMETER) $(LOGGER)
+	$(CPP) $(INCLUDES) -o $@ $(OBJS2) $(LIBS) $(PARAMETER) $(LOGGER)
 
 $(PARAMETER):	$(PARAMETER_OBJS)
 	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
@@ -56,5 +66,5 @@ $(LOGGER):	$(LOGGER_OBJS)
 	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
 
 clean:
-	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS)
+	rm -f $(TARGET) $(TARGET2) $(OBJS) $(OBJS2) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS)
 

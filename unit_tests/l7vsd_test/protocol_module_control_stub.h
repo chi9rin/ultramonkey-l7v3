@@ -17,6 +17,12 @@ protected:
 
 	protocol_module_control(){}
 public:
+
+// variables
+	static	bool	initialize_called;
+	static	bool	finalize_called;
+
+// functions
 	//! instance getter function.
 	static protocol_module_control&	getInstance()
 	{
@@ -27,11 +33,11 @@ public:
 	//! initialize
 	//! @param[in]	shared object file path
 	void	initialize( const std::string& infile_path )
-	{}
+	{ initialize_called = true; }
 
 	//! finalize
 	void	finalize()
-	{}
+	{ finalize_called = true; }
 
 /*
 	//! load module function
@@ -44,7 +50,7 @@ public:
 	{}
 */
 
-};
+};	// class
 
 }	//namespace l7vs
 #endif//PROTOCOL_MODULE_CONTROL

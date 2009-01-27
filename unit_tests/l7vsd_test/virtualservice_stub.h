@@ -63,12 +63,6 @@ public:
 		if( initialize_fail )	err.setter( true, "initialize_fail!" );
 	}
 	void						finalize( error_code& err );
-// 	{
-// 		finalize_called = true;
-// 		vsd.release_virtual_service( element );
-// 		if( finalize_fail )	err.setter( true, "finalize_fail!" );
-// 	}
-	
 
 //	bool						operator==( const virtualservice_base& );
 //	bool						operator!=( const virtualservice_base& );
