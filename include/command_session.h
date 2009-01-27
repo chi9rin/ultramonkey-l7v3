@@ -21,10 +21,13 @@
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
 
+#include "error_code.h"
 #include "l7vs_command.h"
-#include "l7vsd.h"
+//#include "l7vsd.h"
 
 namespace l7vs{
+
+class	l7vsd;
 
 //!	@class	command_session
 //!	@brief	l7vsadm message session class
@@ -40,7 +43,7 @@ protected:
 	//!	l7vsd refferecne
 	l7vsd&										vsd;
 	//!	command to handler map
-	std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<l7vsd::l7vsd_operation_result(void)> >
+	std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<void( l7vs::error_code )> >
 												command_handler_map;
 
 	//! @brief default constructor
