@@ -67,16 +67,15 @@ public:
 	//! @param[in]
 	//! @param[in]
 	snmpbridge( l7vsd& l7vsd_in, boost::asio::io_service& io_service_in ) :
-		vsd(l7vsd_in),
+		send_buffer_size(0),
 		snmp_io_service(io_service_in),
 		snmp_acceptor(io_service_in),
 		snmp_socket(io_service_in),
-		send_buffer_size(0),
-		connection_state(false){
+		connection_state(false),
+		vsd(l7vsd_in){
 			snmp_loglevel_map.clear();
 			levelstring_map.clear();
 	}
-
 	//! destractor
 	~snmpbridge(){}
 
