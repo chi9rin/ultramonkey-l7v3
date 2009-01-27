@@ -9,14 +9,14 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 
-#include "../include/virtualservice.h"
+#include "virtualservice.h"
 //#include "replication.h"
 
 namespace l7vs{
 
 // imprementation for virtualservice_base
-virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
-							const l7vs::replication& inrep,
+virtualservice_base::virtualservice_base(	const l7vsd& invsd,
+							const replication& inrep,
 							const virtualservice_element& inelement)
 												 :	vsd( invsd ),
 													rep( inrep ),
@@ -47,8 +47,8 @@ boost::shared_ptr<schedule_module_base>
 
 
 
-virtualservice_tcp::virtualservice_tcp(	const l7vs::l7vsd& invsd,
-										const l7vs::replication& inrep,
+virtualservice_tcp::virtualservice_tcp(	const l7vsd& invsd,
+										const replication& inrep,
 										const virtualservice_element& inelement )
 												 :	virtualservice_base( invsd, inrep, inelement ),
 													acceptor_( dispatcher ) {}
@@ -96,10 +96,11 @@ void	virtualservice_tcp::release_session( const boost::thread::id thread_id ){}
 
 
 
-virtualservice_udp::virtualservice_udp(		const l7vs::l7vsd& invsd,
-							const l7vs::replication& inrep,
+virtualservice_udp::virtualservice_udp(		const l7vsd& invsd,
+							const replication& inrep,
 							const virtualservice_element& inelement) : 
-													virtualservice_base( invsd, inrep, inelement ){}
+													virtualservice_base( invsd, inrep, inelement ),
+													session( *this, dispatcher ){}
 virtualservice_udp::~virtualservice_udp(){}
 
 void	virtualservice_udp::handle_replication_interrupt( const boost::system::error_code& in ){}
@@ -140,8 +141,8 @@ void	virtualservice_udp::connection_inactive( const boost::asio::ip::tcp::endpoi
 void	virtualservice_udp::release_session( const boost::thread::id thread_id ){}
 
 
-virtual_service::virtual_service(	const l7vs::l7vsd& invsd,
-									const l7vs::replication& inrep,
+virtual_service::virtual_service(	const l7vsd& invsd,
+									const replication& inrep,
 									const virtualservice_element& inelement ){
 	if( inelement.udpmode )
 		vs = boost::shared_ptr<virtualservice_base>(

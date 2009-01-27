@@ -25,9 +25,9 @@
 #include "udp_session.h"
 #include "virtualservice_element.h"
 
-//#include "stub.h"
+#include "stub.h"
 
-#include "l7vsd.h"
+//#include "l7vsd.h"
 #include "realserver.h"
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
@@ -36,6 +36,7 @@
 
 namespace l7vs{
 
+class	session_thread_control;
 
 class	virtualservice_base : boost::noncopyable{
 public:
@@ -63,8 +64,8 @@ protected:
 		vs_replication_body		body;
 	};
 
-	const	l7vs::l7vsd&		vsd;
-	const	l7vs::replication&	rep;
+	const	l7vsd&		vsd;
+	const	replication&	rep;
 
 	boost::asio::io_service		dispatcher;
 	boost::asio::deadline_timer	vs_timer;
@@ -102,8 +103,8 @@ protected:
 
 	void						handle_throughput_update( const boost::system::error_code& );
 public:
-	virtualservice_base(	const l7vs::l7vsd&,
-							const l7vs::replication&,
+	virtualservice_base(	const l7vsd&,
+							const replication&,
 							const virtualservice_element& );
 	virtual	~virtualservice_base(){};
 
@@ -166,8 +167,8 @@ protected:
 												const boost::system::error_code& );
 
 public:
-	virtualservice_tcp(		const l7vs::l7vsd&,
-							const l7vs::replication&,
+	virtualservice_tcp(		const l7vsd&,
+							const replication&,
 							const virtualservice_element& );
 	~virtualservice_tcp();
 
@@ -200,8 +201,8 @@ protected:
 	bool						read_replicationdata( vs_replication_data& );
 
 public:
-	virtualservice_udp(		const l7vs::l7vsd&,
-							const l7vs::replication&,
+	virtualservice_udp(		const l7vsd&,
+							const replication&,
 							const virtualservice_element& );
 	~virtualservice_udp();
 
@@ -231,8 +232,8 @@ class	virtual_service{
 protected:
 	boost::shared_ptr<virtualservice_base>	vs;
 public:
-	virtual_service(	const l7vs::l7vsd& ,
-						const l7vs::replication& ,
+	virtual_service(	const l7vsd& ,
+						const replication& ,
 						const virtualservice_element& );
 	~virtual_service();
 	

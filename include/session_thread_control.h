@@ -19,6 +19,8 @@
 
 namespace l7vs{
 
+class	tcp_session;
+
 //!
 //!	@brief	session thread pooling utility class.
 //! @class	session_thread_control is session thread pool utirity.
@@ -37,10 +39,12 @@ protected:
 	state_tag			upthread_state;				//! upstream thread state
 	boost::mutex		upthread_condition_mutex;	//! upthread condition use mutex 
 	boost::condition	upthread_condition;			//! upthread condition
+	boost::mutex		upthread_exit_mutex;
 	thread_ptr			downthread;					//! downstream thread
 	state_tag			downthread_state;			//! downstream thread state
 	boost::mutex		downthread_condition_mutex;	//! downstream condition use mutex
 	boost::condition	downthread_condition;		//! downstream condition
+	boost::mutex		downthread_exit_mutex;
 	session_ptr			session;					//! session class shared pointer
 	void				upstream_run();				//! upstream thread bind function
 	void				downstream_run();			//! downstream thread bind function
@@ -55,7 +59,10 @@ public:
 		downthread.reset( new boost::thread( boost::bind( &session_thread_control::downstream_run, this ) ) );//! downstream thread create
 	}
 	//! destractor
-	~session_thread_control(){}
+	~session_thread_control(){
+		upthread->join();
+		downthread->join();
+	}
 	//! session shared ptr getter
 	//! @return session shared ptr
 	session_ptr		get_session(){	return session; }

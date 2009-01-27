@@ -80,8 +80,14 @@ std::size_t		l7vs::tcp_socket::read_some(boost::asio::mutable_buffers_1 buffers,
 
 l7vs::tcp_session::tcp_session(l7vs::virtualservice_tcp& vs, boost::asio::io_service& session_io) : io( session_io ),
 																									parent_service( vs ),
-																									client_socket( io ) {}
-l7vs::tcp_session::~tcp_session(void){}
+																									client_socket( io ) {
+	exit_flag = false;
+	session_pause_flag = false;
+	std::cout << "SESSION:CREATE" << std::endl;
+}
+l7vs::tcp_session::~tcp_session(void){
+	std::cout << "SESSION:DESTROY" << std::endl;
+}
 l7vs::session_result_message l7vs::tcp_session::initialize(void){
 	l7vs::session_result_message	result;
 	return result;
@@ -93,11 +99,58 @@ boost::asio::ip::tcp::socket& l7vs::tcp_session::get_client_socket(void){
 bool	l7vs::tcp_session::is_thread_wait(void){
 }
 
-void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){}
+void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){
+	switch( message ){
+	case SORRY_STATE_DISABLE:
+		{
+			boost::mutex::scoped_lock( exit_flag_update_mutex );
+			exit_flag = false;
+		}
+		break;
+	case SESSION_END:
+		{
+			boost::mutex::scoped_lock( exit_flag_update_mutex );
+			exit_flag = true;
+		}
+		break;
+	case SESSION_PAUSE_ON:
+		{
+			boost::mutex::scoped_lock( module_function_sorry_disable_mutex );
+			session_pause_flag = true;
+		}
+		break;
+	case SESSION_PAUSE_OFF:
+		{
+			boost::mutex::scoped_lock( module_function_sorry_disable_mutex );
+			session_pause_flag = false;
+		}
+		break;
+	}
+}
 
-void	l7vs::tcp_session::up_thread_run(void){}
+void	l7vs::tcp_session::up_thread_run(void){
+	unsigned int i = 0;
+	std::cout << "UP:RUN" << std::endl;
+	for( i = 0; i < (INT_MAX/12); ++i ){
+		{
+			boost::mutex::scoped_lock( exit_flag_update_mutex );
+			if( exit_flag )break;
+		}
+	}
+	std::cout << "UP:STOP(" << i << ")" << std::endl;
+}
 
-void	l7vs::tcp_session::down_thread_run(void){}
+void	l7vs::tcp_session::down_thread_run(void){
+	unsigned int i = 0;
+	std::cout << "DOWN:RUN" << std::endl;
+	for( i = 0; i < (INT_MAX/12); ++i ){
+		{
+			boost::mutex::scoped_lock( module_function_sorry_disable_mutex );
+			if( session_pause_flag )break;
+		}
+	}
+	std::cout << "DOWN:STOP(" << i << ")" << std::endl;
+}
 
 // void	thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist);
 // 
