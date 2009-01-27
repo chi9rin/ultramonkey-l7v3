@@ -58,10 +58,12 @@ protected:
 	//! this mutex used loadmodule_map read/write/change.
 	boost::mutex			loadmodule_map_mutex;
 
+	schedule_module_control(){}
 public:
 	//! instance getter function.
 	static schedule_module_control&	getInstance();
 	//! initialize
+	//! @param[in]	shared object file path
 	void	initialize( const std::string& infile_path );
 	//! finalize
 	void	finalize();
