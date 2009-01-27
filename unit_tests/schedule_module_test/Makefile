@@ -4,7 +4,7 @@
 #
 #
 #TARGET		= schedule_module_rr.so schedule_module_ut
-TARGET		= schedule_module_rr.so schedule_module_wrr.so schedule_module_lc.so schedule_module_rr_ut
+TARGET		= schedule_module_rr.so schedule_module_wrr.so schedule_module_lc.so schedule_module_rr_ut schedule_module_wrr_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../logger \
@@ -68,8 +68,8 @@ schedule_module_lc.so: $(SRC_M3)
 schedule_module_rr_ut: $(OBJS_RR) $(SRC_M1)
 	$(CPP) $(INCLUDES) -o schedule_module_rr_ut $(OBJS_RR) $(LIBS)
 
-#schedule_module_wrr_ut: $(OBJS_WRR) $(SRC_M2)
-#	$(CPP) $(INCLUDES) -o schedule_module_wrr_ut $(OBJS_WRR) $(LIBS)
+schedule_module_wrr_ut: $(OBJS_WRR) $(SRC_M2)
+	$(CPP) $(INCLUDES) -o schedule_module_wrr_ut $(OBJS_WRR) $(LIBS)
 
 #schedule_module_lc_ut: $(OBJS_LC) $(SRC_M3)
 #	$(CPP) $(INCLUDES) -o schedule_module_lc_ut $(OBJS_LC) $(LIBS)

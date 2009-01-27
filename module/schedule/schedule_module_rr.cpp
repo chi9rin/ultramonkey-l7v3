@@ -114,7 +114,7 @@ void	schedule_module_round_robin::handle_schedule(
 							rslist_iterator_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&	outendpoint ){
 	boost::asio::ip::udp::endpoint	udp_local_endpoint ;
-	rslist_type::iterator itr;
+	rslist_type::iterator			itr;
 
 	//! set clear data as NULL
 	outendpoint = udp_local_endpoint;

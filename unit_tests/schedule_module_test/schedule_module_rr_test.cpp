@@ -86,7 +86,7 @@ void	schedule_module_test(){
 
 	boost::thread::id								thread_id;
 	l7vs::schedule_module_base::rslist_type		rs_list;
-	l7vs::realserver	server1, server2, server3;
+	l7vs::realserver	server1, server2, server3, server4;
 
 	l7vs::schedule_module_base::rslist_iterator_func_type		rslist_begin;
 	l7vs::schedule_module_base::rslist_iterator_func_type		rslist_end;
@@ -120,6 +120,9 @@ void	schedule_module_test(){
 	server3.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.85" ), 20  ) ;
 	server3.weight = 0;
 	rs_list.push_back( server3 );
+	server4.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.84" ), 19  ) ;
+	server4.weight = 0;
+	rs_list.push_back( server4 );
 
 	schedule_module_rr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
@@ -133,6 +136,8 @@ void	schedule_module_test(){
 	rs_list.push_back( server2 );
 	server3.weight = 3;
 	rs_list.push_back( server3 );
+	server4.weight = 0;
+	rs_list.push_back( server4 );
 
 	schedule_module_rr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server1.tcp_endpoint == endpoint1 );
@@ -182,6 +187,9 @@ void	schedule_module_test(){
 	server3.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.85" ), 20  ) ;
 	server3.weight = 0;
 	rs_list.push_back( server3 );
+	server4.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.84" ), 19  ) ;
+	server4.weight = 0;
+	rs_list.push_back( server4 );
 
 	schedule_module_rr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( endpoint4 == endpoint2 );
@@ -195,6 +203,8 @@ void	schedule_module_test(){
 	rs_list.push_back( server2 );
 	server3.weight = 3;
 	rs_list.push_back( server3 );
+	server4.weight = 0;
+	rs_list.push_back( server4 );
 
 	schedule_module_rr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server1.udp_endpoint == endpoint2 );
