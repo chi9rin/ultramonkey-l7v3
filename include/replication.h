@@ -125,8 +125,8 @@ public:
 
 	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
 															replication_receive_socket( receive_io ),
-															replication_send_socket( send_io ) {} ;
-	~replication();
+															replication_send_socket( send_io ) {}
+	~replication(){}
 
 	int							initialize();
 	void						finalize();
