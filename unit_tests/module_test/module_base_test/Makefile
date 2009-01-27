@@ -6,10 +6,11 @@
 TARGET		= module_base_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
-INCLUDES	=	-I../../logger \
-				-I../../parameter \
-				-I../../include \
-				-I../../src
+INCLUDES	=	-I../../../logger \
+				-I../../../parameter \
+				-I../../../include \
+				-I../../../module/protocol \
+				-I../../../src
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt
@@ -17,7 +18,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
-			../../src/module_base_test.cpp
+			module_base_test.cpp
 
 .SUFFIX:	.cpp .o
 .cpp.o:
