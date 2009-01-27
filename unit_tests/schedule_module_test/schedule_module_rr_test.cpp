@@ -216,7 +216,7 @@ void	schedule_module_test(){
 
 
 	// unit_test[21]  replication_interruptメソッドのテスト
-	BOOST_MESSAGE( "unit_test[20]\n" );
+	BOOST_MESSAGE( "unit_test[21]\n" );
 	schedule_module_rr->replication_interrupt();
 
 	destroy_module( schedule_module_rr );

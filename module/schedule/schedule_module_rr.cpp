@@ -68,8 +68,7 @@ void	schedule_module_round_robin::handle_schedule(
 			break;
 		}
 	}
-	if ( itr == inlist_end() )
-	{
+	if ( itr == inlist_end() ){
 		//! no data
 		return;
 	}
@@ -132,8 +131,7 @@ void	schedule_module_round_robin::handle_schedule(
 			break;
 		}
 	}
-	if ( itr == inlist_end() )
-	{
+	if ( itr == inlist_end() ){
 		//! no data
 		return;
 	}
