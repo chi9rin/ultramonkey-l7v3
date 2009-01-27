@@ -3,7 +3,7 @@
 #	Makefile for session_result_message_test Class unit test frameworks.
 #
 #
-TARGET		= data_buff_base_ut
+TARGET		= session_result_message_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../../logger \

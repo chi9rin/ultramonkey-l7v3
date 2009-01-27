@@ -12,61 +12,96 @@ void	operator_equal_test(){
 
 
 	BOOST_MESSAGE( "----- operator equal test start -----" );
-/*	
-//	session_result_message
-	data_buff_base_test test_obj;
 
-	// ## constractor test [1]  initialize member test "data"
-	std::cout << "constractor test [1]  member initialize test \"data_size\"" << std::endl;
-	BOOST_CHECK_EQUAL( test_obj.get_size(), std::size_t(0) );
+	l7vs::session_result_message test_obj;
+	l7vs::session_result_message chk_obj;
+	bool bres;
+	test_obj.flag = true;
+	test_obj.message = "Test message 1";
+	
+	// ## operator equal test [1] equal case 1
+	std::cout << "operator equal test [1] equal case 1" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = test_obj.message;
+	bres = test_obj == chk_obj;
+	BOOST_CHECK( bres );
 
-	// ## constractor test [2]  initialize member test "send_size"
-	std::cout << "constractor test [2]  member initialize test \"send_size\"" << std::endl;
-	BOOST_CHECK_EQUAL( test_obj.get_send_size(), std::size_t(0) );
+	// ## operator equal test [2] inequal case 1
+	std::cout << "operator equal test [2] inequal case 1" << std::endl;
+	chk_obj.flag = !test_obj.flag;
+	chk_obj.message = test_obj.message;
+	bres = test_obj == chk_obj;
+	BOOST_CHECK( !bres );
 
-	// ## constractor test [3]  initialize member test "data"
-	std::cout << "constractor test [3]  member initialize test \"data\"" << std::endl;
-	boost::array< char , MAX_BUFFER_SIZE> init_data;
-	for(int i = 0;i < MAX_BUFFER_SIZE; i++)
-		init_data[i] = '\0';
+	// ## operator equal test [3] inequal case 2
+	std::cout << "operator equal test [3] inequal case 2" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = "Test message 2";
+	bres = test_obj == chk_obj;
+	BOOST_CHECK( !bres );
 
-	boost::array< char , MAX_BUFFER_SIZE>& chk_data = test_obj.get_data();
-	for(int i = 0;i < MAX_BUFFER_SIZE; i++)
-		BOOST_CHECK_EQUAL( init_data[i] , chk_data[i]);
-*/
+	// ## operator equal test [4] inequal case 3
+	std::cout << "operator equal test [4] inequal case 2" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = "Test message ";
+	bres = test_obj == chk_obj;
+	BOOST_CHECK( !bres );
+
+	// ## operator equal test [5] inequal case 4
+	std::cout << "operator equal test [5] inequal case 2" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = "Test message 1 ";
+	bres = test_obj == chk_obj;
+	BOOST_CHECK( !bres );
+
 	BOOST_MESSAGE( "----- operator equal test end -----" );
 }
 
 void	operator_inequal_test(){
-	BOOST_MESSAGE( "----- operator equal test start -----" );
+	BOOST_MESSAGE( "----- operator inequal test start -----" );
 
-	data_buff_base_test test_obj;
-
-	size_t set_size;
-	size_t get_size;
+	l7vs::session_result_message test_obj;
+	l7vs::session_result_message chk_obj;
+	bool bres;
+	test_obj.flag = true;
+	test_obj.message = "Test message 1";
 	
-	// ## data size setter & getter test [1] set min(0)
-	std::cout << "data size setter & getter test [1] set min(0)" << std::endl;
-	set_size = 0;
-	test_obj.set_size(set_size);
-	get_size = test_obj.get_size();
-	BOOST_CHECK_EQUAL( set_size, get_size );
+	// ## operator inequal test [1] equal case 1
+	std::cout << "operator inequal test [1] equal case 1" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = test_obj.message;
+	bres = test_obj != chk_obj;
+	BOOST_CHECK( !bres );
 
-	// ## data size setter & getter test [2] set max(ULONG_MAX)
-	std::cout << "data size setter & getter test [2] set max(ULONG_MAX)" << std::endl;
-	set_size = ULONG_MAX;
-	test_obj.set_size(set_size);
-	get_size = test_obj.get_size();
-	BOOST_CHECK_EQUAL( set_size, get_size );
+	// ## operator inequal test [2] inequal case 1
+	std::cout << "operator inequal test [2] inequal case 1" << std::endl;
+	chk_obj.flag = !test_obj.flag;
+	chk_obj.message = test_obj.message;
+	bres = test_obj != chk_obj;
+	BOOST_CHECK( bres );
 
-	// ## data size setter & getter test [3] set mid(ULONG_MAX / 2)
-	std::cout << "data size setter & getter test [3] set max(ULONG_MAX / 2)" << std::endl;
-	set_size = ULONG_MAX / 2;
-	test_obj.set_size(set_size);
-	get_size = test_obj.get_size();
-	BOOST_CHECK_EQUAL( set_size, get_size );
+	// ## operator inequal test [3] inequal case 2
+	std::cout << "operator inequal test [3] inequal case 2" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = "Test message 2";
+	bres = test_obj != chk_obj;
+	BOOST_CHECK( bres );
 
-	BOOST_MESSAGE( "----- operator equal test end -----" );
+	// ## operator inequal test [4] inequal case 3
+	std::cout << "operator inequal test [4] inequal case 2" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = "Test message ";
+	bres = test_obj != chk_obj;
+	BOOST_CHECK( bres );
+
+	// ## operator inequal test [5] inequal case 4
+	std::cout << "operator inequal test [5] inequal case 2" << std::endl;
+	chk_obj.flag = test_obj.flag;
+	chk_obj.message = "Test message 1 ";
+	bres = test_obj != chk_obj;
+	BOOST_CHECK( bres );
+
+	BOOST_MESSAGE( "----- operator inequal test end -----" );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
