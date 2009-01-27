@@ -172,6 +172,14 @@ void	add_vs_edit_rs( unsigned int id ){
 	}
 }
 
+void	flush_vs( unsigned int id ){
+	for( size_t i = 0 ; i < 100; ++i ){
+		l7vs::error_code err;
+		vsd_test.flush_virtual_service( err );
+		if( err )	++err_count[id];
+	}
+}
+
 void	thread_test(){
 	BOOST_MESSAGE( "----- thread_test start -----" );
 
@@ -201,6 +209,7 @@ void	thread_test(){
 	func_map["add_vs_del_rs"] = &add_vs_del_rs;
 	func_map["add_vs_edit_rs"] = &add_vs_edit_rs;
 
+	// command combination test
 	for( func_map_type::iterator itr = func_map.begin();
 		 itr != func_map.end();
 		 ++itr ){
@@ -223,6 +232,26 @@ void	thread_test(){
 
 		}
 	}
+
+
+	// flush vs command combination test
+	for( func_map_type::iterator itr = func_map.begin();
+		 itr != func_map.end();
+		 ++itr ){
+
+		err_count[0] = 0;
+		err_count[1] = 0;
+
+		boost::thread	thd1( boost::bind( &flush_vs, 0 ) );
+		boost::thread	thd2( boost::bind( itr->second, 1 ) );
+		thd1.join();
+		thd2.join();
+
+		BOOST_MESSAGE( "flush and " + itr->first );
+		BOOST_CHECK_EQUAL( err_count[0], 0 );
+
+	}
+
 	BOOST_MESSAGE( "----- thread_test end -----" );
 
 }
