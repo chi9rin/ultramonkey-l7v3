@@ -44,6 +44,7 @@ public:
 	//! @struct	protocol_module_information
 	//! @brief	protocol module information structure.
 	struct	protocol_module_info{
+		void *				handle;					//!< dlopen handle
 		unsigned int		ref_count;				//!< refarence count
 		create_func_type	create_func;			//!< create function object
 		destroy_func_type	destroy_func;			//!< destroy function object

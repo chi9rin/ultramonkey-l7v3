@@ -59,49 +59,37 @@ schedule_module_control::finalize(){
  */
 schedule_module_base*
 schedule_module_control::load_module( const	std::string& modulename ){
-	dlerror();
 	schedule_module_base* return_value = NULL;
 	boost::mutex::scoped_lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( modulename );
-//	std::cout << "load_module_name> " << modulename << std::endl;//debug
 	if( it == loadmodule_map.end() ){
 		std::string load_module_name = modulefile_path + modulename + ".so";
-//		std::cout << "dlopen module_name> " << load_module_name.c_str() << std::endl;//debug
 		void* h = dlopen( load_module_name.c_str(), RTLD_LAZY );
-//		std::cout << "dlopen = " << h << std::endl;//debug
 		if( h == NULL ){
 			return NULL;
 		}
-		dlerror();
 		schedule_module_base* (*create_func)(void);
 		void (*destroy_func)(schedule_module_base*);
 
 		*(schedule_module_base**) (&create_func) = (schedule_module_base*)dlsym( h, L7VS_MODULE_INITFN );
 		if( create_func == NULL ){
-//			std::cout << "create_func NULL" << std::endl;//debug
 			dlclose(h);
 			return NULL;
 		}
-		dlerror();
 		*(void**) (&destroy_func) = dlsym( h, L7VS_MODULE_FINIFN );
 		if( destroy_func == NULL ){
-//			std::cout << "destroy_func NULL" << std::endl;//debug
 			dlclose(h);
 			return NULL;
 		}
 		schedule_module_control::schedule_module_info module_info;
 		module_info.handle = h;
 		module_info.create_func = create_func;
-//		std::cout << "create_func = " << module_info.create_func << std::endl;//debug
 		module_info.destroy_func = destroy_func;
-//		std::cout << "destroy_func = " << module_info.destroy_func << std::endl;//debug
 		loadmodule_map.insert( std::pair< std::string, schedule_module_control::schedule_module_info >( modulename, module_info ) );
 		it = loadmodule_map.find( modulename );
 	}
 	it->second.ref_count++;
-//	std::cout << "ref_count = " << it->second.ref_count << std::endl;//debug
 	return_value = it->second.create_func();
-//	std::cout << "return_value = " << return_value << std::endl;//debug
 	return return_value;
 }
 
@@ -114,14 +102,11 @@ schedule_module_control::load_module( const	std::string& modulename ){
  */
 void
 schedule_module_control::unload_module( schedule_module_base* module_ptr ){
-	dlerror();
 	if( module_ptr == NULL ){
 		return;
 	}
-//	std::cout << module_ptr << std::endl;//debug
 
 	std::string unload_module_name = module_ptr->get_name();
-//	std::cout << "unload_module_name= " << module_ptr->get_name() << std::endl;//debug
 	boost::mutex::scoped_lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( unload_module_name );
 	if( it == loadmodule_map.end() ){
@@ -129,9 +114,7 @@ schedule_module_control::unload_module( schedule_module_base* module_ptr ){
 	}
 	it->second.destroy_func(module_ptr);
 	it->second.ref_count--;
-//	std::cout << "ref_count = " << it->second.ref_count << std::endl;//debug
 	if( it->second.ref_count == 0 ){
-//		std::cout << "dlclose> " << std::endl;//debug
 		dlclose(it->second.handle);
 		loadmodule_map.erase( loadmodule_map.find( unload_module_name ) );
 	}

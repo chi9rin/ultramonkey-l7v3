@@ -201,39 +201,6 @@ void	protocol_module_control_unload_test(){
 
 void	protocol_module_control_test_thread(){
 	// unit_test[]  テスト
-#if 1
-	std::cout << std::endl << std::endl << "test" << std::endl;
-
-	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
-	control.initialize( "./" );
-	l7vs::protocol_module_base*		protomod2 = NULL;
-	protomod2 = control.load_module( PM2 );
-	l7vs::protocol_module_base*		protomod3 = NULL;
-	protomod3 = control.load_module( PM2 );
-
-	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
-	BOOST_CHECK( loadmodulemap.size() == 1 );
-	protocol_module_control::name_module_info_map::iterator it;
-	it = loadmodulemap.find( PM2 );
-
-	control.unload_module( protomod2 );
-	BOOST_CHECK( loadmodulemap.size() == 1 );
-	// unit_test[]  unload_module 参照回数の減少の確認2→1
-	it = loadmodulemap.find( PM2 );
-	BOOST_CHECK( it->second.ref_count == 1 );
-
-	control.unload_module( protomod3 );
-	// unload_module 参照回数の減少の確認1→0
-	it = loadmodulemap.find( PM2 );
-	BOOST_CHECK( it->second.ref_count == 0 );
-	// unit_test[]  unload_module マップから削除されたか？
-	BOOST_CHECK( loadmodulemap.size() == 0 );
-
-	l7vs::protocol_module_base*		protomod1 = NULL;
-	protomod1 = control.load_module( PM1 );
-	control.unload_module( protomod1 );
-
-#endif
 
 }
 
