@@ -7,6 +7,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
+#include "virtualservice.h"
 #include "protocol_module_base.h"
 #include "session_result_message.h"
 #include "tcp_socket.h"
@@ -18,7 +19,7 @@
 
 namespace l7vs{
 
-	class virtual_service_tcp;
+	class virtualservice_tcp;
 
 	class tcp_session : private boost::noncopyable{
 		public:
@@ -34,7 +35,7 @@ namespace l7vs{
 				SESSION_PAUSE_OFF
 			};
 			
-			tcp_session(virtual_service_tcp& vs,boost::asio::io_service& session_io);
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io);
 			~tcp_session(void);
 			session_result_message initialize(void);
 			boost::asio::ip::tcp::socket& get_client_socket(void);
@@ -92,7 +93,7 @@ namespace l7vs{
 				DOWN_FUNC_EXIT
 			};
 			boost::asio::io_service& io;
-			virtual_service_tcp& parent_service;
+			virtualservice_tcp& parent_service;
 			bool exit_flag;
 			boost::mutex exit_flag_update_mutex;
 			std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_state;

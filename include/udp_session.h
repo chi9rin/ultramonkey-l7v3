@@ -8,11 +8,12 @@
 
 #include "protocol_module_base.h"
 #include "session_result_message.h"
+#include "virtualservice.h"
 
 #define UDP_SESSION_THREAD_STATE_BIT 8
 
 namespace l7vs{
-	class virtual_service_udp;
+	class virtualservice_udp;
 	class udp_request_thread_control;
 	
 	class udp_session : private boost::noncopyable{
@@ -28,7 +29,7 @@ namespace l7vs{
 			};
 
 			boost::asio::io_service& io;
-			virtual_service_udp& parent_service;
+			virtualservice_udp& parent_service;
 			bool exit_flag;
 			boost::mutex exit_flag_update_mutex;
 			std::bitset<UDP_SESSION_THREAD_STATE_BIT> thread_state;
@@ -40,7 +41,7 @@ namespace l7vs{
 			udp_request_thread_control_map active_request_map;
 			boost::mutex request_map_mutex;
 		public:
-			udp_session(virtual_service_udp& vs, boost::asio::io_service& session_io);
+			udp_session(virtualservice_udp& vs, boost::asio::io_service& session_io);
 			~udp_session();
 			session_result_message initialize(const udp_endpoint listen_end);
 			void set_virtual_service_message(const UDP_VIRTUAL_SERVICE_MESSAGE_TAG message);
