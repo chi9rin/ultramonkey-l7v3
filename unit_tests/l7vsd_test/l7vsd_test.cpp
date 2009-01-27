@@ -30,6 +30,7 @@
 
 using namespace boost::unit_test_framework;
 
+
 // test class
 class	l7vsd_test	:public	l7vs::l7vsd {
 public:
@@ -105,16 +106,18 @@ void	list_virtual_service_test(){
 	//正常系
 	{
 		l7vs::error_code	err;
-		l7vs::l7vsd::vsvec_type	vs_vector;
+		l7vs::l7vsd::vselist_type	vse_list;
 	
-		vsd_test.list_virtual_service( vs_vector, err );
+		vsd_test.list_virtual_service( vse_list, err );
 		// unit_test[1] list_virtual_service 正常系 エラーコード確認
 		BOOST_CHECK( !err );
-		// unit_test[1] list_virtual_service 正常系 vs_vector数確認
-		BOOST_CHECK_EQUAL( vs_vector.size(), 2U );
-		// unit_test[1] list_virtual_service 正常系 vs_vector内容確認
-		BOOST_CHECK_EQUAL( vs_vector[0].protocol_module_name, "cinsert" );
-		BOOST_CHECK_EQUAL( vs_vector[1].protocol_module_name, "url" );
+		// unit_test[1] list_virtual_service 正常系 vse_list数確認
+		BOOST_CHECK_EQUAL( vse_list.size(), 2U );
+		// unit_test[1] list_virtual_service 正常系 vse_list内容確認
+		l7vs::l7vsd::vselist_type::iterator itr = vse_list.begin();
+		BOOST_CHECK_EQUAL( itr->protocol_module_name, "cinsert" );
+		itr++;
+		BOOST_CHECK_EQUAL( itr->protocol_module_name, "url" );
 	}
 
 	vsd_test.get_vslist().clear();
@@ -122,13 +125,13 @@ void	list_virtual_service_test(){
 	//正常系２
 	{
 		l7vs::error_code	err;
-		l7vs::l7vsd::vsvec_type	vs_vector;
+		l7vs::l7vsd::vselist_type	vse_list;
 
-		vsd_test.list_virtual_service( vs_vector, err );
+		vsd_test.list_virtual_service( vse_list, err );
 		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) エラーコード確認
 		BOOST_CHECK( !err );
-		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) vs_vector数確認
-		BOOST_CHECK_EQUAL( vs_vector.size(), 0U );
+		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) vse_list数確認
+		BOOST_CHECK_EQUAL( vse_list.size(), 0U );
 	}
 
 	BOOST_MESSAGE( "----- list_virtual_service_test end -----" );

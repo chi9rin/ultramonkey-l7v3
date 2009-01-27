@@ -46,13 +46,13 @@ l7vsd::~l7vsd(){}
 //! virtual_service list command
 //! @param[out]	arry of vs_element
 //! @param[out]	error_code
-void	l7vsd::list_virtual_service( vsvec_type& out_vslist, error_code& err ){
+void	l7vsd::list_virtual_service( vselist_type& out_vslist, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::list_virtual_service", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	// make vselement array
+	// make vselement list
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
@@ -302,11 +302,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::run", __FILE__, __LINE__ );
 
 	// check options
-	int error_pos(0);
-	if( !check_options( argc, argv, error_pos ) ){
-		std::stringstream buf;
-		buf << "l7vsd: unknown option: " << argv[ error_pos ] << "\n";
-		std::cerr << buf << std::endl;
+	if( !check_options( argc, argv ) ){
 		std::cerr << usage() << std::endl;
 		return -1;
 	}
@@ -328,47 +324,83 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		}
 	}
 
-	std::string file;
+	// protoclol module control initialize
+	protocol_module_control::getInstance().initialize( L7VS_MODULE_PATH );
 
-	//receiver
-	receiver = command_receiver_ptr( new command_receiver( dispatcher, file, *this ) );
+	// schedule module control initialize
+	schedule_module_control::getInstance().initialize( L7VS_MODULE_PATH );
+
+	// receiver initialize
+	receiver = command_receiver_ptr( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
+
+	// replication initialize
+	rep = replication_ptr( new replication( dispatcher ) );
+	if( 0 > rep->initialize() ){
+		std::stringstream buf;
+		buf << "replication initialize failed.";
+		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+		return -1;
+	}
+
+	// snmp bridge initialize
+	bridge = snmpbridge_ptr( new snmpbridge( *this, dispatcher ) );
+	if( 0 > bridge->initialize() ){
+		std::stringstream buf;
+		buf << "snmpbridge initialize failed.";
+		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+		return -1;
+	}
 
 	// main loop
 	for(;;){
 		if( exit_requested )	break;
 		dispatcher.poll();
 	}
+
+	// snmp bridge finalize
+	bridge->finalize();
+
+	// replication finalize
+	rep->finalize();
+
+	// schedule module control finalize
+	schedule_module_control::getInstance().finalize();
+
+	// protpcol module control finalize
+	protocol_module_control::getInstance().finalize();
+
 	return 0;
 }
 
-bool	l7vsd::check_options( int argc, char* argv[], int& error_pos ){
+bool	l7vsd::check_options( int argc, char* argv[] ){
 	for( int pos = 1; pos < argc; ++pos ){	// check options.
 		parse_opt_map_type::iterator itr = option_dic.find( argv[pos] );
 		if( itr != option_dic.end() ){	// find option
-			if( ! itr->second( pos, argc, argv ) ) return false;	// option function execute.
+			if( !itr->second( pos, argc, argv ) ){
+				return false;	// option function execute.
+			}
 		}
 		else{	// don't find option function.
-			error_pos = pos;
+			std::stringstream buf;
+			buf << "l7vsd: unknown option: " << argv[ pos ] << "\n";
+			std::cerr << buf << std::endl;
 			return false;
 		}
 	}
 	return true;
-
 }
 
 bool	l7vsd::parse_help(int& pos, int argc, char* argv[] ){
-	++pos;
 	help = true;		//help_mode flag on
 	return true;
 }
 
 bool	l7vsd::parse_debug(int& pos, int argc, char* argv[] ){
-	++pos;
 	debug = true;		//debug_mode flag on
 	return true;
 }
 
-//! create usage
+//! create usage string
 //! @return		usage string
 std::string	l7vsd::usage(){
 	std::stringstream	stream;

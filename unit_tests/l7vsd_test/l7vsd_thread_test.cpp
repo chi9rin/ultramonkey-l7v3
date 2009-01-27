@@ -70,9 +70,9 @@ boost::asio::ip::basic_endpoint< InternetProtocol > string_to_endpoint( std::str
 void	list_vs( unsigned int id ){
 	for( size_t i = 0 ; i < 100; ++i ){
 		l7vs::error_code err;
-		l7vs::l7vsd::vsvec_type	vsvec;
+		l7vs::l7vsd::vselist_type	vselist;
 
-		vsd_test.list_virtual_service( vsvec, err );
+		vsd_test.list_virtual_service( vselist, err );
 		if( err )	++err_count[id];
 	}
 }

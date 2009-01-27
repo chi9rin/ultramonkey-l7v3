@@ -97,6 +97,7 @@ public:
 	enum	COMMAND_RESPONSE_CODE{	//!<	response command code enum
 		RESPONSE_NONE = 0,			//!<	none
 		RESPONSE_OK,				//!<	request execute ok
+		RESPONSE_ERROR,				//!<	request execute error 
 		RESPONSE_LIST_ERROR,		//!<	list request error
 		RESPONSE_LIST_VERBOSE_ERROR,//!<	list verbose request error
 		RESPONSE_LIST_KEY_ERROR,	//!<	list key request error
