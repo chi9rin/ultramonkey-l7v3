@@ -83,7 +83,7 @@ enum LOG_CATEGORY_TAG{
 
 	LOG_CAT_L7VSADM_PARSE,					//!< logcategory is parse
 	LOG_CAT_L7VSADM_OPERATE,				//!< logcategory is operate
-	LOG_CAT_l7VSADM_CONFIG_RESULT,			//!< logcategory is configure
+	LOG_CAT_L7VSADM_CONFIG_RESULT,			//!< logcategory is configure
 	LOG_CAT_L7VSADM_COMMON,					//!< logcategory is other
 	LOG_CAT_L7VSADM_LOGGER,					//!< logcategory is logger
 	LOG_CAT_L7VSADM_PARAMETER,				//!< logcategory is parameter
@@ -96,6 +96,11 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_SNMPAGENT_L7VSD_SEND,			//!< logcategory is snmpbrigre send
 	LOG_CAT_SNMPAGENT_LOGGER,				//!< logcategory is manager logger
 	LOG_CAT_SNMPAGENT_PARAMETER,			//!< logcategory is manager parameter
+	LOG_CAT_SNMPAGENT_SYSTEM,				//!< logcategory is snmpagent systemcall other
+	LOG_CAT_SNMPAGENT_SYSTEM_MEMORY,		//!< logcategory is snmpagent systemcall memory
+	LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT,		//!< logcategory is snmpagent systemcall socket 
+	LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL,		//!< logcategory is snmpagent systemcall signal
+	LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT,	//!< logcategory is snmpagent systemcall env
 
 	LOG_CAT_SSLPROXY_LOGGER,				//!< logcategory is snmpproxy logger
 	LOG_CAT_SSLPROXY_PARAMETER,				//!< logcategory is snmpproxy parameter
