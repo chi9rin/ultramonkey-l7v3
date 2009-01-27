@@ -36,10 +36,10 @@ void	stc_method_test1(){
 // unit_test[1]  session_thread_controlオブジェクトの作成
 	BOOST_MESSAGE( "-----1" );
 	l7vs::l7vsd					vsd;
-	l7vs::replication			rep;
+	boost::asio::io_service		dispatcher;
+	l7vs::replication			rep( dispatcher );
 	l7vs::virtualservice_element	element;
 	l7vs::virtualservice_tcp	tcpservice( vsd, rep, element );
-	boost::asio::io_service	dispatcher;
 	session_type	session( new l7vs::tcp_session( tcpservice, dispatcher ) );
 	stc_type		stc( new l7vs::session_thread_control( session ) );
 
@@ -112,10 +112,10 @@ void	stc_method_test2(){
 	wait_time.tv_nsec = 10;
 //session_thread_controlオブジェクトの作成
 	l7vs::l7vsd					vsd;
-	l7vs::replication			rep;
+	boost::asio::io_service		dispatcher;
+	l7vs::replication			rep( dispatcher );
 	l7vs::virtualservice_element	element;
 	l7vs::virtualservice_tcp	tcpservice( vsd, rep, element );
-	boost::asio::io_service	dispatcher;
 	session_type	session( new l7vs::tcp_session( tcpservice, dispatcher ) );
 	stc_type		stc( new l7vs::session_thread_control( session ) );
 // 	session->set_upthread_stop( boost::bind( &l7vs::session_thread_control::stopupstream, stc ) );
@@ -224,10 +224,10 @@ void	stc_method_test3(){
 	wait_time.tv_nsec = 10;
 //session_thread_controlオブジェクトの作成
 	l7vs::l7vsd					vsd;
-	l7vs::replication			rep;
+	boost::asio::io_service		dispatcher;
+	l7vs::replication			rep( dispatcher );
 	l7vs::virtualservice_element	element;
 	l7vs::virtualservice_tcp	tcpservice( vsd, rep, element );
-	boost::asio::io_service	dispatcher;
 	session_type	session( new l7vs::tcp_session( tcpservice, dispatcher ) );
 	stc_type		stc( new l7vs::session_thread_control( session ) );
 

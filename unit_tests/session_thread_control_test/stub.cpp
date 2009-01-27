@@ -9,6 +9,49 @@
 #include "udp_session.h"
 
 
+l7vs::l7vsd::l7vsd(){}
+l7vs::l7vsd::~l7vsd(){}
+l7vs::l7vsd::vslist_type::iterator	l7vs::l7vsd::search_vslist( const virtualservice_element& )	const{
+}
+
+int		l7vs::replication::initialize(){
+	return 0;
+}
+void	l7vs::replication::finalize(){}
+void	l7vs::replication::switch_to_master(){}
+void	l7vs::replication::switch_to_slave(){}
+void*	l7vs::replication::pay_memory( std::string& inid, unsigned int& outsize ){
+	return NULL;
+}
+void	l7vs::replication::dump_memory(){}
+void	l7vs::replication::start(){}
+void	l7vs::replication::stop(){}
+void	l7vs::replication::force_replicate(){}
+void	l7vs::replication::reset(){}
+l7vs::replication::REPLICATION_MODE_TAG	l7vs::replication::get_status(){
+	l7vs::replication::REPLICATION_MODE_TAG	retmode = l7vs::replication::REPLICATION_OUT;
+	return retmode;
+}
+int		l7vs::replication::check_interval(){
+	return 0;
+}
+int		l7vs::replication::handle_send(){
+	return 0;
+}
+int		l7vs::replication::handle_receive(){
+	return 0;
+}
+int		l7vs::replication::lock( std::string& inid ){
+	return 0;
+}
+int		l7vs::replication::unlock( std::string& inid ){
+	return 0;
+}
+int		l7vs::replication::refer_lock_mutex( std::string& inid, boost::mutex& outmutex ){
+	return 0;
+}
+
+
 l7vs::data_buff_base::data_buff_base(){}
 l7vs::data_buff_base::~data_buff_base(){}
 void	l7vs::data_buff_base::initialize(){}

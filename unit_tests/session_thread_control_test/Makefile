@@ -11,7 +11,8 @@ INCLUDES	=	\
 				-I../../logger \
 				-I../../parameter \
 				-I../../src \
-				-I../../include
+				-I../../include \
+				-I../../snmpagent
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt
