@@ -19,6 +19,8 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
+			stub.cpp \
+			../../src/virtualservice.cpp \
 			../../src/session_thread_control.cpp \
 			stc_test.cpp
 

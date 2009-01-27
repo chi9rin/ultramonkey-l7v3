@@ -26,7 +26,6 @@ void	protocol_module_control_test(){
 	control.initialize( "./" );
 	control.finalize();
 
-
 	// unit_test[2]  load_moduleメソッドのテスト(正常系その１)
 	control.initialize( "./" );
 	l7vs::protocol_module_base*		protomod1 = NULL;

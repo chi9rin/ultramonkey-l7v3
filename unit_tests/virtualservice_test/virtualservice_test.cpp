@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
-#include "virtualservice.h"
+#include "../../include/virtualservice.h"
 
 using namespace boost::unit_test;
 
