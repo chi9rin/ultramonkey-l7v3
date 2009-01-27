@@ -25,13 +25,16 @@ SRCS		=	\
 				schedule_module_lc_test.cpp
 
 SRCS_RR		=	\
-				schedule_module_rr_test.cpp
+				schedule_module_rr_test.cpp \
+				../../src/realserver.cpp
 
 SRCS_WRR		=	\
-				schedule_module_wrr_test.cpp
+				schedule_module_wrr_test.cpp \
+				../../src/realserver.cpp
 
 SRCS_LC		=	\
-				schedule_module_lc_test.cpp
+				schedule_module_lc_test.cpp \
+				../../src/realserver.cpp
 
 SRC_M1		=	../../module/schedule/schedule_module_rr.cpp
 
@@ -53,22 +56,22 @@ OBJS_LC		= $(SRCS_LC:.cpp=.o)
 
 all:	$(TARGET)
 
-schedule_module_rr.so:
+schedule_module_rr.so: $(SRC_M1)
 	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o schedule_module_rr.so
 
-schedule_module_wrr.so:
+schedule_module_wrr.so: $(SRC_M2)
 	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o schedule_module_wrr.so
 
-schedule_module_lc.so:
+schedule_module_lc.so: $(SRC_M3)
 	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M3) $(LDFLAGS) -o schedule_module_lc.so
 
-schedule_module_rr_ut: $(OBJS_RR)
+schedule_module_rr_ut: $(OBJS_RR) $(SRC_M1)
 	$(CPP) $(INCLUDES) -o schedule_module_rr_ut $(OBJS_RR) $(LIBS)
 
-#schedule_module_wrr_ut: $(OBJS_RR)
+#schedule_module_wrr_ut: $(OBJS_WRR) $(SRC_M2)
 #	$(CPP) $(INCLUDES) -o schedule_module_wrr_ut $(OBJS_WRR) $(LIBS)
 
-#schedule_module_lc_ut: $(OBJS_LC)
+#schedule_module_lc_ut: $(OBJS_LC) $(SRC_M3)
 #	$(CPP) $(INCLUDES) -o schedule_module_lc_ut $(OBJS_LC) $(LIBS)
 
 #schedule_module_ut: $(OBJS)
