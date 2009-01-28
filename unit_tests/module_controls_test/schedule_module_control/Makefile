@@ -3,7 +3,7 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= schedule_module_test1.so schedule_module_test2.so module_control_ut
+TARGET		= sched_schedule_module_test1.so sched_schedule_module_test2.so module_control_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../../logger \
@@ -32,11 +32,11 @@ OBJS		= $(SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-schedule_module_test1.so:
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o schedule_module_test1.so
+sched_schedule_module_test1.so:
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o sched_schedule_module_test1.so
 
-schedule_module_test2.so:
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o schedule_module_test2.so
+sched_schedule_module_test2.so:
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o sched_schedule_module_test2.so
 
 module_control_ut: $(OBJS)
 	$(CPP) $(INCLUDES) -o module_control_ut $(OBJS) $(LIBS)

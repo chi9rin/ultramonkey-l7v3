@@ -42,16 +42,16 @@ void	protocol_module_control_initialize_test(){
 	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
 
 	// unit_test[4]  initializeメソッドのテスト（正常系その１）
-	control.initialize( "./" );
+	control.initialize( "." );
 
 	// unit_test[5]  initialize 引数で指定されたモジュールパスが設定されているか？
-	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./" );
+	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "." );
 	control.finalize();
 
 	// unit_test[6]  initializeメソッドのテスト（正常系その２） 指定するパスを変えてみる
-	control.initialize( "./protocol/" );
+	control.initialize( "./protocol" );
 	// unit_test[7]  initialize 引数で指定されたモジュールパスが設定されているか？
-	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./protocol/" );
+	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./protocol" );
 	control.finalize();
 
 }
@@ -87,7 +87,7 @@ void	protocol_module_control_load_test(){
 	control.unload_module( protomod2 );
 
 	// unit_test[10]  load_moduleメソッドのテスト（正常系）
-	control.initialize( "./" );
+	control.initialize( "." );
 	l7vs::protocol_module_base*		protomod3 = NULL;
 	try{
 		protomod3 = control.load_module( PM1 );
@@ -150,7 +150,7 @@ void	protocol_module_control_load_test(){
 
 void	protocol_module_control_unload_test(){
 	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
-	control.initialize( "./" );
+	control.initialize( "." );
 
 	// unit_test[21]  unload_moduleメソッドのテスト 1回だけロードしたモジュールを指定する
 	l7vs::protocol_module_base*		protomod1 = NULL;

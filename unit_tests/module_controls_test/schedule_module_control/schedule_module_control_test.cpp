@@ -44,16 +44,16 @@ void	schedule_module_control_initialize_test(){
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 
 	// unit_test[4]  initializeメソッドのテスト（正常系その１）
-	control.initialize( "./" );
+	control.initialize( "." );
 
 	// unit_test[5]  initialize 引数で指定されたモジュールパスが設定されているか？
-	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./" );
+	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "." );
 	control.finalize();
 
 	// unit_test[6]  initializeメソッドのテスト（正常系その２） 指定するパスを変えてみる
-	control.initialize( "./schedule/" );
+	control.initialize( "./schedule" );
 	// unit_test[7]  initialize 引数で指定されたモジュールパスが設定されているか？
-	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./schedule/" );
+	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./schedule" );
 	control.finalize();
 
 }
@@ -89,7 +89,7 @@ void	schedule_module_control_load_test(){
 	control.unload_module( schedule2 );
 
 	// unit_test[10]  load_moduleメソッドのテスト（正常系）
-	control.initialize( "./" );
+	control.initialize( "." );
 	l7vs::schedule_module_base*		schedule3 = NULL;
 	try{
 		schedule3 = control.load_module( PM1 );
@@ -153,7 +153,7 @@ void	schedule_module_control_load_test(){
 void	schedule_module_control_unload_test(){
 //	std::cout << std::endl << "schedule_module_control_unload_test" << std::endl;//debug
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
-	control.initialize( "./" );
+	control.initialize( "." );
 
 	// unit_test[21]  unload_moduleメソッドのテスト 1回だけロードしたモジュールを指定する
 	l7vs::schedule_module_base*		schedule1 = NULL;

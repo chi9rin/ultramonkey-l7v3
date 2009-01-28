@@ -63,7 +63,7 @@ schedule_module_control::load_module( const	std::string& modulename ){
 	boost::mutex::scoped_lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( modulename );
 	if( it == loadmodule_map.end() ){
-		std::string load_module_name = modulefile_path + modulename + ".so";
+		std::string load_module_name = modulefile_path + "/sched_" + modulename + ".so";
 		void* h = dlopen( load_module_name.c_str(), RTLD_LAZY );
 		if( h == NULL ){
 			return NULL;

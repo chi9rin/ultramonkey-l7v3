@@ -3,7 +3,7 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= protocol_module_test1.so protocol_module_test2.so module_control_ut
+TARGET		= protomod_protocol_module_test1.so protomod_protocol_module_test2.so module_control_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../../logger \
@@ -32,11 +32,11 @@ OBJS		= $(SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-protocol_module_test1.so:
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o protocol_module_test1.so
+protomod_protocol_module_test1.so:
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o protomod_protocol_module_test1.so
 
-protocol_module_test2.so:
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o protocol_module_test2.so
+protomod_protocol_module_test2.so:
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o protomod_protocol_module_test2.so
 
 module_control_ut: $(OBJS)
 	$(CPP) $(INCLUDES) -o module_control_ut $(OBJS) $(LIBS)
