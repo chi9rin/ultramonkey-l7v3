@@ -38,11 +38,14 @@ class	l7vsd;
 class	replication;
 class	session_thread_control;
 
+//!
+//!	@brief	virtualservice base class
+//! @class	virtualservice_base is base class of virtual service.
 class	virtualservice_base : boost::noncopyable{
 public:
-	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;
+	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;	//! shared_ptr session_thread_control typedef
 protected:
-	struct	vs_replication_header{
+	struct	vs_replication_header{	//! @struct vs_replication_header replication data structure for header data
 		unsigned long long	udpmode;
 		unsigned char		address[16];
 		unsigned long long	port;
@@ -50,7 +53,7 @@ protected:
 		unsigned long long	datasize;
 	};
 	
-	struct	vs_replication_body{
+	struct	vs_replication_body{	//! @struct vs_replication_body replication data structure for body data
 		unsigned long long	sorry_maxconnection;
 		unsigned char		sorry_address[16];
 		unsigned long long	sorry_port;
@@ -59,24 +62,24 @@ protected:
 		unsigned long long	qos_down;
 	};
 	
-	struct	vs_replication_data{
+	struct	vs_replication_data{	//! @struct vs_replication_data replication data structure
 		vs_replication_header	header;
 		vs_replication_body		body;
 	};
 
-	const	l7vsd&		vsd;
-	const	replication&	rep;
+	const	l7vsd&				vsd;		//! l7vsd reference
+	const	replication&		rep;		//! replication reference
 
-	boost::asio::io_service		dispatcher;
-	boost::asio::deadline_timer	vs_timer;
+	boost::asio::io_service		dispatcher;	//! dispatcer service
+	boost::asio::deadline_timer	vs_timer;	//! timer object
 
-	virtualservice_element		element;
+	virtualservice_element		element;	//! virtual service element
 
 	boost::shared_ptr<protocol_module_base>	protomod;
 	boost::shared_ptr<schedule_module_base>	schedmod;
 	std::list<realserver>		rs_list;
-	std::list<boost::mutex>		rs_mutex;
-	unsigned int				rs_list_ref_count;
+	std::list<boost::mutex>		rs_mutex_list;
+	unsigned long long 			rs_list_ref_count;
 	boost::mutex				rs_list_ref_count_mutex;
 	boost::mutex				rs_list_ref_count_inc_mutex;
 
@@ -108,8 +111,8 @@ public:
 							const virtualservice_element& );
 	virtual	~virtualservice_base(){};
 
-	virtual	void	initialize( error_code& ) = 0;
-	virtual	void	finalize( error_code& ) = 0;
+	virtual	void				initialize( error_code& ) = 0;
+	virtual	void				finalize( error_code& ) = 0;
 
 	virtual	bool				operator==( const virtualservice_base& ) = 0;
 	virtual	bool				operator!=( const virtualservice_base& ) = 0;
@@ -149,6 +152,9 @@ public:
 								get_schedule_module();
 };
 
+//!
+//!	@brief	virtualservice class for TCP
+//! @class	virtualservice_tcp is class of virtual service for TCP transfer.
 class	virtualservice_tcp : public virtualservice_base{
 public:
 	typedef	std::map< boost::thread::id, boost::shared_ptr<session_thread_control> >
@@ -193,6 +199,9 @@ public:
 	void						release_session( const boost::thread::id );
 };
 
+//!
+//!	@brief	virtualservice class for UDP
+//! @class	virtualservice_udp is class of virtual service for UDP transfer.
 class	virtualservice_udp : public virtualservice_base{
 protected:
 	udp_session					session;
@@ -228,6 +237,9 @@ public:
 	void						release_session( const boost::thread::id );
 };
 
+//!
+//!	@brief	virtualservice wrapping class
+//! @class	virtual_service
 class	virtual_service{
 protected:
 	boost::shared_ptr<virtualservice_base>	vs;
@@ -255,9 +267,9 @@ public:
 	void						run();
 	void						stop();
 
-	void		connection_active( const boost::asio::ip::tcp::endpoint&  );
-	void		connection_inactive( const boost::asio::ip::tcp::endpoint&  );
-	void		release_session( const boost::thread::id );
+	void						connection_active( const boost::asio::ip::tcp::endpoint&  );
+	void						connection_inactive( const boost::asio::ip::tcp::endpoint&  );
+	void						release_session( const boost::thread::id );
 
 	unsigned long long			get_qos_upstream();
 	unsigned long long			get_qos_downstream();

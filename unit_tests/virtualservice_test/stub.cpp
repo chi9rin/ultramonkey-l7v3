@@ -8,6 +8,96 @@
 #include "tcp_session.h"
 #include "udp_session.h"
 
+#include "protocol_module_test1.h"
+#include "schedule_module_test1.h"
+
+l7vs::protocol_module_control&	l7vs::protocol_module_control::getInstance(){
+	static	protocol_module_control	instance;
+	return	instance;
+}
+void	l7vs::protocol_module_control::initialize( const std::string& infile_path ){}
+void	l7vs::protocol_module_control::finalize(){}
+l7vs::protocol_module_base*	l7vs::protocol_module_control::load_module( const std::string& modulename ){
+	l7vs::protocol_module_base* return_value = NULL;
+
+	return_value = new protocol_module_test1;
+
+	return return_value;
+}
+void	l7vs::protocol_module_control::unload_module( protocol_module_base* module_ptr ){
+	delete	module_ptr;
+}
+
+l7vs::schedule_module_control&	l7vs::schedule_module_control::getInstance(){
+	static	schedule_module_control	instance;
+	return	instance;
+}
+void	l7vs::schedule_module_control::initialize( const std::string& infile_path ){}
+void	l7vs::schedule_module_control::finalize(){}
+l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const std::string& modulename ){
+	l7vs::schedule_module_base* return_value = NULL;
+
+	return_value = new schedule_module_test1;
+
+	return return_value;
+}
+void	l7vs::schedule_module_control::unload_module( schedule_module_base* module_ptr ){
+	delete module_ptr;
+}
+
+
+
+l7vs::Logger::Logger() :
+	scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
+	scopedLogId(0),
+	scopedLogMessage("Logger Constructor"),
+	scopedLogFile(__FILE__),
+	scopedLogLine(__LINE__) {}
+
+l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::string& msg, const char* file, int line) :
+	scopedLogCategory(cat),
+	scopedLogId(id),
+	scopedLogMessage(msg),
+	scopedLogFile(file),
+	scopedLogLine(line) {}
+
+l7vs::Logger::~Logger(){}
+
+void	l7vs::Logger::loadConf(){}
+
+l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel( l7vs::LOG_CATEGORY_TAG ){
+	l7vs::LOG_LEVEL_TAG		ret_tag = l7vs::LOG_LV_DEBUG;
+	return ret_tag;
+}
+
+bool	l7vs::Logger::setLogLevel( l7vs::LOG_CATEGORY_TAG cat, l7vs::LOG_LEVEL_TAG level ){
+}
+
+void	l7vs::Logger::putLogFatal( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
+	std::cout << "FATAL : " << msg << std::endl;
+}
+
+void	l7vs::Logger::putLogError( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
+	std::cout << "ERROR : " << msg << std::endl;
+}
+
+void	l7vs::Logger::putLogWarn( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
+	std::cout << "WARN  : " << msg << std::endl;
+}
+
+void	l7vs::Logger::putLogInfo( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
+	std::cout << "INFO  : " << msg << std::endl;
+}
+
+void	l7vs::Logger::putLogDebug( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
+	std::cout << "DEBUG : " << msg << std::endl;
+}
+
+
+l7vs::l7vsd::l7vsd(){}
+l7vs::l7vsd::~l7vsd(){}
+l7vs::l7vsd::vslist_type::iterator	l7vs::l7vsd::search_vslist( const virtualservice_element& )	const{
+}
 
 l7vs::data_buff_base::data_buff_base(){}
 l7vs::data_buff_base::~data_buff_base(){}

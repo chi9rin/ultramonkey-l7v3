@@ -46,7 +46,7 @@ BASEOBJS	= $(BASESRCS:.cpp=.o)
 all:	$(TARGET)
 
 vs_base_ut:	$(BASEOBJS)
-	$(CPP) $(INCLUDES) -o vs_base_ut $(BASEOBJS) $(LIBS)
+	$(CPP) $(INCLUDES) -o vs_base_ut $(BASEOBJS) $(LDFLAGS) $(LIBS)
 
 # vs_tcp_ut:	$(TCPOBJS)
 # 	$(CPP) $(INCLUDES) -o vs_tcp_ut $(TCPOBJS) $(LIBS)

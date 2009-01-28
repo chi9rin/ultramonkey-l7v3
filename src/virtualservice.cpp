@@ -10,6 +10,8 @@
 //
 
 #include "virtualservice.h"
+#include "logger_enum.h"
+#include "logger.h"
 //#include "replication.h"
 
 namespace l7vs{
@@ -23,12 +25,38 @@ virtualservice_base::virtualservice_base(	const l7vsd& invsd,
 													element( inelement ),
 													vs_timer( dispatcher ) {};
 
-void	virtualservice_base::handle_protomod_replication( const boost::system::error_code& ){}
-void	virtualservice_base::handle_schedmod_replication( const boost::system::error_code& ){}
-void	virtualservice_base::handle_throughput_update( const boost::system::error_code& ){}
+void	virtualservice_base::handle_protomod_replication( const boost::system::error_code& ){
+	if( NULL != protomod )
+		protomod->replication_interrupt();
+	else{
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "Protocol Module not loaded.", __FILE__, __LINE__ );
+	}
+}
+void	virtualservice_base::handle_schedmod_replication( const boost::system::error_code& ){
+	if( NULL != schedmod )
+		schedmod->replication_interrupt();
+	else{
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "Schedule Module not loaded.", __FILE__, __LINE__ );
+	}
+}
+void	virtualservice_base::handle_throughput_update( const boost::system::error_code& ){
+}
 
-void	virtualservice_base::rs_list_lock(){}
-void	virtualservice_base::rs_list_unlock(){}
+void	virtualservice_base::rs_list_lock(){
+	boost::mutex::scoped_lock( rs_list_ref_count_inc_mutex );
+	boost::mutex::scoped_lock( rs_list_ref_count_mutex );
+	if( ULLONG_MAX > rs_list_ref_count )
+		++rs_list_ref_count;
+	else
+		rs_list_ref_count = 0;
+}
+void	virtualservice_base::rs_list_unlock(){
+	boost::mutex::scoped_lock( rs_list_ref_count_mutex );
+	if( 0 < rs_list_ref_count )
+		--rs_list_ref_count;
+	else
+		rs_list_ref_count = ULLONG_MAX;
+}
 
 unsigned long long	virtualservice_base::get_qos_upstream(){ return element.qos_upstream; }
 unsigned long long	virtualservice_base::get_qos_downstream(){ return element.qos_downstream; }
