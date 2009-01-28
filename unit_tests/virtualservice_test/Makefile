@@ -3,7 +3,7 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= virtualservice_ut
+TARGET		= vs_base_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../logger \
@@ -18,21 +18,41 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
-SRCS		=	\
-			stub.cpp \
-			../../src/virtualservice.cpp \
-			virtualservice_test.cpp
+BASESRCS		=	\
+				stub.cpp \
+				../../src/virtualservice.cpp \
+				vs_base_test.cpp
+
+# TCPSRCS		=	\
+# 				stub.cpp \
+# 				../../src/virtualservice.cpp \
+# 				vs_tcp_test.cpp
+
+# UDPSRCS		=	\
+# 				stub.cpp \
+# 				../../src/virtualservice.cpp \
+# 				vs_udp_test.cpp
 
 .SUFFIX:	.cpp .o
 .cpp.o:
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
-OBJS		= $(SRCS:.cpp=.o)
+BASEOBJS	= $(BASESRCS:.cpp=.o)
+
+# TCPOBJS		= $(TCPSRCS:.cpp=.o)
+
+# UDPOBJS		= $(UDPSRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS)
-	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
+vs_base_ut:	$(BASEOBJS)
+	$(CPP) $(INCLUDES) -o vs_base_ut $(BASEOBJS) $(LIBS)
+
+# vs_tcp_ut:	$(TCPOBJS)
+# 	$(CPP) $(INCLUDES) -o vs_tcp_ut $(TCPOBJS) $(LIBS)
+
+# $(TARGET):	$(OBJS)
+# 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(BASEOBJS)
