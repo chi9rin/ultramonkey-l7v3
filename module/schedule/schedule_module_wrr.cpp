@@ -30,6 +30,12 @@ void	schedule_module_weighted_round_robin::initialize(){
 	vs_weights.currentWeight = 0;
 	vs_weights.maxWeight = 0;
 	vs_weights.gcd = 0;
+
+	if ( !putLogInfo.empty() )
+	{
+		std::string msg("saved endpoint, weight and gcd were initialized.");
+		putLogInfo( 1, msg, __FILE__, __LINE__);
+	}
 }
 
 //! tcp protocol support check
@@ -62,16 +68,21 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 
 	if ( inlist_begin.empty() || inlist_end.empty() ){
 		//! invalid iterator function
+		if ( !putLogFatal.empty() )
+		{
+			std::string msg("iterator function is empty.");
+			putLogFatal( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
 	if ( -1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next ) ){
-		//! init error
-		return;
-	}
-
-	if ( 0 == vs_weights.maxWeight ){
-		//! no data
+		//! init error( no data )
+		if ( !putLogError.empty() )
+		{
+			std::string msg("there is no realserver on list.");
+			putLogError( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
@@ -137,16 +148,21 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 
 	if ( inlist_begin.empty() || inlist_end.empty() ){
 		//! invalid iterator function
+		if ( !putLogFatal.empty() )
+		{
+			std::string msg("iterator function is empty.");
+			putLogFatal( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
 	if ( -1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next ) ){
-		//! init error
-		return;
-	}
-
-	if ( 0 == vs_weights.maxWeight ){
-		//! no data
+		//! init error( no data )
+		if ( !putLogError.empty() )
+		{
+			std::string msg("there is no realserver on list.");
+			putLogError( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
@@ -203,12 +219,12 @@ int		schedule_module_weighted_round_robin::sched_wrr_service_init(
 							rslist_iterator_func_type	inlist_next ){
 
 	vs_weights.maxWeight = sched_wrr_getMaxWeight( inlist_begin, inlist_end, inlist_next );
-	if ( vs_weights.maxWeight < 0 ){
+	if ( vs_weights.maxWeight <= 0 ){
 		return -1;
 	}
 
 	vs_weights.gcd = sched_wrr_getGCD( inlist_begin, inlist_end, inlist_next );
-	if ( vs_weights.gcd < 0 ){
+	if ( vs_weights.gcd <= 0 ){
 		return -1;
 	}
 	return 0;

@@ -20,7 +20,13 @@ schedule_module_least_connection::schedule_module_least_connection() : schedule_
 schedule_module_least_connection::~schedule_module_least_connection(){}
 
 //!	initialize function
-void	schedule_module_least_connection::initialize(){}
+void	schedule_module_least_connection::initialize(){
+	if ( !putLogInfo.empty() )
+	{
+		std::string msg("function was initialized.");
+		putLogInfo( 1, msg, __FILE__, __LINE__);
+	}
+}
 
 //! tcp protocol support check
 //! @return tcp support is true
@@ -53,6 +59,11 @@ void	schedule_module_least_connection::handle_schedule(
 
 	if ( inlist_begin.empty() || inlist_end.empty() ){
 		//! invalid iterator function
+		if ( !putLogFatal.empty() )
+		{
+			std::string msg("iterator function is empty.");
+			putLogFatal( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
@@ -62,6 +73,16 @@ void	schedule_module_least_connection::handle_schedule(
 			outendpoint = itr->tcp_endpoint;
 			active = itr->get_active();
 		}
+	}
+
+	if ( active == INT_MAX ){
+		//! no data
+		if ( !putLogError.empty() )
+		{
+			std::string msg("there is no realserver on list.");
+			putLogError( 1, msg, __FILE__, __LINE__);
+		}
+		return;
 	}
 }
 
@@ -76,7 +97,13 @@ void	schedule_module_least_connection::handle_schedule(
 							rslist_iterator_func_type		inlist_begin,
 							rslist_iterator_func_type		inlist_end,
 							rslist_iterator_func_type		inlist_next,
-							boost::asio::ip::udp::endpoint&	outendpoint ){}
+							boost::asio::ip::udp::endpoint&	outendpoint ){
+	if ( !putLogWarn.empty() )
+	{
+		std::string msg("udp function is invalid.");
+		putLogWarn( 1, msg, __FILE__, __LINE__);
+	}
+}
 
 //! replication interval interrrupt
 //! timer thread call this function. from virtualservice.

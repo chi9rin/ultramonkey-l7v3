@@ -3,6 +3,8 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/function.hpp>
 #include "schedule_module_base.h"
+#include "logger.h"
+#include "parameter.h"
 
 #include "../../module/schedule/schedule_module_lc.cpp"
 
@@ -32,6 +34,20 @@ void	schedule_module_test(){
 	// unit_test[2]  get_nameメソッドのテスト
 	BOOST_MESSAGE( "unit_test[2]\n" );
 	BOOST_CHECK_EQUAL( CHECK_NAME, schedule_module_lc->get_name() );
+
+	l7vs::module_base::getloglevel_func_type	getloglevel = boost::bind( &( l7vs::Logger::getLogLevel ), l7vs::LOG_CAT_SCHEDULE );
+	l7vs::module_base::logger_func_type			putLogFatal	= boost::bind( &( l7vs::Logger::putLogFatal ), l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 );
+	l7vs::module_base::logger_func_type			putLogError	= boost::bind( &( l7vs::Logger::putLogError ), l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 );
+	l7vs::module_base::logger_func_type			putLogWarn	= boost::bind( &( l7vs::Logger::putLogWarn ), l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 );
+	l7vs::module_base::logger_func_type			putLogInfo	= boost::bind( &( l7vs::Logger::putLogInfo ), l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 );
+	l7vs::module_base::logger_func_type			putLogDebug	= boost::bind( &( l7vs::Logger::putLogDebug ), l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 );
+
+	schedule_module_lc->init_logger_functions(	getloglevel,
+													putLogFatal,
+													putLogError,
+													putLogWarn,
+													putLogInfo,
+													putLogDebug);
 
 	// unit_test[3]  initializeメソッドのテスト
 	BOOST_MESSAGE( "unit_test[3]\n" );
@@ -181,6 +197,10 @@ l7vs::schedule_module_base::rslist_type::iterator	list_end( l7vs::schedule_modul
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
+	l7vs::Logger	logger;
+	l7vs::Parameter	parameter;
+
+	logger.loadConf();
 
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "schedule_module_lc_test" );

@@ -26,6 +26,12 @@ void	schedule_module_round_robin::initialize(){
 
 	tcp_endpoint = tcp_local_endpoint ;
 	udp_endpoint = udp_local_endpoint ;
+
+	if ( !putLogInfo.empty() )
+	{
+		std::string msg("saved endpoint was initialized.");
+		putLogInfo( 1, msg, __FILE__, __LINE__);
+	}
 }
 
 //! tcp protocol support check
@@ -58,6 +64,11 @@ void	schedule_module_round_robin::handle_schedule(
 
 	if ( inlist_begin.empty() || inlist_end.empty() ){
 		//! invalid iterator function
+		if ( !putLogFatal.empty() )
+		{
+			std::string msg("iterator function is empty.");
+			putLogFatal( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
@@ -70,6 +81,11 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 	if ( itr == inlist_end() ){
 		//! no data
+		if ( !putLogError.empty() )
+		{
+			std::string msg("there is no realserver on list.");
+			putLogError( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
@@ -121,6 +137,11 @@ void	schedule_module_round_robin::handle_schedule(
 
 	if ( inlist_begin.empty() || inlist_end.empty() ){
 		//! invalid iterator function
+		if ( !putLogFatal.empty() )
+		{
+			std::string msg("iterator function is empty.");
+			putLogFatal( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 
@@ -133,6 +154,11 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 	if ( itr == inlist_end() ){
 		//! no data
+		if ( !putLogError.empty() )
+		{
+			std::string msg("there is no realserver on list.");
+			putLogError( 1, msg, __FILE__, __LINE__);
+		}
 		return;
 	}
 

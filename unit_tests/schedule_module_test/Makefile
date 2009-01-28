@@ -9,8 +9,7 @@ CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
-				-I../../include
-				-I../../src \
+				-I../../include \
 				-I../../module/schedule
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
