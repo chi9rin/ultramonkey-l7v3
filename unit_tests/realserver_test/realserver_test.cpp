@@ -8,6 +8,25 @@ class	l7vs::realserver;
 
 using namespace boost::unit_test;
 
+
+namespace l7vs{
+
+class realserver_fake : public realserver
+{
+public:
+	//!	constractor
+	realserver_fake(){}
+	//! destractor
+	~realserver_fake(){}
+
+    void	set_active( const int in_active ){ nactive = in_active ; }
+    void	set_inact( const int in_inact ){ ninact = in_inact ; }
+};
+
+}	//namespace l7vs
+
+
+
 //test case1.
 void	realserver_test(){
 	int	loop;
@@ -50,10 +69,15 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
 	// unit_test[11]  接続数インクリメントメソッドのテスト２
-	for ( loop = 0; loop < INT_MAX; loop++ ){
-		server1.increment_active();
-	}
-	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+//	for ( loop = 0; loop < INT_MAX; loop++ ){
+//		server1.increment_active();
+//	}
+//	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+	l7vs::realserver_fake	server3;
+
+	server3.set_active( INT_MAX - 1 );
+	server3.increment_active();
+	BOOST_CHECK_EQUAL( server3.get_active(), 0 );
 
 	// unit_test[12]  接続数デクリメントメソッドのテスト２
 	server1.decrement_active();
@@ -64,10 +88,14 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 
 	// unit_test[14]  切断数インクリメントメソッドのテスト２
-	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
-		server1.increment_inact();
-	}
-	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
+//	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
+//		server1.increment_inact();
+//	}
+//	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
+
+	server3.set_inact( INT_MAX - 1 );
+	server3.increment_inact();
+	BOOST_CHECK_EQUAL( server3.get_inact(), 0 );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -75,6 +103,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	l7vs::Parameter	parameter;
 
 	logger.loadConf();
+
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "realserver_test" );
 
