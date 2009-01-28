@@ -11,10 +11,11 @@
 #ifndef	COMMAND_SESSION_H
 #define	COMMAND_SESSION_H
 
-#ifndef	MAX_BUFFER_SIZE
-	#define	MAX_BUFFER_SIZE (65535)
+#ifndef	COMMAND_BUFFER_SIZE
+	#define	COMMAND_BUFFER_SIZE (65535)
 #endif
 
+#include <sstream>
 #include <boost/array.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
@@ -32,19 +33,35 @@ class	l7vsd;
 //!	@class	command_session
 //!	@brief	l7vsadm message session class
 class	command_session : public boost::enable_shared_from_this< command_session >{
+public:
+	//! unix domain socket typedef
+	typedef	boost::asio::local::stream_protocol::socket	unixsocket_type;
+	//! command_handler typedef
+	typedef std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<void( l7vs::error_code )> >	command_handler_map_type;
+	//! command code to status code map typedef
+	typedef	std::map<l7vsadm_request::COMMAND_CODE_TAG, l7vsd_response::COMMAND_RESPONSE_CODE>	command_status_map_type;
+	//! command_session shared_ptr typedef
+	typedef	boost::shared_ptr<command_session>	command_session_ptr;
+
 protected:
-	//l7vsd_main_thread								main_thread;
+	
 	//! unix domain socket
-	boost::asio::local::stream_protocol::socket	unixsocket;
+	unixsocket_type			unixsocket;
 	//!	l7vsadm request data
-	l7vsadm_request								request_data;
+	l7vsadm_request			request_data;
 	//!	l7vsd response data
-	l7vsd_response								response_data;
+	l7vsd_response			response_data;
 	//!	l7vsd refferecne
-	l7vsd&										vsd;
+	l7vsd&					vsd;
 	//!	command to handler map
-	std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<void( l7vs::error_code )> >
-												command_handler_map;
+	command_handler_map_type	command_handler_map;
+	//! command code to status code map
+	command_status_map_type		command_status_map;
+
+	//! request recv buffer
+	boost::array<char, COMMAND_BUFFER_SIZE>	request_buffer;
+	//! response send stream
+	std::stringstream						response_stream;
 
 	//! @brief default constructor
 	command_session();
@@ -58,6 +75,9 @@ protected:
 	//!	@param[in]	error code
 	void	handle_write( const boost::system::error_code& );
 
+	//!	@brief		execute request command
+	void	execute_command();
+
 public:
 	//!	@brief		constructor
 	//!	@param[in]	io_service
@@ -65,7 +85,7 @@ public:
 	command_session( boost::asio::io_service&, l7vsd& );
 
 	//!	@brief		return unixsocket
-	boost::asio::local::stream_protocol::socket&	socket(){ return unixsocket; }
+	unixsocket_type&	socket(){ return unixsocket; }
 
 	//!	@brief		session start
 	void	start();

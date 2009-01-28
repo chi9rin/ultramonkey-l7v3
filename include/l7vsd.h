@@ -32,6 +32,11 @@
 
 namespace l7vs{
 class virtual_service;
+class command_receiver;
+class replication;
+class snmpbridge;
+class protocol_module_control;
+class schedule_module_control;
 
 //! l7vsd main class
 class l7vsd : private boost::noncopyable{
@@ -43,6 +48,8 @@ public:
 	typedef std::list< boost::shared_ptr< virtual_service > >	vslist_type;	//!< virtual service list typedef
 	//typedef std::vector< virtualservice_element >				vsvec_type;		//!< virtual service element vector typedef
 	typedef std::list< virtualservice_element >					vselist_type;	//!< virtual service element list typedef
+
+	typedef	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >	logstatus_list_type;	//!< logstatus list typedef
 
 	l7vsd();				//!< constructor
 	virtual	~l7vsd();		//!< destructor
@@ -76,8 +83,13 @@ protected:
 	parse_opt_map_type	option_dic;
 
 public:
-	void	list_virtual_service( vselist_type&, error_code&  );	//!< virtual_service list command
-
+	void	list_virtual_service( vselist_type&, error_code&  );				//!< virtual_service list command
+	void	list_virtual_service_verbose(	vselist_type&,
+											REPLICATION_MODE_TAG&,
+											logstatus_list_type&,
+											bool&,
+											logstatus_list_type&,
+											error_code&  );						//!< virtual_service verbose list command
 	void	add_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service add command
 	void	del_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service del command
 	void	edit_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service edit command
@@ -88,20 +100,23 @@ public:
 
 	void	flush_virtual_service( error_code& );	//!< all virtual_service delete command
 
-	void	get_replication_info( replication::REPLICATION_MODE_TAG&, error_code& );	//!< get replication info command
-	void	start_replication( error_code& );				//!< start replication command
-	void	stop_replication( error_code& );				//!< stop replication command
-	void	dump_replication_memory( error_code& );			//!< dump replication memory command
-	void	force_replicate( error_code& );					//!< force replicate command
+	void	replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG, error_code& );	//!< replication command
+//	void	get_replication_info( replication::REPLICATION_MODE_TAG&, error_code& );	//!< get replication info command
+//	void	start_replication( error_code& );				//!< start replication command
+//	void	stop_replication( error_code& );				//!< stop replication command
+//	void	dump_replication_memory( error_code& );			//!< dump replication memory command
+//	void	force_replicate( error_code& );					//!< force replicate command
 
-	void	get_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get loglevel command
-	void	set_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set loglevel command
-	void	set_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set all category loglevel command
+	void	log_command( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );		//!< log command
+//	void	get_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get loglevel command
+//	void	set_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set loglevel command
+//	void	set_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set all category loglevel command
 
-	void	get_snmp_connect_status( int&, error_code& );									//!< get snmp connect status command
-	void	get_snmp_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get snmp loglevel command
-	void	set_snmp_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set snmp loglevel command
-	void	set_snmp_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set snmp all loglevel command
+	void	snmp_log_command( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< snmp log command
+//	void	get_snmp_connect_status( int&, error_code& );									//!< get snmp connect status command
+//	void	get_snmp_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get snmp loglevel command
+//	void	set_snmp_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set snmp loglevel command
+//	void	set_snmp_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set snmp all loglevel command
 
 	void	reload_parameter( const PARAMETER_COMPONENT_TAG, error_code& );	//!< reload component parameter command
 

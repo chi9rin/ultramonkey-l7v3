@@ -14,7 +14,11 @@
 
 #include <vector>
 #include <boost/foreach.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/list.hpp>
 #include "realserver_element.h"
+#include "endpoint.h"
 
 namespace l7vs{
 
@@ -133,6 +137,27 @@ public:
 			return elem1.udp_recv_endpoint < elem2.udp_recv_endpoint;
 		}
 		return false;
+	}
+
+private:
+	friend class	boost::serialization::access;		//! friend boost serializable class
+	//! serializable
+	//! @brief using boost serialiable. class serializable function.
+	//! @param[in]	archive
+	//! @param[in]	version
+	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+		ar & udpmode;
+		ar & tcp_accept_endpoint;
+		ar & udp_recv_endpoint;
+		ar & realserver_vector;
+		ar & protocol_module_name;
+		ar & schedule_module_name;
+		ar & protocol_args;
+		ar & sorry_maxconnection;
+		ar & sorry_endpoint;
+		ar & sorry_flag;
+		ar & qos_upstream;
+		ar & qos_downstream;
 	}
 };
 

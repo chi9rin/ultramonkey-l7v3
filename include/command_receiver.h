@@ -17,11 +17,12 @@
 #include "l7vsd.h"
 
 namespace l7vs{
+class	l7vsd;
+
 //!	@class	command_receiver
 //!	@brief	l7vsadm message receiver class
 class	command_receiver : private boost::noncopyable{
 protected:
-	// l7vsd_mainthread								main_thread;
 	//! io dispatcher
 	boost::asio::io_service&						dispatcher;
 	//! acceptor

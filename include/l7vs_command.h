@@ -15,6 +15,7 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/list.hpp>
+#include <boost/serialization/utility.hpp>
 #include <boost/asio.hpp>
 #include <list>
 #include <memory>

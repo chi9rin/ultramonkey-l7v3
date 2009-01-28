@@ -11,6 +11,10 @@
 #ifndef	REALSERVER_ELEMENT_H
 #define	REALSERVER_ELEMENT_H
 #include <boost/asio.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/list.hpp>
+#include "endpoint.h"
 
 namespace l7vs{
 
@@ -45,6 +49,18 @@ public:
 		if( rselem1.tcp_endpoint < rselem2.tcp_endpoint ) return true;
 		if( rselem1.tcp_endpoint != rselem2.tcp_endpoint ) return false;
 		return rselem1.weight < rselem2.weight;
+	}
+
+private:
+	friend class	boost::serialization::access;		//! friend boost serializable class
+	//! serializable
+	//! @brief using boost serialiable. class serializable function.
+	//! @param[in]	archive
+	//! @param[in]	version
+	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+		ar & tcp_endpoint;
+		ar & udp_endpoint;
+		ar & weight;
 	}
 };
 
