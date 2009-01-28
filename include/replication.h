@@ -70,38 +70,80 @@ struct replication_data{
 	char							data[DATA_SIZE];			//!< Raw data
 };
 
-//! Component information set to SG file.
-struct replication_component{
-	char 							id[ID_LENGTH];				//!< ID distinguishes Component
-	unsigned int					block_head;					//!< The first Block Number of Component's memory
-	unsigned int					block_size;					//!< Number of Block allocated in component memory
-};
-
-//! State Infomation struct to execute Replication.
-struct replication_state{
-	enum REPLICATION_MODE_TAG		service_status;				//!< States Type of Replication Function
-	unsigned long long				send_time;					//!< Completion last time to send data
-	unsigned int					last_send_block;			//!< Completion last Block Number to send data
-	unsigned int					last_recv_block;			//!< Completion last Block Number to receive data
-	unsigned int					total_block;				//!< The maximum Block Number of Components memory
-	void*							replication_memory;			//!< Top address in Replication memory
-	void*							component_memory;			//!< Top address in Component memory
-	uint64_t						sarface_block_no;			//!< Serial number for respect switch
-	uint64_t*						sarface_block_array_ptr;	//!< Serial number in received respect at every block
-};
-
-//! Essential information set to SG file.
-struct replication_info{
-	char 							ip_addr[NI_MAXHOST];		//!< Destination IP address (IPv4 or IPv6)
-	char 							service_name[NI_MAXSERV];	//!< Destination service name or port number
-	char 							nic[NIC_LENGTH];			//!< Network device (ex. eth0, bond0, hme0, etc.)
-	unsigned short					interval;					//!< Interval when data of one block is sent
-	int								component_num;				//!< Number of components read setting
-	struct replication_component	component_info[CMP_MAX];	//!< Information on individual component
-};
-
 class	replication{
+public:
+	enum REPLICATION_MODE_TAG{
+		REPLICATION_OUT = 0,
+		REPLICATION_SINGLE,
+		REPLICATION_MASTER,
+		REPLICATION_SLAVE,
+		REPLICATION_MASTER_STOP,
+		REPLICATION_SLAVE_STOP
+	};
+
 protected:
+	//! Component information set to SG file.
+	struct replication_component{
+		char 							id[ID_LENGTH];				//!< ID distinguishes Component
+		unsigned int					block_head;					//!< The first Block Number of Component's memory
+		unsigned int					block_size;					//!< Number of Block allocated in component memory
+
+		replication_component() :		id(""),
+										block_head(0),
+										block_size(0) {}
+	};
+
+	//! State Infomation struct to execute Replication.
+	struct replication_state{
+		enum REPLICATION_MODE_TAG		service_status;				//!< States Type of Replication Function
+		unsigned long long				send_time;					//!< Completion last time to send data
+		unsigned int					last_send_block;			//!< Completion last Block Number to send data
+		unsigned int					last_recv_block;			//!< Completion last Block Number to receive data
+		unsigned int					total_block;				//!< The maximum Block Number of Components memory
+		void*							replication_memory;			//!< Top address in Replication memory
+		void*							component_memory;			//!< Top address in Component memory
+		uint64_t						sarface_block_no;			//!< Serial number for respect switch
+		uint64_t*						sarface_block_array_ptr;	//!< Serial number in received respect at every block
+
+		replication_state() :			service_status(REPLICATION_OUT),
+										send_time(0),
+										last_send_block(0),
+										last_recv_block(0),
+										total_block(0),
+										replication_memory(NULL),
+										component_memory(NULL),
+										sarface_block_no(0),
+										sarface_block_array_ptr(NULL) {}
+	};
+
+	//! Essential information set to SG file.
+	struct replication_info{
+		char 							ip_addr[NI_MAXHOST];		//!< Destination IP address (IPv4 or IPv6)
+		char 							service_name[NI_MAXSERV];	//!< Destination service name or port number
+		char 							nic[NIC_LENGTH];			//!< Network device (ex. eth0, bond0, hme0, etc.)
+		unsigned short					interval;					//!< Interval when data of one block is sent
+		int								component_num;				//!< Number of components read setting
+		struct replication_component	component_info[CMP_MAX];	//!< Information on individual component
+
+		replication_info() :			ip_addr(""),
+										service_name(""),
+										nic(""),
+										interval(0),
+										component_num(0) {}
+	};
+
+
+	//! emun States Type string
+	const char* replication_mode[] = {
+		"REPLICATION_OUT",
+		"REPLICATION_SINGLE",
+		"REPLICATION_MASTER",
+		"REPLICATION_SLAVE",
+		"REPLICATION_MASTER_STOP",
+		"REPLICATION_SLAVE_STOP"
+	};
+
+
 	std::map<std::string, boost::mutex>		replication_mutex;
 	boost::asio::ip::udp::socket			replication_receive_socket;
 	boost::asio::ip::udp::socket			replication_send_socket;
@@ -113,16 +155,8 @@ protected:
 	boost::mutex							replication_thread_mutex;
 	boost::condition						replication_thread_condition;
 	int										replication_flag;
-public:
-	enum REPLICATION_MODE_TAG{
-		REPLICATION_OUT = 0,
-		REPLICATION_SINGLE,
-		REPLICATION_MASTER,
-		REPLICATION_SLAVE,
-		REPLICATION_MASTER_STOP,
-		REPLICATION_SLAVE_STOP
-	};
 
+public:
 	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
 															replication_receive_socket( inreceive_io ),
 															replication_send_socket( inreceive_io ) {} ;
