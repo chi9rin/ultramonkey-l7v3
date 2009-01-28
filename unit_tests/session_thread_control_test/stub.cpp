@@ -144,6 +144,12 @@ bool	l7vs::tcp_session::is_thread_wait(void){
 
 void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){
 	switch( message ){
+	case SORRY_STATE_ENABLE:
+		{
+			boost::mutex::scoped_lock( exit_flag_update_mutex );
+			exit_flag = true;
+		}
+		break;
 	case SORRY_STATE_DISABLE:
 		{
 			boost::mutex::scoped_lock( exit_flag_update_mutex );
@@ -153,7 +159,9 @@ void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_ME
 	case SESSION_END:
 		{
 			boost::mutex::scoped_lock( exit_flag_update_mutex );
+			boost::mutex::scoped_lock( module_function_sorry_disable_mutex );
 			exit_flag = true;
+			session_pause_flag = true;
 		}
 		break;
 	case SESSION_PAUSE_ON:

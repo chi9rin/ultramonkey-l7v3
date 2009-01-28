@@ -55,11 +55,13 @@ public:
 			session( ptr ),
 			upthread_state( WAIT ),
 			downthread_state( WAIT ){
-		upthread.reset( new boost::thread( boost::bind( &session_thread_control::upstream_run, this ) ) );	//! upstream thread create
-		downthread.reset( new boost::thread( boost::bind( &session_thread_control::downstream_run, this ) ) );//! downstream thread create
+		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	//! upstream thread create
+		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create
 	}
 	//! destractor
 	~session_thread_control(){
+//		session->set_virtual_service_message( tcp_session::SESSION_END );
+		join();
 		upthread->join();
 		downthread->join();
 	}
