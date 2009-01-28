@@ -1,6 +1,8 @@
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
 #include "realserver.h"
+#include "logger.h"
+#include "parameter.h"
 
 class	l7vs::realserver;
 
@@ -48,7 +50,7 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
 	// unit_test[11]  接続数インクリメントメソッドのテスト２
-	for ( loop = 0 ; loop < INT_MAX ; loop++ ){
+	for ( loop = 0; loop < INT_MAX; loop++ ){
 		server1.increment_active();
 	}
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
@@ -62,14 +64,17 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 
 	// unit_test[14]  切断数インクリメントメソッドのテスト２
-	for ( loop = server1.get_inact() ; loop < INT_MAX ; loop++ ){
+	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
 		server1.increment_inact();
 	}
 	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
+	l7vs::Logger	logger;
+	l7vs::Parameter	parameter;
 
+	logger.loadConf();
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "realserver_test" );
 

@@ -9,19 +9,25 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 #include	"realserver.h"
+#include	"parameter.h"
+#include	"logger.h"
 
 namespace l7vs{
 
 void	realserver::increment_active(){
+	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::increment_active", __FILE__, __LINE__ );
 	boost::mutex::scoped_lock( active_mutex );
 
 	nactive++;
 	if ( nactive == INT_MAX ){
 		nactive = 0;
+		std::string msg("nactive was reset.");
+		Logger::putLogInfo( LOG_CAT_L7VSD_REALSERVER, 1, msg, __FILE__, __LINE__);
 	}
 }
 
 void	realserver::decrement_active(){
+	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::decrement_active", __FILE__, __LINE__ );
 	boost::mutex::scoped_lock( active_mutex );
 
 	if ( nactive > 0 ){
@@ -30,21 +36,26 @@ void	realserver::decrement_active(){
 }
 
 void	realserver::increment_inact(){
+	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::increment_inact", __FILE__, __LINE__ );
 	boost::mutex::scoped_lock( inact_mutex );
 
 	ninact++;
 	if ( ninact == INT_MAX ){
 		ninact = 0;
+		std::string msg("ninact was reset.");
+		Logger::putLogInfo( LOG_CAT_L7VSD_REALSERVER, 1, msg, __FILE__, __LINE__);
 	}
 }
 
 int		realserver::get_active(){
+	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::get_active", __FILE__, __LINE__ );
 	boost::mutex::scoped_lock( active_mutex );
 
 	return nactive;
 }
 
 int		realserver::get_inact(){
+	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::get_inact", __FILE__, __LINE__ );
 	boost::mutex::scoped_lock( inact_mutex );
 
 	return ninact;

@@ -5,7 +5,7 @@
 #
 TARGET		= realserver_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG  -D PARAMETER_FILE='"./sample.ini"'
+CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include
@@ -17,7 +17,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 LOGGER		= libtest_logger.a
-PARAMETER	= ligtest_parameter.a
+PARAMETER	= libtest_parameter.a
 AR			= ar
 ARFLAGS		= cru
 
