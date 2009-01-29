@@ -15,6 +15,7 @@
 #include <map>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/condition.hpp>
 #include <stdint.h>
 
 //! Max Number of Components
@@ -84,7 +85,7 @@ public:
 protected:
 	//! Component information set to SG file.
 	struct replication_component{
-		char 							id[ID_LENGTH];				//!< ID distinguishes Component
+		std::string 					id;							//!< ID distinguishes Component
 		unsigned int					block_head;					//!< The first Block Number of Component's memory
 		unsigned int					block_size;					//!< Number of Block allocated in component memory
 
@@ -94,7 +95,7 @@ protected:
 	};
 
 	//! State Infomation struct to execute Replication.
-	struct replication_state{
+	struct replication_state_struct{
 		enum REPLICATION_MODE_TAG		service_status;				//!< States Type of Replication Function
 		unsigned long long				send_time;					//!< Completion last time to send data
 		unsigned int					last_send_block;			//!< Completion last Block Number to send data
@@ -105,7 +106,7 @@ protected:
 		uint64_t						sarface_block_no;			//!< Serial number for respect switch
 		uint64_t*						sarface_block_array_ptr;	//!< Serial number in received respect at every block
 
-		replication_state() :			service_status(REPLICATION_OUT),
+		replication_state_struct() :	service_status(REPLICATION_OUT),
 										send_time(0),
 										last_send_block(0),
 										last_recv_block(0),
@@ -117,38 +118,26 @@ protected:
 	};
 
 	//! Essential information set to SG file.
-	struct replication_info{
-		char 							ip_addr[NI_MAXHOST];		//!< Destination IP address (IPv4 or IPv6)
-		char 							service_name[NI_MAXSERV];	//!< Destination service name or port number
-		char 							nic[NIC_LENGTH];			//!< Network device (ex. eth0, bond0, hme0, etc.)
+	struct replication_info_struct{
+		std::string						ip_addr;					//!< Destination IP address (IPv4 or IPv6)
+		std::string 					service_name;				//!< Destination service name or port number
+		std::string 					nic;						//!< Network device (ex. eth0, bond0, hme0, etc.)
 		unsigned short					interval;					//!< Interval when data of one block is sent
 		int								component_num;				//!< Number of components read setting
 		struct replication_component	component_info[CMP_MAX];	//!< Information on individual component
 
-		replication_info() :			ip_addr(""),
+		replication_info_struct() :		ip_addr(""),
 										service_name(""),
 										nic(""),
 										interval(0),
 										component_num(0) {}
 	};
 
-
-	//! emun States Type string
-	const char* replication_mode[] = {
-		"REPLICATION_OUT",
-		"REPLICATION_SINGLE",
-		"REPLICATION_MASTER",
-		"REPLICATION_SLAVE",
-		"REPLICATION_MASTER_STOP",
-		"REPLICATION_SLAVE_STOP"
-	};
-
-
 	std::map<std::string, boost::mutex>		replication_mutex;
 	boost::asio::ip::udp::socket			replication_receive_socket;
 	boost::asio::ip::udp::socket			replication_send_socket;
-	struct replication_state				replication_state_struct;
-	struct replication_info					replication_info_struct;
+	struct replication_state				replication_state;
+	struct replication_info					replication_info;
 	boost::asio::io_service&				receive_io;
 	boost::asio::io_service					send_io;
 	boost::thread							replication_thread;
@@ -172,7 +161,7 @@ public:
 	void						stop();
 	void						force_replicate();
 	void						reset();
-	enum REPLICATION_MODE_TAG	get_status();
+	REPLICATION_MODE_TAG		get_status();
 	int							check_interval();
 	int							handle_send();
 	int							handle_receive();
