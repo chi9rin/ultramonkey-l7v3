@@ -29,6 +29,8 @@ protected:
 	boost::asio::local::stream_protocol::acceptor	acceptor_;
 	//! l7vsd refference
 	l7vsd&											vsd;
+	//! socketfile
+	std::string								sockfile;
 
 	//!	@brief		accept handler
 	//!	@param[in]	command session

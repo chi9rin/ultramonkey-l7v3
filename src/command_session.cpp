@@ -21,6 +21,96 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 								:	unixsocket( io_service ),
 									vsd( parent ){
 
+	//debug
+	std::cout << "session_const" << std::endl;
+
+
+	// command status map initialize
+	command_status_map[l7vsadm_request::CMD_LIST]			= l7vsd_response::RESPONSE_LIST_ERROR;
+	command_status_map[l7vsadm_request::CMD_LIST_VERBOSE]	= l7vsd_response::RESPONSE_LIST_VERBOSE_ERROR;
+	command_status_map[l7vsadm_request::CMD_LIST_KEY]		= l7vsd_response::RESPONSE_LIST_KEY_ERROR;
+	command_status_map[l7vsadm_request::CMD_ADD_VS]			= l7vsd_response::RESPONSE_ADD_VS_ERROR;
+	command_status_map[l7vsadm_request::CMD_DEL_VS]			= l7vsd_response::RESPONSE_DEL_VS_ERROR;
+	command_status_map[l7vsadm_request::CMD_EDIT_VS]		= l7vsd_response::RESPONSE_EDIT_VS_ERROR;
+	command_status_map[l7vsadm_request::CMD_FLUSH_VS]		= l7vsd_response::RESPONSE_FLUSH_VS_ERROR;
+	command_status_map[l7vsadm_request::CMD_ADD_RS]			= l7vsd_response::RESPONSE_ADD_RS_ERROR;
+	command_status_map[l7vsadm_request::CMD_DEL_RS]			= l7vsd_response::RESPONSE_DEL_RS_ERROR;
+	command_status_map[l7vsadm_request::CMD_EDIT_RS]		= l7vsd_response::RESPONSE_EDIT_RS_ERROR;
+	command_status_map[l7vsadm_request::CMD_REPLICATION]	= l7vsd_response::RESPONSE_REPLICATION_ERROR;
+	command_status_map[l7vsadm_request::CMD_LOG]			= l7vsd_response::RESPONSE_LOG_ERROR;
+	command_status_map[l7vsadm_request::CMD_SNMP]			= l7vsd_response::RESPONSE_SNMP_ERROR;
+	command_status_map[l7vsadm_request::CMD_PARAMETER]		= l7vsd_response::RESPONSE_PARAMETER_ERROR;
+
+}
+
+// commmand_session::~command_session(){
+// 	//debug
+// 	std::cout << "session_dest" << std::endl;
+// 	
+// }
+
+//!	@brief		read handler
+//!	@param[in]	error code
+//!	@param[in]	read size
+void	command_session::handle_read( const boost::system::error_code& err, size_t size){
+	//debug
+	std::cout << "session_handle_read" << std::endl;
+	std::cout << "err:" << err << std::endl;
+
+	if( err.value() == boost::asio::error::eof)
+		std::cout << "eof" << std::endl;
+
+	if( !err ){
+		// execute received command
+		execute_command();
+		// async write response to unixsocket
+		boost::asio::async_write(	unixsocket,
+									boost::asio::buffer( response_stream.str() ),
+									boost::bind(	&command_session::handle_write,
+													shared_from_this(),
+													boost::asio::placeholders::error ) );
+	}
+	else{
+// 		// retry async read request from unixsocket.
+// 		boost::asio::async_read(	unixsocket,
+// 									boost::asio::buffer( request_buffer, COMMAND_BUFFER_SIZE ),
+// 									boost::bind(	&command_session::handle_read,
+// 													shared_from_this(),
+// 													boost::asio::placeholders::error,
+// 													boost::asio::placeholders::bytes_transferred) );
+	}
+}
+
+//!	@brief		write handler
+//!	@param[in]	error code
+void	command_session::handle_write( const boost::system::error_code& err ){
+	//debug
+	std::cout << "session_handle_write" << std::endl;
+
+	if( err ){
+		// error
+	}
+// 	// next data wait, start async read unixsocket again.
+// 	boost::asio::async_read(	unixsocket,
+// 								boost::asio::buffer( request_buffer, COMMAND_BUFFER_SIZE ),
+// 								boost::bind(	&command_session::handle_read,
+// 												shared_from_this(),
+// 												boost::asio::placeholders::error,
+// 												boost::asio::placeholders::bytes_transferred) );
+
+	std::cout << "async_read_" << std::endl;
+
+	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
+								boost::bind(	&command_session::handle_read,
+												shared_from_this(),
+												boost::asio::placeholders::error,
+												boost::asio::placeholders::bytes_transferred ));
+
+}
+
+//!	@brief		bind command function
+void	command_session::bind_function(){
+
 	// command handler map initialize
 	command_handler_map[l7vsadm_request::CMD_LIST]
 											= boost::bind(	&l7vsd::list_virtual_service, &vsd,
@@ -63,73 +153,27 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 	command_handler_map[l7vsadm_request::CMD_PARAMETER]
 											= boost::bind( &l7vsd::reload_parameter, &vsd, request_data.reload_param, _1 );
 
-	// command status map initialize
-	command_status_map[l7vsadm_request::CMD_LIST]			= l7vsd_response::RESPONSE_LIST_ERROR;
-	command_status_map[l7vsadm_request::CMD_LIST_VERBOSE]	= l7vsd_response::RESPONSE_LIST_VERBOSE_ERROR;
-	command_status_map[l7vsadm_request::CMD_LIST_KEY]		= l7vsd_response::RESPONSE_LIST_KEY_ERROR;
-	command_status_map[l7vsadm_request::CMD_ADD_VS]			= l7vsd_response::RESPONSE_ADD_VS_ERROR;
-	command_status_map[l7vsadm_request::CMD_DEL_VS]			= l7vsd_response::RESPONSE_DEL_VS_ERROR;
-	command_status_map[l7vsadm_request::CMD_EDIT_VS]		= l7vsd_response::RESPONSE_EDIT_VS_ERROR;
-	command_status_map[l7vsadm_request::CMD_FLUSH_VS]		= l7vsd_response::RESPONSE_FLUSH_VS_ERROR;
-	command_status_map[l7vsadm_request::CMD_ADD_RS]			= l7vsd_response::RESPONSE_ADD_RS_ERROR;
-	command_status_map[l7vsadm_request::CMD_DEL_RS]			= l7vsd_response::RESPONSE_DEL_RS_ERROR;
-	command_status_map[l7vsadm_request::CMD_EDIT_RS]		= l7vsd_response::RESPONSE_EDIT_RS_ERROR;
-	command_status_map[l7vsadm_request::CMD_REPLICATION]	= l7vsd_response::RESPONSE_REPLICATION_ERROR;
-	command_status_map[l7vsadm_request::CMD_LOG]			= l7vsd_response::RESPONSE_LOG_ERROR;
-	command_status_map[l7vsadm_request::CMD_SNMP]			= l7vsd_response::RESPONSE_SNMP_ERROR;
-	command_status_map[l7vsadm_request::CMD_PARAMETER]		= l7vsd_response::RESPONSE_PARAMETER_ERROR;
-
-}
-
-//!	@brief		read handler
-//!	@param[in]	error code
-//!	@param[in]	read size
-void	command_session::handle_read( const boost::system::error_code& err, size_t size){
-	if( !err ){
-		// execute received command
-		execute_command();
-		// async write response to unixsocket
-		boost::asio::async_write(	unixsocket,
-									boost::asio::buffer( response_stream.str() ),
-									boost::bind(	&command_session::handle_write,
-													shared_from_this(),
-													boost::asio::placeholders::error ) );
-	}
-	else{
-		// retry async read request from unixsocket.
-		boost::asio::async_read(	unixsocket,
-									boost::asio::buffer( request_buffer, COMMAND_BUFFER_SIZE ),
-									boost::bind(	&command_session::handle_read,
-													shared_from_this(),
-													boost::asio::placeholders::error,
-													boost::asio::placeholders::bytes_transferred) );
-	}
-}
-
-//!	@brief		write handler
-//!	@param[in]	error code
-void	command_session::handle_write( const boost::system::error_code& err ){
-	if( err ){
-		// error
-	}
-	// next data wait, start async read unixsocket again.
-	boost::asio::async_read(	unixsocket,
-								boost::asio::buffer( request_buffer, COMMAND_BUFFER_SIZE ),
-								boost::bind(	&command_session::handle_read,
-												shared_from_this(),
-												boost::asio::placeholders::error,
-												boost::asio::placeholders::bytes_transferred) );
 }
 
 //!	@brief		execute request command
 void	command_session::execute_command(){
+	//debug
+	std::cout << "session_execute_command" << std::endl;
+
 	// deserialize requestdata
 	std::stringstream	ss;
 	ss << &( request_buffer[0] );
 	boost::archive::text_iarchive	ia(ss);
 	ia >> request_data;
 
+	std::cout << "com:" << request_data.command << std::endl;
+	std::cout << "rep:" << request_data.replication_command << std::endl;
+
+	// bind function
+	bind_function();
+
 	// execute command
+	std::cout << "execute" << std::endl;
 	command_handler_map_type::iterator itr = command_handler_map.find( request_data.command );
 	if( itr != command_handler_map.end() ){
 		error_code err;
@@ -148,20 +192,35 @@ void	command_session::execute_command(){
 		response_data.message = "command not found.";
 	}
 
+	std::cout << "execute_end" << std::endl;
 	// serialize responsedata
 	boost::archive::text_oarchive	oa( response_stream );
 	oa << (const l7vsd_response&) response_data;
+
+	std::cout << "response_data " << std::endl;
+
 }
 
 //!	@brief		session start
 void	command_session::start(){
-	// start async read requestdata from unixsocket.
-	boost::asio::async_read(	unixsocket,
-								boost::asio::buffer( request_buffer, COMMAND_BUFFER_SIZE ),
+	//debug
+	std::cout << "session_start" << std::endl;
+
+
+	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
 								boost::bind(	&command_session::handle_read,
 												shared_from_this(),
 												boost::asio::placeholders::error,
-												boost::asio::placeholders::bytes_transferred) );
+												boost::asio::placeholders::bytes_transferred ));
+
+
+// 	// start async read requestdata from unixsocket.
+// 	boost::asio::async_read(	unixsocket,
+// 								boost::asio::buffer( request_buffer, COMMAND_BUFFER_SIZE ),
+// 								boost::bind(	&command_session::handle_read,
+// 												shared_from_this(),
+// 												boost::asio::placeholders::error,
+// 												boost::asio::placeholders::bytes_transferred) );
 
 }
 

@@ -75,8 +75,13 @@ protected:
 	//!	@param[in]	error code
 	void	handle_write( const boost::system::error_code& );
 
+	//!	@brief		bind function command
+	void	bind_function();
+
 	//!	@brief		execute request command
 	void	execute_command();
+
+	//~command_session();
 
 public:
 	//!	@brief		constructor
