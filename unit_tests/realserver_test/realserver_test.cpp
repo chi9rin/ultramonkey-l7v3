@@ -279,21 +279,21 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[7]  接続数取得メソッドのテスト
+	// unit_test[22]  接続数取得メソッドのテスト
 	BOOST_CHECK_EQUAL( server1.get_active(), nactive );
 
-	// unit_test[8]  切断数取得メソッドのテスト
+	// unit_test[23]  切断数取得メソッドのテスト
 	BOOST_CHECK_EQUAL( server1.get_inact(), ninact );
 
-	// unit_test[9]  接続数インクリメントメソッドのテスト
+	// unit_test[24]  接続数インクリメントメソッドのテスト
 	server1.increment_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 1 );
 
-	// unit_test[10]  接続数デクリメントメソッドのテスト
+	// unit_test[25]  接続数デクリメントメソッドのテスト
 	server1.decrement_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
-	// unit_test[11]  接続数インクリメントメソッドのテスト２
+	// unit_test[26]  接続数インクリメントメソッドのテスト２
 //  Loggerを加えたら処理時間40秒が27分になってしまったので却下
 //	for ( loop = 0; loop < INT_MAX; loop++ ){
 //		server1.increment_active();
@@ -301,26 +301,32 @@ void	realserver_test(){
 //	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 	l7vs::realserver_fake	server3;
 
-	server3.set_active( INT_MAX - 1 );
+	nactive = INT_MAX - 1 ;
+	server3.set_active( nactive );
+	BOOST_CHECK_EQUAL( server3.get_active(), nactive );
+
 	server3.increment_active();
 	BOOST_CHECK_EQUAL( server3.get_active(), 0 );
 
-	// unit_test[12]  接続数デクリメントメソッドのテスト２
+	// unit_test[27]  接続数デクリメントメソッドのテスト２
 	server1.decrement_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
-	// unit_test[13]  切断数インクリメントメソッドのテスト
+	// unit_test[28]  切断数インクリメントメソッドのテスト
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 
-	// unit_test[14]  切断数インクリメントメソッドのテスト２
+	// unit_test[29]  切断数インクリメントメソッドのテスト２
 //  Loggerを加えたら処理時間40秒が27分になってしまったので却下
 //	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
 //		server1.increment_inact();
 //	}
 //	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
 
-	server3.set_inact( INT_MAX - 1 );
+	ninact = INT_MAX - 1 ;
+	server3.set_inact( ninact );
+	BOOST_CHECK_EQUAL( server3.get_inact(), ninact );
+
 	server3.increment_inact();
 	BOOST_CHECK_EQUAL( server3.get_inact(), 0 );
 }
