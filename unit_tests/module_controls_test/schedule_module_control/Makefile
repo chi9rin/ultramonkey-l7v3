@@ -4,6 +4,7 @@
 #
 #
 TARGET		= sched_schedule_module_test1.so sched_schedule_module_test2.so module_control_ut
+TARGET2		= sched_schedule_module_test1.so sched_schedule_module_test2.so module_control_thread_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../../logger \
@@ -21,6 +22,10 @@ SRCS		=	\
 			../../../src/schedule_module_control.cpp \
 				schedule_module_control_test.cpp
 
+SRCS2		=	\
+			../../../src/schedule_module_control.cpp \
+				schedule_module_control_thread_test.cpp
+
 SRC_M1		=	schedule_module_test1.cpp
 SRC_M2		=	schedule_module_test2.cpp
 
@@ -29,8 +34,9 @@ SRC_M2		=	schedule_module_test2.cpp
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 OBJS		= $(SRCS:.cpp=.o)
+OBJS2		= $(SRCS2:.cpp=.o)
 
-all:	$(TARGET)
+all:	$(TARGET) $(TARGET2)
 
 sched_schedule_module_test1.so:
 	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o sched_schedule_module_test1.so
@@ -41,8 +47,11 @@ sched_schedule_module_test2.so:
 module_control_ut: $(OBJS)
 	$(CPP) $(INCLUDES) -o module_control_ut $(OBJS) $(LIBS)
 
+module_control_thread_ut: $(OBJS2)
+	$(CPP) $(INCLUDES) -o module_control_thread_ut $(OBJS2) $(LIBS)
+
 #$(TARGET):	$(OBJS)
 #	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(TARGET2) $(OBJS) $(OBJS2)

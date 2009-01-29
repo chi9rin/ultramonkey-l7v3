@@ -3,27 +3,10 @@
 #include <dlfcn.h>
 #include <boost/test/included/unit_test.hpp>
 #include "protocol_module_control.h"
-//#include "../../../src/protocol_module_control.cpp"
-
-#define	PM1	"protocol_module_test1"
-#define	PM2	"protocol_module_test2"
-
-class	l7vs::protocol_module_control;
+#include "protocol_module_control_test.h"
 
 using namespace l7vs;
 using namespace boost::unit_test;
-
-class	protocol_module_control_testclass : public l7vs::protocol_module_control{
-public:
-	std::string&			get_modulefile_path(){ return modulefile_path; }
-	name_module_info_map&	get_loadmodule_map(){ return loadmodule_map; }
-
-	static protocol_module_control_testclass& getInstance(){
-		static protocol_module_control_testclass instance_test;
-		return instance_test;
-	}
-
-};
 
 void	protocol_module_control_getInstance_test(){
 	// unit_test[1]  getInstanceメソッドのテスト
@@ -53,7 +36,6 @@ void	protocol_module_control_initialize_test(){
 	// unit_test[7]  initialize 引数で指定されたモジュールパスが設定されているか？
 	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./protocol" );
 	control.finalize();
-
 }
 
 void	protocol_module_control_finalize_test(){
@@ -82,7 +64,12 @@ void	protocol_module_control_load_test(){
 
 	// unit_test[9]  load_moduleメソッドのテスト ロードするモジュールが存在しない場合
 	l7vs::protocol_module_base*		protomod2 = NULL;
-	protomod2 = control.load_module( "error" );
+	try{
+		protomod2 = control.load_module( "error" );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	BOOST_CHECK( protomod2 == NULL );
 	control.unload_module( protomod2 );
 
@@ -145,7 +132,6 @@ void	protocol_module_control_load_test(){
 	control.unload_module( protomod4 );
 	control.unload_module( protomod5 );
 	control.finalize();
-
 }
 
 void	protocol_module_control_unload_test(){
@@ -154,14 +140,29 @@ void	protocol_module_control_unload_test(){
 
 	// unit_test[21]  unload_moduleメソッドのテスト 1回だけロードしたモジュールを指定する
 	l7vs::protocol_module_base*		protomod1 = NULL;
-	protomod1 = control.load_module( PM1 );
+	try{
+		protomod1 = control.load_module( PM1 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	control.unload_module( protomod1 );
 
 	// unit_test[22]  unload_moduleメソッドのテスト 2回ロードしたモジュールを指定する
 	l7vs::protocol_module_base*		protomod2 = NULL;
-	protomod2 = control.load_module( PM1 );
+	try{
+		protomod2 = control.load_module( PM1 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	l7vs::protocol_module_base*		protomod3 = NULL;
-	protomod3 = control.load_module( PM1 );
+	try{
+		protomod3 = control.load_module( PM1 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 
 	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
 	BOOST_CHECK( loadmodulemap.size() == 1 );
@@ -189,18 +190,18 @@ void	protocol_module_control_unload_test(){
 #if 0
 	// unit_test[]  unload_moduleメソッドのテスト 引数のモジュールを2回unloadした場合
 	l7vs::protocol_module_base*		protomod5 = NULL;
-	protomod5 = control.load_module( PM1 );
+	try{
+		protomod5 = control.load_module( PM1 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	control.unload_module( protomod5 );
 	BOOST_CHECK( dlerror() == NULL );
 	control.unload_module( protomod5 );
 	BOOST_CHECK( dlerror() == NULL );
 #endif
 	control.finalize();
-
-}
-
-void	protocol_module_control_test_thread(){
-	// unit_test[]  テスト
 
 }
 
@@ -215,7 +216,6 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &protocol_module_control_finalize_test ) );
 	ts->add( BOOST_TEST_CASE( &protocol_module_control_load_test ) );
 	ts->add( BOOST_TEST_CASE( &protocol_module_control_unload_test ) );
-	ts->add( BOOST_TEST_CASE( &protocol_module_control_test_thread ) );
 
 	framework::master_test_suite().add( ts );
 

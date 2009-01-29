@@ -88,8 +88,12 @@ schedule_module_control::load_module( const	std::string& modulename ){
 		loadmodule_map.insert( std::pair< std::string, schedule_module_control::schedule_module_info >( modulename, module_info ) );
 		it = loadmodule_map.find( modulename );
 	}
-	it->second.ref_count++;
-	return_value = it->second.create_func();
+	if( it != loadmodule_map.end() ){
+		return_value = it->second.create_func();
+		if(return_value != NULL){
+			it->second.ref_count++;
+		}
+	}
 	return return_value;
 }
 
@@ -116,7 +120,7 @@ schedule_module_control::unload_module( schedule_module_base* module_ptr ){
 	it->second.ref_count--;
 	if( it->second.ref_count == 0 ){
 		dlclose(it->second.handle);
-		loadmodule_map.erase( loadmodule_map.find( unload_module_name ) );
+		loadmodule_map.erase( it );
 	}
 }
 

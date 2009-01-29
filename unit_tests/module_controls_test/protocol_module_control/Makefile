@@ -4,6 +4,7 @@
 #
 #
 TARGET		= protomod_protocol_module_test1.so protomod_protocol_module_test2.so module_control_ut
+TARGET2		= protomod_protocol_module_test1.so protomod_protocol_module_test2.so module_control_thread_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../../logger \
@@ -21,6 +22,10 @@ SRCS		=	\
 			../../../src/protocol_module_control.cpp \
 				protocol_module_control_test.cpp
 
+SRCS2		=	\
+			../../../src/protocol_module_control.cpp \
+				protocol_module_control_thread_test.cpp
+
 SRC_M1		=	protocol_module_test1.cpp
 SRC_M2		=	protocol_module_test2.cpp
 
@@ -29,8 +34,9 @@ SRC_M2		=	protocol_module_test2.cpp
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 OBJS		= $(SRCS:.cpp=.o)
+OBJS2		= $(SRCS2:.cpp=.o)
 
-all:	$(TARGET)
+all:	$(TARGET) $(TARGET2)
 
 protomod_protocol_module_test1.so:
 	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o protomod_protocol_module_test1.so
@@ -41,8 +47,11 @@ protomod_protocol_module_test2.so:
 module_control_ut: $(OBJS)
 	$(CPP) $(INCLUDES) -o module_control_ut $(OBJS) $(LIBS)
 
+module_control_thread_ut: $(OBJS2)
+	$(CPP) $(INCLUDES) -o module_control_thread_ut $(OBJS2) $(LIBS)
+
 #$(TARGET):	$(OBJS)
 #	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(TARGET2) $(OBJS) $(OBJS2)

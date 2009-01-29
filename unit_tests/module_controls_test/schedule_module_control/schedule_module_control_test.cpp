@@ -3,30 +3,13 @@
 #include <dlfcn.h>
 #include <boost/test/included/unit_test.hpp>
 #include "schedule_module_control.h"
-//#include "../../../src/schedule_module_control.cpp"
-
-#define	PM1	"schedule_module_test1"
-#define	PM2	"schedule_module_test2"
-
-class	l7vs::schedule_module_control;
+#include "schedule_module_control_test.h"
 
 using namespace l7vs;
 using namespace boost::unit_test;
 
-class	schedule_module_control_testclass : public l7vs::schedule_module_control{
-public:
-	std::string&			get_modulefile_path(){ return modulefile_path; }
-	name_module_info_map&	get_loadmodule_map(){ return loadmodule_map; }
-
-	static schedule_module_control_testclass& getInstance(){
-		static schedule_module_control_testclass instance_test;
-		return instance_test;
-	}
-
-};
-
 void	schedule_module_control_getInstance_test(){
-//	std::cout << std::endl << "schedule_module_control_getInstance_test" << std::endl;//debug
+	BOOST_TEST_MESSAGE( "schedule_module_control_getInstance_test" );
 	// unit_test[1]  getInstanceメソッドのテスト
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 	schedule_module_control_testclass& control_2 = schedule_module_control_testclass::getInstance();
@@ -40,7 +23,7 @@ void	schedule_module_control_getInstance_test(){
 }
 
 void	schedule_module_control_initialize_test(){
-//	std::cout << std::endl << "schedule_module_control_initialize_test" << std::endl;//debug
+	BOOST_TEST_MESSAGE( "schedule_module_control_initialize_test" );
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 
 	// unit_test[4]  initializeメソッドのテスト（正常系その１）
@@ -55,11 +38,10 @@ void	schedule_module_control_initialize_test(){
 	// unit_test[7]  initialize 引数で指定されたモジュールパスが設定されているか？
 	BOOST_CHECK_EQUAL( control.get_modulefile_path(), "./schedule" );
 	control.finalize();
-
 }
 
 void	schedule_module_control_finalize_test(){
-//	std::cout << std::endl << "schedule_module_control_finalize_test" << std::endl;//debug
+	BOOST_TEST_MESSAGE( "schedule_module_control_finalize_test" );
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 
 	// unit_test[8]  finalizeメソッドのテスト
@@ -67,7 +49,7 @@ void	schedule_module_control_finalize_test(){
 }
 
 void	schedule_module_control_load_test(){
-//	std::cout << std::endl << "schedule_module_control_load_test" << std::endl;//debug
+	BOOST_TEST_MESSAGE( "schedule_module_control_load_test" );
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 #if 0
 	// unit_test[]  load_moduleメソッドのテスト initializeしないでロードした場合
@@ -84,7 +66,12 @@ void	schedule_module_control_load_test(){
 #endif
 	// unit_test[9]  load_moduleメソッドのテスト ロードするモジュールが存在しない場合
 	l7vs::schedule_module_base*		schedule2 = NULL;
-	schedule2 = control.load_module( "error" );
+	try{
+		schedule2 = control.load_module( "error" );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	BOOST_CHECK( schedule2 == NULL );
 	control.unload_module( schedule2 );
 
@@ -147,11 +134,10 @@ void	schedule_module_control_load_test(){
 	control.unload_module( schedule4 );
 	control.unload_module( schedule5 );
 	control.finalize();
-
 }
 
 void	schedule_module_control_unload_test(){
-//	std::cout << std::endl << "schedule_module_control_unload_test" << std::endl;//debug
+	BOOST_TEST_MESSAGE( "schedule_module_control_unload_test" );
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 	control.initialize( "." );
 
@@ -167,10 +153,19 @@ void	schedule_module_control_unload_test(){
 
 	// unit_test[22]  unload_moduleメソッドのテスト 2回ロードしたモジュールを指定する
 	l7vs::schedule_module_base*		schedule2 = NULL;
-	schedule2 = control.load_module( PM1 );
+	try{
+		schedule2 = control.load_module( PM1 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	l7vs::schedule_module_base*		schedule3 = NULL;
-	schedule3 = control.load_module( PM1 );
-
+	try{
+		schedule3 = control.load_module( PM1 );
+	}
+	catch(...){
+		BOOST_ERROR( "exception : load_module" );
+	}
 	schedule_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
 	BOOST_CHECK( loadmodulemap.size() == 1 );
 	schedule_module_control::name_module_info_map::iterator it;
@@ -209,12 +204,6 @@ void	schedule_module_control_unload_test(){
 	BOOST_CHECK( dlerror() == NULL );
 #endif
 	control.finalize();
-
-}
-
-void	schedule_module_control_test_thread(){
-	// unit_test[]  テスト
-
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -228,10 +217,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &schedule_module_control_finalize_test ) );
 	ts->add( BOOST_TEST_CASE( &schedule_module_control_load_test ) );
 	ts->add( BOOST_TEST_CASE( &schedule_module_control_unload_test ) );
-	ts->add( BOOST_TEST_CASE( &schedule_module_control_test_thread ) );
 
 	framework::master_test_suite().add( ts );
 
 	return 0;
 }
-
