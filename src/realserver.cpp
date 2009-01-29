@@ -47,14 +47,12 @@ void	realserver::increment_inact(){
 
 int		realserver::get_active(){
 	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::get_active", __FILE__, __LINE__ );
-	boost::mutex::scoped_lock( active_mutex );
 
 	return nactive;
 }
 
 int		realserver::get_inact(){
 	Logger	logger( LOG_CAT_L7VSD_REALSERVER, 1, "realserver::get_inact", __FILE__, __LINE__ );
-	boost::mutex::scoped_lock( inact_mutex );
 
 	return ninact;
 }
