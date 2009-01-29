@@ -136,8 +136,8 @@ protected:
 	std::map<std::string, boost::mutex>		replication_mutex;
 	boost::asio::ip::udp::socket			replication_receive_socket;
 	boost::asio::ip::udp::socket			replication_send_socket;
-	struct replication_state				replication_state;
-	struct replication_info					replication_info;
+	struct replication_state_struct			replication_state;
+	struct replication_info_struct			replication_info;
 	boost::asio::io_service&				receive_io;
 	boost::asio::io_service					send_io;
 	boost::thread							replication_thread;
@@ -169,6 +169,8 @@ public:
 	int							unlock( std::string& inid );
 	int							refer_lock_mutex( std::string& inid, boost::mutex& outmutex );
 protected:
+	int							set_master();
+	int							set_slave();
 	int							check_parameter();
 	void*						getrpl();
 	void*						getcmp();
