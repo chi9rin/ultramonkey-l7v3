@@ -21,7 +21,7 @@ void	realserver::increment_active(){
 	nactive++;
 	if ( nactive == INT_MAX ){
 		nactive = 0;
-		std::string msg("nactive was reset.");
+		std::string msg("nactive was go round.");
 		Logger::putLogInfo( LOG_CAT_L7VSD_REALSERVER, 1, msg, __FILE__, __LINE__);
 	}
 }
@@ -42,7 +42,7 @@ void	realserver::increment_inact(){
 	ninact++;
 	if ( ninact == INT_MAX ){
 		ninact = 0;
-		std::string msg("ninact was reset.");
+		std::string msg("ninact was go round.");
 		Logger::putLogInfo( LOG_CAT_L7VSD_REALSERVER, 1, msg, __FILE__, __LINE__);
 	}
 }

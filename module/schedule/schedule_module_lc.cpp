@@ -23,7 +23,7 @@ schedule_module_least_connection::~schedule_module_least_connection(){}
 void	schedule_module_least_connection::initialize(){
 	if ( !putLogInfo.empty() )
 	{
-		std::string msg("function was initialized.");
+		std::string msg("Function was initialized.");
 		putLogInfo( 1, msg, __FILE__, __LINE__);
 	}
 }
@@ -61,7 +61,7 @@ void	schedule_module_least_connection::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			std::string msg("iterator function is empty.");
+			std::string msg("Iterator function is empty.");
 			putLogFatal( 1, msg, __FILE__, __LINE__);
 		}
 		return;
@@ -79,7 +79,7 @@ void	schedule_module_least_connection::handle_schedule(
 		//! no data
 		if ( !putLogError.empty() )
 		{
-			std::string msg("there is no realserver on list.");
+			std::string msg("There is no realserver on list.");
 			putLogError( 1, msg, __FILE__, __LINE__);
 		}
 		return;
@@ -100,7 +100,7 @@ void	schedule_module_least_connection::handle_schedule(
 							boost::asio::ip::udp::endpoint&	outendpoint ){
 	if ( !putLogWarn.empty() )
 	{
-		std::string msg("udp function is invalid.");
+		std::string msg("UDP function was not supported.");
 		putLogWarn( 1, msg, __FILE__, __LINE__);
 	}
 }

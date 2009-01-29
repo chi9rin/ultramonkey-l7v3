@@ -29,7 +29,7 @@ void	schedule_module_round_robin::initialize(){
 
 	if ( !putLogInfo.empty() )
 	{
-		std::string msg("saved endpoint was initialized.");
+		std::string msg("Saved endpoint was initialized.");
 		putLogInfo( 1, msg, __FILE__, __LINE__);
 	}
 }
@@ -66,7 +66,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			std::string msg("iterator function is empty.");
+			std::string msg("Iterator function is empty.");
 			putLogFatal( 1, msg, __FILE__, __LINE__);
 		}
 		return;
@@ -83,7 +83,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! no data
 		if ( !putLogError.empty() )
 		{
-			std::string msg("there is no realserver on list.");
+			std::string msg("There is no realserver on list.");
 			putLogError( 1, msg, __FILE__, __LINE__);
 		}
 		return;
@@ -139,7 +139,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			std::string msg("iterator function is empty.");
+			std::string msg("Iterator function is empty.");
 			putLogFatal( 1, msg, __FILE__, __LINE__);
 		}
 		return;
@@ -156,7 +156,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! no data
 		if ( !putLogError.empty() )
 		{
-			std::string msg("there is no realserver on list.");
+			std::string msg("There is no realserver on list.");
 			putLogError( 1, msg, __FILE__, __LINE__);
 		}
 		return;
