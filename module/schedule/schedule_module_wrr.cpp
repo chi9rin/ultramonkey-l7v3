@@ -33,8 +33,7 @@ void	schedule_module_weighted_round_robin::initialize(){
 
 	if ( !putLogInfo.empty() )
 	{
-		std::string msg("Saved endpoint, weight and gcd were initialized.");
-		putLogInfo( 1, msg, __FILE__, __LINE__);
+		putLogInfo( 1, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
 	}
 }
 
@@ -70,8 +69,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			std::string msg("Iterator function is empty.");
-			putLogFatal( 1, msg, __FILE__, __LINE__);
+			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		return;
 	}
@@ -80,8 +78,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! init error( no data )
 		if ( !putLogError.empty() )
 		{
-			std::string msg("There is no realserver on list.");
-			putLogError( 1, msg, __FILE__, __LINE__);
+			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		return;
 	}
@@ -150,8 +147,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			std::string msg("Iterator function is empty.");
-			putLogFatal( 1, msg, __FILE__, __LINE__);
+			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		return;
 	}
@@ -160,8 +156,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! init error( no data )
 		if ( !putLogError.empty() )
 		{
-			std::string msg("There is no realserver on list.");
-			putLogError( 1, msg, __FILE__, __LINE__);
+			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		return;
 	}
