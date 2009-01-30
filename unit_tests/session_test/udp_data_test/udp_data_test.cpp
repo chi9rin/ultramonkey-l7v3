@@ -106,7 +106,7 @@ void	initialize_test(){
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
-	test_suite* ts = BOOST_TEST_SUITE( "l7vs::data_buff_base class test" );
+	test_suite* ts = BOOST_TEST_SUITE( "l7vs::udp_data class test" );
 
 	ts->add( BOOST_TEST_CASE( &constractor_test ) );
 	ts->add( BOOST_TEST_CASE( &endpoint_function_test ) );
