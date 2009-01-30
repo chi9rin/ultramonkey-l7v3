@@ -4,6 +4,8 @@
 #include <boost/test/included/unit_test.hpp>
 #include "schedule_module_control.h"
 #include "schedule_module_control_test.h"
+#include "logger.h"
+#include "parameter.h"
 
 using namespace l7vs;
 using namespace boost::unit_test;
@@ -92,12 +94,14 @@ void	schedule_module_control_load_test(){
 	schedule_module_control::name_module_info_map::iterator it;
 	it = loadmodulemap.find( PM1 );
 	BOOST_CHECK( it->second.ref_count == 1 );
-	// unit_test[13]  load_module create_funcの確認
+	// unit_test[13]  load_module handleの確認
+	BOOST_CHECK( it->second.handle != NULL );
+	// unit_test[14]  load_module create_funcの確認
 	BOOST_CHECK( it->second.create_func != NULL );
-	// unit_test[14]  load_module destroy_funcの確認
+	// unit_test[15]  load_module destroy_funcの確認
 	BOOST_CHECK( it->second.destroy_func != NULL );
 
-	// unit_test[15]  load_moduleメソッドのテスト 同じモジュールを再ロードする
+	// unit_test[16]  load_moduleメソッドのテスト 同じモジュールを再ロードする
 	l7vs::schedule_module_base*		schedule4 = NULL;
 	try{
 		schedule4 = control.load_module( PM1 );
@@ -106,14 +110,14 @@ void	schedule_module_control_load_test(){
 		BOOST_ERROR( "exception : load_module" );
 	}
  	BOOST_CHECK( schedule4 != NULL );
-	// unit_test[16]  load_module 別のインスタンスか？
+	// unit_test[17]  load_module 別のインスタンスか？
 	BOOST_CHECK( schedule3 != schedule4 );
 
-	// unit_test[17]  load_module 参照回数の増加の確認1→2
+	// unit_test[18]  load_module 参照回数の増加の確認1→2
 	it = loadmodulemap.find( PM1 );
 	BOOST_CHECK( it->second.ref_count == 2 );
 
-	// unit_test[18]  load_moduleメソッドのテスト 別のモジュールをロードする
+	// unit_test[19]  load_moduleメソッドのテスト 別のモジュールをロードする
 	l7vs::schedule_module_base*		schedule5 = NULL;
 	try{
 		schedule5 = control.load_module( PM2 );
@@ -122,9 +126,9 @@ void	schedule_module_control_load_test(){
 		BOOST_ERROR( "exception : load_module" );
 	}
  	BOOST_CHECK( schedule5 != NULL );
-	// unit_test[19]  load_module 別のインスタンスか？
+	// unit_test[20]  load_module 別のインスタンスか？
 	BOOST_CHECK( schedule4 != schedule5 );
-	// unit_test[20]  load_module マップが更新されたか？
+	// unit_test[21]  load_module マップが更新されたか？
 	BOOST_CHECK( loadmodulemap.size() == 2 );
 	// load_module 参照回数の増加の確認0→1
 	it = loadmodulemap.find( PM2 );
@@ -141,7 +145,7 @@ void	schedule_module_control_unload_test(){
 	schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
 	control.initialize( "." );
 
-	// unit_test[21]  unload_moduleメソッドのテスト 1回だけロードしたモジュールを指定する
+	// unit_test[22]  unload_moduleメソッドのテスト 1回だけロードしたモジュールを指定する
 	l7vs::schedule_module_base*		schedule1 = NULL;
 	try{
 		schedule1 = control.load_module( PM1 );
@@ -151,7 +155,7 @@ void	schedule_module_control_unload_test(){
 	}
 	control.unload_module( schedule1 );
 
-	// unit_test[22]  unload_moduleメソッドのテスト 2回ロードしたモジュールを指定する
+	// unit_test[23]  unload_moduleメソッドのテスト 2回ロードしたモジュールを指定する
 	l7vs::schedule_module_base*		schedule2 = NULL;
 	try{
 		schedule2 = control.load_module( PM1 );
@@ -173,7 +177,7 @@ void	schedule_module_control_unload_test(){
 
 	control.unload_module( schedule2 );
 	BOOST_CHECK( loadmodulemap.size() == 1 );
-	// unit_test[23]  unload_module 参照回数の減少の確認2→1
+	// unit_test[24]  unload_module 参照回数の減少の確認2→1
 	it = loadmodulemap.find( PM1 );
 	BOOST_CHECK( it->second.ref_count == 1 );
 
@@ -181,10 +185,10 @@ void	schedule_module_control_unload_test(){
 	// unload_module 参照回数の減少の確認1→0
 	it = loadmodulemap.find( PM1 );
 	BOOST_CHECK( it->second.ref_count == 0 );
-	// unit_test[24]  unload_module マップから削除されたか？
+	// unit_test[25]  unload_module マップから削除されたか？
 	BOOST_CHECK( loadmodulemap.size() == 0 );
 
-	// unit_test[25]  unload_moduleメソッドのテスト 引数がNULLの場合
+	// unit_test[26]  unload_moduleメソッドのテスト 引数がNULLの場合
 	l7vs::schedule_module_base*		schedule4 = NULL;
 	control.unload_module( schedule4 );
 	BOOST_CHECK( dlerror() == NULL );
@@ -207,6 +211,9 @@ void	schedule_module_control_unload_test(){
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
+
+	Logger logger;
+	l7vs::Parameter param;
 
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "schedule_module_control" );

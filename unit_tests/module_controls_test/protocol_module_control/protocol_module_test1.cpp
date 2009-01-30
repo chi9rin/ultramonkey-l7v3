@@ -39,7 +39,9 @@ public:
 	//use in upstream_thread
 	EVENT_TAG	handle_session_initialize(
 									const boost::thread::id upthread_id,
-									const boost::thread::id down_thread_id );
+									const boost::thread::id down_thread_id,
+									const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+									const boost::asio::ip::udp::endpoint& client_endpoint_udp );
 
 	EVENT_TAG	handle_session_finalize(
 									const boost::thread::id up_thread_id,
@@ -194,7 +196,9 @@ protocol_module_test1::register_replication_area_unlock(
 protocol_module_base::EVENT_TAG
 protocol_module_test1::handle_session_initialize(
 									const boost::thread::id upthread_id,
-									const boost::thread::id down_thread_id )
+									const boost::thread::id down_thread_id,
+									const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+									const boost::asio::ip::udp::endpoint& client_endpoint_udp )
 {
 	return STOP;
 }
