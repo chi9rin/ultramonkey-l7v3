@@ -122,6 +122,7 @@ void	virtualservice_base_test2(){
 	BOOST_CHECK( 40ULL == vs->get_up_recv_size() );
 	BOOST_MESSAGE( "up recv size : " << vs->get_up_recv_size() );
 	// unit_test[19]  test update_up_recv_size method, ULLONG_MAX added
+	//ULLONG_MAXの境界値テスト
 	BOOST_MESSAGE( "-------19" );
 	vs->update_up_recv_size( ULLONG_MAX );
 	BOOST_CHECK( 40ULL == vs->get_up_recv_size() );
@@ -138,6 +139,7 @@ void	virtualservice_base_test2(){
 	BOOST_CHECK( 3072ULL == vs->get_up_send_size() );
 	BOOST_MESSAGE( "up send size : " << vs->get_up_send_size() );
 	// unit_test[22]  test update_up_recv_size method, ULLONG_MAX added
+	//ULLONG_MAXの境界値テスト
 	BOOST_MESSAGE( "-------22" );
 	vs->update_up_send_size( ULLONG_MAX );
 	BOOST_CHECK( 3072ULL == vs->get_up_send_size() );
@@ -154,6 +156,7 @@ void	virtualservice_base_test2(){
 	BOOST_CHECK( 606060ULL == vs->get_down_recv_size() );
 	BOOST_MESSAGE( "down recv size : " << vs->get_down_recv_size() );
 	// unit_test[26]  test update_up_recv_size method
+	//ULLONG_MAXの境界値テスト
 	BOOST_MESSAGE( "-------26" );
 	vs->update_down_recv_size( ULLONG_MAX );
 	BOOST_CHECK( 606060ULL == vs->get_down_recv_size() );
@@ -170,6 +173,7 @@ void	virtualservice_base_test2(){
 	BOOST_CHECK( 1111111110ULL == vs->get_down_send_size() );
 	BOOST_MESSAGE( "down send size : " << vs->get_down_send_size() );
 	// unit_test[29]  test update_up_recv_size method
+	//ULLONG_MAXの境界値テスト
 	BOOST_MESSAGE( "-------29" );
 	vs->update_down_send_size( ULLONG_MAX );
 	BOOST_CHECK( 1111111110ULL == vs->get_down_send_size() );
@@ -178,20 +182,20 @@ void	virtualservice_base_test2(){
 	//スループット計算のテスト
 	// unit_test[30]  	calcurate throughput
 	BOOST_MESSAGE( "-------30" );
-	//次に、計算
+	//計算(curr_sizeクリアのため)
+	vs->call_handle_throughput_update( test_err );
+	//のぼり受信データサイズ更新
+	vs->update_up_recv_size( 1000000000ULL );
+	vs->update_down_recv_size( 2000000000ULL );
+	//それから計算
 	vs->call_handle_throughput_update( test_err );
 	//コンソールに出して確認
-	//もう一回、のぼり受信データサイズ更新
-	//それから計算
-	//コンソールに出して確認
-
-	// unit_test[22]	test get_throughput_upstream method
+	// unit_test[31]	test get_throughput_upstream method
 	BOOST_MESSAGE( "-------31" );
 	BOOST_MESSAGE( "bps up   : " << vs->get_throughput_upstream() );
-	// unit_test[23]	test get_throughput_downstream method
+	// unit_test[32]	test get_throughput_downstream method
 	BOOST_MESSAGE( "-------32" );
 	BOOST_MESSAGE( "bps down : " << vs->get_throughput_downstream() );
-
 }
 
 //test case3 replication data serialization test

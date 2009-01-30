@@ -9,6 +9,7 @@ namespace l7vs{
 
 class	vs_test : public virtualservice_base {
 protected:
+	boost::xtime	diffelencial_time;
 	void	handle_replication_interrupt( const boost::system::error_code& err ){
 	}
 	bool	read_replicationdata( vs_replication_data& in_rep_data ){
@@ -87,7 +88,14 @@ public:
 		return current_down_recvsize;
 	}
 	void	call_handle_throughput_update( const boost::system::error_code& err ){
+		boost::xtime_get( &diffelencial_time, boost::TIME_UTC );
 		handle_throughput_update( err );
+		unsigned long long dif = diffelencial_time.sec;
+		if( (ULLONG_MAX / 1000000000ULL) > diffelencial_time.sec ){
+			dif = (dif * 1000000000ULL) + diffelencial_time.nsec;
+			if( 0 < dif ) dif = dif / 1000ULL;
+		}else dif = ULLONG_MAX;
+		std::cout << dif << "[usec]" << std::endl;
 	}
 	void	test_replication(){
 		//serialize出力
