@@ -551,12 +551,13 @@ void close_test(){
 	
 	BOOST_CHECK(!test_server.bdisconnect_flag);
 	
-	test_server.brecv_triger = true;
-
 	// ## close test [1] close success error_code object
 	std::cout << "close test [1] close success error_code object" << std::endl;
 	test_obj.close(ec);
 	BOOST_CHECK(!ec);
+	
+	test_server.brecv_triger = true;
+	sleep(1);
 	
 	// ## close test [2] open_flag set false
 	std::cout << "close test [2] open_flag set false" << std::endl;
