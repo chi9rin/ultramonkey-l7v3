@@ -7,8 +7,22 @@ using namespace boost::unit_test_framework;
 using namespace l7vs;
 
 #define	CHECK_METHOD_OK_STRING_NUM	(16)
-#define	CHECK_METHOD_NG_STRING_NUM	(10)
-#define	CHECK_METHOD_INPOSSIBLE_STRING_NUM	(2)
+#define	CHECK_METHOD_NG_STRING_NUM	(8)
+#define	CHECK_METHOD_INPOSSIBLE_STRING_NUM	(3)
+
+#define	CHECK_VERSION_OK_STRING_NUM	(10)
+#define	CHECK_VERSION_NG_STRING_NUM	(16)
+#define	CHECK_VERSION_INPOSSIBLE_STRING_NUM	(4)
+
+#define	CHECK_STATUS_CODE_OK_STRING_NUM	(6)
+#define	CHECK_STATUS_CODE_NG_STRING_NUM	(9)
+#define	CHECK_STATUS_CODE_INPOSSIBLE_STRING_NUM	(2)
+
+#define	FIND_URI_OK_STRING_NUM	(4)
+#define	FIND_URI_NG_STRING_NUM	(3)
+
+#define	FIND_STATUS_CODE_OK_STRING_NUM	(2)
+#define	FIND_STATUS_CODE_NG_STRING_NUM	(2)
 
 //--stub functions--
 
@@ -21,118 +35,120 @@ http_protocol_module_base_test( std::string in_modulename ) : http_protocol_modu
 bool	is_tcp(){ return true; }
 bool	is_udp(){ return true; }
 void	replication_interrupt(){}
-// void	initialize(
-// 							rs_list_itr_func_type	inlist_begin,
-// 							rs_list_itr_func_type	inlist_end,
-// 							rs_list_itr_func_type	inlist_next,
-// 							boost::function< void( void ) >	inlist_lock,
-// 							boost::function< void( void ) >	inlist_unlock ){}
-// 
-// void	finalize(){}
-// 
-// bool	is_use_sorry(){ return true; }
-// 
-// void	handle_rslist_update(){}
+void	initialize(
+							rs_list_itr_func_type	inlist_begin,
+							rs_list_itr_func_type	inlist_end,
+							rs_list_itr_func_type	inlist_next,
+							boost::function< void( void ) >	inlist_lock,
+							boost::function< void( void ) >	inlist_unlock ){}
 
-// check_message_result	check_parameter( const std::vector<std::string>& args ){
-// 	check_message_result	result;
-// 	return result;
-// }
-// check_message_result	set_parameter( const std::vector<std::string>& args ){
-// 	check_message_result	result;
-// 	return result;
-// }
-// check_message_result	add_parameter( const std::vector<std::string>& args ){
-// 	check_message_result	result;
-// 	return result;
-// }
-// void	register_schedule( tcp_schedule_func_type inschedule ){}
-// void	register_schedule( udp_schedule_func_type inschedule ){}
-// EVENT_TAG	handle_session_initialize(
-// 									const boost::thread::id up_thread_id,
-// 									const boost::thread::id down_thread_id ){ return STOP; }
-// EVENT_TAG	handle_session_finalize(
-// 									const boost::thread::id up_thread_id,
-// 									const boost::thread::id down_thread_id ){ return STOP; }
-// EVENT_TAG	handle_accept( const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_client_recv(
-// 									const boost::thread::id thread_id,
-// 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-// 									const size_t recvlen ){ return STOP; }
-// EVENT_TAG	handle_realserver_select(
-// 									const boost::thread::id thread_id,
-// 									boost::asio::ip::tcp::endpoint& rs_endpoint ){ return STOP; }
-// EVENT_TAG	handle_realserver_select(
-// 									const boost::thread::id thread_id,
-// 									boost::asio::ip::udp::endpoint& rs_endpoint,
-// 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-// 									size_t& datalen ){ return STOP; }
-// EVENT_TAG	handle_realserver_connect(
-// 									const boost::thread::id thread_id,
-// 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-// 									size_t& datalen ){ return STOP; }
-// EVENT_TAG	handle_realserver_connection_fail(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::tcp::endpoint& rs_endpoint ){ return STOP; }
-// EVENT_TAG	handle_realserver_send(
-// 									const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_sorryserver_select(
-// 									const boost::thread::id thread_id,
-// 									boost::asio::ip::tcp::endpoint& sorry_endpoint ){ return STOP; }
-// EVENT_TAG	handle_sorryserver_connect(
-// 									const boost::thread::id thread_id,
-// 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-// 									size_t& datalen ){ return STOP; }
-// EVENT_TAG	handle_sorryserver_connection_fail(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::tcp::endpoint& sorry_endpoint ){ return STOP; }
-// EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_realserver_recv(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::tcp::endpoint& rs_endpoint,
-// 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-// 									const size_t recvlen ){ return STOP; }
-// EVENT_TAG	handle_realserver_recv(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::udp::endpoint& rs_endpoint,
-// 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-// 									const size_t recvlen ){ return STOP; }
-// EVENT_TAG	handle_sorryserver_recv(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::tcp::endpoint& sorry_endpoint,
-// 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-// 									const size_t recvlen ){ return STOP; }
-// EVENT_TAG	handle_response_send_inform(
-// 									const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_client_connection_check(
-// 									const boost::thread::id thread_id,
-// 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-// 									size_t& datalen ){ return STOP; }
-// EVENT_TAG	handle_client_select(
-// 									const boost::thread::id thread_id,
-// 									boost::asio::ip::udp::endpoint& cl_endpoint,
-// 									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-// 									size_t& datalen ){ return STOP; }
-// EVENT_TAG	handle_client_send( const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_client_disconnect(
-// 									const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_sorry_enable( const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_sorry_disable( const boost::thread::id thread_id ){ return STOP; }
-// EVENT_TAG	handle_realserver_disconnect(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::tcp::endpoint& rs_endpoint ){ return STOP; }
-// EVENT_TAG	handle_sorryserver_disconnect(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::tcp::endpoint& sorry_endpoint ){ return STOP; }
-// EVENT_TAG	handle_realserver_close(
-// 									const boost::thread::id thread_id,
-// 									const boost::asio::ip::udp::endpoint& rs_endpoint ){ return STOP; }
+void	finalize(){}
+
+bool	is_use_sorry(){ return true; }
+
+void	handle_rslist_update(){}
+
+check_message_result	check_parameter( const std::vector<std::string>& args ){
+	check_message_result	result;
+	return result;
+}
+check_message_result	set_parameter( const std::vector<std::string>& args ){
+	check_message_result	result;
+	return result;
+}
+check_message_result	add_parameter( const std::vector<std::string>& args ){
+	check_message_result	result;
+	return result;
+}
+void	register_schedule( tcp_schedule_func_type inschedule ){}
+void	register_schedule( udp_schedule_func_type inschedule ){}
+EVENT_TAG	handle_session_initialize(
+									const boost::thread::id up_thread_id,
+									const boost::thread::id down_thread_id,
+									const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+									const boost::asio::ip::udp::endpoint& client_endpoint_udp ){ return STOP; }
+EVENT_TAG	handle_session_finalize(
+									const boost::thread::id up_thread_id,
+									const boost::thread::id down_thread_id ){ return STOP; }
+EVENT_TAG	handle_accept( const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_client_recv(
+									const boost::thread::id thread_id,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen ){ return STOP; }
+EVENT_TAG	handle_realserver_select(
+									const boost::thread::id thread_id,
+									boost::asio::ip::tcp::endpoint& rs_endpoint ){ return STOP; }
+EVENT_TAG	handle_realserver_select(
+									const boost::thread::id thread_id,
+									boost::asio::ip::udp::endpoint& rs_endpoint,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									size_t& datalen ){ return STOP; }
+EVENT_TAG	handle_realserver_connect(
+									const boost::thread::id thread_id,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									size_t& datalen ){ return STOP; }
+EVENT_TAG	handle_realserver_connection_fail(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& rs_endpoint ){ return STOP; }
+EVENT_TAG	handle_realserver_send(
+									const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_sorryserver_select(
+									const boost::thread::id thread_id,
+									boost::asio::ip::tcp::endpoint& sorry_endpoint ){ return STOP; }
+EVENT_TAG	handle_sorryserver_connect(
+									const boost::thread::id thread_id,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									size_t& datalen ){ return STOP; }
+EVENT_TAG	handle_sorryserver_connection_fail(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint ){ return STOP; }
+EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_realserver_recv(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& rs_endpoint,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen ){ return STOP; }
+EVENT_TAG	handle_realserver_recv(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::udp::endpoint& rs_endpoint,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen ){ return STOP; }
+EVENT_TAG	handle_sorryserver_recv(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint,
+									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen ){ return STOP; }
+EVENT_TAG	handle_response_send_inform(
+									const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_client_connection_check(
+									const boost::thread::id thread_id,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									size_t& datalen ){ return STOP; }
+EVENT_TAG	handle_client_select(
+									const boost::thread::id thread_id,
+									boost::asio::ip::udp::endpoint& cl_endpoint,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									size_t& datalen ){ return STOP; }
+EVENT_TAG	handle_client_send( const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_client_disconnect(
+									const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_sorry_enable( const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_sorry_disable( const boost::thread::id thread_id ){ return STOP; }
+EVENT_TAG	handle_realserver_disconnect(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& rs_endpoint ){ return STOP; }
+EVENT_TAG	handle_sorryserver_disconnect(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint ){ return STOP; }
+EVENT_TAG	handle_realserver_close(
+									const boost::thread::id thread_id,
+									const boost::asio::ip::udp::endpoint& rs_endpoint ){ return STOP; }
 
 void	check_http_method_test(){
 
-	int count					= 1;
+	int count	= 1;
 
-	char	buffer_OK[CHECK_METHOD_OK_STRING_NUM][256]
+	char	buffer_ok[CHECK_METHOD_OK_STRING_NUM][256]
 				=	{
 						"GET /abc/def/ HTTP/1.0",
 						"HEAD /abc/def/ HTTP/1.0",
@@ -149,9 +165,9 @@ void	check_http_method_test(){
 						"UNLOCK /abc/def/ HTTP/1.0",
 						"MOVE /abc/def/ HTTP/1.0",
 						"MKCOL /abc/def/ HTTP/1.0",
-						"MKCOL /abc/def/ ",
+						"GET /a HTTP/1.0",
 					};
-	char	buffer_NG[CHECK_METHOD_NG_STRING_NUM][256]
+	char	buffer_ng[CHECK_METHOD_NG_STRING_NUM][256]
 				=	{
 						"get /abc/def/ HTTP/1.0",
 						"Get /abc/def/ HTTP/1.0",
@@ -160,16 +176,15 @@ void	check_http_method_test(){
 						" GET /abc/def/ HTTP/1.0",
 						"get GET /abc/def/ HTTP/1.0",
 						"get /abc/GET /abc/def/ HTTP/1.0",
-						"get /abc/def/ HTTP/1.0 Get ",
-						"get /abc/def/ HTTP/1.0 Get",
-						"get /abc/def/ HTTP/1.0 Get /abc/def/ HTTP/1.0",
+						"GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0",
 					};
-	char	buffer_INPOSSIBLE[CHECK_METHOD_INPOSSIBLE_STRING_NUM][256]
+	char	buffer_inpossible[CHECK_METHOD_INPOSSIBLE_STRING_NUM][256]
 				=	{
-						"GET /abc/def/ H",
-						"Get /abc/def/ H",
+						"GET / HTTP/1.0",
+						"Get / HTTP/1.0",
+						"",
 					};
-	size_t	buffer_len		= 0;
+	size_t	buffer_len	= 0;
 
 	BOOST_MESSAGE( "----- check_http_method test start -----" );
 
@@ -182,9 +197,11 @@ void	check_http_method_test(){
 		else{
 			std::cout << count << "--------------------------------------" << std::endl;
 		}
-		buffer_len = strlen( buffer_OK[i] );
-		std::cout << "String = [" << buffer_OK[i] << "]  Length = [" << buffer_len << "]" << std::endl;
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( buffer_OK[i], buffer_len ) == CHECK_OK );
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
@@ -194,9 +211,11 @@ void	check_http_method_test(){
 		else{
 			std::cout << count << "--------------------------------------" << std::endl;
 		}
-		buffer_len = strlen( buffer_NG[i] );
-		std::cout << "String = [" << buffer_NG[i] << "]  Length = [" << buffer_len << "]" << std::endl;
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( buffer_NG[i], buffer_len ) == CHECK_NG );
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_INPOSSIBLE_STRING_NUM; i++, count++ ){
@@ -206,201 +225,553 @@ void	check_http_method_test(){
 		else{
 			std::cout << count << "--------------------------------------" << std::endl;
 		}
-		buffer_len = strlen( buffer_INPOSSIBLE[i] );
-		std::cout << "String = [" << buffer_INPOSSIBLE[i] << "]  Length = [" << buffer_len << "]" << std::endl;
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( buffer_INPOSSIBLE[i], buffer_len ) == CHECK_INPOSSIBLE );
+		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		buffer_len = strlen( buffer_inpossible[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
-//		check_result = http_protocol_module_base_test_1.check_http_method( buffer_OK[i], buffer_len );
-//	http_protocol_module_base_test_1.check_http_method( (const char*)&buffer[0], ( const size_t )18 );
-//	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( buffer, buffer_len ) );
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 0;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
+	count++;
 
-//	buffer_len = strlen( buffer2[0] );
-//	http_protocol_module_base_test_1.check_http_method( buffer2[0], buffer_len );
-//	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( buffer2[0], buffer_len ) );
-//	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( buffer2[1], buffer_len ) );
-//	http_protocol_module_base_test_1.check_http_method( (const char*)&buffer[0], (const size_t)18 );
-//	BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( buffer, buffer_len, http_header_name, http_header_offset, http_header_len ) );
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 100;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
+	count++;
 
 	BOOST_MESSAGE( "----- check_http_method test end -----" );
 }
 
+void	check_http_version_test(){
+
+	int count	= 1;
+
+	char	buffer_ok[CHECK_VERSION_OK_STRING_NUM][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"GET /abc/def/ HTTP/1.1",
+						"GET /abc/def/ghi HTTP/1.0",
+						"GET /abc/def/ghi HTTP/1.1",
+						"get /abc/def/ghi HTTP/1.0",
+						"get /abc/def/ghi HTTP/1.1",
+						"HTTP/1.0 100 abcdff",
+						"HTTP/1.1 100 abcdff",
+						"HTTP/1.0 404 abcdff",
+						"HTTP/1.1 404 abcdff",
+					};
+	char	buffer_ng[CHECK_VERSION_NG_STRING_NUM][256]
+				=	{
+						"GET /abc/def/ HTTP/0.0",
+						"GET /abc/def/ HTTP/0.9",
+						"GET /abc/def/ HTTP/1.2",
+						"GET /abc/def/ HTTP/2.0",
+						"GET /abc/def/ghiHTTP/1.0",
+						"GET/abc/def/ghi HTTP/1.1",
+						"/abc/def/ghi HTTP/1.0",
+						"GET /abc/def/ http/1.0",
+						"HTTP/0.0 100 abcdff",
+						"HTTP/0.9 100 abcdff",
+						"HTTP/1.2 100 abcdff",
+						"HTTP/2.0 100 abcdff",
+						"HTTP/1.0 404abcdff",
+						"HTTP/1.1404 abcdff",
+						"HTTP/1.1404abcdff",
+						"http/1.0 100 abcdff",
+					};
+	char	buffer_inpossible[CHECK_VERSION_INPOSSIBLE_STRING_NUM][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"GET /abc/def/ H",
+						"Get /abc/def/ H",
+						"",
+					};
+	size_t	buffer_len	= 0;
+
+	BOOST_MESSAGE( "----- check_http_version test start -----" );
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	for( int i = 0; i < CHECK_VERSION_OK_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+	}
+
+	for( int i = 0; i < CHECK_VERSION_NG_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+	}
+
+	for( int i = 0; i < CHECK_VERSION_INPOSSIBLE_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		buffer_len = strlen( buffer_inpossible[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+	}
+
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 0;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 100;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	BOOST_MESSAGE( "----- check_http_version test end -----" );
+}
+
+void	check_status_code_test(){
+
+	int count	= 1;
+
+	char	buffer_ok[CHECK_STATUS_CODE_OK_STRING_NUM][256]
+				=	{
+						"HTTP/1.0 100 abcdff",
+						"HTTP/1.0 199 abcdff",
+						"HTTP/1.0 200 abcdff",
+						"HTTP/1.0 299 abcdff",
+						"HTTP/1.0 300 abcdff",
+						"HTTP/1.0 399 abcdff",
+					};
+	char	buffer_ng[CHECK_STATUS_CODE_NG_STRING_NUM][256]
+				=	{
+						"HTTP/1.0 000 abcdff",
+						"HTTP/1.0 099 abcdff",
+						"HTTP/1.0 400 abcdff",
+						"HTTP/1.0 999 abcdff",
+						"HTTP/1.0 10 abcdff",
+						"HTTP/1.0 1000 abcdff",
+						"HTTP/1.0 a00 abcdff",
+						"HTTP/1.0 1a0 abcdff",
+						"HTTP/1.0 10a abcdff",
+					};
+	char	buffer_inpossible[CHECK_STATUS_CODE_INPOSSIBLE_STRING_NUM][256]
+				=	{
+						"HTTP/1.0 100",
+						"",
+					};
+	size_t	buffer_len	= 0;
+
+	BOOST_MESSAGE( "----- check_status_code test start -----" );
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	for( int i = 0; i < CHECK_STATUS_CODE_OK_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+	}
+
+	for( int i = 0; i < CHECK_STATUS_CODE_NG_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+	}
+
+	for( int i = 0; i < CHECK_STATUS_CODE_INPOSSIBLE_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "String = [" << buffer_inpossible[i] << "] + [CR]" << std::endl;
+		buffer_len = strlen( buffer_inpossible[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+	}
+
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 0;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 100;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	BOOST_MESSAGE( "----- check_status_code test end -----" );
+}
+
+void	find_uri_test(){
+
+	int count	= 1;
+
+	char	disp_uri[256];
+
+	char	buffer_ok[FIND_URI_OK_STRING_NUM][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"GET /abc/def/ghi HTTP/1.0",
+						"HEAD abcdef HTTP/1.0",
+						"HEAD /abc/def/ghi/jkl/mno/pqr/stu/vwx/yz0/123/456/789/ HTTP/1.0",
+					};
+	size_t	size_OK[FIND_URI_OK_STRING_NUM][2];
+
+	char	buffer_ng[FIND_URI_NG_STRING_NUM][256]
+				=	{
+						"GET/abc/def/ HTTP/1.0",
+						"GET /abc/def/HTTP/1.0",
+						"HEAD/abc/def/HTTP/1.0",
+					};
+
+	size_t	buffer_len	= 0;
+	size_t	uri_offset	= 0;
+	size_t	uri_len		= 0;
+
+	BOOST_MESSAGE( "----- find_uri test start -----" );
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	for( int i = 0; i < FIND_URI_OK_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		memset( disp_uri, '\0', 256 );
+		uri_offset	= 0;
+		uri_len		= 0;
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.find_uri( (const char*)buffer_ok[i], buffer_len, uri_offset, uri_len ) == true );
+		memcpy( disp_uri, buffer_ok[i] + uri_offset, uri_len );
+		std::cout << "URI Offset = [" << uri_offset << "]" << std::endl;
+		std::cout << "URI Length = [" << uri_len << "]" << std::endl;
+		std::cout << "URI String = [" << disp_uri << "]" << std::endl;
+	}
+
+	for( int i = 0; i < FIND_URI_NG_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		memset( disp_uri, '\0', 256 );
+		uri_offset	= 0;
+		uri_len		= 0;
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.find_uri( (const char*)buffer_ng[i], buffer_len, uri_offset, uri_len ) == false );
+		memcpy( disp_uri, buffer_ng[i] + uri_offset, uri_len );
+		std::cout << "URI Offset = [" << uri_offset << "]" << std::endl;
+		std::cout << "URI Length = [" << uri_len << "]" << std::endl;
+		std::cout << "URI String = [" << disp_uri << "]" << std::endl;
+	}
+
+	BOOST_MESSAGE( "----- find_uri test end -----" );
+}
+
+void	find_status_code_test(){
+
+	int count	= 1;
+
+	char	disp_status_code[256];
+
+	char	buffer_ok[FIND_STATUS_CODE_OK_STRING_NUM][256]
+				=	{
+						"HTTP/1.0 000 abcdff",
+						"HTTP/1.0 099 abcdff",
+					};
+	size_t	size_OK[FIND_STATUS_CODE_OK_STRING_NUM][2];
+
+	char	buffer_ng[FIND_STATUS_CODE_NG_STRING_NUM][256]
+				=	{
+						"HTTP/1.0000 abcdff",
+						"HTTP/1.0 099abcdff",
+					};
+
+	size_t	buffer_len			= 0;
+	size_t	status_code_offset	= 0;
+	size_t	status_code_len		= 0;
+
+	BOOST_MESSAGE( "----- find_status_code test start -----" );
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	for( int i = 0; i < FIND_STATUS_CODE_OK_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		memset( disp_status_code, '\0', 256 );
+		status_code_offset	= 0;
+		status_code_len		= 0;
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.find_status_code( (const char*)buffer_ok[i], buffer_len, status_code_offset, status_code_len ) == true );
+		memcpy( disp_status_code, buffer_ok[i] + status_code_offset, status_code_len );
+		std::cout << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
+		std::cout << "STATUS CODE Length = [" << status_code_len << "]" << std::endl;
+		std::cout << "STATUS CODE String = [" << disp_status_code << "]" << std::endl;
+	}
+
+	for( int i = 0; i < FIND_STATUS_CODE_NG_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << count << "--------------------------------------" << std::endl;
+		}
+		memset( disp_status_code, '\0', 256 );
+		status_code_offset	= 0;
+		status_code_len		= 0;
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( http_protocol_module_base_test_1.find_status_code( (const char*)buffer_ng[i], buffer_len, status_code_offset, status_code_len ) == false );
+		memcpy( disp_status_code, buffer_ng[i] + status_code_offset, status_code_len );
+		std::cout << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
+		std::cout << "STATUS CODE Length = [" << status_code_len << "]" << std::endl;
+		std::cout << "STATUS CODE String = [" << disp_status_code << "]" << std::endl;
+	}
+
+	BOOST_MESSAGE( "----- find_status_code test end -----" );
+}
+
 void	find_http_header_test(){
 
-	char* buffer					= "GET /abc/defg/ HTTP/1.0";
-	size_t buffer_len				= 0;
-	std::string http_header_name	= "Cookie";
-	size_t http_header_offset		= 0;
-	size_t http_header_len			= 0;
+	int		count	= 1;
+	int		i		= 0;
+	int		j		= 0;
 
+	char	disp_http_header[4096];
+
+	std::string	http_header_name[5]
+				=	{
+						"Cookie",
+						"X-Forwarded-For",
+						"Cookie2",
+						"X-Forwarded-For2",
+						"",
+					};
+
+	bool	result_1[5]
+				=	{
+						true,
+						true,
+						false,
+						false,
+						true,
+					};
+
+	bool	result_2[5]
+				=	{
+						false,
+						false,
+						false,
+						false,
+						true,
+					};
+
+	char	buffer_all_1[3][4096];
+	char	buffer_all_2[3][4096];
+
+	char	buffer_line_1[7][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"Cookie: 10.10.10.10:11111",
+						"X-Forwarded-For: 20.20.20.20",
+						"",
+						"GET /abc/def/ HTTP/1.0",
+						"Cookie2: 30.30.30.30:33333",
+						"X-Forwarded-For2: 40.40.40.40",
+					};
+
+
+	char	buffer_line_2[7][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"",
+						"Cookie: 10.10.10.10:11111",
+						"X-Forwarded-For: 20.20.20.20",
+						"GET /abc/def/ HTTP/1.0",
+						"Cookie2: 30.30.30.30:33333",
+						"X-Forwarded-For2: 40.40.40.40",
+					};
+
+	size_t	buffer_len			= 0;
+	size_t	http_header_offset	= 0;
+	size_t	http_header_len		= 0;
 
 	BOOST_MESSAGE( "----- find_http_header test start -----" );
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
-//	BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( buffer, buffer_len, http_header_name, http_header_offset, http_header_len ) );
+
+	memset( buffer_all_1, '\0', sizeof(buffer_all_1));
+	memset( buffer_all_2, '\0', sizeof(buffer_all_2));
+	for( i = 0; i < 7; i++ ){
+		for( j = 0; j < 3; j++ ){
+			memcpy( buffer_all_1[j] + strlen( buffer_all_1[j] ), buffer_line_1[i], strlen( buffer_line_1[i] ));
+			if( j == 0 || j == 2 ){
+				buffer_all_1[j][strlen( buffer_all_1[j] )] = '\r';
+			}
+			if( j == 1 || j == 2 ){
+				buffer_all_1[j][strlen( buffer_all_1[j] )] = '\n';
+			}
+			
+		}
+	}
+
+	for( i = 0; i < 7; i++ ){
+		for( j = 0; j < 3; j++ ){
+			memcpy( buffer_all_2[j] + strlen( buffer_all_2[j] ), buffer_line_2[i], strlen( buffer_line_1[i] ));
+			if( j == 0 || j == 2 ){
+				buffer_all_2[j][strlen( buffer_all_2[j] )] = '\r';
+			}
+			if( j == 1 || j == 2 ){
+				buffer_all_2[j][strlen( buffer_all_2[j] )] = '\n';
+			}
+			
+		}
+	}
+
+
+	for( i = 0; i < 3; i++ ){
+		buffer_len = strlen( buffer_all_1[i] );
+		for( j = 0; j < 5; j++, count++ ){
+			if( count < 10 ){
+				std::cout << count << "---------------------------------------" << std::endl;
+			}
+			else{
+				std::cout << count << "--------------------------------------" << std::endl;
+			}
+			http_header_offset	= 0;
+			http_header_len		= 0;
+			std::cout << "Length = [" << buffer_len << "]" << std::endl;
+			std::cout << "Http Header Name = [" << http_header_name[j] << "]" << std::endl;
+			std::cout << "Http Header Name Length = [" << http_header_name[j].length() << "]" << std::endl;
+			BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( (const char*)buffer_all_1[i], buffer_len, http_header_name[j], http_header_offset, http_header_len ) == result_1[j] );
+			memset( disp_http_header, '\0', sizeof(disp_http_header));
+			memcpy( disp_http_header, buffer_all_1[i] + http_header_offset, http_header_len );
+			std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
+			std::cout << "Http Header Length = [" << http_header_len << "]" << std::endl;
+			std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
+		}
+	}
+
+	for( i = 0; i < 3; i++ ){
+		buffer_len = strlen( buffer_all_2[i] );
+		for( j = 0; j < 5; j++, count++ ){
+			if( count < 10 ){
+				std::cout << count << "---------------------------------------" << std::endl;
+			}
+			else{
+				std::cout << count << "--------------------------------------" << std::endl;
+			}
+			http_header_offset	= 0;
+			http_header_len		= 0;
+			std::cout << "Length = [" << buffer_len << "]" << std::endl;
+			std::cout << "Http Header Name = [" << http_header_name[j] << "]" << std::endl;
+			std::cout << "Http Header Name Length = [" << http_header_name[j].length() << "]" << std::endl;
+			BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( (const char*)buffer_all_2[i], buffer_len, http_header_name[j], http_header_offset, http_header_len ) == result_2[j] );
+			memset( disp_http_header, '\0', sizeof(disp_http_header));
+			memcpy( disp_http_header, buffer_all_2[i] + http_header_offset, http_header_len );
+			std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
+			std::cout << "Http Header Length = [" << http_header_len << "]" << std::endl;
+			std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
+		}
+	}
 
 	BOOST_MESSAGE( "----- find_http_header test end -----" );
 }
-
-// void	constractor_test(){
-// 
-// 	BOOST_MESSAGE( "----- constractor test start -----" );
-// 
-// 	std::string module_name_1 = "cinsert";
-// 	std::string module_name_2 = "";
-// 
-// 	module_base_test	module_base_test_1( module_name_1 );
-// 	module_base_test	module_base_test_2( module_name_2 );
-// 
-// 	// ## test [1]  constractor parameter set test ("cinsert")
-// 	
-// 	BOOST_CHECK_EQUAL( module_base_test_1.name, module_name_1 );
-// 
-// 	// ## test [2]  constractor parameter set test ("")
-// 	std::cout << "2----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_2.name, module_name_2 );
-// 
-// 	BOOST_MESSAGE( "----- constractor test end -----" );
-// }
-// 
-// void	get_name_test(){
-// 
-// 	BOOST_MESSAGE( "----- get_name test start -----" );
-// 
-// 	std::string module_name_1 = "cinsert";
-// 	std::string module_name_2 = "";
-// 
-// 	module_base_test	module_base_test_1( module_name_1 );
-// 	module_base_test	module_base_test_2( module_name_2 );
-// 
-// 	// ## test [1]  get_name get test ("cinsert")
-// 	std::cout << "1----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_1.get_name(), module_name_1 );
-// 
-// 	// ## test [2]  get_name get test ("cinsert")
-// 	std::cout << "2----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_1.get_name(), module_base_test_1.name );
-// 
-// 	// ## test [3]  get_name get test ("")
-// 	std::cout << "3----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_2.get_name(), module_name_2 );
-// 
-// 	// ## test [4]  get_name get test ("")
-// 	std::cout << "4----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_2.get_name(), module_base_test_2.name );
-// 
-// 	BOOST_MESSAGE( "----- get_name test end -----" );
-// }
-// 
-// void	init_logger_functions_test(
-// 							getloglevel_func_type	ingetloglevel,
-// 							logger_func_type		inputLogFatal,
-// 							logger_func_type		inputLogError,
-// 							logger_func_type		inputLogWarn,
-// 							logger_func_type		inputLogInfo,
-// 							logger_func_type		inputLogDebug ){
-// 
-// 	BOOST_MESSAGE( "----- init_logger_functions test start -----" );
-// 
-// 	module_base_test	module_base_test_1( "cinsert" );
-// 
-// 	std::cout << "0----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.getloglevel	== NULL );
-// 	BOOST_CHECK( module_base_test_1.putLogFatal	== NULL );
-// 	BOOST_CHECK( module_base_test_1.putLogError	== NULL );
-// 	BOOST_CHECK( module_base_test_1.putLogWarn	== NULL );
-// 	BOOST_CHECK( module_base_test_1.putLogInfo	== NULL );
-// 	BOOST_CHECK( module_base_test_1.putLogDebug	== NULL );
-// 
-// 	module_base_test_1.init_logger_functions(
-// 												ingetloglevel,
-// 												inputLogFatal,
-// 												inputLogError,
-// 												inputLogWarn,
-// 												inputLogInfo,
-// 												inputLogDebug );
-// 
-// 	// ## test [1]  init_logger_functions call test (getloglevel)
-// 	std::cout << "1----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.getloglevel != NULL );
-// 	module_base_test_1.getloglevel();
-// 
-// 	// ## test [2]  init_logger_functions call test (putLogFatal)
-// 	std::cout << "2----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.putLogFatal != NULL );
-// 	module_base_test_1.putLogFatal( 0, "", NULL, 0 );
-// 
-// 	// ## test [3]  init_logger_functions call test (putLogError)
-// 	std::cout << "3----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.putLogError != NULL );
-// 	module_base_test_1.putLogError( 0, "", NULL, 0 );
-// 
-// 	// ## test [4]  init_logger_functions call test (putLogWarn)
-// 	std::cout << "4----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.putLogWarn != NULL );
-// 	module_base_test_1.putLogWarn( 0, "", NULL, 0 );
-// 
-// 	// ## test [5]  init_logger_functions call test (putLogInfo)
-// 	std::cout << "5----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.putLogInfo != NULL );
-// 	module_base_test_1.putLogInfo( 0, "", NULL, 0 );
-// 
-// 	// ## test [6]  init_logger_functions call test (putLogDebug)
-// 	std::cout << "6----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.putLogDebug != NULL );
-// 	module_base_test_1.putLogDebug( 0, "", NULL, 0 );
-// 
-// 	BOOST_MESSAGE( "----- init_logger_functions test end -----" );
-// }
-// 
-// void	init_replication_functions_test(
-// 							replicationpaymemory_func_type	inreplication_pay_memory,
-// 							boost::function< void( void ) >	inreplication_area_lock,
-// 							boost::function< void( void ) >	inreplication_area_unlock,
-// 							const boost::asio::ip::tcp::endpoint&	invirtual_service_endpoint_tcp,
-// 							const boost::asio::ip::udp::endpoint&	invirtual_service_endpoint_udp	){
-// 
-// 	BOOST_MESSAGE( "----- init_replication_functions test start -----" );
-// 
-// 	module_base_test	module_base_test_1( "cinsert" );
-// 
-// 	std::cout << "0----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.replication_pay_memory	== NULL );
-// 	BOOST_CHECK( module_base_test_1.replication_area_lock	== NULL );
-// 	BOOST_CHECK( module_base_test_1.replication_area_unlock	== NULL );
-// 
-// 	module_base_test_1.init_replication_functions(
-// 												inreplication_pay_memory,
-// 												inreplication_area_lock,
-// 												inreplication_area_unlock,
-// 												invirtual_service_endpoint_tcp,
-// 												invirtual_service_endpoint_udp );
-// 
-// 	// ## test [1]  init_replication_functions parameter set test (replication_pay_memory)
-// 	std::cout << "1----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.replication_pay_memory	!= NULL );
-// 	module_base_test_1.replication_pay_memory( "", NULL );
-// 
-// 	// ## test [1]  init_replication_functions call test (replication_area_lock)
-// 	std::cout << "2----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.replication_area_lock	!= NULL );
-// 	module_base_test_1.replication_area_lock();
-// 
-// 	// ## test [1]  init_replication_functions call test (replication_area_unlock)
-// 	std::cout << "3----------------------------------------" << std::endl;
-// 	BOOST_CHECK( module_base_test_1.replication_area_unlock	!= NULL );
-// 	module_base_test_1.replication_area_unlock();
-// 
-// 	// ## test [1]  init_replication_functions parameter set test (virtual_service_endpoint_tcp)
-// 	std::cout << "4----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_1.virtual_service_endpoint_tcp, invirtual_service_endpoint_tcp );
-// 
-// 	// ## test [1]  init_replication_functions parameter set test (virtual_service_endpoint_udp)
-// 	std::cout << "5----------------------------------------" << std::endl;
-// 	BOOST_CHECK_EQUAL( module_base_test_1.virtual_service_endpoint_udp, invirtual_service_endpoint_udp );
-// 
-// 	BOOST_MESSAGE( "----- init_replication_functions test end -----" );
-// }
 
 };
 
@@ -412,77 +783,50 @@ void	check_http_method_test(){
 
 }
 
+void	check_http_version_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+	http_protocol_module_base_test_1.check_http_version_test();
+
+}
+
+void	check_status_code_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+	http_protocol_module_base_test_1.check_status_code_test();
+
+}
+
+void	find_uri_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+	http_protocol_module_base_test_1.find_uri_test();
+
+}
+
+void	find_status_code_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+	http_protocol_module_base_test_1.find_status_code_test();
+
+}
+
 void	find_http_header_test(){
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 	http_protocol_module_base_test_1.find_http_header_test();
 
 }
-// void	constractor_test(){
-// 
-// 	module_base_test	module_base_test_1( "cinsert" );
-// 	module_base_test_1.constractor_test();
-// 
-// }
-// 
-// void	get_name_test(){
-// 
-// 	module_base_test	module_base_test_1( "cinsert" );
-// 	module_base_test_1.get_name_test();
-// 
-// }
-// 
-// void	init_logger_functions_test(){
-// 
-// 	boost::function< LOG_LEVEL_TAG(void) >	getloglevel = &stb_getloglevel;
-// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	putLogFatal	= &stb_putLogFatal;
-// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	putLogError	= &stb_putLogError;
-// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	putLogWarn		= &stb_putLogWarn;
-// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	putLogInfo		= &stb_putLogInfo;
-// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	putLogDebug	= &stb_putLogDebug;
-// 
-// 	module_base_test	module_base_test_1( "cinsert" );
-// 	module_base_test_1.init_logger_functions_test(	getloglevel,
-// 													putLogFatal,
-// 													putLogError,
-// 													putLogWarn,
-// 													putLogInfo,
-// 													putLogDebug);
-// 
-// }
-// 
-// void	init_replication_functions_test(){
-// 
-// 	boost::function< void* ( const std::string&, unsigned int* ) >	replication_pay_memory	=	&stb_replication_pay_memory;
-// 	boost::function< void( void ) >	replication_area_lock	=	&stb_replication_area_lock;
-// 	boost::function< void( void ) >	replication_area_unlock	=	&stb_replication_area_unlock;
-// 	boost::asio::ip::address	address_1;
-// 	unsigned short				port_1 = 1111;
-// 	boost::asio::ip::address	address_2;
-// 	unsigned short				port_2 = 2222;
-// 	boost::asio::ip::tcp::endpoint virtual_service_endpoint_tcp( address_1, port_1 );
-// 	boost::asio::ip::udp::endpoint virtual_service_endpoint_udp( address_2, port_2 );
-// 
-// 	module_base_test	module_base_test_1( "cinsert" );
-// 	module_base_test_1.init_replication_functions_test(
-// 													replication_pay_memory,
-// 													replication_area_lock,
-// 													replication_area_unlock,
-// 													virtual_service_endpoint_tcp,
-// 													virtual_service_endpoint_udp );
-// 
-// }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	test_suite* ts = BOOST_TEST_SUITE( "http_protocol_module_base class test" );
 
-// 	ts->add( BOOST_TEST_CASE( &constractor_test ) );
-// 	ts->add( BOOST_TEST_CASE( &get_name_test ) );
-// 	ts->add( BOOST_TEST_CASE( &init_logger_functions_test ) );
-// 	ts->add( BOOST_TEST_CASE( &init_replication_functions_test ) );
-
 	ts->add( BOOST_TEST_CASE( &check_http_method_test ) );
+	ts->add( BOOST_TEST_CASE( &check_http_version_test ) );
+	ts->add( BOOST_TEST_CASE( &check_status_code_test ) );
+	ts->add( BOOST_TEST_CASE( &find_uri_test ) );
+	ts->add( BOOST_TEST_CASE( &find_status_code_test ) );
 	ts->add( BOOST_TEST_CASE( &find_http_header_test ) );
 
 	framework::master_test_suite().add( ts );
