@@ -3,7 +3,22 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-#include "tcp_thread_message.h"
+#define TCP_SESSION_H
+namespace l7vs{
+	class tcp_session{
+		public:
+			enum TCP_PROCESS_TYPE_TAG{
+				LOCAL_PROC = 0,
+				MESSAGE_PROC
+			};
+			
+			tcp_session();
+			~tcp_session();
+		
+	};
+}
+
+#include "../../../src/tcp_thread_message.cpp"
 
 using namespace boost::unit_test_framework;
 
