@@ -60,7 +60,6 @@ public:
 	}
 	//! destractor
 	~session_thread_control(){
-//		session->set_virtual_service_message( tcp_session::SESSION_END );
 		join();
 		upthread->join();
 		downthread->join();
