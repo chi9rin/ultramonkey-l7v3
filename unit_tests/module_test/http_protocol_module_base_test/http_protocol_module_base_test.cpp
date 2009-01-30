@@ -201,6 +201,7 @@ void	check_http_method_test(){
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [1]  http method check test (check result = OK)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
@@ -215,6 +216,7 @@ void	check_http_method_test(){
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [2]  http method check test (check result = NG)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
@@ -228,6 +230,7 @@ void	check_http_method_test(){
 		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
 		buffer_len = strlen( buffer_inpossible[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [3]  http method check test (check result = INPOSSIBLE)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
@@ -240,6 +243,7 @@ void	check_http_method_test(){
 	buffer_len = 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [4]  http method check test (check result = NG / buffer = NULL / buffer_len = 0)
 	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -252,6 +256,7 @@ void	check_http_method_test(){
 	buffer_len = 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [5]  http method check test (check result = NG / buffer = NULL / buffer_len = 100)
 	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -318,6 +323,7 @@ void	check_http_version_test(){
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [1]  http version check test (check result = OK)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
@@ -332,6 +338,7 @@ void	check_http_version_test(){
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [2]  http version check test (check result = NG)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
@@ -345,6 +352,7 @@ void	check_http_version_test(){
 		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
 		buffer_len = strlen( buffer_inpossible[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [3]  http version check test (check result = INPOSSIBLE)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
@@ -357,6 +365,7 @@ void	check_http_version_test(){
 	buffer_len = 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [4]  http version check test (check result = NG / buffer = NULL / buffer_len = 0)
 	BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -369,6 +378,7 @@ void	check_http_version_test(){
 	buffer_len = 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [5]  http version check test (check result = NG / buffer = NULL / buffer_len = 100)
 	BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -422,6 +432,7 @@ void	check_status_code_test(){
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [1]  status code check test (check result = OK)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
@@ -436,6 +447,7 @@ void	check_status_code_test(){
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [2]  status code check test (check result = NG)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
@@ -449,6 +461,7 @@ void	check_status_code_test(){
 		std::cout << "String = [" << buffer_inpossible[i] << "] + [CR]" << std::endl;
 		buffer_len = strlen( buffer_inpossible[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [3]  status code check test (check result = INPOSSIBLE)
 		BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
@@ -461,6 +474,7 @@ void	check_status_code_test(){
 	buffer_len = 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [4]  status code check test (check result = NG / buffer = NULL / buffer_len = 0)
 	BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -473,6 +487,7 @@ void	check_status_code_test(){
 	buffer_len = 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [5]  status code check test (check result = NG / buffer = NULL / buffer_len = 100)
 	BOOST_CHECK( http_protocol_module_base_test_1.check_status_code( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -523,6 +538,7 @@ void	find_uri_test(){
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [1]  uri find test (find result = TRUE)
 		BOOST_CHECK( http_protocol_module_base_test_1.find_uri( (const char*)buffer_ok[i], buffer_len, uri_offset, uri_len ) == true );
 		memcpy( disp_uri, buffer_ok[i] + uri_offset, uri_len );
 		std::cout << "URI Offset = [" << uri_offset << "]" << std::endl;
@@ -544,6 +560,7 @@ void	find_uri_test(){
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [2]  uri find test (find result = FALSE)
 		BOOST_CHECK( http_protocol_module_base_test_1.find_uri( (const char*)buffer_ng[i], buffer_len, uri_offset, uri_len ) == false );
 		memcpy( disp_uri, buffer_ng[i] + uri_offset, uri_len );
 		std::cout << "URI Offset = [" << uri_offset << "]" << std::endl;
@@ -595,6 +612,7 @@ void	find_status_code_test(){
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [1]  status code find test (find result = TRUE)
 		BOOST_CHECK( http_protocol_module_base_test_1.find_status_code( (const char*)buffer_ok[i], buffer_len, status_code_offset, status_code_len ) == true );
 		memcpy( disp_status_code, buffer_ok[i] + status_code_offset, status_code_len );
 		std::cout << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
@@ -616,6 +634,7 @@ void	find_status_code_test(){
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [2]  status code find test (find result = FALSE)
 		BOOST_CHECK( http_protocol_module_base_test_1.find_status_code( (const char*)buffer_ng[i], buffer_len, status_code_offset, status_code_len ) == false );
 		memcpy( disp_status_code, buffer_ng[i] + status_code_offset, status_code_len );
 		std::cout << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
@@ -738,6 +757,7 @@ void	find_http_header_test(){
 			std::cout << "Length = [" << buffer_len << "]" << std::endl;
 			std::cout << "Http Header Name = [" << http_header_name[j] << "]" << std::endl;
 			std::cout << "Http Header Name Length = [" << http_header_name[j].length() << "]" << std::endl;
+			// ## test [1]  http header find test (http header valid)
 			BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( (const char*)buffer_all_1[i], buffer_len, http_header_name[j], http_header_offset, http_header_len ) == result_1[j] );
 			memset( disp_http_header, '\0', sizeof(disp_http_header));
 			memcpy( disp_http_header, buffer_all_1[i] + http_header_offset, http_header_len );
@@ -761,6 +781,7 @@ void	find_http_header_test(){
 			std::cout << "Length = [" << buffer_len << "]" << std::endl;
 			std::cout << "Http Header Name = [" << http_header_name[j] << "]" << std::endl;
 			std::cout << "Http Header Name Length = [" << http_header_name[j].length() << "]" << std::endl;
+			// ## test [2]  http header find test (http header invalid)
 			BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( (const char*)buffer_all_2[i], buffer_len, http_header_name[j], http_header_offset, http_header_len ) == result_2[j] );
 			memset( disp_http_header, '\0', sizeof(disp_http_header));
 			memcpy( disp_http_header, buffer_all_2[i] + http_header_offset, http_header_len );
@@ -769,6 +790,44 @@ void	find_http_header_test(){
 			std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
 		}
 	}
+
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	http_header_offset	= 0;
+	http_header_len		= 0;
+	buffer_len = 0;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "Http Header Name = [" << http_header_name[0] << "]" << std::endl;
+	std::cout << "Http Header Name Length = [" << http_header_name[0].length() << "]" << std::endl;
+	// ## test [3]  http header find test (buffer = NULL / buffer_len = 0)
+	BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( NULL, buffer_len, http_header_name[0], http_header_offset, http_header_len ) == false );
+	memset( disp_http_header, '\0', sizeof(disp_http_header));
+	std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
+	std::cout << "Http Header Length = [" << http_header_len << "]" << std::endl;
+	std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
+
+	if( count < 10 ){
+		std::cout << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << count << "--------------------------------------" << std::endl;
+	}
+	http_header_offset	= 0;
+	http_header_len		= 0;
+	buffer_len = 100;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "Http Header Name = [" << http_header_name[0] << "]" << std::endl;
+	std::cout << "Http Header Name Length = [" << http_header_name[0].length() << "]" << std::endl;
+	// ## test [4]  http header find test (buffer = NULL / buffer_len = 100)
+	BOOST_CHECK( http_protocol_module_base_test_1.find_http_header( NULL, buffer_len, http_header_name[0], http_header_offset, http_header_len ) == false );
+	memset( disp_http_header, '\0', sizeof(disp_http_header));
+	std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
+	std::cout << "Http Header Length = [" << http_header_len << "]" << std::endl;
+	std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
 
 	BOOST_MESSAGE( "----- find_http_header test end -----" );
 }
