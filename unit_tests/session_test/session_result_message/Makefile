@@ -6,7 +6,7 @@
 TARGET		= session_result_message_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
-INCLUDES	=	-I../../../logger \
+INCLUDES	=	-I../logger_stb \
 				-I../../../parameter \
 				-I./ \
 				-I../../../src \
@@ -18,6 +18,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
+			../logger_stb/logger.cpp \
 			session_result_message_test.cpp
 
 .SUFFIX:	.cpp .o
