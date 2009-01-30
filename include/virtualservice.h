@@ -38,65 +38,155 @@ class	l7vsd;
 class	replication;
 class	session_thread_control;
 
-//!
-//!	@brief	virtualservice base class
-//! @class	virtualservice_base is base class of virtual service.
+//!	@class	virtualservice_base
+//!	@brief	virtualservice base class is base class of tcp virtual service and udp virtual service.
 class	virtualservice_base : boost::noncopyable{
 public:
-	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;	//! shared_ptr session_thread_control typedef
+	//! shared_ptr session_thread_control typedef
+	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;
 protected:
-	struct	vs_replication_header{	//! @struct vs_replication_header replication data structure for header data
-		unsigned long long	udpmode;
-		unsigned char		address[16];
-		unsigned long long	port;
-		unsigned long long	bodytype;
-		unsigned long long	datasize;
-	};
+	//!	@class	vs_replication_header replication data structure for header data
+	class	vs_replication_header{
+	public:
+		vs_replication_header() : udpflag( false ) {}
+		vs_replication_header( const vs_replication_header& in ){
+			udpflag			= in.udpflag;
+			tcp_endpoint	= in.tcp_endpoint;
+			udp_endpoint	= in.udp_endpoint;
+			bodytype		= in.bodytype;
+			datasize		= in.datasize;
+		}
+		vs_replication_header&	operator=( const vs_replication_header& in ){
+			udpflag			= in.udpflag;
+			tcp_endpoint	= in.tcp_endpoint;
+			udp_endpoint	= in.udp_endpoint;
+			bodytype		= in.bodytype;
+			datasize		= in.datasize;
+		}
 	
-	struct	vs_replication_body{	//! @struct vs_replication_body replication data structure for body data
-		unsigned long long	sorry_maxconnection;
-		unsigned char		sorry_address[16];
-		unsigned long long	sorry_port;
-		unsigned long long	sorry_flag;
+		bool				udpflag;
+		boost::asio::ip::tcp::endpoint
+							tcp_endpoint;
+		boost::asio::ip::udp::endpoint
+							udp_endpoint;
+		unsigned int		bodytype;
+		unsigned long long	datasize;
+	private:
+		friend class	boost::serialization::access;		//! friend boost serializable class
+		//! serializable
+		//! @brief using boost serialiable. class serializable function.
+		//! @param[in]	archive
+		//! @param[in]	version
+		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+			ar & udpflag;
+			ar & tcp_endpoint;
+			ar & udp_endpoint;
+			ar & bodytype;
+			ar & datasize;
+		}
+	};
+
+	//! @class vs_replication_body replication data structure for body data
+	class	vs_replication_body{
+	public:
+		vs_replication_body(){}
+		vs_replication_body( const vs_replication_body& in ){
+			sorry_maxconnection	= in.sorry_maxconnection;
+			sorry_endpoint		= in.sorry_endpoint;
+			sorry_flag			= in.sorry_flag;
+			qos_up				= in.qos_up;
+			qos_down			= in.qos_down;
+		}
+		vs_replication_body&	operator=( const vs_replication_body& in ){
+			sorry_maxconnection	= in.sorry_maxconnection;
+			sorry_endpoint		= in.sorry_endpoint;
+			sorry_flag			= in.sorry_flag;
+			qos_up				= in.qos_up;
+			qos_down			= in.qos_down;
+		}
+	
+		long long			sorry_maxconnection;
+		boost::asio::ip::tcp::endpoint
+							sorry_endpoint;
+		bool				sorry_flag;
 		unsigned long long	qos_up;
 		unsigned long long	qos_down;
+	private:
+		friend class	boost::serialization::access;		//! friend boost serializable class
+		//! serializable
+		//! @brief using boost serialiable. class serializable function.
+		//! @param[in]	archive
+		//! @param[in]	version
+		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+			ar & sorry_maxconnection;
+			ar & sorry_endpoint;
+			ar & sorry_flag;
+			ar & qos_up;
+			ar & qos_down;
+		}
 	};
+
+	//! @class vs_replication_data replication data structure
+	class	vs_replication_data{
+	public:
+		vs_replication_data(){}
+		vs_replication_data( const vs_replication_data& in ){
+			header	= in.header;
+			body	= in.body;
+		}
+		vs_replication_data&	operator=( const vs_replication_data& in ){
+			header	= in.header;
+			body	= in.body;
+		}
 	
-	struct	vs_replication_data{	//! @struct vs_replication_data replication data structure
 		vs_replication_header	header;
 		vs_replication_body		body;
+	private:
+		friend class	boost::serialization::access;		//! friend boost serializable class
+		//! serializable
+		//! @brief using boost serialiable. class serializable function.
+		//! @param[in]	archive
+		//! @param[in]	version
+		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+			ar & header;
+			ar & body;
+		}
 	};
 
-	const	l7vsd&				vsd;		//! l7vsd reference
-	const	replication&		rep;		//! replication reference
+	const	l7vsd&				vsd;			//! l7vsd reference
+	const	replication&		rep;			//! replication reference
 
-	boost::asio::io_service		dispatcher;	//! dispatcer service
-	boost::asio::deadline_timer	vs_timer;	//! timer object
+	boost::asio::io_service		dispatcher;		//! dispatcer service
+	boost::asio::deadline_timer	calc_bps_timer;	//! timer object
+	boost::asio::deadline_timer	replication_timer;	//! timer object
 
-	virtualservice_element		element;	//! virtual service element
+	virtualservice_element		element;		//! virtual service element
 
-	boost::shared_ptr<protocol_module_base>	protomod;
-	boost::shared_ptr<schedule_module_base>	schedmod;
-	std::list<realserver>		rs_list;
-	std::list<boost::mutex>		rs_mutex_list;
-	unsigned long long 			rs_list_ref_count;
-	boost::mutex				rs_list_ref_count_mutex;
-	boost::mutex				rs_list_ref_count_inc_mutex;
+	boost::shared_ptr<protocol_module_base>	protomod;			//! protocol module smart pointer
+	boost::shared_ptr<schedule_module_base>	schedmod;			//! schedule module smart pointer
 
-	unsigned long long			recvsize_up;
-	unsigned long long			current_up_recvsize;
-	boost::mutex				recvsize_up_mutex;
-	unsigned long long			sendsize_up;
-	boost::mutex				sendsize_up_mutex;
-	unsigned long long			recvsize_down;
-	unsigned long long			current_down_recvsize;
-	boost::mutex				recvsize_down_mutex;
-	unsigned long long			sendsize_down;
-	boost::mutex				sendsize_down_mutex;
+	std::list<realserver>		rs_list;						//! realserver list
+	std::list<boost::mutex>		rs_mutex_list;					//! list of realserver mutex
+	unsigned long long 			rs_list_ref_count;				//! reference count of realserver list
+	boost::mutex				rs_list_ref_count_mutex;		//! mutex for update reference count
+	boost::mutex				rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
 
-	unsigned long long			last_calc_time;
-	unsigned long long			throughput_up;
-	unsigned long long			throughput_down;
+	unsigned long long			recvsize_up;					//! upstream total receive data size
+	unsigned long long			current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
+	boost::mutex				recvsize_up_mutex;				//! mutex for update upstream receive data size
+	unsigned long long			sendsize_up;					//! upstream total send data size
+	boost::mutex				sendsize_up_mutex;				//! mutex for update upstream send data size
+	unsigned long long			recvsize_down;					//! downstream total receive data size
+	unsigned long long			current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
+	boost::mutex				recvsize_down_mutex;			//! mutex for update downstream receive data size
+	unsigned long long			sendsize_down;					//! downstream total send data size
+	boost::mutex				sendsize_down_mutex;			//! mutex for update downstream send data size
+
+	boost::xtime				last_calc_time;					//! time at calcurate throughput
+	unsigned long long			throughput_up;					//! upstream throughput value
+	boost::mutex				throughput_up_mutex;			//! mutex for update upstream throughput value
+	unsigned long long			throughput_down;				//! downstream throughput value
+	boost::mutex				throughput_down_mutex;			//! mutex for update downstream throughput value
 
 	virtual	void				handle_replication_interrupt( const boost::system::error_code& ) = 0;
 	virtual	bool				read_replicationdata( vs_replication_data& ) = 0;
