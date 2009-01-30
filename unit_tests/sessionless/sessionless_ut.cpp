@@ -1,4 +1,5 @@
 #include <boost/test/included/unit_test.hpp>
+#include "../../module/protocol/http_protocol_module_base.cpp"
 #include "../../module/protocol/protocol_module_sessionless.cpp"
 
 using namespace std;
@@ -9,10 +10,10 @@ using namespace l7vs;
 typedef l7vs::protocol_module_sessionless::check_message_result
 		check_message_result;
 
-//protocol_module_sessionless ég‰Æƒ
+//protocol_module_sessionless é¦®å®¶ç´”
 void protocol_module_sessionless_test(){
 
-	//unit_test[1] ƒ‚ƒWƒ…[ƒ‹–¼i"sessionless"j
+	//unit_test[1] ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åï¼ˆ"sessionless"ï¼‰
     protocol_module_sessionless obj1;
     BOOST_CHECK_EQUAL("sessionless",obj1.name);
 
@@ -22,33 +23,33 @@ void protocol_module_sessionless_test(){
     delete p1;
 }
 
-//~protocol_module_sessionless ég‰Æƒ
+//~protocol_module_sessionless é¦®å®¶ç´”
 
-//is_tcp ég‰Æƒ
+//is_tcp é¦®å®¶ç´”
 void is_tcp_test(){
 
-	//unit_test[4] TRUE‚ğ•Ô‹p‚·‚é
+	//unit_test[4] TRUEã‚’è¿”å´ã™ã‚‹
     protocol_module_sessionless obj;
     BOOST_CHECK(obj.is_tcp());
 }
 
-//is_udp ég‰Æƒ
+//is_udp é¦®å®¶ç´”
 void is_udp_test(){
 
-	//unit_test[5] FALSE‚ğ•Ô‹p‚·‚é
+	//unit_test[5] FALSEã‚’è¿”å´ã™ã‚‹
     protocol_module_sessionless obj;
     BOOST_CHECK(!obj.is_udp());
 }
 
-//get_name ég‰Æƒ
+//get_name é¦®å®¶ç´”
 void get_name_test(){
 
-	//unit_test[5] ƒ‚ƒWƒ…[ƒ‹–¼i"sessionless"j‚ğ•Ô‹p‚·‚é
+	//unit_test[5] ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åï¼ˆ"sessionless"ï¼‰ã‚’è¿”å´ã™ã‚‹
     protocol_module_sessionless obj;
     BOOST_CHECK_EQUAL("sesslonless", obj.get_name());
 }
 
-//initialize “Ÿì•û
+//initialize è‘£ä½œæ–¹
 typedef protocol_module_sessionless::realserverlist_type real_server_list;
 typedef	protocol_module_sessionless::rs_list_itr_func_type rs_list_itr_func_type;
 real_server_list real_list;
@@ -59,9 +60,9 @@ void list_lock_for_test() {}
 void list_unlock_for_test() {}
 void initialize_test() {
 
-	//unit_test[1] RealServerƒŠƒXƒg‚ÌŠe‘€ìŠÖ”ƒƒ\ƒbƒh‚ÌƒeƒXƒg
-	//unit_test[1] test data:RealServerƒŠƒXƒgæ“ªæ“¾ŠÖ”,RealServerƒŠƒXƒg––’[æ“¾ŠÖ”,RealServerƒŠƒXƒgŸ—v‘fæ“¾ŠÖ”
-	//unit_test[1] test data:RealServerƒŠƒXƒgƒƒbƒNŠÖ”,RealServerƒŠƒXƒgƒAƒ“ƒƒbƒNŠÖ”
+	//unit_test[1] RealServerãƒªã‚¹ãƒˆã®å„æ“ä½œé–¢æ•°ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆ
+	//unit_test[1] test data:RealServerãƒªã‚¹ãƒˆå…ˆé ­å–å¾—é–¢æ•°,RealServerãƒªã‚¹ãƒˆæœ«ç«¯å–å¾—é–¢æ•°,RealServerãƒªã‚¹ãƒˆæ¬¡è¦ç´ å–å¾—é–¢æ•°
+	//unit_test[1] test data:RealServerãƒªã‚¹ãƒˆãƒ­ãƒƒã‚¯é–¢æ•°,RealServerãƒªã‚¹ãƒˆã‚¢ãƒ³ãƒ­ãƒƒã‚¯é–¢æ•°
 	rs_list_itr_func_type inrslist_begin = real_begin;
 	rs_list_itr_func_type inrslist_end = real_end;
 	rs_list_itr_func_type inrslist_next = real_next;
@@ -79,10 +80,10 @@ void initialize_test() {
 
 };
 
-//finalize “Ÿì•û
+//finalize è‘£ä½œæ–¹
 void finalize_test() {
 
-	//unit_test[2] Še‘€ìŠÖ”‚ğ‰Šú‰»‚·‚é
+	//unit_test[2] å„æ“ä½œé–¢æ•°ã‚’åˆæœŸåŒ–ã™ã‚‹
 	//unit_test[2] test data
 	protocol_module_sessionless sessionless;
 	sessionless.finalize();
@@ -112,43 +113,43 @@ void finalize_test() {
 
 }
 
-//is_use_sorry ”n‰‰
+//is_use_sorry é¦¬ç¿ ç¿ 
 void is_use_sorry_test() {
 	protocol_module_sessionless sessionless;
 
-	// unit_test[1]  is_use_sorryƒƒ\ƒbƒh‚ÌƒeƒXƒg
+	// unit_test[1]  is_use_sorryãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆ
 	bool is_return = sessionless.is_use_sorry();
 	BOOST_CHECK_EQUAL(is_return,true);
 }
 
-//check_parameter ”n‰‰
+//check_parameter é¦¬ç¿ ç¿ 
 void check_parameter_test() {
 	protocol_module_sessionless sessionless;
 	check_message_result result;
 	vector<string> args(5);
 
-	// unit_test[2] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[2] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚Éƒf[ƒ^‚È‚µ
+	// unit_test[2] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[2] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ã«ãƒ‡ãƒ¼ã‚¿ãªã—
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[3] ‘—MŒ³İ’èw¦İ’èƒtƒ‰ƒO‚ğON,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[3] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-F"
+	// unit_test[3] é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[3] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-F"
 	args[0] = "l7vsadmin";
 	args[1] = "-F";
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[4] ‘—MŒ³İ’èw¦İ’èƒtƒ‰ƒO‚ğON, ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[4] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-F"
+	// unit_test[4] é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON, ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[4] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-F"
 	args[0] = "l7vsadmin";
 	args[1] = "--forwarded-for";
 	sessionless.check_parameter(args);
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[5] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-S/--sorryURI' option value '%s' is too long."i%s‚ÍŸ—v‘fj‚ğİ’è‚·‚é
-	// unit_test[5] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· > 127
+	// unit_test[5] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-S/--sorryURI' option value '%s' is too long."ï¼ˆ%sã¯æ¬¡è¦ç´ ï¼‰ã‚’è¨­å®šã™ã‚‹
+	// unit_test[5] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· > 127
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/";
@@ -156,8 +157,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"'-S/--sorryURI' option value 'http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
 
-	// unit_test[6] sorryURIİ’èƒtƒ‰ƒO‚ğON ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[6] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· = 127 ƒ`ƒFƒbƒNOK‚Ìê‡
+	// unit_test[6] sorryURIè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[6] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· = 127 ãƒã‚§ãƒƒã‚¯OKã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/";
@@ -167,8 +168,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message,"Cannot set multiple option ''-S/--sorryURI'.");
 	BOOST_CHECK_EQUAL(result.flag,false);
 
-	// unit_test[7] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-S/--sorryURI' option value '%s' is not a valid URI."i%s‚ÍŸ—v‘fj‚ğİ’è‚·‚é
-	// unit_test[7] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· = 127 ƒ`ƒFƒbƒNNG‚Ìê‡
+	// unit_test[7] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-S/--sorryURI' option value '%s' is not a valid URI."ï¼ˆ%sã¯æ¬¡è¦ç´ ï¼‰ã‚’è¨­å®šã™ã‚‹
+	// unit_test[7] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· = 127 ãƒã‚§ãƒƒã‚¯NGã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/1234567+/";
@@ -176,8 +177,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"'-S/--sorryURI' option value 'http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/1234567+/' is not a valid URI.");
 
-	// unit_test[8] sorryURIİ’èƒtƒ‰ƒO‚ğON ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[8] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· < 127 ƒ`ƒFƒbƒNOK‚Ìê‡
+	// unit_test[8] sorryURIè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[8] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· < 127 ãƒã‚§ãƒƒã‚¯OKã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/";
@@ -187,8 +188,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message,"Cannot set multiple option ''-S/--sorryURI'.");
 	BOOST_CHECK_EQUAL(result.flag,false);
 
-	// unit_test[9] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-S/--sorryURI' option value '%s' is not a valid URI."i%s‚ÍŸ—v‘fj‚ğİ’è‚·‚é
-	// unit_test[9] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· < 127 ƒ`ƒFƒbƒNNG‚Ìê‡
+	// unit_test[9] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-S/--sorryURI' option value '%s' is not a valid URI."ï¼ˆ%sã¯æ¬¡è¦ç´ ï¼‰ã‚’è¨­å®šã™ã‚‹
+	// unit_test[9] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· < 127 ãƒã‚§ãƒƒã‚¯NGã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/aa+";
@@ -196,16 +197,16 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"'-S/--sorryURI' option value 'http://abcd.com/aa+' is not a valid URI.");
 
-	// unit_test[10] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"You have to set  option value ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[10] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡
+	// unit_test[10] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"You have to set  option value ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[10] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"You have to set  option value ''-S/--sorryURI'.");
 
-	// unit_test[11] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[11] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = ON
+	// unit_test[11] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[11] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = ON
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/";
@@ -215,8 +216,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"Cannot set multiple option ''-S/--sorryURI");
 
-	// unit_test[12] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Option error."‚ğİ’è‚·‚é
-	// unit_test[12] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ"-F","-S" ˆÈŠO‚Ìê‡
+	// unit_test[12] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Option error."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[12] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—"-F","-S" ä»¥å¤–ã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-D";
 	result = sessionless.check_parameter(args);
@@ -225,40 +226,40 @@ void check_parameter_test() {
 
 }
 
-//set_parameter ”n‰‰
+//set_parameter é¦¬ç¿ ç¿ 
 void set_parameter_test() {
 	protocol_module_sessionless sessionless;
 	check_message_result result;
 	vector<string> args(5);
 
-	// unit_test[13] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[13] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚Éƒf[ƒ^‚È‚µ
+	// unit_test[13] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[13] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ã«ãƒ‡ãƒ¼ã‚¿ãªã—
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[14] ‘—MŒ³İ’èw¦‚É1‚ğİ’è‚·‚é
+	// unit_test[14] é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºã«1ã‚’è¨­å®šã™ã‚‹
 	args[0] = "l7vsadmin";
 	sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(sessionless.forwarded_for,1);
 
-	// unit_test[15] ‘—MŒ³İ’èw¦İ’èƒtƒ‰ƒO‚ğON,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[15] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-F"
+	// unit_test[15] é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[15] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-F"
 	args[0] = "l7vsadmin";
 	args[1] = "-F";
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(sessionless.forwarded_for,1);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[16] ‘—MŒ³İ’èw¦İ’èƒtƒ‰ƒO‚ğON,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[16] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-F"
+	// unit_test[16] é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[16] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-F"
 	args[0] = "l7vsadmin";
 	args[1] = "--forwarded-for";
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(sessionless.forwarded_for,1);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[17] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-S/--sorryURI' option value '%s' is too long."i%s‚ÍŸ—v‘fj‚ğİ’è‚·‚é
-	// unit_test[17] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· > 127
+	// unit_test[17] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-S/--sorryURI' option value '%s' is too long."ï¼ˆ%sã¯æ¬¡è¦ç´ ï¼‰ã‚’è¨­å®šã™ã‚‹
+	// unit_test[17] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· > 127
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/";
@@ -266,8 +267,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"'-S/--sorryURI' option value 'http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
 
-	// unit_test[18] sorryURIİ’èƒtƒ‰ƒO‚ğON ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[18] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· = 127 ƒ`ƒFƒbƒNOK‚Ìê‡
+	// unit_test[18] sorryURIè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[18] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· = 127 ãƒã‚§ãƒƒã‚¯OKã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/";
@@ -277,8 +278,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message,"Cannot set multiple option ''-S/--sorryURI'.");
 	BOOST_CHECK_EQUAL(result.flag,false);
 
-	// unit_test[19] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-S/--sorryURI' option value '%s' is not a valid URI."i%s‚ÍŸ—v‘fj‚ğİ’è‚·‚é
-	// unit_test[19] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· = 127 ƒ`ƒFƒbƒNNG‚Ìê‡
+	// unit_test[19] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-S/--sorryURI' option value '%s' is not a valid URI."ï¼ˆ%sã¯æ¬¡è¦ç´ ï¼‰ã‚’è¨­å®šã™ã‚‹
+	// unit_test[19] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· = 127 ãƒã‚§ãƒƒã‚¯NGã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/1234567+/";
@@ -286,8 +287,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"'-S/--sorryURI' option value 'http://abcde.com/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/1234567+/' is not a valid URI.");
 
-	// unit_test[20] sorryURIİ’èƒtƒ‰ƒO‚ğON ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[20] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ’· < 127 ƒ`ƒFƒbƒNOK‚Ìê‡
+	// unit_test[20] sorryURIè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[20] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· < 127 ãƒã‚§ãƒƒã‚¯OKã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/";
@@ -297,8 +298,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message,"Cannot set multiple option ''-S/--sorryURI'.");
 	BOOST_CHECK_EQUAL(result.flag,false);
 
-	// unit_test[21] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-S/--sorryURI' option value '%s' is not a valid URI."i%s‚ÍŸ—v‘fj‚ğİ’è‚·‚é
-	// unit_test[21] test data:Ÿ—v‘f‚Ì•¶š—ñ’· < 127 ƒ`ƒFƒbƒNNG‚Ìê‡
+	// unit_test[21] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-S/--sorryURI' option value '%s' is not a valid URI."ï¼ˆ%sã¯æ¬¡è¦ç´ ï¼‰ã‚’è¨­å®šã™ã‚‹
+	// unit_test[21] test data:æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· < 127 ãƒã‚§ãƒƒã‚¯NGã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/aa+";
@@ -306,16 +307,16 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"'-S/--sorryURI' option value 'http://abcd.com/aa+' is not a valid URI.");
 
-	// unit_test[22] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"You have to set  option value ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[22] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡
+	// unit_test[22] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"You have to set  option value ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[22] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"You have to set  option value ''-S/--sorryURI'.");
 
-	// unit_test[23] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option ''-S/--sorryURI'."‚ğİ’è‚·‚é
-	// unit_test[23] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S" sorryURIİ’èƒtƒ‰ƒO = ON
+	// unit_test[23] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option ''-S/--sorryURI'."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[23] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S" sorryURIè¨­å®šãƒ•ãƒ©ã‚° = ON
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/";
@@ -325,16 +326,16 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"Cannot set multiple option ''-S/--sorryURI");
 
-	// unit_test[24] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Option error."‚ğİ’è‚·‚é
-	// unit_test[24] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ"-F","-S" ˆÈŠO‚Ìê‡
+	// unit_test[24] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Option error."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[24] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—"-F","-S" ä»¥å¤–ã®å ´åˆ
 	args[0] = "l7vsadmin";
 	args[1] = "-D";
 	result = sessionless.check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"Option error.");
 
-	// unit_test[25] ‘—MŒ³İ’èw¦‚É0‚ğİ’è‚·‚é
-	// unit_test[25] test data:ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO = TRUE‚Ìê‡A‘—MŒ³İ’èw¦İ’èƒtƒ‰ƒO = OFF
+	// unit_test[25] é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºã«0ã‚’è¨­å®šã™ã‚‹
+	// unit_test[25] test data:ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚° = TRUEã®å ´åˆã€é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºè¨­å®šãƒ•ãƒ©ã‚° = OFF
 	args[0] = "l7vsadmin";
 	args[1] = "-S";
 	args[2] = "http://abcd.com/";
@@ -343,28 +344,28 @@ void set_parameter_test() {
 
 }
 
-//add_parameter ”n‰‰
+//add_parameter é¦¬ç¿ ç¿ 
 void add_parameter_test() {
 	protocol_module_sessionless sessionless;
 	check_message_result result;
 	vector<string> args(2);
 
-	// unit_test[58] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	// unit_test[58] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚ª‘¶İ‚µ‚È‚¢ê‡
+	// unit_test[58] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	// unit_test[58] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	result = sessionless.add_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,true);
 
-	// unit_test[59] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é, ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot add option."‚ğİ’è‚·‚é
-	// unit_test[59] test data:ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚ª‘¶İ‚·‚éê‡
+	// unit_test[59] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹, ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot add option."ã‚’è¨­å®šã™ã‚‹
+	// unit_test[59] test data:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ãŒå­˜åœ¨ã™ã‚‹å ´åˆ
 	args[0] = "-F";
 	result = sessionless.add_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag,false);
 	BOOST_CHECK_EQUAL(result.message,"Cannot add option.");
 }
 
-//handle_rslist_update ”n‰‰
+//handle_rslist_update é¦¬ç¿ ç¿ 
 
-//register_schedule(tcp) “Ÿì•û
+//register_schedule(tcp) è‘£ä½œæ–¹
 void schedule_tcp( const boost::thread::id id,
 		           rs_list_itr_func_type func_type1,
 		           rs_list_itr_func_type func_type2,
@@ -372,8 +373,8 @@ void schedule_tcp( const boost::thread::id id,
 		           boost::asio::ip::tcp::endpoint& ) {};
 void register_schedule_tcp_test() {
 
-	// unit_test[3]  schedule_tcpƒƒ\ƒbƒh‚ÌƒeƒXƒg
-	// unit_test[3] test data:ClientU‚è•ª‚¯ˆ—ŠÖ”
+	// unit_test[3]  schedule_tcpãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆ
+	// unit_test[3] test data:ClientæŒ¯ã‚Šåˆ†ã‘å‡¦ç†é–¢æ•°
 	protocol_module_sessionless::tcp_schedule_func_type  func = schedule_tcp;
 
 	protocol_module_sessionless sessionless;
@@ -382,18 +383,18 @@ void register_schedule_tcp_test() {
 	BOOST_CHECK_EQUAL(sessionless.schedule_tcp,schedule_tcp);
 }
 
-//register_schedule(udp) “Ÿì•û
+//register_schedule(udp) è‘£ä½œæ–¹
 
 
-//handle_session_initialize “Ÿì•û
+//handle_session_initialize è‘£ä½œæ–¹
 typedef protocol_module_sessionless::session_thread_data_sessionless session_thread_data;
 typedef std::map< thread::id, session_thread_data*> thread_map;
 void up_thread_func(){}
 void down_thread_func(){}
 void handle_session_initialize_test() {
 
-	// unit_test[5] ‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = ACCEPT
-	// unit_test[5] test data:ƒXƒŒƒbƒh
+	// unit_test[5] é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = ACCEPT
+	// unit_test[5] test data:ã‚¹ãƒ¬ãƒƒãƒ‰
 	boost::thread up_thread(up_thread_func);
 	boost::thread down_thread(down_thread_func);
 
@@ -406,13 +407,13 @@ void handle_session_initialize_test() {
     thread_map::iterator thread_map_iterator;
     thread_map::iterator thread_map_iterator_end;
 
-    //unit_test[6]  ã‚èƒXƒŒƒbƒhƒ}ƒv‹ó‚ÌƒeƒXƒg
-    //unit_test[6] test data:ƒ}ƒv
+    //unit_test[6]  ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒ—ç©ºã®ãƒ†ã‚¹ãƒˆ
+    //unit_test[6] test data:ãƒãƒ—
     thread_map_iterator = sessionless.session_thread_data_map.find(up_thread.get_id());
     thread_map_iterator_end = sessionless.session_thread_data_map.end();
     BOOST_CHECK(thread_map_iterator != thread_map_iterator_end);
 
-    //unit_test[7]  ã‚èƒXƒŒƒbƒhƒ}ƒv‚ÌƒeƒXƒg
+    //unit_test[7]  ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒ—ã®ãƒ†ã‚¹ãƒˆ
     thread_map_iterator = sessionless.session_thread_data_map.find(up_thread.get_id());
     session_thread_data* data = thread_map_iterator->second;
 
@@ -428,11 +429,11 @@ void handle_session_initialize_test() {
     BOOST_CHECK_EQUAL(data->sorryserver_switch_flag, 0);
     BOOST_CHECK_EQUAL(data->realserver_switch_flag, 0);
 
-    //unit_test[8]  ‰º‚èƒXƒŒƒbƒhƒ}ƒv‹ó‚ÌƒeƒXƒg
+    //unit_test[8]  ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒ—ç©ºã®ãƒ†ã‚¹ãƒˆ
     thread_map_iterator = sessionless.session_thread_data_map.find(down_thread.get_id());
     BOOST_CHECK(thread_map_iterator != thread_map_iterator_end);
 
-	//unit_test[9]  ‰º‚èƒXƒŒƒbƒhƒ}ƒv‚ÌƒeƒXƒg
+	//unit_test[9]  ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ãƒãƒ—ã®ãƒ†ã‚¹ãƒˆ
     thread_map_iterator = sessionless.session_thread_data_map.find(down_thread.get_id());
     data = thread_map_iterator->second;
 
@@ -449,11 +450,11 @@ void handle_session_initialize_test() {
     BOOST_CHECK_EQUAL(data->realserver_switch_flag, 0);
 }
 
-//handle_session_finalize “Ÿì•û
+//handle_session_finalize è‘£ä½œæ–¹
 void handle_session_finalize_test() {
 
-	//unit_test[1] ƒZƒbƒVƒ‡ƒ“ƒXƒŒƒbƒh‚É‘Î‰‚·‚éI—¹ˆ—
-	//unit_test[1] test data:ƒZƒbƒVƒ‡ƒ“ƒXƒŒƒbƒh‰Šú‰»
+	//unit_test[1] ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¯¾å¿œã™ã‚‹çµ‚äº†å‡¦ç†
+	//unit_test[1] test data:ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚¹ãƒ¬ãƒƒãƒ‰åˆæœŸåŒ–
 	boost::thread up_thread(up_thread_func);
 	boost::thread down_thread(down_thread_func);
 	protocol_module_sessionless sessionless;
@@ -475,14 +476,14 @@ void handle_session_finalize_test() {
 
 }
 
-//handle_accept “Ÿì•û
+//handle_accept è‘£ä½œæ–¹
 void thread_func_for_accept(){}
 void handle_accept_test() {
 
 	session_thread_data  data;
 	boost::thread accept_thread(thread_func_for_accept);
 
-	//unit_test[13] sorryó‘Ô‚Ìê‡
+	//unit_test[13] sorryçŠ¶æ…‹ã®å ´åˆ
 	//unit_test[13] test data:accept_end_flag=0,sorry_flag=1
 	data.accept_end_flag = 0;
 	data.sorry_flag = 1;
@@ -493,10 +494,10 @@ void handle_accept_test() {
 
 	protocol_module_base::EVENT_TAG ret = obj1.handle_accept(accept_thread.get_id());
 
-	BOOST_CHECK_EQUAL(data.accept_end_flag, 1);//acceptŠ®—¹ƒtƒ‰ƒO‚ğON
-	BOOST_CHECK_EQUAL(ret, protocol_module_base::SORRYSERVER_SELECT);//‘JˆÚæƒXƒe[ƒ^ƒX=SORRYSERVER_SELECT
+	BOOST_CHECK_EQUAL(data.accept_end_flag, 1);//acceptå®Œäº†ãƒ•ãƒ©ã‚°ã‚’ON
+	BOOST_CHECK_EQUAL(ret, protocol_module_base::SORRYSERVER_SELECT);//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹=SORRYSERVER_SELECT
 
-	//unit_test[13] sorryó‘ÔˆÈŠO‚Ìê‡
+	//unit_test[13] sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ
 	data.accept_end_flag = 0;
 	data.sorry_flag = 0;
 
@@ -506,17 +507,17 @@ void handle_accept_test() {
 
 	ret = obj2.handle_accept(accept_thread.get_id());
 
-	BOOST_CHECK_EQUAL(data.accept_end_flag, 1);//acceptŠ®—¹ƒtƒ‰ƒO‚ğON
-	BOOST_CHECK_EQUAL(ret, protocol_module_base::REALSERVER_SELECT);//‘JˆÚæƒXƒe[ƒ^ƒX=REALSERVER_SELECT
+	BOOST_CHECK_EQUAL(data.accept_end_flag, 1);//acceptå®Œäº†ãƒ•ãƒ©ã‚°ã‚’ON
+	BOOST_CHECK_EQUAL(ret, protocol_module_base::REALSERVER_SELECT);//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹=REALSERVER_SELECT
 }
 
 //handle_client_recv
 
-//handle_realserver_select(tcp) ég‰Æƒ
+//handle_realserver_select(tcp) é¦®å®¶ç´”
 void upthread_func_for_handle_realserver_select_test(){}
 void downthread_func_for_handle_realserver_select_test(){}
 
-void schedule_tcp_determinate(//endpoint = Œˆ’è
+void schedule_tcp_determinate(//endpoint = æ±ºå®š
 		const boost::thread::id thread_id,
 		protocol_module_base::rs_list_itr_func_type rs_list_begin,
 		protocol_module_base::rs_list_itr_func_type rs_list_end,
@@ -525,7 +526,7 @@ void schedule_tcp_determinate(//endpoint = Œˆ’è
 	rs_endpoint.resize(1234);
 }
 
-void schedule_tcp_nodeterminate(//endpoint = –¢Œˆ’è
+void schedule_tcp_nodeterminate(//endpoint = æœªæ±ºå®š
 		const boost::thread::id thread_id,
 		protocol_module_base::rs_list_itr_func_type rs_list_begin,
 		protocol_module_base::rs_list_itr_func_type rs_list_end,
@@ -534,7 +535,7 @@ void schedule_tcp_nodeterminate(//endpoint = –¢Œˆ’è
 }
 void handle_realserver_select_test(){
 
-	//unit_test[6] endpoint = Œˆ’è
+	//unit_test[6] endpoint = æ±ºå®š
 	protocol_module_sessionless obj1;
 
 	boost::thread upt1(upthread_func_for_handle_realserver_select_test);
@@ -559,7 +560,7 @@ void handle_realserver_select_test(){
 	BOOST_CHECK(datadown.recive_data_map.find(ep1) != datadown.recive_data_map.end());
 	BOOST_CHECK_EQUAL(ret, protocol_module_base::CLIENT_RECV);
 
-	//unit_test[7] endpoint = –¢Œˆ’è
+	//unit_test[7] endpoint = æœªæ±ºå®š
 	protocol_module_sessionless obj2;
 
 	boost::thread upt2(upthread_func_for_handle_realserver_select_test);
@@ -581,9 +582,9 @@ void handle_realserver_select_test(){
 
 //handle_realserver_connect
 
-//handle_realserver_connection_fail ég‰Æƒ
+//handle_realserver_connection_fail é¦®å®¶ç´”
 void handle_realserver_connection_fail_test(){
-	//unit_test[8] I—¹ƒtƒ‰ƒO,‘JˆÚæƒXƒe[ƒ^ƒX
+	//unit_test[8] çµ‚äº†ãƒ•ãƒ©ã‚°,é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
 	protocol_module_sessionless obj;
 
 	boost::thread t;
@@ -596,16 +597,16 @@ void handle_realserver_connection_fail_test(){
 
 	ret = obj.handle_realserver_connection_fail(t.get_id(),ep);
 
-	BOOST_CHECK_EQUAL(data.end_flag, 1);		//I—¹ƒtƒ‰ƒO‚ğON
+	BOOST_CHECK_EQUAL(data.end_flag, 1);		//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_DISCONNECT, ret);		//status = CLIENT_DISCONNECT
 }
 
-//handle_realserver_send “Ÿì•û
+//handle_realserver_send è‘£ä½œæ–¹
 
-//handle_sorryserver_select ég‰Æƒ
+//handle_sorryserver_select é¦®å®¶ç´”
 void handle_sorryserver_select_test(){
 
-	//unit_test[9] ŠY“–ƒXƒŒƒbƒh‚Ì‘—M‰Â”\ƒf[ƒ^‚ğæ“¾‚·‚é,‰º‚èƒXƒŒƒbƒh‚ÉsorryserveróMƒoƒbƒtƒ@‚ğŠm•Û‚·‚é,‘—Mæendpoint,‘JˆÚæƒXƒe[ƒ^ƒX
+	//unit_test[9] è©²å½“ã‚¹ãƒ¬ãƒƒãƒ‰ã®é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—ã™ã‚‹,ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã«sorryserverå—ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚’ç¢ºä¿ã™ã‚‹,é€ä¿¡å…ˆendpoint,é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
 	protocol_module_sessionless obj;
 
 	boost::thread upt,downt;
@@ -624,7 +625,7 @@ void handle_sorryserver_select_test(){
 	datadown.pair_thread_id = upt.get_id();
 	datadown.recive_data_map.clear();
 
-	//send_status‘—M‰Â”\ƒf[ƒ^
+	//send_statusé€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿
 	protocol_module_sessionless::send_status st;
 	st.status = protocol_module_sessionless::SEND_OK;
 	st.send_possible_size = 2;
@@ -632,8 +633,8 @@ void handle_sorryserver_select_test(){
 
 	ret = obj.handle_sorryserver_select(upt.get_id(), ep);
 
-	BOOST_CHECK(!datadown.recive_data_map.empty());		//‰º‚èƒXƒŒƒbƒh‚ÉsorryserveróMƒoƒbƒtƒ@‚ğŠm•Û‚·‚é
-	//BOOST_CHECK_EQUAL(ep, dataup.sorry_endpoint);	// ‘—Mæendpoint‚Éendpoint‚ğİ’è‚·‚é
+	BOOST_CHECK(!datadown.recive_data_map.empty());		//ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã«sorryserverå—ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚’ç¢ºä¿ã™ã‚‹
+	//BOOST_CHECK_EQUAL(ep, dataup.sorry_endpoint);	// é€ä¿¡å…ˆendpointã«endpointã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(protocol_module_base::SORRYSERVER_CONNECT, ret);	//status = SORRYSERVER_CONNECT
 }
 
@@ -653,7 +654,7 @@ void handle_sorryserver_select_test(){
 
 //handle_client_connection_check
 void handle_client_connection_check_test(){
-	//unit_test[10] ‘—Mƒoƒbƒtƒ@ƒTƒCƒY@>@‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY
+	//unit_test[10] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºã€€>ã€€é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 	protocol_module_sessionless obj1;
 
 	boost::thread t1;
@@ -679,18 +680,18 @@ void handle_client_connection_check_test(){
 	data1.recive_data_map[ep1] = rd1;
 
 	ret = obj1.handle_client_connection_check(t1.get_id(),sbf1,d1);
-	//‘—M‰Â”\ƒf[ƒ^‚ğæ“ª‚©‚ç‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY•ªA‘—Mƒoƒbƒtƒ@‚ÉƒRƒs[‚·‚é
+	//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚’å…ˆé ­ã‹ã‚‰é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºåˆ†ã€é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	std::string chk1 = "bc";
 	BOOST_CHECK_EQUAL(chk1.c_str(),sbf1.data());
-	//‘—MÏƒf[ƒ^ƒTƒCƒY‚É‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚ğİ’è‚·‚é
+	//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(data1.recive_data_map[ep1].send_status_list.rbegin()->send_end_size, 2);
-	//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+	//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(data1.recive_data_map[ep1].send_status_list.rbegin()->send_possible_size, 0);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_SEND, ret);
 
 
-	//unit_test[11] ‘—Mƒoƒbƒtƒ@ƒTƒCƒY@<@‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY
+	//unit_test[11] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºã€€<ã€€é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 	protocol_module_sessionless obj2;
 
 	boost::thread t2;
@@ -715,18 +716,18 @@ void handle_client_connection_check_test(){
 	data2.recive_data_map[ep2] = rd2;
 
 	ret = obj2.handle_client_connection_check(t2.get_id(),sbf2,d2);
-	//‘—M‰Â”\ƒf[ƒ^‚ğæ“ª‚©‚ç‘—Mƒoƒbƒtƒ@ƒTƒCƒY•ªA‘—Mƒoƒbƒtƒ@‚ÉƒRƒs[‚·‚é
+	//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚’å…ˆé ­ã‹ã‚‰é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºåˆ†ã€é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	std::string chk2 = "bcdef";
 	BOOST_CHECK_EQUAL(chk2.c_str(),sbf2.data());
-	//‘—MÏƒf[ƒ^ƒTƒCƒY‚É‘—Mƒoƒbƒtƒ@ƒTƒCƒY‚ğİ’è‚·‚é
+	//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 	int sbfsize = sbf2.max_size();
 	BOOST_CHECK_EQUAL(data2.recive_data_map[ep2].send_status_list.rbegin()->send_end_size, sbfsize);
-	//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚©‚ç‘—Mƒoƒbƒtƒ@ƒTƒCƒY‚ğŒ¸Z‚·‚é
+	//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‹ã‚‰é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 	BOOST_CHECK_EQUAL(5000-sbfsize,data2.recive_data_map[ep2].send_status_list.rbegin()->send_possible_size);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_SEND,ret);
 
-	//unit_test[10] ‘—Mƒoƒbƒtƒ@ƒTƒCƒY@=@‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY
+	//unit_test[10] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºã€€=ã€€é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 	protocol_module_sessionless obj3;
 
 	boost::thread t3;
@@ -751,15 +752,15 @@ void handle_client_connection_check_test(){
 	data3.recive_data_map[ep3] = rd3;
 
 	ret = obj3.handle_client_connection_check(t3.get_id(),sbf3,d3);
-	//‘—M‰Â”\ƒf[ƒ^‚ğæ“ª‚©‚ç‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY•ªA‘—Mƒoƒbƒtƒ@‚ÉƒRƒs[‚·‚é
+	//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚’å…ˆé ­ã‹ã‚‰é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºåˆ†ã€é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	char *chk3;
 	memset(chk3,96,4095);
 	BOOST_CHECK_EQUAL(chk3, sbf3.data());
-	//‘—MÏƒf[ƒ^ƒTƒCƒY‚É‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚ğİ’è‚·‚é
+	//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(data3.recive_data_map[ep3].send_status_list.rbegin()->send_end_size, 4096);
-	//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+	//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(data3.recive_data_map[ep3].send_status_list.rbegin()->send_possible_size, 0);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_SEND, ret);
 
 }
@@ -781,9 +782,9 @@ void handle_client_select_test(){
 
 //handle_client_send
 
-//handle_client_disconnect ég‰Æƒ
+//handle_client_disconnect é¦®å®¶ç´”
 void handle_client_disconnect_test(){
-	//unit_test[12] ‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+	//unit_test[12] é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 	protocol_module_sessionless obj;
 
 	protocol_module_sessionless::EVENT_TAG ret;
@@ -793,7 +794,7 @@ void handle_client_disconnect_test(){
 	BOOST_CHECK_EQUAL(protocol_module_base::FINALIZE,ret);
 }
 
-//handle_sorry_enable ”n‰‰
+//handle_sorry_enable é¦¬ç¿ ç¿ 
 void thread_t(){}
 void handle_sorry_enable_test() {
 	protocol_module_sessionless sessionless;
@@ -808,20 +809,20 @@ void handle_sorry_enable_test() {
 	boost::asio::ip::tcp::endpoint endpoint;
 	boost::asio::ip::tcp::endpoint endpoint_down;
 
-	// ã‚èƒXƒŒƒbƒh‚Ìê‡
+	// ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ
 	thread_data->thread_division = 0;
 	thread_data->thread_id = thread_id_up;
 	sessionless.session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data*>(thread_id_up,thread_data));
 
-	// unit_test[26] sorryó‘Ô‚ğON,status = protocol_module_sessionless::ACCEPT
-	// unit_test[26] test data:acceptŠ®—¹ƒtƒ‰ƒOOFF‚Ìê‡
+	// unit_test[26] sorryçŠ¶æ…‹ã‚’ON,status = protocol_module_sessionless::ACCEPT
+	// unit_test[26] test data:acceptå®Œäº†ãƒ•ãƒ©ã‚°OFFã®å ´åˆ
 	sessionless.session_thread_data_map[thread_id_up]->accept_end_flag = 0;
 	status = sessionless.handle_sorry_enable(thread_id_up);
 	BOOST_CHECK_EQUAL(sessionless.session_thread_data_map[thread_id_up]->sorry_flag,1);
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::ACCEPT);
 
 	// unit_test[27] status =SORRYSERVER_SELECT
-	// unit_test[27] test data:acceptŠ®—¹ƒtƒ‰ƒOON‚Ìê‡,sorryó‘Ô‚Ìê‡,‘—M‰Â”\ƒf[ƒ^‚ ‚è‚Ìê‡ list 1Œ
+	// unit_test[27] test data:acceptå®Œäº†ãƒ•ãƒ©ã‚°ONã®å ´åˆ,sorryçŠ¶æ…‹ã®å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Šã®å ´åˆ list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_up]->accept_end_flag = 1;
 	sessionless.session_thread_data_map[thread_id_up]->sorry_flag = 1;
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
@@ -833,7 +834,7 @@ void handle_sorry_enable_test() {
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
 	// unit_test[28] status =SORRYSERVER_SELECT
-	// unit_test[28] test data:‘—M‰Â”\ƒf[ƒ^‚ ‚è‚Ìê‡ list 2Œ 1Œ‚ ‚è
+	// unit_test[28] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Šã®å ´åˆ list 2ä»¶ 1ä»¶ã‚ã‚Š
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	sendstatus.send_possible_size = 10;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -845,7 +846,7 @@ void handle_sorry_enable_test() {
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
 	// unit_test[29] status =CLIENT_RECV
-	// unit_test[29] test data:‘—M‰Â”\ƒf[ƒ^‚È‚µ list 3Œ
+	// unit_test[29] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
@@ -857,8 +858,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::CLIENT_RECV);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// unit_test[30] I—¹ƒtƒ‰ƒO‚ğON,status = REALSERVER_DISCONNECT
-	// unit_test[30] test data:sorryó‘ÔˆÈŠO‚Ìê‡,‘—MŒp‘±ƒf[ƒ^‚ ‚è list 1Œ
+	// unit_test[30] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = REALSERVER_DISCONNECT
+	// unit_test[30] test data:sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ,é€ä¿¡ç¶™ç¶šãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_up]->sorry_flag = 0;
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -868,8 +869,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::REALSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// unit_test[31] I—¹ƒtƒ‰ƒO‚ğON,status = REALSERVER_DISCONNECT
-	// unit_test[31] test data:‘—MŒp‘±ƒf[ƒ^‚ ‚è list 2Œ 1Œ‚ ‚è
+	// unit_test[31] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = REALSERVER_DISCONNECT
+	// unit_test[31] test data:é€ä¿¡ç¶™ç¶šãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 2ä»¶ 1ä»¶ã‚ã‚Š
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_NG;
@@ -880,8 +881,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::REALSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// unit_test[32] sorryserverØ‘Ö’†ƒtƒ‰ƒOON,sorryó‘Ô‚ğON,status = REALSERVER_DISCONNECT
-	// unit_test[32] test data:‘—MŒp‘±ƒf[ƒ^‚È‚µ list 3Œ
+	// unit_test[32] sorryserveråˆ‡æ›¿ä¸­ãƒ•ãƒ©ã‚°ON,sorryçŠ¶æ…‹ã‚’ON,status = REALSERVER_DISCONNECT
+	// unit_test[32] test data:é€ä¿¡ç¶™ç¶šãƒ‡ãƒ¼ã‚¿ãªã— list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_NG;
@@ -895,14 +896,14 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::REALSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// ‰º‚èƒXƒŒƒbƒh‚Ìê‡
+	// ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ
 	sessionless.session_thread_data_map.clear();
 	thread_data->thread_division = 1;
 	thread_data->thread_id = thread_id_down;
 	sessionless.session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data*>(thread_id_down,thread_data));
 
 	// unit_test[33] status =CLIENT_CONNECTION_CHECK
-	// unit_test[33] test data:sorryó‘Ô‚Ìê‡,‘—M‰Â”\ƒf[ƒ^‚ ‚è list 1Œ
+	// unit_test[33] test data:sorryçŠ¶æ…‹ã®å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_down]->sorry_flag = 1;
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	sendstatus.send_possible_size = 10;
@@ -913,7 +914,7 @@ void handle_sorry_enable_test() {
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[34] status =CLIENT_CONNECTION_CHECK
-	// unit_test[34] test data:‘—M‰Â”\ƒf[ƒ^‚ ‚è list 2Œ 1Œ‚ ‚è
+	// unit_test[34] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 2ä»¶ 1ä»¶ã‚ã‚Š
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
@@ -925,7 +926,7 @@ void handle_sorry_enable_test() {
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[35] status =SORRYSERVER_RECV
-	// unit_test[35] test data:‘—M‰Â”\ƒf[ƒ^‚È‚µ list 3Œ
+	// unit_test[35] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
@@ -937,8 +938,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::SORRYSERVER_RECV);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[36] I—¹ƒtƒ‰ƒO‚ğON,status = REALSERVER_DISCONNECT
-	// unit_test[36] test data:sorryó‘ÔˆÈŠO‚Ìê‡,‘—M•s‰Âƒf[ƒ^‚ ‚è list 1Œ
+	// unit_test[36] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = REALSERVER_DISCONNECT
+	// unit_test[36] test data:sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ,é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_down]->sorry_flag = 0;
 	sendstatus.status = protocol_module_sessionless::SEND_NG;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -948,8 +949,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::REALSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[37] I—¹ƒtƒ‰ƒO‚ğON,status = REALSERVER_DISCONNECT
-	// unit_test[37] test data:‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚·‚éê‡ list 2Œ
+	// unit_test[37] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = REALSERVER_DISCONNECT
+	// unit_test[37] test data:é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã™ã‚‹å ´åˆ list 2ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	sendstatus.send_rest_size = 10;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -962,8 +963,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::REALSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[38] sorryó‘Ô‚ğON
-	// unit_test[38] test data:‘—M•s‰Âƒf[ƒ^‚È‚µ@‚©‚Â@‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚µ‚È‚¢ê‡ list 1Œ
+	// unit_test[38] sorryçŠ¶æ…‹ã‚’ON
+	// unit_test[38] test data:é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ãªã—ã€€ã‹ã¤ã€€é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã—ãªã„å ´åˆ list 1ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	sendstatus.send_rest_size = 0;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -973,7 +974,7 @@ void handle_sorry_enable_test() {
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[39]  status = SORRYSERVER_RECV
-	// unit_test[39] test data:‘—M•s‰Âƒf[ƒ^‚È‚µ@‚©‚Â@‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚µ‚È‚¢ê‡,‘—M‰Â”\ƒf[ƒ^‚È‚µ list 1Œ
+	// unit_test[39] test data:é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ãªã—ã€€ã‹ã¤ã€€é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã—ãªã„å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— list 1ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	sendstatus.send_rest_size = 0;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -982,8 +983,8 @@ void handle_sorry_enable_test() {
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::SORRYSERVER_RECV);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[40] ‘—M‰Â”\ƒf[ƒ^‚ ‚è status = CLIENT_CONNECTION_CHECK
-	// unit_test[40] test data:‘—M•s‰Âƒf[ƒ^‚È‚µ@‚©‚Â@‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚µ‚È‚¢ê‡,‘—M‰Â”\ƒf[ƒ^‚ ‚è list 3Œ
+	// unit_test[40] é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š status = CLIENT_CONNECTION_CHECK
+	// unit_test[40] test data:é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ãªã—ã€€ã‹ã¤ã€€é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã—ãªã„å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	sendstatus.send_rest_size = 0;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -999,7 +1000,7 @@ void handle_sorry_enable_test() {
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[41] status =FINALIZE
-	// unit_test[41] test data:thread_id‘Î‰‚Ìsession_thread_data‚È‚µ
+	// unit_test[41] test data:thread_idå¯¾å¿œã®session_thread_dataãªã—
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	receivedata.send_status_list.push_back(sendstatus);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint_down,receivedata));
@@ -1009,7 +1010,7 @@ void handle_sorry_enable_test() {
 
 }
 
-//handle_sorry_disable ”n‰‰
+//handle_sorry_disable é¦¬ç¿ ç¿ 
 void handle_sorry_disable_test(){
 	protocol_module_sessionless sessionless;
 	protocol_module_sessionless::EVENT_TAG status;
@@ -1023,20 +1024,20 @@ void handle_sorry_disable_test(){
 	boost::asio::ip::tcp::endpoint endpoint;
 	boost::asio::ip::tcp::endpoint endpoint_down;
 
-	// ã‚èƒXƒŒƒbƒh‚Ìê‡
+	// ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ
 	thread_data->thread_division = 0;
 	thread_data->thread_id = thread_id_up;
 	sessionless.session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data*>(thread_id_up,thread_data));
 
-	// unit_test[42] sorryó‘Ô‚ğOFF,status =ACCEPT
-	// unit_test[42] test data:acceptŠ®—¹ƒtƒ‰ƒOOFF‚Ìê‡
+	// unit_test[42] sorryçŠ¶æ…‹ã‚’OFF,status =ACCEPT
+	// unit_test[42] test data:acceptå®Œäº†ãƒ•ãƒ©ã‚°OFFã®å ´åˆ
 	sessionless.session_thread_data_map[thread_id_up]->accept_end_flag = 0;
 	status = sessionless.handle_sorry_disable(thread_id_up);
 	BOOST_CHECK_EQUAL(sessionless.session_thread_data_map[thread_id_up]->sorry_flag,0);
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::ACCEPT);
 
-	// unit_test[43] I—¹ƒtƒ‰ƒO‚ğON,status = SORRYSERVER_DISCONNECT
-	// unit_test[43] test data:acceptŠ®—¹ƒtƒ‰ƒOON‚Ìê‡,sorryó‘Ô‚Ìê‡,‘—MŒp‘±ƒf[ƒ^‚ ‚è list 1Œ
+	// unit_test[43] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = SORRYSERVER_DISCONNECT
+	// unit_test[43] test data:acceptå®Œäº†ãƒ•ãƒ©ã‚°ONã®å ´åˆ,sorryçŠ¶æ…‹ã®å ´åˆ,é€ä¿¡ç¶™ç¶šãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_up]->accept_end_flag = 1;
 	sessionless.session_thread_data_map[thread_id_up]->sorry_flag = 1;
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
@@ -1047,8 +1048,8 @@ void handle_sorry_disable_test(){
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::SORRYSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// unit_test[44] I—¹ƒtƒ‰ƒO‚ğON,status = SORRYSERVER_DISCONNECT
-	// unit_test[44] test data:‘—MŒp‘±ƒf[ƒ^‚ ‚è list 2Œ 1Œ‚ ‚è
+	// unit_test[44] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = SORRYSERVER_DISCONNECT
+	// unit_test[44] test data:é€ä¿¡ç¶™ç¶šãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 2ä»¶ 1ä»¶ã‚ã‚Š
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_NG;
@@ -1059,8 +1060,8 @@ void handle_sorry_disable_test(){
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::SORRYSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// unit_test[45] realserverØ‘Ö’†,sorryó‘Ô‚ğOFF,status = SORRYSERVER_DISCONNECT
-	// unit_test[45] test data:‘—MŒp‘±ƒf[ƒ^‚È‚µ list 3Œ
+	// unit_test[45] realserveråˆ‡æ›¿ä¸­,sorryçŠ¶æ…‹ã‚’OFF,status = SORRYSERVER_DISCONNECT
+	// unit_test[45] test data:é€ä¿¡ç¶™ç¶šãƒ‡ãƒ¼ã‚¿ãªã— list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_NG;
@@ -1075,7 +1076,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
 	// unit_test[46] status =REALSERVER_SELECT
-	// unit_test[46] test data:sorryó‘ÔˆÈŠO‚Ìê‡,‘—M‰Â”\ƒf[ƒ^‚ ‚è‚Ìê‡ list 1Œ
+	// unit_test[46] test data:sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Šã®å ´åˆ list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_up]->sorry_flag = 0;
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1085,7 +1086,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
 	// unit_test[47] status =REALSERVER_SELECT
-	// unit_test[47] test data:‘—M‰Â”\ƒf[ƒ^‚ ‚è‚Ìê‡ list 2Œ 1Œ‚ ‚è
+	// unit_test[47] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Šã®å ´åˆ list 2ä»¶ 1ä»¶ã‚ã‚Š
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_END;
@@ -1096,7 +1097,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
 	// unit_test[48] status =CLIENT_RECV
-	// unit_test[48] test data:‘—M‰Â”\ƒf[ƒ^‚È‚µ list 3Œ
+	// unit_test[48] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
@@ -1108,14 +1109,14 @@ void handle_sorry_disable_test(){
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::CLIENT_RECV);
 	sessionless.session_thread_data_map[thread_id_up]->recive_data_map.clear();
 
-	// ‰º‚èƒXƒŒƒbƒh‚Ìê‡
+	// ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ
 	sessionless.session_thread_data_map.clear();
 	thread_data->thread_division = 1;
 	thread_data->thread_id = thread_id_down;
 	sessionless.session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data*>(thread_id_down,thread_data));
 
-	// unit_test[49] I—¹ƒtƒ‰ƒO‚ğON,status = SORRYSERVER_DISCONNECT
-	// unit_test[49] test data:sorryó‘Ô‚Ìê‡,‘—M•s‰Âƒf[ƒ^‚ ‚è list 1Œ
+	// unit_test[49] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = SORRYSERVER_DISCONNECT
+	// unit_test[49] test data:sorryçŠ¶æ…‹ã®å ´åˆ,é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_down]->sorry_flag = 1;
 	sendstatus.status = protocol_module_sessionless::SEND_NG;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1125,8 +1126,8 @@ void handle_sorry_disable_test(){
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::SORRYSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[50] I—¹ƒtƒ‰ƒO‚ğON,status = SORRYSERVER_DISCONNECT
-	// unit_test[50] test data:‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚·‚éê‡ list 2Œ
+	// unit_test[50] çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,status = SORRYSERVER_DISCONNECT
+	// unit_test[50] test data:é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã™ã‚‹å ´åˆ list 2ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	sendstatus.send_rest_size = 10;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1139,8 +1140,8 @@ void handle_sorry_disable_test(){
 	BOOST_CHECK_EQUAL(status,protocol_module_sessionless::SORRYSERVER_DISCONNECT);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[51] sorryó‘Ô‚ğOFF
-	// unit_test[51] test data:‘—M•s‰Âƒf[ƒ^‚È‚µ@‚©‚Â@‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚µ‚È‚¢ê‡ list 1Œ
+	// unit_test[51] sorryçŠ¶æ…‹ã‚’OFF
+	// unit_test[51] test data:é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ãªã—ã€€ã‹ã¤ã€€é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã—ãªã„å ´åˆ list 1ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	sendstatus.send_rest_size = 0;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1149,8 +1150,8 @@ void handle_sorry_disable_test(){
 	BOOST_CHECK_EQUAL(sessionless.session_thread_data_map[thread_id_down]->sorry_flag,0);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
-	// unit_test[52] sorryó‘Ô‚ğOFF,‘—M‰Â”\ƒf[ƒ^‚È‚µ status = REALSERVER_RECV
-	// unit_test[52] test data:‘—M•s‰Âƒf[ƒ^‚È‚µ@‚©‚Â@‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚µ‚È‚¢ê‡,‘—M‰Â”\ƒf[ƒ^‚È‚µ list 1Œ
+	// unit_test[52] sorryçŠ¶æ…‹ã‚’OFF,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— status = REALSERVER_RECV
+	// unit_test[52] test data:é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ãªã—ã€€ã‹ã¤ã€€é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã—ãªã„å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— list 1ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	sendstatus.send_rest_size = 0;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1160,7 +1161,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[53] status = CLIENT_CONNECTION_CHECK
-	// unit_test[53] test data:‘—M•s‰Âƒf[ƒ^‚È‚µ@‚©‚Â@‘—Mƒf[ƒ^cƒTƒCƒY „ ‚O@‚ª‘¶İ‚µ‚È‚¢ê‡,‘—M‰Â”\ƒf[ƒ^‚ ‚è list 3Œ
+	// unit_test[53] test data:é€ä¿¡ä¸å¯ãƒ‡ãƒ¼ã‚¿ãªã—ã€€ã‹ã¤ã€€é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º ï¼ ï¼ã€€ãŒå­˜åœ¨ã—ãªã„å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	sendstatus.send_rest_size = 0;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1176,7 +1177,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[54] status =CLIENT_CONNECTION_CHECK
-	// unit_test[54] test data:sorryó‘ÔˆÈŠO‚Ìê‡,‘—M‰Â”\ƒf[ƒ^‚ ‚è list 1Œ
+	// unit_test[54] test data:sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ,é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 1ä»¶
 	sessionless.session_thread_data_map[thread_id_down]->sorry_flag = 0;
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	receivedata.send_status_list.push_back(sendstatus);
@@ -1186,7 +1187,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[55] status =CLIENT_CONNECTION_CHECK
-	// unit_test[55] test data:‘—M‰Â”\ƒf[ƒ^‚ ‚è list 2Œ 1Œ‚ ‚è
+	// unit_test[55] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š list 2ä»¶ 1ä»¶ã‚ã‚Š
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
@@ -1197,7 +1198,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[56] status =REALSERVER_RECV
-	// unit_test[56] test data:‘—M‰Â”\ƒf[ƒ^‚È‚µ list 3Œ
+	// unit_test[56] test data:é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã— list 3ä»¶
 	sendstatus.status = protocol_module_sessionless::SEND_END;
 	receivedata.send_status_list.push_back(sendstatus);
 	sendstatus.status = protocol_module_sessionless::SEND_CONTINUE;
@@ -1210,7 +1211,7 @@ void handle_sorry_disable_test(){
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.clear();
 
 	// unit_test[57] status =FINALIZE
-	// unit_test[57] test data:thread_id‘Î‰‚Ìsession_thread_data‚È‚µ
+	// unit_test[57] test data:thread_idå¯¾å¿œã®session_thread_dataãªã—
 	sendstatus.status = protocol_module_sessionless::SEND_OK;
 	receivedata.send_status_list.push_back(sendstatus);
 	sessionless.session_thread_data_map[thread_id_down]->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint_down,receivedata));
@@ -1222,7 +1223,7 @@ void handle_sorry_disable_test(){
 //handle_realserver_disconnect(tcp)
 void handle_realserver_disconnect_test(){
 
-	//unit_test[13] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªON‚Ìê‡
+	//unit_test[13] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒONã®å ´åˆ
 	protocol_module_sessionless obj1;
 
 	boost::thread t1;
@@ -1231,17 +1232,17 @@ void handle_realserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data1;
 	obj1.session_thread_data_map[t1.get_id()] = &data1;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data1.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªON‚Ìê‡ 1->on
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒONã®å ´åˆ 1->on
 	data1.end_flag = 1;
 
 	ret = obj1.handle_realserver_disconnect(t1.get_id(), ep1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_RECV
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_RECV
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, ret);
 
 
-	//unit_test[14] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡->sorryserverØ‘Ö’†‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//unit_test[14] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ->sorryserveråˆ‡æ›¿ä¸­ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless obj2;
 
 	boost::thread t2;
@@ -1249,13 +1250,13 @@ void handle_realserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data2;
 	obj2.session_thread_data_map[t2.get_id()] = &data2;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data2.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡ 0->off
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ 0->off
 	data2.end_flag = 0;
-	//make sorryserverØ‘Ö’†‚Ìê‡ 1->Ø‘Ö’†
+	//make sorryserveråˆ‡æ›¿ä¸­ã®å ´åˆ 1->åˆ‡æ›¿ä¸­
 	data2.sorryserver_switch_flag = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless::send_status st2;
 	st2.status = protocol_module_sessionless::SEND_OK;
 	st2.send_possible_size = 100;
@@ -1263,11 +1264,11 @@ void handle_realserver_disconnect_test(){
 
 
 	ret = obj2.handle_realserver_disconnect(t2.get_id(),ep2);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = SORRYSERVER_SELECT
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = SORRYSERVER_SELECT
 	BOOST_CHECK_EQUAL(protocol_module_base::SORRYSERVER_SELECT, ret);
 
 
-	//unit_test[15] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡->sorryserverØ‘Ö’†‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//unit_test[15] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ->sorryserveråˆ‡æ›¿ä¸­ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless obj3;
 
 	boost::thread t3;
@@ -1275,24 +1276,24 @@ void handle_realserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data3;
 	obj3.session_thread_data_map[t3.get_id()] = &data3;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data3.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡ 0->off
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ 0->off
 	data3.end_flag = 0;
-	//make sorryserverØ‘Ö’†‚Ìê‡ 1->Ø‘Ö’†
+	//make sorryserveråˆ‡æ›¿ä¸­ã®å ´åˆ 1->åˆ‡æ›¿ä¸­
 	data3.sorryserver_switch_flag = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless::send_status st3;
 	//send_possible=0
 	st3.send_possible_size = 0;
 	data3.recive_data_map[ep3].send_status_list.push_back(st3);
 
 	ret = obj3.handle_realserver_disconnect(t3.get_id(), ep3);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_RECV
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_RECV
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, ret);
 
 
-	//unit_test[16] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡->sorryserverØ‘Ö’†‚Å‚È‚¢ê‡
+	//unit_test[16] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ->sorryserveråˆ‡æ›¿ä¸­ã§ãªã„å ´åˆ
 	protocol_module_sessionless obj4;
 
 	boost::thread t4;
@@ -1300,21 +1301,21 @@ void handle_realserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data4;
 	obj4.session_thread_data_map[t4.get_id()] = &data4;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data4.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡ 0->off
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ 0->off
 	data4.end_flag = 0;
-	//make sorryserverØ‘Ö’†‚Å‚È‚¢ê‡ 0->Ø‘Ö’†‚Å‚È‚¢
+	//make sorryserveråˆ‡æ›¿ä¸­ã§ãªã„å ´åˆ 0->åˆ‡æ›¿ä¸­ã§ãªã„
 	data4.sorryserver_switch_flag = 0;
 
 	ret = obj4.handle_realserver_disconnect(t4.get_id(),ep4);
-	//I—¹ƒtƒ‰ƒO‚ğON
+	//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(data4.end_flag, 1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_RECV
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_RECV
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, ret);
 
 
-	//unit_test[17] ‰º‚èƒXƒŒƒbƒh‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//unit_test[17] ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless obj5;
 
 	boost::thread t5;
@@ -1322,9 +1323,9 @@ void handle_realserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data5;
 	obj5.session_thread_data_map[t5.get_id()] = &data5;
-	//make ‰º‚èƒXƒŒƒbƒh‚Ìê‡ 1->‰º‚èƒXƒŒƒbƒh
+	//make ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 1->ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data5.thread_division = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless::send_status st5;
 	st5.status = protocol_module_sessionless::SEND_OK;
 	//send_possible>0
@@ -1332,13 +1333,13 @@ void handle_realserver_disconnect_test(){
 	data5.recive_data_map[ep5].send_status_list.push_back(st5);
 
 	ret = obj5.handle_realserver_disconnect(t5.get_id(), ep5);
-	//I—¹ƒtƒ‰ƒO‚ğON
+	//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(data5.end_flag, 1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_CONNECTION_CHECK
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_CONNECTION_CHECK
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_CONNECTION_CHECK, ret);
 
 
-	//unit_test[18] ‰º‚èƒXƒŒƒbƒh‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//unit_test[18] ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless obj6;
 
 	boost::thread t6;
@@ -1346,27 +1347,27 @@ void handle_realserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data6;
 	obj6.session_thread_data_map[t6.get_id()] = &data6;
-	//make ‰º‚èƒXƒŒƒbƒh‚Ìê‡ 1->‰º‚èƒXƒŒƒbƒh
+	//make ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 1->ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data6.thread_division = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless::send_status st6;
 	//send_possible>0
 	st5.send_possible_size = 0;
 	data6.recive_data_map[ep6].send_status_list.push_back(st6);
 
 	ret = obj6.handle_realserver_disconnect(t6.get_id(), ep6);
-	//I—¹ƒtƒ‰ƒO‚ğON
+	//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(data6.end_flag, 1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_DISCONNECT
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_DISCONNECT
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_DISCONNECT, ret);
 }
 
 //handle_realserver_disconnect(udp)
 
-//handle_sorryserver_disconnect ég‰Æƒ
+//handle_sorryserver_disconnect é¦®å®¶ç´”
 void handle_sorryserver_disconnect_test(){
 
-	//unit_test[19] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªON‚Ìê‡
+	//unit_test[19] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒONã®å ´åˆ
 	protocol_module_sessionless obj1;
 
 	boost::thread t1;
@@ -1375,17 +1376,17 @@ void handle_sorryserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data1;
 	obj1.session_thread_data_map[t1.get_id()] = &data1;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data1.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªON‚Ìê‡ 1->on
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒONã®å ´åˆ 1->on
 	data1.end_flag = 1;
 
 	ret = obj1.handle_realserver_disconnect(t1.get_id(), ep1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_RECV
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_RECV
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, ret);
 
 
-	//unit_test[20] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡->realserverØ‘Ö’†‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//unit_test[20] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ->realserveråˆ‡æ›¿ä¸­ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless obj2;
 
 	boost::thread t2;
@@ -1393,13 +1394,13 @@ void handle_sorryserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data2;
 	obj2.session_thread_data_map[t2.get_id()] = &data2;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data2.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡ 0->off
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ 0->off
 	data2.end_flag = 0;
-	//make realserverØ‘Ö’†‚Ìê‡ 1->Ø‘Ö’†
+	//make realserveråˆ‡æ›¿ä¸­ã®å ´åˆ 1->åˆ‡æ›¿ä¸­
 	data2.realserver_switch_flag = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless::send_status st2;
 	st2.status = protocol_module_sessionless::SEND_OK;
 	//send_possible>0
@@ -1407,11 +1408,11 @@ void handle_sorryserver_disconnect_test(){
 	data2.recive_data_map[ep2].send_status_list.push_back(st2);
 
 	ret = obj2.handle_realserver_disconnect(t2.get_id(), ep2);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = REALSERVER_SELECT
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = REALSERVER_SELECT
 	BOOST_CHECK_EQUAL(protocol_module_base::REALSERVER_SELECT, ret);
 
 
-	//unit_test[21] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡->realserverØ‘Ö’†‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//unit_test[21] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ->realserveråˆ‡æ›¿ä¸­ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless obj3;
 
 	boost::thread t3;
@@ -1419,24 +1420,24 @@ void handle_sorryserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data3;
 	obj3.session_thread_data_map[t3.get_id()] = &data3;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data3.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡ 0->off
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ 0->off
 	data3.end_flag = 0;
-	//make realserverØ‘Ö’†‚Ìê‡ 1->Ø‘Ö’†
+	//make realserveråˆ‡æ›¿ä¸­ã®å ´åˆ 1->åˆ‡æ›¿ä¸­
 	data3.realserver_switch_flag = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless::send_status st3;
 	//send_possible=0
 	st3.send_possible_size = 0;
 	data3.recive_data_map[ep3].send_status_list.push_back(st3);
 
 	ret = obj3.handle_realserver_disconnect(t3.get_id(), ep3);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_RECV
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_RECV
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, ret);
 
 
-	//unit_test[22] ã‚èƒXƒŒƒbƒh‚Ìê‡->I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡->realserverØ‘Ö’†‚Å‚È‚¢ê‡
+	//unit_test[22] ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ->realserveråˆ‡æ›¿ä¸­ã§ãªã„å ´åˆ
 	protocol_module_sessionless obj4;
 
 	boost::thread t4;
@@ -1444,21 +1445,21 @@ void handle_sorryserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data4;
 	obj4.session_thread_data_map[t4.get_id()] = &data4;
-	//make ã‚èƒXƒŒƒbƒh‚Ìê‡ 0->ã‚èƒXƒŒƒbƒh
+	//make ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 0->ä¸Šã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data4.thread_division = 0;
-	//make I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡ 0->off
+	//make çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ 0->off
 	data4.end_flag = 0;
-	//make realserverØ‘Ö’†‚Å‚È‚¢ê‡ 0->Ø‘Ö’†‚Å‚È‚¢
+	//make realserveråˆ‡æ›¿ä¸­ã§ãªã„å ´åˆ 0->åˆ‡æ›¿ä¸­ã§ãªã„
 	data4.realserver_switch_flag = 0;
 
 	ret = obj4.handle_realserver_disconnect(t4.get_id(),ep4);
-	//I—¹ƒtƒ‰ƒO‚ğON
+	//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(data4.end_flag,1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_RECV
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_RECV
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, ret);
 
 
-	//unit_test[23] ‰º‚èƒXƒŒƒbƒh‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//unit_test[23] ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless obj5;
 
 	boost::thread t5;
@@ -1466,9 +1467,9 @@ void handle_sorryserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data5;
 	obj5.session_thread_data_map[t5.get_id()] = &data5;
-	//make ‰º‚èƒXƒŒƒbƒh‚Ìê‡ 1->‰º‚èƒXƒŒƒbƒh
+	//make ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 1->ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data5.thread_division = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚ ‚è
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 	protocol_module_sessionless::send_status st5;
 	st5.status = protocol_module_sessionless::SEND_OK;
 	//send_possible>0
@@ -1476,13 +1477,13 @@ void handle_sorryserver_disconnect_test(){
 	data5.recive_data_map[ep5].send_status_list.push_back(st5);
 
 	ret = obj5.handle_realserver_disconnect(t5.get_id(),ep5);
-	//I—¹ƒtƒ‰ƒO‚ğON
+	//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(data5.end_flag, 1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_CONNECTION_CHECK
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_CONNECTION_CHECK
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_CONNECTION_CHECK, ret);
 
 
-	//unit_test[24] ‰º‚èƒXƒŒƒbƒh‚Ìê‡->‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//unit_test[24] ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ->é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless obj6;
 
 	boost::thread t6;
@@ -1490,18 +1491,18 @@ void handle_sorryserver_disconnect_test(){
 
 	protocol_module_sessionless::session_thread_data_sessionless data6;
 	obj6.session_thread_data_map[t6.get_id()] = &data6;
-	//make ‰º‚èƒXƒŒƒbƒh‚Ìê‡ 1->‰º‚èƒXƒŒƒbƒh
+	//make ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆ 1->ä¸‹ã‚Šã‚¹ãƒ¬ãƒƒãƒ‰
 	data6.thread_division = 1;
-	//make ‘—M‰Â”\ƒf[ƒ^‚È‚µ
+	//make é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 	protocol_module_sessionless::send_status st6;
 	//send_possible=0
 	st6.send_possible_size = 0;
 	data6.recive_data_map[ep6].send_status_list.push_back(st6);
 
 	ret = obj6.handle_realserver_disconnect(t6.get_id(),ep6);
-	//I—¹ƒtƒ‰ƒO‚ğON
+	//çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON
 	BOOST_CHECK_EQUAL(data6.end_flag,1);
-	//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é status = CLIENT_DISCONNECT
+	//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹ status = CLIENT_DISCONNECT
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_DISCONNECT,ret);
 }
 

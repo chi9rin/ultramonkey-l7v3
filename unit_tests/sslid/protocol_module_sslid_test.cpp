@@ -66,7 +66,7 @@ void thread_func2(){}
 bool check=false;
 
 
-//protocol_module_sslid é¸u”ò
+//protocol_module_sslid é®‘å¿—é£›
 void protocol_module_sslid_test(){
 
 	protocol_module_sslid sslid;
@@ -75,34 +75,34 @@ void protocol_module_sslid_test(){
 	BOOST_CHECK_EQUAL("sslid", sslid.name);
 }
 
-//is_tcp ‹–H•²
+//is_tcp è¨±ç§‹ç²‰
 void is_tcp_test(){
     protocol_module_sslid sslid;
-    //unit_test[1] is_tcp()ƒƒ\ƒbƒh‚ÌƒeƒXƒg@ normal
+    //unit_test[1] is_tcp()ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆã€€ normal
     //unit_test[1] test data:NULL
     BOOST_CHECK(sslid.is_tcp());
 }
 
-//is_udp ‹–H•²
+//is_udp è¨±ç§‹ç²‰
 void is_udp_test(){
 	protocol_module_sslid sslid;
-	//unit_test[2] is_udp()ƒƒ\ƒbƒh‚ÌƒeƒXƒg@ normal
+	//unit_test[2] is_udp()ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆã€€ normal
 	//unit_test[2] test data:NULL
 	BOOST_CHECK(!sslid.is_udp());
 }
 
-//get_name ‹–H•²
+//get_name è¨±ç§‹ç²‰
 void get_name_test()
 {
 	protocol_module_sslid sslid;
 	std::string name=sslid.get_name();
 	std::string sslidname="sslid";
-	//unit_test[3]@get_name()ƒƒ\ƒbƒh‚ÌƒeƒXƒg@ normal
+	//unit_test[3]ã€€get_name()ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆã€€ normal
 	//unit_test[3] test data:NULL
 	BOOST_CHECK_EQUAL(sslidname,name);
 }
 
-//initialize é¸u”ò
+//initialize é®‘å¿—é£›
 void initialize_test(){
 
 	std::list<realserver> rs_list;
@@ -148,7 +148,7 @@ void initialize_test(){
 	rs_list_fini();
 }
 
-//finalize é¸u”ò
+//finalize é®‘å¿—é£›
 void finalize_test(){
 	l7vs::protocol_module_sslid sslid;
 
@@ -177,67 +177,67 @@ void finalize_test(){
 	BOOST_CHECK(sslid.replication_data_processor == NULL);
 }
 
-//is_use_sorry ‹–H•²
+//is_use_sorry è¨±ç§‹ç²‰
 void is_use_sorry_test()
 {
 	protocol_module_sslid  sslid;
-	//unit_test[4] is_use_sorry()ƒƒ\ƒbƒh‚ÌƒeƒXƒg@ normal
+	//unit_test[4] is_use_sorry()ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆã€€ normal
 	//unit_test[4] test data:NULL
 	BOOST_CHECK(!sslid.is_use_sorry());
 }
 
-//check_parameter ‹–H•²
+//check_parameter è¨±ç§‹ç²‰
 void check_parameter_test()
 {
 
 	l7vs::protocol_module_sslid sslid;
 	std::vector<std::string> args;
 
-	//unit_test[13] ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚ª‘¶İ‚µ‚È‚¢ê‡, ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[13] ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚ª‘¶İ‚µ‚È‚¢ê‡
+	//unit_test[13] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ãŒå­˜åœ¨ã—ãªã„å ´åˆ, ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[13] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	args.push_back("l7vsdadm");
 	protocol_module_base::check_message_result check_message;
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[14] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T", timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[14] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T", timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡
+	//unit_test[14] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T", timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[14] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T", timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	args.push_back("-T");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
 
-	//unit_test[15] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚éê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-T/--timeout' option value 2ewqt is not numeric character."‚ğİ’è‚·‚é
-	//unit_test[15] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚éê‡
+	//unit_test[15] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-T/--timeout' option value 2ewqt is not numeric character."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[15] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹å ´åˆ
 	args.push_back("2ewqt");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout option' value 2ewqt is not numeric character.");
 
-	//unit_test[16] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l „ INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-T/--timeout' option value 2148583647 is not numeric character."‚ğİ’è‚·‚é
-	//unit_test[16] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l „ INT_MAX
+	//unit_test[16] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ ï¼ INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-T/--timeout' option value 2148583647 is not numeric character."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[16] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ ï¼ INT_MAX
 	args.pop_back();
 	args.push_back("2148583647");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout option' value 2148583647 is too large.");
 
-	//unit_test[17] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l < INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[17] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l < INT_MAX
+	//unit_test[17] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ < INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[17] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ < INT_MAX
 	args.pop_back();
 	args.push_back("2000");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[18] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l = INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[18] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l = INT_MAX
+	//unit_test[18] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ = INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[18] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ = INT_MAX
 	args.pop_back();
 	args.push_back("2147483674");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[19] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l <= INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-T/timeout'"‚ğİ’è‚·‚é
-	//unit_test[19] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l = INT_MAX
+	//unit_test[19] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ <= INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-T/timeout'"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[19] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ = INT_MAX
 	args.pop_back();
 	args.push_back("2000");
 	args.push_back("-T");
@@ -246,8 +246,8 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/timeout'",check_message.message);
 
-	//unit_test[20] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l <= INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-T/timeout'"‚ğİ’è‚·‚é
-	//unit_test[20] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-T" timeoutİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l = INT_MAX
+	//unit_test[20] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ <= INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-T/timeout'"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[20] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-T" timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ = INT_MAX
 	args.pop_back();
 	args.pop_back();
 	args.push_back("--timeout");
@@ -256,8 +256,8 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("Cannot set multiple option'-T/--timeout'",check_message.message);
 
-	//unit_test[21] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[21] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡
+	//unit_test[21] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[21] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	args.pop_back();
 	args.pop_back();
 	args.pop_back();
@@ -267,38 +267,38 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
 
-	//unit_test[22] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚éê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-T/--timeout' option value 2ewqt is not numeric character."‚ğİ’è‚·‚é
-	//unit_test[22] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚éê‡
+	//unit_test[22] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-T/--timeout' option value 2ewqt is not numeric character."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[22] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹å ´åˆ
 	args.push_back("2ewqt");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout option' value 2ewqt is not numeric character.");
 
-	//unit_test[23] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l „ INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-T/--timeout' option value 2148583647 is not numeric character."‚ğİ’è‚·‚é
-	//unit_test[23] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l „ INT_MAX
+	//unit_test[23] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ ï¼ INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-T/--timeout' option value 2148583647 is not numeric character."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[23] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ ï¼ INT_MAX
 	args.pop_back();
 	args.push_back("2148583647");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout option' value 2148583647 is too large.");
 
-	//unit_test[24] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l < INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[24] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l < INT_MAX
+	//unit_test[24] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ < INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[24] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ < INT_MAX
 	args.pop_back();
 	args.push_back("2000");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[25] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l = INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[25] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l = INT_MAX
+	//unit_test[25] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ = INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[25] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ = INT_MAX
 	args.pop_back();
 	args.push_back("2147483674");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//”’l <= INT_MAX timeoutİ’èƒtƒ‰ƒO = ON
-	//unit_test[26] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l <= INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-T/timeout'"‚ğİ’è‚·‚é
-	//unit_test[26] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--timeout" timeoutİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š‚Ìê‡ ”’l <= INT_MAX
+	//æ•°å€¤ <= INT_MAX timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON
+	//unit_test[26] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ <= INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-T/timeout'"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[26] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--timeout" timeoutè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—ã®å ´åˆ æ•°å€¤ <= INT_MAX
 	args.pop_back();
 	args.push_back("2000");
 	args.push_back("-timeout");
@@ -308,8 +308,8 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/timeout'",check_message.message);
 
 	//maxlist
-	//unit_test[27] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[27] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡
+	//unit_test[27] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[27] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 	args.pop_back();
 	args.pop_back();
 	args.pop_back();
@@ -318,38 +318,38 @@ void check_parameter_test()
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[28] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚éê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-M/--maxlist option' value 1st is not numeric character."‚ğİ’è‚·‚é
-	//unit_test[28] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é
+	//unit_test[28] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-M/--maxlist option' value 1st is not numeric character."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[28] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹
 	args.push_back("1st");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist option' value 1st is not numeric character.");
 
-	//unit_test[29] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l „ INT_MAXê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-M/--maxlist option' value 2148583647 is too large."‚ğİ’è‚·‚é
-	//unit_test[29] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l „ INT_MAX
+	//unit_test[29] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ ï¼ INT_MAXå ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-M/--maxlist option' value 2148583647 is too large."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[29] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ ï¼ INT_MAX
 	args.pop_back();
 	args.push_back("2148583647");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist option' value 2148583647 is too large.");
 
-	//unit_test[30] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l < INT_MAXê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[30] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l < INT_MAX
+	//unit_test[30] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ < INT_MAXå ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[30] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ < INT_MAX
 	args.pop_back();
 	args.push_back("100");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[31] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l = INT_MAXê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[31] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l = INT_MAX
+	//unit_test[31] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ = INT_MAXå ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[31] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ = INT_MAX
 	args.pop_back();
 	args.push_back("2147483674");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
 
-	//unit_test[32] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l <= INT_MAXê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-M/maxlist'"‚ğİ’è‚·‚é
-	//unit_test[32] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l <= INT_MAX
+	//unit_test[32] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ <= INT_MAXå ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-M/maxlist'"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[32] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ <= INT_MAX
 	args.pop_back();
 	args.push_back("100");
 	args.push_back("-M");
@@ -358,19 +358,19 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/maxlist'",check_message.message);
 
-	//unit_test[33] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l <= INT_MAXê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-M/maxlist'"‚ğİ’è‚·‚é
-	//unit_test[33] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = ON Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š ”’l <= INT_MAX
+	//unit_test[33] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ <= INT_MAXå ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-M/maxlist'"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[33] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = ON æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­— æ•°å€¤ <= INT_MAX
 	args.pop_back();
 	args.pop_back();
 	args.push_back("--maxlist");
 	args.push_back("200");
 	check_message=sslid.check_parameter(args);
-	//unit_test[21] ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-M/maxlist'"‚ğİ’è‚·‚é
+	//unit_test[21] ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-M/maxlist'"ã‚’è¨­å®šã™ã‚‹
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/maxlist'",check_message.message);
 
-	//unit_test[34] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[34] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢
+	//unit_test[34] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[34] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„
 	args.pop_back();
 	args.pop_back();
 	args.pop_back();
@@ -379,38 +379,38 @@ void check_parameter_test()
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[35] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚éê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-M/--maxlist option' value 1st is not numeric character."‚ğİ’è‚·‚é
-	//unit_test[35] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚É”šˆÈŠO‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é
+	//unit_test[35] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-M/--maxlist option' value 1st is not numeric character."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[35] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ã«æ•°å­—ä»¥å¤–ãŒå«ã¾ã‚Œã¦ã„ã‚‹
 	args.push_back("1st");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist option' value 1st is not numeric character.");
 
-	//unit_test[36] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š,”’l „ INT_MAX‚Ìê‡,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"'-M/--maxlist option' value 2148583647 is too large."‚ğİ’è‚·‚é
-	//unit_test[36] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-M" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š,”’l „ INT_MAX
+	//unit_test[36] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—,æ•°å€¤ ï¼ INT_MAXã®å ´åˆ,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"'-M/--maxlist option' value 2148583647 is too large."ã‚’è¨­å®šã™ã‚‹
+	//unit_test[36] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-M" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—,æ•°å€¤ ï¼ INT_MAX
 	args.pop_back();
 	args.push_back("2148583647");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist option' value 2148583647 is too large.");
 
-	//unit_test[37] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š,”’l <= INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[37] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š,”’l <= INT_MAX
+	//unit_test[37] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—,æ•°å€¤ <= INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[37] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—,æ•°å€¤ <= INT_MAX
 	args.pop_back();
 	args.push_back("100");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[38] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š,”’l = INT_MAX,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[38] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist" maxlistİ’èƒtƒ‰ƒO = OFF Ÿ—v‘f‚Ì•¶š—ñ‚ª‘S‚Ä”š,”’l = INT_MAX
+	//unit_test[38] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—,æ•°å€¤ = INT_MAX,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[38] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist" maxlistè¨­å®šãƒ•ãƒ©ã‚° = OFF æ¬¡è¦ç´ ã®æ–‡å­—åˆ—ãŒå…¨ã¦æ•°å­—,æ•°å€¤ = INT_MAX
 	args.pop_back();
 	args.push_back("2147483674");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
 
-	//unit_test[39] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist",”’l <= INT_MAX maxlistİ’èƒtƒ‰ƒO = ON,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"Cannot set multiple option '-M/maxlist'"‚ğİ’è‚·‚é
-	//unit_test[39] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "--maxlist",”’l <= INT_MAX maxlistİ’èƒtƒ‰ƒO = ON
+	//unit_test[39] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist",æ•°å€¤ <= INT_MAX maxlistè¨­å®šãƒ•ãƒ©ã‚° = ON,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"Cannot set multiple option '-M/maxlist'"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[39] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "--maxlist",æ•°å€¤ <= INT_MAX maxlistè¨­å®šãƒ•ãƒ©ã‚° = ON
 	args.pop_back();
 	args.push_back("100");
 	args.push_back("--maxlist");
@@ -419,8 +419,8 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/maxlist'",check_message.message);
 
-	//unit_test[40] ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-R",no_rescheduleİ’èƒtƒ‰ƒO = ON,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"You have to choose either of reschedule or no_reschedule‚ğİ’è‚·‚é
-	//unit_test[40] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-R",no_rescheduleİ’èƒtƒ‰ƒO = ON
+	//unit_test[40] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-R",no_rescheduleè¨­å®šãƒ•ãƒ©ã‚° = ON,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"You have to choose either of reschedule or no_rescheduleã‚’è¨­å®šã™ã‚‹
+	//unit_test[40] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-R",no_rescheduleè¨­å®šãƒ•ãƒ©ã‚° = ON
 	args.pop_back();
 	args.pop_back();
 	args.pop_back();
@@ -431,8 +431,8 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no_reschedule",check_message.message);
 
-	//unit_test[41] ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-N",rescheduleİ’èƒtƒ‰ƒO = ON,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"You have to choose either of reschedule or no_reschedule‚ğİ’è‚·‚é
-	//unit_test[41] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-N",rescheduleİ’èƒtƒ‰ƒO = ON
+	//unit_test[41] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-N",rescheduleè¨­å®šãƒ•ãƒ©ã‚° = ON,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"You have to choose either of reschedule or no_rescheduleã‚’è¨­å®šã™ã‚‹
+	//unit_test[41] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-N",rescheduleè¨­å®šãƒ•ãƒ©ã‚° = ON
 	args.pop_back();
 	args.pop_back();
 	args.push_back("-R");
@@ -441,8 +441,8 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no_reschedule",check_message.message);
 
-	//unit_test[42] ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-T 2000 --maxlist 100 -R",ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
-	//unit_test[42] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-T 2000 --maxlist 100 -R"
+	//unit_test[42] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-T 2000 --maxlist 100 -R",ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
+	//unit_test[42] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-T 2000 --maxlist 100 -R"
 	args.pop_back();
 	args.pop_back();
 	args.push_back("-T");
@@ -453,15 +453,15 @@ void check_parameter_test()
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
-	//unit_test[43] ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-T 2000 --maxlist 100 -R -N",ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"You have to choose either of reschedule or no_reschedule‚ğİ’è‚·‚é
-	//unit_test[43] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ ="-T 2000 --maxlist 100 -R"
+	//unit_test[43] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-T 2000 --maxlist 100 -R -N",ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"You have to choose either of reschedule or no_rescheduleã‚’è¨­å®šã™ã‚‹
+	//unit_test[43] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— ="-T 2000 --maxlist 100 -R"
 	args.push_back("-N");
 	check_message=sslid.check_parameter(args);
 	BOOST_CHECK_EQUAL(false,check_message.flag);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no_reschedule",check_message.message);
 
-	//unit_test[44] ƒIƒvƒVƒ‡ƒ“•¶š—ñ = ã‹LˆÈŠO,ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é,ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚É"option error"‚ğİ’è‚·‚é
-	//unit_test[44] data test:ƒIƒvƒVƒ‡ƒ“•¶š—ñ = ã‹LˆÈŠO
+	//unit_test[44] ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = ä¸Šè¨˜ä»¥å¤–,ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹,ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«"option error"ã‚’è¨­å®šã™ã‚‹
+	//unit_test[44] data test:ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = ä¸Šè¨˜ä»¥å¤–
 	args.pop_back();
 	args.pop_back();
 	args.push_back("-$");
@@ -470,7 +470,7 @@ void check_parameter_test()
 	BOOST_CHECK_EQUAL("option error",check_message.message);
 }
 
-//register_schedule ‹–H•²
+//register_schedule è¨±ç§‹ç²‰
 void t_schedule(const boost::thread::id,protocol_module_base::rs_list_itr_func_type,
 		protocol_module_base::rs_list_itr_func_type,
 		protocol_module_base::rs_list_itr_func_type,
@@ -481,7 +481,7 @@ void t_schedule(const boost::thread::id,protocol_module_base::rs_list_itr_func_t
 void register_schedule_test()
 {
 	protocol_module_sslid sslid;
-	//unit_test[10] schedule_tcp‚Ét_schedule‚ğİ’è‚·‚é
+	//unit_test[10] schedule_tcpã«t_scheduleã‚’è¨­å®šã™ã‚‹
 	//unit_test[10] test data:NULL
 	boost::thread thread1(thread_func);
 	const boost::thread::id thread_id=thread1.get_id();
@@ -495,7 +495,7 @@ void register_schedule_test()
 	BOOST_CHECK_EQUAL(sslid.schedule_tcp,t_schedule);
 }
 
-//handle_session_finalize é¸u”ò
+//handle_session_finalize é®‘å¿—é£›
 void handle_session_finalize_test(){
 	boost::thread up_thread(thread_callback);
 	boost::thread down_thread(thread_callback);
@@ -516,19 +516,19 @@ void handle_session_finalize_test(){
 }
 
 
-//handle_accept ‹–H•²
+//handle_accept è¨±ç§‹ç²‰
 void handle_accept_test()
 {
 	protocol_module_sslid sslid;
 	boost::thread thread1(thread_func);
 	boost::thread::id thread1_id=thread1.get_id();
-	//unit_test[5] handle_accpet()ƒƒ\ƒbƒh‚ÌƒeƒXƒg@ normal
+	//unit_test[5] handle_accpet()ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆã€€ normal
 	//unit_test[5] test data:NULL
 	protocol_module_base::EVENT_TAG accept=sslid.handle_accept(thread1_id);
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_RECV, accept);
 }
 
-//handle_client_recv é¸u”ò
+//handle_client_recv é®‘å¿—é£›
 void handle_client_recv_test(){
 
 	boost::thread up_thread(thread_callback);
@@ -575,7 +575,7 @@ void handle_client_recv_test(){
 
 	// unit_test[10]
 	// condition:
-	//  end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (ˆÙí)
+	//  end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (ç•°å¸¸)
 	// check:
 	//  handle_client_recv() return FINALIZE
 	up_thread_data = new session_thread_data_sslid;
@@ -592,7 +592,7 @@ void handle_client_recv_test(){
 
 	// unit_test[11]
 	// condition:
-	//	end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (‘—M•s‰Â)
+	//	end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (é€ä¿¡ä¸å¯)
 	// check:
 	//  handle_client_recv() return CLIENT_RECV
 	up_thread_data = new session_thread_data_sslid;
@@ -608,7 +608,7 @@ void handle_client_recv_test(){
 
 	// unit_test[12]
 	// condition:
-	//  end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (‘—M‰Â”\)
+	//  end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (é€ä¿¡å¯èƒ½)
 	//  is hello message
 	// check:
 	//  hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT, current_record_rest_size
@@ -639,7 +639,7 @@ void handle_client_recv_test(){
 
 	// unit_test[13]
 	// condition:
-	//  end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (‘—M‰Â”\)
+	//  end_flag = 0 (OFF), data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (é€ä¿¡å¯èƒ½)
 	// is not hello message
 	// check:
 	// hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT, current_record_rest_size
@@ -708,7 +708,7 @@ void handle_client_recv_test(){
 	// unit_test[15]
 	// condition:
 	//  end_flag = 0, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
-	//  check_ssl_record_sendable() return -1 (ˆÙí)
+	//  check_ssl_record_sendable() return -1 (ç•°å¸¸)
 	// check:
 	//  handle_client_recv() return FINALIZE, data_size, data_begain_offset
 	up_thread_data = new session_thread_data_sslid;
@@ -730,7 +730,7 @@ void handle_client_recv_test(){
 	// unit_test[16]
 	// condition:
 	//  end_flag = 0, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
-	//  check_ssl_record_sendable() return -1 (ˆÙí)
+	//  check_ssl_record_sendable() return -1 (ç•°å¸¸)
 	// check:
 	//  handle_client_recv() return FINALIZE, data_size, data_begain_offset
 	up_thread_data = new session_thread_data_sslid;
@@ -752,7 +752,7 @@ void handle_client_recv_test(){
 	// unit_test[17]
 	// condition:
 	//  end_flag = 0, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
-	//  check_ssl_record_sendable() return 1 (‘—M•s‰Â)
+	//  check_ssl_record_sendable() return 1 (é€ä¿¡ä¸å¯)
 	// check:
 	//  handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
 	up_thread_data = new session_thread_data_sslid;
@@ -773,7 +773,7 @@ void handle_client_recv_test(){
 	// unit_test[18]
 	// condition:
 	//  end_flag = 0, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
-	//  check_ssl_record_sendable() return 1 (‘—M•s‰Â)
+	//  check_ssl_record_sendable() return 1 (é€ä¿¡ä¸å¯)
 	// check:
 	//  handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
 	up_thread_data = new session_thread_data_sslid;
@@ -794,7 +794,7 @@ void handle_client_recv_test(){
 	// unit_test[19]
 	// condition:
 	//  end_flag = 0, data_size > 0, current_record_rest_size = 0,data_begain_offset != 0
-	//  check_ssl_record_sendable() return 0 (‘—M‰Â”\), is hello message
+	//  check_ssl_record_sendable() return 0 (é€ä¿¡å¯èƒ½), is hello message
 	// check:
 	// handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
 	up_thread_data = new session_thread_data_sslid;
@@ -832,7 +832,7 @@ void handle_client_recv_test(){
 	// unit_test[20]
 	// condition:
 	//  end_flag = 0, data_size > 0, current_record_rest_size = 0,data_begain_offset = 0
-	//  check_ssl_record_sendable() return 0 (‘—M‰Â”\), is hello message
+	//  check_ssl_record_sendable() return 0 (é€ä¿¡å¯èƒ½), is hello message
 	// check:
 	// handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
 	up_thread_data = new session_thread_data_sslid;
@@ -870,7 +870,7 @@ void handle_client_recv_test(){
 	// unit_test[21]
 	// condition:
 	//  end_flag = 0,data_size>0,current_record_rest_size=0,data_begain_offset != 0
-	//  check_ssl_record_sendable() return 0 (‘—M‰Â”\), is not hello message
+	//  check_ssl_record_sendable() return 0 (é€ä¿¡å¯èƒ½), is not hello message
 	// check:
 	// handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
 	up_thread_data = new session_thread_data_sslid;
@@ -903,7 +903,7 @@ void handle_client_recv_test(){
 	// unit_test[22]
 	// condition:
 	//  end_flag = 0,data_size>0,current_record_rest_size=0,data_begain_offset = 0
-	//  check_ssl_record_sendable() return 0 (‘—M‰Â”\), is not hello message
+	//  check_ssl_record_sendable() return 0 (é€ä¿¡å¯èƒ½), is not hello message
 	// check:
 	// handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
 	up_thread_data = new session_thread_data_sslid;
@@ -967,7 +967,7 @@ void handle_client_recv_test(){
 
 }
 
-//handle_realserver_connection_fail ‹–H•²
+//handle_realserver_connection_fail è¨±ç§‹ç²‰
 void handle_realserver_connection_fail_test()
 {
 	protocol_module_sslid sslid;
@@ -991,15 +991,15 @@ void handle_realserver_connection_fail_test()
 		BOOST_MESSAGE("end of the map");
 	}
 
-	//unit_test[7] rescheduleƒ‚[ƒh‚Ìê‡,realserver_connect_failed_count ‚Å1‚ğ‰ÁZ‚·‚é,‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é,status = REALSERVER_SELECT
-	//unit_test[7] test data:rescheduleƒ‚[ƒh,the first fail
+	//unit_test[7] rescheduleãƒ¢ãƒ¼ãƒ‰ã®å ´åˆ,realserver_connect_failed_count ã§1ã‚’åŠ ç®—ã™ã‚‹,é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹,status = REALSERVER_SELECT
+	//unit_test[7] test data:rescheduleãƒ¢ãƒ¼ãƒ‰,the first fail
 	sslid.reschedule=1;
 	protocol_module_base::EVENT_TAG schedule1=sslid.handle_realserver_connection_fail(thread_up_id,ep);
 	int fail_count_add=data->realserver_connect_failed_count;
 	BOOST_CHECK_EQUAL(fail_count_add,1);
 	BOOST_CHECK_EQUAL(protocol_module_base::REALSERVER_SELECT,schedule1);
 
-	//unit_test[8] rescheduleƒ‚[ƒh‚Ìê‡,realserver_connect_failed_count ‚Å1‚ğ‰ÁZ‚·‚é,‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é,status = REALSERVER_SELECT
+	//unit_test[8] rescheduleãƒ¢ãƒ¼ãƒ‰ã®å ´åˆ,realserver_connect_failed_count ã§1ã‚’åŠ ç®—ã™ã‚‹,é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹,status = REALSERVER_SELECT
 	//unit_test[8] test data:reschedule, the third fail
 	sslid.reschedule=1;
 	protocol_module_base::EVENT_TAG schedule3=sslid.handle_realserver_connection_fail(thread_up_id,ep);
@@ -1008,21 +1008,21 @@ void handle_realserver_connection_fail_test()
 	BOOST_CHECK_EQUAL(fail_count_add3,3);
 	BOOST_CHECK_EQUAL(protocol_module_base::REALSERVER_SELECT,schedule3);
 
-	//unit_test[9] no rescheduleƒ‚[ƒh‚Ìê‡,I—¹ƒtƒ‰ƒO‚ğON,‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é,status = CLIENT_DISCONNECT
-	//unit_test[9] test data:no rescheduleƒ‚[ƒh
+	//unit_test[9] no rescheduleãƒ¢ãƒ¼ãƒ‰ã®å ´åˆ,çµ‚äº†ãƒ•ãƒ©ã‚°ã‚’ON,é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹,status = CLIENT_DISCONNECT
+	//unit_test[9] test data:no rescheduleãƒ¢ãƒ¼ãƒ‰
 	sslid.reschedule=0;
 	protocol_module_base::EVENT_TAG schedule=sslid.handle_realserver_connection_fail(thread_up_id,ep);
 	BOOST_CHECK_EQUAL(data->end_flag,1);
 	BOOST_CHECK_EQUAL(protocol_module_base::CLIENT_DISCONNECT,schedule);
 }
 
-//handle_client_disconnect ‹–H•²
+//handle_client_disconnect è¨±ç§‹ç²‰
 void handle_client_disconnect_test()
 {
 	protocol_module_sslid sslid;
 	boost::thread thread1(thread_func);
 	boost::thread::id thread_id=thread1.get_id();
-	//unit_test[6] handle_client_disconnect()ƒƒ\ƒbƒh‚ÌƒeƒXƒg@ normal
+	//unit_test[6] handle_client_disconnect()ãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ†ã‚¹ãƒˆã€€ normal
 	//unit_test[6] test data:NULL
 	protocol_module_base::EVENT_TAG disconn=sslid.handle_client_disconnect(thread_id);
 	BOOST_CHECK(protocol_module_base::FINALIZE==disconn);

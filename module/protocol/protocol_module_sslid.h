@@ -164,12 +164,12 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         bool realserver_selected( const boost::asio::ip::tcp::endpoint& rs_endpoint );
 
-    protected:
+//Modify for test:    protected:
         int put_data_to_sendbuffer(
                                 const boost::thread::id& thread_id,
                                 boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen);
-    protected:
+//Modify for test:    protected:
         int timeout;
         int maxlist;
         int reschedule;

@@ -66,7 +66,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length < 6
 	// check:
-	//  check_ssl_record_sendable() return 1 (送信不可)
+	//  check_ssl_record_sendable() return 1 (騾∽ｿ｡荳榊庄)
 	recv_length = 5;
 	record_data = new char[recv_length];
 	is_hello_message = true;
@@ -80,7 +80,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 6, record_data is not a ssl record
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 6;
 	record_data = new char[recv_length];
 	record_data[0] = 0x00;
@@ -95,7 +95,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 6, record_data is a ssl record(minimal size), but is not a hello message.
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 6;
 	record_data = new char[recv_length];
 	record_data[0] = 0x17;
@@ -121,7 +121,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 6, record_data is a ssl record(minimal size), but is not a hello message.
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 6;
 	record_data = new char[recv_length];
 	record_data[0] = 0x17;
@@ -147,7 +147,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 6, record_data is a ssl record(minimal size), and is a hello message.
 	// check:
-	//  check_ssl_record_sendable() return 1 (送信不可)
+	//  check_ssl_record_sendable() return 1 (騾∽ｿ｡荳榊庄)
 	recv_length = 6;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -167,7 +167,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 6, record_data is a ssl record(minimal size), and is a hello message.
 	// check:
-	//  check_ssl_record_sendable() return 1 (送信不可)
+	//  check_ssl_record_sendable() return 1 (騾∽ｿ｡荳榊庄)
 	recv_length = 6;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -187,7 +187,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 6, record_data is  not ssl record data
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 10;
 	record_data = new char[recv_length];
 	record_data[0] = 0x00;
@@ -202,7 +202,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 6, record_data is ssl record data, but is not a hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 10;
 	record_data = new char[recv_length];
 	record_data[0] = 0x17;
@@ -227,7 +227,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 6, record_data is ssl record data, but is not a hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 10;
 	record_data = new char[recv_length];
 	record_data[0] = 0x17;
@@ -252,7 +252,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 6, recv_length < 76, record_data is ssl record data, is a hello message
 	// check:
-	//  check_ssl_record_sendable() return 1 (送信不可)
+	//  check_ssl_record_sendable() return 1 (騾∽ｿ｡荳榊庄)
 	recv_length = 10;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -272,7 +272,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 6, recv_length < 76, record_data is ssl record data, is a hello message
 	// check:
-	//  check_ssl_record_sendable() return 1 (送信不可)
+	//  check_ssl_record_sendable() return 1 (騾∽ｿ｡荳榊庄)
 	recv_length = 10;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -292,7 +292,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, but is a error hello message,
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -314,7 +314,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, but is a error hello message,
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -336,7 +336,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -359,7 +359,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -382,7 +382,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -405,7 +405,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -428,7 +428,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -451,7 +451,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -474,7 +474,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -497,7 +497,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -520,7 +520,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -549,7 +549,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -578,7 +578,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -607,7 +607,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -636,7 +636,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -665,7 +665,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -694,7 +694,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -723,7 +723,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 76;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -752,7 +752,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, but is a error hello message,
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -774,7 +774,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, but is a error hello message,
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -796,7 +796,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -819,7 +819,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -842,7 +842,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -865,7 +865,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	// 	recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -888,7 +888,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -911,7 +911,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -934,7 +934,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -957,7 +957,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, but is a error hello message
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -980,7 +980,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1009,7 +1009,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1038,7 +1038,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1067,7 +1067,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length > 76, record_data is ssl record data, and is client hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1096,7 +1096,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1125,7 +1125,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1154,7 +1154,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1183,7 +1183,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  recv_length = 76, record_data is ssl record data, and is server hello message
 	// check:
-	//  check_ssl_record_sendable() return 0 (送信可能)
+	//  check_ssl_record_sendable() return 0 (騾∽ｿ｡蜿ｯ閭ｽ)
 	recv_length = 100;
 	record_data = new char[recv_length];
 	record_data[0] = 0x16;
@@ -1212,7 +1212,7 @@ void check_ssl_record_sendable(){
 	// condition:
 	//  record_data = NULL
 	// check:
-	//  check_ssl_record_sendable() return -1 (異常)
+	//  check_ssl_record_sendable() return -1 (逡ｰ蟶ｸ)
 	record_data = NULL;
 	ret = ssl_base.check_ssl_record_sendable(is_message_from_client, record_data, 0,
 			all_length, is_hello_message);

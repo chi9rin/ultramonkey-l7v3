@@ -70,7 +70,7 @@ bool protocol_module_sessionless::is_udp()
 	return false;
 }
 
-//replication—pƒCƒ“ƒ^[ƒtƒFƒCƒX
+//replicationç”¨ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹
 void protocol_module_sessionless::replication_interrupt()
 {
 }
@@ -103,16 +103,16 @@ void protocol_module_sessionless::initialize(
 	}
 	/*------DEBUG LOG END------*/
 
-	//RealServerƒŠƒXƒg‚ÌŠe‘€ìŠÖ”‚ğİ’è‚·‚é
-	//RealServerƒŠƒXƒgæ“ªæ“¾ŠÖ”
+	//RealServerãƒªã‚¹ãƒˆã®å„æ“ä½œé–¢æ•°ã‚’è¨­å®šã™ã‚‹
+	//RealServerãƒªã‚¹ãƒˆå…ˆé ­å–å¾—é–¢æ•°
 	rs_list_begin = inrslist_begin;
-	//RealServerƒŠƒXƒg––’[æ“¾ŠÖ”
+	//RealServerãƒªã‚¹ãƒˆæœ«ç«¯å–å¾—é–¢æ•°
 	rs_list_end = inrslist_end;
-	//RealServerƒŠƒXƒgŸ—v‘fæ“¾ŠÖ”
+	//RealServerãƒªã‚¹ãƒˆæ¬¡è¦ç´ å–å¾—é–¢æ•°
 	rs_list_next = inrslist_next;
-	//RealServerƒŠƒXƒgƒƒbƒNŠÖ”
+	//RealServerãƒªã‚¹ãƒˆãƒ­ãƒƒã‚¯é–¢æ•°
 	rs_list_lock = inlist_lock;
-	//RealServerƒŠƒXƒgƒAƒ“ƒƒbƒNŠÖ”
+	//RealServerãƒªã‚¹ãƒˆã‚¢ãƒ³ãƒ­ãƒƒã‚¯é–¢æ•°
 	rs_list_unlock = inlist_unlock;
 
 	/*-------- DEBUG LOG --------*/
@@ -144,47 +144,47 @@ void protocol_module_sessionless::finalize()
 	}
 	/*------DEBUG LOG END------*/
 
-	//ƒƒOo—Í‚ÌŠe‘€ìŠÖ”‚ğ‰Šú‰»‚·‚é
-	//ƒƒOƒŒƒxƒ‹æ“¾ŠÖ”
+	//ãƒ­ã‚°å‡ºåŠ›ã®å„æ“ä½œé–¢æ•°ã‚’åˆæœŸåŒ–ã™ã‚‹
+	//ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«å–å¾—é–¢æ•°
 	getloglevel.clear();
-	//ƒƒOo—ÍŠÖ”iFatalj
+	//ãƒ­ã‚°å‡ºåŠ›é–¢æ•°ï¼ˆFatalï¼‰
 	putLogFatal.clear();
-	//ƒƒOo—ÍŠÖ”iErrorj
+	//ãƒ­ã‚°å‡ºåŠ›é–¢æ•°ï¼ˆErrorï¼‰
 	putLogError.clear();
-	//ƒƒOo—ÍŠÖ”iWarnj
+	//ãƒ­ã‚°å‡ºåŠ›é–¢æ•°ï¼ˆWarnï¼‰
 	putLogWarn.clear();
-	//ƒƒOo—ÍŠÖ”iInfoj
+	//ãƒ­ã‚°å‡ºåŠ›é–¢æ•°ï¼ˆInfoï¼‰
 	putLogInfo.clear();
-	//ƒƒOo—ÍŠÖ”iDebugj
+	//ãƒ­ã‚°å‡ºåŠ›é–¢æ•°ï¼ˆDebugï¼‰
 	putLogDebug.clear();
 
-	//RealServerƒŠƒXƒg‚ÌŠe‘€ìŠÖ”‚ğ‰Šú‰»‚·‚é
-	//RealServerƒŠƒXƒgæ“ªæ“¾ŠÖ”
+	//RealServerãƒªã‚¹ãƒˆã®å„æ“ä½œé–¢æ•°ã‚’åˆæœŸåŒ–ã™ã‚‹
+	//RealServerãƒªã‚¹ãƒˆå…ˆé ­å–å¾—é–¢æ•°
 	rs_list_begin.clear();
-	//RealServerƒŠƒXƒg––’[æ“¾ŠÖ”
+	//RealServerãƒªã‚¹ãƒˆæœ«ç«¯å–å¾—é–¢æ•°
 	rs_list_end.clear();
-	//RealServerƒŠƒXƒgŸ—v‘fæ“¾ŠÖ”
+	//RealServerãƒªã‚¹ãƒˆæ¬¡è¦ç´ å–å¾—é–¢æ•°
 	rs_list_next.clear();
-	//RealServerƒŠƒXƒgƒƒbƒNŠÖ”
+	//RealServerãƒªã‚¹ãƒˆãƒ­ãƒƒã‚¯é–¢æ•°
 	rs_list_lock.clear();
-	//RealServerƒŠƒXƒgƒAƒ“ƒƒbƒNŠÖ”
+	//RealServerãƒªã‚¹ãƒˆã‚¢ãƒ³ãƒ­ãƒƒã‚¯é–¢æ•°
 	rs_list_unlock.clear();
 
-	//Replication‚ÌŠe‘€ìŠÖ”‚ğ‰Šú‰»‚·‚é
-	//ƒRƒ“ƒ|[ƒlƒ“ƒg—ÌˆæŠ„‚è“–‚ÄŠÖ”
+	//Replicationã®å„æ“ä½œé–¢æ•°ã‚’åˆæœŸåŒ–ã™ã‚‹
+	//ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆé ˜åŸŸå‰²ã‚Šå½“ã¦é–¢æ•°
 	replication_pay_memory.clear();
-	//ƒRƒ“ƒ|[ƒlƒ“ƒg—ÌˆæƒƒbƒNŠÖ”
+	//ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆé ˜åŸŸãƒ­ãƒƒã‚¯é–¢æ•°
 	replication_area_lock.clear();
-	//ƒRƒ“ƒ|[ƒlƒ“ƒg—ÌˆæƒAƒ“ƒƒbƒNŠÖ”
+	//ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆé ˜åŸŸã‚¢ãƒ³ãƒ­ãƒƒã‚¯é–¢æ•°
 	replication_area_unlock.clear();
 
-	//ScheduleModule‚ÌU•ªŠÖ”‚ğ‰Šú‰»‚·‚é
-	//ClientU‚è•ª‚¯ˆ—ŠÖ”
+	//ScheduleModuleã®æŒ¯åˆ†é–¢æ•°ã‚’åˆæœŸåŒ–ã™ã‚‹
+	//ClientæŒ¯ã‚Šåˆ†ã‘å‡¦ç†é–¢æ•°
 	schedule_tcp.clear();
 	schedule_udp.clear();
 
-	//Šeƒ‚ƒWƒ…[ƒ‹ƒIƒvƒVƒ‡ƒ“‚ğ‰Šú‰»‚·‚é
-	//‘—MŒ³İ’èw¦
+	//å„ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’åˆæœŸåŒ–ã™ã‚‹
+	//é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤º
 	forwarded_for = 0;
 	//sorryURI
 	boost::array<char, MAX_OPTION_SIZE> tmp;
@@ -244,14 +244,14 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::c
 	}
 	/*------DEBUG LOG END------*/
 
-	//ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉTRUE‚ğİ’è‚·‚é
+	//ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«TRUEã‚’è¨­å®šã™ã‚‹
 	check_message_result check_result;
 	check_result.flag = true;
 	bool forward_checked = false;
 	bool sorryuri_checked = false;
 	const std::string regex_match_str = "([^?#]*)(\\?([^#]*))?(#(.*))?";
 
-	//ƒIƒvƒVƒ‡ƒ“•¶š—ñ‚Ì—v‘f”•ªŒJ‚è•Ô‚µ
+	//ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ—ã®è¦ç´ æ•°åˆ†ç¹°ã‚Šè¿”ã—
 	typedef std::vector<std::string>::const_iterator vec_str_it;
 
 	try
@@ -260,105 +260,105 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::c
 		vec_str_it it_end = args.end();
 		for (; it != it_end; ++it)
 		{
-			//ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-F"
+			//ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-F"
 			if (*it == "-F" || *it == "--forward-for")
 			{
-				//‘—MŒ³İ’èw¦İ’èƒtƒ‰ƒO‚ğON
+				//é€ä¿¡å…ƒè¨­å®šæŒ‡ç¤ºè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON
 				forward_checked = true;
 			}
-			//ƒIƒvƒVƒ‡ƒ“•¶š—ñ = "-S"
+			//ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = "-S"
 			else if (*it == "-S" || *it == "--sorryURI")
 			{
-				//sorryURIİ’èƒtƒ‰ƒO = OFF
+				//sorryURIè¨­å®šãƒ•ãƒ©ã‚° = OFF
 				if (!sorryuri_checked)
 				{
-					//Ÿ—v‘f‚ª‘¶İ‚·‚éê‡
+					//æ¬¡è¦ç´ ãŒå­˜åœ¨ã™ã‚‹å ´åˆ
 					if (++it != it_end)
 					{
-						//Ÿ—v‘f‚Ì•¶š—ñ’· „ 127
+						//æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· ï¼ 127
 						if (it->size() > 127)
 						{
 							std::ostringstream ostr;
 							ostr << "\"-S/--sorryURI\" option value'" << *it
 									<< "'is too long.";
 
-							//ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é
+							//ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹
 							check_result.flag = false;
-							//ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚ğİ’è‚·‚é
+							//ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
 							check_result.message = ostr.str();
 							putLogError(0170000, check_result.message,
 									__FILE__, __LINE__ );
-							//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+							//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 							break;
 						}
-						//Ÿ—v‘f‚Ì•¶š—ñ’· … 127
+						//æ¬¡è¦ç´ ã®æ–‡å­—åˆ—é•· â‰¦ 127
 						else
 						{
-							//³‹K•\Œ»‚ÅURIihttp‚©‚çƒ|[ƒg‚Ü‚Å‚Ì•”•ª‚ğ‘ÎÛŠOj‚Ì‘Ã“–«‚ğƒ`ƒFƒbƒN‚·‚é
-							//³‹K•\Œ»‚Í([^?#]*)(\?([^#]*))?(#(.*))?’Ê‚è
+							//æ­£è¦è¡¨ç¾ã§URIï¼ˆhttpã‹ã‚‰ãƒãƒ¼ãƒˆã¾ã§ã®éƒ¨åˆ†ã‚’å¯¾è±¡å¤–ï¼‰ã®å¦¥å½“æ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
+							//æ­£è¦è¡¨ç¾ã¯([^?#]*)(\?([^#]*))?(#(.*))?é€šã‚Š
 							boost::regex uri(regex_match_str);
 							boost::cmatch what;
 							if (boost::regex_match(it->c_str(), what, uri))
 							{
-								//ƒ`ƒFƒbƒNOK‚Ìê‡
-								//sorryURIİ’èƒtƒ‰ƒO‚ğON
+								//ãƒã‚§ãƒƒã‚¯OKã®å ´åˆ
+								//sorryURIè¨­å®šãƒ•ãƒ©ã‚°ã‚’ON
 								sorryuri_checked = true;
 							}
-							//ƒ`ƒFƒbƒNNG‚Ìê‡
+							//ãƒã‚§ãƒƒã‚¯NGã®å ´åˆ
 							else
 							{
 								std::ostringstream ostr;
 								ostr << "\"-S/--sorryURI\" option value '"
 										<< *it << "' is not a valid URI.";
 
-								//ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é
+								//ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹
 								check_result.flag = false;
-								//ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚ğİ’è‚·‚é
+								//ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
 								check_result.message = ostr.str();
 								putLogError(0170000, check_result.message,
 										__FILE__, __LINE__ );
-								//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+								//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 								break;
 							}
 						}
 					}
-					//Ÿ—v‘f‚ª‘¶İ‚µ‚È‚¢ê‡
+					//æ¬¡è¦ç´ ãŒå­˜åœ¨ã—ãªã„å ´åˆ
 					else
 					{
-						//ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é
+						//ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹
 						check_result.flag = false;
-						//ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚ğİ’è‚·‚é
+						//ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
 						check_result.message
 								= "You have to set option value \"-S/--sorryURI\".";
 						putLogError(0170000, check_result.message, __FILE__,
 						__LINE__ );
-						//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+						//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 						break;
 					}
 				}
-				//sorryURIİ’èƒtƒ‰ƒO = ON
+				//sorryURIè¨­å®šãƒ•ãƒ©ã‚° = ON
 				else
 				{
-					//ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é
+					//ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹
 					check_result.flag = false;
-					//ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚ğİ’è‚·‚é
+					//ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
 					check_result.message
 							= "Cannot set multiple option \"-S/--sorryURI\".";
 					putLogError(0170000, check_result.message, __FILE__,
 					__LINE__ );
-					//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+					//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 					break;
 				}
 			}
-			//ƒIƒvƒVƒ‡ƒ“•¶š—ñ = ã‹LˆÈŠO
+			//ã‚ªãƒ—ã‚·ãƒ§ãƒ³æ–‡å­—åˆ— = ä¸Šè¨˜ä»¥å¤–
 			else
 			{
-				//ƒ`ƒFƒbƒNŒ‹‰Êƒtƒ‰ƒO‚ÉFALSE‚ğİ’è‚·‚é
+				//ãƒã‚§ãƒƒã‚¯çµæœãƒ•ãƒ©ã‚°ã«FALSEã‚’è¨­å®šã™ã‚‹
 				check_result.flag = false;
-				//ƒ`ƒFƒbƒNŒ‹‰ÊƒƒbƒZ[ƒW‚ğİ’è‚·‚é
+				//ãƒã‚§ãƒƒã‚¯çµæœãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¨­å®šã™ã‚‹
 				check_result.message = "Option error.";
 				putLogError(0170000, check_result.message, __FILE__, __LINE__ );
-				//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+				//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 				break;
 			}
 		}
@@ -723,7 +723,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 	session_thread_data_sessionless* p_up = NULL;
 	session_thread_data_sessionless* p_down = NULL;
 
-	//ƒZƒbƒVƒ‡ƒ“ƒXƒŒƒbƒh‚É‘Î‰‚·‚é‰Šúˆ—‚ğs‚¤
+	//ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¯¾å¿œã™ã‚‹åˆæœŸå‡¦ç†ã‚’è¡Œã†
 	try
 	{
 		p_up = new session_thread_data_sessionless;
@@ -869,7 +869,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 	session_thread_data_sessionless* p_up = NULL;
 	session_thread_data_sessionless* p_down = NULL;
 	boost::asio::ip::tcp::endpoint endpoint;
-	//ƒZƒbƒVƒ‡ƒ“ƒXƒŒƒbƒh‚É‘Î‰‚·‚éI—¹ˆ—‚ğs‚¤
+	//ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¯¾å¿œã™ã‚‹çµ‚äº†å‡¦ç†ã‚’è¡Œã†
 	try
 	{
 		boost::mutex::scoped_lock slock(session_thread_data_map_mutex);
@@ -1139,19 +1139,19 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_accep
 		status = FINALIZE;
 	}
 
-	//acceptŠ®—¹ƒtƒ‰ƒO‚ğON
+	//acceptå®Œäº†ãƒ•ãƒ©ã‚°ã‚’ON
 	session_data->accept_end_flag = ACCEPT_END_FLAG_ON;
 
-	//sorryó‘Ô‚Ìê‡
+	//sorryçŠ¶æ…‹ã®å ´åˆ
 	if (session_data->sorry_flag == SORRY_FLAG_ON)
 	{
-		//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+		//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 		status = SORRYSERVER_SELECT;
 	}
-	//sorryó‘ÔˆÈŠO‚Ìê‡
+	//sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ
 	else
 	{
-		//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+		//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 		status = REALSERVER_SELECT;
 	}
 
@@ -1200,12 +1200,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 			send_end_it_vec;
 	send_end_it_vec send_end_vec;
 	boost::asio::ip::tcp::endpoint endpoint;
-	int data_remain_start = 0; //–¢‘—Mƒf[ƒ^ŠJnˆÊ’u
-	int data_remain_size = 0; //–¢‘—Mƒf[ƒ^ƒTƒCƒY
-	int request_data_size = 0; //ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY
-	int request_data_remain_size = 0; //ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+	int data_remain_start = 0; //æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®
+	int data_remain_size = 0; //æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
+	int request_data_size = 0; //ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
+	int request_data_remain_size = 0; //ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 	bool bret = false;
-	CHECK_RESULT_TAG check_result; //ƒ`ƒFƒbƒNŒ‹‰Ê
+	CHECK_RESULT_TAG check_result; //ãƒã‚§ãƒƒã‚¯çµæœ
 	size_t header_offset = 0;
 	size_t header_offset_len = 0;
 	size_t count_length_header_value = 0;
@@ -1220,7 +1220,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 	char* buffer2 = NULL;
 	size_t count = 0;
 
-	//ƒpƒ‰ƒ[ƒ^ƒ`ƒFƒbƒN
+	//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒã‚§ãƒƒã‚¯
 	if (recvlen > recvbuffer.size())
 	{
 		putLogError(0170000, "Data size bigger than buffer size.", __FILE__,
@@ -1288,7 +1288,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 			}
 		}
 
-		//I—¹ƒtƒ‰ƒO‚ªON‚Ìê‡
+		//çµ‚äº†ãƒ•ãƒ©ã‚°ãŒONã®å ´åˆ
 		if (session_data->end_flag == END_FLAG_ON)
 		{
 			/*-------- DEBUG LOG --------*/
@@ -1306,7 +1306,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 			return CLIENT_RECV;
 		}
 
-		//I—¹ƒtƒ‰ƒO‚ªOFF‚Ìê‡
+		//çµ‚äº†ãƒ•ãƒ©ã‚°ãŒOFFã®å ´åˆ
 		if (session_data->recive_data_map.find(endpoint)
 				== session_data->recive_data_map.end())
 		{
@@ -1372,31 +1372,31 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 			return FINALIZE;
 		}
 
-		//‘—Mó‘ÔƒŠƒXƒg‚Ì—v‘f”•ªŒJ‚è•Ô‚µ
+		//é€ä¿¡çŠ¶æ…‹ãƒªã‚¹ãƒˆã®è¦ç´ æ•°åˆ†ç¹°ã‚Šè¿”ã—
 		for (; it != it_end; ++it)
 		{
-			//‘—Mó‘Ô‚ª‘—MÏ‚Ìê‡
+			//é€ä¿¡çŠ¶æ…‹ãŒé€ä¿¡æ¸ˆã®å ´åˆ
 			if (it->status == SEND_END)
 			{
-				//‘—Mó‘ÔƒŠƒXƒg‚©‚çíœ‚·‚é
+				//é€ä¿¡çŠ¶æ…‹ãƒªã‚¹ãƒˆã‹ã‚‰å‰Šé™¤ã™ã‚‹
 				send_end_vec.push_back(it);
 			}
-			else if (it->status == SEND_CONTINUE) //‘—Mó‘Ô‚ª‘—MŒp‘±‚Ìê‡
+			else if (it->status == SEND_CONTINUE) //é€ä¿¡çŠ¶æ…‹ãŒé€ä¿¡ç¶™ç¶šã®å ´åˆ
 			{
-				//‘—Mƒf[ƒ^ƒIƒtƒZƒbƒg‚É‘—MÏƒTƒCƒY‚ğ‰ÁZ‚·‚é
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã«é€ä¿¡æ¸ˆã‚µã‚¤ã‚ºã‚’åŠ ç®—ã™ã‚‹
 				it->send_offset += it->send_end_size;
-				//–¢‘—Mƒf[ƒ^ŠJnˆÊ’u‚É‘—Mƒf[ƒ^ƒIƒtƒZƒbƒg‚ğİ’è‚·‚é
+				//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®ã«é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¨­å®šã™ã‚‹
 				data_remain_start = it->send_offset;
-				//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+				//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 				break;
 			}
 			else
-			{ //‘—Mó‘Ô‚ª‘—MÏˆÈŠO‚Ìê‡
-				//–¢‘—Mƒf[ƒ^ŠJnˆÊ’u‚É‘—Mƒf[ƒ^ƒIƒtƒZƒbƒg‚ğİ’è‚·‚é
+			{ //é€ä¿¡çŠ¶æ…‹ãŒé€ä¿¡æ¸ˆä»¥å¤–ã®å ´åˆ
+				//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®ã«é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¨­å®šã™ã‚‹
 				data_remain_start = it->send_offset;
-				//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚É–¢‘—Mƒf[ƒ^ƒTƒCƒY‚ğİ’è‚·‚é
+				//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 				data_remain_size = it->unsend_size;
-				//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+				//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 				break;
 			}
 		}
@@ -1404,21 +1404,21 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 		for (send_end_it_vec::iterator it = send_end_vec.begin(); it
 				!= send_end_vec.end(); ++it)
 		{
-			//‘—Mó‘ÔƒŠƒXƒg‚©‚çíœ‚·‚é
+			//é€ä¿¡çŠ¶æ…‹ãƒªã‚¹ãƒˆã‹ã‚‰å‰Šé™¤ã™ã‚‹
 			recv_data.send_status_list.erase(*it);
 		}
 
-		//ƒf[ƒ^ƒoƒbƒtƒ@cƒTƒCƒY@ƒ@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY
+		//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡æ®‹ã‚µã‚¤ã‚ºã€€ï¼œã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 		if (recv_data.recive_buffer_rest_size < request_data_size)
 		{
-			//ƒf[ƒ^ƒoƒbƒtƒ@MAXƒTƒCƒY@ƒ@–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY
+			//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡MAXã‚µã‚¤ã‚ºã€€ï¼œã€€æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 			if (recv_data.recive_buffer_max_size < data_remain_size
 					+ request_data_size)
 			{
 				if (recv_data.recive_buffer == NULL)
 				{
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚ğMAX_BUFFER_SIZE•ªA
-					//V‹K‚ÉŠm•Û‚µA‰Šú‰»‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã‚’MAX_BUFFER_SIZEåˆ†ã€
+					//æ–°è¦ã«ç¢ºä¿ã—ã€åˆæœŸåŒ–ã™ã‚‹
 					recv_data.recive_buffer1 = new char[MAX_BUFFER_SIZE];
 					/*-------- DEBUG LOG --------*/
 					if (LOG_LV_DEBUG == getloglevel())
@@ -1430,8 +1430,8 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 					}
 					/*-------- DEBUG LOG --------*/
 					memset(recv_data.recive_buffer1, 0, MAX_BUFFER_SIZE);
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚Q‚ğMAX_BUFFER_SIZE•ªA
-					//V‹K‚ÉŠm•Û‚µA‰Šú‰»‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã‚’MAX_BUFFER_SIZEåˆ†ã€
+					//æ–°è¦ã«ç¢ºä¿ã—ã€åˆæœŸåŒ–ã™ã‚‹
 					recv_data.recive_buffer2 = new char[MAX_BUFFER_SIZE];
 					/*-------- DEBUG LOG --------*/
 					if (LOG_LV_DEBUG == getloglevel())
@@ -1444,13 +1444,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 					/*-------- DEBUG LOG --------*/
 					memset(recv_data.recive_buffer2, 0, MAX_BUFFER_SIZE);
 					recv_data.recive_buffer = recv_data.recive_buffer1;
-					//ƒf[ƒ^ƒoƒbƒtƒ@MAXƒTƒCƒY‚ÉMAX_BUFFER_SIZE‚ğİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡MAXã‚µã‚¤ã‚ºã«MAX_BUFFER_SIZEã‚’è¨­å®šã™ã‚‹
 					recv_data.recive_buffer_max_size = MAX_BUFFER_SIZE;
 				}
 				else
 				{
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚ğu–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒYv•ªA
-					//V‹K‚ÉŠm•Û‚µA‰Šú‰»‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã‚’ã€Œæœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€åˆ†ã€
+					//æ–°è¦ã«ç¢ºä¿ã—ã€åˆæœŸåŒ–ã™ã‚‹
 					buffer1 = new char[data_remain_size + request_data_size];
 					/*-------- DEBUG LOG --------*/
 					if (LOG_LV_DEBUG == getloglevel())
@@ -1462,8 +1462,8 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 					}
 					/*-------- DEBUG LOG --------*/
 					memset(buffer1, 0, data_remain_size + request_data_size);
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚Q‚ğu–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒYv•ªA
-					//V‹K‚ÉŠm•Û‚µA‰Šú‰»‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã‚’ã€Œæœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€åˆ†ã€
+					//æ–°è¦ã«ç¢ºä¿ã—ã€åˆæœŸåŒ–ã™ã‚‹
 					buffer2 = new char[data_remain_size + request_data_size];
 					/*-------- DEBUG LOG --------*/
 					if (LOG_LV_DEBUG == getloglevel())
@@ -1497,11 +1497,11 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 					}
 					/*------DEBUG LOG END------*/
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚Ég—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚Ì–¢‘—Mƒf[ƒ^ŠJnˆÊ’u‚©‚ç–¢‘—Mƒf[ƒ^ƒTƒCƒY•ªİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã«ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®ã‹ã‚‰æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºåˆ†è¨­å®šã™ã‚‹
 					memcpy(buffer1,
 							recv_data.recive_buffer + data_remain_start,
 							data_remain_size);
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^‚ğƒTƒCƒY•ª’Ç‰Áİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’ã‚µã‚¤ã‚ºåˆ†è¿½åŠ è¨­å®šã™ã‚‹
 					memcpy(buffer1 + data_remain_size, recvbuffer.data(),
 							request_data_size);
 					/*-------- DEBUG LOG --------*/
@@ -1525,7 +1525,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 					}
 					/*------DEBUG LOG END------*/
-					//‹Œƒf[ƒ^ƒoƒbƒtƒ@‚PA‹Œƒf[ƒ^ƒoƒbƒtƒ@‚Q‚ğ‰ğ•ú‚·‚é
+					//æ—§ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã€æ—§ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã‚’è§£æ”¾ã™ã‚‹
 					if (recv_data.recive_buffer1 != NULL)
 					{
 						/*-------- DEBUG LOG --------*/
@@ -1556,16 +1556,16 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						recv_data.recive_buffer2 = NULL;
 					}
 
-					//g—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚Éƒf[ƒ^ƒoƒbƒtƒ@‚P‚ğİ’è‚·‚é
+					//ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã«ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã‚’è¨­å®šã™ã‚‹
 					recv_data.recive_buffer1 = buffer1;
 					recv_data.recive_buffer2 = buffer2;
 					recv_data.recive_buffer = recv_data.recive_buffer1;
-					//ƒf[ƒ^ƒoƒbƒtƒ@MAXƒTƒCƒY‚Éu–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒYv‚ğİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡MAXã‚µã‚¤ã‚ºã«ã€Œæœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€ã‚’è¨­å®šã™ã‚‹
 					recv_data.recive_buffer_max_size = data_remain_size
 							+ request_data_size;
 				}
 			}
-			//ƒf[ƒ^ƒoƒbƒtƒ@MAXƒTƒCƒY@†@–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY
+			//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡MAXã‚µã‚¤ã‚ºã€€â‰§ã€€æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 			else
 			{
 				if (recv_data.recive_buffer1 == NULL
@@ -1587,10 +1587,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 					/*------DEBUG LOG END------*/
 					return FINALIZE;
 				}
-				//g—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚ªƒf[ƒ^ƒoƒbƒtƒ@‚P‚Ìê‡
+				//ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ãŒãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã®å ´åˆ
 				if (recv_data.recive_buffer == recv_data.recive_buffer1)
 				{
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚Q‚ğ‰Šú‰»‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã‚’åˆæœŸåŒ–ã™ã‚‹
 					memset(recv_data.recive_buffer2, 0,
 							recv_data.recive_buffer_max_size);
 					/*-------- DEBUG LOG --------*/
@@ -1613,10 +1613,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 					}
 					/*------DEBUG LOG END------*/
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚Q‚Ég—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚Ì–¢‘—Mƒf[ƒ^ŠJnˆÊ’u‚©‚ç–¢‘—Mƒf[ƒ^ƒTƒCƒY•ªİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã«ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®ã‹ã‚‰æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºåˆ†è¨­å®šã™ã‚‹
 					memcpy(recv_data.recive_buffer2, recv_data.recive_buffer
 							+ data_remain_start, data_remain_size);
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚Q‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^‚ğƒTƒCƒY•ª’Ç‰Áİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’ã‚µã‚¤ã‚ºåˆ†è¿½åŠ è¨­å®šã™ã‚‹
 					memcpy(recv_data.recive_buffer2 + data_remain_size,
 							recvbuffer.data(), request_data_size);
 					/*-------- DEBUG LOG --------*/
@@ -1639,13 +1639,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 					}
 					/*------DEBUG LOG END------*/
-					//g—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚Éƒf[ƒ^ƒoƒbƒtƒ@‚Q‚ğİ’è‚·‚é
+					//ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã«ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã‚’è¨­å®šã™ã‚‹
 					recv_data.recive_buffer = recv_data.recive_buffer2;
 				}
-				//g—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚ªƒf[ƒ^ƒoƒbƒtƒ@‚Q‚Ìê‡
+				//ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ãŒãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼’ã®å ´åˆ
 				else
 				{
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚ğ‰Šú‰»‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã‚’åˆæœŸåŒ–ã™ã‚‹
 					memset(recv_data.recive_buffer1, 0,
 							recv_data.recive_buffer_max_size);
 					/*-------- DEBUG LOG --------*/
@@ -1668,10 +1668,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 					}
 					/*------DEBUG LOG END------*/
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚Ég—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚Ì–¢‘—Mƒf[ƒ^ŠJnˆÊ’u‚©‚ç–¢‘—Mƒf[ƒ^ƒTƒCƒY•ªİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã«ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®ã‹ã‚‰æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºåˆ†è¨­å®šã™ã‚‹
 					memcpy(recv_data.recive_buffer1, recv_data.recive_buffer
 							+ data_remain_start, data_remain_size);
-					//ƒf[ƒ^ƒoƒbƒtƒ@‚P‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^‚ğƒTƒCƒY•ª’Ç‰Áİ’è‚·‚é
+					//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’ã‚µã‚¤ã‚ºåˆ†è¿½åŠ è¨­å®šã™ã‚‹
 					memcpy(recv_data.recive_buffer1 + data_remain_size,
 							recvbuffer.data(), request_data_size);
 					/*-------- DEBUG LOG --------*/
@@ -1694,18 +1694,18 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 					}
 					/*------DEBUG LOG END------*/
-					//g—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚Éƒf[ƒ^ƒoƒbƒtƒ@‚P‚ğİ’è‚·‚é
+					//ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã«ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ï¼‘ã‚’è¨­å®šã™ã‚‹
 					recv_data.recive_buffer = recv_data.recive_buffer1;
 				}
 			}
 
-			//ƒf[ƒ^ƒoƒbƒtƒ@cƒTƒCƒY‚É
-			//uƒf[ƒ^ƒoƒbƒtƒ@MAXƒTƒCƒY@|@–¢‘—Mƒf[ƒ^ƒTƒCƒY@|@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒYv‚ğİ’è‚·‚é
+			//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡æ®‹ã‚µã‚¤ã‚ºã«
+			//ã€Œãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡MAXã‚µã‚¤ã‚ºã€€ï¼ã€€æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€ã‚’è¨­å®šã™ã‚‹
 			recv_data.recive_buffer_rest_size
 					= recv_data.recive_buffer_max_size - data_remain_size
 							- request_data_size;
 
-			//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚Éu–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒYv‚ğİ’è‚·‚é
+			//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ã€Œæœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€ã‚’è¨­å®šã™ã‚‹
 			data_remain_size += request_data_size;
 
 			send_status_it it_begin = recv_data.send_status_list.begin();
@@ -1713,11 +1713,11 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 
 			for (; it_begin != it_end; ++it_begin)
 			{
-				//‘—Mƒf[ƒ^ƒIƒtƒZƒbƒg‚©‚ç–¢‘—Mƒf[ƒ^ŠJnˆÊ’u‚ğŒ¸Z
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã‹ã‚‰æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿é–‹å§‹ä½ç½®ã‚’æ¸›ç®—
 				it->send_offset -= data_remain_start;
 			}
 		}
-		//ƒf[ƒ^ƒoƒbƒtƒ@cƒTƒCƒY@†@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY
+		//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡æ®‹ã‚µã‚¤ã‚ºã€€â‰§ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º
 		else
 		{
 			if (recv_data.recive_buffer == NULL)
@@ -1758,13 +1758,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 				putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
 			}
 			/*------DEBUG LOG END------*/
-			//g—p’†ƒf[ƒ^ƒoƒbƒtƒ@‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^‚ğƒTƒCƒY•ª’Ç‰Áİ’è‚·‚é
+			//ä½¿ç”¨ä¸­ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’ã‚µã‚¤ã‚ºåˆ†è¿½åŠ è¨­å®šã™ã‚‹
 			memcpy(recv_data.recive_buffer + recv_data.recive_buffer_max_size
 					- recv_data.recive_buffer_rest_size, recvbuffer.data(),
 					request_data_size);
-			//ƒf[ƒ^ƒoƒbƒtƒ@cƒTƒCƒY‚©‚çƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY‚ğŒ¸Z‚·‚é
+			//ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡æ®‹ã‚µã‚¤ã‚ºã‹ã‚‰ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 			recv_data.recive_buffer_rest_size -= request_data_size;
-			//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚Éu–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒYv‚ğİ’è‚·‚é
+			//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ã€Œæœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€ã‚’è¨­å®šã™ã‚‹
 			data_remain_size += request_data_size;
 		}
 
@@ -1773,69 +1773,69 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 
 		for (; it != it_end; ++it)
 		{
-			//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^ƒTƒCƒY‚ğİ’è‚·‚é
+			//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 			request_data_remain_size = request_data_size;
-			//‘—Mó‘Ô‚ª‘—MŒp‘±‚Ìê‡
+			//é€ä¿¡çŠ¶æ…‹ãŒé€ä¿¡ç¶™ç¶šã®å ´åˆ
 			if (it->status == SEND_CONTINUE)
 			{
-				//‘—Mƒf[ƒ^cƒTƒCƒY@„@ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€ï¼ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 				if (it->send_rest_size > request_data_remain_size)
 				{
-					//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+					//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 					it->send_possible_size = request_data_remain_size;
-					//‘—Mƒf[ƒ^cƒTƒCƒY‚©‚çƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğŒ¸Z‚·‚é
+					//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‹ã‚‰ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 					it->send_rest_size -= request_data_remain_size;
-					//‘—MÏƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->send_end_size = 0;
-					//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					request_data_remain_size = 0;
 				}
-				//‘—Mƒf[ƒ^cƒTƒCƒY@…@ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€â‰¦ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 				else
 				{
-					//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚É‘—Mƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+					//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 					it->send_possible_size = it->send_rest_size;
-					//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚©‚ç‘—Mƒf[ƒ^cƒTƒCƒY‚ğŒ¸Z‚·‚é
+					//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‹ã‚‰é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 					request_data_remain_size -= it->send_rest_size;
-					//‘—MÏƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->send_end_size = 0;
-					//‘—Mƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->send_rest_size = 0;
 				}
-				//•ÒW‹æ•ª‚É•ÒW‚È‚µ‚ğİ’è‚·‚é
+				//ç·¨é›†åŒºåˆ†ã«ç·¨é›†ãªã—ã‚’è¨­å®šã™ã‚‹
 				it->edit_division = EDIT_DIVISION_NO_EDIT;
-				//‘—Mó‘Ô‚É‘—M‘Ò‚ğİ’è‚·‚é
+				//é€ä¿¡çŠ¶æ…‹ã«é€ä¿¡å¾…ã‚’è¨­å®šã™ã‚‹
 				it->status = SEND_OK;
 			}
-			//‘—Mó‘Ô‚ª‘—M•s‰Â‚Ìê‡
+			//é€ä¿¡çŠ¶æ…‹ãŒé€ä¿¡ä¸å¯ã®å ´åˆ
 			else if (it->status == SEND_NG)
 			{
-				//HTTPƒƒ\ƒbƒh‚Ì‘Ã“–«‚ğƒ`ƒFƒbƒN‚·‚é
+				//HTTPãƒ¡ã‚½ãƒƒãƒ‰ã®å¦¥å½“æ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 				check_result = check_http_method(recv_data.recive_buffer
 						+ it->send_offset, data_remain_size);
-				//ƒ`ƒFƒbƒNŒ‹‰Ê‚ª³í‚Ìê‡
+				//ãƒã‚§ãƒƒã‚¯çµæœãŒæ­£å¸¸ã®å ´åˆ
 				if (check_result == CHECK_OK)
 				{
-					//HTTPƒo[ƒWƒ‡ƒ“‚Ì‘Ã“–«‚ğƒ`ƒFƒbƒN‚·‚é
+					//HTTPãƒãƒ¼ã‚¸ãƒ§ãƒ³ã®å¦¥å½“æ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 					check_result = check_http_version(recv_data.recive_buffer
 							+ it->send_offset, data_remain_size);
 				}
-				//ƒ`ƒFƒbƒNŒ‹‰Ê‚ª³í‚Ìê‡
+				//ãƒã‚§ãƒƒã‚¯çµæœãŒæ­£å¸¸ã®å ´åˆ
 				if (check_result == CHECK_OK)
 				{
-					//‘—M‰Â”\ƒf[ƒ^“à‚ÌHTTPƒwƒbƒ_‚ÌŠJnˆÊ’uAƒTƒCƒY‚ğæ“¾‚·‚é
+					//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿å†…ã®HTTPãƒ˜ãƒƒãƒ€ã®é–‹å§‹ä½ç½®ã€ã‚µã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
 					bret = find_http_header(recv_data.recive_buffer
 							+ it->send_offset, data_remain_size, http_header,
 							header_offset, header_offset_len);
-					//ŒŸõŒ‹‰Ê‚ªŠY“–‚ ‚è‚Ìê‡
+					//æ¤œç´¢çµæœãŒè©²å½“ã‚ã‚Šã®å ´åˆ
 					if (bret)
 					{
-						//HTTPƒwƒbƒ_iContentLengthj‚ğŒŸõ‚·‚é
+						//HTTPãƒ˜ãƒƒãƒ€ï¼ˆContentLengthï¼‰ã‚’æ¤œç´¢ã™ã‚‹
 						bret = find_http_header(recv_data.recive_buffer
 								+ it->send_offset, data_remain_size,
 								content_header, header_offset,
 								count_length_header_value);
-						//ŒŸõŒ‹‰Ê‚ªŠY“–‚ ‚è‚Ìê‡
+						//æ¤œç´¢çµæœãŒè©²å½“ã‚ã‚Šã®å ´åˆ
 						if (bret)
 						{
 							str_value.assign(recv_data.recive_buffer
@@ -1843,239 +1843,239 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 									count_length_header_value);
 							value = boost::lexical_cast<size_t>(
 									str_value.c_str());
-							//‘—Mƒf[ƒ^cƒTƒCƒY‚É
-							//uHTTPƒwƒbƒ_ƒTƒCƒY@{@ContentLengthv‚ğİ’è‚·‚é
+							//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«
+							//ã€ŒHTTPãƒ˜ãƒƒãƒ€ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ContentLengthã€ã‚’è¨­å®šã™ã‚‹
 							it->send_rest_size = header_offset_len + value;
 						}
-						//ŒŸõŒ‹‰Ê‚ªŠY“–‚È‚µ‚Ìê‡
+						//æ¤œç´¢çµæœãŒè©²å½“ãªã—ã®å ´åˆ
 						else
 						{
-							//‘—Mƒf[ƒ^cƒTƒCƒY‚É–¢‘—Mƒf[ƒ^ƒTƒCƒY + ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+							//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º + ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 							it->send_rest_size = it->unsend_size + request_data_remain_size;
 						}
-						//•ÒW‹æ•ª‚É•ÒW‚ ‚è‚ğİ’è‚·‚é
+						//ç·¨é›†åŒºåˆ†ã«ç·¨é›†ã‚ã‚Šã‚’è¨­å®šã™ã‚‹
 						it->edit_division = EDIT_DIVISION_EDIT;
 					}
-					//ŒŸõŒ‹‰Ê‚ªŠY“–‚È‚µ‚Ìê‡
+					//æ¤œç´¢çµæœãŒè©²å½“ãªã—ã®å ´åˆ
 					else
 					{
-						//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğ‰ÁZ‚·‚é
+						//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’åŠ ç®—ã™ã‚‹
 						data_remain_size += request_data_remain_size;
 						it->unsend_size = data_remain_size;
-						//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+						//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 						request_data_remain_size = 0;
-						//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+						//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 						break;
 					}
 				}
-				//ƒ`ƒFƒbƒNŒ‹‰Ê‚ªˆÙí‚Ìê‡
+				//ãƒã‚§ãƒƒã‚¯çµæœãŒç•°å¸¸ã®å ´åˆ
 				else if (check_result == CHECK_NG)
 				{
-					//•ÒW‹æ•ª‚É•ÒW‚È‚µ‚ğİ’è‚·‚é
+					//ç·¨é›†åŒºåˆ†ã«ç·¨é›†ãªã—ã‚’è¨­å®šã™ã‚‹
 					it->edit_division = EDIT_DIVISION_NO_EDIT;
-					//‘—Mƒf[ƒ^cƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+					//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 					it->send_rest_size = request_data_remain_size;
 				}
-				//ƒ`ƒFƒbƒNŒ‹‰Ê‚ª”»’è•s”\‚Ìê‡
+				//ãƒã‚§ãƒƒã‚¯çµæœãŒåˆ¤å®šä¸èƒ½ã®å ´åˆ
 				//check_result == CHECK_INPOSSIBLE
 				else
 				{
-					//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğ‰ÁZ‚·‚é
+					//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’åŠ ç®—ã™ã‚‹
 					data_remain_size += request_data_remain_size;
 					it->unsend_size = data_remain_size;
-					//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					request_data_remain_size = 0;
-					//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+					//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 					break;
 				}
 
-				//‘—Mƒf[ƒ^cƒTƒCƒY@„@–¢‘—Mƒf[ƒ^ƒTƒCƒY+ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€ï¼ã€€æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º+ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 				if (it->send_rest_size > data_remain_size
 						+ request_data_remain_size)
 				{
-					//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚É–¢‘—Mƒf[ƒ^ƒTƒCƒY{ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+					//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºï¼‹ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 					it->send_possible_size = data_remain_size
 							+ request_data_remain_size;
-					//‘—Mƒf[ƒ^cƒTƒCƒY‚©‚ç–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğŒ¸Z‚·‚é
+					//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‹ã‚‰æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 					it->send_rest_size -= (data_remain_size
 							+ request_data_remain_size);
-					//‘—MÏƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->send_end_size = 0;
-					//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->unsend_size = 0;
-					//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					request_data_remain_size = 0;
 				}
-				//‘—Mƒf[ƒ^cƒTƒCƒY@…@–¢‘—Mƒf[ƒ^ƒTƒCƒY@{@ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€â‰¦ã€€æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 				else
 				{
-					//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚É‘—Mƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+					//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 					it->send_possible_size = it->send_rest_size;
-					//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É
-					//u–¢‘—Mƒf[ƒ^ƒTƒCƒY{ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY|‘—Mƒf[ƒ^cƒTƒCƒYv‚ğİ’è‚·‚é
+					//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«
+					//ã€Œæœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºï¼‹ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºï¼é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€ã‚’è¨­å®šã™ã‚‹
 					request_data_remain_size = data_remain_size
 							+ request_data_remain_size - it->send_rest_size;
-					//‘—MÏƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->send_end_size = 0;
-					//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->unsend_size = 0;
-					//‘—Mƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					it->send_rest_size = 0;
 				}
 
-				//‘—Mó‘Ô‚É‘—M‘Ò‚ğİ’è‚·‚é
+				//é€ä¿¡çŠ¶æ…‹ã«é€ä¿¡å¾…ã‚’è¨­å®šã™ã‚‹
 				it->status = SEND_OK;
 			}
-			//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY@…@0
+			//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€â‰¦ã€€0
 			if (request_data_remain_size <= 0)
 			{
 				break;
 			}
 		}
 
-		//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY@„@0
+		//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€ï¼ã€€0
 		while (request_data_remain_size > 0)
 		{
-			//‘—Mó‘Ô‚ğ¶¬‚·‚é
+			//é€ä¿¡çŠ¶æ…‹ã‚’ç”Ÿæˆã™ã‚‹
 			send_status new_send_state;
-			//‘—Mó‘Ô‚É‘—M•s‰Â‚ğİ’è‚·‚é
+			//é€ä¿¡çŠ¶æ…‹ã«é€ä¿¡ä¸å¯ã‚’è¨­å®šã™ã‚‹
 			new_send_state.status = SEND_NG;
-			//‘—Mƒf[ƒ^ƒIƒtƒZƒbƒg‚ğİ’è‚·‚é
+			//é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¨­å®šã™ã‚‹
 			new_send_state.send_offset = recv_data.recive_buffer_max_size
 					- recv_data.recive_buffer_rest_size
 					- request_data_remain_size;
 
-			//HTTPƒƒ\ƒbƒh‚Ì‘Ã“–«‚ğƒ`ƒFƒbƒN‚·‚é
+			//HTTPãƒ¡ã‚½ãƒƒãƒ‰ã®å¦¥å½“æ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 			check_result = check_http_method(recv_data.recive_buffer
 					+ new_send_state.send_offset, request_data_remain_size);
-			//ƒ`ƒFƒbƒNŒ‹‰Ê‚ª³í‚Ìê‡
+			//ãƒã‚§ãƒƒã‚¯çµæœãŒæ­£å¸¸ã®å ´åˆ
 			if (check_result == CHECK_OK)
 			{
-				//HTTPƒo[ƒWƒ‡ƒ“‚Ì‘Ã“–«‚ğƒ`ƒFƒbƒN‚·‚é
+				//HTTPãƒãƒ¼ã‚¸ãƒ§ãƒ³ã®å¦¥å½“æ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 				check_result = check_http_version(recv_data.recive_buffer
 						+ new_send_state.send_offset, request_data_remain_size);
 			}
-			//ƒ`ƒFƒbƒNŒ‹‰Ê‚ª³í‚Ìê‡
+			//ãƒã‚§ãƒƒã‚¯çµæœãŒæ­£å¸¸ã®å ´åˆ
 			if (check_result == CHECK_OK)
 			{
-				//‘—M‰Â”\ƒf[ƒ^“à‚ÌHTTPƒwƒbƒ_‚ÌŠJnˆÊ’uAƒTƒCƒY‚ğæ“¾‚·‚é
-				bret = find_http_header(recvbuffer.data() + request_data_size
-						- request_data_remain_size, request_data_remain_size,
+				//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿å†…ã®HTTPãƒ˜ãƒƒãƒ€ã®é–‹å§‹ä½ç½®ã€ã‚µã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
+				bret = find_http_header(recv_data.recive_buffer
+					+ new_send_state.send_offset, request_data_remain_size,
 						http_header, header_offset, header_offset_len);
-				//ŒŸõŒ‹‰Ê‚ªŠY“–‚ ‚è‚Ìê‡
+				//æ¤œç´¢çµæœãŒè©²å½“ã‚ã‚Šã®å ´åˆ
 				if (bret)
 				{
-					//HTTPƒwƒbƒ_iContentLengthj‚ğŒŸõ‚·‚é
-					bret = find_http_header(recvbuffer.data()
-							+ request_data_size - request_data_remain_size,
+					//HTTPãƒ˜ãƒƒãƒ€ï¼ˆContentLengthï¼‰ã‚’æ¤œç´¢ã™ã‚‹
+					bret = find_http_header(recv_data.recive_buffer
+					+ new_send_state.send_offset,
 							request_data_remain_size, content_header,
 							header_offset, count_length_header_value);
 					str_value.assign(recv_data.recive_buffer + it->send_offset
 							+ header_offset, count_length_header_value);
 					value = boost::lexical_cast<size_t>(str_value.c_str());
-					//ŒŸõŒ‹‰Ê‚ªŠY“–‚ ‚è‚Ìê‡
+					//æ¤œç´¢çµæœãŒè©²å½“ã‚ã‚Šã®å ´åˆ
 					if (bret)
 					{
-						//‘—Mƒf[ƒ^cƒTƒCƒY‚É
-						//uHTTPƒwƒbƒ_ƒTƒCƒY@{@ContentLengthv‚ğİ’è‚·‚é
+						//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«
+						//ã€ŒHTTPãƒ˜ãƒƒãƒ€ã‚µã‚¤ã‚ºã€€ï¼‹ã€€ContentLengthã€ã‚’è¨­å®šã™ã‚‹
 						new_send_state.send_rest_size = header_offset_len
 								+ value;
 					}
-					//ŒŸõŒ‹‰Ê‚ªŠY“–‚È‚µ‚Ìê‡
+					//æ¤œç´¢çµæœãŒè©²å½“ãªã—ã®å ´åˆ
 					else
 					{
-						//‘—Mƒf[ƒ^cƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+						//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 						new_send_state.send_rest_size = request_data_remain_size;
 					}
-					//•ÒW‹æ•ª‚É•ÒW‚ ‚è‚ğİ’è‚·‚é
+					//ç·¨é›†åŒºåˆ†ã«ç·¨é›†ã‚ã‚Šã‚’è¨­å®šã™ã‚‹
 					new_send_state.edit_division = EDIT_DIVISION_EDIT;
 				}
-				//ŒŸõŒ‹‰Ê‚ªŠY“–‚È‚µ‚Ìê‡
+				//æ¤œç´¢çµæœãŒè©²å½“ãªã—ã®å ´åˆ
 				else
 				{
-					//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+					//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 					new_send_state.unsend_size = request_data_remain_size;
-					//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+					//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 					request_data_remain_size = 0;
-					//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+					//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 					break;
 				}
 			}
-			//ƒ`ƒFƒbƒNŒ‹‰Ê‚ªˆÙí‚Ìê‡
+			//ãƒã‚§ãƒƒã‚¯çµæœãŒç•°å¸¸ã®å ´åˆ
 			else if (check_result == CHECK_NG)
 			{
-				//•ÒW‹æ•ª‚É•ÒW‚È‚µ‚ğİ’è‚·‚é
+				//ç·¨é›†åŒºåˆ†ã«ç·¨é›†ãªã—ã‚’è¨­å®šã™ã‚‹
 				new_send_state.edit_division = EDIT_DIVISION_NO_EDIT;
-				//‘—Mƒf[ƒ^cƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 				new_send_state.send_rest_size = request_data_remain_size;
 			}
-			//ƒ`ƒFƒbƒNŒ‹‰Ê‚ª”»’è•s”\‚Ìê‡
+			//ãƒã‚§ãƒƒã‚¯çµæœãŒåˆ¤å®šä¸èƒ½ã®å ´åˆ
 			//check_result == CHECK_INPOSSIBLE
 			else
 			{
-				//–¢‘—Mƒf[ƒ^ƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğ‰ÁZ‚·‚é
+				//æœªé€ä¿¡ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’åŠ ç®—ã™ã‚‹
 				new_send_state.unsend_size = request_data_remain_size;
-				//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+				//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 				request_data_remain_size = 0;
-				//ŒJ‚è•Ô‚µˆ—‚ğI—¹‚·‚é
+				//ç¹°ã‚Šè¿”ã—å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 				break;
 			}
 
-			//‘—Mƒf[ƒ^cƒTƒCƒY@„@ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+			//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€ï¼ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 			if (new_send_state.send_rest_size > request_data_remain_size)
 			{
-				//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚ÉƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+				//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 				new_send_state.send_possible_size = request_data_remain_size;
-				//‘—Mƒf[ƒ^cƒTƒCƒY‚©‚çƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚ğŒ¸Z‚·‚é
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‹ã‚‰ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 				new_send_state.send_rest_size -= request_data_remain_size;
-				//‘—MÏƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+				//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 				new_send_state.send_end_size = 0;
-				//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+				//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 				request_data_remain_size = 0;
 			}
-			//‘—Mƒf[ƒ^cƒTƒCƒY@…@ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY
+			//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã€€â‰¦ã€€ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚º
 			else
 			{
-				//‘—M‰Â”\ƒf[ƒ^ƒTƒCƒY‚É‘—Mƒf[ƒ^cƒTƒCƒY‚ğİ’è‚·‚é
+				//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 				new_send_state.send_possible_size
 						= new_send_state.send_rest_size;
-				//ƒŠƒNƒGƒXƒgƒf[ƒ^cƒTƒCƒY‚©‚ç‘—Mƒf[ƒ^cƒTƒCƒY‚ğŒ¸Z‚·‚é
+				//ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‹ã‚‰é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã‚’æ¸›ç®—ã™ã‚‹
 				request_data_remain_size -= new_send_state.send_rest_size;
-				//‘—MÏƒf[ƒ^ƒTƒCƒY‚É0‚ğİ’è‚·‚é
+				//é€ä¿¡æ¸ˆãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 				new_send_state.send_end_size = 0;
-				//‘—Mƒf[ƒ^cƒTƒCƒY‚É0‚ğİ’è‚·‚é
+				//é€ä¿¡ãƒ‡ãƒ¼ã‚¿æ®‹ã‚µã‚¤ã‚ºã«0ã‚’è¨­å®šã™ã‚‹
 				new_send_state.send_rest_size = 0;
 			}
 
-			//‘—Mó‘Ô‚É‘—M‘Ò‚ğİ’è‚·‚é
+			//é€ä¿¡çŠ¶æ…‹ã«é€ä¿¡å¾…ã‚’è¨­å®šã™ã‚‹
 			new_send_state.status = SEND_OK;
-			//‘—Mó‘ÔƒŠƒXƒg‚É‘—Mó‘Ô‚ğİ’è‚·‚é
+			//é€ä¿¡çŠ¶æ…‹ãƒªã‚¹ãƒˆã«é€ä¿¡çŠ¶æ…‹ã‚’è¨­å®šã™ã‚‹
 			recv_data.send_status_list.push_back(new_send_state);
 		}
 
-		//‘—M‰Â”\ƒf[ƒ^‚ ‚è‚ğƒ`ƒFƒbƒN
+		//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Šã‚’ãƒã‚§ãƒƒã‚¯
 		send_status_it it_find = find_if(recv_data.send_status_list.begin(),
 				recv_data.send_status_list.end(), has_send_possible_data());
-		//‘—M‰Â”\ƒf[ƒ^‚ ‚è
+		//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ã‚ã‚Š
 		if (it_find != recv_data.send_status_list.end())
 		{
-			//sorryó‘Ô‚Ìê‡
+			//sorryçŠ¶æ…‹ã®å ´åˆ
 			if (session_data->sorry_flag == SORRY_FLAG_ON)
 			{
-				//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+				//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 				status = SORRYSERVER_CONNECT;
 			}
-			//sorryó‘ÔˆÈŠO‚Ìê‡
+			//sorryçŠ¶æ…‹ä»¥å¤–ã®å ´åˆ
 			else
 			{
-				//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+				//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 				status = REALSERVER_CONNECT;
 			}
 		}
-		//‘—M‰Â”\ƒf[ƒ^‚È‚µ
+		//é€ä¿¡å¯èƒ½ãƒ‡ãƒ¼ã‚¿ãªã—
 		else
 		{
-			//‘JˆÚæƒXƒe[ƒ^ƒX‚ğİ’è‚·‚é
+			//é·ç§»å…ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’è¨­å®šã™ã‚‹
 			status = CLIENT_RECV;
 		}
 	} catch (const std::bad_alloc&)
