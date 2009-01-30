@@ -35,7 +35,7 @@ void	construcor_test(){
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
-	test_suite* ts = BOOST_TEST_SUITE( "l7vs::data_buff_base class test" );
+	test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_thread_message class test" );
 
 	ts->add( BOOST_TEST_CASE( &construcor_test ) );
 
