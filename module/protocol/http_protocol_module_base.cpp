@@ -5,8 +5,6 @@
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
-#include <iostream>
-#include <vector>
 #include <boost/xpressive/xpressive.hpp>
 
 #include "http_protocol_module_base.h"
@@ -46,17 +44,24 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			memcpy( check_string, buffer, line_length );
-
-			check_string[line_length] = '\0';
-
-			if( !regex_match( check_string, method_regex )){
+			if( check_string != NULL ){
+				memcpy( check_string, buffer, line_length );
+	
+				check_string[line_length] = '\0';
+	
+				if( !regex_match( check_string, method_regex )){
+	
+					check_result = CHECK_NG;
+	
+				}
+	
+				free( check_string );
+			}
+			else{
 
 				check_result = CHECK_NG;
 
 			}
-
-			free( check_string );
 
 		}
 		else{
@@ -111,18 +116,27 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			memcpy( check_string, buffer, line_length );
+			if( check_string != NULL ){
 
-			check_string[line_length] = '\0';
+				memcpy( check_string, buffer, line_length );
+	
+				check_string[line_length] = '\0';
+	
+				if( !regex_match( check_string, version_regex_request ) &&
+					!regex_match( check_string, version_regex_response ) ){
+	
+					check_result = CHECK_NG;
+	
+				}
+	
+				free( check_string );
 
-			if( !regex_match( check_string, version_regex_request ) &&
-				!regex_match( check_string, version_regex_response ) ){
+			}
+			else{
 
 				check_result = CHECK_NG;
 
 			}
-
-			free( check_string );
 
 		}
 		else{
@@ -172,17 +186,26 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			memcpy( check_string, buffer, line_length );
+			if( check_string != NULL ){
 
-			check_string[line_length] = '\0';
+				memcpy( check_string, buffer, line_length );
+	
+				check_string[line_length] = '\0';
+	
+				if( !regex_match( check_string, status_code_regex )){
+	
+					check_result = CHECK_NG;
+	
+				}
+	
+				free( check_string );
 
-			if( !regex_match( check_string, status_code_regex )){
+			}
+			else{
 
 				check_result = CHECK_NG;
 
 			}
-
-			free( check_string );
 
 		}
 		else{
@@ -236,21 +259,30 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 			find_string = (char*)malloc( line_length + 1 );
 
-			memcpy( find_string, buffer, line_length );
+			if( find_string != NULL ){
 
-			find_string[line_length] = '\0';
-
-			find_result = regex_search( find_string, result, uri_regex );
-
-			if( find_result == true ){
-
-				uri_offset	= result.position(1);
-
-				uri_len		= result.length(1);
+				memcpy( find_string, buffer, line_length );
+	
+				find_string[line_length] = '\0';
+	
+				find_result = regex_search( find_string, result, uri_regex );
+	
+				if( find_result == true ){
+	
+					uri_offset	= result.position(1);
+	
+					uri_len		= result.length(1);
+	
+				}
+	
+				free( find_string );
 
 			}
+			else{
 
-			free( find_string );
+				find_result = false;
+
+			}
 
 		}
 		else{
@@ -304,21 +336,30 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 			find_string = (char*)malloc( line_length + 1 );
 
-			memcpy( find_string, buffer, line_length );
+			if( find_string != NULL ){
 
-			find_string[line_length] = '\0';
-
-			find_result = regex_search( find_string, result, status_code_regex );
-
-			if( find_result == true ){
-
-				status_code_offset	= result.position(1);
-
-				status_code_len		= result.length(1);
+				memcpy( find_string, buffer, line_length );
+	
+				find_string[line_length] = '\0';
+	
+				find_result = regex_search( find_string, result, status_code_regex );
+	
+				if( find_result == true ){
+	
+					status_code_offset	= result.position(1);
+	
+					status_code_len		= result.length(1);
+	
+				}
+	
+				free( find_string );
 
 			}
+			else{
 
-			free( find_string );
+				find_result = false;
+
+			}
 
 		}
 		else{
@@ -405,51 +446,60 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 			find_string = (char*)malloc( header_length + 1 );
 
-			memcpy( find_string, buffer + header_begin, header_length );
+			if( find_string != NULL ){
 
-			find_string[header_length] = '\0';
-
-			if( http_header_name.length() > 0 ){
-
-				http_header_regex = _ln >> (s1 = http_header_name >> _ >> _s >> *~_ln);
-
-				find_result = regex_search( find_string, result, http_header_regex );
-
-				if( find_result == true ){
-
-					http_header_offset	= result.position(1) + header_begin;
-					http_header_len		= result.length(1);
-
+				memcpy( find_string, buffer + header_begin, header_length );
+	
+				find_string[header_length] = '\0';
+	
+				if( http_header_name.length() > 0 ){
+	
+					http_header_regex = _ln >> (s1 = http_header_name >> _ >> _s >> *~_ln);
+	
+					find_result = regex_search( find_string, result, http_header_regex );
+	
+					if( find_result == true ){
+	
+						http_header_offset	= result.position(1) + header_begin;
+						http_header_len		= result.length(1);
+	
+					}
 				}
+				else{
+	
+					http_header_regex = _ln >> (s1 = *_ >> ~_ln) >> repeat<2>(_ln);
+	
+					find_result = regex_search( find_string, result, http_header_regex );
+	
+					if( find_result == true ){
+	
+						http_header_offset	= result.position(1) + header_begin;
+						http_header_len		= result.length(1);
+	
+					}
+					else{
+	
+						http_header_regex = _ln >> (s1 = _ln);
+	
+						find_result = regex_search( find_string, result, http_header_regex );
+	
+						if( find_result == true ){
+	
+							http_header_offset	= result.position(1) + header_begin;
+							http_header_len		= 0;
+	
+						}
+					}
+				}
+	
+				free( find_string );
+
 			}
 			else{
 
-				http_header_regex = _ln >> (s1 = *_ >> ~_ln) >> repeat<2>(_ln);
+				find_result	= false;
 
-				find_result = regex_search( find_string, result, http_header_regex );
-
-				if( find_result == true ){
-
-					http_header_offset	= result.position(1) + header_begin;
-					http_header_len		= result.length(1);
-
-				}
-				else{
-
-					http_header_regex = _ln >> (s1 = _ln);
-
-					find_result = regex_search( find_string, result, http_header_regex );
-
-					if( find_result == true ){
-
-						http_header_offset	= result.position(1) + header_begin;
-						http_header_len		= 0;
-
-					}
-				}
 			}
-
-			free( find_string );
 
 		}
 		else{
@@ -467,5 +517,3 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 	return find_result;
 
 }
-
-
