@@ -1,4 +1,3 @@
-
 #define	TEST_CASE
 
 #include <boost/test/included/unit_test.hpp>

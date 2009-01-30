@@ -6,7 +6,7 @@
 TARGET		= tcp_thread_message_que_test_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
-INCLUDES	=	-I../../../logger \
+INCLUDES	=	-I../logger_stb \
 				-I../../../parameter \
 				-I./ \
 				-I../../../src \
@@ -18,6 +18,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
+			../logger_stb/logger.cpp \
 			tcp_thread_message_que_test.cpp
 #			../../../src/tcp_thread_message.cpp \
 #			../../../src/tcp_thread_message_que.cpp \
