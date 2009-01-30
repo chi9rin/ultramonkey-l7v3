@@ -249,51 +249,6 @@ void	l7vs::tcp_session::down_thread_run(void){
 	std::cout << "DOWN:STOP(" << i << ")" << std::endl;
 }
 
-// void	thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist);
-// 
-// void	up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_get_distination_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type);
-// void	up_thread_all_socket_close(void);
-// 
-// void	down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_client_connection_chk_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type);
-// void	down_thread_all_socket_close(void);
-
 
 l7vs::udp_session::udp_session(virtualservice_udp& vs, boost::asio::io_service& session_io) :	io( session_io ),
 																								parent_service( vs ),

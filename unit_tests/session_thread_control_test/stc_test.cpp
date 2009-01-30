@@ -130,8 +130,6 @@ void	stc_method_test2(){
 	l7vs::virtualservice_tcp	tcpservice( vsd, rep, element );
 	session_type	session( new l7vs::tcp_session( tcpservice, dispatcher ) );
 	stc_type		stc( new l7vs::session_thread_control( session ) );
-// 	session->set_upthread_stop( boost::bind( &l7vs::session_thread_control::stopupstream, stc ) );
-// 	session->set_downthread_stop( boost::bind( &l7vs::session_thread_control::stopdownstream, stc ) );
 
 
 // unit_test[12]  のぼりスレッドとくだりスレッドを開始し、順番に停止する(sessionループは自然に終了)
