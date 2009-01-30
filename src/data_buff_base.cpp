@@ -10,6 +10,7 @@
 //
 
 #include "data_buff_base.h"
+#include "logger.h"
 
 namespace l7vs{
 

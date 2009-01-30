@@ -10,17 +10,16 @@
 //
 
 #include "tcp_thread_message.h"
+#include "logger.h"
  
 namespace l7vs{
 
 	//! construcor
 	tcp_thread_message::tcp_thread_message(){
-		
 	}
 	
 	//! destructor
 	tcp_thread_message::~tcp_thread_message(){
-		
 	}
 	
 }// namespace l7vs

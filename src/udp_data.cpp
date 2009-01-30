@@ -10,6 +10,7 @@
 //
 
 #include "udp_data.h"
+#include "logger.h"
 
 namespace l7vs{
 	//! construcor
