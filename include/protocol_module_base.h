@@ -168,7 +168,9 @@ public:
 	//! @return		session use EVENT mode.
 	virtual	EVENT_TAG	handle_session_initialize(
 									const boost::thread::id up_thread_id,
-									const boost::thread::id down_thread_id ) = 0;
+									const boost::thread::id down_thread_id,
+									const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+									const boost::asio::ip::udp::endpoint& client_endpoint_udp ) = 0;
 
 	//! called from session finalize use in upstream thread.
 	//! @param[in]	upstream thread id.
