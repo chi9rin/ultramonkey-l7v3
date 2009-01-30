@@ -106,7 +106,7 @@ void	initialize_test(){
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
-	test_suite* ts = BOOST_TEST_SUITE( "l7vs::data_buff_base class test" );
+	test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_data class test" );
 
 	tcp_data_test test;
 	std::cout << test.b_construcor_call_chk;
