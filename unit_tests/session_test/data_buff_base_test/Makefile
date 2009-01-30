@@ -6,7 +6,7 @@
 TARGET		= data_buff_base_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
-INCLUDES	=	-I../../../logger \
+INCLUDES	=	-I../logger_stb \
 				-I../../../parameter \
 				-I./ \
 				-I../../../src \
@@ -18,6 +18,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
+			../logger_stb/logger.cpp \
 			../../../src/data_buff_base.cpp \
 			data_buff_base_test.cpp
 
