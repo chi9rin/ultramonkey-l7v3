@@ -155,7 +155,33 @@ void	thread_test(){
 	BOOST_MESSAGE( "----- thread_test start -----" );
 	
 	boost::thread	thd1( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_LIST ) );
-	//boost::thread	thd2( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_ADD_VS ) );
+	boost::thread	thd2( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_LIST_VERBOSE ) );
+	boost::thread	thd3( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_LIST_KEY ) );
+	boost::thread	thd4( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_ADD_VS ) );
+	boost::thread	thd5( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_DEL_VS ) );
+	boost::thread	thd6( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_EDIT_VS ) );
+	boost::thread	thd7( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_FLUSH_VS ) );
+	boost::thread	thd8( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_ADD_RS ) );
+	boost::thread	thd9( boost::bind( &cmd_thread, l7vs::l7vsadm_request::CMD_DEL_RS ) );
+
+
+
+		CMD_NONE = 0,
+		CMD_LIST,               //!< List command(-l,--list)
+		CMD_LIST_VERBOSE,       //!< Verbose list command(-V,--verbose)
+		CMD_LIST_KEY,           //!< Key list command(-K, --key)
+		CMD_ADD_VS,             //!< Add VirtualService command(-A,--add-service)
+		CMD_DEL_VS,             //!< Delete VirtualService command(-D, --delete-service)
+		CMD_EDIT_VS,            //!< Edit VirtualService command(-E, --edit-service)
+		CMD_FLUSH_VS,           //!< Flush VirtualService command(-C, --flush)
+		CMD_ADD_RS,             //!< Add RealServer command(-a, --add-server)
+		CMD_DEL_RS,             //!< Delete RealServer command(-d, --delete-server)
+		CMD_EDIT_RS,            //!< Edit RealServer command(-e.--edit-server)
+		CMD_REPLICATION,        //!< Replication command(-R, --replication)
+		CMD_LOG,                //!< Logger command(-L, -log)
+		CMD_SNMP,               //!< SNMPAgent command(-S, --snmp)
+		CMD_PARAMETER,          //!< Parameter command(-P, --parameter)
+		CMD_HELP,               //!< Help command(-h, --help)
 
 	std::cout << "join" << std::endl;
 	thd1.join();

@@ -20,10 +20,6 @@ command_receiver::command_receiver( boost::asio::io_service& io_service, const s
 		:	dispatcher( io_service ),
 			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) ),
 			vsd( parent ){
-
-	//debug
-	std::cout << "receiver_const" << std::endl;
-
 	sockfile = file;
 
 	// create command_session for first acception.
@@ -45,17 +41,10 @@ command_receiver::~command_receiver(){
 //!	@param[in]	command session
 //!	@param[in]	error code
 void	command_receiver::handle_accept( command_session::command_session_ptr session, const boost::system::error_code& err ){
-	//debug
-	std::cout << "handle_accept" << std::endl;
-
 	// check async_accept() result.
 	if ( !err ) {
 		// command_session start.
 		session->start();
-
-		//debug
-		sleep(1);
-
 		// create command_session for next acception.
 		session.reset( new command_session( dispatcher, vsd ) );
 		// start an asynchronous accept for next.
@@ -66,9 +55,6 @@ void	command_receiver::handle_accept( command_session::command_session_ptr sessi
 									boost::asio::placeholders::error) );
 
 	} else {
-		//debug
-		std::cout << "handle_accept_error" <<  err << std::endl;
-		
 		// start an asynchronous accept for retry.
 		acceptor_.async_accept(	session->socket(),
 								boost::bind(&command_receiver::handle_accept,

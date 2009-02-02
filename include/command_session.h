@@ -81,8 +81,6 @@ protected:
 	//!	@brief		execute request command
 	void	execute_command();
 
-	//~command_session();
-
 public:
 	//!	@brief		constructor
 	//!	@param[in]	io_service
