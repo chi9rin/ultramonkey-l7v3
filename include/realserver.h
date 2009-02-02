@@ -65,12 +65,29 @@ public:
 		return rselem1.weight < rselem2.weight;
 	}
 
-	void	increment_active();
-	void	decrement_active();
-	void	increment_inact();
-	int		get_active();
-	int		get_inact();
-
+	void	increment_active(){
+		nactive++;
+		if ( nactive == INT_MAX ){
+			nactive = 0;
+		}
+	}
+	void	decrement_active(){
+		if ( nactive > 0 ){
+			nactive--;
+		}
+	}
+	void	increment_inact(){
+		ninact++;
+		if ( ninact == INT_MAX ){
+			ninact = 0;
+		}
+	}
+	int		get_active(){
+		return nactive;
+	}
+	int		get_inact(){
+		return ninact;
+	}
 };
 
 

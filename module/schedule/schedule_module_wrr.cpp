@@ -54,18 +54,18 @@ bool	schedule_module_weighted_round_robin::is_udp(){ return true; }
 //!	@param[in]	list iterator next function object
 //! @param[out]	scheduled TCP/IP endpoint
 void	schedule_module_weighted_round_robin::handle_schedule(
-							boost::thread::id				thread_id,
-							rslist_iterator_func_type		inlist_begin,
-							rslist_iterator_func_type		inlist_end,
-							rslist_iterator_func_type		inlist_next,
-							boost::asio::ip::tcp::endpoint&	outendpoint ){
+							boost::thread::id					thread_id,
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next,
+							boost::asio::ip::tcp::endpoint&		outendpoint ){
 	boost::asio::ip::tcp::endpoint	tcp_local_endpoint ;
 	rslist_type::iterator			itr;
 
 	//! set clear data as NULL
 	outendpoint = tcp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() ){
+	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
@@ -93,11 +93,11 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 			vs_weights.currentWeight = vs_weights.maxWeight;
 		}
 
-		for ( itr = inlist_begin(); itr != inlist_end(); itr++ ){
+		for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 			if ( itr->weight > 0 ){
 				//! prev endpoint
 				if ( tcp_endpoint == itr->tcp_endpoint ){
-					itr++;
+					itr = inlist_next( itr );
 					break;
 				}
 			}
@@ -108,7 +108,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	}
 
 	for ( ; ; ){
-		for ( ; itr != inlist_end(); itr++ ){
+		for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 			if ( itr->weight >= vs_weights.currentWeight ){
 				//! set found data
 				tcp_endpoint = outendpoint = itr->tcp_endpoint;
@@ -132,18 +132,18 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 //!	@param[in]	list iterator next function object
 //! @param[out]	scheduled UDP endpoint
 void	schedule_module_weighted_round_robin::handle_schedule(
-							boost::thread::id				thread_id,
-							rslist_iterator_func_type		inlist_begin,
-							rslist_iterator_func_type		inlist_end,
-							rslist_iterator_func_type		inlist_next,
-							boost::asio::ip::udp::endpoint&	outendpoint ){
+							boost::thread::id					thread_id,
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next,
+							boost::asio::ip::udp::endpoint&		outendpoint ){
 	boost::asio::ip::udp::endpoint	udp_local_endpoint ;
 	rslist_type::iterator			itr;
 
 	//! set clear data as NULL
 	outendpoint = udp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() ){
+	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
@@ -171,11 +171,11 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 			vs_weights.currentWeight = vs_weights.maxWeight;
 		}
 
-		for ( itr = inlist_begin(); itr != inlist_end(); itr++ ){
+		for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 			if ( itr->weight > 0 ){
 				//! prev endpoint
 				if ( udp_endpoint == itr->udp_endpoint ){
-					itr++;
+					itr = inlist_next( itr );
 					break;
 				}
 			}
@@ -186,7 +186,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	}
 
 	for ( ; ; ){
-		for ( ; itr != inlist_end(); itr++ ){
+		for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 			if ( itr->weight >= vs_weights.currentWeight ){
 				//! set found data
 				udp_endpoint = outendpoint = itr->udp_endpoint;
@@ -209,9 +209,9 @@ void	schedule_module_weighted_round_robin::replication_interrupt(){}
 
 
 int		schedule_module_weighted_round_robin::sched_wrr_service_init(
-							rslist_iterator_func_type	inlist_begin,
-							rslist_iterator_func_type	inlist_end,
-							rslist_iterator_func_type	inlist_next ){
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next ){
 
 	vs_weights.maxWeight = sched_wrr_getMaxWeight( inlist_begin, inlist_end, inlist_next );
 	if ( vs_weights.maxWeight <= 0 ){
@@ -227,13 +227,13 @@ int		schedule_module_weighted_round_robin::sched_wrr_service_init(
 
 
 int		schedule_module_weighted_round_robin::sched_wrr_getMaxWeight(
-							rslist_iterator_func_type	inlist_begin,
-							rslist_iterator_func_type	inlist_end,
-							rslist_iterator_func_type	inlist_next ){
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next ){
 	int					weight = 0;
 	rslist_type::iterator	itr;
 
-	for ( itr = inlist_begin(); itr != inlist_end(); itr++ ){
+	for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 		//! keep max weight of list
 		if ( itr->weight > weight ){
 			weight = itr->weight;
@@ -260,13 +260,13 @@ int		schedule_module_weighted_round_robin::sched_wrr_gcd( int a, int b ){
 }
 
 int		schedule_module_weighted_round_robin::sched_wrr_getGCD(
-							rslist_iterator_func_type	inlist_begin,
-							rslist_iterator_func_type	inlist_end,
-							rslist_iterator_func_type	inlist_next ){
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next ){
 	int					current_gcd = 1;
 	rslist_type::iterator	itr;
 
-	for ( itr = inlist_begin(); itr != inlist_end(); itr++ ){
+	for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 		//! keep first data of list
 		if ( itr->weight > 0 ){
 			current_gcd = itr->weight;
@@ -278,7 +278,7 @@ int		schedule_module_weighted_round_robin::sched_wrr_getGCD(
 		return -1;
 	}
 
-	for ( ; itr != inlist_end(); itr++ ){
+	for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 		if ( itr->weight > 0 ){
 			current_gcd = sched_wrr_gcd( current_gcd, itr->weight );
 		}

@@ -35,7 +35,11 @@ public:
 	typedef	std::list<l7vs::realserver>
 									rslist_type;
 	typedef	boost::function< rslist_type::iterator (void)>
-									rslist_iterator_func_type;
+									rslist_iterator_begin_func_type;
+	typedef	boost::function< rslist_type::iterator (void)>
+									rslist_iterator_end_func_type;
+	typedef	boost::function< rslist_type::iterator (rslist_type::iterator)>
+									rslist_iterator_next_func_type;
 public:
 	//!	constractor
 	schedule_module_base( std::string in_modulename ) : module_base( in_modulename ) {};
@@ -51,9 +55,9 @@ public:
 	//! @param[out]	scheduled TCP/IP endpoint
 	virtual	void	handle_schedule(
 										boost::thread::id,
-										rslist_iterator_func_type,
-										rslist_iterator_func_type,
-										rslist_iterator_func_type,
+										rslist_iterator_begin_func_type,
+										rslist_iterator_end_func_type,
+										rslist_iterator_next_func_type,
 										boost::asio::ip::tcp::endpoint&) = 0;
 
 	//! handle schedule calles then schedule function for UDP endpoint
@@ -64,9 +68,9 @@ public:
 	//! @param[out]	scheduled UDP endpoint
 	virtual	void	handle_schedule(
 										boost::thread::id,
-										rslist_iterator_func_type,
-										rslist_iterator_func_type,
-										rslist_iterator_func_type,
+										rslist_iterator_begin_func_type,
+										rslist_iterator_end_func_type,
+										rslist_iterator_next_func_type,
 										boost::asio::ip::udp::endpoint&) = 0;
 
 };

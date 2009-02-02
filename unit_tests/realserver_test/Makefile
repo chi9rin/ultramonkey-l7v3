@@ -22,7 +22,6 @@ AR			= ar
 ARFLAGS		= cru
 
 SRCS		=	\
-			../../src/realserver.cpp \
 			realserver_test.cpp
 
 PARAMETER_SRCS	=	\

@@ -4,7 +4,7 @@
 #
 #
 #TARGET		= schedule_module_rr.so schedule_module_ut
-TARGET		= schedule_module_rr.so schedule_module_wrr.so schedule_module_lc.so schedule_module_rr_ut schedule_module_wrr_ut  schedule_module_lc_ut
+TARGET		= sched_schedule_module_rr.so sched_schedule_module_wrr.so sched_schedule_module_lc.so schedule_module_rr_ut schedule_module_wrr_ut  schedule_module_lc_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../logger \
@@ -30,15 +30,15 @@ SRCS		=	\
 
 SRCS_RR		=	\
 				schedule_module_rr_test.cpp \
-				../../src/realserver.cpp
+				../../src/schedule_module_control.cpp
 
 SRCS_WRR		=	\
 				schedule_module_wrr_test.cpp \
-				../../src/realserver.cpp
+				../../src/schedule_module_control.cpp
 
 SRCS_LC		=	\
 				schedule_module_lc_test.cpp \
-				../../src/realserver.cpp
+				../../src/schedule_module_control.cpp
 
 SRC_M1		=	../../module/schedule/schedule_module_rr.cpp
 
@@ -73,14 +73,14 @@ LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-schedule_module_rr.so: $(SRC_M1)
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o schedule_module_rr.so
+sched_schedule_module_rr.so: $(SRC_M1)
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M1) $(LDFLAGS) -o sched_schedule_module_rr.so
 
-schedule_module_wrr.so: $(SRC_M2)
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o schedule_module_wrr.so
+sched_schedule_module_wrr.so: $(SRC_M2)
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M2) $(LDFLAGS) -o sched_schedule_module_wrr.so
 
-schedule_module_lc.so: $(SRC_M3)
-	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M3) $(LDFLAGS) -o schedule_module_lc.so
+sched_schedule_module_lc.so: $(SRC_M3)
+	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M3) $(LDFLAGS) -o sched_schedule_module_lc.so
 
 schedule_module_rr_ut: $(OBJS_RR) $(SRC_M1) $(PARAMETER) $(LOGGER)
 	$(CPP) $(INCLUDES) -o schedule_module_rr_ut $(OBJS_RR) $(LIBS) $(PARAMETER) $(LOGGER)
