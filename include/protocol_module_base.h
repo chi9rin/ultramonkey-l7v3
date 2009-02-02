@@ -30,18 +30,20 @@ public:
 	//! realserver iterator function object type
 	typedef	boost::function< realserverlist_type::iterator( void ) >
 								rs_list_itr_func_type;
+	typedef	boost::function< realserverlist_type::iterator( realserverlist_type::iterator ) >
+								rs_list_itr_next_func_type;
 	//! TCP/IP scheduler function object type.
 	typedef	boost::function< void (		const boost::thread::id,
 										rs_list_itr_func_type,
 										rs_list_itr_func_type,
-										rs_list_itr_func_type,
+										rs_list_itr_next_func_type,
 										boost::asio::ip::tcp::endpoint& ) >
 								tcp_schedule_func_type;
 	//! UDP scheduler function object type.
 	typedef	boost::function< void (		const boost::thread::id,
 										rs_list_itr_func_type,
 										rs_list_itr_func_type,
-										rs_list_itr_func_type,
+										rs_list_itr_next_func_type,
 										boost::asio::ip::udp::endpoint& ) >
 								udp_schedule_func_type;
 
@@ -99,7 +101,8 @@ protected:
 	//! realserver list iterator end function object
 	rs_list_itr_func_type	rs_list_end;
 	//! realserver list iterator next function object
-	rs_list_itr_func_type	rs_list_next;
+	rs_list_itr_next_func_type
+							rs_list_next;
 
 	//! realserver list lock function object
 	boost::function< void( void ) >	rs_list_lock;
@@ -123,7 +126,7 @@ public:
 	virtual	void	initialize(
 							rs_list_itr_func_type	inlist_begin,
 							rs_list_itr_func_type	inlist_end,
-							rs_list_itr_func_type	inlist_next,
+							rs_list_itr_next_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock ) = 0;
 
