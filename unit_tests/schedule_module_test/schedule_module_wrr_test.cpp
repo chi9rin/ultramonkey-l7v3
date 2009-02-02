@@ -146,6 +146,7 @@ void	schedule_module_test(){
 
 	endpoint1 = endpoint3 ;
 
+	// boost::functionのempty評価のため空のままイテレターメソッドを渡す　endpoint1は更新されない。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
@@ -155,6 +156,7 @@ void	schedule_module_test(){
 	rslist_end = boost::bind( &list_end, &rs_list );
 	rslist_next = boost::bind( &list_next, _1 );
 
+	// リストの内容が空　endpoint1は更新されない。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
@@ -173,6 +175,7 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
+	// リストの項目が全て振り分け無し　endpoint1は更新されない。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
@@ -188,36 +191,43 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
+	// 重みが設定されているので最大値のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server3.tcp_endpoint == endpoint1 );
 
 	// unit_test[11]  handle_schedule(tcp)メソッドのテスト５
 	BOOST_MESSAGE( "unit_test[11]" );
+	// 一巡し重みが設定されているのでserver1が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server1.tcp_endpoint == endpoint1 );
 
 	// unit_test[12]  handle_schedule(tcp)メソッドのテスト６
 	BOOST_MESSAGE( "unit_test[12]" );
+	// 重みが設定されているので次のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server3.tcp_endpoint == endpoint1 );
 
 	// unit_test[13]  handle_schedule(tcp)メソッドのテスト７
 	BOOST_MESSAGE( "unit_test[13]" );
+	// 一巡し重みが設定されているのでserver1が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server1.tcp_endpoint == endpoint1 );
 
 	// unit_test[14]  handle_schedule(tcp)メソッドのテスト８
 	BOOST_MESSAGE( "unit_test[14]" );
+	// 重みが設定されているので次のserver2が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server2.tcp_endpoint == endpoint1 );
 
 	// unit_test[15]  handle_schedule(tcp)メソッドのテスト９
 	BOOST_MESSAGE( "unit_test[15]" );
+	// 重みが設定されているので次のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server3.tcp_endpoint == endpoint1 );
 
 	// unit_test[16]  handle_schedule(tcp)メソッドのテスト１０
 	BOOST_MESSAGE( "unit_test[16]" );
+	// 一巡し重みが設定されているので最大値のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server3.tcp_endpoint == endpoint1 );
 
@@ -233,6 +243,7 @@ void	schedule_module_test(){
 
 	endpoint2 = endpoint4 ;
 
+	// boost::functionのempty評価のため空のままイテレターメソッドを渡す　endpoint2は更新されない。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( endpoint4 == endpoint2 );
 
@@ -242,6 +253,7 @@ void	schedule_module_test(){
 	rslist_end = boost::bind( &list_end, &rs_list );
 	rslist_next = boost::bind( &list_next, _1 );
 
+	// リストの内容が空　endpoint2は更新されない。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( endpoint4 == endpoint2 );
 
@@ -261,6 +273,7 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
+	// リストの項目が全て振り分け無し　endpoint2は更新されない。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( endpoint4 == endpoint2 );
 
@@ -276,36 +289,43 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
+	// 重みが設定されているので最大値のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server3.udp_endpoint == endpoint2 );
 
 	// unit_test[21]  handle_schedule(udp)メソッドのテスト５
 	BOOST_MESSAGE( "unit_test[21]" );
+	// 一巡し重みが設定されているのでserver1が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server1.udp_endpoint == endpoint2 );
 
 	// unit_test[22]  handle_schedule(udp)メソッドのテスト６
 	BOOST_MESSAGE( "unit_test[22]" );
+	// 重みが設定されているので次のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server3.udp_endpoint == endpoint2 );
 
 	// unit_test[23]  handle_schedule(udp)メソッドのテスト７
 	BOOST_MESSAGE( "unit_test[23]" );
+	// 一巡し重みが設定されているのでserver1が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server1.udp_endpoint == endpoint2 );
 
 	// unit_test[24]  handle_schedule(udp)メソッドのテスト８
 	BOOST_MESSAGE( "unit_test[24]" );
+	// 重みが設定されているので次のserver2が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server2.udp_endpoint == endpoint2 );
 
 	// unit_test[25]  handle_schedule(udp)メソッドのテスト９
 	BOOST_MESSAGE( "unit_test[25]" );
+	// 重みが設定されているので次のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server3.udp_endpoint == endpoint2 );
 
 	// unit_test[26]  handle_schedule(udp)メソッドのテスト１０
 	BOOST_MESSAGE( "unit_test[26]" );
+	// 一巡し重みが設定されているので最大値のserver3が帰る。
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( server3.udp_endpoint == endpoint2 );
 
