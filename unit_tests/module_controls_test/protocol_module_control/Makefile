@@ -6,7 +6,7 @@
 TARGET		= protomod_protocol_module_test1.so protomod_protocol_module_test2.so module_control_ut
 TARGET2		= protomod_protocol_module_test1.so protomod_protocol_module_test2.so module_control_thread_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG  -D PARAMETER_FILE='"./sample.ini"'
+CPPFLAGS	= -O0 -Wall -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG  -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../../logger \
 				-I../../../parameter \
 				-I../../../include \

@@ -66,7 +66,7 @@ schedule_module_base*
 schedule_module_control::load_module( const	std::string& modulename ){
 	Logger logger( LOG_CAT_L7VSD_MODULE, 1, "schedule_module_control::load_module", __FILE__, __LINE__ );
 	schedule_module_base* return_value = NULL;
-	boost::mutex::scoped_lock lcok( loadmodule_map_mutex );
+	boost::mutex::scoped_lock lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( modulename );
 	if( it == loadmodule_map.end() ){
 		std::string load_module_name = modulefile_path + "/sched_" + modulename + ".so";

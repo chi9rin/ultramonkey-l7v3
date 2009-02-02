@@ -6,7 +6,7 @@
 TARGET		= sched_schedule_module_test1.so sched_schedule_module_test2.so module_control_ut
 TARGET2		= sched_schedule_module_test1.so sched_schedule_module_test2.so module_control_thread_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG  -D PARAMETER_FILE='"./sample.ini"'
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG  -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../../logger \
 				-I../../../parameter \
 				-I../../../include \
