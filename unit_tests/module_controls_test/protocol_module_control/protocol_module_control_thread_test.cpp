@@ -232,7 +232,7 @@ void	protocol_module_control_test_thread1(){
 	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
 	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
 #if 1
-	// unit_test[1] スレッド１はPM1のロードとアンロード、スレッド２はPM2のロードとアンロードを行う
+	// unit_test[1] スレッド１はPM1のロードとアンロード、スレッド２はPM2のロードとアンロードを行い、最終的にロードモジュールのマップのサイズが0となっていることを確認する
 	boost::thread	thd1( &thread1 );
 	boost::thread	thd2( &thread2 );
 	thd1.join();
@@ -249,14 +249,14 @@ void	protocol_module_control_test_thread2(){
 	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
 	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
 #if 1
-	// unit_test[2] スレッド１はPM1のロード、スレッド２はPM1のロードを行う
+	// unit_test[2] スレッド１はPM1のロード、スレッド２はPM1のロードを行い、最終的にロードモジュールのマップのサイズが1となっていることを確認する
 	boost::thread	thd1( &thread3 );
 	boost::thread	thd2( &thread4 );
 	thd1.join();
 	thd2.join();
 	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)1 );
 
-	// unit_test[3] スレッド１はPM1のアンロード、スレッド２はPM1のアンロードを行う
+	// unit_test[3] スレッド３はPM1のアンロード、スレッド４はPM1のアンロードを行い、最終的にロードモジュールのマップのサイズが0となっていることを確認する
 	boost::thread	thd3( &thread5 );
 	boost::thread	thd4( &thread6 );
 	thd3.join();
@@ -272,7 +272,7 @@ void	protocol_module_control_test_thread3(){
 
 	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
 	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
-	// unit_test[4] スレッド１はPM1のロードとアンロード、スレッド２はPM1のロードとアンロードを行う
+	// unit_test[4] スレッド１はPM1のロードとアンロード、スレッド２はPM1のロードとアンロードを行い、最終的にロードモジュールのマップのサイズが0となっていることを確認する
 	boost::thread	thd1( &thread7 );
 	boost::thread	thd2( &thread8 );
 	thd1.join();
@@ -288,7 +288,7 @@ void	protocol_module_control_test_thread4(){
 
 	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
 	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
-	// unit_test[5] スレッド１はPM1のロード/アンロード、スレッド２はPM2のロード/アンロードをそれぞれセットで行う
+	// unit_test[5] スレッド１はPM1のロード/アンロード、スレッド２はPM2のロード/アンロードをそれぞれセットで行い、最終的にロードモジュールのマップのサイズが0となっていることを確認する
 	boost::thread	thd1( &thread9 );
 	boost::thread	thd2( &thread10 );
 	thd1.join();

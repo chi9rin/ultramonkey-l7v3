@@ -10,7 +10,7 @@ public:
 	void	initialize(
 							rs_list_itr_func_type	inlist_begin,
 							rs_list_itr_func_type	inlist_end,
-							rs_list_itr_func_type	inlist_next,
+							rs_list_itr_next_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock );
 
@@ -142,7 +142,7 @@ void
 protocol_module_test2::initialize(
 							protocol_module_base::rs_list_itr_func_type	inlist_begin,
 							protocol_module_base::rs_list_itr_func_type	inlist_end,
-							protocol_module_base::rs_list_itr_func_type	inlist_next,
+							protocol_module_base::rs_list_itr_next_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock ){}
 
