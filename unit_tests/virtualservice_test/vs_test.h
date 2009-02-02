@@ -13,6 +13,7 @@ protected:
 	void	handle_replication_interrupt( const boost::system::error_code& err ){
 	}
 	bool	read_replicationdata( vs_replication_data& in_rep_data ){
+		return true;
 	}
 
 public:
@@ -30,8 +31,10 @@ public:
 	}
 
 	bool	operator==( const virtualservice_base& vs ){
+		return true;
 	}
 	bool	operator!=( const virtualservice_base& vs ){
+		return true;
 	}
 
 	void	set_virtualservice( const virtualservice_element& el, error_code& err ){
@@ -90,12 +93,12 @@ public:
 	void	call_handle_throughput_update( const boost::system::error_code& err ){
 		boost::xtime_get( &diffelencial_time, boost::TIME_UTC );
 		handle_throughput_update( err );
-		unsigned long long dif = diffelencial_time.sec;
-		if( (ULLONG_MAX / 1000000000ULL) > diffelencial_time.sec ){
-			dif = (dif * 1000000000ULL) + diffelencial_time.nsec;
-			if( 0 < dif ) dif = dif / 1000ULL;
-		}else dif = ULLONG_MAX;
-		std::cout << dif << "[usec]" << std::endl;
+
+		if( 0 < diffelencial_time.sec ){
+			std::cout << diffelencial_time.sec << "[sec]" << std::endl;
+		}else{
+			std::cout << diffelencial_time.nsec << "[nsec]" << std::endl;
+		}
 	}
 	void	test_replication(){
 		//serialize出力
@@ -112,17 +115,15 @@ public:
 		a1.body.sorry_flag			= true;
 		a1.body.qos_up				= 0ULL;
 		a1.body.qos_down			= 30ULL;
-	
-	
-	
+
 		std::stringstream	ss;
 		boost::archive::text_oarchive	oa( ss );
 		oa << (const l7vs::virtualservice_base::vs_replication_data&)a1;
-	
+
 		std::cout << ss.str() << std::endl;
 		std::cout << ss.str().size() << std::endl;
-	
-	//serialize入力
+
+		//serialize入力
 		boost::archive::text_iarchive	ia( ss );
 		l7vs::virtualservice_base::vs_replication_data	a2;
 		ia >> a2;

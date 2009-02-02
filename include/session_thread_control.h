@@ -51,10 +51,10 @@ protected:
 public:
 	//! constractor.
 	//! @param session_ptr	session class shared ptr
-	session_thread_control( session_ptr ptr ) :
-			session( ptr ),
+	session_thread_control( session_ptr& ptr ) :
 			upthread_state( WAIT ),
 			downthread_state( WAIT ){
+		session = ptr;
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	//! upstream thread create
 		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create
 	}

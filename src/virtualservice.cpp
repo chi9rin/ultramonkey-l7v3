@@ -27,20 +27,20 @@ virtualservice_base::virtualservice_base(	const l7vsd& invsd,
 							const virtualservice_element& inelement)
 												 :	vsd( invsd ),
 													rep( inrep ),
-													element( inelement ),
-													calc_bps_timer( dispatcher ),
-													replication_timer( dispatcher ) {
+													rs_list_ref_count( 0 ),
+													recvsize_up( 0 ),
+													current_up_recvsize( 0 ),
+													sendsize_up( 0 ),
+													recvsize_down( 0 ),
+													current_down_recvsize( 0 ),
+													sendsize_down( 0 ),
+													throughput_up( 0 ),
+													throughput_down( 0 ) {
+	calc_bps_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
+	replication_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	rs_list.clear();
 	rs_mutex_list.clear();
-	rs_list_ref_count	= 0;
-	recvsize_up			= 0;
-	current_up_recvsize	= 0;
-	sendsize_up			= 0;
-	recvsize_down		= 0;
-	current_down_recvsize	= 0;
-	sendsize_down		= 0;
-	throughput_up		= 0;
-	throughput_down		= 0;
+	element = inelement;
 };
 
 /*!
@@ -86,24 +86,20 @@ void	virtualservice_base::handle_throughput_update( const boost::system::error_c
 	time_difference.nsec = current_time.nsec - last_calc_time.nsec;
 	last_calc_time = current_time;
 
-	unsigned long long dif = time_difference.sec;
-	if( (ULLONG_MAX / 1000000000ULL) > time_difference.sec ){
-		dif = (dif * 1000000000ULL) + time_difference.nsec;
-		if( 0 < dif ) dif = dif / 1000ULL;
-	}else dif = ULLONG_MAX;
-
 	{
 		//mutex lock
 		boost::mutex::scoped_lock( throughput_up_mutex );
 		boost::mutex::scoped_lock( recvsize_up_mutex );
 		//calcurate throughput
-		//bps = current_up_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
+
 		if( 0 < current_up_recvsize ){
-			throughput_up = current_up_recvsize / dif;
-			if( (ULLONG_MAX / 8ULL) > throughput_up )
-				throughput_up = throughput_up * 8ULL;
-			else
-				throughput_up = ULLONG_MAX;
+			if( 0 < time_difference.sec ){
+				//秒が0でなければ秒をベースにスループットを計算
+				//bps = current_up_recvsize[bytes] * 8[8bit=1byte] / time_difference.sec
+				throughput_up	= current_up_recvsize / time_difference.sec * 8;
+			}else{
+				throughput_up	= current_up_recvsize / time_difference.nsec / 1000000000 * 8;
+			}
 		}else throughput_up = 0ULL;
 		current_up_recvsize = 0ULL;
 	}
@@ -113,12 +109,13 @@ void	virtualservice_base::handle_throughput_update( const boost::system::error_c
 		boost::mutex::scoped_lock( recvsize_down_mutex );
 		//calcurate throughput
 		//bps = current_down_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
+
 		if( 0 < current_down_recvsize ){
-			throughput_down = current_down_recvsize / dif;
-			if( (ULLONG_MAX / 8ULL) > throughput_down )
-				throughput_down = throughput_down * 8ULL;
-			else
-				throughput_down = ULLONG_MAX;
+			if( 0 < time_difference.sec ){
+				throughput_down = current_down_recvsize / time_difference.sec * 8;
+			}else{
+				throughput_down = current_down_recvsize / time_difference.nsec / 1000000000 * 8;
+			}
 		}else throughput_down = 0ULL;
 		current_down_recvsize = 0ULL;
 	}
@@ -288,11 +285,15 @@ virtualservice_tcp::virtualservice_tcp(	const l7vsd& invsd,
 													acceptor_( dispatcher ) {}
 virtualservice_tcp::~virtualservice_tcp(){}
 
-void	virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){}
-bool	virtualservice_tcp::read_replicationdata( vs_replication_data& out ){ return true; }
+void	virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
+}
+bool	virtualservice_tcp::read_replicationdata( vs_replication_data& out ){
+	return true;
+}
 
 void	virtualservice_tcp::handle_accept(	const session_thread_control_ptr in_session,
-											const boost::system::error_code& in_error ){}
+											const boost::system::error_code& in_error ){
+}
 
 void	virtualservice_tcp::initialize( error_code& err ){
 	err.setter( true, "" );
@@ -301,8 +302,12 @@ void		virtualservice_tcp::finalize( error_code& err ){
 	err.setter( true, "" );
 }
 
-bool	virtualservice_tcp::operator==( const virtualservice_base& in ){ return true; }
-bool	virtualservice_tcp::operator!=( const virtualservice_base& in ){ return true; }
+bool	virtualservice_tcp::operator==( const virtualservice_base& in ){
+	return true;
+}
+bool	virtualservice_tcp::operator!=( const virtualservice_base& in ){
+	return true;
+}
 
 void	virtualservice_tcp::set_virtualservice( const virtualservice_element& in, error_code& err ){
 	err.setter( true, "" );
@@ -337,8 +342,11 @@ virtualservice_udp::virtualservice_udp(		const l7vsd& invsd,
 													session( *this, dispatcher ){}
 virtualservice_udp::~virtualservice_udp(){}
 
-void	virtualservice_udp::handle_replication_interrupt( const boost::system::error_code& in ){}
-bool	virtualservice_udp::read_replicationdata( vs_replication_data& out ){ return true; }
+void	virtualservice_udp::handle_replication_interrupt( const boost::system::error_code& in ){
+}
+bool	virtualservice_udp::read_replicationdata( vs_replication_data& out ){
+	return true;
+}
 
 void	virtualservice_udp::initialize( error_code& err ){
 	err.setter( true, "" );
@@ -347,8 +355,12 @@ void		virtualservice_udp::finalize( error_code& err ){
 	err.setter( true, "" );
 }
 
-bool	virtualservice_udp::operator==( const virtualservice_base& in ){ return true; }
-bool	virtualservice_udp::operator!=( const virtualservice_base& in ){ return true; }
+bool	virtualservice_udp::operator==( const virtualservice_base& in ){
+	return true;
+}
+bool	virtualservice_udp::operator!=( const virtualservice_base& in ){
+	return true;
+}
 
 void	virtualservice_udp::set_virtualservice( const virtualservice_element& in, error_code& err ){
 	err.setter( true, "" );
@@ -385,131 +397,99 @@ virtual_service::virtual_service(	const l7vsd& invsd,
 		vs = boost::shared_ptr<virtualservice_base>(
 				dynamic_cast<virtualservice_base*>( new virtualservice_tcp( invsd, inrep, inelement ) ) );
 }
+
 virtual_service::~virtual_service(){
 }
-	
+
 void	virtual_service::initialize( error_code& err ){
 	if( NULL != vs )
 		vs->initialize( err );
+	else{
+		err.setter( false, "Fail, create VirtualService" );
+	}
 }
 void	virtual_service::finalize( error_code& err ){
-	if( NULL != vs )
-		vs->finalize( err );
+	vs->finalize( err );
 }
 
 bool	virtual_service::operator==( const virtualservice_base& in ){
-	if( NULL != vs )
-		return vs->operator==( in );
-	else
-		return false;
+	return vs->operator==( in );
 }
 bool	virtual_service::operator!=( const virtualservice_base& in ){
-	if( NULL != vs )
-		return vs->operator!=( in );
-	else
-		return false;
+	return vs->operator!=( in );
 }
 
 void	virtual_service::set_virtualservice( const virtualservice_element& in, error_code& err ){
-	if( NULL != vs )
-		vs->set_virtualservice( in, err );
+	vs->set_virtualservice( in, err );
 }
 void	virtual_service::edit_virtualservice( const virtualservice_element& in, error_code& err ){
-	if( NULL != vs )
-		vs->edit_virtualservice( in, err );
+	vs->edit_virtualservice( in, err );
 }
 
 void	virtual_service::add_realserver( const virtualservice_element& in, error_code& err ){
-	if( NULL != vs )
-		vs->add_realserver( in, err );
+	vs->add_realserver( in, err );
 }
 void	virtual_service::edit_realserver( const virtualservice_element& in, error_code& err ){
-	if( NULL != vs )
-		vs->edit_realserver( in, err );
+	vs->edit_realserver( in, err );
 }
 void	virtual_service::del_realserver( const virtualservice_element& in, error_code& err ){
-	if( NULL != vs )
-		vs->del_realserver( in, err );
+	vs->del_realserver( in, err );
 }
 
 virtualservice_element&	virtual_service::get_element(){
-	if( NULL != vs )
-		return vs->get_element();
+	return vs->get_element();
 }
 
 void		virtual_service::run(){
-	if( NULL != vs )
-		vs->run();
+	vs->run();
 }
 void		virtual_service::stop(){
-	if( NULL != vs )
-		vs->stop();
+	vs->stop();
 }
 
 void		virtual_service::connection_active( const boost::asio::ip::tcp::endpoint& in ){
-	if( NULL != vs )
-		vs->connection_active( in );
+	vs->connection_active( in );
 }
 void		virtual_service::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){
-	if( NULL != vs )
-		vs->connection_inactive( in );
+	vs->connection_inactive( in );
 }
 void		virtual_service::release_session( const boost::thread::id thread_id ){
-	if( NULL != vs )
-		vs->release_session( thread_id );
+	vs->release_session( thread_id );
 }
 
 unsigned long long		virtual_service::get_qos_upstream(){
-	if( NULL != vs )
-		return vs->get_qos_upstream();
-	else
-		return 0;
+	return vs->get_qos_upstream();
 }
 unsigned long long		virtual_service::get_qos_downstream(){
-	if( NULL != vs )
-		return vs->get_qos_downstream();
-	else
-		return 0;
+	return vs->get_qos_downstream();
 }
 unsigned long long		virtual_service::get_throughput_upstream(){
-	if( NULL != vs )
-		return vs->get_throughput_upstream();
-	else
-		return 0;
+	return vs->get_throughput_upstream();
 }
 unsigned long long		virtual_service::get_throughput_downstream(){
-	if( NULL != vs )
-		return vs->get_throughput_downstream();
-	else
-		return 0;
+	return vs->get_throughput_downstream();
 }
 
 void		virtual_service::update_up_recv_size( unsigned long long	datasize ){
-	if( NULL != vs )
-		vs->update_up_recv_size( datasize );
+	vs->update_up_recv_size( datasize );
 }
 void		virtual_service::update_up_send_size( unsigned long long	datasize ){
-	if( NULL != vs )
-		vs->update_up_send_size( datasize );
+	vs->update_up_send_size( datasize );
 }
 void		virtual_service::update_down_recv_size( unsigned long long	datasize ){
-	if( NULL != vs )
-		vs->update_down_recv_size( datasize );
+	vs->update_down_recv_size( datasize );
 }
 void		virtual_service::update_down_send_size( unsigned long long	datasize ){
-	if( NULL != vs )
-		vs->update_down_send_size( datasize );
+	vs->update_down_send_size( datasize );
 }
 	
 boost::shared_ptr<protocol_module_base>
 			virtual_service::get_protocol_module(){
-	if( NULL != vs )
-		return vs->get_protocol_module();
+	return vs->get_protocol_module();
 }
 boost::shared_ptr<schedule_module_base>
 			virtual_service::get_schedule_module(){
-	if( NULL != vs )
-		return vs->get_schedule_module();
+	return vs->get_schedule_module();
 }
 
 }

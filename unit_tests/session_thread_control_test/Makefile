@@ -5,7 +5,7 @@
 #
 TARGET		= stc_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	\
 				-I./ \
 				-I../../logger \

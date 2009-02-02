@@ -43,7 +43,8 @@ class	session_thread_control;
 class	virtualservice_base : boost::noncopyable{
 public:
 	//! shared_ptr session_thread_control typedef
-	typedef	boost::shared_ptr<session_thread_control>	session_thread_control_ptr;
+	typedef	boost::shared_ptr<session_thread_control>		session_thread_control_ptr;
+	typedef	boost::shared_ptr<boost::asio::deadline_timer>	deadline_timer_ptr_type;
 protected:
 	//!	@class	vs_replication_header replication data structure for header data
 	class	vs_replication_header{
@@ -62,6 +63,7 @@ protected:
 			udp_endpoint	= in.udp_endpoint;
 			bodytype		= in.bodytype;
 			datasize		= in.datasize;
+			return *this;
 		}
 	
 		bool				udpflag;
@@ -103,6 +105,7 @@ protected:
 			sorry_flag			= in.sorry_flag;
 			qos_up				= in.qos_up;
 			qos_down			= in.qos_down;
+			return *this;
 		}
 	
 		long long			sorry_maxconnection;
@@ -137,6 +140,7 @@ protected:
 		vs_replication_data&	operator=( const vs_replication_data& in ){
 			header	= in.header;
 			body	= in.body;
+			return *this;
 		}
 	
 		vs_replication_header	header;
@@ -157,8 +161,8 @@ protected:
 	const	replication&		rep;			//! replication reference
 
 	boost::asio::io_service		dispatcher;		//! dispatcer service
-	boost::asio::deadline_timer	calc_bps_timer;	//! timer object
-	boost::asio::deadline_timer	replication_timer;	//! timer object
+	deadline_timer_ptr_type		calc_bps_timer;	//! timer object
+	deadline_timer_ptr_type		replication_timer;	//! timer object
 
 	virtualservice_element		element;		//! virtual service element
 
@@ -235,7 +239,7 @@ public:
 	void						update_up_send_size( unsigned long long );
 	void						update_down_recv_size( unsigned long long );
 	void						update_down_send_size( unsigned long long );
-	
+
 	boost::shared_ptr<protocol_module_base>
 								get_protocol_module();
 	boost::shared_ptr<schedule_module_base>
