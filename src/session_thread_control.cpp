@@ -19,10 +19,10 @@ namespace l7vs{
 void	session_thread_control::upstream_run(){
 	state_tag	state;
 	{	// get first state from class upstream state.
-		boost::mutex::scoped_lock( upthread_condition_mutex );	// upstream state lock
+		boost::mutex::scoped_lock upcond_lock( upthread_condition_mutex );	// upstream state lock
 		state = upthread_state;	//thread local state is update.
 	}
-	boost::mutex::scoped_lock( upthread_exit_mutex );
+	boost::mutex::scoped_lock up_exit_lock( upthread_exit_mutex );
 	for(;;){	// thread loop
 		if( state == WAIT ){	// after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( upthread_condition_mutex );
@@ -35,7 +35,7 @@ void	session_thread_control::upstream_run(){
 			session->up_thread_run();	//session upstream thread looping.
 			stopupstream();
 		}
-		boost::mutex::scoped_lock	lock( upthread_condition_mutex );	// upstream state lock
+		boost::mutex::scoped_lock	upcond_lock( upthread_condition_mutex );	// upstream state lock
 		state = upthread_state;	//thread local state is update.
 	}
 }
@@ -45,10 +45,10 @@ void	session_thread_control::upstream_run(){
 void	session_thread_control::downstream_run(){
 	state_tag	state;
 	{
-		boost::mutex::scoped_lock( downthread_condition_mutex );	//downstream state is lock
+		boost::mutex::scoped_lock downcond_lock( downthread_condition_mutex );	//downstream state is lock
 		state = downthread_state;	//thread local state is update.
 	}
-	boost::mutex::scoped_lock( downthread_exit_mutex );
+	boost::mutex::scoped_lock down_exit_lock( downthread_exit_mutex );
 	for(;;){	//thread loop
 		if( state == WAIT ){	//after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( downthread_condition_mutex );
@@ -61,7 +61,7 @@ void	session_thread_control::downstream_run(){
 			session->down_thread_run();//session downstream thread looping.
 			stopdownstream();
 		}
-		boost::mutex::scoped_lock	lock( downthread_condition_mutex );	//downstream state lock
+		boost::mutex::scoped_lock	downcond_lock( downthread_condition_mutex );	//downstream state lock
 		state = downthread_state;	// thread local sate is update.
 	}
 }
@@ -69,7 +69,7 @@ void	session_thread_control::downstream_run(){
 //! @brief	start upstream function.
 //
 void	session_thread_control::startupstream(){
-	boost::mutex::scoped_lock( upthread_condition_mutex );	//upstream state lock
+	boost::mutex::scoped_lock	lock( upthread_condition_mutex );	//upstream state lock
 	if( upthread_state != EXIT ) upthread_state = RUNNING;		// upthread state update.[RUNNING] -> alive mode
 	upthread_condition.notify_all();							// conditionwait upstreamthread is run.
 }
@@ -84,7 +84,7 @@ void	session_thread_control::stopupstream(){
 //! @brief	start downstream function
 //
 void	session_thread_control::startdownstream(){
-	boost::mutex::scoped_lock( downthread_condition_mutex );		// downstream state lock
+	boost::mutex::scoped_lock	lock( downthread_condition_mutex );		// downstream state lock
 	if( downthread_state != EXIT ) downthread_state = RUNNING;		// downstream state is update [RUNNING] -> alive mode
 	downthread_condition.notify_all();								// condition wait thread is run.
 }
