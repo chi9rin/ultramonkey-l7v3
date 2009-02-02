@@ -300,8 +300,8 @@ void	protocol_module_control_test_thread4(){
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
-	Logger logger;
-	l7vs::Parameter param;
+//	Logger logger;
+//	l7vs::Parameter param;
 
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "protocol_module_control_thread_test" );

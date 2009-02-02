@@ -213,8 +213,8 @@ void	schedule_module_control_unload_test(){
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
-	Logger logger;
-	l7vs::Parameter param;
+//	Logger logger;
+//	l7vs::Parameter param;
 
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "schedule_module_control" );

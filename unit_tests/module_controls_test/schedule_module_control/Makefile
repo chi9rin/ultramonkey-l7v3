@@ -19,10 +19,10 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
-LOGGER		= libtest_logger.a
-PARAMETER	= ligtest_parameter.a
-AR			= ar
-ARFLAGS		= cru
+#LOGGER		= libtest_logger.a
+#PARAMETER	= ligtest_parameter.a
+#AR			= ar
+#ARFLAGS		= cru
 
 SRCS		=	\
 			../../../src/schedule_module_control.cpp \
@@ -35,11 +35,11 @@ SRCS2		=	\
 SRC_M1		=	schedule_module_test1.cpp
 SRC_M2		=	schedule_module_test2.cpp
 
-PARAMETER_SRCS	=	\
+#PARAMETER_SRCS	=	\
 			../../../parameter/parameter.cpp \
 			../../../parameter/parameter_impl.cpp
 
-LOGGER_SRCS	=	\
+#LOGGER_SRCS	=	\
 			../../../logger/logger.cpp \
 			../../../logger/logger_impl.cpp \
 			../../../logger/strict_time_based_rolling_policy.cpp \
@@ -52,8 +52,8 @@ LOGGER_SRCS	=	\
 OBJS		= $(SRCS:.cpp=.o)
 OBJS2		= $(SRCS2:.cpp=.o)
 
-PARAMETER_OBJS	= $(PARAMETER_SRCS:.cpp=.o)
-LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
+#PARAMETER_OBJS	= $(PARAMETER_SRCS:.cpp=.o)
+#LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
 all:	$(TARGET) $(TARGET2)
 
@@ -72,11 +72,11 @@ module_control_thread_ut: $(OBJS2) $(PARAMETER) $(LOGGER)
 #$(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
 #	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS) $(PARAMETER) $(LOGGER)
 
-$(PARAMETER):	$(PARAMETER_OBJS)
-	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
+#$(PARAMETER):	$(PARAMETER_OBJS)
+#	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
 
-$(LOGGER):	$(LOGGER_OBJS)
-	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
+#$(LOGGER):	$(LOGGER_OBJS)
+#	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
 
 clean:
 	rm -f $(TARGET) $(TARGET2) $(OBJS) $(OBJS2) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS)
