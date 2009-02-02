@@ -1,5 +1,6 @@
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
+#include <boost/thread/condition.hpp>
 #include "realserver.h"
 #include "logger.h"
 #include "parameter.h"
@@ -11,9 +12,13 @@ using namespace boost::unit_test;
 
 namespace l7vs{
 
+
 class realserver_fake : public realserver
 {
 public:
+	boost::mutex		starting_mutex;
+	boost::condition	starting_condition;
+
 	//!	constractor
 	realserver_fake(){}
 	//! destractor
@@ -21,10 +26,63 @@ public:
 
     void	set_active( const int in_active ){ nactive = in_active ; }
     void	set_inact( const int in_inact ){ ninact = in_inact ; }
+
+	void	increment_active2( const std::string& msg1, const std::string& msg2 ){
+		boost::mutex::scoped_lock	lock( starting_mutex );
+		starting_condition.wait( lock );
+
+		BOOST_MESSAGE( msg1 );
+		increment_active();
+		BOOST_MESSAGE( msg2 );
+	}
+
+	void	decrement_active2( const std::string& msg1, const std::string& msg2 ){
+		boost::mutex::scoped_lock	lock( starting_mutex );
+		starting_condition.wait( lock );
+
+		BOOST_MESSAGE( msg1 );
+		decrement_active();
+		BOOST_MESSAGE( msg2 );
+	}
+
+	void	increment_inact2( const std::string& msg1, const std::string& msg2 ){
+		boost::mutex::scoped_lock	lock( starting_mutex );
+		starting_condition.wait( lock );
+
+		BOOST_MESSAGE( msg1 );
+		increment_inact();
+		BOOST_MESSAGE( msg2 );
+	}
 };
 
 }	//namespace l7vs
 
+l7vs::realserver_fake	rush_server;
+
+void starting_thread( int id )
+{
+	{
+		std::stringstream	msg1, msg2;
+
+		msg1 << "start increment_active <Thread:" << id << ">";
+		msg2 << "complete increment_active <Thread:" << id << ">";
+		rush_server.increment_active2( msg1.str(), msg2.str() );
+	}
+	{
+		std::stringstream	msg1, msg2;
+
+		msg1 << "start decrement_active <Thread:" << id << ">";
+		msg2 << "complete decrement_active <Thread:" << id << ">";
+		rush_server.decrement_active2( msg1.str(), msg2.str() );
+	}
+	{
+		std::stringstream	msg1, msg2;
+
+		msg1 << "start increment_inact <Thread:" << id << ">";
+		msg2 << "complete increment_inact <Thread:" << id << ">";
+		rush_server.increment_inact2( msg1.str(), msg2.str() );
+	}
+};
 
 
 //test case1.
@@ -329,6 +387,40 @@ void	realserver_test(){
 
 	server3.increment_inact();
 	BOOST_CHECK_EQUAL( server3.get_inact(), 0 );
+
+
+	boost::thread	thread_item1( boost::bind ( &starting_thread, 1 ) );
+	boost::thread	thread_item2( boost::bind ( &starting_thread, 2 ) );
+	boost::thread	thread_item3( boost::bind ( &starting_thread, 3 ) );
+	boost::thread	thread_item4( boost::bind ( &starting_thread, 4 ) );
+	boost::thread	thread_item5( boost::bind ( &starting_thread, 5 ) );
+
+	// unit_test[30]  接続数インクリメントメソッドのテスト３
+	BOOST_MESSAGE( "sleep in" );
+	sleep( 1 );
+	rush_server.starting_condition.notify_all();
+	sleep( 1 );
+	BOOST_CHECK_EQUAL( rush_server.get_active(), 5 );
+
+	// unit_test[31]  接続数デクリメントメソッドのテスト３
+	BOOST_MESSAGE( "sleep in" );
+	sleep( 1 );
+	rush_server.starting_condition.notify_all();
+	sleep( 1 );
+	BOOST_CHECK_EQUAL( rush_server.get_active(), 0 );
+
+	// unit_test[32]  切断数インクリメントメソッドのテスト３
+	BOOST_MESSAGE( "sleep in" );
+	sleep( 1 );
+	rush_server.starting_condition.notify_all();
+	sleep( 1 );
+	BOOST_CHECK_EQUAL( rush_server.get_inact(), 5 );
+
+	thread_item1.join();
+	thread_item2.join();
+	thread_item3.join();
+	thread_item4.join();
+	thread_item5.join();
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
