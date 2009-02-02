@@ -6,6 +6,9 @@
 #include "logger.h"
 #include "parameter.h"
 
+#include "logger_stub.cpp"
+#include "parameter_stub.cpp"
+
 #include "schedule_module_control.h"
 #include "../../module/schedule/schedule_module_lc.cpp"
 

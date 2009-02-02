@@ -424,10 +424,10 @@ void	realserver_test(){
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
-	l7vs::Logger	logger;
-	l7vs::Parameter	parameter;
+//	l7vs::Logger	logger;
+//	l7vs::Parameter	parameter;
 
-	logger.loadConf();
+//	logger.loadConf();
 
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "realserver_test" );

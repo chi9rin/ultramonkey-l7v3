@@ -82,20 +82,29 @@ sched_schedule_module_wrr.so: $(SRC_M2)
 sched_schedule_module_lc.so: $(SRC_M3)
 	$(CPP) $(CPPFLAGS) -shared -fPIC $(INCLUDES) $(SRC_M3) $(LDFLAGS) -o sched_schedule_module_lc.so
 
-schedule_module_rr_ut: $(OBJS_RR) $(SRC_M1) $(PARAMETER) $(LOGGER)
-	$(CPP) $(INCLUDES) -o schedule_module_rr_ut $(OBJS_RR) $(LIBS) $(PARAMETER) $(LOGGER)
+schedule_module_rr_ut: $(OBJS_RR) $(SRC_M1)
+	$(CPP) $(INCLUDES) -o schedule_module_rr_ut $(OBJS_RR) $(LIBS)
 
-schedule_module_wrr_ut: $(OBJS_WRR) $(SRC_M2) $(PARAMETER) $(LOGGER)
-	$(CPP) $(INCLUDES) -o schedule_module_wrr_ut $(OBJS_WRR) $(LIBS) $(PARAMETER) $(LOGGER)
+schedule_module_wrr_ut: $(OBJS_WRR) $(SRC_M2)
+	$(CPP) $(INCLUDES) -o schedule_module_wrr_ut $(OBJS_WRR) $(LIBS)
 
-schedule_module_lc_ut: $(OBJS_LC) $(SRC_M3) $(PARAMETER) $(LOGGER)
-	$(CPP) $(INCLUDES) -o schedule_module_lc_ut $(OBJS_LC) $(LIBS) $(PARAMETER) $(LOGGER)
+schedule_module_lc_ut: $(OBJS_LC) $(SRC_M3)
+	$(CPP) $(INCLUDES) -o schedule_module_lc_ut $(OBJS_LC) $(LIBS)
 
-$(PARAMETER):	$(PARAMETER_OBJS)
-	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
+#schedule_module_rr_ut: $(OBJS_RR) $(SRC_M1) $(PARAMETER) $(LOGGER)
+#	$(CPP) $(INCLUDES) -o schedule_module_rr_ut $(OBJS_RR) $(LIBS) $(PARAMETER) $(LOGGER)
 
-$(LOGGER):	$(LOGGER_OBJS)
-	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
+#schedule_module_wrr_ut: $(OBJS_WRR) $(SRC_M2) $(PARAMETER) $(LOGGER)
+#	$(CPP) $(INCLUDES) -o schedule_module_wrr_ut $(OBJS_WRR) $(LIBS) $(PARAMETER) $(LOGGER)
+
+#schedule_module_lc_ut: $(OBJS_LC) $(SRC_M3) $(PARAMETER) $(LOGGER)
+#	$(CPP) $(INCLUDES) -o schedule_module_lc_ut $(OBJS_LC) $(LIBS) $(PARAMETER) $(LOGGER)
+
+#$(PARAMETER):	$(PARAMETER_OBJS)
+#	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
+
+#$(LOGGER):	$(LOGGER_OBJS)
+#	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
 
 #$(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
 #	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)  $(PARAMETER) $(LOGGER)
