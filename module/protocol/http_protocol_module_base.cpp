@@ -81,7 +81,6 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 }
 
-
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 														const size_t buffer_len ) const {
 
@@ -454,7 +453,7 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 	
 				if( http_header_name.length() > 0 ){
 	
-					http_header_regex = _ln >> (s1 = http_header_name >> _ >> _s >> *~_ln);
+					http_header_regex = _ln >> (s1 = icase(http_header_name) >> ":" >> *~_ln);
 	
 					find_result = regex_search( find_string, result, http_header_regex );
 	
