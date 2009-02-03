@@ -1,6 +1,7 @@
 #ifndef SCHEDULE_MODULE_CONTROL_TEST
 #define SCHEDULE_MODULE_CONTROL_TEST
 
+#include <boost/thread/condition.hpp>
 #include "schedule_module_control.h"
 
 #define	PM1	"schedule_module_test1"
@@ -18,6 +19,36 @@ public:
 		return instance_test;
 	}
 
+	boost::mutex			load_mutex;
+	boost::condition		load_condition;
+
+	l7vs::schedule_module_base* load_module2( int id, const std::string& modulename ){
+		std::stringstream msg1, msg2;
+		msg1 << "load_module start thread:" << id;
+		msg2 << "load_module end thread:" << id;
+
+		boost::mutex::scoped_lock lock( load_mutex );
+		BOOST_MESSAGE(msg1.str());
+		load_condition.wait( lock );
+
+		l7vs::schedule_module_base* return_value = NULL;
+
+		return_value = load_module(modulename);
+		BOOST_MESSAGE(msg2.str());
+		return return_value;
+	}
+	void unload_module2( int id, l7vs::schedule_module_base* module_ptr ){
+		std::stringstream msg1, msg2;
+		msg1 << "unload_module start thread:" << id;
+		msg2 << "unload_module end thread:" << id;
+
+		boost::mutex::scoped_lock lock( load_mutex );
+		BOOST_MESSAGE(msg1.str());
+		load_condition.wait( lock );
+
+		unload_module(module_ptr);
+		BOOST_MESSAGE(msg2.str());
+	}
 };
 
 l7vs::Logger::Logger() :

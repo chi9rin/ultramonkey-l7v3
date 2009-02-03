@@ -225,6 +225,33 @@ void	thread10(){
 	BOOST_TEST_MESSAGE( "thread10 stop" );
 }
 
+void	load2_unload2_thread( int id, const std::string& modulename ){
+	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
+	l7vs::protocol_module_base*		protomod1 = NULL;
+	protomod1 = control.load_module2( id, modulename );
+	control.unload_module2( id, protomod1 );
+
+	control.finalize();
+}
+
+void	load_unload2_thread( int id, const std::string& modulename ){
+	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
+	l7vs::protocol_module_base*		protomod1 = NULL;
+	protomod1 = control.load_module( modulename );
+	control.unload_module2( id, protomod1 );
+
+	control.finalize();
+}
+
+void	load2_unload_thread( int id, const std::string& modulename ){
+	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
+	l7vs::protocol_module_base*		protomod1 = NULL;
+	protomod1 = control.load_module2( id, modulename );
+	control.unload_module( protomod1 );
+
+	control.finalize();
+}
+
 void	protocol_module_control_test_thread1(){
 	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
 	control.initialize( "." );
@@ -298,6 +325,99 @@ void	protocol_module_control_test_thread4(){
 	control.finalize();
 }
 
+void	protocol_module_control_test_thread5(){
+	protocol_module_control_testclass& control = protocol_module_control_testclass::getInstance();
+	control.initialize( "." );
+	protocol_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+
+	// unit_test[6] load_moduleを複数スレッドからアクセスした場合の動作チェック（同じモジュールを指定した場合）
+	boost::thread	thd1( boost::bind( &load2_unload2_thread, 1, PM1 ) );
+	boost::thread	thd2( boost::bind( &load2_unload2_thread, 2, PM1 ) );
+	boost::thread	thd3( boost::bind( &load2_unload2_thread, 3, PM1 ) );
+	boost::thread	thd4( boost::bind( &load2_unload2_thread, 4, PM1 ) );
+	boost::thread	thd5( boost::bind( &load2_unload2_thread, 5, PM1 ) );
+
+	sleep(1);
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+	BOOST_MESSAGE( "notify_all" );
+	control.load_condition.notify_all();
+
+	sleep(1);
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)1 );
+	// unit_test[7] unload_moduleを複数スレッドからアクセスした場合の動作チェック（同じモジュールを指定した場合）
+	BOOST_MESSAGE( "notify_all" );
+	control.load_condition.notify_all();
+
+	thd1.join();
+	thd2.join();
+	thd3.join();
+	thd4.join();
+	thd5.join();
+
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+
+	// unit_test[8] load_moduleとunload_moduleを複数スレッドからアクセスした場合の動作チェック（同じモジュールを指定した場合）
+	boost::thread	thd6( boost::bind( &load2_unload_thread, 6, PM1 ) );
+	boost::thread	thd7( boost::bind( &load_unload2_thread, 7, PM1 ) );
+
+	sleep(1);
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)1 );
+	BOOST_MESSAGE( "notify_all" );
+	control.load_condition.notify_all();
+
+	thd6.join();
+	thd7.join();
+
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+
+	// unit_test[9] load_moduleを複数スレッドからアクセスした場合の動作チェック（それぞれ別のモジュールを指定した場合）
+	boost::thread	thd8( boost::bind( &load2_unload2_thread, 8, PM1 ) );
+	boost::thread	thd9( boost::bind( &load2_unload2_thread, 9, PM2 ) );
+
+	sleep(1);
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+	BOOST_MESSAGE( "notify_all" );
+	control.load_condition.notify_all();
+
+	sleep(1);
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)2 );
+	// unit_test[10] unload_moduleを複数スレッドからアクセスした場合の動作チェック（それぞれ別のモジュールを指定した場合）
+	BOOST_MESSAGE( "notify_all" );
+	control.load_condition.notify_all();
+
+	thd8.join();
+	thd9.join();
+
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+
+	// unit_test[11] load_moduleとunload_moduleを複数スレッドからアクセスした場合の動作チェック（それぞれ別のモジュールを指定した場合）
+	boost::thread	thd10( boost::bind( &load2_unload_thread, 10, PM1 ) );
+	boost::thread	thd11( boost::bind( &load_unload2_thread, 11, PM2 ) );
+
+	sleep(1);
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)1 );
+	BOOST_MESSAGE( "notify_all" );
+	control.load_condition.notify_all();
+
+	thd10.join();
+	thd11.join();
+
+	loadmodulemap = control.get_loadmodule_map();
+	BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
+	control.finalize();
+}
+
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 //	Logger logger;
@@ -311,6 +431,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &protocol_module_control_test_thread2 ) );
 	ts->add( BOOST_TEST_CASE( &protocol_module_control_test_thread3 ) );
 	ts->add( BOOST_TEST_CASE( &protocol_module_control_test_thread4 ) );
+	ts->add( BOOST_TEST_CASE( &protocol_module_control_test_thread5 ) );
 
 	framework::master_test_suite().add( ts );
 
