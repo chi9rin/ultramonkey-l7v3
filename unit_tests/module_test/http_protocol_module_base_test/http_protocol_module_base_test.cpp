@@ -200,7 +200,7 @@ void	check_http_method_test_t1(){
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "[Thread_1] " << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [1]  http method check test (check result = OK)
-		BOOST_CHECK( ( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+		BOOST_CHECK( check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
@@ -1071,7 +1071,7 @@ void	find_http_header_test(){
 //--test functions--
 void	check_http_method_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
 
-	for( int i = 0; i < 10; i++ ){
+	for( int i = 0; i < 100; i++ ){
 		http_protocol_module_base_test_1.check_http_method_test_t1();
 	}
 
@@ -1079,7 +1079,7 @@ void	check_http_method_test_t1( http_protocol_module_base_test http_protocol_mod
 
 void	check_http_method_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
 
-	for( int i = 0; i < 10; i++ ){
+	for( int i = 0; i < 100; i++ ){
 		http_protocol_module_base_test_1.check_http_method_test_t2();
 	}
 
