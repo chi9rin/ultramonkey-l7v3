@@ -38,7 +38,7 @@ void	replication_interrupt(){}
 void	initialize(
 							rs_list_itr_func_type	inlist_begin,
 							rs_list_itr_func_type	inlist_end,
-							rs_list_itr_func_type	inlist_next,
+							rs_list_itr_next_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock ){}
 
@@ -544,7 +544,7 @@ void	check_http_version_test(){
 
 	BOOST_MESSAGE( "----- check_http_version test start -----" );
 
-	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+//	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
 	for( int i = 0; i < CHECK_VERSION_OK_STRING_NUM; i++, count++ ){
 		if( count < 10 ){
@@ -558,7 +558,7 @@ void	check_http_version_test(){
 		buffer_len = strlen( buffer_ok[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [1]  http version check test (check result = OK)
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+		BOOST_CHECK( check_http_version( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
 	for( int i = 0; i < CHECK_VERSION_NG_STRING_NUM; i++, count++ ){
@@ -573,7 +573,7 @@ void	check_http_version_test(){
 		buffer_len = strlen( buffer_ng[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [2]  http version check test (check result = NG)
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+		BOOST_CHECK( check_http_version( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
 	for( int i = 0; i < CHECK_VERSION_INPOSSIBLE_STRING_NUM; i++, count++ ){
@@ -587,7 +587,7 @@ void	check_http_version_test(){
 		buffer_len = strlen( buffer_inpossible[i] );
 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [3]  http version check test (check result = INPOSSIBLE)
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+		BOOST_CHECK( check_http_version( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
 	if( count < 10 ){
@@ -600,7 +600,7 @@ void	check_http_version_test(){
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
 	// ## test [4]  http version check test (check result = NG / buffer = NULL / buffer_len = 0)
-	BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( NULL, buffer_len ) == CHECK_NG );
+	BOOST_CHECK( check_http_version( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
 	if( count < 10 ){
@@ -613,7 +613,7 @@ void	check_http_version_test(){
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
 	// ## test [5]  http version check test (check result = NG / buffer = NULL / buffer_len = 100)
-	BOOST_CHECK( http_protocol_module_base_test_1.check_http_version( NULL, buffer_len ) == CHECK_NG );
+	BOOST_CHECK( check_http_version( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
 	BOOST_MESSAGE( "----- check_http_version test end -----" );
