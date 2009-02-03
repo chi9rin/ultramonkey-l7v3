@@ -67,7 +67,7 @@ void	schedule_module_test(){
 	BOOST_MESSAGE( "unit_test[4]" );
 	BOOST_CHECK_EQUAL( true, schedule_module_lc->is_tcp() );
 
-	// unit_test[5]  is_udpメソッドのテスト
+	// unit_test[5]  is_udpメソッドのテスト(UDP非対応)
 	BOOST_MESSAGE( "unit_test[5]" );
 	BOOST_CHECK_EQUAL( false, schedule_module_lc->is_udp() );
 
@@ -79,25 +79,23 @@ void	schedule_module_test(){
 	l7vs::schedule_module_base::rslist_iterator_end_func_type		rslist_end;
 	l7vs::schedule_module_base::rslist_iterator_next_func_type		rslist_next;
 
-	// unit_test[6]  handle_schedule(tcp)メソッドのテスト
+	// unit_test[6]  handle_schedule(tcp)メソッドのテスト(boost::functionのempty評価のため空のままイテレターメソッドを渡す　endpoint1は更新されない)
 	BOOST_MESSAGE( "unit_test[6]" );
 	boost::asio::ip::tcp::endpoint endpoint1, endpoint3 ;
 
-	// boost::functionのempty評価のため空のままイテレターメソッドを渡す　endpoint1は更新されない。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
-	// unit_test[7]  handle_schedule(tcp)メソッドのテスト２
+	// unit_test[7]  handle_schedule(tcp)メソッドのテスト２(リストの内容が空　endpoint1は更新されない)
 	BOOST_MESSAGE( "unit_test[7]" );
 	rslist_begin = boost::bind( &list_begin, &rs_list );
 	rslist_end = boost::bind( &list_end, &rs_list );
 	rslist_next = boost::bind( &list_next, _1 );
 
-	// リストの内容が空　endpoint1は更新されない。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
-	// unit_test[8]  handle_schedule(tcp)メソッドのテスト３
+	// unit_test[8]  handle_schedule(tcp)メソッドのテスト３(リストの項目が全て振り分け無し　endpoint1は更新されない)
 	BOOST_MESSAGE( "unit_test[8]" );
 	server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.87" ), 22  ) ;
 	server1.weight = 0;
@@ -112,11 +110,10 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
-	// リストの項目が全て振り分け無し　endpoint1は更新されない。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
-	// unit_test[9]  handle_schedule(tcp)メソッドのテスト４
+	// unit_test[9]  handle_schedule(tcp)メソッドのテスト４(重みが設定されているのでserver1が返る)
 	BOOST_MESSAGE( "unit_test[9]" );
 	rs_list.clear();
 	server1.weight = 2;
@@ -128,11 +125,10 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
-	// 重みが設定されているのでserver1が帰る。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server1.tcp_endpoint == endpoint1 );
 
-	// unit_test[10]  handle_schedule(tcp)メソッドのテスト５
+	// unit_test[10]  handle_schedule(tcp)メソッドのテスト５(重みが設定されているので次に接続数の少ないserver2が返る)
 	BOOST_MESSAGE( "unit_test[10]" );
 	rs_list.clear();
 	server1.increment_active();
@@ -140,11 +136,10 @@ void	schedule_module_test(){
 	rs_list.push_back( server2 );
 	rs_list.push_back( server3 );
 	rs_list.push_back( server4 );
-	// 重みが設定されているので次に接続数の少ないserver2が帰る。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server2.tcp_endpoint == endpoint1 );
 
-	// unit_test[11]  handle_schedule(tcp)メソッドのテスト６
+	// unit_test[11]  handle_schedule(tcp)メソッドのテスト６(重みが設定されているので次に接続数の少ないserver3が返る)
 	BOOST_MESSAGE( "unit_test[11]" );
 	rs_list.clear();
 	rs_list.push_back( server1 );
@@ -152,11 +147,10 @@ void	schedule_module_test(){
 	rs_list.push_back( server2 );
 	rs_list.push_back( server3 );
 	rs_list.push_back( server4 );
-	// 重みが設定されているので次に接続数の少ないserver3が帰る。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server3.tcp_endpoint == endpoint1 );
 
-	// unit_test[12]  handle_schedule(tcp)メソッドのテスト７
+	// unit_test[12]  handle_schedule(tcp)メソッドのテスト７(server4には重みがないので、一巡し重みが設定されているserver1が返る)
 	BOOST_MESSAGE( "unit_test[12]" );
 	rs_list.clear();
 	rs_list.push_back( server1 );
@@ -164,12 +158,11 @@ void	schedule_module_test(){
 	server3.increment_active();
 	rs_list.push_back( server3 );
 	rs_list.push_back( server4 );
-	// server4には重みがないので、一巡し重みが設定されているserver1が帰る。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server1.tcp_endpoint == endpoint1 );
 
 
-	// unit_test[13]  handle_schedule(udp)メソッドのテスト
+	// unit_test[13]  handle_schedule(udp)メソッドのテスト(UDPは非対応　endpoint2は更新されない)
 	BOOST_MESSAGE( "unit_test[13]" );
 	boost::asio::ip::udp::endpoint endpoint2, endpoint4 ;
 
@@ -187,7 +180,6 @@ void	schedule_module_test(){
 	server4.weight = 0;
 	rs_list.push_back( server4 );
 
-	// UDPは未対応　endpoint2は更新されない。
 	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint2 ) ;
 	BOOST_CHECK( endpoint4 == endpoint2 );
 

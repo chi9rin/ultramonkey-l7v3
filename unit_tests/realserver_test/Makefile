@@ -5,7 +5,7 @@
 #
 TARGET		= realserver_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -D PARAMETER_FILE='"./sample.ini"'
+CPPFLAGS	= -O0 -g -Wall -pthread -DMAX_BUFFER_SIZE=65535 -D PARAMETER_FILE='"./sample.ini"'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include

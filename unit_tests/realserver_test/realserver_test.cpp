@@ -94,7 +94,7 @@ void	realserver_test(){
 	unsigned long long	send_byte = 0ULL;
 	int					weight = -1;
 
-	// unit_test[1]  コンストラクタのテスト
+	// unit_test[1]  コンストラクタのテスト（全てが初期化済み）
 	l7vs::realserver	server1;
 
 	BOOST_CHECK_EQUAL( nactive, server1.get_active() );
@@ -102,7 +102,7 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( send_byte, server1.send_byte );
 	BOOST_CHECK_EQUAL( weight, server1.weight );
 
-	// unit_test[2]  コピーコンストラクタのテスト
+	// unit_test[2]  コピーコンストラクタのテスト（全てがコピー元と同じ）
 	server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "11.11.11.11" ), 11 ) ;
 	server1.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "22.22.22.22" ), 22 ) ;
 	server1.send_byte = 10;
@@ -120,7 +120,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
 
-	// unit_test[3]  比較オペレータのテスト
+	// unit_test[3]  比較オペレータのテスト（TCPエンドポイントが異なるとエラー）
 	BOOST_CHECK_EQUAL( ( server1 == server2 ), true );
 
 	server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "33.33.33.33" ), 33 ) ;
@@ -132,7 +132,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint != server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[4]  比較オペレータのテスト２
+	// unit_test[4]  比較オペレータのテスト２（UDPエンドポイントが異なるとエラー）
 	server1 = server2;
 	server1.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "44.44.44.44" ), 44 ) ;
 	BOOST_CHECK_EQUAL( ( server1 == server2 ), false );
@@ -143,7 +143,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint != server1.udp_endpoint );
 
-	// unit_test[5]  比較オペレータのテスト３
+	// unit_test[5]  比較オペレータのテスト３（weightが異なるとエラー）
 	server1 = server2;
 	server1.weight = 3;
 	BOOST_CHECK_EQUAL( ( server1 == server2 ), false );
@@ -154,7 +154,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[6]  比較オペレータのテスト４
+	// unit_test[6]  比較オペレータのテスト４（接続数が異なっても問題無し）
 	server1 = server2;
 	server1.increment_active();
 	BOOST_CHECK_EQUAL( ( server1 == server2 ), true );
@@ -165,7 +165,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[7]  比較オペレータのテスト５
+	// unit_test[7]  比較オペレータのテスト５（切断数が異なっても問題無し）
 	server1 = server2;
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( ( server1 == server2 ), true );
@@ -176,7 +176,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[8]  比較オペレータのテスト６
+	// unit_test[8]  比較オペレータのテスト６（送信バイト数が異なっても問題無し）
 	server1 = server2;
 	server1.send_byte = 100;
 	BOOST_CHECK_EQUAL( ( server1 == server2 ), true );
@@ -187,7 +187,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[9]  否定オペレータのテスト
+	// unit_test[9]  否定オペレータのテスト（TCPエンドポイントが異なると検出）
 	server1 = server2;
 
 	BOOST_CHECK_EQUAL( ( server1 != server2 ), false);
@@ -201,7 +201,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint != server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[10]  否定オペレータのテスト２
+	// unit_test[10]  否定オペレータのテスト２（UDPエンドポイントが異なると検出）
 	server1 = server2;
 	server1.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "44.44.44.44" ), 44 ) ;
 	BOOST_CHECK_EQUAL( ( server1 != server2 ), true );
@@ -212,7 +212,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint != server1.udp_endpoint );
 
-	// unit_test[11]  否定オペレータのテスト３
+	// unit_test[11]  否定オペレータのテスト３（weightが異なると検出）
 	server1 = server2;
 	server1.weight = 3;
 	BOOST_CHECK_EQUAL( ( server1 != server2 ), true );
@@ -223,7 +223,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[12]  否定オペレータのテスト４
+	// unit_test[12]  否定オペレータのテスト４（接続数が異なっても問題無し）
 	server1 = server2;
 	server1.increment_active();
 	BOOST_CHECK_EQUAL( ( server1 != server2 ), false );
@@ -234,7 +234,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[13]  否定オペレータのテスト５
+	// unit_test[13]  否定オペレータのテスト５（切断数が異なっても問題無し）
 	server1 = server2;
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( ( server1 != server2 ), false );
@@ -245,7 +245,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[14]  否定オペレータのテスト６
+	// unit_test[14]  否定オペレータのテスト６（送信バイト数が異なっても問題無し）
 	server1 = server2;
 	server1.send_byte = 100;
 	BOOST_CHECK_EQUAL( ( server1 != server2 ), false );
@@ -256,7 +256,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[15]  コピーオペレータのテスト
+	// unit_test[15]  コピーオペレータのテスト（全てがコピー元と同じ）
 	server1 = l7vs::realserver();
 	server2 = server1 ;
 
@@ -269,7 +269,7 @@ void	realserver_test(){
 
 	BOOST_CHECK( server1 == server2 );
 
-	// unit_test[16]  大小比較オペレータのテスト
+	// unit_test[16]  大小比較オペレータのテスト（TCPエンドポイントが大きいと検出）
 	server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.86" ), 21 ) ;
 
 	BOOST_CHECK_EQUAL( ( server2 < server1 ), true );
@@ -280,7 +280,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint < server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[17]  大小比較オペレータのテスト２
+	// unit_test[17]  大小比較オペレータのテスト２（UDPエンドポイントが異なっても問題無し）
 	server1 = server2;
 	server1.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "10.144.169.86" ), 21 ) ;
 
@@ -292,7 +292,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint < server1.udp_endpoint );
 
-	// unit_test[18]  大小比較オペレータのテスト３
+	// unit_test[18]  大小比較オペレータのテスト３（TCPが等しくweightが大きいと検出）
 	server1 = server2;
 	server1.weight = 10;
 
@@ -304,7 +304,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[19]  大小比較オペレータのテスト４
+	// unit_test[19]  大小比較オペレータのテスト４（接続数が異なっても問題無し）
 	server1 = server2;
 	server1.increment_active();
 	BOOST_CHECK_EQUAL( ( server2 < server1 ), false );
@@ -315,7 +315,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[20]  大小比較オペレータのテスト５
+	// unit_test[20]  大小比較オペレータのテスト５（切断数が異なっても問題無し）
 	server1 = server2;
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( ( server2 < server1 ), false );
@@ -326,7 +326,7 @@ void	realserver_test(){
 	BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
 	BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
-	// unit_test[21]  大小比較オペレータのテスト６
+	// unit_test[21]  大小比較オペレータのテスト６（送信バイト数が異なっても問題無し）
 	server1 = server2;
 	server1.send_byte = 100;
 	BOOST_CHECK_EQUAL( ( server2 < server1 ), false );
@@ -351,12 +351,12 @@ void	realserver_test(){
 	server1.decrement_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
-	// unit_test[26]  接続数インクリメントメソッドのテスト２
-//  Loggerを加えたら処理時間40秒が27分になってしまったので却下
-//	for ( loop = 0; loop < INT_MAX; loop++ ){
-//		server1.increment_active();
-//	}
-//	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+	// unit_test[26]  接続数インクリメントメソッドのテスト２（上限INT_MAXに達すると0にクリア）
+	for ( loop = 0; loop < INT_MAX; loop++ ){
+		server1.increment_active();
+	}
+	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+
 	l7vs::realserver_fake	server3;
 
 	nactive = INT_MAX - 1 ;
@@ -366,7 +366,7 @@ void	realserver_test(){
 	server3.increment_active();
 	BOOST_CHECK_EQUAL( server3.get_active(), 0 );
 
-	// unit_test[27]  接続数デクリメントメソッドのテスト２
+	// unit_test[27]  接続数デクリメントメソッドのテスト２（0に対しては何も行わない）
 	server1.decrement_active();
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
@@ -374,12 +374,11 @@ void	realserver_test(){
 	server1.increment_inact();
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 
-	// unit_test[29]  切断数インクリメントメソッドのテスト２
-//  Loggerを加えたら処理時間40秒が27分になってしまったので却下
-//	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
-//		server1.increment_inact();
-//	}
-//	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
+	// unit_test[29]  切断数インクリメントメソッドのテスト２（上限INT_MAXに達すると0にクリア）
+	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
+		server1.increment_inact();
+	}
+	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
 
 	ninact = INT_MAX - 1 ;
 	server3.set_inact( ninact );
@@ -395,21 +394,21 @@ void	realserver_test(){
 	boost::thread	thread_item4( boost::bind ( &starting_thread, 4 ) );
 	boost::thread	thread_item5( boost::bind ( &starting_thread, 5 ) );
 
-	// unit_test[30]  接続数インクリメントメソッドのテスト３
+	// unit_test[30]  接続数インクリメントメソッドのテスト３（複数スレッドから同時アクセス）
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
 	sleep( 1 );
 	BOOST_CHECK_EQUAL( rush_server.get_active(), 5 );
 
-	// unit_test[31]  接続数デクリメントメソッドのテスト３
+	// unit_test[31]  接続数デクリメントメソッドのテスト３（複数スレッドから同時アクセス）
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
 	sleep( 1 );
 	BOOST_CHECK_EQUAL( rush_server.get_active(), 0 );
 
-	// unit_test[32]  切断数インクリメントメソッドのテスト３
+	// unit_test[32]  切断数インクリメントメソッドのテスト３（複数スレッドから同時アクセス）
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
