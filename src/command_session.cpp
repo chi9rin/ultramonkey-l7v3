@@ -83,9 +83,6 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 //!	@param[in]	error code
 //!	@param[in]	read size
 void	command_session::handle_read( const boost::system::error_code& err, size_t size){
-	//debug
-	std::cout << "handle_read" << std::endl;
-
 	if( !err ){
 		// execute received command
 		execute_command();
@@ -109,27 +106,21 @@ void	command_session::handle_read( const boost::system::error_code& err, size_t 
 //!	@brief		write handler
 //!	@param[in]	error code
 void	command_session::handle_write( const boost::system::error_code& err ){
-	//debug
-	std::cout << "handle_write" << std::endl;
-
 	if( err ){
 		std::stringstream buf;
 		buf << "handle_write error:" << err;
 		Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, buf.str(), __FILE__, __LINE__);
 	}
-	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
-								boost::bind(	&command_session::handle_read,
-												shared_from_this(),
-												boost::asio::placeholders::error,
-												boost::asio::placeholders::bytes_transferred ));
+// 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
+// 								boost::bind(	&command_session::handle_read,
+// 												shared_from_this(),
+// 												boost::asio::placeholders::error,
+// 												boost::asio::placeholders::bytes_transferred ));
 
 }
 
 //!	@brief		execute request command
 void	command_session::execute_command(){
-	//debug
-	std::cout << "execute_command" << std::endl;
-
 	// deserialize requestdata
 	std::stringstream	ss;
 	ss << &( request_buffer[0] );
@@ -143,11 +134,9 @@ void	command_session::execute_command(){
 		// execute command
 		itr->second( err );
 		if( !err ){		// command succeed
-			std::cout << "res:ok" << std::endl;
 			response_data.status = l7vsd_response::RESPONSE_OK;
 		}
 		else {			// command failed
-			std::cout << "res:ng" << std::endl;
 			response_data.status = command_status_map[ request_data.command ];
 			response_data.message = err.get_message();
 		}
@@ -164,10 +153,6 @@ void	command_session::execute_command(){
 
 //!	@brief		session start
 void	command_session::start(){
-
-	//debug
-	std::cout << "session start" << std::endl;
-
 	// start async read requestdata from unixsocket.
 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
 								boost::bind(	&command_session::handle_read,

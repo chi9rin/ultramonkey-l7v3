@@ -37,7 +37,7 @@ public:
 	//! unix domain socket typedef
 	typedef	boost::asio::local::stream_protocol::socket	unixsocket_type;
 	//! command_handler typedef
-	typedef std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<void( l7vs::error_code )> >	command_handler_map_type;
+	typedef std::map<l7vsadm_request::COMMAND_CODE_TAG, boost::function<void( l7vs::error_code& )> >	command_handler_map_type;
 	//! command code to status code map typedef
 	typedef	std::map<l7vsadm_request::COMMAND_CODE_TAG, l7vsd_response::COMMAND_RESPONSE_CODE>	command_status_map_type;
 	//! command_session shared_ptr typedef

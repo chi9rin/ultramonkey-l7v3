@@ -57,7 +57,7 @@ public:
 											logstatus_list_type*,
 											bool*,
 											logstatus_list_type*,
-											error_code&  err )
+											error_code& err )
 	{
 		list_vs_v_called = true;
 		if(list_vs_v_fail)	err.setter( true, "");
