@@ -20,17 +20,25 @@
 #include <boost/thread.hpp>
 
 #include "error_code.h"
-#include "session_thread_control.h"
-#include "tcp_session.h"
-#include "udp_session.h"
-#include "virtualservice_element.h"
-
 #include "l7vsd.h"
 #include "realserver.h"
+#include "virtualservice_element.h"
+#include "tcp_session.h"
+#include "udp_session.h"
+#include "session_thread_control.h"
+#include "replication.h"
+
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 
-#define	SESSION_POOL_NUM_DEFAULT	256
+#define	SESSION_POOL_NUM_DEFAULT	(256)
+
+#define	PARAM_POOLSIZE_KEY_NAME	"SESSION_POOL_SIZE"
+
+#define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
+#define	SCHEDMOD_NOTLOAD_ERROR_MSG	"Schedule Module not loaded"
+#define	PROTOMOD_LOAD_ERROR_MSG	"Protocol Module load error"
+#define	SCHEDMOD_LOAD_ERROR_MSG "Schedule Module load error"
 
 namespace l7vs{
 
@@ -47,10 +55,10 @@ public:
 	typedef	boost::shared_ptr<boost::asio::deadline_timer>	deadline_timer_ptr_type;
 protected:
 	//!	@class	vs_replication_header replication data structure for header data
-	class	vs_replication_data{
+	class	replication_data{
 	public:
-		vs_replication_data() : udpflag( false ) {}
-		vs_replication_data( const vs_replication_data& in ){
+		replication_data() : udpflag( false ) {}
+		replication_data( const replication_data& in ){
 			udpflag			= in.udpflag;
 			tcp_endpoint	= in.tcp_endpoint;
 			udp_endpoint	= in.udp_endpoint;
@@ -60,7 +68,7 @@ protected:
 			qos_up			= in.qos_up;
 			qos_down		= in.qos_down;
 		}
-		vs_replication_data&	operator=( const vs_replication_data& in ){
+		replication_data&	operator=( const replication_data& in ){
 			udpflag			= in.udpflag;
 			tcp_endpoint	= in.tcp_endpoint;
 			udp_endpoint	= in.udp_endpoint;
@@ -100,6 +108,11 @@ protected:
 		}
 	};
 
+	struct	parameter_data{
+		int	session_pool_size;
+		parameter_data() : session_pool_size( SESSION_POOL_NUM_DEFAULT ){}
+	};
+
 	const	l7vsd&				vsd;			//! l7vsd reference
 	const	replication&		rep;			//! replication reference
 
@@ -107,6 +120,7 @@ protected:
 	deadline_timer_ptr_type		calc_bps_timer;	//! timer object
 	deadline_timer_ptr_type		replication_timer;	//! timer object
 
+	parameter_data				param_data;		//! virtual service parameter data
 	virtualservice_element		element;		//! virtual service element
 
 	boost::shared_ptr<protocol_module_base>	protomod;			//! protocol module smart pointer
@@ -135,8 +149,10 @@ protected:
 	unsigned long long			throughput_down;				//! downstream throughput value
 	boost::mutex				throughput_down_mutex;			//! mutex for update downstream throughput value
 
+	void						load_parameter();
+
 	virtual	void				handle_replication_interrupt( const boost::system::error_code& ) = 0;
-	virtual	bool				read_replicationdata( vs_replication_data& ) = 0;
+	virtual	bool				read_replicationdata( replication_data& ) = 0;
 
 	void						handle_protomod_replication( const boost::system::error_code& );
 	void						handle_schedmod_replication( const boost::system::error_code& );
@@ -196,6 +212,8 @@ class	virtualservice_tcp : public virtualservice_base{
 public:
 	typedef	std::map< boost::thread::id, boost::shared_ptr<session_thread_control> >
 								session_map_type;
+	typedef	std::pair< boost::thread::id, boost::shared_ptr<session_thread_control> >
+								session_map_pair_type;
 protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
@@ -204,9 +222,9 @@ protected:
 	session_map_type			active_sessions;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
-	bool						read_replicationdata( vs_replication_data& );
+	bool						read_replicationdata( replication_data& );
 
-	void						handle_accept(	const session_thread_control_ptr,
+	void						handle_accept(	const virtualservice_base::session_thread_control_ptr,
 												const boost::system::error_code& );
 
 public:
@@ -244,7 +262,7 @@ protected:
 	udp_session					session;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
-	bool						read_replicationdata( vs_replication_data& );
+	bool						read_replicationdata( virtualservice_base::replication_data& );
 
 public:
 	virtualservice_udp(		const l7vsd&,

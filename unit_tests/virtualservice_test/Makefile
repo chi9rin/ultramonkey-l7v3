@@ -56,4 +56,4 @@ vs_tcp_ut:	$(TCPOBJS)
 # 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(BASEOBJS)
+	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS)

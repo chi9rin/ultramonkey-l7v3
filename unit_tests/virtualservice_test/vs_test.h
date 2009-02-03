@@ -13,7 +13,7 @@ protected:
 	boost::xtime	diffelencial_time;
 	void	handle_replication_interrupt( const boost::system::error_code& err ){
 	}
-	bool	read_replicationdata( vs_replication_data& in_rep_data ){
+	bool	read_replicationdata( replication_data& in_rep_data ){
 		return true;
 	}
 
@@ -103,7 +103,7 @@ public:
 	}
 	void	test_replication(){
 		//serialize出力(header&data)
-		virtualservice_base::vs_replication_data	a1;
+		virtualservice_base::replication_data	a1;
 		//set data
 		a1.udpflag		= true;
 		a1.tcp_endpoint	= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "192.168.10.10" ), 8080 );
@@ -116,14 +116,14 @@ public:
 
 		std::stringstream	ss;
 		boost::archive::text_oarchive	oa( ss );
-		oa << (const l7vs::virtualservice_base::vs_replication_data&)a1;
+		oa << (const l7vs::virtualservice_base::replication_data&)a1;
 
 		std::cout << ss.str() << std::endl;
 		std::cout << ss.str().size() << std::endl;
 
 		//serialize入力
 		boost::archive::text_iarchive	ia( ss );
-		l7vs::virtualservice_base::vs_replication_data	a2;
+		l7vs::virtualservice_base::replication_data	a2;
 		ia >> a2;
 		BOOST_CHECK( a2.udpflag == a1.udpflag );
 		BOOST_CHECK( a2.tcp_endpoint == a1.tcp_endpoint );
