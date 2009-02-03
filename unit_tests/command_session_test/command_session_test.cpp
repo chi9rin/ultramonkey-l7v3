@@ -46,11 +46,11 @@ void	client_thread( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd ){
 	//std::cout << "accept" << std::endl;
 	acc.accept( s );
 
-	// wait
-	boost::xtime xt;
-	xtime_get(&xt, boost::TIME_UTC);
-	xt.sec += 1;
-	boost::thread::sleep(xt);
+// 	// wait
+// 	boost::xtime xt;
+// 	xtime_get(&xt, boost::TIME_UTC);
+// 	xt.sec += 1;
+// 	boost::thread::sleep(xt);
 
 	// create request
 	request.command = cmd;
