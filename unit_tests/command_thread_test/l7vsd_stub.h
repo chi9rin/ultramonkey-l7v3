@@ -20,7 +20,6 @@
 #include "schedule_module_control.h"
 #include "logger.h"
 #include "parameter.h"
-#include "test_data.h"
 
 #ifndef	L7VS_MODULE_PATH
 	#define L7VS_MODULE_PATH		"."
@@ -55,8 +54,8 @@ public:
 	l7vsd();				//!< constructor
 	virtual	~l7vsd();		//!< destructor
 
-	bool	exit_flag;
-	test_data	data;
+	typedef	std::map< l7vs::l7vsadm_request::COMMAND_CODE_TAG, unsigned int >	cmd_num_map_type;
+	cmd_num_map_type	call_num_map;
 
 protected:
 	boost::thread_group			vs_threads;			//!< virtual_service thread group
@@ -88,56 +87,36 @@ protected:
 
 
 public:
-	void	list_virtual_service( vselist_type&, error_code&  );				//!< virtual_service list command
-	void	list_virtual_service_verbose(	vselist_type&,
-											REPLICATION_MODE_TAG&,
-											logstatus_list_type&,
-											bool&,
-											logstatus_list_type&,
+	void	list_virtual_service( vselist_type*, error_code&  );				//!< virtual_service list command
+	void	list_virtual_service_verbose(	vselist_type*,
+											replication::REPLICATION_MODE_TAG*,
+											logstatus_list_type*,
+											bool*,
+											logstatus_list_type*,
 											error_code&  );						//!< virtual_service verbose list command
-	void	add_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service add command
-	void	del_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service del command
-	void	edit_virtual_service( const virtualservice_element&, error_code& );	//!< virtual_service edit command
+	void	add_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service add command
+	void	del_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service del command
+	void	edit_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service edit command
 
-	void	add_real_server( const virtualservice_element&, error_code& );	//!< real_server add command
-	void	del_real_server( const virtualservice_element&, error_code& );	//!< real_server del command
-	void	edit_real_server( const virtualservice_element&, error_code& );	//!< real_server edit command
+	void	add_real_server( const virtualservice_element*, error_code& );	//!< real_server add command
+	void	del_real_server( const virtualservice_element*, error_code& );	//!< real_server del command
+	void	edit_real_server( const virtualservice_element*, error_code& );	//!< real_server edit command
 
 	void	flush_virtual_service( error_code& );	//!< all virtual_service delete command
 
-	void	replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG, error_code& );	//!< replication command
-//	void	get_replication_info( replication::REPLICATION_MODE_TAG&, error_code& );	//!< get replication info command
-//	void	start_replication( error_code& );				//!< start replication command
-//	void	stop_replication( error_code& );				//!< stop replication command
-//	void	dump_replication_memory( error_code& );			//!< dump replication memory command
-//	void	force_replicate( error_code& );					//!< force replicate command
-
-	void	log_command( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );		//!< log command
-//	void	get_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get loglevel command
-//	void	set_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set loglevel command
-//	void	set_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set all category loglevel command
-
-	void	snmp_log_command( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< snmp log command
-//	void	get_snmp_connect_status( int&, error_code& );									//!< get snmp connect status command
-//	void	get_snmp_log_level( const LOG_CATEGORY_TAG, LOG_LEVEL_TAG&, error_code& );		//!< get snmp loglevel command
-//	void	set_snmp_log_level( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& );	//!< set snmp loglevel command
-//	void	set_snmp_log_level_all( const LOG_LEVEL_TAG, error_code& );						//!< set snmp all loglevel command
-
-	void	reload_parameter( const PARAMETER_COMPONENT_TAG, error_code& );	//!< reload component parameter command
+	void	replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG*, error_code& );	//!< replication command
+	void	log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );		//!< log command
+	void	snmp_log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );	//!< snmp log command
+	void	reload_parameter( const PARAMETER_COMPONENT_TAG*, error_code& );	//!< reload component parameter command
 
 	int		run( int, char*[] );		//!< l7vsd run method
 
 	void	release_virtual_service( const virtualservice_element& )	const;		//!< virtualservice release from vslist
 
 
-	bool	list_vs_called;
- 	void	set_replication( boost::shared_ptr< l7vs::replication > inrep ){
- 		rep = inrep;
- 	}
-
-	test_data&	get_test_data()
-	{ return data; }
-
+	void	set_replication( boost::shared_ptr< l7vs::replication > inrep ){
+		rep = inrep;
+	}
 
 protected:
 	bool	is_exit_requested();		//!< check if exit requested

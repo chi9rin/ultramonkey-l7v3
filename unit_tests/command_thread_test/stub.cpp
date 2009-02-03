@@ -16,7 +16,7 @@
 
 namespace	l7vs{
 // l7vsd
-l7vsd::l7vsd() : exit_flag(false) {}
+l7vsd::l7vsd() {}
 l7vsd::~l7vsd(){}
 
 //! vs_list search function
@@ -33,60 +33,91 @@ l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element&
 	return vslist.end();
 }
 
-void	l7vsd::list_virtual_service( vselist_type&, error_code&  )
+void	l7vsd::list_virtual_service( vselist_type*, error_code&  )
 {
-	boost::mutex::scoped_lock	lock(command_mutex);
-	data.method_map[l7vs::l7vsadm_request::CMD_LIST].num_called++;
-	
+	boost::mutex::scoped_lock lock(command_mutex);
+
+	++call_num_map[l7vs::l7vsadm_request::CMD_LIST];
 }
 
-void	l7vsd::list_virtual_service_verbose(	vselist_type&,
-										REPLICATION_MODE_TAG&,
-										logstatus_list_type&,
-										bool&,
-										logstatus_list_type&,
+void	l7vsd::list_virtual_service_verbose(	vselist_type*,
+										replication::REPLICATION_MODE_TAG*,
+										logstatus_list_type*,
+										bool*,
+										logstatus_list_type*,
 										error_code&  )
-{}
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_LIST_VERBOSE];
+}
 
-void	l7vsd::add_virtual_service( const virtualservice_element&, error_code& )
-{}
-void	l7vsd::del_virtual_service( const virtualservice_element&, error_code& )
-{}
-void	l7vsd::edit_virtual_service( const virtualservice_element&, error_code& )
-{}
+void	l7vsd::add_virtual_service( const virtualservice_element*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_ADD_VS];
+}
 
-void	l7vsd::add_real_server( const virtualservice_element&, error_code& )
-{}
-void	l7vsd::del_real_server( const virtualservice_element&, error_code& )
-{}
-void	l7vsd::edit_real_server( const virtualservice_element&, error_code& )
-{}
+void	l7vsd::del_virtual_service( const virtualservice_element*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_DEL_VS];
+}
+
+void	l7vsd::edit_virtual_service( const virtualservice_element*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_EDIT_VS];
+}
+
+
+void	l7vsd::add_real_server( const virtualservice_element*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_ADD_RS];
+}
+
+void	l7vsd::del_real_server( const virtualservice_element*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_DEL_RS];
+}
+
+void	l7vsd::edit_real_server( const virtualservice_element*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_EDIT_RS];
+}
+
 
 void	l7vsd::flush_virtual_service( error_code& )
-{}
-
-void	l7vsd::replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG rep_cmd, error_code& )
 {
-	std::cout << "rep" << std::endl;
-	std::cout << "rep_cmd" << rep_cmd << std::endl;
-	boost::mutex::scoped_lock	lock(command_mutex);
-	if( rep_cmd == l7vs::l7vsadm_request::REP_FORCE ){
-		std::cout << "exit" << std::endl;
-		exit_flag = true;
-	}
-	else {
-		data.method_map[l7vs::l7vsadm_request::CMD_REPLICATION].num_called++;
-	}
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_FLUSH_VS];
 }
 
-void	l7vsd::log_command( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& )
-{}
+void	l7vsd::replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG* rep_cmd, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_REPLICATION];
+}
 
-void	l7vsd::snmp_log_command( const LOG_CATEGORY_TAG, const LOG_LEVEL_TAG, error_code& )
-{}
+void	l7vsd::log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_LOG];
+}
 
-void	l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG, error_code& )
-{}
+void	l7vsd::snmp_log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_SNMP];
+}
+
+void	l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG*, error_code& )
+{
+	boost::mutex::scoped_lock lock(command_mutex);
+	++call_num_map[l7vs::l7vsadm_request::CMD_PARAMETER];
+}
 
 void	l7vsd::release_virtual_service( const virtualservice_element& )	const
 {}
