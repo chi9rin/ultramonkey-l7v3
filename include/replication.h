@@ -146,9 +146,9 @@ protected:
 	int										replication_flag;
 
 public:
-	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
-															replication_receive_socket( inreceive_io ),
-															replication_send_socket( inreceive_io ) {} ;
+	replication( boost::asio::io_service& inreceive_io ) :	replication_receive_socket( inreceive_io ),
+															replication_send_socket( inreceive_io ),
+															receive_io( inreceive_io ) {} ;
 	~replication(){}
 
 	int							initialize();
