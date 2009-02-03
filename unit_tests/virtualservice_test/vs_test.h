@@ -1,6 +1,7 @@
 #ifndef VS_TEST
 #define VS_TEST
 
+#include <boost/serialization/list.hpp>
 #include "virtualservice.h"
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
@@ -101,20 +102,17 @@ public:
 		}
 	}
 	void	test_replication(){
-		//serialize出力
+		//serialize出力(header&data)
 		virtualservice_base::vs_replication_data	a1;
-		//set header data
-		a1.header.udpflag		= true;
-		a1.header.tcp_endpoint	= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "192.168.10.10" ), 8080 );
-		a1.header.udp_endpoint	= boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( "192.168.10.20" ), 8080 );
-		a1.header.bodytype		= 1U;
-		a1.header.datasize		= ULLONG_MAX;
-		//set body data
-		a1.body.sorry_maxconnection	= LLONG_MAX;
-		a1.body.sorry_endpoint		= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "192.168.10.1" ), 80 );
-		a1.body.sorry_flag			= true;
-		a1.body.qos_up				= 0ULL;
-		a1.body.qos_down			= 30ULL;
+		//set data
+		a1.udpflag		= true;
+		a1.tcp_endpoint	= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "192.168.10.10" ), 8080 );
+		a1.udp_endpoint	= boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( "192.168.10.20" ), 8080 );
+		a1.sorry_maxconnection	= LLONG_MAX;
+		a1.sorry_endpoint		= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "192.168.10.1" ), 80 );
+		a1.sorry_flag			= true;
+		a1.qos_up				= 0ULL;
+		a1.qos_down				= 30ULL;
 
 		std::stringstream	ss;
 		boost::archive::text_oarchive	oa( ss );
@@ -127,18 +125,14 @@ public:
 		boost::archive::text_iarchive	ia( ss );
 		l7vs::virtualservice_base::vs_replication_data	a2;
 		ia >> a2;
-		//check header data
-		BOOST_CHECK( a2.header.udpflag == a1.header.udpflag );
-		BOOST_CHECK( a2.header.tcp_endpoint == a1.header.tcp_endpoint );
-		BOOST_CHECK( a2.header.udp_endpoint == a1.header.udp_endpoint );
-		BOOST_CHECK( a2.header.bodytype == a1.header.bodytype );
-		BOOST_CHECK( a2.header.datasize == a1.header.datasize );
-		//check body data
-		BOOST_CHECK( a2.body.sorry_maxconnection == a1.body.sorry_maxconnection );
-		BOOST_CHECK( a2.body.sorry_endpoint == a1.body.sorry_endpoint );
-		BOOST_CHECK( a2.body.sorry_flag == a1.body.sorry_flag );
-		BOOST_CHECK( a2.body.qos_up == a1.body.qos_up );
-		BOOST_CHECK( a2.body.qos_down == a1.body.qos_down );
+		BOOST_CHECK( a2.udpflag == a1.udpflag );
+		BOOST_CHECK( a2.tcp_endpoint == a1.tcp_endpoint );
+		BOOST_CHECK( a2.udp_endpoint == a1.udp_endpoint );
+		BOOST_CHECK( a2.sorry_maxconnection == a1.sorry_maxconnection );
+		BOOST_CHECK( a2.sorry_endpoint == a1.sorry_endpoint );
+		BOOST_CHECK( a2.sorry_flag == a1.sorry_flag );
+		BOOST_CHECK( a2.qos_up == a1.qos_up );
+		BOOST_CHECK( a2.qos_down == a1.qos_down );
 	}
 };
 

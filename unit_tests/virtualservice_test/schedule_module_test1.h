@@ -22,16 +22,16 @@ public:
 
 	void	handle_schedule(
 							boost::thread::id					thread_id,
-							rslist_iterator_func_type		inlist_begin,
-							rslist_iterator_func_type		inlist_end,
-							rslist_iterator_func_type		inlist_next,
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&	outendpoint ){}
 
 	void	handle_schedule(
 							boost::thread::id					thread_id,
-							rslist_iterator_func_type		inlist_begin,
-							rslist_iterator_func_type		inlist_end,
-							rslist_iterator_func_type		inlist_next,
+							rslist_iterator_begin_func_type		inlist_begin,
+							rslist_iterator_end_func_type		inlist_end,
+							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&	outendpoint ){}
 
 	void	replication_interrupt(){

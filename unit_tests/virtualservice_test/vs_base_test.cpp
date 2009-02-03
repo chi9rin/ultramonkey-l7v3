@@ -207,11 +207,6 @@ void	virtualservice_base_test3(){
 	vs1->test_replication();
 }
 
-//test case4 外部スレッドからのメソッドアクセス
-void	virtualservice_base_test4(){
-	
-}
-
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	// create unit test suite

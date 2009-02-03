@@ -15,9 +15,9 @@ public:
 	}
 
 	void	initialize(
-							rs_list_itr_func_type	inlist_begin,
-							rs_list_itr_func_type	inlist_end,
-							rs_list_itr_func_type	inlist_next,
+							rs_list_itr_func_type		inlist_begin,
+							rs_list_itr_func_type		inlist_end,
+							rs_list_itr_next_func_type	inlist_next,
 							boost::function< void( void ) >	inlist_lock,
 							boost::function< void( void ) >	inlist_unlock ){}
 
@@ -59,8 +59,10 @@ public:
 
 	//use in upstream_thread
 	EVENT_TAG	handle_session_initialize(
-									const boost::thread::id upthread_id,
-									const boost::thread::id down_thread_id ){return STOP;}
+									const boost::thread::id up_thread_id,
+									const boost::thread::id down_thread_id,
+									const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+									const boost::asio::ip::udp::endpoint& client_endpoint_udp ){return STOP;}
 
 	EVENT_TAG	handle_session_finalize(
 									const boost::thread::id up_thread_id,

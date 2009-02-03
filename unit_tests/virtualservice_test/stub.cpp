@@ -71,6 +71,7 @@ l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel( l7vs::LOG_CATEGORY_TAG ){
 }
 
 bool	l7vs::Logger::setLogLevel( l7vs::LOG_CATEGORY_TAG cat, l7vs::LOG_LEVEL_TAG level ){
+	return true;
 }
 
 void	l7vs::Logger::putLogFatal( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
@@ -97,6 +98,7 @@ void	l7vs::Logger::putLogDebug( l7vs::LOG_CATEGORY_TAG, const unsigned int, cons
 l7vs::l7vsd::l7vsd(){}
 l7vs::l7vsd::~l7vsd(){}
 l7vs::l7vsd::vslist_type::iterator	l7vs::l7vsd::search_vslist( const virtualservice_element& )	const{
+	return vslist.begin();
 }
 
 l7vs::data_buff_base::data_buff_base(){}
@@ -119,8 +121,12 @@ l7vs::tcp_realserver_connect_socket_list::tcp_realserver_connect_socket_list(){}
 l7vs::tcp_realserver_connect_socket_list::~tcp_realserver_connect_socket_list(){}
 void	l7vs::tcp_realserver_connect_socket_list::push_back(list_element realserver_socket){}
 l7vs::tcp_realserver_connect_socket_list::list_element	l7vs::tcp_realserver_connect_socket_list::get_socket(){
+	l7vs::tcp_realserver_connect_socket_list::list_element	retval;
+	return retval;
 }
-bool	l7vs::tcp_realserver_connect_socket_list::empty(){}
+bool	l7vs::tcp_realserver_connect_socket_list::empty(){
+	return true;
+}
 
 l7vs::tcp_thread_message::tcp_thread_message(){}
 l7vs::tcp_thread_message::~tcp_thread_message(){}
@@ -129,8 +135,11 @@ l7vs::tcp_thread_message_que::tcp_thread_message_que(){}
 l7vs::tcp_thread_message_que::~tcp_thread_message_que(){}
 void	l7vs::tcp_thread_message_que::push(tcp_thread_message_ptr message){}
 l7vs::tcp_thread_message_que::tcp_thread_message_ptr	l7vs::tcp_thread_message_que::front(){
+	return message_que.front();
 }
-bool	l7vs::tcp_thread_message_que::empty(){}
+bool	l7vs::tcp_thread_message_que::empty(){
+	return true;
+}
 void 	l7vs::tcp_thread_message_que::clear(){}
 
 
@@ -178,9 +187,11 @@ l7vs::session_result_message l7vs::tcp_session::initialize(void){
 }
 
 boost::asio::ip::tcp::socket& l7vs::tcp_session::get_client_socket(void){
+	return client_socket.get_socket();
 }
 
 bool	l7vs::tcp_session::is_thread_wait(void){
+	return true;
 }
 
 void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){}
