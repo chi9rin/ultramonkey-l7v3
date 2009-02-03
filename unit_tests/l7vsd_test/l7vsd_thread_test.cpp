@@ -72,7 +72,7 @@ void	list_vs( unsigned int id ){
 		l7vs::error_code err;
 		l7vs::l7vsd::vselist_type	vselist;
 
-		vsd_test.list_virtual_service( vselist, err );
+		vsd_test.list_virtual_service( &vselist, err );
 		if( err )	++err_count[id];
 	}
 }
@@ -81,12 +81,12 @@ void	add_vs_del_vs( unsigned int id ){
 	for( size_t i = 0 ; i < 100; ++i ){
 		{
 			l7vs::error_code err;
-			vsd_test.add_virtual_service( vselement[id][i], err );
+			vsd_test.add_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.del_virtual_service( vselement[id][i], err );
+			vsd_test.del_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 	}
@@ -96,17 +96,17 @@ void	add_vs_edit_vs( unsigned int id ){
 	for( size_t i = 0 ; i < 100; ++i ){
 		{
 			l7vs::error_code err;
-			vsd_test.add_virtual_service( vselement[id][i], err );
+			vsd_test.add_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.edit_virtual_service( vselement[id][i], err );
+			vsd_test.edit_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.del_virtual_service( vselement[id][i], err );
+			vsd_test.del_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 	}
@@ -116,17 +116,17 @@ void	add_vs_add_rs( unsigned int id ){
 	for( size_t i = 0 ; i < 100; ++i ){
 		{
 			l7vs::error_code err;
-			vsd_test.add_virtual_service( vselement[id][i], err );
+			vsd_test.add_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.add_real_server( vselement[id][i], err );
+			vsd_test.add_real_server( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.del_virtual_service( vselement[id][i], err );
+			vsd_test.del_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 	}
@@ -136,17 +136,17 @@ void	add_vs_del_rs( unsigned int id ){
 	for( size_t i = 0 ; i < 100; ++i ){
 		{
 			l7vs::error_code err;
-			vsd_test.add_virtual_service( vselement[id][i], err );
+			vsd_test.add_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.del_real_server( vselement[id][i], err );
+			vsd_test.del_real_server( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.del_virtual_service( vselement[id][i], err );
+			vsd_test.del_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 	}
@@ -156,17 +156,17 @@ void	add_vs_edit_rs( unsigned int id ){
 	for( size_t i = 0 ; i < 100; ++i ){
 		{
 			l7vs::error_code err;
-			vsd_test.add_virtual_service( vselement[id][i], err );
+			vsd_test.add_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.edit_real_server( vselement[id][i], err );
+			vsd_test.edit_real_server( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 		{
 			l7vs::error_code err;
-			vsd_test.del_virtual_service( vselement[id][i], err );
+			vsd_test.del_virtual_service( &vselement[id][i], err );
 			if( err )	++err_count[id];
 		}
 	}

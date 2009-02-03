@@ -21,7 +21,7 @@
 #include <memory>
 #include "logger_enum.h"
 #include "parameter_enum.h"
-#include "l7vs_replication.h"
+#include "replication.h"
 #include "virtualservice_element.h"
 
 namespace l7vs{
@@ -125,7 +125,7 @@ public:
 	std::list< virtualservice_element >
 							virtualservice_status_list;//!< virtual service lists
 	
-	REPLICATION_MODE_TAG	replication_mode_status;//!< replication status.
+	replication::REPLICATION_MODE_TAG	replication_mode_status;//!< replication status.
 	
 	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
 							log_status_list;	//!< log cateogries statuses.

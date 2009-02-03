@@ -20,6 +20,48 @@ namespace	l7vs{
 command_session::command_session(	boost::asio::io_service& io_service, l7vsd& parent )
 								:	unixsocket( io_service ),
 									vsd( parent ){
+	// command handler map initialize
+	command_handler_map[l7vsadm_request::CMD_LIST]
+											= boost::bind(	&l7vsd::list_virtual_service, &vsd,
+															&response_data.virtualservice_status_list, _1 );
+	command_handler_map[l7vsadm_request::CMD_LIST_KEY]
+											= boost::bind(	&l7vsd::list_virtual_service, &vsd,
+															&response_data.virtualservice_status_list, _1 );
+	command_handler_map[l7vsadm_request::CMD_LIST_VERBOSE]
+											= boost::bind(	&l7vsd::list_virtual_service_verbose, &vsd,
+															&response_data.virtualservice_status_list,
+															&response_data.replication_mode_status,
+															&response_data.log_status_list,
+															&response_data.snmp_connection_status,
+															&response_data.snmp_log_status_list, _1 );
+	command_handler_map[l7vsadm_request::CMD_ADD_VS]
+											= boost::bind( &l7vsd::add_virtual_service, &vsd, &request_data.vs_element, _1 );
+	command_handler_map[l7vsadm_request::CMD_DEL_VS]
+											= boost::bind( &l7vsd::del_virtual_service, &vsd, &request_data.vs_element, _1 );
+	command_handler_map[l7vsadm_request::CMD_EDIT_VS]
+											= boost::bind( &l7vsd::edit_virtual_service, &vsd, &request_data.vs_element, _1 );
+	command_handler_map[l7vsadm_request::CMD_ADD_RS]
+											= boost::bind( &l7vsd::add_real_server, &vsd, &request_data.vs_element, _1 );
+	command_handler_map[l7vsadm_request::CMD_DEL_RS]
+											= boost::bind( &l7vsd::del_real_server, &vsd, &request_data.vs_element, _1 );
+	command_handler_map[l7vsadm_request::CMD_EDIT_RS]
+											= boost::bind( &l7vsd::edit_real_server, &vsd, &request_data.vs_element, _1 );
+	command_handler_map[l7vsadm_request::CMD_FLUSH_VS]
+											= boost::bind( &l7vsd::flush_virtual_service, &vsd, _1 );
+	command_handler_map[l7vsadm_request::CMD_REPLICATION]
+											= boost::bind(	&l7vsd::replication_command, &vsd,
+															&request_data.replication_command, _1 );
+	command_handler_map[l7vsadm_request::CMD_LOG]
+											= boost::bind(	&l7vsd::log_command, &vsd,
+															&request_data.log_category,
+															&request_data.log_level, _1 );
+	command_handler_map[l7vsadm_request::CMD_SNMP]
+											= boost::bind(	&l7vsd::snmp_log_command, &vsd,
+															&request_data.snmp_log_category,
+															&request_data.snmp_log_level, _1 );
+	command_handler_map[l7vsadm_request::CMD_PARAMETER]
+											= boost::bind( &l7vsd::reload_parameter, &vsd, &request_data.reload_param, _1 );
+
 	// command status map initialize
 	command_status_map[l7vsadm_request::CMD_LIST]			= l7vsd_response::RESPONSE_LIST_ERROR;
 	command_status_map[l7vsadm_request::CMD_LIST_VERBOSE]	= l7vsd_response::RESPONSE_LIST_VERBOSE_ERROR;
@@ -41,6 +83,9 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 //!	@param[in]	error code
 //!	@param[in]	read size
 void	command_session::handle_read( const boost::system::error_code& err, size_t size){
+	//debug
+	std::cout << "handle_read" << std::endl;
+
 	if( !err ){
 		// execute received command
 		execute_command();
@@ -65,10 +110,12 @@ void	command_session::handle_read( const boost::system::error_code& err, size_t 
 //!	@param[in]	error code
 void	command_session::handle_write( const boost::system::error_code& err ){
 	//debug
-	std::cout << "session_handle_write" << std::endl;
+	std::cout << "handle_write" << std::endl;
 
 	if( err ){
-		// error
+		std::stringstream buf;
+		buf << "handle_write error:" << err;
+		Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, buf.str(), __FILE__, __LINE__);
 	}
 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
 								boost::bind(	&command_session::handle_read,
@@ -78,62 +125,16 @@ void	command_session::handle_write( const boost::system::error_code& err ){
 
 }
 
-//!	@brief		bind command function
-void	command_session::bind_function(){
-	// command handler map initialize
-	command_handler_map[l7vsadm_request::CMD_LIST]
-											= boost::bind(	&l7vsd::list_virtual_service, &vsd,
-															response_data.virtualservice_status_list, _1 );
-	command_handler_map[l7vsadm_request::CMD_LIST_KEY]
-											= boost::bind(	&l7vsd::list_virtual_service, &vsd,
-															response_data.virtualservice_status_list, _1 );
-	command_handler_map[l7vsadm_request::CMD_LIST_VERBOSE]
-											= boost::bind(	&l7vsd::list_virtual_service_verbose, &vsd,
-															response_data.virtualservice_status_list,
-															response_data.replication_mode_status,
-															response_data.log_status_list,
-															response_data.snmp_connection_status,
-															response_data.snmp_log_status_list, _1 );
-	command_handler_map[l7vsadm_request::CMD_ADD_VS]
-											= boost::bind( &l7vsd::add_virtual_service, &vsd, request_data.vs_element, _1 );
-	command_handler_map[l7vsadm_request::CMD_DEL_VS]
-											= boost::bind( &l7vsd::del_virtual_service, &vsd, request_data.vs_element, _1 );
-	command_handler_map[l7vsadm_request::CMD_EDIT_VS]
-											= boost::bind( &l7vsd::edit_virtual_service, &vsd, request_data.vs_element, _1 );
-	command_handler_map[l7vsadm_request::CMD_ADD_RS]
-											= boost::bind( &l7vsd::add_real_server, &vsd, request_data.vs_element, _1 );
-	command_handler_map[l7vsadm_request::CMD_DEL_RS]
-											= boost::bind( &l7vsd::del_real_server, &vsd, request_data.vs_element, _1 );
-	command_handler_map[l7vsadm_request::CMD_EDIT_RS]
-											= boost::bind( &l7vsd::edit_real_server, &vsd, request_data.vs_element, _1 );
-	command_handler_map[l7vsadm_request::CMD_FLUSH_VS]
-											= boost::bind( &l7vsd::flush_virtual_service, &vsd, _1 );
-	command_handler_map[l7vsadm_request::CMD_REPLICATION]
-											= boost::bind(	&l7vsd::replication_command, &vsd,
-															request_data.replication_command, _1 );
-	command_handler_map[l7vsadm_request::CMD_LOG]
-											= boost::bind(	&l7vsd::log_command, &vsd,
-															request_data.log_category,
-															request_data.log_level, _1 );
-	command_handler_map[l7vsadm_request::CMD_SNMP]
-											= boost::bind(	&l7vsd::snmp_log_command, &vsd,
-															request_data.snmp_log_category,
-															request_data.snmp_log_level, _1 );
-	command_handler_map[l7vsadm_request::CMD_PARAMETER]
-											= boost::bind( &l7vsd::reload_parameter, &vsd, request_data.reload_param, _1 );
-
-}
-
 //!	@brief		execute request command
 void	command_session::execute_command(){
+	//debug
+	std::cout << "execute_command" << std::endl;
+
 	// deserialize requestdata
 	std::stringstream	ss;
 	ss << &( request_buffer[0] );
 	boost::archive::text_iarchive	ia(ss);
 	ia >> request_data;
-
-	// bind function
-	bind_function();
 
 	// execute command
 	command_handler_map_type::iterator itr = command_handler_map.find( request_data.command );
@@ -142,9 +143,11 @@ void	command_session::execute_command(){
 		// execute command
 		itr->second( err );
 		if( !err ){		// command succeed
+			std::cout << "res:ok" << std::endl;
 			response_data.status = l7vsd_response::RESPONSE_OK;
 		}
 		else {			// command failed
+			std::cout << "res:ng" << std::endl;
 			response_data.status = command_status_map[ request_data.command ];
 			response_data.message = err.get_message();
 		}
@@ -161,6 +164,10 @@ void	command_session::execute_command(){
 
 //!	@brief		session start
 void	command_session::start(){
+
+	//debug
+	std::cout << "session start" << std::endl;
+
 	// start async read requestdata from unixsocket.
 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
 								boost::bind(	&command_session::handle_read,

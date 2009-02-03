@@ -46,30 +46,101 @@ l7vsd::~l7vsd(){}
 //! virtual_service list command
 //! @param[out]	arry of vs_element
 //! @param[out]	error_code
-void	l7vsd::list_virtual_service( vselist_type& out_vslist, error_code& err ){
+void	l7vsd::list_virtual_service( vselist_type* out_vslist, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::list_virtual_service", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
+	if( !out_vslist ){
+		std::string msg("out_vslist pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
 	// make vselement list
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
-		out_vslist.push_back( (*itr)->get_element() );
+		out_vslist->push_back( (*itr)->get_element() );
+	}
+}
+
+//! virtual_service list verbose command
+//! @param[out]	arry of vs_element
+//! @param[out]	error_code
+void	l7vsd::list_virtual_service_verbose(	vselist_type* out_vslist, 
+												replication::REPLICATION_MODE_TAG* repmode,
+												logstatus_list_type* logstatus,
+												bool*	snmpstatus,
+												logstatus_list_type* snmplogstatus,
+												error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::list_virtual_service_verbose", __FILE__, __LINE__ );
+
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	if( !out_vslist ){
+		std::string msg("out_vslist pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( !repmode ){
+		std::string msg("repmode pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( !logstatus ){
+		std::string msg("logstatus pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( !snmpstatus ){
+		std::string msg("snmpstatus pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( !snmplogstatus ){
+		std::string msg("snmplogstatus pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	// make vselement list
+	for( vslist_type::iterator itr = vslist.begin();
+		 itr != vslist.end();
+		 ++itr ){
+		out_vslist->push_back( (*itr)->get_element() );
 	}
 }
 
 //! virtual_service add command
 //! @param[in]	vs_element
 //! @param[out]	error_code
-void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+void	l7vsd::add_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::add_virtual_service", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	if( vslist.end() == search_vslist( in_vselement ) ){
+	if( !in_vselement ){
+		std::string msg("in_vselement pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( vslist.end() == search_vslist( *in_vselement ) ){
 		// replication null check
 		if( NULL == rep ){
 			std::string msg("replication pointer is null.");
@@ -80,14 +151,14 @@ void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, err
 		}
 		// create virtualservice
 		boost::shared_ptr< virtual_service >
-			vsptr( new virtual_service( *this, *rep, in_vselement ) );
+			vsptr( new virtual_service( *this, *rep, *in_vselement ) );
 
 		// vs initialize
 		vsptr->initialize( err );
 		if( err )	return;
 
 		// set virtualservice
-		vsptr->set_virtualservice( in_vselement, err );
+		vsptr->set_virtualservice( *in_vselement, err );
 		if( err )	return;
 
 		// create thread and run
@@ -113,13 +184,20 @@ void	l7vsd::add_virtual_service( const virtualservice_element& in_vselement, err
 //! virtual_service del command
 //! @param[in]	vs_element
 //! @param[out]	error_code
-void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+void	l7vsd::del_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::del_virtual_service", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( !in_vselement ){
+		std::string msg("in_vselement pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// vs stop
 		(*vsitr)->stop();
@@ -143,16 +221,23 @@ void	l7vsd::del_virtual_service( const virtualservice_element& in_vselement, err
 //! virtual_service edit command
 //! @param[in]	vs_element
 //! @param[out]	error_code
-void	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement, error_code& err ){
+void	l7vsd::edit_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::edit_virtual_service", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( !in_vselement ){
+		std::string msg("in_vselement pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// edit virtualservice
-		(*vsitr)->edit_virtualservice( in_vselement, err );
+		(*vsitr)->edit_virtualservice( *in_vselement, err );
 		if( err )	return;
 	}
 	else {
@@ -167,16 +252,23 @@ void	l7vsd::edit_virtual_service( const virtualservice_element& in_vselement, er
 //! real_server add command
 //! @param[in]	vs_element
 //! @param[out]	error_code
-void	l7vsd::add_real_server( const virtualservice_element& in_vselement, error_code& err ){
+void	l7vsd::add_real_server( const virtualservice_element* in_vselement, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::add_real_server", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( !in_vselement ){
+		std::string msg("in_vselement pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// add realserver
-		(*vsitr)->add_realserver( in_vselement, err );
+		(*vsitr)->add_realserver( *in_vselement, err );
 		if( err )	return;
 	}
 	else {
@@ -191,16 +283,23 @@ void	l7vsd::add_real_server( const virtualservice_element& in_vselement, error_c
 //! real_server del command
 //! @param[in]	vs_element
 //! @param[out]	error_code
-void	l7vsd::del_real_server( const virtualservice_element& in_vselement, error_code& err ){
+void	l7vsd::del_real_server( const virtualservice_element* in_vselement, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::del_real_server", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( !in_vselement ){
+		std::string msg("in_vselement pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// del realserver
-		(*vsitr)->del_realserver( in_vselement, err );
+		(*vsitr)->del_realserver( *in_vselement, err );
 		if( err )	return;
 	}
 	else {
@@ -215,16 +314,23 @@ void	l7vsd::del_real_server( const virtualservice_element& in_vselement, error_c
 //! real_server edit command
 //! @param[in]	vs_element
 //! @param[out]	error_code
-void	l7vsd::edit_real_server( const virtualservice_element& in_vselement, error_code& err ){
+void	l7vsd::edit_real_server( const virtualservice_element* in_vselement, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::edit_real_server", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	vslist_type::iterator vsitr = search_vslist( in_vselement );
+	if( !in_vselement ){
+		std::string msg("in_vselement pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// del realserver
-		(*vsitr)->edit_realserver( in_vselement, err );
+		(*vsitr)->edit_realserver( *in_vselement, err );
 		if( err )	return;
 	}
 	else {

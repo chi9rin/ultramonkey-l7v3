@@ -30,6 +30,8 @@ command_receiver::command_receiver( boost::asio::io_service& io_service, const s
 								this,
 								session,
 								boost::asio::placeholders::error));
+
+
 }
 
 //!	@brief		destructor
