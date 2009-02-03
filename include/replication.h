@@ -134,21 +134,21 @@ protected:
 	};
 
 	std::map<std::string, boost::mutex>		replication_mutex;
+	boost::asio::io_service&				receive_io;
+	boost::asio::io_service					send_io;
 	boost::asio::ip::udp::socket			replication_receive_socket;
 	boost::asio::ip::udp::socket			replication_send_socket;
 	struct replication_state_struct			replication_state;
 	struct replication_info_struct			replication_info;
-	boost::asio::io_service&				receive_io;
-	boost::asio::io_service					send_io;
 	boost::thread							replication_thread;
 	boost::mutex							replication_thread_mutex;
 	boost::condition						replication_thread_condition;
 	int										replication_flag;
 
 public:
-	replication( boost::asio::io_service& inreceive_io ) :	replication_receive_socket( inreceive_io ),
-															replication_send_socket( inreceive_io ),
-															receive_io( inreceive_io ) {} ;
+	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
+															replication_receive_socket( inreceive_io ),
+															replication_send_socket( send_io ) {} ;
 	~replication(){}
 
 	int							initialize();
@@ -176,7 +176,6 @@ protected:
 	void*						getcmp();
 	uint64_t*					getsrf();
 	int							sock_init();
-	void						sock_fini();
 	unsigned long long			make_serial();
 	int							send_data( struct replication_data* indata );
 	int							recv_data( struct replication_data* outdata );
