@@ -39,6 +39,8 @@
 
 namespace l7vs{
 
+class	l7vsd;
+
 //! @class snmpbridge
 //! @brief
 class	snmpbridge{

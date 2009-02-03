@@ -5,7 +5,7 @@
 #
 TARGET		= l7vs_snmpbridge
 CPP			= g++
-CPPFLAGS	= -g -Wall -Werror -pthread -O0
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include \
