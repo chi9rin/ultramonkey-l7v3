@@ -144,7 +144,7 @@ EVENT_TAG	handle_realserver_close(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint& rs_endpoint ){ return STOP; }
 
-void	check_http_method_test(){
+void	check_http_method_test_t1(){
 
 	int count	= 1;
 
@@ -188,80 +188,314 @@ void	check_http_method_test(){
 
 	BOOST_MESSAGE( "----- check_http_method test start -----" );
 
-	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
-
 	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
 		if( count < 10 ){
- 			std::cout << count << "---------------------------------------" << std::endl;
+ 			std::cout << "[Thread_1] " << count << "---------------------------------------" << std::endl;
 		}
 		else{
-			std::cout << count << "--------------------------------------" << std::endl;
+			std::cout << "[Thread_1] " << count << "--------------------------------------" << std::endl;
 		}
-		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		std::cout << "[Thread_1] " << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
-		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		std::cout << "[Thread_1] " << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [1]  http method check test (check result = OK)
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+		BOOST_CHECK( ( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
 		if( count < 10 ){
- 			std::cout << count << "---------------------------------------" << std::endl;
+ 			std::cout << "[Thread_1] " << count << "---------------------------------------" << std::endl;
 		}
 		else{
-			std::cout << count << "--------------------------------------" << std::endl;
+			std::cout << "[Thread_1] " << count << "--------------------------------------" << std::endl;
 		}
-		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		std::cout << "[Thread_1] " << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
-		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		std::cout << "[Thread_1] " << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [2]  http method check test (check result = NG)
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+		BOOST_CHECK( check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_INPOSSIBLE_STRING_NUM; i++, count++ ){
 		if( count < 10 ){
- 			std::cout << count << "---------------------------------------" << std::endl;
+ 			std::cout << "[Thread_1] " << count << "---------------------------------------" << std::endl;
 		}
 		else{
-			std::cout << count << "--------------------------------------" << std::endl;
+			std::cout << "[Thread_1] " << count << "--------------------------------------" << std::endl;
 		}
-		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		std::cout << "[Thread_1] " << "String = [" << buffer_inpossible[i] << "]" << std::endl;
 		buffer_len = strlen( buffer_inpossible[i] );
-		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		std::cout << "[Thread_1] " << "Length = [" << buffer_len << "]" << std::endl;
 		// ## test [3]  http method check test (check result = INPOSSIBLE)
-		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+		BOOST_CHECK( check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
 	if( count < 10 ){
-		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "[Thread_1] " << count << "---------------------------------------" << std::endl;
 	}
 	else{
-		std::cout << count << "--------------------------------------" << std::endl;
+		std::cout << "[Thread_1] " << count << "--------------------------------------" << std::endl;
 	}
 	buffer_len = 0;
-	std::cout << "String = [NULL]" << std::endl;
-	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "[Thread_1] " << "String = [NULL]" << std::endl;
+	std::cout << "[Thread_1] " << "Length = [" << buffer_len << "]" << std::endl;
 	// ## test [4]  http method check test (check result = NG / buffer = NULL / buffer_len = 0)
-	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
+	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
 	if( count < 10 ){
-		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "[Thread_1] " << count << "---------------------------------------" << std::endl;
 	}
 	else{
-		std::cout << count << "--------------------------------------" << std::endl;
+		std::cout << "[Thread_1] " << count << "--------------------------------------" << std::endl;
 	}
 	buffer_len = 100;
-	std::cout << "String = [NULL]" << std::endl;
-	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "[Thread_1] " << "String = [NULL]" << std::endl;
+	std::cout << "[Thread_1] " << "Length = [" << buffer_len << "]" << std::endl;
 	// ## test [5]  http method check test (check result = NG / buffer = NULL / buffer_len = 100)
-	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
+	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
 	BOOST_MESSAGE( "----- check_http_method test end -----" );
 }
+
+void	check_http_method_test_t2(){
+
+	int count	= 1;
+
+	char	buffer_ok[CHECK_METHOD_OK_STRING_NUM][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"HEAD /abc/def/ HTTP/1.0",
+						"POST /abc/def/ HTTP/1.0",
+						"PUT /abc/def/ HTTP/1.0",
+						"PROPFIND /abc/def/ HTTP/1.0",
+						"PROPPATCH /abc/def/ HTTP/1.0",
+						"OPTIONS /abc/def/ HTTP/1.0",
+						"CONNECT /abc/def/ HTTP/1.0",
+						"COPY /abc/def/ HTTP/1.0",
+						"TRACE /abc/def/ HTTP/1.0",
+						"DELETE /abc/def/ HTTP/1.0",
+						"LOCK /abc/def/ HTTP/1.0",
+						"UNLOCK /abc/def/ HTTP/1.0",
+						"MOVE /abc/def/ HTTP/1.0",
+						"MKCOL /abc/def/ HTTP/1.0",
+						"GET /a HTTP/1.0",
+					};
+	char	buffer_ng[CHECK_METHOD_NG_STRING_NUM][256]
+				=	{
+						"get /abc/def/ HTTP/1.0",
+						"Get /abc/def/ HTTP/1.0",
+						"GET/abc/def/ HTTP/1.0",
+						"GGET /abc/def/ HTTP/1.0",
+						" GET /abc/def/ HTTP/1.0",
+						"get GET /abc/def/ HTTP/1.0",
+						"get /abc/GET /abc/def/ HTTP/1.0",
+						"GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0",
+					};
+	char	buffer_inpossible[CHECK_METHOD_INPOSSIBLE_STRING_NUM][256]
+				=	{
+						"GET / HTTP/1.0",
+						"Get / HTTP/1.0",
+						"",
+					};
+	size_t	buffer_len	= 0;
+
+	BOOST_MESSAGE( "----- check_http_method test start -----" );
+
+	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << "[Thread_2] " << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << "[Thread_2] " << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "[Thread_2] " << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "[Thread_2] " << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [1]  http method check test (check result = OK)
+		BOOST_CHECK( check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+	}
+
+	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << "[Thread_2] " << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << "[Thread_2] " << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "[Thread_2] " << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "[Thread_2] " << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [2]  http method check test (check result = NG)
+		BOOST_CHECK( check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+	}
+
+	for( int i = 0; i < CHECK_METHOD_INPOSSIBLE_STRING_NUM; i++, count++ ){
+		if( count < 10 ){
+ 			std::cout << "[Thread_2] " << count << "---------------------------------------" << std::endl;
+		}
+		else{
+			std::cout << "[Thread_2] " << count << "--------------------------------------" << std::endl;
+		}
+		std::cout << "[Thread_2] " << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		buffer_len = strlen( buffer_inpossible[i] );
+		std::cout << "[Thread_2] " << "Length = [" << buffer_len << "]" << std::endl;
+		// ## test [3]  http method check test (check result = INPOSSIBLE)
+		BOOST_CHECK( check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+	}
+
+	if( count < 10 ){
+		std::cout << "[Thread_2] " << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << "[Thread_2] " << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 0;
+	std::cout << "[Thread_2] " << "String = [NULL]" << std::endl;
+	std::cout << "[Thread_2] " << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [4]  http method check test (check result = NG / buffer = NULL / buffer_len = 0)
+	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	if( count < 10 ){
+		std::cout << "[Thread_2] " << count << "---------------------------------------" << std::endl;
+	}
+	else{
+		std::cout << "[Thread_2] " << count << "--------------------------------------" << std::endl;
+	}
+	buffer_len = 100;
+	std::cout << "[Thread_2] " << "String = [NULL]" << std::endl;
+	std::cout << "[Thread_2] " << "Length = [" << buffer_len << "]" << std::endl;
+	// ## test [5]  http method check test (check result = NG / buffer = NULL / buffer_len = 100)
+	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	BOOST_MESSAGE( "----- check_http_method test end -----" );
+}
+
+// void	check_http_method_test(){
+// 
+// 	int count	= 1;
+// 
+// 	char	buffer_ok[CHECK_METHOD_OK_STRING_NUM][256]
+// 				=	{
+// 						"GET /abc/def/ HTTP/1.0",
+// 						"HEAD /abc/def/ HTTP/1.0",
+// 						"POST /abc/def/ HTTP/1.0",
+// 						"PUT /abc/def/ HTTP/1.0",
+// 						"PROPFIND /abc/def/ HTTP/1.0",
+// 						"PROPPATCH /abc/def/ HTTP/1.0",
+// 						"OPTIONS /abc/def/ HTTP/1.0",
+// 						"CONNECT /abc/def/ HTTP/1.0",
+// 						"COPY /abc/def/ HTTP/1.0",
+// 						"TRACE /abc/def/ HTTP/1.0",
+// 						"DELETE /abc/def/ HTTP/1.0",
+// 						"LOCK /abc/def/ HTTP/1.0",
+// 						"UNLOCK /abc/def/ HTTP/1.0",
+// 						"MOVE /abc/def/ HTTP/1.0",
+// 						"MKCOL /abc/def/ HTTP/1.0",
+// 						"GET /a HTTP/1.0",
+// 					};
+// 	char	buffer_ng[CHECK_METHOD_NG_STRING_NUM][256]
+// 				=	{
+// 						"get /abc/def/ HTTP/1.0",
+// 						"Get /abc/def/ HTTP/1.0",
+// 						"GET/abc/def/ HTTP/1.0",
+// 						"GGET /abc/def/ HTTP/1.0",
+// 						" GET /abc/def/ HTTP/1.0",
+// 						"get GET /abc/def/ HTTP/1.0",
+// 						"get /abc/GET /abc/def/ HTTP/1.0",
+// 						"GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0",
+// 					};
+// 	char	buffer_inpossible[CHECK_METHOD_INPOSSIBLE_STRING_NUM][256]
+// 				=	{
+// 						"GET / HTTP/1.0",
+// 						"Get / HTTP/1.0",
+// 						"",
+// 					};
+// 	size_t	buffer_len	= 0;
+// 
+// 	BOOST_MESSAGE( "----- check_http_method test start -----" );
+// 
+// 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+// 
+// 	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
+// 		if( count < 10 ){
+//  			std::cout << count << "---------------------------------------" << std::endl;
+// 		}
+// 		else{
+// 			std::cout << count << "--------------------------------------" << std::endl;
+// 		}
+// 		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+// 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+// 		buffer_len = strlen( buffer_ok[i] );
+// 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+// 		// ## test [1]  http method check test (check result = OK)
+// 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+// 	}
+// 
+// 	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
+// 		if( count < 10 ){
+//  			std::cout << count << "---------------------------------------" << std::endl;
+// 		}
+// 		else{
+// 			std::cout << count << "--------------------------------------" << std::endl;
+// 		}
+// 		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+// 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+// 		buffer_len = strlen( buffer_ng[i] );
+// 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+// 		// ## test [2]  http method check test (check result = NG)
+// 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+// 	}
+// 
+// 	for( int i = 0; i < CHECK_METHOD_INPOSSIBLE_STRING_NUM; i++, count++ ){
+// 		if( count < 10 ){
+//  			std::cout << count << "---------------------------------------" << std::endl;
+// 		}
+// 		else{
+// 			std::cout << count << "--------------------------------------" << std::endl;
+// 		}
+// 		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+// 		buffer_len = strlen( buffer_inpossible[i] );
+// 		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+// 		// ## test [3]  http method check test (check result = INPOSSIBLE)
+// 		BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+// 	}
+// 
+// 	if( count < 10 ){
+// 		std::cout << count << "---------------------------------------" << std::endl;
+// 	}
+// 	else{
+// 		std::cout << count << "--------------------------------------" << std::endl;
+// 	}
+// 	buffer_len = 0;
+// 	std::cout << "String = [NULL]" << std::endl;
+// 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+// 	// ## test [4]  http method check test (check result = NG / buffer = NULL / buffer_len = 0)
+// 	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
+// 	count++;
+// 
+// 	if( count < 10 ){
+// 		std::cout << count << "---------------------------------------" << std::endl;
+// 	}
+// 	else{
+// 		std::cout << count << "--------------------------------------" << std::endl;
+// 	}
+// 	buffer_len = 100;
+// 	std::cout << "String = [NULL]" << std::endl;
+// 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+// 	// ## test [5]  http method check test (check result = NG / buffer = NULL / buffer_len = 100)
+// 	BOOST_CHECK( http_protocol_module_base_test_1.check_http_method( NULL, buffer_len ) == CHECK_NG );
+// 	count++;
+// 
+// 	BOOST_MESSAGE( "----- check_http_method test end -----" );
+// }
 
 void	check_http_version_test(){
 
@@ -835,10 +1069,33 @@ void	find_http_header_test(){
 };
 
 //--test functions--
+void	check_http_method_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+
+	for( int i = 0; i < 10; i++ ){
+		http_protocol_module_base_test_1.check_http_method_test_t1();
+	}
+
+}
+
+void	check_http_method_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+
+	for( int i = 0; i < 10; i++ ){
+		http_protocol_module_base_test_1.check_http_method_test_t2();
+	}
+
+}
+
 void	check_http_method_test(){
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
-	http_protocol_module_base_test_1.check_http_method_test();
+	boost::thread	t1(boost::bind(&check_http_method_test_t1, http_protocol_module_base_test_1));
+	boost::thread	t2(boost::bind(&check_http_method_test_t2, http_protocol_module_base_test_1));
+
+	t1.join();
+	t2.join();
+
+//	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+//	http_protocol_module_base_test_1.check_http_method_test();
 
 }
 
@@ -882,11 +1139,11 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "http_protocol_module_base class test" );
 
 	ts->add( BOOST_TEST_CASE( &check_http_method_test ) );
-	ts->add( BOOST_TEST_CASE( &check_http_version_test ) );
-	ts->add( BOOST_TEST_CASE( &check_status_code_test ) );
-	ts->add( BOOST_TEST_CASE( &find_uri_test ) );
-	ts->add( BOOST_TEST_CASE( &find_status_code_test ) );
-	ts->add( BOOST_TEST_CASE( &find_http_header_test ) );
+// 	ts->add( BOOST_TEST_CASE( &check_http_version_test ) );
+// 	ts->add( BOOST_TEST_CASE( &check_status_code_test ) );
+// 	ts->add( BOOST_TEST_CASE( &find_uri_test ) );
+// 	ts->add( BOOST_TEST_CASE( &find_status_code_test ) );
+// 	ts->add( BOOST_TEST_CASE( &find_http_header_test ) );
 
 	framework::master_test_suite().add( ts );
 
