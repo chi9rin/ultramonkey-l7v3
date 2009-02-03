@@ -88,8 +88,8 @@ void	virtualservice_base::handle_throughput_update( const boost::system::error_c
 
 	{
 		//mutex lock
-		boost::mutex::scoped_lock( throughput_up_mutex );
-		boost::mutex::scoped_lock( recvsize_up_mutex );
+		boost::mutex::scoped_lock throughput_up_lock( throughput_up_mutex );
+		boost::mutex::scoped_lock recvsize_up_lock( recvsize_up_mutex );
 		//calcurate throughput
 
 		if( 0 < current_up_recvsize ){
@@ -105,8 +105,8 @@ void	virtualservice_base::handle_throughput_update( const boost::system::error_c
 	}
 	{
 		//mutex lock
-		boost::mutex::scoped_lock( throughput_down_mutex );
-		boost::mutex::scoped_lock( recvsize_down_mutex );
+		boost::mutex::scoped_lock throughput_down_lock( throughput_down_mutex );
+		boost::mutex::scoped_lock recvsize_down_lock( recvsize_down_mutex );
 		//calcurate throughput
 		//bps = current_down_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
 
@@ -128,8 +128,8 @@ void	virtualservice_base::handle_throughput_update( const boost::system::error_c
  * @return  void
  */
 void	virtualservice_base::rs_list_lock(){
-	boost::mutex::scoped_lock( rs_list_ref_count_inc_mutex );
-	boost::mutex::scoped_lock( rs_list_ref_count_mutex );
+	boost::mutex::scoped_lock refcnt_inc_lock( rs_list_ref_count_inc_mutex );
+	boost::mutex::scoped_lock refcnt_lock( rs_list_ref_count_mutex );
 	if( ULLONG_MAX > rs_list_ref_count )
 		++rs_list_ref_count;
 	else
@@ -143,7 +143,7 @@ void	virtualservice_base::rs_list_lock(){
  * @return  void
  */
 void	virtualservice_base::rs_list_unlock(){
-	boost::mutex::scoped_lock( rs_list_ref_count_mutex );
+	boost::mutex::scoped_lock refcnt_lock( rs_list_ref_count_mutex );
 	if( 0 < rs_list_ref_count )
 		--rs_list_ref_count;
 	else
@@ -173,7 +173,7 @@ unsigned long long	virtualservice_base::get_qos_downstream(){ return element.qos
  * @return  upstream throughput[bit/sec] value
  */
 unsigned long long	virtualservice_base::get_throughput_upstream(){
-	boost::mutex::scoped_lock( throughput_up_mutex );
+	boost::mutex::scoped_lock lock( throughput_up_mutex );
 	return throughput_up;
 }
 
@@ -184,7 +184,7 @@ unsigned long long	virtualservice_base::get_throughput_upstream(){
  * @return  downstream throughput[bit/sec] value
  */
 unsigned long long	virtualservice_base::get_throughput_downstream(){
-	boost::mutex::scoped_lock( throughput_down_mutex );
+	boost::mutex::scoped_lock lock( throughput_down_mutex );
 	return throughput_down;
 }
 
@@ -195,7 +195,7 @@ unsigned long long	virtualservice_base::get_throughput_downstream(){
  * @return  void
  */
 void	virtualservice_base::update_up_recv_size( unsigned long long	datasize ){
-	boost::mutex::scoped_lock( recvsize_up_mutex );
+	boost::mutex::scoped_lock lock( recvsize_up_mutex );
 
 	if( (ULLONG_MAX - current_up_recvsize) < datasize )
 		current_up_recvsize	= ULLONG_MAX;
@@ -215,7 +215,7 @@ void	virtualservice_base::update_up_recv_size( unsigned long long	datasize ){
  * @return  void
  */
 void	virtualservice_base::update_up_send_size( unsigned long long	datasize ){
-	boost::mutex::scoped_lock( sendsize_up_mutex );
+	boost::mutex::scoped_lock lock( sendsize_up_mutex );
 
 	if( (ULLONG_MAX - sendsize_up) < datasize )
 		sendsize_up = datasize - ( ULLONG_MAX - sendsize_up );
@@ -230,7 +230,7 @@ void	virtualservice_base::update_up_send_size( unsigned long long	datasize ){
  * @return  void
  */
 void	virtualservice_base::update_down_recv_size( unsigned long long	datasize ){
-	boost::mutex::scoped_lock( recvsize_down_mutex );
+	boost::mutex::scoped_lock lock( recvsize_down_mutex );
 
 	if( (ULLONG_MAX - current_down_recvsize) < datasize )
 		current_down_recvsize = ULLONG_MAX;
@@ -250,7 +250,7 @@ void	virtualservice_base::update_down_recv_size( unsigned long long	datasize ){
  * @return  void
  */
 void	virtualservice_base::update_down_send_size( unsigned long long	datasize ){
-	boost::mutex::scoped_lock( sendsize_down_mutex );
+	boost::mutex::scoped_lock lock( sendsize_down_mutex );
 
 	if( (ULLONG_MAX - sendsize_down) < datasize )
 		sendsize_down = datasize - ( ULLONG_MAX - sendsize_down );

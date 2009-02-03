@@ -47,67 +47,35 @@ public:
 	typedef	boost::shared_ptr<boost::asio::deadline_timer>	deadline_timer_ptr_type;
 protected:
 	//!	@class	vs_replication_header replication data structure for header data
-	class	vs_replication_header{
+	class	vs_replication_data{
 	public:
-		vs_replication_header() : udpflag( false ) {}
-		vs_replication_header( const vs_replication_header& in ){
+		vs_replication_data() : udpflag( false ) {}
+		vs_replication_data( const vs_replication_data& in ){
 			udpflag			= in.udpflag;
 			tcp_endpoint	= in.tcp_endpoint;
 			udp_endpoint	= in.udp_endpoint;
-			bodytype		= in.bodytype;
-			datasize		= in.datasize;
+			sorry_maxconnection = in.sorry_maxconnection;
+			sorry_endpoint	= in.sorry_endpoint;
+			sorry_flag		= in.sorry_flag;
+			qos_up			= in.qos_up;
+			qos_down		= in.qos_down;
 		}
-		vs_replication_header&	operator=( const vs_replication_header& in ){
+		vs_replication_data&	operator=( const vs_replication_data& in ){
 			udpflag			= in.udpflag;
 			tcp_endpoint	= in.tcp_endpoint;
 			udp_endpoint	= in.udp_endpoint;
-			bodytype		= in.bodytype;
-			datasize		= in.datasize;
+			sorry_maxconnection = in.sorry_maxconnection;
+			sorry_endpoint	= in.sorry_endpoint;
+			sorry_flag		= in.sorry_flag;
+			qos_up			= in.qos_up;
+			qos_down		= in.qos_down;
 			return *this;
 		}
-	
 		bool				udpflag;
 		boost::asio::ip::tcp::endpoint
 							tcp_endpoint;
 		boost::asio::ip::udp::endpoint
 							udp_endpoint;
-		unsigned int		bodytype;
-		unsigned long long	datasize;
-	private:
-		friend class	boost::serialization::access;		//! friend boost serializable class
-		//! serializable
-		//! @brief using boost serialiable. class serializable function.
-		//! @param[in]	archive
-		//! @param[in]	version
-		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
-			ar & udpflag;
-			ar & tcp_endpoint;
-			ar & udp_endpoint;
-			ar & bodytype;
-			ar & datasize;
-		}
-	};
-
-	//! @class vs_replication_body replication data structure for body data
-	class	vs_replication_body{
-	public:
-		vs_replication_body(){}
-		vs_replication_body( const vs_replication_body& in ){
-			sorry_maxconnection	= in.sorry_maxconnection;
-			sorry_endpoint		= in.sorry_endpoint;
-			sorry_flag			= in.sorry_flag;
-			qos_up				= in.qos_up;
-			qos_down			= in.qos_down;
-		}
-		vs_replication_body&	operator=( const vs_replication_body& in ){
-			sorry_maxconnection	= in.sorry_maxconnection;
-			sorry_endpoint		= in.sorry_endpoint;
-			sorry_flag			= in.sorry_flag;
-			qos_up				= in.qos_up;
-			qos_down			= in.qos_down;
-			return *this;
-		}
-	
 		long long			sorry_maxconnection;
 		boost::asio::ip::tcp::endpoint
 							sorry_endpoint;
@@ -121,39 +89,14 @@ protected:
 		//! @param[in]	archive
 		//! @param[in]	version
 		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+			ar & udpflag;
+			ar & tcp_endpoint;
+			ar & udp_endpoint;
 			ar & sorry_maxconnection;
 			ar & sorry_endpoint;
 			ar & sorry_flag;
 			ar & qos_up;
 			ar & qos_down;
-		}
-	};
-
-	//! @class vs_replication_data replication data structure
-	class	vs_replication_data{
-	public:
-		vs_replication_data(){}
-		vs_replication_data( const vs_replication_data& in ){
-			header	= in.header;
-			body	= in.body;
-		}
-		vs_replication_data&	operator=( const vs_replication_data& in ){
-			header	= in.header;
-			body	= in.body;
-			return *this;
-		}
-	
-		vs_replication_header	header;
-		vs_replication_body		body;
-	private:
-		friend class	boost::serialization::access;		//! friend boost serializable class
-		//! serializable
-		//! @brief using boost serialiable. class serializable function.
-		//! @param[in]	archive
-		//! @param[in]	version
-		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
-			ar & header;
-			ar & body;
 		}
 	};
 
