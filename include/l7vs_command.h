@@ -142,6 +142,17 @@ public:
 	unsigned long long		total_realserver_send_byte;	//!< l7vsd's total realserver send bytes
 	std::vector<virtualservice_element>
 							virtualservice_vec;			//!< virtualservice lists
+	//! constructor
+	l7vsd_response() :		code( l7vsadm_request::CMD_NONE ),
+							status( RESPONSE_NONE ),
+							message( "" ),
+							replication_mode_status( replication::REPLICATION_OUT ),
+							snmp_connection_status( false ),
+							total_bps( 0ULL ),
+							total_client_recv_byte( 0ULL ),
+							total_client_send_byte( 0ULL ),
+							total_realserver_recv_byte( 0ULL ),
+							total_realserver_send_byte( 0ULL ){}
 private:
 	friend class	boost::serialization::access;		//! friend boost serializable class
 	//! serializable
