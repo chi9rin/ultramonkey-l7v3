@@ -7,7 +7,7 @@ PARAMETER_FILE		= @l7vs_config@
 L7VS_SBINDIR		= @sbindir@
 
 l7vsd_CPPFLAGS		= \
-			-O2 -g -Wall -Werror \
+			-O2 -g -Wall -Werror -pthread \
 			-I../include \
 			-I../logger \
 			-I../parameter \
