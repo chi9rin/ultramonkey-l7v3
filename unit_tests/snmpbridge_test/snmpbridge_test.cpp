@@ -33,7 +33,7 @@ public:
 };
 
 void create_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "create_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "create_snmpbridge_test" );
 	// unit_test[1] snmpbridge クラスを生成する
 	boost::asio::io_service io_service;
 	l7vsd vsd;
@@ -57,7 +57,7 @@ void create_snmpbridge_test(){
 }
 
 void initialize_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "initialize_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "initialize_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -237,7 +237,7 @@ void initialize_snmpbridge_test(){
 }
 
 void finalize_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "finalize_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "finalize_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -247,7 +247,7 @@ void finalize_snmpbridge_test(){
 	// unit_test[] finalizeの呼び出しのチェック
 	test.finalize();
 	// unit_test[] finalize connection_stateの値をチェック
-	BOOST_CHECK_EQUAL( test.get_connectionstate(), -1 );
+	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 	// unit_test[] finalize snmp_acceptorがcloseされていることのチェック
 	BOOST_CHECK_EQUAL( test.get_snmp_acceptor().is_open(), false );
 	// unit_test[] finalize snmp_socketがcloseされていることのチェック
@@ -255,7 +255,7 @@ void finalize_snmpbridge_test(){
 }
 
 void send_trap_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "send_trap_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "send_trap_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -303,7 +303,7 @@ void send_trap_snmpbridge_test(){
 }
 
 void reload_config_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "reload_config_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "reload_config_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -353,7 +353,7 @@ void reload_config_snmpbridge_test(){
 }
 
 void change_loglevel_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "change_loglevel_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "change_loglevel_snmpbridge_test" );
 	// unit_test[]
 	boost::asio::io_service io_service;
 	l7vsd vsd;
@@ -404,7 +404,7 @@ void change_loglevel_snmpbridge_test(){
 }
 
 void change_loglevel_allcategory_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "change_loglevel_allcategory_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "change_loglevel_allcategory_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -456,7 +456,7 @@ void change_loglevel_allcategory_snmpbridge_test(){
 }
 
 void send_mibcollection_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "send_mibcollection_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "send_mibcollection_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -557,7 +557,7 @@ void send_mibcollection_snmpbridge_test(){
 }
 
 void get_connectionstate_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "get_connectionstate_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "get_connectionstate_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -565,21 +565,21 @@ void get_connectionstate_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[] snmpbridge get_connectionstateのテスト
-	BOOST_CHECK_EQUAL( test.get_connectionstate(), -1 );
+	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 
 	// unit_test[] snmpbridge get_connectionstateのテスト
 	test.set_connection_state(true);
-	BOOST_CHECK_EQUAL( test.get_connectionstate(), 0 );
+	BOOST_CHECK_EQUAL( test.get_connectionstate(), true );
 
 	// unit_test[] snmpbridge get_connectionstateのテスト
 	test.set_connection_state(false);
-	BOOST_CHECK_EQUAL( test.get_connectionstate(), -1 );
+	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 
 	test.finalize();
 }
 
 void get_loglevel_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "get_loglevel_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "get_loglevel_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -622,8 +622,28 @@ void get_loglevel_snmpbridge_test(){
 	test.finalize();
 }
 
+void get_loglevel_allcategory_snmpbridge_test(){
+//	BOOST_TEST_MESSAGE( "get_loglevel_allcategory_snmpbridge_test" );
+	boost::asio::io_service io_service;
+	l7vsd vsd;
+	snmpbridge_testclass test(vsd, io_service);
+
+	test.initialize();
+
+	// unit_test[]
+	std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>	loglevelmap;
+	test.get_loglevel_allcategory( loglevelmap );
+	BOOST_CHECK_EQUAL( loglevelmap.size(), (size_t)2 );//debug
+	std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>::iterator it = loglevelmap.find( LOG_CAT_SNMPAGENT_START_STOP );
+	BOOST_CHECK_EQUAL( it->second, LOG_LV_INFO );
+	it = loglevelmap.find( LOG_CAT_SNMPAGENT_MANAGER_RECEIVE );
+	BOOST_CHECK_EQUAL( it->second, LOG_LV_INFO );
+
+	test.finalize();
+}
+
 void handle_accept_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "handle_accept_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "handle_accept_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -632,17 +652,17 @@ void handle_accept_snmpbridge_test(){
 
 	// unit_test[]
 	// 正常
-//	BOOST_CHECK_EQUAL( test.get_connectionstate(), -1 );
+//	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 //	test.handle_accept();
 
 	// unit_test[] handle_acceptが呼ばれたときに状態が変わっていることの確認
-//	BOOST_CHECK_EQUAL( test.get_connectionstate(), 0 );
+//	BOOST_CHECK_EQUAL( test.get_connectionstate(), true );
 
 	test.finalize();
 }
 
 void handle_receive_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "handle_receive_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "handle_receive_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -657,7 +677,7 @@ void handle_receive_snmpbridge_test(){
 }
 
 void handle_send_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "handle_send_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "handle_send_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -672,7 +692,7 @@ void handle_send_snmpbridge_test(){
 }
 
 void load_config_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "load_config_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "load_config_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -687,7 +707,7 @@ void load_config_snmpbridge_test(){
 }
 
 void load_loglevel_snmpbridge_test(){
-	BOOST_TEST_MESSAGE( "load_loglevel_snmpbridge_test" );
+//	BOOST_TEST_MESSAGE( "load_loglevel_snmpbridge_test" );
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
@@ -723,6 +743,7 @@ test_suite* init_unit_test_suite( int args, char* argv[]){
 //	ts->add( BOOST_TEST_CASE( &send_mibcollection_snmpbridge_test ) );
 	ts->add( BOOST_TEST_CASE( &get_connectionstate_snmpbridge_test ) );
 	ts->add( BOOST_TEST_CASE( &get_loglevel_snmpbridge_test ) );
+//	ts->add( BOOST_TEST_CASE( &get_loglevel_allcategory_snmpbridge_test ) );
 //	ts->add( BOOST_TEST_CASE( &handle_accept_snmpbridge_test ) );
 //	ts->add( BOOST_TEST_CASE( &handle_receive_snmpbridge_test ) );
 //	ts->add( BOOST_TEST_CASE( &handle_send_snmpbridge_test ) );

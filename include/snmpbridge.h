@@ -114,12 +114,17 @@ public:
 
 	//! connection status function
 	//! @return
-	int				get_connectionstate();
+	bool				get_connectionstate();
 
 	//! loglevel getting function
 	//! @param[in]
 	//! @return
 	LOG_LEVEL_TAG	get_loglevel( const LOG_CATEGORY_TAG snmp_log_category );
+
+	//! loglevel getting function
+	//! @param[out]
+	//! @return
+	void	get_loglevel_allcategory( std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>&	loglevelmap );
 
 protected:
 	void			handle_accept(const boost::system::error_code& error);

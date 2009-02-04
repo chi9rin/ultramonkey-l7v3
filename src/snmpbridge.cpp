@@ -551,13 +551,8 @@ int l7vs::snmpbridge::send_mibcollection(struct l7ag_mibrequest_message* payload
 /*!
  * Get connection status
  */
-int l7vs::snmpbridge::get_connectionstate(){
-
-	if(connection_state){
-		return 0;
-	}else{
-		return -1;
-	}
+bool l7vs::snmpbridge::get_connectionstate(){
+	return connection_state;
 }
 
 /*!
@@ -570,6 +565,17 @@ l7vs::LOG_LEVEL_TAG l7vs::snmpbridge::get_loglevel( const l7vs::LOG_CATEGORY_TAG
         level = snmp_param.loglevel.find( snmp_log_category )->second;
     }
     return level;
+}
+
+/*!
+ * Get log level allcategory
+ */
+void l7vs::snmpbridge::get_loglevel_allcategory( std::map<l7vs::LOG_CATEGORY_TAG, l7vs::LOG_LEVEL_TAG>&	loglevelmap ){
+	for( std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>::iterator it = snmp_param.loglevel.begin();
+		it != snmp_param.loglevel.end();
+		++it ){
+		loglevelmap.insert( std::pair<l7vs::LOG_CATEGORY_TAG, l7vs::LOG_LEVEL_TAG>( it->first, it->second ) );
+	}
 }
 
 /*!
