@@ -24,8 +24,16 @@ public:
 	//! destractor
 	~realserver_fake(){}
 
-    void	set_active( const int in_active ){ nactive = in_active ; }
-    void	set_inact( const int in_inact ){ ninact = in_inact ; }
+    void	set_active( const int in_active ){ 
+		boost::mutex::scoped_lock( active_mutex_ptr );
+
+		nactive = in_active ;
+	}
+    void	set_inact( const int in_inact ){
+		boost::mutex::scoped_lock( inact_mutex_ptr );
+
+		ninact = in_inact ;
+	}
 
 	void	increment_active2( const std::string& msg1, const std::string& msg2 ){
 		boost::mutex::scoped_lock	lock( starting_mutex );
@@ -352,6 +360,7 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
 	// unit_test[26]  接続数インクリメントメソッドのテスト２（上限INT_MAXに達すると0にクリア）
+	BOOST_MESSAGE( "wait a minute to INT_MAX" );
 	for ( loop = 0; loop < INT_MAX; loop++ ){
 		server1.increment_active();
 	}
@@ -375,6 +384,7 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 
 	// unit_test[29]  切断数インクリメントメソッドのテスト２（上限INT_MAXに達すると0にクリア）
+	BOOST_MESSAGE( "wait a minute to INT_MAX" );
 	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
 		server1.increment_inact();
 	}

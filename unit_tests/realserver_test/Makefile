@@ -44,7 +44,7 @@ LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS)
+$(TARGET):	$(OBJS) ../../include/realserver.h
 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 #$(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
