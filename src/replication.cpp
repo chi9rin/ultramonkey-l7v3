@@ -166,15 +166,6 @@ int			replication::initialize(){
 		return 0;
 	}
 
-	// The memory is larger than int. 
-	if ( 100000 < replication_state.total_block){
-		buf << "Set number of blocks exceeds " << CMP_BLOCK_MAX << ".";
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf.str(), __FILE__, __LINE__ );
-		// Status Set
-		replication_state.service_status = REPLICATION_SINGLE;
-		return -1;
-	}
-
 	// Get the Replication memory
 	replication_state.replication_memory = getrpl();
 	// Confirmation of Replication memory 
@@ -447,7 +438,7 @@ int		replication::set_slave()
 //! @return Replication memory address
 //! @retval nonnull Replication memory address
 //! @retval NULL Error
-void*		replication::pay_memory( std::string& inid, unsigned int& outsize ){
+void*		replication::pay_memory( const std::string& inid, unsigned int& outsize ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::pay_memory", __FILE__, __LINE__ );
 
 	void *ret = NULL;
@@ -491,7 +482,6 @@ void*		replication::pay_memory( std::string& inid, unsigned int& outsize ){
 
 			// LOG INFO
 			char str[256];
-//			sprintf( str, "Component Info ID : \"%s\". Block size : %d . Head Block No : %d/  Pay memory : %p ",
 			sprintf( str, "Component Info ID : \"%s\". Block size : %d . Head Block No : %d/  Pay memory : %p ",
 					replication_info.component_info[i].id.c_str(), 
 					replication_info.component_info[i].block_size,
@@ -819,7 +809,7 @@ int			replication::handle_receive(){
 	return 0;
 }
 
-int			replication::lock( std::string& inid ){
+int			replication::lock( const std::string& inid ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::lock", __FILE__, __LINE__ );
 
 	std::map<std::string, mutex_ptr>::iterator	itr;
@@ -837,7 +827,7 @@ int			replication::lock( std::string& inid ){
 	return 0;
 }
 
-int			replication::unlock( std::string& inid ){
+int			replication::unlock( const std::string& inid ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::unlock", __FILE__, __LINE__ );
 
 	std::map<std::string, mutex_ptr>::iterator	itr;
@@ -855,7 +845,7 @@ int			replication::unlock( std::string& inid ){
 	return 0;
 }
 
-int			replication::refer_lock_mutex( std::string& inid, mutex_ptr outmutex ){
+int			replication::refer_lock_mutex( const std::string& inid, mutex_ptr outmutex ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::refer_lock_mutex", __FILE__, __LINE__ );
 
 	std::map<std::string, mutex_ptr>::iterator	itr;
@@ -948,19 +938,6 @@ void*		replication::getrpl(){
 	unsigned int total_block = replication_state.total_block;
 	void *memory = NULL;
 
-	// Check by continuous initialize.
-	if ( REPLICATION_OUT != replication_state.service_status ){
-		// Initialization has already been done.
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Already got replication memory.", __FILE__, __LINE__ );
-		return NULL;
-	}
-
-	// Check Total Block
-	if ( 0 == total_block || total_block > CMP_BLOCK_MAX){
-		// Check Total Block
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Invalid total component blocks.", __FILE__, __LINE__ );
-		return NULL;
-	}
 	// Get replication memory
 	memory = malloc( total_block*DATA_SIZE );
 
@@ -979,22 +956,9 @@ void*		replication::getrpl(){
 //! @retval memory memory get Success
 //! @retval NULL Error
 void*		replication::getcmp(){
-	unsigned int total_block ;
+	unsigned int total_block = replication_state.total_block;
 	void *memory = NULL ;
 
-	total_block = replication_state.total_block;
-	// Check by continuous initialize.
-	if ( REPLICATION_OUT != replication_state.service_status ){
-		// Initialization has already been done.
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Already got component memory.", __FILE__, __LINE__ );
-		return NULL;
-	}
-	// Check Total Block
-	if ( 0 == total_block || total_block > CMP_BLOCK_MAX){
-		// Check Total Block
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Invalid total component blocks.", __FILE__, __LINE__ );
-		return NULL;
-	}
 	// Get component memory
 	memory = malloc( total_block*DATA_SIZE );
 
@@ -1013,22 +977,9 @@ void*		replication::getcmp(){
 //! @retval memory memory get Success
 //! @retval NULL Error
 uint64_t*	replication::getsrf(){
-	unsigned int total_block;
+	unsigned int total_block = replication_state.total_block;
 	uint64_t *memory = NULL;
 
-	total_block = replication_state.total_block;
-	// Check by continuous initialize.
-	if ( REPLICATION_OUT != replication_state.service_status ){
-		// Initialization has already been done.
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Already got surface info memory.", __FILE__, __LINE__ );
-		return NULL;
-	}
-	// Check Total Block
-	if ( 0 == total_block || total_block > CMP_BLOCK_MAX){
-		// Check Total Block
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Invalid total component blocks.", __FILE__, __LINE__ );
-		return NULL;
-	}
 	// Get memory
 	memory = (uint64_t*)malloc( total_block*sizeof(uint64_t) );
 
@@ -1038,6 +989,7 @@ uint64_t*	replication::getsrf(){
 		return NULL;
 	}
 	memset(memory,0,total_block*sizeof(uint64_t));
+
 	return memory;
 }
 

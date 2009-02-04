@@ -158,7 +158,7 @@ public:
 	void						finalize();
 	void						switch_to_master();
 	void						switch_to_slave();
-	void*						pay_memory( std::string& inid, unsigned int& outsize );
+	void*						pay_memory( const std::string& inid, unsigned int& outsize );
 	void						dump_memory();
 	void						start();
 	void						stop();
@@ -168,9 +168,9 @@ public:
 	int							check_interval();
 	int							handle_send();
 	int							handle_receive();
-	int							lock( std::string& inid );
-	int							unlock( std::string& inid );
-	int							refer_lock_mutex( std::string& inid, mutex_ptr outmutex );
+	int							lock( const std::string& inid );
+	int							unlock( const std::string& inid );
+	int							refer_lock_mutex( const std::string& inid, mutex_ptr outmutex );
 protected:
 	int							set_master();
 	int							set_slave();
