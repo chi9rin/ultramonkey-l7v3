@@ -115,7 +115,7 @@ int			replication::initialize(){
 	char key_id[ID_LENGTH];
 	char key_size[CMP_SIZE_LENGTH];
 	error_code	id_ret, size_ret;
-//	boost::mutex	component_mutex;
+	mutex_ptr	component_mutex;
 
 	replication_mutex.clear();
 	// Conponent exists
@@ -147,7 +147,8 @@ int			replication::initialize(){
 		// Number of Component 
 		replication_info.component_num++;
 
-//		replication_mutex.insert( std::pair<std::string, boost::mutex>( replication_info.component_info[i].id, component_mutex ) );
+		component_mutex = mutex_ptr( new boost::mutex );
+		replication_mutex.insert( std::pair<std::string, mutex_ptr>( replication_info.component_info[i].id, component_mutex ) );
 	}
 
 	// Check the Parameters value
@@ -821,7 +822,7 @@ int			replication::handle_receive(){
 int			replication::lock( std::string& inid ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::lock", __FILE__, __LINE__ );
 
-	std::map<std::string, boost::mutex>::iterator	itr;
+	std::map<std::string, mutex_ptr>::iterator	itr;
 	std::stringstream buf;
 
 	itr = replication_mutex.find( inid );
@@ -831,7 +832,7 @@ int			replication::lock( std::string& inid ){
 		return -1;
 	}
 
-	itr->second.lock();
+	itr->second->lock();
 
 	return 0;
 }
@@ -839,7 +840,7 @@ int			replication::lock( std::string& inid ){
 int			replication::unlock( std::string& inid ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::unlock", __FILE__, __LINE__ );
 
-	std::map<std::string, boost::mutex>::iterator	itr;
+	std::map<std::string, mutex_ptr>::iterator	itr;
 	std::stringstream buf;
 
 	itr = replication_mutex.find( inid );
@@ -849,15 +850,15 @@ int			replication::unlock( std::string& inid ){
 		return -1;
 	}
 
-	itr->second.unlock();
+	itr->second->unlock();
 
 	return 0;
 }
 
-int			replication::refer_lock_mutex( std::string& inid, boost::mutex& outmutex ){
+int			replication::refer_lock_mutex( std::string& inid, mutex_ptr outmutex ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::refer_lock_mutex", __FILE__, __LINE__ );
 
-	std::map<std::string, boost::mutex>::iterator	itr;
+	std::map<std::string, mutex_ptr>::iterator	itr;
 	std::stringstream buf;
 
 	itr = replication_mutex.find( inid );
@@ -867,7 +868,7 @@ int			replication::refer_lock_mutex( std::string& inid, boost::mutex& outmutex )
 		return -1;
 	}
 
-//	outmutex = itr->second;
+	outmutex = itr->second;
 
 	return 0;
 }

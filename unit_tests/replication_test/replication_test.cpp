@@ -81,7 +81,7 @@ void	replication_test(){
 	BOOST_CHECK_EQUAL(repli1.initialize(), -1);
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-	// unit_test[8]  initializeのテスト(全部存在しない)
+	// unit_test[8]  initializeのテスト(全部存在しない　initializeはOK)
 	BOOST_MESSAGE( "unit_test[8]" );
 	get_string_stubmode = 1000;
 	get_int_stubmode = 1000;
@@ -134,32 +134,28 @@ void	replication_test(){
 	BOOST_CHECK_EQUAL(repli1.initialize(), -1);
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-#if 0
-	// unit_test[15]  initializeのテスト(cmponent_id_00が存在しない)
+	get_string_stubmode = 0;
+	// unit_test[15]  initializeのテスト(cmponent_size_00が存在しない)
 	BOOST_MESSAGE( "unit_test[15]" );
-	get_string_stubmode = 4;
+	get_int_stubmode = 2;
 	repli1.finalize();
 	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-	// unit_test[16]  initializeのテスト(cmponent_id_00が不正)
+	// unit_test[16]  initializeのテスト(cmponent_size_00が不正)
 	BOOST_MESSAGE( "unit_test[16]" );
-	get_string_stubmode = 104;
+	get_int_stubmode = 102;
 	repli1.finalize();
-	BOOST_CHECK_EQUAL(repli1.initialize(), -1);
-	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
-#endif
+	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-
-
-
-
-	// unit_test[17]  initializeのテスト(cmponent_id_01が存在しない)
+	get_int_stubmode = 0;
+	// unit_test[17]  initializeのテスト(cmponent_id_01が存在しない　OK)
 	BOOST_MESSAGE( "unit_test[17]" );
 	get_string_stubmode = 5;
 	repli1.finalize();
 	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
-	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
 	// unit_test[18]  initializeのテスト(cmponent_id_01が不正)
 	BOOST_MESSAGE( "unit_test[18]" );
@@ -168,6 +164,50 @@ void	replication_test(){
 	BOOST_CHECK_EQUAL(repli1.initialize(), -1);
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
+	get_string_stubmode = 0;
+	// unit_test[19]  initializeのテスト(cmponent_size_01が存在しない　OK)
+	BOOST_MESSAGE( "unit_test[19]" );
+	get_int_stubmode = 3;
+	repli1.finalize();
+	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	// unit_test[20]  initializeのテスト(cmponent_size_01が不正)
+	BOOST_MESSAGE( "unit_test[20]" );
+	get_int_stubmode = 103;
+	repli1.finalize();
+	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	get_int_stubmode = 0;
+	// unit_test[21]  initializeのテスト(cmponent_id_02が存在しない　OK)
+	BOOST_MESSAGE( "unit_test[21]" );
+	get_string_stubmode = 6;
+	repli1.finalize();
+	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	// unit_test[22]  initializeのテスト(cmponent_id_02が不正)
+	BOOST_MESSAGE( "unit_test[22]" );
+	get_string_stubmode = 106;
+	repli1.finalize();
+	BOOST_CHECK_EQUAL(repli1.initialize(), -1);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+
+	get_string_stubmode = 0;
+	// unit_test[23]  initializeのテスト(cmponent_size_02が存在しない　OK)
+	BOOST_MESSAGE( "unit_test[23]" );
+	get_int_stubmode = 4;
+	repli1.finalize();
+	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	// unit_test[24]  initializeのテスト(cmponent_size_02が不正)
+	BOOST_MESSAGE( "unit_test[24]" );
+	get_int_stubmode = 104;
+	repli1.finalize();
+	BOOST_CHECK_EQUAL(repli1.initialize(), 0);
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
 
 

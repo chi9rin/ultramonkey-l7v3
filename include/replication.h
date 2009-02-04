@@ -16,6 +16,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/condition.hpp>
+#include <boost/shared_ptr.hpp>
 #include <stdint.h>
 
 //! Max Number of Components
@@ -82,6 +83,8 @@ public:
 		REPLICATION_SLAVE_STOP
 	};
 
+	typedef	boost::shared_ptr<boost::mutex>		mutex_ptr;
+
 protected:
 	//! Component information set to SG file.
 	struct replication_component{
@@ -133,17 +136,17 @@ protected:
 										component_num(0) {}
 	};
 
-	std::map<std::string, boost::mutex>		replication_mutex;
-	boost::asio::io_service&				receive_io;
-	boost::asio::io_service					send_io;
-	boost::asio::ip::udp::socket			replication_receive_socket;
-	boost::asio::ip::udp::socket			replication_send_socket;
-	struct replication_state_struct			replication_state;
-	struct replication_info_struct			replication_info;
-	boost::thread							replication_thread;
-	boost::mutex							replication_thread_mutex;
-	boost::condition						replication_thread_condition;
-	int										replication_flag;
+	std::map<std::string, mutex_ptr>	replication_mutex;
+	boost::asio::io_service&			receive_io;
+	boost::asio::io_service				send_io;
+	boost::asio::ip::udp::socket		replication_receive_socket;
+	boost::asio::ip::udp::socket		replication_send_socket;
+	struct replication_state_struct		replication_state;
+	struct replication_info_struct		replication_info;
+	boost::thread						replication_thread;
+	boost::mutex						replication_thread_mutex;
+	boost::condition					replication_thread_condition;
+	int									replication_flag;
 
 public:
 	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
@@ -167,7 +170,7 @@ public:
 	int							handle_receive();
 	int							lock( std::string& inid );
 	int							unlock( std::string& inid );
-	int							refer_lock_mutex( std::string& inid, boost::mutex& outmutex );
+	int							refer_lock_mutex( std::string& inid, mutex_ptr outmutex );
 protected:
 	int							set_master();
 	int							set_slave();
