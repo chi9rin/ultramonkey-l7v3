@@ -19,9 +19,9 @@ struct session_thread_data_sslid
         int realserver_connect_failed_count;
         boost::asio::ip::tcp::endpoint selected_realserver;
         boost::array<char, MAX_SSLID_BUFFER_SIZE> data_buffer;
-        int data_begain_offset;
-        int data_size;
-        int current_record_rest_size;
+        size_t data_begain_offset;
+        size_t data_size;
+        size_t current_record_rest_size;
         bool hello_message_flag;
 };
 
@@ -38,7 +38,7 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         void initialize( rs_list_itr_func_type	inlist_begin,
                          rs_list_itr_func_type	inlist_end,
-						 rs_list_itr_func_type	inlist_next,
+						 rs_list_itr_next_func_type inlist_next,
 						 boost::function< void( void ) >	inlist_lock,
 						 boost::function< void( void ) >	inlist_unlock );
 
@@ -60,7 +60,9 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         EVENT_TAG handle_session_initialize(
                                 const boost::thread::id up_thread_id,
-                                const boost::thread::id down_thread_id );
+                                const boost::thread::id down_thread_id,
+                                const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+                                const boost::asio::ip::udp::endpoint& client_endpoint_udp );
 
         EVENT_TAG handle_session_finalize(
                                 const boost::thread::id up_thread_id,
@@ -164,12 +166,12 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         bool realserver_selected( const boost::asio::ip::tcp::endpoint& rs_endpoint );
 
-//Modify for test:    protected:
+    protected:
         int put_data_to_sendbuffer(
                                 const boost::thread::id& thread_id,
                                 boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen);
-//Modify for test:    protected:
+    protected:
         int timeout;
         int maxlist;
         int reschedule;
@@ -179,8 +181,13 @@ class protocol_module_sslid : public ssl_protocol_module_base
         int realserver_connect_failed_max_count;
         sslid_replication_data_processor* replication_data_processor;
         sslid_session_data_processor* session_data_processor;
-    private:
+    public:
         static const std::string MODULE_NAME;
+        static const int REALSERVER_CONNECT_FAILED_MAX_COUNT;
+        static const int THREAD_DIVISION_UP_STREAM;      // up thread
+        static const int THREAD_DIVISION_DOWN_STREAM;    // down thread
+        static const int END_FLAG_ON;                    // end flag ON
+        static const int END_FLAG_OFF;                   // end flag OFF
 };
 
 }

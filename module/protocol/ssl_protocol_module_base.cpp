@@ -1,4 +1,5 @@
 #include "ssl_protocol_module_base.h"
+#include <arpa/inet.h>
 
 namespace l7vs
 {
@@ -34,7 +35,7 @@ namespace l7vs
     		else
     		{
     			//the length of ssl session id is 0, the ssl record data dose not have a session id.
-    			return -1;
+    			return 1;
     		}
     	}
     	else
@@ -57,7 +58,7 @@ namespace l7vs
                                                     bool& is_hello_message)
     {
     	//check record_data pointer
-    	if (record_data == NULL) {
+    	if (record_data == NULL || recv_length < 0) {
     		return -1;
     	}
     	//is_hello_messageを FALSEで設定する
@@ -97,12 +98,8 @@ namespace l7vs
 							is_hello_message = true;
 							//SSLレコードデータの4バイト目と5バイト目がSSL recordのmessagesのサイズで、
 							//sSSL recordの全サイズを messagesのサイズ + 5で設定する
-							unsigned short high_length = 0;
-							unsigned short low_length = 0;
-							high_length = static_cast<unsigned short>(static_cast<unsigned char>(record_data[3]));
-							high_length = high_length << 8;
-							low_length = static_cast<unsigned short>(static_cast<unsigned char>(record_data[4]));
-							all_length = (high_length | low_length) + 5;
+							unsigned short* message_size = reinterpret_cast<unsigned short*>(const_cast<char*>(record_data)+3);
+							all_length = ntohs(*message_size) + 5;
 							//SSL recordチェック結果を「送信可能」
 							return 0;
 						}
@@ -144,5 +141,4 @@ namespace l7vs
 			return 1;
 		}
     }
-
 }

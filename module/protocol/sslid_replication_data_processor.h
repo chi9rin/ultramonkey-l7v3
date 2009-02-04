@@ -15,8 +15,8 @@ struct sslid_replication_data_header
 {
     char virtualserver_ip[SSLID_IP_MAXLENGTH];
     unsigned short virtualserver_port;
-    unsigned int offset;
-    unsigned int size;
+    size_t offset;
+    size_t size;
 };
 
 struct sslid_replication_data
