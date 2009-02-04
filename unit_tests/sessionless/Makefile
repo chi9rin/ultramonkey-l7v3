@@ -5,7 +5,7 @@
 #
 TARGET		= sessionless_ut
 CPP			= g++
-CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DMAX_BUFFER_SIZE=65535
+CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DMAX_BUFFER_SIZE=65535u
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include \
