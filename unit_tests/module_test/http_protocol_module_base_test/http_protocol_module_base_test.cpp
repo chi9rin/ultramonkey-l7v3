@@ -156,22 +156,22 @@ void	check_http_method_test(){
 
 	char	buffer_ok[CHECK_METHOD_OK_STRING_NUM][256]
 				=	{
-// ## test [01] check_http_method( CheckData = "GET /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [02] check_http_method( CheckData = "HEAD /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [03] check_http_method( CheckData = "POST /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [04] check_http_method( CheckData = "PUT /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [05] check_http_method( CheckData = "PROPFIND /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [06] check_http_method( CheckData = "PROPPATCH /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [07] check_http_method( CheckData = "OPTIONS /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [08] check_http_method( CheckData = "CONNECT /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [09] check_http_method( CheckData = "COPY /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [10] check_http_method( CheckData = "TRACE /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [11] check_http_method( CheckData = "DELETE /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [12] check_http_method( CheckData = "LOCK /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [13] check_http_method( CheckData = "UNLOCK /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [14] check_http_method( CheckData = "MOVE /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [15] check_http_method( CheckData = "MKCOL /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [16] check_http_method( CheckData = "GET /a HTTP/1.0" / Result = OK )
+// unit_test[01]  check_http_method( CheckData = "GET /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[02]  check_http_method( CheckData = "HEAD /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[03]  check_http_method( CheckData = "POST /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[04]  check_http_method( CheckData = "PUT /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[05]  check_http_method( CheckData = "PROPFIND /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[06]  check_http_method( CheckData = "PROPPATCH /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[07]  check_http_method( CheckData = "OPTIONS /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[08]  check_http_method( CheckData = "CONNECT /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[09]  check_http_method( CheckData = "COPY /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[10]  check_http_method( CheckData = "TRACE /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[11]  check_http_method( CheckData = "DELETE /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[12]  check_http_method( CheckData = "LOCK /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[13]  check_http_method( CheckData = "UNLOCK /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[14]  check_http_method( CheckData = "MOVE /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[15]  check_http_method( CheckData = "MKCOL /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[16]  check_http_method( CheckData = "GET /a HTTP/1.0" / Result = OK )
 						"GET /abc/def/ HTTP/1.0",
 						"HEAD /abc/def/ HTTP/1.0",
 						"POST /abc/def/ HTTP/1.0",
@@ -191,14 +191,14 @@ void	check_http_method_test(){
 					};
 	char	buffer_ng[CHECK_METHOD_NG_STRING_NUM][256]
 				=	{
-// ## test [17] check_http_method( CheckData = "get /abc/def/ HTTP/1.0" / Result = NG )
-// ## test [18] check_http_method( CheckData = "Get /abc/def/ HTTP/1.0" / Result = NG )
-// ## test [19] check_http_method( CheckData = "GET/abc/def/ HTTP/1.0" / Result = NG )
-// ## test [20] check_http_method( CheckData = "GGET /abc/def/ HTTP/1.0" / Result = NG )
-// ## test [21] check_http_method( CheckData = " GET /abc/def/ HTTP/1.0" / Result = NG )
-// ## test [22] check_http_method( CheckData = "get GET /abc/def/ HTTP/1.0" / Result = NG )
-// ## test [23] check_http_method( CheckData = "get /abc/GET /abc/def/ HTTP/1.0" / Result = NG )
-// ## test [24] check_http_method( CheckData = "GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[17]  check_http_method( CheckData = "get /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[18]  check_http_method( CheckData = "Get /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[19]  check_http_method( CheckData = "GET/abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[20]  check_http_method( CheckData = "GGET /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[21]  check_http_method( CheckData = " GET /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[22]  check_http_method( CheckData = "get GET /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[23]  check_http_method( CheckData = "get /abc/GET /abc/def/ HTTP/1.0" / Result = NG )
+// unit_test[24]  check_http_method( CheckData = "GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0" / Result = NG )
 						"get /abc/def/ HTTP/1.0",
 						"Get /abc/def/ HTTP/1.0",
 						"GET/abc/def/ HTTP/1.0",
@@ -210,9 +210,9 @@ void	check_http_method_test(){
 					};
 	char	buffer_inpossible[CHECK_METHOD_INPOSSIBLE_STRING_NUM][256]
 				=	{
-// ## test [25] check_http_method( CheckData = "GET / HTTP/1.0" / Result = INPOSSIBLE )
-// ## test [26] check_http_method( CheckData = "Get / HTTP/1.0" / Result = INPOSSIBLE )
-// ## test [27] check_http_method( CheckData = "" / Result = INPOSSIBLE )
+// unit_test[25]  check_http_method( CheckData = "GET / HTTP/1.0" / Result = INPOSSIBLE )
+// unit_test[26]  check_http_method( CheckData = "Get / HTTP/1.0" / Result = INPOSSIBLE )
+// unit_test[27]  check_http_method( CheckData = "" / Result = INPOSSIBLE )
 						"GET / HTTP/1.0",
 						"Get / HTTP/1.0",
 						"",
@@ -260,7 +260,7 @@ void	check_http_method_test(){
 	buffer_len = 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [28] check_http_method( CheckData = NULL, Length = 0 / Result = NG )
+// unit_test[28]  check_http_method( CheckData = NULL, Length = 0 / Result = NG )
 	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -270,7 +270,7 @@ void	check_http_method_test(){
 	buffer_len = 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [29] check_http_method( CheckData = NULL, Length = 100 / Result = NG )
+// unit_test[29]  check_http_method( CheckData = NULL, Length = 100 / Result = NG )
 	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -285,6 +285,11 @@ void	check_http_method_test_thread( int thread_no ){
 
 	char	buffer[5][256]
 				=	{
+// unit_test[30]  check_http_method( CheckData = "GET /abc/def/ HTTP/1.0" / Result = OK / ThreadNo = 1 )
+// unit_test[31]  check_http_method( CheckData = "HEAD /abc/def/ HTTP/1.0" / Result = OK / ThreadNo = 2 )
+// unit_test[32]  check_http_method( CheckData = "get /abc/def/ HTTP/1.0" / Result = NG / ThreadNo = 3 )
+// unit_test[33]  check_http_method( CheckData = "Get /abc/def/ HTTP/1.0" / Result = NG / ThreadNo = 4 )
+// unit_test[34]  check_http_method( CheckData = "" / Result = INPOSSIBLE / ThreadNo = 5 )
 						"GET /abc/def/ HTTP/1.0",
 						"HEAD /abc/def/ HTTP/1.0",
 						"get /abc/def/ HTTP/1.0",
@@ -328,6 +333,7 @@ void	check_http_method_test_thread( int thread_no ){
 		sync_condition.wait( lk );
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
+	// [30] - [34]
 	BOOST_CHECK( check_http_method( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	std::cout << "[Thread_" << thread_no << "] " << "StartTime = [" << start_time.nsec << "]" << std::endl;
@@ -342,16 +348,16 @@ void	check_http_version_test(){
 
 	char	buffer_ok[CHECK_VERSION_OK_STRING_NUM][256]
 				=	{
-// ## test [01] check_http_version( CheckData = "GET /abc/def/ HTTP/1.0" / Result = OK )
-// ## test [02] check_http_version( CheckData = "GET /abc/def/ HTTP/1.1" / Result = OK )
-// ## test [03] check_http_version( CheckData = "GET /abc/def/ghi HTTP/1.0" / Result = OK )
-// ## test [04] check_http_version( CheckData = "GET /abc/def/ghi HTTP/1.1" / Result = OK )
-// ## test [05] check_http_version( CheckData = "get /abc/def/ghi HTTP/1.0" / Result = OK )
-// ## test [06] check_http_version( CheckData = "get /abc/def/ghi HTTP/1.1" / Result = OK )
-// ## test [07] check_http_version( CheckData = "HTTP/1.0 100 abcdff" / Result = OK )
-// ## test [08] check_http_version( CheckData = "HTTP/1.1 100 abcdff" / Result = OK )
-// ## test [09] check_http_version( CheckData = "HTTP/1.0 404 abcdff" / Result = OK )
-// ## test [10] check_http_version( CheckData = "HTTP/1.1 404 abcdff" / Result = OK )
+// unit_test[01]  check_http_version( CheckData = "GET /abc/def/ HTTP/1.0" / Result = OK )
+// unit_test[02]  check_http_version( CheckData = "GET /abc/def/ HTTP/1.1" / Result = OK )
+// unit_test[03]  check_http_version( CheckData = "GET /abc/def/ghi HTTP/1.0" / Result = OK )
+// unit_test[04]  check_http_version( CheckData = "GET /abc/def/ghi HTTP/1.1" / Result = OK )
+// unit_test[05]  check_http_version( CheckData = "get /abc/def/ghi HTTP/1.0" / Result = OK )
+// unit_test[06]  check_http_version( CheckData = "get /abc/def/ghi HTTP/1.1" / Result = OK )
+// unit_test[07]  check_http_version( CheckData = "HTTP/1.0 100 abcdff" / Result = OK )
+// unit_test[08]  check_http_version( CheckData = "HTTP/1.1 100 abcdff" / Result = OK )
+// unit_test[09]  check_http_version( CheckData = "HTTP/1.0 404 abcdff" / Result = OK )
+// unit_test[10]  check_http_version( CheckData = "HTTP/1.1 404 abcdff" / Result = OK )
 						"GET /abc/def/ HTTP/1.0",
 						"GET /abc/def/ HTTP/1.1",
 						"GET /abc/def/ghi HTTP/1.0",
@@ -365,22 +371,22 @@ void	check_http_version_test(){
 					};
 	char	buffer_ng[CHECK_VERSION_NG_STRING_NUM][256]
 				=	{
-// ## test [11] check_http_version( CheckData = "GET /abc/def/ HTTP/0.0" / Result = NG )
-// ## test [12] check_http_version( CheckData = "GET /abc/def/ HTTP/0.9" / Result = NG )
-// ## test [13] check_http_version( CheckData = "GET /abc/def/ HTTP/1.2" / Result = NG )
-// ## test [14] check_http_version( CheckData = "GET /abc/def/ HTTP/2.0" / Result = NG )
-// ## test [15] check_http_version( CheckData = "GET /abc/def/ghiHTTP/1.0" / Result = NG )
-// ## test [16] check_http_version( CheckData = "GET/abc/def/ghi HTTP/1.1" / Result = NG )
-// ## test [17] check_http_version( CheckData = "/abc/def/ghi HTTP/1.0" / Result = NG )
-// ## test [18] check_http_version( CheckData = "GET /abc/def/ http/1.0" / Result = NG )
-// ## test [19] check_http_version( CheckData = "HTTP/0.0 100 abcdff" / Result = NG )
-// ## test [20] check_http_version( CheckData = "HTTP/0.9 100 abcdff" / Result = NG )
-// ## test [21] check_http_version( CheckData = "HTTP/1.2 100 abcdff" / Result = NG )
-// ## test [22] check_http_version( CheckData = "HTTP/2.0 100 abcdff" / Result = NG )
-// ## test [23] check_http_version( CheckData = "HTTP/1.0 404abcdff" / Result = NG )
-// ## test [24] check_http_version( CheckData = "HTTP/1.1404 abcdff" / Result = NG )
-// ## test [25] check_http_version( CheckData = "HTTP/1.1404abcdff" / Result = NG )
-// ## test [26] check_http_version( CheckData = "http/1.0 100 abcdff" / Result = NG )
+// unit_test[11]  check_http_version( CheckData = "GET /abc/def/ HTTP/0.0" / Result = NG )
+// unit_test[12]  check_http_version( CheckData = "GET /abc/def/ HTTP/0.9" / Result = NG )
+// unit_test[13]  check_http_version( CheckData = "GET /abc/def/ HTTP/1.2" / Result = NG )
+// unit_test[14]  check_http_version( CheckData = "GET /abc/def/ HTTP/2.0" / Result = NG )
+// unit_test[15]  check_http_version( CheckData = "GET /abc/def/ghiHTTP/1.0" / Result = NG )
+// unit_test[16]  check_http_version( CheckData = "GET/abc/def/ghi HTTP/1.1" / Result = NG )
+// unit_test[17]  check_http_version( CheckData = "/abc/def/ghi HTTP/1.0" / Result = NG )
+// unit_test[18]  check_http_version( CheckData = "GET /abc/def/ http/1.0" / Result = NG )
+// unit_test[19]  check_http_version( CheckData = "HTTP/0.0 100 abcdff" / Result = NG )
+// unit_test[20]  check_http_version( CheckData = "HTTP/0.9 100 abcdff" / Result = NG )
+// unit_test[21]  check_http_version( CheckData = "HTTP/1.2 100 abcdff" / Result = NG )
+// unit_test[22]  check_http_version( CheckData = "HTTP/2.0 100 abcdff" / Result = NG )
+// unit_test[23]  check_http_version( CheckData = "HTTP/1.0 404abcdff" / Result = NG )
+// unit_test[24]  check_http_version( CheckData = "HTTP/1.1404 abcdff" / Result = NG )
+// unit_test[25]  check_http_version( CheckData = "HTTP/1.1404abcdff" / Result = NG )
+// unit_test[26]  check_http_version( CheckData = "http/1.0 100 abcdff" / Result = NG )
 						"GET /abc/def/ HTTP/0.0",
 						"GET /abc/def/ HTTP/0.9",
 						"GET /abc/def/ HTTP/1.2",
@@ -400,10 +406,10 @@ void	check_http_version_test(){
 					};
 	char	buffer_inpossible[CHECK_VERSION_INPOSSIBLE_STRING_NUM][256]
 				=	{
-// ## test [27] check_http_version( CheckData = "GET /abc/def/ HTTP/1.0" / Result = INPOSSIBLE )
-// ## test [28] check_http_version( CheckData = "GET /abc/def/ H" / Result = INPOSSIBLE )
-// ## test [29] check_http_version( CheckData = "Get /abc/def/ H" / Result = INPOSSIBLE )
-// ## test [30] check_http_version( CheckData = "" / Result = INPOSSIBLE )
+// unit_test[27]  check_http_version( CheckData = "GET /abc/def/ HTTP/1.0" / Result = INPOSSIBLE )
+// unit_test[28]  check_http_version( CheckData = "GET /abc/def/ H" / Result = INPOSSIBLE )
+// unit_test[29]  check_http_version( CheckData = "Get /abc/def/ H" / Result = INPOSSIBLE )
+// unit_test[30]  check_http_version( CheckData = "" / Result = INPOSSIBLE )
 						"GET /abc/def/ HTTP/1.0",
 						"GET /abc/def/ H",
 						"Get /abc/def/ H",
@@ -452,7 +458,7 @@ void	check_http_version_test(){
 	buffer_len = 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [31] check_http_version( CheckData = NULL, Length = 0 / Result = NG )
+// unit_test[31]  check_http_version( CheckData = NULL, Length = 0 / Result = NG )
 	BOOST_CHECK( check_http_version( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -462,7 +468,7 @@ void	check_http_version_test(){
 	buffer_len = 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [32] check_http_version( CheckData = NULL, Length = 100 / Result = NG )
+// unit_test[32]  check_http_version( CheckData = NULL, Length = 100 / Result = NG )
 	BOOST_CHECK( check_http_version( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -477,6 +483,11 @@ void	check_http_version_test_thread( int thread_no ){
 
 	char	buffer[5][256]
 				=	{
+// unit_test[33]  check_http_version( CheckData = "GET /abc/def/ HTTP/1.0" / Result = OK / ThreadNo = 1 )
+// unit_test[34]  check_http_version( CheckData = "HTTP/1.0 100 abcdff" / Result = OK / ThreadNo = 2 )
+// unit_test[35]  check_http_version( CheckData = "GET /abc/def/ HTTP/0.0" / Result = NG / ThreadNo = 3 )
+// unit_test[36]  check_http_version( CheckData = "HTTP/0.0 100 abcdff" / Result = NG / ThreadNo = 4 )
+// unit_test[37]  check_http_version( CheckData = "" / Result = INPOSSIBLE / ThreadNo = 5 )
 						"GET /abc/def/ HTTP/1.0",
 						"HTTP/1.0 100 abcdff",
 						"GET /abc/def/ HTTP/0.0",
@@ -520,6 +531,7 @@ void	check_http_version_test_thread( int thread_no ){
 		sync_condition.wait( lk );
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
+	// [33] - [37]
 	BOOST_CHECK( check_http_version( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	std::cout << "[Thread_" << thread_no << "] " << "StartTime = [" << start_time.nsec << "]" << std::endl;
@@ -535,12 +547,12 @@ void	check_status_code_test(){
 
 	char	buffer_ok[CHECK_STATUS_CODE_OK_STRING_NUM][256]
 				=	{
-// ## test [01] check_status_code( CheckData = "HTTP/1.0 100 abcdff" / Result = OK )
-// ## test [02] check_status_code( CheckData = "HTTP/1.0 199 abcdff" / Result = OK )
-// ## test [03] check_status_code( CheckData = "HTTP/1.0 200 abcdff" / Result = OK )
-// ## test [04] check_status_code( CheckData = "HTTP/1.0 299 abcdff" / Result = OK )
-// ## test [05] check_status_code( CheckData = "HTTP/1.0 300 abcdff" / Result = OK )
-// ## test [06] check_status_code( CheckData = "HTTP/1.0 399 abcdff" / Result = OK )
+// unit_test[01]  check_status_code( CheckData = "HTTP/1.0 100 abcdff" / Result = OK )
+// unit_test[02]  check_status_code( CheckData = "HTTP/1.0 199 abcdff" / Result = OK )
+// unit_test[03]  check_status_code( CheckData = "HTTP/1.0 200 abcdff" / Result = OK )
+// unit_test[04]  check_status_code( CheckData = "HTTP/1.0 299 abcdff" / Result = OK )
+// unit_test[05]  check_status_code( CheckData = "HTTP/1.0 300 abcdff" / Result = OK )
+// unit_test[06]  check_status_code( CheckData = "HTTP/1.0 399 abcdff" / Result = OK )
 						"HTTP/1.0 100 abcdff",
 						"HTTP/1.0 199 abcdff",
 						"HTTP/1.0 200 abcdff",
@@ -550,15 +562,15 @@ void	check_status_code_test(){
 					};
 	char	buffer_ng[CHECK_STATUS_CODE_NG_STRING_NUM][256]
 				=	{
-// ## test [07] check_status_code( CheckData = "HTTP/1.0 000 abcdff" / Result = NG )
-// ## test [08] check_status_code( CheckData = "HTTP/1.0 099 abcdff" / Result = NG )
-// ## test [09] check_status_code( CheckData = "HTTP/1.0 400 abcdff" / Result = NG )
-// ## test [10] check_status_code( CheckData = "HTTP/1.0 999 abcdff" / Result = NG )
-// ## test [11] check_status_code( CheckData = "HTTP/1.0 10 abcdff" / Result = NG )
-// ## test [12] check_status_code( CheckData = "HTTP/1.0 1000 abcdff" / Result = NG )
-// ## test [13] check_status_code( CheckData = "HTTP/1.0 a00 abcdff" / Result = NG )
-// ## test [14] check_status_code( CheckData = "HTTP/1.0 1a0 abcdff" / Result = NG )
-// ## test [15] check_status_code( CheckData = "HTTP/1.0 10a abcdff" / Result = NG )
+// unit_test[07]  check_status_code( CheckData = "HTTP/1.0 000 abcdff" / Result = NG )
+// unit_test[08]  check_status_code( CheckData = "HTTP/1.0 099 abcdff" / Result = NG )
+// unit_test[09]  check_status_code( CheckData = "HTTP/1.0 400 abcdff" / Result = NG )
+// unit_test[10]  check_status_code( CheckData = "HTTP/1.0 999 abcdff" / Result = NG )
+// unit_test[11]  check_status_code( CheckData = "HTTP/1.0 10 abcdff" / Result = NG )
+// unit_test[12]  check_status_code( CheckData = "HTTP/1.0 1000 abcdff" / Result = NG )
+// unit_test[13]  check_status_code( CheckData = "HTTP/1.0 a00 abcdff" / Result = NG )
+// unit_test[14]  check_status_code( CheckData = "HTTP/1.0 1a0 abcdff" / Result = NG )
+// unit_test[15]  check_status_code( CheckData = "HTTP/1.0 10a abcdff" / Result = NG )
 						"HTTP/1.0 000 abcdff",
 						"HTTP/1.0 099 abcdff",
 						"HTTP/1.0 400 abcdff",
@@ -571,8 +583,8 @@ void	check_status_code_test(){
 					};
 	char	buffer_inpossible[CHECK_STATUS_CODE_INPOSSIBLE_STRING_NUM][256]
 				=	{
-// ## test [16] check_status_code( CheckData = "HTTP/1.0 100" / Result = INPOSSIBLE )
-// ## test [17] check_status_code( CheckData = "" / Result = INPOSSIBLE )
+// unit_test[16]  check_status_code( CheckData = "HTTP/1.0 100" / Result = INPOSSIBLE )
+// unit_test[17]  check_status_code( CheckData = "" / Result = INPOSSIBLE )
 						"HTTP/1.0 100",
 						"",
 					};
@@ -619,7 +631,7 @@ void	check_status_code_test(){
 	buffer_len = 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [18] check_status_code( CheckData = NULL, Length = 0 / Result = NG )
+// unit_test[18]  check_status_code( CheckData = NULL, Length = 0 / Result = NG )
 	BOOST_CHECK( check_status_code( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -629,7 +641,7 @@ void	check_status_code_test(){
 	buffer_len = 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [19] check_status_code( CheckData = NULL, Length = 100 / Result = NG )
+// unit_test[19]  check_status_code( CheckData = NULL, Length = 100 / Result = NG )
 	BOOST_CHECK( check_status_code( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
@@ -644,6 +656,11 @@ void	check_status_code_test_thread( int thread_no ){
 
 	char	buffer[5][256]
 				=	{
+// unit_test[20]  check_status_code( CheckData = "HTTP/1.0 100 abcdff" / Result = OK / ThreadNo = 1 )
+// unit_test[21]  check_status_code( CheckData = "HTTP/1.0 399 abcdff" / Result = OK / ThreadNo = 2 )
+// unit_test[22]  check_status_code( CheckData = "HTTP/1.0 099 abcdff" / Result = NG / ThreadNo = 3 )
+// unit_test[23]  check_status_code( CheckData = "HTTP/1.0 400 abcdff" / Result = NG / ThreadNo = 4 )
+// unit_test[24]  check_status_code( CheckData = "" / Result = INPOSSIBLE / ThreadNo = 5 )
 						"HTTP/1.0 100 abcdff",
 						"HTTP/1.0 399 abcdff",
 						"HTTP/1.0 099 abcdff",
@@ -687,6 +704,7 @@ void	check_status_code_test_thread( int thread_no ){
 		sync_condition.wait( lk );
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
+	// [20] - [24]
 	BOOST_CHECK( check_status_code( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	std::cout << "[Thread_" << thread_no << "] " << "StartTime = [" << start_time.nsec << "]" << std::endl;
@@ -704,10 +722,10 @@ void	find_uri_test(){
 
 	char	buffer_ok[FIND_URI_OK_STRING_NUM][256]
 				=	{
-// ## test [01] find_uri( FindData = "GET /abc/def/ HTTP/1.0" / Result = true )
-// ## test [02] find_uri( FindData = "GET /abc/def/ghi HTTP/1.0" / Result = true )
-// ## test [03] find_uri( FindData = "HEAD abcdef HTTP/1.0" / Result = true )
-// ## test [04] find_uri( FindData = "HEAD /abc/def/ghi/jkl/mno/pqr/stu/vwx/yz0/123/456/789/ HTTP/1.0" / Result = true )
+// unit_test[01]  find_uri( FindData = "GET /abc/def/ HTTP/1.0" / Result = true )
+// unit_test[02]  find_uri( FindData = "GET /abc/def/ghi HTTP/1.0" / Result = true )
+// unit_test[03]  find_uri( FindData = "HEAD abcdef HTTP/1.0" / Result = true )
+// unit_test[04]  find_uri( FindData = "HEAD /abc/def/ghi/jkl/mno/pqr/stu/vwx/yz0/123/456/789/ HTTP/1.0" / Result = true )
 						"GET /abc/def/ HTTP/1.0",
 						"GET /abc/def/ghi HTTP/1.0",
 						"HEAD abcdef HTTP/1.0",
@@ -716,10 +734,10 @@ void	find_uri_test(){
 
 	char	buffer_ng[FIND_URI_NG_STRING_NUM][256]
 				=	{
-// ## test [05] find_uri( FindData = "GET/abc/def/ HTTP/1.0" / Result = false )
-// ## test [06] find_uri( FindData = "GET /abc/def/HTTP/1.0" / Result = false )
-// ## test [07] find_uri( FindData = "HEAD/abc/def/HTTP/1.0" / Result = false )
-// ## test [08] find_uri( FindData = "" / Result = false )
+// unit_test[05]  find_uri( FindData = "GET/abc/def/ HTTP/1.0" / Result = false )
+// unit_test[06]  find_uri( FindData = "GET /abc/def/HTTP/1.0" / Result = false )
+// unit_test[07]  find_uri( FindData = "HEAD/abc/def/HTTP/1.0" / Result = false )
+// unit_test[08]  find_uri( FindData = "" / Result = false )
 						"GET/abc/def/ HTTP/1.0",
 						"GET /abc/def/HTTP/1.0",
 						"HEAD/abc/def/HTTP/1.0",
@@ -777,7 +795,7 @@ void	find_uri_test(){
 	buffer_len	= 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [09] find_uri( FindData = NULL, Length = 0 / Result = false )
+// unit_test[09]  find_uri( FindData = NULL, Length = 0 / Result = false )
 	BOOST_CHECK( find_uri( NULL, buffer_len, uri_offset, uri_len ) == false );
 	std::cout << "URI Offset = [" << uri_offset << "]" << std::endl;
 	std::cout << "URI Length = [" << uri_len << "]" << std::endl;
@@ -793,7 +811,7 @@ void	find_uri_test(){
 	buffer_len	= 100;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [10] find_uri( FindData = NULL, Length = 100 / Result = false )
+// unit_test[10]  find_uri( FindData = NULL, Length = 100 / Result = false )
 	BOOST_CHECK( find_uri( NULL, buffer_len, uri_offset, uri_len ) == false );
 	std::cout << "URI Offset = [" << uri_offset << "]" << std::endl;
 	std::cout << "URI Length = [" << uri_len << "]" << std::endl;
@@ -813,6 +831,11 @@ void	find_uri_test_thread( int thread_no ){
 
 	char	buffer[5][256]
 				=	{
+// unit_test[11]  find_uri( FindData = "GET /abc/def/ HTTP/1.0" / Result = true / ThreadNo = 1 )
+// unit_test[12]  find_uri( FindData = "HEAD /abc/def/ghi/jkl/mno/pqr/stu/vwx/yz0/123/456/789/ HTTP/1.0" / Result = true / ThreadNo = 2 )
+// unit_test[13]  find_uri( FindData = "GET/abc/def/ HTTP/1.0" / Result = false / ThreadNo = 3 )
+// unit_test[14]  find_uri( FindData = "HEAD/abc/def/HTTP/1.0" / Result = false / ThreadNo = 4 )
+// unit_test[15]  find_uri( FindData = "" / Result = false / ThreadNo = 5 )
 						"GET /abc/def/ HTTP/1.0",
 						"HEAD /abc/def/ghi/jkl/mno/pqr/stu/vwx/yz0/123/456/789/ HTTP/1.0",
 						"GET/abc/def/ HTTP/1.0",
@@ -861,6 +884,7 @@ void	find_uri_test_thread( int thread_no ){
 		sync_condition.wait( lk );
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
+	// [11] - [15]
 	BOOST_CHECK( find_uri( (const char*)buffer[thread_no-1], buffer_len, uri_offset, uri_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	memcpy( disp_uri, buffer[thread_no-1] + uri_offset, uri_len );
@@ -882,8 +906,8 @@ void	find_status_code_test(){
 
 	char	buffer_ok[FIND_STATUS_CODE_OK_STRING_NUM][256]
 				=	{
-// ## test [01] find_status_code( FindData = "HTTP/1.0 000 abcdff" / Result = true )
-// ## test [02] find_status_code( FindData = "HTTP/1.0 999 abcdff" / Result = true )
+// unit_test[01]  find_status_code( FindData = "HTTP/1.0 000 abcdff" / Result = true )
+// unit_test[02]  find_status_code( FindData = "HTTP/1.0 999 abcdff" / Result = true )
 						"HTTP/1.0 000 abcdff",
 						"HTTP/1.0 999 abcdff",
 					};
@@ -891,10 +915,10 @@ void	find_status_code_test(){
 
 	char	buffer_ng[FIND_STATUS_CODE_NG_STRING_NUM][256]
 				=	{
-// ## test [03] find_status_code( FindData = "HTTP/1.0 10 abcdff" / Result = false )
-// ## test [04] find_status_code( FindData = "HTTP/1.0 1000 abcdff" / Result = false )
-// ## test [05] find_status_code( FindData = "HTTP/1.0 aaa abcdff" / Result = false )
-// ## test [06] find_status_code( FindData = "" / Result = false )
+// unit_test[03]  find_status_code( FindData = "HTTP/1.0 10 abcdff" / Result = false )
+// unit_test[04]  find_status_code( FindData = "HTTP/1.0 1000 abcdff" / Result = false )
+// unit_test[05]  find_status_code( FindData = "HTTP/1.0 aaa abcdff" / Result = false )
+// unit_test[06]  find_status_code( FindData = "" / Result = false )
 						"HTTP/1.0 10 abcdff",
 						"HTTP/1.0 1000 abcdff",
 						"HTTP/1.0 aaa abcdff",
@@ -952,7 +976,7 @@ void	find_status_code_test(){
 	buffer_len			= 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [07] find_status_code( FindData = NULL, Length = 0 / Result = false )
+// unit_test[07]  find_status_code( FindData = NULL, Length = 0 / Result = false )
 	BOOST_CHECK( find_status_code( NULL, buffer_len, status_code_offset, status_code_len ) == false );
 	std::cout << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
 	std::cout << "STATUS CODE Length = [" << status_code_len << "]" << std::endl;
@@ -968,7 +992,7 @@ void	find_status_code_test(){
 	buffer_len			= 0;
 	std::cout << "String = [NULL]" << std::endl;
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
-// ## test [08] find_status_code( FindData = NULL, Length = 100 / Result = false )
+// unit_test[08]  find_status_code( FindData = NULL, Length = 100 / Result = false )
 	BOOST_CHECK( find_status_code( NULL, buffer_len, status_code_offset, status_code_len ) == false );
 	std::cout << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
 	std::cout << "STATUS CODE Length = [" << status_code_len << "]" << std::endl;
@@ -988,6 +1012,11 @@ void	find_status_code_test_thread( int thread_no ){
 
 	char	buffer[5][256]
 				=	{
+// unit_test[09]  find_status_code( FindData = "HTTP/1.0 000 abcdff" / Result = true / ThreadNo = 1 )
+// unit_test[10]  find_status_code( FindData = "HTTP/1.0 999 abcdff" / Result = true / ThreadNo = 2 )
+// unit_test[11]  find_status_code( FindData = "HTTP/1.0 10 abcdff" / Result = false / ThreadNo = 3 )
+// unit_test[12]  find_status_code( FindData = "HTTP/1.0 1000 abcdff" / Result = false / ThreadNo = 4 )
+// unit_test[13]  find_status_code( FindData = "" / Result = false / ThreadNo = 5 )
 						"HTTP/1.0 000 abcdff",
 						"HTTP/1.0 999 abcdff",
 						"HTTP/1.0 10 abcdff",
@@ -1036,6 +1065,7 @@ void	find_status_code_test_thread( int thread_no ){
 		sync_condition.wait( lk );
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
+	// [09] - [13]
 	BOOST_CHECK( find_status_code( (const char*)buffer[thread_no-1], buffer_len, status_code_offset, status_code_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	memcpy( disp_status_code, buffer[thread_no-1] + status_code_offset, status_code_len );
@@ -1072,38 +1102,38 @@ void	find_http_header_test(){
 
 	bool	result_1[10]
 				=	{
-// ## test [01] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie", ReturnCode = "\r" / Result = true )
-// ## test [02] find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For", ReturnCode = "\r" / Result = true )
-// ## test [03] find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r" / Result = false )
-// ## test [04] find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r" / Result = false )
-// ## test [05] find_http_header( FindData = "...BlankLine...", HeaderName = "", ReturnCode = "\r" / Result = true )
-// ## test [06] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "cookie", ReturnCode = "\r" / Result = true )
-// ## test [07] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "COOKIE", ReturnCode = "\r" / Result = true )
-// ## test [08] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "content-length", ReturnCode = "\r" / Result = true )
-// ## test [09] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "Content-Length", ReturnCode = "\r" / Result = true )
-// ## test [10] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r" / Result = true )
+// unit_test[01]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie", ReturnCode = "\r" / Result = true )
+// unit_test[02]  find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For", ReturnCode = "\r" / Result = true )
+// unit_test[03]  find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r" / Result = false )
+// unit_test[04]  find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r" / Result = false )
+// unit_test[05]  find_http_header( FindData = "...BlankLine...", HeaderName = "", ReturnCode = "\r" / Result = true )
+// unit_test[06]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "cookie", ReturnCode = "\r" / Result = true )
+// unit_test[07]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "COOKIE", ReturnCode = "\r" / Result = true )
+// unit_test[08]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "content-length", ReturnCode = "\r" / Result = true )
+// unit_test[09]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "Content-Length", ReturnCode = "\r" / Result = true )
+// unit_test[10]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r" / Result = true )
 
-// ## test [11] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie", ReturnCode = "\n" / Result = true )
-// ## test [12] find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For", ReturnCode = "\n" / Result = true )
-// ## test [13] find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\n" / Result = false )
-// ## test [14] find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\n" / Result = false )
-// ## test [15] find_http_header( FindData = "...BlankLine...", HeaderName = "", ReturnCode = "\n" / Result = true )
-// ## test [16] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "cookie", ReturnCode = "\n" / Result = true )
-// ## test [17] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "COOKIE", ReturnCode = "\n" / Result = true )
-// ## test [18] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "content-length", ReturnCode = "\n" / Result = true )
-// ## test [19] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "Content-Length", ReturnCode = "\n" / Result = true )
-// ## test [20] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\n" / Result = true )
+// unit_test[11]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie", ReturnCode = "\n" / Result = true )
+// unit_test[12]  find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For", ReturnCode = "\n" / Result = true )
+// unit_test[13]  find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\n" / Result = false )
+// unit_test[14]  find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\n" / Result = false )
+// unit_test[15]  find_http_header( FindData = "...BlankLine...", HeaderName = "", ReturnCode = "\n" / Result = true )
+// unit_test[16]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "cookie", ReturnCode = "\n" / Result = true )
+// unit_test[17]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "COOKIE", ReturnCode = "\n" / Result = true )
+// unit_test[18]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "content-length", ReturnCode = "\n" / Result = true )
+// unit_test[19]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "Content-Length", ReturnCode = "\n" / Result = true )
+// unit_test[20]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\n" / Result = true )
 
-// ## test [21] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie", ReturnCode = "\r\n" / Result = true )
-// ## test [22] find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For", ReturnCode = "\r\n" / Result = true )
-// ## test [23] find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r\n" / Result = false )
-// ## test [24] find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r\n" / Result = false )
-// ## test [25] find_http_header( FindData = "...BlankLine...", HeaderName = "", ReturnCode = "\r\n" / Result = true )
-// ## test [26] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "cookie", ReturnCode = "\r\n" / Result = true )
-// ## test [27] find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "COOKIE", ReturnCode = "\r\n" / Result = true )
-// ## test [28] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "content-length", ReturnCode = "\r\n" / Result = true )
-// ## test [29] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "Content-Length", ReturnCode = "\r\n" / Result = true )
-// ## test [30] find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r\n" / Result = true )
+// unit_test[21]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie", ReturnCode = "\r\n" / Result = true )
+// unit_test[22]  find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For", ReturnCode = "\r\n" / Result = true )
+// unit_test[23]  find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r\n" / Result = false )
+// unit_test[24]  find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r\n" / Result = false )
+// unit_test[25]  find_http_header( FindData = "...BlankLine...", HeaderName = "", ReturnCode = "\r\n" / Result = true )
+// unit_test[26]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "cookie", ReturnCode = "\r\n" / Result = true )
+// unit_test[27]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "COOKIE", ReturnCode = "\r\n" / Result = true )
+// unit_test[28]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "content-length", ReturnCode = "\r\n" / Result = true )
+// unit_test[29]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "Content-Length", ReturnCode = "\r\n" / Result = true )
+// unit_test[30]  find_http_header( FindData = "...CONTENT-LENGTH: 1000...BlankLine...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r\n" / Result = true )
 						true,
 						true,
 						false,
@@ -1118,38 +1148,38 @@ void	find_http_header_test(){
 
 	bool	result_2[10]
 				=	{
-// ## test [31] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "Cookie", ReturnCode = "\r" / Result = false )
-// ## test [32] find_http_header( FindData = "BlankLine...X-Forwarded-For: 20.20.20.20...", HeaderName = "X-Forwarded-For", ReturnCode = "\r" / Result = false )
-// ## test [33] find_http_header( FindData = "BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r" / Result = false )
-// ## test [34] find_http_header( FindData = "BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r" / Result = false )
-// ## test [35] find_http_header( FindData = "BlankLine...", HeaderName = "", ReturnCode = "\r" / Result = true )
-// ## test [36] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "cookie", ReturnCode = "\r" / Result = false )
-// ## test [37] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "COOKIE", ReturnCode = "\r" / Result = false )
-// ## test [38] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "content-length", ReturnCode = "\r" / Result = false )
-// ## test [39] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "Content-Length", ReturnCode = "\r" / Result = false )
-// ## test [40] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r" / Result = false )
+// unit_test[31]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "Cookie", ReturnCode = "\r" / Result = false )
+// unit_test[32]  find_http_header( FindData = "BlankLine...X-Forwarded-For: 20.20.20.20...", HeaderName = "X-Forwarded-For", ReturnCode = "\r" / Result = false )
+// unit_test[33]  find_http_header( FindData = "BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r" / Result = false )
+// unit_test[34]  find_http_header( FindData = "BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r" / Result = false )
+// unit_test[35]  find_http_header( FindData = "BlankLine...", HeaderName = "", ReturnCode = "\r" / Result = true )
+// unit_test[36]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "cookie", ReturnCode = "\r" / Result = false )
+// unit_test[37]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "COOKIE", ReturnCode = "\r" / Result = false )
+// unit_test[38]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "content-length", ReturnCode = "\r" / Result = false )
+// unit_test[39]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "Content-Length", ReturnCode = "\r" / Result = false )
+// unit_test[40]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r" / Result = false )
 
-// ## test [41] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "Cookie", ReturnCode = "\n" / Result = false )
-// ## test [42] find_http_header( FindData = "BlankLine...X-Forwarded-For: 20.20.20.20...", HeaderName = "X-Forwarded-For", ReturnCode = "\n" / Result = false )
-// ## test [43] find_http_header( FindData = "BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\n" / Result = false )
-// ## test [44] find_http_header( FindData = "BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\n" / Result = false )
-// ## test [45] find_http_header( FindData = "BlankLine...", HeaderName = "", ReturnCode = "\n" / Result = true )
-// ## test [46] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "cookie", ReturnCode = "\n" / Result = false )
-// ## test [47] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "COOKIE", ReturnCode = "\n" / Result = false )
-// ## test [48] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "content-length", ReturnCode = "\n" / Result = false )
-// ## test [49] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "Content-Length", ReturnCode = "\n" / Result = false )
-// ## test [50] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\n" / Result = false )
+// unit_test[41]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "Cookie", ReturnCode = "\n" / Result = false )
+// unit_test[42]  find_http_header( FindData = "BlankLine...X-Forwarded-For: 20.20.20.20...", HeaderName = "X-Forwarded-For", ReturnCode = "\n" / Result = false )
+// unit_test[43]  find_http_header( FindData = "BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\n" / Result = false )
+// unit_test[44]  find_http_header( FindData = "BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\n" / Result = false )
+// unit_test[45]  find_http_header( FindData = "BlankLine...", HeaderName = "", ReturnCode = "\n" / Result = true )
+// unit_test[46]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "cookie", ReturnCode = "\n" / Result = false )
+// unit_test[47]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "COOKIE", ReturnCode = "\n" / Result = false )
+// unit_test[48]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "content-length", ReturnCode = "\n" / Result = false )
+// unit_test[49]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "Content-Length", ReturnCode = "\n" / Result = false )
+// unit_test[50]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\n" / Result = false )
 
-// ## test [51] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "Cookie", ReturnCode = "\r\n" / Result = false )
-// ## test [52] find_http_header( FindData = "BlankLine...X-Forwarded-For: 20.20.20.20...", HeaderName = "X-Forwarded-For", ReturnCode = "\r\n" / Result = false )
-// ## test [53] find_http_header( FindData = "BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r\n" / Result = false )
-// ## test [54] find_http_header( FindData = "BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r\n" / Result = false )
-// ## test [55] find_http_header( FindData = "BlankLine...", HeaderName = "", ReturnCode = "\r\n" / Result = true )
-// ## test [56] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "cookie", ReturnCode = "\r\n" / Result = false )
-// ## test [57] find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "COOKIE", ReturnCode = "\r\n" / Result = false )
-// ## test [58] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "content-length", ReturnCode = "\r\n" / Result = false )
-// ## test [59] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "Content-Length", ReturnCode = "\r\n" / Result = false )
-// ## test [60] find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r\n" / Result = false )
+// unit_test[51]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "Cookie", ReturnCode = "\r\n" / Result = false )
+// unit_test[52]  find_http_header( FindData = "BlankLine...X-Forwarded-For: 20.20.20.20...", HeaderName = "X-Forwarded-For", ReturnCode = "\r\n" / Result = false )
+// unit_test[53]  find_http_header( FindData = "BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2", ReturnCode = "\r\n" / Result = false )
+// unit_test[54]  find_http_header( FindData = "BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2", ReturnCode = "\r\n" / Result = false )
+// unit_test[55]  find_http_header( FindData = "BlankLine...", HeaderName = "", ReturnCode = "\r\n" / Result = true )
+// unit_test[56]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "cookie", ReturnCode = "\r\n" / Result = false )
+// unit_test[57]  find_http_header( FindData = "BlankLine...Cookie: 10.10.10.10:11111...", HeaderName = "COOKIE", ReturnCode = "\r\n" / Result = false )
+// unit_test[58]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "content-length", ReturnCode = "\r\n" / Result = false )
+// unit_test[59]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "Content-Length", ReturnCode = "\r\n" / Result = false )
+// unit_test[60]  find_http_header( FindData = "BlankLine...CONTENT-LENGTH: 1000...", HeaderName = "CONTENT-LENGTH", ReturnCode = "\r\n" / Result = false )
 						false,
 						false,
 						false,
@@ -1274,7 +1304,7 @@ void	find_http_header_test(){
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
 	std::cout << "Http Header Name = [" << http_header_name[0] << "]" << std::endl;
 	std::cout << "Http Header Name Length = [" << http_header_name[0].length() << "]" << std::endl;
-// ## test [61] find_http_header( FindData = NULL, HeaderName = "Cookie", Length = 0 / Result = false )
+// unit_test[61]  find_http_header( FindData = NULL, HeaderName = "Cookie", Length = 0 / Result = false )
 	BOOST_CHECK( find_http_header( NULL, buffer_len, http_header_name[0], http_header_offset, http_header_len ) == false );
 	memset( disp_http_header, '\0', sizeof(disp_http_header));
 	std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
@@ -1291,7 +1321,7 @@ void	find_http_header_test(){
 	std::cout << "Length = [" << buffer_len << "]" << std::endl;
 	std::cout << "Http Header Name = [" << http_header_name[0] << "]" << std::endl;
 	std::cout << "Http Header Name Length = [" << http_header_name[0].length() << "]" << std::endl;
-// ## test [62] find_http_header( FindData = NULL, HeaderName = "Cookie", Length = 100 / Result = false )
+// unit_test[62]  find_http_header( FindData = NULL, HeaderName = "Cookie", Length = 100 / Result = false )
 	BOOST_CHECK( find_http_header( NULL, buffer_len, http_header_name[0], http_header_offset, http_header_len ) == false );
 	memset( disp_http_header, '\0', sizeof(disp_http_header));
 	std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
@@ -1313,6 +1343,11 @@ void	find_http_header_test_thread( int thread_no ){
 
 	std::string	http_header_name[5]
 				=	{
+// unit_test[63]  find_http_header( FindData = "...Cookie: 10.10.10.10:11111...BlankLine...", HeaderName = "Cookie" / Result = true / ThreadNo = 1 )
+// unit_test[64]  find_http_header( FindData = "...X-Forwarded-For: 20.20.20.20...BlankLine...", HeaderName = "X-Forwarded-For" / Result = true / ThreadNo = 2 )
+// unit_test[65]  find_http_header( FindData = "...BlankLine...Cookie2: 30.30.30.30:33333...", HeaderName = "Cookie2" / Result = false / ThreadNo = 3 )
+// unit_test[66]  find_http_header( FindData = "...BlankLine...X-Forwarded-For2: 40.40.40.40...", HeaderName = "X-Forwarded-For2" / Result = false / ThreadNo = 4 )
+// unit_test[67]  find_http_header( FindData = "...BlankLine...", HeaderName = "" / Result = true / ThreadNo = 5 )
 						"Cookie",
 						"X-Forwarded-For",
 						"Cookie2",
@@ -1370,7 +1405,9 @@ void	find_http_header_test_thread( int thread_no ){
 		sync_condition.wait( lk );
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
+	// [63] - [67]
 	BOOST_CHECK( find_http_header( (const char*)buffer_all, buffer_len, http_header_name[thread_no-1], http_header_offset, http_header_len ) == result[thread_no-1] );
+	boost::xtime_get(&end_time, boost::TIME_UTC);
 	memcpy( disp_http_header, buffer_all + http_header_offset, http_header_len );
 
 	std::cout << "[Thread_" << thread_no << "] " << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
