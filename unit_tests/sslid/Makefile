@@ -3,13 +3,12 @@
 #	Makefile for sslid unit test frameworks.
 #
 #
-TARGET		= protocol_module_sslid_ut
+TARGET		= sslid_ut
 CPP			= g++
 CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DDATA_SIZE=480 -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../include \
 				-I../../logger \
-				-I../../module/protocol \
-				-I../../src
+				-I../../module/protocol
 				
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
@@ -17,7 +16,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
-SRCS		=  protocol_module_sslid_test.cpp
+SRCS		=  sslid_ut.cpp
 
 OBJS		= $(SRCS:.cpp=.o)
 
