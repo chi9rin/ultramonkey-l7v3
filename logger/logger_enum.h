@@ -25,6 +25,8 @@
 #ifndef LOGGER_ENUM_H
 #define LOGGER_ENUM_H
 
+#include <list>
+#include <boost/function.hpp>
 #include <log4cxx/level.h>
 
 namespace l7vs{
@@ -119,6 +121,15 @@ inline LOG_CATEGORY_TAG& operator++(LOG_CATEGORY_TAG& cat) {
 	cat = static_cast<LOG_CATEGORY_TAG>(cat + 1);
 	return cat;
 }
+
+//! typedef category level pair list
+typedef	std::list< std::pair< LOG_CATEGORY_TAG, LOG_LEVEL_TAG > >
+	category_level_list_type;
+
+//! typedef snmp send trap func type
+typedef boost::function<void( const std::string& )>
+	snmpSendtrapFuncType;
+
 
 } //namespace l7vs
 #endif	//__LOGGER_ENUM_H__

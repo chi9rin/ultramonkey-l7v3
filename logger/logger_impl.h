@@ -96,6 +96,19 @@ public:
 	}
 
 	/*!
+	 * retrieve all category's log level.
+	 *
+	 * @param[out]   category level list
+	 */
+	virtual inline void getLogLevelAll( category_level_list_type& list ){
+		for( category_level_map_type::iterator itr = category_level_map.begin();
+			 itr != category_level_map.end();
+			 ++itr ){
+			list.push_back( *itr );
+		}
+	}
+
+	/*!
 	 * set category's log level.
 	 *
 	 * @param   category to set log level
@@ -117,6 +130,33 @@ public:
 		}
 		return true;
 	}
+
+	/*!
+	 * set all category's log level.
+	 *
+	 * @param   category to set log level
+	 * @param   level
+	 * @retval  true  succeed
+	 * @retval  false failed
+	 */
+	virtual inline bool setLogLevelAll( LOG_LEVEL_TAG level ){
+		for( category_level_map_type::iterator itr = category_level_map.begin();
+			 itr != category_level_map.end();
+			 ++itr ){
+			itr->second = level;
+
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( itr->first );
+
+			try {
+				log4cxx::Logger::getLogger(categoryname_itr->second)->setLevel( log4cxx::Level::toLevel( levelTable[level] ) );
+			}
+			catch (const std::exception& ex) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/*!
 	 * output fatal log.
 	 *
@@ -164,6 +204,10 @@ public:
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getFatal(),
 																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
+			// send_trap
+			if( snmpSendtrap ){
+				snmpSendtrap( buf.str() );
+			}
 		}
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
@@ -181,7 +225,6 @@ public:
 	 * @param   current line
 	 * @retrun  void
 	 */
-	//! output fatal log.
 	virtual inline void putLogError(	LOG_CATEGORY_TAG cat,
 										const unsigned int message_id,
 										const std::string& message,
@@ -219,6 +262,10 @@ public:
 			log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(	log4cxx::Level::getError(),
 																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
+			// send_trap
+			if( snmpSendtrap ){
+				snmpSendtrap( buf.str() );
+			}
 		}
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
@@ -236,7 +283,6 @@ public:
 	 * @param   current line
 	 * @retrun  void
 	 */
-	//! output fatal log.
 	virtual inline void putLogWarn(		LOG_CATEGORY_TAG cat,
 										const unsigned int message_id,
 										const std::string& message,
@@ -291,7 +337,6 @@ public:
 	 * @param   current line
 	 * @retrun  void
 	 */
-	//! output fatal log.
 	virtual inline void putLogInfo(		LOG_CATEGORY_TAG cat,
 										const unsigned int message_id,
 										const std::string& message,
@@ -390,6 +435,16 @@ public:
 		}
 	}
 
+	/*!
+	 * set snmp sendtrap function
+	 *
+	 * @param   snmp send trap function object
+	 * @retrun  void
+	 */
+	void	setSnmpSendtrap( const snmpSendtrapFuncType func ){
+		snmpSendtrap = func;
+	}
+
 protected:
 	//! default constructor initialize member variables.
 	LoggerImpl();
@@ -413,6 +468,7 @@ protected:
 
 	virtual void logic_error( const unsigned int, const std::string&, const char*, const unsigned int);
 
+/*
 	//! log4cxx::LevelPtr to LOG_LEVEL_TAG transrator
 	virtual inline LOG_LEVEL_TAG toLevelTag(const log4cxx::LevelPtr level){
 		int levelInt = level->toInt();
@@ -431,6 +487,8 @@ protected:
 			return LOG_LV_DEBUG;
 		}
 	}
+*/
+
 	//! destructor.
 	virtual ~LoggerImpl() {}
 	//! static Logger instance
@@ -476,6 +534,10 @@ protected:
 	};
 	appender_property	normal_log_property;
 	appender_property	access_log_property;
+
+	//! snmp trap function
+	snmpSendtrapFuncType	snmpSendtrap;
+
 };
 
 }	//namespace l7vs

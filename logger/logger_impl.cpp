@@ -1236,6 +1236,4 @@ void l7vs::LoggerImpl::loadConf(){
 		errorConf(7, oss.str(), __FILE__, __LINE__);
 		throw std::logic_error(oss.str());
 	}
-
 }
-

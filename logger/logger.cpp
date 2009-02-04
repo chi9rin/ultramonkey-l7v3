@@ -93,6 +93,16 @@ l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
 }
 
 /*!
+ * retrieve all category's log level.
+ * this is only wrapper to implement method.
+ * @param[out]   category level list
+ */
+void l7vs::Logger::getLogLevelAll( category_level_list_type& list )
+{
+	return LoggerImpl::getInstance().getLogLevelAll( list );
+}
+
+/*!
  * set category's log level.
  * this is only wrapper to implement method.
  * @param   category to set log level
@@ -103,6 +113,19 @@ l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
 bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level)
 {
 	return LoggerImpl::getInstance().setLogLevel(cat, level);
+}
+
+/*!
+ * set all category's log level.
+ * this is only wrapper to implement method.
+ * @param   category to set log level
+ * @param   level
+ * @retval  true  succeed
+ * @retval  false failed
+ */
+bool l7vs::Logger::setLogLevelAll( LOG_LEVEL_TAG level )
+{
+	return LoggerImpl::getInstance().setLogLevelAll( level );
 }
 
 /*!
@@ -193,4 +216,11 @@ void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_
 void l7vs::Logger::loadConf()
 {
 	LoggerImpl::getInstance().loadConf();
+}
+
+//! set snmp sendtrap function
+//! @param   snmp send trap function object
+//! @retrun  void
+void	l7vs::Logger::setSnmpSendtrap( const snmpSendtrapFuncType func ){
+	LoggerImpl::getInstance().setSnmpSendtrap( func );
 }

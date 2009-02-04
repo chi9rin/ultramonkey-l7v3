@@ -64,12 +64,24 @@ public:
 	//! @return		loglevel
 	static LOG_LEVEL_TAG getLogLevel( LOG_CATEGORY_TAG );
 
+	//! retrieve all category's log level.
+	//! @param[in]	logcategory
+	//! @return		loglevel
+	static void getLogLevelAll( category_level_list_type& );
+
 	//! set category's log level.
 	//!	@param[in]	logcategory
 	//!	@param[in]	loglevel
 	//!	@return true	success loglevel change
 	//!	@return	false	failer loglevel change
 	static bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
+
+	//! set all category's log level.
+	//!	@param[in]	logcategory
+	//!	@param[in]	loglevel
+	//!	@return true	success loglevel change
+	//!	@return	false	failer loglevel change
+	static bool setLogLevelAll( LOG_LEVEL_TAG level );
 
 	//! output fatal log.
 	//! @param[in]	Log output category tag
@@ -110,8 +122,12 @@ public:
 	//!	@param[in]	filename	(=__FILE__)
 	//! @param[in]	lineno		(=__LINE__)
 	static void putLogDebug(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
-};
 
+	//! set snmp sendtrap function
+	//! @param   snmp send trap function object
+	//! @retrun  void
+	static void	setSnmpSendtrap( const snmpSendtrapFuncType func );
+};
 }	//namespace l7vs
 
 #endif	//LOGGER_H
