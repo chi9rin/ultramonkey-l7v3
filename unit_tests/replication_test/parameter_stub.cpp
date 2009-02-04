@@ -51,15 +51,15 @@ int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 	if ( 1000 <= get_int_stubmode ) {
 		err.setter( true, "don't find key" );
 	} else if ( "interval" == key && 1 != ( get_int_stubmode % 100 ) ){
-		value = 1000;
+		value = get_int_table[0];
 	} else if ( "cmponent_size_00" == key && 2 != ( get_int_stubmode % 100 ) ){
-		value = 64;
+		value = get_int_table[1];
 	} else if ( "cmponent_size_01" == key && 3 != ( get_int_stubmode % 100 ) ){
-		value = 1;
+		value = get_int_table[2];
 	} else if ( "cmponent_size_02" == key && 4 != ( get_int_stubmode % 100 ) ){
-		value = 200;
+		value = get_int_table[3];
 	} else if ( "compulsorily_interval" == key && 5 != ( get_int_stubmode % 100 ) ){
-		value = 10;
+		value = get_int_table[4];
 	} else if ( 100 > get_int_stubmode ) {
 		err.setter( true, "don't find key" );
 	}
@@ -82,17 +82,17 @@ std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG co
 	if ( 1000 <= get_string_stubmode ) {
 		err.setter( true, "don't find key" );
 	} else if ( "ip_addr" == key && 1 != ( get_string_stubmode % 100 ) ){
-		str = "192.168.0.20" ;
+		str = get_string_table[0];
 	} else if ( "service_name" == key && 2 != ( get_string_stubmode % 100 ) ){
-		str = "40000";
+		str = get_string_table[1];
 	} else if ( "nic" == key && 3 != ( get_string_stubmode % 100 ) ){
-		str = "eth1";
+		str = get_string_table[2];
 	} else if ( "cmponent_id_00" == key && 4 != ( get_string_stubmode % 100 ) ){
-		str = "virtualservice";
+		str = get_string_table[3];
 	} else if ( "cmponent_id_01" == key && 5!= ( get_string_stubmode % 100 ) ){
-		str = "chash";
+		str = get_string_table[4];
 	} else if ( "cmponent_id_02" == key && 6 != ( get_string_stubmode % 100 ) ){
-		str = "sslid";
+		str = get_string_table[5];
 	} else if ( 100 > get_string_stubmode ) {
 		err.setter( true, "don't find key" );
 	}

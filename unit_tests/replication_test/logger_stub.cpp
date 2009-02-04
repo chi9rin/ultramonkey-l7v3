@@ -146,7 +146,7 @@ void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_i
 void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
 	std::stringstream buf;
 	buf << message << "  " << file << "  " << line;
-//	BOOST_MESSAGE ( buf.str() ) ;
+	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!

@@ -45,7 +45,7 @@ LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS) ../../include/replication.h
+$(TARGET):	$(OBJS) ../../include/replication.h parameter_stub.cpp
 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 #$(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
