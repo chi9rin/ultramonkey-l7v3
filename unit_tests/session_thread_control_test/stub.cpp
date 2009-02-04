@@ -7,6 +7,71 @@
 #include "tcp_socket.h"
 #include "tcp_session.h"
 #include "udp_session.h"
+#include "parameter.h"
+#include "stub.h"
+
+// protocol_module_control　STUB code
+l7vs::protocol_module_control&	l7vs::protocol_module_control::getInstance(){
+	static	protocol_module_control	instance;
+	return	instance;
+}
+void	l7vs::protocol_module_control::initialize( const std::string& infile_path ){}
+void	l7vs::protocol_module_control::finalize(){}
+l7vs::protocol_module_base*	l7vs::protocol_module_control::load_module( const std::string& modulename ){
+	l7vs::protocol_module_base* return_value = NULL;
+
+// 	if( !pmcontrol_error_flag )
+// 		return_value = new protocol_module_test1;
+
+	return return_value;
+}
+void	l7vs::protocol_module_control::unload_module( protocol_module_base* module_ptr ){
+	delete	module_ptr;
+}
+
+l7vs::schedule_module_control&	l7vs::schedule_module_control::getInstance(){
+	static	schedule_module_control	instance;
+	return	instance;
+}
+void	l7vs::schedule_module_control::initialize( const std::string& infile_path ){}
+void	l7vs::schedule_module_control::finalize(){}
+l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const std::string& modulename ){
+	l7vs::schedule_module_base* return_value = NULL;
+
+// 	if( !smcontrol_error_flag )
+// 		return_value = new schedule_module_test1;
+
+	return return_value;
+}
+void	l7vs::schedule_module_control::unload_module( schedule_module_base* module_ptr ){
+	delete module_ptr;
+}
+
+
+// parameter stub
+l7vs::Parameter::Parameter(){}
+
+l7vs::Parameter::~Parameter(){}
+
+bool	l7vs::Parameter::read_file( const PARAMETER_COMPONENT_TAG in ){	return true; }
+
+int		l7vs::Parameter::get_int(	const PARAMETER_COMPONENT_TAG in_tag,
+									const std::string& in_str,
+									error_code& err ){
+	int	retval = 0;
+	if( session_pool_debugger::getInstance().get_exist_flag() ){
+		retval = SESSION_POOL_NUM_PARAM;
+	}else{
+		err.setter( true, "not exist value." );
+	}
+	return retval;
+}
+
+std::string		l7vs::Parameter::get_string(const PARAMETER_COMPONENT_TAG in_tag,
+											const std::string& in_str,
+											error_code& err){
+	return "";
+}
 
 
 l7vs::Logger::Logger() :
