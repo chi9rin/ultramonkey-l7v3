@@ -1,6 +1,10 @@
 #define	TEST_CASE
 
 #include <boost/test/included/unit_test.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/thread/condition.hpp>
+
 #include "http_protocol_module_base.h"
 
 using namespace boost::unit_test_framework;
@@ -24,8 +28,9 @@ using namespace l7vs;
 #define	FIND_STATUS_CODE_OK_STRING_NUM	(2)
 #define	FIND_STATUS_CODE_NG_STRING_NUM	(4)
 
-#define	THREAD_01_LOOP_NUM	(100)
-#define	THREAD_02_LOOP_NUM	(0)
+#define	THREAD_01_LOOP_NUM	(1)
+#define	THREAD_02_LOOP_NUM	(1)
+#define	THREAD_LOOP_NUM	(1)
 
 //--stub functions--
 
@@ -33,6 +38,8 @@ using namespace l7vs;
 //--test class--
 class	http_protocol_module_base_test : public http_protocol_module_base {
 public:
+boost::mutex		sync_mutex;
+boost::condition	sync_condition;
 http_protocol_module_base_test( std::string in_modulename ) : http_protocol_module_base( in_modulename ){}
 ~http_protocol_module_base_test(){}
 bool	is_tcp(){ return true; }
@@ -147,9 +154,7 @@ EVENT_TAG	handle_realserver_close(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint& rs_endpoint ){ return STOP; }
 
-void	check_http_method_test_t1(){
-
-	std::string		thread_name	= "[Thread_01] ";
+void	check_http_method_test(){
 
 	int count	= 1;
 
@@ -221,61 +226,56 @@ void	check_http_method_test_t1(){
 	BOOST_MESSAGE( "----- check_http_method test start -----" );
 
 	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
- 		std::cout << thread_name;
 		std::cout.width(2);
 		std::cout.fill('0');
 		std::cout << count << "---------------------------------------" << std::endl;
-		std::cout << thread_name << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
-		std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
 		// [01] - [16]
 		BOOST_CHECK( check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
- 		std::cout << thread_name;
 		std::cout.width(2);
 		std::cout.fill('0');
 		std::cout << count << "---------------------------------------" << std::endl;
-		std::cout << thread_name << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
 		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
 		buffer_len = strlen( buffer_ng[i] );
-		std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
 		// [17] - [24]
 		BOOST_CHECK( check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
 	for( int i = 0; i < CHECK_METHOD_INPOSSIBLE_STRING_NUM; i++, count++ ){
- 		std::cout << thread_name;
 		std::cout.width(2);
 		std::cout.fill('0');
 		std::cout << count << "---------------------------------------" << std::endl;
-		std::cout << thread_name << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
 		buffer_len = strlen( buffer_inpossible[i] );
-		std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
 		// [25] - [27]
 		BOOST_CHECK( check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
 
-	std::cout << thread_name;
 	std::cout.width(2);
 	std::cout.fill('0');
 	std::cout << count << "---------------------------------------" << std::endl;
 	buffer_len = 0;
-	std::cout << thread_name << "String = [NULL]" << std::endl;
-	std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
 // ## test [28] check_http_method( CheckData = NULL, Length = 0 / Result = NG )
 	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
 
-	std::cout << thread_name;
 	std::cout.width(2);
 	std::cout.fill('0');
 	std::cout << count << "---------------------------------------" << std::endl;
 	buffer_len = 100;
-	std::cout << thread_name << "String = [NULL]" << std::endl;
-	std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
 // ## test [29] check_http_method( CheckData = NULL, Length = 100 / Result = NG )
 	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
 	count++;
@@ -283,110 +283,128 @@ void	check_http_method_test_t1(){
 	BOOST_MESSAGE( "----- check_http_method test end -----" );
 }
 
-void	check_http_method_test_t2(){
+// void	check_http_method_test_thread_1(){
+// 
+// 	boost::mutex::scoped_lock	lk( sync_mutex );
+// 
+// 	std::string		thread_name	= "[Thread_01] ";
+// 
+// 	int count	= 1;
+// 
+// 	char	buffer_ok[1][256]
+// 				=	{
+// 						"GET /abc/def/ HTTP/1.0",
+// 					};
+// 	size_t	buffer_len	= 0;
+// 
+// 	BOOST_MESSAGE( "----- check_http_method test start -----" );
+// 
+// 	std::cout << thread_name;
+// 	std::cout.width(2);
+// 	std::cout.fill('0');
+// 	std::cout << count << "---------------------------------------" << std::endl;
+// 	std::cout << thread_name << "String = [" << buffer_ok[0] << "] + [CR]" << std::endl;
+// 	buffer_ok[0][strlen( buffer_ok[0] )] = '\r';
+// 	buffer_len = strlen( buffer_ok[0] );
+// 	std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+// 	sync_condition.wait( lk );
+// 	BOOST_CHECK( check_http_method( (const char*)buffer_ok[0], buffer_len ) == CHECK_OK );
+// 
+// 	BOOST_MESSAGE( "----- check_http_method test end -----" );
+// }
+// 
+// void	check_http_method_test_thread_2(){
+// 
+// 	boost::mutex::scoped_lock	lk( sync_mutex );
+// 
+// 	std::string		thread_name	= "[Thread_02] ";
+// 
+// 	int count	= 1;
+// 
+// 	char	buffer_ok[1][256]
+// 				=	{
+// 						"GET /abc/def/ HTTP/1.0",
+// 					};
+// 	size_t	buffer_len	= 0;
+// 
+// 	BOOST_MESSAGE( "----- check_http_method test start -----" );
+// 
+// 	std::cout << thread_name;
+// 	std::cout.width(2);
+// 	std::cout.fill('0');
+// 	std::cout << count << "---------------------------------------" << std::endl;
+// 	std::cout << thread_name << "String = [" << buffer_ok[0] << "] + [CR]" << std::endl;
+// 	buffer_ok[0][strlen( buffer_ok[0] )] = '\r';
+// 	buffer_len = strlen( buffer_ok[0] );
+// 	std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
+// 	sync_condition.wait( lk );
+// 	BOOST_CHECK( check_http_method( (const char*)buffer_ok[0], buffer_len ) == CHECK_OK );
+// 
+// 	BOOST_MESSAGE( "----- check_http_method test end -----" );
+// }
 
-	std::string		thread_name	= "[Thread_02] ";
+void	check_http_method_test_thread( int thread_no ){
+
+	boost::xtime	start_time;
+	boost::xtime	end_time;
 
 	int count	= 1;
 
-	char	buffer_ok[CHECK_METHOD_OK_STRING_NUM][256]
+	char	buffer[5][256]
 				=	{
 						"GET /abc/def/ HTTP/1.0",
 						"HEAD /abc/def/ HTTP/1.0",
-						"POST /abc/def/ HTTP/1.0",
-						"PUT /abc/def/ HTTP/1.0",
-						"PROPFIND /abc/def/ HTTP/1.0",
-						"PROPPATCH /abc/def/ HTTP/1.0",
-						"OPTIONS /abc/def/ HTTP/1.0",
-						"CONNECT /abc/def/ HTTP/1.0",
-						"COPY /abc/def/ HTTP/1.0",
-						"TRACE /abc/def/ HTTP/1.0",
-						"DELETE /abc/def/ HTTP/1.0",
-						"LOCK /abc/def/ HTTP/1.0",
-						"UNLOCK /abc/def/ HTTP/1.0",
-						"MOVE /abc/def/ HTTP/1.0",
-						"MKCOL /abc/def/ HTTP/1.0",
-						"GET /a HTTP/1.0",
-					};
-	char	buffer_ng[CHECK_METHOD_NG_STRING_NUM][256]
-				=	{
 						"get /abc/def/ HTTP/1.0",
 						"Get /abc/def/ HTTP/1.0",
-						"GET/abc/def/ HTTP/1.0",
-						"GGET /abc/def/ HTTP/1.0",
-						" GET /abc/def/ HTTP/1.0",
-						"get GET /abc/def/ HTTP/1.0",
-						"get /abc/GET /abc/def/ HTTP/1.0",
-						"GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0",
-					};
-	char	buffer_inpossible[CHECK_METHOD_INPOSSIBLE_STRING_NUM][256]
-				=	{
-						"GET / HTTP/1.0",
-						"Get / HTTP/1.0",
 						"",
 					};
+
+	int	edit_flag[5]
+				=	{
+						1,
+						1,
+						1,
+						1,
+						0,
+					};
+
+	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	result[5]
+				=	{
+						CHECK_OK,
+						CHECK_OK,
+						CHECK_NG,
+						CHECK_NG,
+						CHECK_INPOSSIBLE,
+					};
+
 	size_t	buffer_len	= 0;
 
 	BOOST_MESSAGE( "----- check_http_method test start -----" );
 
-	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
- 		std::cout << thread_name;
-		std::cout.width(2);
-		std::cout.fill('0');
-		std::cout << count << "---------------------------------------" << std::endl;
-		std::cout << thread_name << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
-		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
-		buffer_len = strlen( buffer_ok[i] );
-		std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
-		BOOST_CHECK( check_http_method( (const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
-	}
-
-	for( int i = 0; i < CHECK_METHOD_NG_STRING_NUM; i++, count++ ){
- 		std::cout << thread_name;
-		std::cout.width(2);
-		std::cout.fill('0');
-		std::cout << count << "---------------------------------------" << std::endl;
-		std::cout << thread_name << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
-		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
-		buffer_len = strlen( buffer_ng[i] );
-		std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
-		BOOST_CHECK( check_http_method( (const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
-	}
-
-	for( int i = 0; i < CHECK_METHOD_INPOSSIBLE_STRING_NUM; i++, count++ ){
- 		std::cout << thread_name;
-		std::cout.width(2);
-		std::cout.fill('0');
-		std::cout << count << "---------------------------------------" << std::endl;
-		std::cout << thread_name << "String = [" << buffer_inpossible[i] << "]" << std::endl;
-		buffer_len = strlen( buffer_inpossible[i] );
-		std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
-		BOOST_CHECK( check_http_method( (const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
-	}
-
-	std::cout << thread_name;
+	std::cout << "[Thread_" << thread_no << "] ";
 	std::cout.width(2);
 	std::cout.fill('0');
 	std::cout << count << "---------------------------------------" << std::endl;
-	buffer_len = 0;
-	std::cout << thread_name << "String = [NULL]" << std::endl;
-	std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
-	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
-	count++;
-
-	std::cout << thread_name;
-	std::cout.width(2);
-	std::cout.fill('0');
-	std::cout << count << "---------------------------------------" << std::endl;
-	buffer_len = 100;
-	std::cout << thread_name << "String = [NULL]" << std::endl;
-	std::cout << thread_name << "Length = [" << buffer_len << "]" << std::endl;
-	BOOST_CHECK( check_http_method( NULL, buffer_len ) == CHECK_NG );
-	count++;
+	std::cout << "[Thread_" << thread_no << "] " << "String = [" << buffer[thread_no-1] << "]" << std::endl;
+	if( edit_flag[thread_no-1] == 1){
+		buffer[thread_no-1][strlen( buffer[thread_no-1] )] = '\r';
+	}
+	buffer_len = strlen( buffer[thread_no-1] );
+	std::cout << "[Thread_" << thread_no << "] " << "Length = [" << buffer_len << "]" << std::endl;
+	std::cout << "[Thread_" << thread_no << "] " << "Wait..." << std::endl;
+	{
+		boost::mutex::scoped_lock	lk( sync_mutex );
+		sync_condition.wait( lk );
+	}
+	boost::xtime_get(&start_time, boost::TIME_UTC);
+	BOOST_CHECK( check_http_method( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
+	boost::xtime_get(&end_time, boost::TIME_UTC);
+	std::cout << "[Thread_" << thread_no << "] " << "StartTime = " << start_time.nsec << std::endl;
+	std::cout << "[Thread_" << thread_no << "] " << "EndTime = " << end_time.nsec << std::endl;
+	std::cout << "[Thread_" << thread_no << "] " << "CheckEnd" << std::endl;
 
 	BOOST_MESSAGE( "----- check_http_method test end -----" );
 }
-
 
 void	check_http_version_test_t1(){
 
@@ -1743,17 +1761,23 @@ void	find_http_header_test_t2(){
 
 //--test functions--
 //-------------------------------------------------------------------
-void	check_http_method_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+// void	check_http_method_test_thread_1( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
+// 
+// 	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
+// 		http_protocol_module_base_test_1->check_http_method_test_thread_1();
+// 	}
+// 
+// }
+// void	check_http_method_test_thread_2( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
+// 
+// 	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
+// 		http_protocol_module_base_test_1->check_http_method_test_thread_2();
+// 	}
+// }
+void	check_http_method_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
 
-	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.check_http_method_test_t1();
-	}
-
-}
-void	check_http_method_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
-
-	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.check_http_method_test_t2();
+	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
+		http_protocol_module_base_test_1->check_http_method_test_thread(thread_no);
 	}
 
 }
@@ -1761,27 +1785,42 @@ void	check_http_method_test(){
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
-	boost::thread	t1(	boost::bind(	&check_http_method_test_t1,
-										http_protocol_module_base_test_1));
-	boost::thread	t2(	boost::bind(	&check_http_method_test_t2,
-										http_protocol_module_base_test_1));
+	http_protocol_module_base_test_1.check_http_method_test();
+
+	boost::thread	t1(	boost::bind(	&check_http_method_test_thread,
+										&http_protocol_module_base_test_1, 1));
+	boost::thread	t2(	boost::bind(	&check_http_method_test_thread,
+										&http_protocol_module_base_test_1, 2));
+	boost::thread	t3(	boost::bind(	&check_http_method_test_thread,
+										&http_protocol_module_base_test_1, 3));
+	boost::thread	t4(	boost::bind(	&check_http_method_test_thread,
+										&http_protocol_module_base_test_1, 4));
+	boost::thread	t5(	boost::bind(	&check_http_method_test_thread,
+										&http_protocol_module_base_test_1, 5));
+
+	sleep(3);
+
+	http_protocol_module_base_test_1.sync_condition.notify_all();
 
 	t1.join();
 	t2.join();
+	t3.join();
+	t4.join();
+	t5.join();
 
 }
 //-------------------------------------------------------------------
-void	check_http_version_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	check_http_version_test_t1( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.check_http_version_test_t1();
+		http_protocol_module_base_test_1->check_http_version_test_t1();
 	}
 
 }
-void	check_http_version_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	check_http_version_test_t2( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.check_http_version_test_t2();
+		http_protocol_module_base_test_1->check_http_version_test_t2();
 	}
 
 }
@@ -1790,26 +1829,26 @@ void	check_http_version_test(){
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
 	boost::thread	t1(	boost::bind(	&check_http_version_test_t1,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 	boost::thread	t2(	boost::bind(	&check_http_version_test_t2,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 
 	t1.join();
 	t2.join();
 
 }
 //-------------------------------------------------------------------
-void	check_status_code_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	check_status_code_test_t1( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.check_status_code_test_t1();
+		http_protocol_module_base_test_1->check_status_code_test_t1();
 	}
 
 }
-void	check_status_code_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	check_status_code_test_t2( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.check_status_code_test_t2();
+		http_protocol_module_base_test_1->check_status_code_test_t2();
 	}
 
 }
@@ -1818,26 +1857,26 @@ void	check_status_code_test(){
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
 	boost::thread	t1(	boost::bind(	&check_status_code_test_t1,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 	boost::thread	t2(	boost::bind(	&check_status_code_test_t2,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 
 	t1.join();
 	t2.join();
 
 }
 //-------------------------------------------------------------------
-void	find_uri_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	find_uri_test_t1( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.find_uri_test_t1();
+		http_protocol_module_base_test_1->find_uri_test_t1();
 	}
 
 }
-void	find_uri_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	find_uri_test_t2( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.find_uri_test_t2();
+		http_protocol_module_base_test_1->find_uri_test_t2();
 	}
 
 }
@@ -1846,26 +1885,26 @@ void	find_uri_test(){
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
 	boost::thread	t1(	boost::bind(	&find_uri_test_t1,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 	boost::thread	t2(	boost::bind(	&find_uri_test_t2,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 
 	t1.join();
 	t2.join();
 
 }
 //-------------------------------------------------------------------
-void	find_status_code_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	find_status_code_test_t1( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.find_status_code_test_t1();
+		http_protocol_module_base_test_1->find_status_code_test_t1();
 	}
 
 }
-void	find_status_code_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	find_status_code_test_t2( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.find_status_code_test_t2();
+		http_protocol_module_base_test_1->find_status_code_test_t2();
 	}
 
 }
@@ -1874,26 +1913,26 @@ void	find_status_code_test(){
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
 	boost::thread	t1(	boost::bind(	&find_status_code_test_t1,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 	boost::thread	t2(	boost::bind(	&find_status_code_test_t2,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 
 	t1.join();
 	t2.join();
 
 }
 //-------------------------------------------------------------------
-void	find_http_header_test_t1( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	find_http_header_test_t1( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_01_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.find_http_header_test_t1();
+		http_protocol_module_base_test_1->find_http_header_test_t1();
 	}
 
 }
-void	find_http_header_test_t2( http_protocol_module_base_test http_protocol_module_base_test_1 ){
+void	find_http_header_test_t2( http_protocol_module_base_test* http_protocol_module_base_test_1 ){
 
 	for( int i = 0; i < THREAD_02_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1.find_http_header_test_t2();
+		http_protocol_module_base_test_1->find_http_header_test_t2();
 	}
 
 }
@@ -1902,9 +1941,9 @@ void	find_http_header_test(){
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
 	boost::thread	t1(	boost::bind(	&find_http_header_test_t1,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 	boost::thread	t2(	boost::bind(	&find_http_header_test_t2,
-										http_protocol_module_base_test_1));
+										&http_protocol_module_base_test_1));
 
 	t1.join();
 	t2.join();
@@ -1942,11 +1981,11 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "http_protocol_module_base class test" );
 
 	ts->add( BOOST_TEST_CASE( &check_http_method_test ) );
-	ts->add( BOOST_TEST_CASE( &check_http_version_test ) );
-	ts->add( BOOST_TEST_CASE( &check_status_code_test ) );
-	ts->add( BOOST_TEST_CASE( &find_uri_test ) );
-	ts->add( BOOST_TEST_CASE( &find_status_code_test ) );
-	ts->add( BOOST_TEST_CASE( &find_http_header_test ) );
+//	ts->add( BOOST_TEST_CASE( &check_http_version_test ) );
+//	ts->add( BOOST_TEST_CASE( &check_status_code_test ) );
+//	ts->add( BOOST_TEST_CASE( &find_uri_test ) );
+//	ts->add( BOOST_TEST_CASE( &find_status_code_test ) );
+//	ts->add( BOOST_TEST_CASE( &find_http_header_test ) );
 	
 // 	ts->add( BOOST_TEST_CASE( &multi_thread_test ) );
 
