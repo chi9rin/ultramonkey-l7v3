@@ -88,12 +88,7 @@ protected:
 
 public:
 	void	list_virtual_service( vselist_type*, error_code&  );				//!< virtual_service list command
-	void	list_virtual_service_verbose(	vselist_type*,
-											replication::REPLICATION_MODE_TAG*,
-											logstatus_list_type*,
-											bool*,
-											logstatus_list_type*,
-											error_code&  );						//!< virtual_service verbose list command
+	void	list_virtual_service_verbose( l7vsd_response*, error_code&  );		//!< virtual_service verbose list command
 	void	add_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service add command
 	void	del_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service del command
 	void	edit_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service edit command

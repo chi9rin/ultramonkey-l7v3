@@ -29,11 +29,7 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 															&response_data.virtualservice_status_list, _1 );
 	command_handler_map[l7vsadm_request::CMD_LIST_VERBOSE]
 											= boost::bind(	&l7vsd::list_virtual_service_verbose, &vsd,
-															&response_data.virtualservice_status_list,
-															&response_data.replication_mode_status,
-															&response_data.log_status_list,
-															&response_data.snmp_connection_status,
-															&response_data.snmp_log_status_list, _1 );
+															&response_data, _1 );
 	command_handler_map[l7vsadm_request::CMD_ADD_VS]
 											= boost::bind( &l7vsd::add_virtual_service, &vsd, &request_data.vs_element, _1 );
 	command_handler_map[l7vsadm_request::CMD_DEL_VS]

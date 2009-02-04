@@ -52,12 +52,7 @@ public:
 		list_vs_called = true;
 		if(list_vs_fail)	err.setter( true, "");
 	}
-	void	list_virtual_service_verbose(	vselist_type*,
-											replication::REPLICATION_MODE_TAG*,
-											logstatus_list_type*,
-											bool*,
-											logstatus_list_type*,
-											error_code& err )
+	void	list_virtual_service_verbose( l7vsd_response*, error_code& err )
 	{
 		list_vs_v_called = true;
 		if(list_vs_v_fail)	err.setter( true, "");

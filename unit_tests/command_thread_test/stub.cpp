@@ -40,12 +40,7 @@ void	l7vsd::list_virtual_service( vselist_type*, error_code&  )
 	++call_num_map[l7vs::l7vsadm_request::CMD_LIST];
 }
 
-void	l7vsd::list_virtual_service_verbose(	vselist_type*,
-										replication::REPLICATION_MODE_TAG*,
-										logstatus_list_type*,
-										bool*,
-										logstatus_list_type*,
-										error_code&  )
+void	l7vsd::list_virtual_service_verbose( l7vsd_response*, error_code& )
 {
 	boost::mutex::scoped_lock lock(command_mutex);
 	++call_num_map[l7vs::l7vsadm_request::CMD_LIST_VERBOSE];

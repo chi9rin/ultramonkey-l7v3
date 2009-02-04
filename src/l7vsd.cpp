@@ -38,6 +38,7 @@ l7vsd::l7vsd()
 	option_dic["-d"]		= boost::bind( &l7vsd::parse_debug, this, _1, _2, _3 );
 	option_dic["--debug"]	= boost::bind( &l7vsd::parse_debug, this, _1, _2, _3 );
 
+	starttime = boost::posix_time::second_clock::local_time();
 }
 
 //! destructor
@@ -70,47 +71,14 @@ void	l7vsd::list_virtual_service( vselist_type* out_vslist, error_code& err ){
 //! virtual_service list verbose command
 //! @param[out]	arry of vs_element
 //! @param[out]	error_code
-void	l7vsd::list_virtual_service_verbose(	vselist_type* out_vslist, 
-												replication::REPLICATION_MODE_TAG* repmode,
-												logstatus_list_type* logstatus,
-												bool*	snmpstatus,
-												logstatus_list_type* snmplogstatus,
-												error_code& err ){
+void	l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_code& err ){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::list_virtual_service_verbose", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock command_lock( command_mutex );
 	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
-	if( !out_vslist ){
-		std::string msg("out_vslist pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
-		err.setter( true, msg );
-		return;
-	}
-
-	if( !repmode ){
-		std::string msg("repmode pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
-		err.setter( true, msg );
-		return;
-	}
-
-	if( !logstatus ){
-		std::string msg("logstatus pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
-		err.setter( true, msg );
-		return;
-	}
-
-	if( !snmpstatus ){
-		std::string msg("snmpstatus pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
-		err.setter( true, msg );
-		return;
-	}
-
-	if( !snmplogstatus ){
-		std::string msg("snmplogstatus pointer is null.");
+	if( !response ){
+		std::string msg("response pointer is null.");
 		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
@@ -120,17 +88,17 @@ void	l7vsd::list_virtual_service_verbose(	vselist_type* out_vslist,
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
-		out_vslist->push_back( (*itr)->get_element() );
+		response->virtualservice_status_list.push_back( (*itr)->get_element() );
 	}
 
 	// get_replication_mode
-	*repmode = rep->get_status();
+	response->replication_mode_status = rep->get_status();
 
 	// get all category log level
-	Logger::getLogLevelAll( *logstatus );
+	Logger::getLogLevelAll( response->log_status_list );
 
 	// get snmp connect status
-	*snmpstatus = bridge->get_connectionstate();
+	response->snmp_connection_status = bridge->get_connectionstate();
 
 	// get snmp all category log level
 	typedef std::map< LOG_CATEGORY_TAG, LOG_LEVEL_TAG > snmplogmap_type; 
@@ -139,7 +107,7 @@ void	l7vsd::list_virtual_service_verbose(	vselist_type* out_vslist,
 	for( snmplogmap_type::iterator itr = snmplogmap.begin();
 		 itr != snmplogmap.end();
 		 ++itr ){
-		snmplogstatus->push_back( *itr );
+		response->snmp_log_status_list.push_back( *itr );
 	}
 }
 

@@ -8,6 +8,7 @@
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "error_code.h"
 #include "l7vs_command.h"
 #include "command_receiver.h"
@@ -73,6 +74,8 @@ protected:
 
 	bool						help;				//!< help mode
 	bool						debug;				//!< debug mode
+
+	boost::posix_time::ptime	starttime;			//!< l7vsd startup time
 
 	//! option parse function object type.
 	typedef	boost::function< bool ( int&, int, char*[] ) >
