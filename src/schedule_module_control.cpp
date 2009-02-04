@@ -76,10 +76,9 @@ schedule_module_control::load_module( const	std::string& modulename ){
 			Logger::putLogError(LOG_CAT_L7VSD_MODULE, 1, msg, __FILE__, __LINE__);
 			return NULL;
 		}
-		schedule_module_base* (*create_func)(void);
-		void (*destroy_func)(schedule_module_base*);
 
-		*(schedule_module_base**) (&create_func) = (schedule_module_base*)dlsym( h, L7VS_MODULE_INITFN );
+		schedule_module_base* (*create_func)(void);
+		create_func = (schedule_module_base* (*)(void))dlsym( h, L7VS_MODULE_INITFN );
 		if( create_func == NULL ){
 			std::stringstream buf;
 			buf << "Could not find symbol " << L7VS_MODULE_INITFN << ": " << dlerror();
@@ -87,7 +86,8 @@ schedule_module_control::load_module( const	std::string& modulename ){
 			dlclose(h);
 			return NULL;
 		}
-		*(void**) (&destroy_func) = dlsym( h, L7VS_MODULE_FINIFN );
+		void (*destroy_func)(schedule_module_base*);
+		destroy_func = ( void (*)(schedule_module_base*))dlsym( h, L7VS_MODULE_FINIFN );
 		if( destroy_func == NULL ){
 			std::stringstream buf;
 			buf << "Could not find symbol " << L7VS_MODULE_FINIFN << ": " << dlerror();
