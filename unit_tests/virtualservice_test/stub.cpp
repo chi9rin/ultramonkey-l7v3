@@ -10,6 +10,7 @@
 #include "parameter.h"
 #include "stub.h"
 
+
 // parameter stub
 l7vs::Parameter::Parameter(){}
 
@@ -21,7 +22,7 @@ int		l7vs::Parameter::get_int(	const PARAMETER_COMPONENT_TAG in_tag,
 									const std::string& in_str,
 									error_code& err ){
 	int	retval = 0;
-	if( session_pool_debugger::getInstance().get_exist_flag() ){
+	if( session_pool_debugger::getInstance().param_exist_flag() ){
 		retval = SESSION_POOL_NUM_PARAM;
 	}else{
 		err.setter( true, "not exist value." );

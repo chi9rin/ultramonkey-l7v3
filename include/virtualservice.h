@@ -52,6 +52,12 @@ class	virtualservice_base : boost::noncopyable{
 public:
 	//! shared_ptr session_thread_control typedef
 	typedef	boost::shared_ptr<boost::asio::deadline_timer>	deadline_timer_ptr_type;
+	//! tcp endpoint typedef
+	typedef	boost::asio::ip::tcp::endpoint					tcp_endpoint_type;
+	//! udp endpoint typedef
+	typedef	boost::asio::ip::udp::endpoint					udp_endpoint_type;
+
+	typedef	boost::shared_ptr<boost::mutex>					mutex_ptr;
 protected:
 	//!	@class	vs_replication_header replication data structure for header data
 	class	replication_data{
@@ -79,13 +85,10 @@ protected:
 			return *this;
 		}
 		bool				udpflag;
-		boost::asio::ip::tcp::endpoint
-							tcp_endpoint;
-		boost::asio::ip::udp::endpoint
-							udp_endpoint;
+		tcp_endpoint_type	tcp_endpoint;
+		udp_endpoint_type	udp_endpoint;
 		long long			sorry_maxconnection;
-		boost::asio::ip::tcp::endpoint
-							sorry_endpoint;
+		tcp_endpoint_type	sorry_endpoint;
 		bool				sorry_flag;
 		unsigned long long	qos_up;
 		unsigned long long	qos_down;
@@ -126,7 +129,8 @@ protected:
 	boost::shared_ptr<schedule_module_base>	schedmod;			//! schedule module smart pointer
 
 	std::list<realserver>		rs_list;						//! realserver list
-	std::list<boost::mutex>		rs_mutex_list;					//! list of realserver mutex
+	std::map< tcp_endpoint_type,mutex_ptr >
+								rs_mutex_list;					//! list of realserver mutex
 	unsigned long long 			rs_list_ref_count;				//! reference count of realserver list
 	boost::mutex				rs_list_ref_count_mutex;		//! mutex for update reference count
 	boost::mutex				rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
@@ -184,8 +188,8 @@ public:
 	virtual	void				run() = 0;
 	virtual	void				stop() = 0;
 
-	virtual	void				connection_active( const boost::asio::ip::tcp::endpoint& ) = 0;
-	virtual	void				connection_inactive( const boost::asio::ip::tcp::endpoint& ) = 0;
+	virtual	void				connection_active( const tcp_endpoint_type& ) = 0;
+	virtual	void				connection_inactive( const tcp_endpoint_type& ) = 0;
 	virtual	void				release_session( const boost::thread::id ) = 0;
 
 	unsigned long long			get_qos_upstream();
@@ -251,8 +255,8 @@ public:
 	void						run();
 	void						stop();
 
-	void						connection_active( const boost::asio::ip::tcp::endpoint& );
-	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
+	void						connection_active( const tcp_endpoint_type& );
+	void						connection_inactive( const tcp_endpoint_type& );
 	void						release_session( const boost::thread::id );
 };
 
@@ -289,8 +293,8 @@ public:
 	void						run();
 	void						stop();
 
-	void						connection_active( const boost::asio::ip::tcp::endpoint& );
-	void						connection_inactive( const boost::asio::ip::tcp::endpoint& );
+	void						connection_active( const boost::asio::ip::tcp::endpoint& ){}
+	void						connection_inactive( const boost::asio::ip::tcp::endpoint& ){}
 	void						release_session( const boost::thread::id );
 };
 

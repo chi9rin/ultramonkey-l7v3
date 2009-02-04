@@ -14,26 +14,20 @@
 
 using namespace boost::unit_test;
 
-bool pmcontrol_error_flag;
-bool smcontrol_error_flag;
-
-bool pm_function_called;
 
 //test case1  create,initialize,run,stop,finalize,destroy(normal case)
 void	virtualservice_tcp_test1(){
-	pmcontrol_error_flag	= false;
-	smcontrol_error_flag	= false;
-
-	pm_function_called		= false;
-
-	session_pool_debugger::getInstance().set_exist_flag( false );
+	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
+	session_pool_debugger::getInstance().smcontrol_err_flag()	= false;
+	session_pool_debugger::getInstance().param_exist_flag() = false;
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
 	l7vs::replication			rep( dispatcher );
 	l7vs::virtualservice_element	element;
 	//set element value
-
+	element.protocol_module_name	= "pmtest1";
+	element.schedule_module_name	= "smtest1";
 	
 	// unit_test[1]  object create
 	BOOST_MESSAGE( "-------1" );
@@ -66,17 +60,22 @@ void	virtualservice_tcp_test1(){
 	BOOST_MESSAGE( "-------4" );
 	vs->stop();
 
+	// unit_test[5]  stop method test(call twice)
+	BOOST_MESSAGE( "-------5" );
+	vs->stop();
+
 	vs_main.join();
 
-	// unit_test[5]  finalize method call
+	// unit_test[6]  finalize method call
+	BOOST_MESSAGE( "-------" );
 	vs->finalize( vs_err );
 
-	// unit_test[6]  object destroy
-	BOOST_MESSAGE( "-------2" );
+	// unit_test[7]  object destroy
+	BOOST_MESSAGE( "-------" );
 	delete vs;
 }
 
-//test case2
+//test case2 
 void	virtualservice_tcp_test2(){
 	l7vs::error_code	vs_err;
 
@@ -90,9 +89,10 @@ void	virtualservice_tcp_test2(){
 
 	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, element );
 	// unit_test[]  initialize method call(poolsize from parameter file:value = 512)
-	session_pool_debugger::getInstance().set_exist_flag( true );
-	pmcontrol_error_flag	= false;
-	smcontrol_error_flag	= false;
+	BOOST_MESSAGE( "-------" );
+	session_pool_debugger::getInstance().param_exist_flag() = true;
+	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
+	session_pool_debugger::getInstance().smcontrol_err_flag()	= false;
 	vs->initialize( vs_err );
 	BOOST_CHECK( SESSION_POOL_NUM_PARAM == vs->get_pool_sessions().size() );
 	BOOST_CHECK( vs_err == false );
@@ -101,8 +101,10 @@ void	virtualservice_tcp_test2(){
 
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
-	pmcontrol_error_flag	= true;
-	smcontrol_error_flag	= false;
+	BOOST_MESSAGE( "-------" );
+	session_pool_debugger::getInstance().param_exist_flag() = false;
+	session_pool_debugger::getInstance().pmcontrol_err_flag()	= true;
+	session_pool_debugger::getInstance().smcontrol_err_flag()	= false;
 	BOOST_CHECK( NULL == vs->get_protocol_module() );
 	BOOST_CHECK( NULL == vs->get_schedule_module() );
 	vs->initialize( vs_err );
@@ -116,8 +118,9 @@ void	virtualservice_tcp_test2(){
 
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
-	pmcontrol_error_flag	= false;
-	smcontrol_error_flag	= true;
+	BOOST_MESSAGE( "-------" );
+	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
+	session_pool_debugger::getInstance().smcontrol_err_flag()	= true;
 	BOOST_CHECK( NULL == vs->get_protocol_module() );
 	BOOST_CHECK( NULL == vs->get_schedule_module() );
 	vs->initialize( vs_err );
@@ -132,13 +135,8 @@ void	virtualservice_tcp_test2(){
 
 //test case3
 void	virtualservice_tcp_test3(){
+	//実際にAcceptさせる試験
 
-	//private method call
-// 	call_handle_replication_interrupt();
-// 	call_read_replicationdata();
-// 	call_handle_accept();
-
-	//public method call
 }
 
 void	session_pool_access_test(){
@@ -388,7 +386,7 @@ void	l7vs::protocol_module_control::finalize(){}
 l7vs::protocol_module_base*	l7vs::protocol_module_control::load_module( const std::string& modulename ){
 	l7vs::protocol_module_base* return_value = NULL;
 
-	if( !pmcontrol_error_flag )
+	if( !session_pool_debugger::getInstance().pmcontrol_err_flag() )
 		return_value = new protocol_module_test1;
 
 	return return_value;
@@ -406,7 +404,7 @@ void	l7vs::schedule_module_control::finalize(){}
 l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const std::string& modulename ){
 	l7vs::schedule_module_base* return_value = NULL;
 
-	if( !smcontrol_error_flag )
+	if( !session_pool_debugger::getInstance().smcontrol_err_flag() )
 		return_value = new schedule_module_test1;
 
 	return return_value;

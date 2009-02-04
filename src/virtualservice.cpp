@@ -338,6 +338,23 @@ bool	l7vs::virtualservice_tcp::read_replicationdata( l7vs::virtualservice_base::
 
 void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
 													const boost::system::error_code& in_error ){
+
+	//switch status runing, session_thread_control
+	in_session->startupstream();
+	in_session->startdownstream();
+
+	//switch active a session
+	boost::thread::id			t_id;
+	session_thread_control_ptr	stc_ptr;
+	t_id	= pool_sessions.begin()->first;
+	stc_ptr	= pool_sessions.begin()->second;
+
+	pool_sessions.erase( t_id );
+	active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+
+	//regist accept event handler
+	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
+							boost::bind( &l7vs::virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
 }
 
 /*!
@@ -389,7 +406,12 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 			return;
 		}
 		boost::shared_ptr<session_thread_control>	stc( new l7vs::session_thread_control( sess ) );
-		pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
+		std::pair<session_map_type::iterator,bool> retval;
+		retval	= pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
+		if( !retval.second ){
+			err.setter( true, "error, create session pool." );
+			return;
+		}
 	}
 
 	err.setter( false, "" );
@@ -399,10 +421,14 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 }
 
 bool	l7vs::virtualservice_tcp::operator==( const l7vs::virtualservice_base& in ){
-	return true;
+	l7vs::virtualservice_base&	vs = const_cast<l7vs::virtualservice_base&>( in );
+	return (	( element.tcp_accept_endpoint == vs.get_element().tcp_accept_endpoint )
+			&&	( element.udpmode == vs.get_element().udpmode ) );
 }
 bool	l7vs::virtualservice_tcp::operator!=( const l7vs::virtualservice_base& in ){
-	return true;
+	l7vs::virtualservice_base&	vs = const_cast<l7vs::virtualservice_base&>( in );
+	return (	( element.tcp_accept_endpoint != vs.get_element().tcp_accept_endpoint )
+			||	( element.udpmode != vs.get_element().udpmode ) );
 }
 
 void	l7vs::virtualservice_tcp::set_virtualservice( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
@@ -422,9 +448,18 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 	err.setter( true, "" );
 }
 
+/*!
+ * main loop of virtualservice(TCP)
+ *
+ * @param   void
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::run(){
 	//bind acceptor
+	acceptor_.open( element.tcp_accept_endpoint.protocol() );
+	acceptor_.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
 	acceptor_.bind( element.tcp_accept_endpoint );
+	acceptor_.listen();
 
 	//switch active a session
 	boost::thread::id			t_id;
@@ -432,31 +467,46 @@ void	l7vs::virtualservice_tcp::run(){
 	t_id	= pool_sessions.begin()->first;
 	stc_ptr	= pool_sessions.begin()->second;
 
-	//switch status runing, session_thread_control
-	stc_ptr->startupstream();
-	stc_ptr->startdownstream();
-
 	pool_sessions.erase( t_id );
 	active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
-	//regist accept event handler
 
+	//regist accept event handler
+	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
+							boost::bind( &l7vs::virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
 	//regist timer event handler
 
-	//run dispatcher
+
+
+	//run dispatcher(start io_service loop)
 	dispatcher.run();
 }
+
+/*!
+ * stop loop
+ *
+ * @param   void
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::stop(){
+	boost::system::error_code	err;
+	//close acceptor
+// 	acceptor_.cancel( err );
+	acceptor_.close();
+
 	//stop dispatcher
+// 	dispatcher.reset();
+	dispatcher.stop();
 
-	//unbind acceptor
-
-	//stop active sessions
+	//stop all active sessions
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
 		//stop session
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_END );
 		//stop session_thread_control
-		//join session_thread_control
-
-	//reset dispatcher
-
+		itr->second->stopupstream();
+		itr->second->stopdownstream();
+	}
 }
 
 void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::endpoint& in ){}
@@ -516,8 +566,6 @@ void	l7vs::virtualservice_udp::del_realserver( const l7vs::virtualservice_elemen
 void	l7vs::virtualservice_udp::run(){}
 void	l7vs::virtualservice_udp::stop(){}
 
-void	l7vs::virtualservice_udp::connection_active( const boost::asio::ip::tcp::endpoint& in ){}
-void	l7vs::virtualservice_udp::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){}
 void	l7vs::virtualservice_udp::release_session( const boost::thread::id thread_id ){}
 
 
