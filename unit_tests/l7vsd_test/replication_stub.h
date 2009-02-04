@@ -54,7 +54,9 @@ public:
 	void						stop();
 	void						force_replicate();
 	void						reset();
-	enum REPLICATION_MODE_TAG	get_status();
+	REPLICATION_MODE_TAG		get_status()
+	{ return REPLICATION_OUT; }
+
 	int							check_interval();
 	int							handle_send();
 	int							handle_receive();

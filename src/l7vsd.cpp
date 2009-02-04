@@ -122,6 +122,25 @@ void	l7vsd::list_virtual_service_verbose(	vselist_type* out_vslist,
 		 ++itr ){
 		out_vslist->push_back( (*itr)->get_element() );
 	}
+
+	// get_replication_mode
+	*repmode = rep->get_status();
+
+	// get all category log level
+	Logger::getLogLevelAll( *logstatus );
+
+	// get snmp connect status
+	*snmpstatus = bridge->get_connectionstate();
+
+	// get snmp all category log level
+	typedef std::map< LOG_CATEGORY_TAG, LOG_LEVEL_TAG > snmplogmap_type; 
+	snmplogmap_type snmplogmap;
+	bridge->get_loglevel_allcategory( snmplogmap );
+	for( snmplogmap_type::iterator itr = snmplogmap.begin();
+		 itr != snmplogmap.end();
+		 ++itr ){
+		snmplogstatus->push_back( *itr );
+	}
 }
 
 //! virtual_service add command
@@ -457,11 +476,17 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		return -1;
 	}
 
+	// snmp trap function set
+	Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
+
 	// main loop
 	for(;;){
 		if( exit_requested )	break;
 		dispatcher.poll();
 	}
+
+	// snmp trap function unset
+	Logger::setSnmpSendtrap( NULL );
 
 	// snmp bridge finalize
 	bridge->finalize();

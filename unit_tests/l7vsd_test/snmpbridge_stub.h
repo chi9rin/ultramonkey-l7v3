@@ -33,6 +33,49 @@ public:
 	void			finalize()
 	{ finalize_called = true; }
 
+	//! trap send function
+	//! @param[in]
+	//! @return
+	int				send_trap( const std::string& message )
+	{ return 0; }
+
+	//! param reload function
+	void			reload_config()
+	{}
+
+	//! change log level function
+	//! @param[in]
+	//! @param[in]
+	//! @return
+	int				change_loglevel( const LOG_CATEGORY_TAG snmp_log_category, const LOG_LEVEL_TAG loglevel )
+	{ return 0; }
+
+	//! view all log level function
+	//! @param[in]
+	//! @return
+	int				change_loglevel_allcategory( const LOG_LEVEL_TAG loglevel )
+	{ return 0; }
+
+	//! send mibcollection
+	//! @param[in]
+	//! @return
+	int				send_mibcollection( struct l7ag_mibrequest_message* payload )
+	{ return 0; }
+
+	//! connection status function
+	//! @return
+	int				get_connectionstate()
+	{ return 0; }
+
+	//! loglevel getting function
+	//! @param[in]
+	//! @return
+	LOG_LEVEL_TAG	get_loglevel( const LOG_CATEGORY_TAG snmp_log_category )
+	{ return LOG_LV_DEBUG; }
+
+	void	get_loglevel_allcategory( std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>& )
+	{ }
+
 };	//class
 
 }	//namespace	l7vs

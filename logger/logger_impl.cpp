@@ -134,8 +134,9 @@ l7vs::LoggerImpl& l7vs::LoggerImpl::getInstance(){
 	return *instance;
 }
 
-
-l7vs::LoggerImpl::LoggerImpl() : initialized(false){
+l7vs::LoggerImpl::LoggerImpl()
+					:	initialized( false ),
+						snmpSendtrap( NULL ){
 	levelTable[LOG_LV_NONE]		= log4cxx::Level::DEBUG_INT;
 	levelTable[LOG_LV_DEBUG]	= log4cxx::Level::DEBUG_INT;
 	levelTable[LOG_LV_INFO]		= log4cxx::Level::INFO_INT;
