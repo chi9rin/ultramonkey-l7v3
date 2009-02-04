@@ -51,7 +51,6 @@ class	session_thread_control;
 class	virtualservice_base : boost::noncopyable{
 public:
 	//! shared_ptr session_thread_control typedef
-	typedef	boost::shared_ptr<session_thread_control>		session_thread_control_ptr;
 	typedef	boost::shared_ptr<boost::asio::deadline_timer>	deadline_timer_ptr_type;
 protected:
 	//!	@class	vs_replication_header replication data structure for header data
@@ -193,6 +192,8 @@ public:
 	unsigned long long			get_qos_downstream();
 	unsigned long long			get_throughput_upstream();
 	unsigned long long			get_throughput_downstream();
+	unsigned long long			get_up_recv_size();
+	unsigned long long			get_down_recv_size();
 
 	void						update_up_recv_size( unsigned long long );
 	void						update_up_send_size( unsigned long long );
@@ -210,9 +211,10 @@ public:
 //! @class	virtualservice_tcp is class of virtual service for TCP transfer.
 class	virtualservice_tcp : public virtualservice_base{
 public:
-	typedef	std::map< boost::thread::id, boost::shared_ptr<session_thread_control> >
+	typedef	boost::shared_ptr<session_thread_control>		session_thread_control_ptr;
+	typedef	std::map< boost::thread::id, session_thread_control_ptr >
 								session_map_type;
-	typedef	std::pair< boost::thread::id, boost::shared_ptr<session_thread_control> >
+	typedef	std::pair< boost::thread::id, session_thread_control_ptr >
 								session_map_pair_type;
 protected:
 	boost::asio::ip::tcp::acceptor
@@ -224,7 +226,7 @@ protected:
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	bool						read_replicationdata( replication_data& );
 
-	void						handle_accept(	const virtualservice_base::session_thread_control_ptr,
+	void						handle_accept(	const session_thread_control_ptr,
 												const boost::system::error_code& );
 
 public:

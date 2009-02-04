@@ -205,6 +205,28 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_downstream(){
 }
 
 /*!
+ * get upstream total receive size bit/sec value.
+ *
+ * @param   void
+ * @return  upstream receive size[bit/sec] value
+ */
+unsigned long long	l7vs::virtualservice_base::get_up_recv_size(){
+	boost::mutex::scoped_lock lock( recvsize_up_mutex );
+	return recvsize_up;
+}
+
+/*!
+ * get downstream total receive size bit/sec value.
+ *
+ * @param   void
+ * @return  downstream receive size[bit/sec] value
+ */
+unsigned long long	l7vs::virtualservice_base::get_down_recv_size(){
+	boost::mutex::scoped_lock lock( recvsize_down_mutex );
+	return recvsize_down;
+}
+
+/*!
  * update upstream receive data size
  *
  * @param   datasize
@@ -294,11 +316,18 @@ boost::shared_ptr<l7vs::schedule_module_base>
 
 
 
+// imprementation for virtualservice_tcp
+/*!
+ * virtualservice_tcp class constructor.
+ */
 l7vs::virtualservice_tcp::virtualservice_tcp(	const l7vsd& invsd,
 												const replication& inrep,
 												const virtualservice_element& inelement )
 												 :	virtualservice_base( invsd, inrep, inelement ),
 													acceptor_( dispatcher ) {}
+/*!
+ * virtualservice_tcp class destructor.
+ */
 l7vs::virtualservice_tcp::~virtualservice_tcp(){}
 
 void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
@@ -307,10 +336,16 @@ bool	l7vs::virtualservice_tcp::read_replicationdata( l7vs::virtualservice_base::
 	return true;
 }
 
-void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_base::session_thread_control_ptr in_session,
+void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
 													const boost::system::error_code& in_error ){
 }
 
+/*!
+ * initialize virtualservice(TCP)
+ *
+ * @param   erro_code
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	//load parameter value
 	load_parameter();
@@ -345,7 +380,14 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	schedmod.reset( sm );
 	//create session pool
 	for( int i = 0; i < param_data.session_pool_size; ++i ){
-		l7vs::tcp_session*	sess	= new l7vs::tcp_session( *this, dispatcher );
+		l7vs::tcp_session*	sess;
+		try{
+			sess	= new l7vs::tcp_session( *this, dispatcher );
+		}
+		catch( ... ){ //bad alloc exception catch
+			err.setter( true, "error, create session pool." );
+			return;
+		}
 		boost::shared_ptr<session_thread_control>	stc( new l7vs::session_thread_control( sess ) );
 		pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
 	}
@@ -380,8 +422,42 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 	err.setter( true, "" );
 }
 
-void	l7vs::virtualservice_tcp::run(){}
-void	l7vs::virtualservice_tcp::stop(){}
+void	l7vs::virtualservice_tcp::run(){
+	//bind acceptor
+	acceptor_.bind( element.tcp_accept_endpoint );
+
+	//switch active a session
+	boost::thread::id			t_id;
+	session_thread_control_ptr	stc_ptr;
+	t_id	= pool_sessions.begin()->first;
+	stc_ptr	= pool_sessions.begin()->second;
+
+	//switch status runing, session_thread_control
+	stc_ptr->startupstream();
+	stc_ptr->startdownstream();
+
+	pool_sessions.erase( t_id );
+	active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+	//regist accept event handler
+
+	//regist timer event handler
+
+	//run dispatcher
+	dispatcher.run();
+}
+void	l7vs::virtualservice_tcp::stop(){
+	//stop dispatcher
+
+	//unbind acceptor
+
+	//stop active sessions
+		//stop session
+		//stop session_thread_control
+		//join session_thread_control
+
+	//reset dispatcher
+
+}
 
 void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::endpoint& in ){}
 void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){}
@@ -389,6 +465,10 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 
 
 
+// imprementation for virtualservice_udp
+/*!
+ * virtualservice_udp class constructor.
+ */
 l7vs::virtualservice_udp::virtualservice_udp(	const l7vs::l7vsd& invsd,
 												const l7vs::replication& inrep,
 												const l7vs::virtualservice_element& inelement) : 
