@@ -25,12 +25,12 @@ public:
 	~realserver_fake(){}
 
     void	set_active( const int in_active ){ 
-		boost::mutex::scoped_lock( active_mutex_ptr );
+		boost::mutex::scoped_lock lock( *active_mutex_ptr );
 
 		nactive = in_active ;
 	}
     void	set_inact( const int in_inact ){
-		boost::mutex::scoped_lock( inact_mutex_ptr );
+		boost::mutex::scoped_lock lock( *inact_mutex_ptr );
 
 		ninact = in_inact ;
 	}
