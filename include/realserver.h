@@ -75,7 +75,7 @@ public:
 	}
 
 	void	increment_active(){
-		boost::mutex::scoped_lock( active_mutex_ptr );
+		boost::mutex::scoped_lock lock( *active_mutex_ptr );
 
 		nactive++;
 		if ( nactive == INT_MAX ){
@@ -84,7 +84,7 @@ public:
 	}
 
 	void	decrement_active(){
-		boost::mutex::scoped_lock( active_mutex_ptr );
+		boost::mutex::scoped_lock lock( *active_mutex_ptr );
 
 		if ( nactive > 0 ){
 			nactive--;
@@ -92,7 +92,7 @@ public:
 	}
 
 	void	increment_inact(){
-		boost::mutex::scoped_lock( inact_mutex_ptr );
+		boost::mutex::scoped_lock lock( *inact_mutex_ptr );
 
 		ninact++;
 		if ( ninact == INT_MAX ){

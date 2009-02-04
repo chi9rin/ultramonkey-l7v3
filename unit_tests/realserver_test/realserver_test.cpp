@@ -35,30 +35,68 @@ public:
 		ninact = in_inact ;
 	}
 
-	void	increment_active2( const std::string& msg1, const std::string& msg2 ){
-		boost::mutex::scoped_lock	lock( starting_mutex );
-		starting_condition.wait( lock );
+	void	increment_active2( const std::string& msg1, const std::string& msg2, const std::string& msg3, const std::string& msg4 ){
+		{
+			boost::mutex::scoped_lock	lock( starting_mutex );
+			starting_condition.wait( lock );
+		}
 
 		BOOST_MESSAGE( msg1 );
-		increment_active();
+//		increment_active();
+		{
+			boost::mutex::scoped_lock lock( *active_mutex_ptr );
+
+			BOOST_MESSAGE( msg3 );
+			nactive++;
+			if ( nactive == INT_MAX ){
+				nactive = 0;
+			}
+			BOOST_MESSAGE( msg4 );
+//			sleep(1);
+		}
 		BOOST_MESSAGE( msg2 );
 	}
 
-	void	decrement_active2( const std::string& msg1, const std::string& msg2 ){
-		boost::mutex::scoped_lock	lock( starting_mutex );
-		starting_condition.wait( lock );
+	void	decrement_active2( const std::string& msg1, const std::string& msg2, const std::string& msg3, const std::string& msg4 ){
+		{
+			boost::mutex::scoped_lock	lock( starting_mutex );
+			starting_condition.wait( lock );
+		}
 
 		BOOST_MESSAGE( msg1 );
-		decrement_active();
+//		decrement_active();
+		{
+			boost::mutex::scoped_lock lock( *active_mutex_ptr );
+
+			BOOST_MESSAGE( msg3 );
+			if ( nactive > 0 ){
+				nactive--;
+			}
+			BOOST_MESSAGE( msg4 );
+//			sleep(1);
+		}
 		BOOST_MESSAGE( msg2 );
 	}
 
-	void	increment_inact2( const std::string& msg1, const std::string& msg2 ){
-		boost::mutex::scoped_lock	lock( starting_mutex );
-		starting_condition.wait( lock );
+	void	increment_inact2( const std::string& msg1, const std::string& msg2, const std::string& msg3, const std::string& msg4 ){
+		{
+			boost::mutex::scoped_lock	lock( starting_mutex );
+			starting_condition.wait( lock );
+		}
 
 		BOOST_MESSAGE( msg1 );
-		increment_inact();
+//		increment_inact();
+		{
+			boost::mutex::scoped_lock lock( *inact_mutex_ptr );
+
+			BOOST_MESSAGE( msg3 );
+			ninact++;
+			if ( ninact == INT_MAX ){
+				ninact = 0;
+			}
+			BOOST_MESSAGE( msg4 );
+//			sleep(1);
+		}
 		BOOST_MESSAGE( msg2 );
 	}
 };
@@ -70,33 +108,37 @@ l7vs::realserver_fake	rush_server;
 void starting_thread( int id )
 {
 	{
-		std::stringstream	msg1, msg2;
+		std::stringstream	msg1, msg2, msg3, msg4;
 
 		msg1 << "start increment_active <Thread:" << id << ">";
 		msg2 << "complete increment_active <Thread:" << id << ">";
-		rush_server.increment_active2( msg1.str(), msg2.str() );
+		msg3 << "start inside <Thread:" << id << ">";
+		msg4 << "complete inside <Thread:" << id << ">";
+		rush_server.increment_active2( msg1.str(), msg2.str(), msg3.str(), msg4.str() );
 	}
 	{
-		std::stringstream	msg1, msg2;
+		std::stringstream	msg1, msg2, msg3, msg4;
 
 		msg1 << "start decrement_active <Thread:" << id << ">";
 		msg2 << "complete decrement_active <Thread:" << id << ">";
-		rush_server.decrement_active2( msg1.str(), msg2.str() );
+		msg3 << "start inside <Thread:" << id << ">";
+		msg4 << "complete inside <Thread:" << id << ">";
+		rush_server.decrement_active2( msg1.str(), msg2.str(), msg3.str(), msg4.str() );
 	}
 	{
-		std::stringstream	msg1, msg2;
+		std::stringstream	msg1, msg2, msg3, msg4;
 
 		msg1 << "start increment_inact <Thread:" << id << ">";
 		msg2 << "complete increment_inact <Thread:" << id << ">";
-		rush_server.increment_inact2( msg1.str(), msg2.str() );
+		msg3 << "start inside <Thread:" << id << ">";
+		msg4 << "complete inside <Thread:" << id << ">";
+		rush_server.increment_inact2( msg1.str(), msg2.str(), msg3.str(), msg4.str() );
 	}
 };
 
 
 //test case1.
 void	realserver_test(){
-	int	loop;
-
 	int					nactive = 0;
 	int					ninact = 0;
 	unsigned long long	send_byte = 0ULL;
@@ -360,11 +402,11 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
 	// unit_test[26]  接続数インクリメントメソッドのテスト２（上限INT_MAXに達すると0にクリア）
-	BOOST_MESSAGE( "wait a minute to INT_MAX" );
-	for ( loop = 0; loop < INT_MAX; loop++ ){
-		server1.increment_active();
-	}
-	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
+//	BOOST_MESSAGE( "wait a minute to INT_MAX" );
+//	for ( int loop = 0; loop < INT_MAX; loop++ ){
+//		server1.increment_active();
+//	}
+//	BOOST_CHECK_EQUAL( server1.get_active(), 0 );
 
 	l7vs::realserver_fake	server3;
 
@@ -384,11 +426,11 @@ void	realserver_test(){
 	BOOST_CHECK_EQUAL( server1.get_inact(), 1 );
 
 	// unit_test[29]  切断数インクリメントメソッドのテスト２（上限INT_MAXに達すると0にクリア）
-	BOOST_MESSAGE( "wait a minute to INT_MAX" );
-	for ( loop = server1.get_inact(); loop < INT_MAX; loop++ ){
-		server1.increment_inact();
-	}
-	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
+//	BOOST_MESSAGE( "wait a minute to INT_MAX" );
+//	for ( int loop = server1.get_inact(); loop < INT_MAX; loop++ ){
+//		server1.increment_inact();
+//	}
+//	BOOST_CHECK_EQUAL( server1.get_inact(), 0 );
 
 	ninact = INT_MAX - 1 ;
 	server3.set_inact( ninact );
@@ -408,28 +450,28 @@ void	realserver_test(){
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
-	sleep( 1 );
+	sleep( 2 );
 	BOOST_CHECK_EQUAL( rush_server.get_active(), 5 );
 
 	// unit_test[31]  接続数デクリメントメソッドのテスト３（複数スレッドから同時アクセス）
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
-	sleep( 1 );
+	sleep( 2 );
 	BOOST_CHECK_EQUAL( rush_server.get_active(), 0 );
 
 	// unit_test[32]  切断数インクリメントメソッドのテスト３（複数スレッドから同時アクセス）
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
-	sleep( 1 );
-	BOOST_CHECK_EQUAL( rush_server.get_inact(), 5 );
 
 	thread_item1.join();
 	thread_item2.join();
 	thread_item3.join();
 	thread_item4.join();
 	thread_item5.join();
+
+	BOOST_CHECK_EQUAL( rush_server.get_inact(), 5 );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
