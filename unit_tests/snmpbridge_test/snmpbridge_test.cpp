@@ -26,7 +26,6 @@ public:
 	snmpbridge_testclass( l7vsd& l7vsd_in, boost::asio::io_service& io_service_in ) : snmpbridge(l7vsd_in, io_service_in){}
 
 	void								set_snmp_param(l7ag_parameter& snmp_param_in){
-//											memcpy(&snmp_param, snmp_param_in, sizeof(snmp_param)); }
 											snmp_param = snmp_param_in; }
 	void								set_connection_state(bool in){ connection_state = in; }
 
@@ -262,14 +261,47 @@ void send_trap_snmpbridge_test(){
 
 	test.initialize();
 
-	// unit_test[]
-	// 正常
+	// unit_test[] send_trap（正常系）
+	std::string msg = "error message";
 	int ret = 0;
-//	ret = test.send_trap();
-	// unit_test[] 戻り値は0か？
+	ret = test.send_trap(msg);
+	// unit_test[] send_trap 戻り値は0か？
 	BOOST_CHECK_EQUAL( ret, 0 );
-	// unit_test[] 送信データの設定は正しいか？
+	// send_trap 送信データの設定は正しいか？
+	char * buffer;
+	buffer = test.get_send_buffer();
+	struct l7ag_message_header* header        = (struct l7ag_message_header*) buffer;
+	struct l7ag_payload_header* payloadheader = (struct l7ag_payload_header*) (header + 1);
+	struct l7ag_traprequest_message* trapmes  = (struct l7ag_traprequest_message*) (payloadheader + 1);
 
+	// unit_test[] send_trap header->magic[0]のチェック
+	BOOST_CHECK_EQUAL( header->magic[0], 0x4d );
+	// unit_test[] send_trap header->magic[1]のチェック
+	BOOST_CHECK_EQUAL( header->magic[1], 0x47 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( header->version, (unsigned long long)1 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( header->payload_count, (unsigned long long)1 );
+	// unit_test[] 
+	size_t send_buffer_size = test.get_send_buffer_size();
+	BOOST_CHECK_EQUAL( header->size, send_buffer_size );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->magic[0], 0x50 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->magic[1], 0x59 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->message_id, (unsigned long long)MESSAGE_ID_TRAPREQUEST );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->payload_datasize, sizeof( struct l7ag_payload_header ) + sizeof( struct l7ag_traprequest_message ) );
+	// unit_test[] 
+	char oid[] = "1.3.6.1.4.1.60000.1.0.2";
+	BOOST_CHECK_EQUAL( trapmes->oid, oid );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( trapmes->message, msg.c_str() );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( trapmes->magic[0], 0x54 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( trapmes->magic[1], 0x52 );
 	// unit_test[] 送信サイズは正しいか？
 	size_t size = 0;
 	size = sizeof( struct l7ag_message_header ) +
@@ -283,7 +315,8 @@ void send_trap_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( ret, -1 );
 
 	// unit_test[] 送信バッファのポインタはNULLか？
-	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
+	buffer = test.get_send_buffer();
+	BOOST_CHECK( buffer == (char *)NULL );
 
 	// unit_test[] 送信サイズは0か？
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
@@ -294,7 +327,8 @@ void send_trap_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( ret, -1 );
 
 	// unit_test[] 送信バッファのポインタはNULLか？
-	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
+	buffer = test.get_send_buffer();
+	BOOST_CHECK( buffer == (char *)NULL );
 
 	// unit_test[] 送信サイズは0か？
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
@@ -310,14 +344,50 @@ void reload_config_snmpbridge_test(){
 
 	test.initialize();
 
-	// unit_test[]
-	int ret = 0;
-	// 正常
+	// unit_test[] reload_config（正常系）
+//	int ret = 0;
 //	ret = test.reload_config();
-	// unit_test[] 戻り値は0か？
-	BOOST_CHECK_EQUAL( ret, 0 );
+	test.reload_config();
+	// unit_test[] reload_config 戻り値は0か？
+//	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] 送信データの設定は正しいか？
+	// reload_config 送信データの設定は正しいか？
+	char * buffer;
+	buffer = test.get_send_buffer();
+    struct l7ag_message_header* header             = (struct l7ag_message_header*) buffer;
+    struct l7ag_payload_header* payloadheader      = (struct l7ag_payload_header*) (header + 1);
+    struct l7ag_settingcommand_message* settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
+
+	// unit_test[] reload_config header->magic[0]のチェック
+	BOOST_CHECK_EQUAL( header->magic[0], 0x4d );
+	// unit_test[] reload_config header->magic[1]のチェック
+	BOOST_CHECK_EQUAL( header->magic[1], 0x47 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( header->version, (unsigned long long)1 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( header->payload_count, (unsigned long long)1 );
+	// unit_test[] 
+	size_t send_buffer_size = test.get_send_buffer_size();
+	BOOST_CHECK_EQUAL( header->size, send_buffer_size );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->magic[0], 0x50 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->magic[1], 0x59 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->message_id, (unsigned long long)MESSAGE_ID_COMMANDREQUEST );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( payloadheader->payload_datasize, sizeof( struct l7ag_payload_header ) + sizeof( struct l7ag_settingcommand_message ) );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( settingcmd->command_id, (unsigned long long)COMMAND_SETTINGFILE_RELOAD );
+	// unit_test[] 
+	unsigned char data[COMMANDDATASIZE];
+	memset( data, 0, COMMANDDATASIZE );
+//	BOOST_CHECK_EQUAL( settingcmd->data, data );
+	BOOST_CHECK_EQUAL( settingcmd->data[0], data[0] );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( settingcmd->magic[0], 0x53 );
+	// unit_test[] 
+	BOOST_CHECK_EQUAL( settingcmd->magic[1], 0x54 );
 
 	// unit_test[] 送信サイズは正しいか？
 	size_t size = 0;
@@ -329,10 +399,11 @@ void reload_config_snmpbridge_test(){
 	// メモリが確保できなかった場合
 //	ret = test.reload_config();
 	// unit_test[] 戻り値は-1か？
-	BOOST_CHECK_EQUAL( ret, -1 );
+//	BOOST_CHECK_EQUAL( ret, -1 );
 
 	// unit_test[] 送信バッファのポインタはNULLか？
-	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
+	buffer = test.get_send_buffer();
+	BOOST_CHECK( buffer == (char *)NULL );
 
 	// unit_test[] 送信サイズは0か？
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
@@ -341,10 +412,11 @@ void reload_config_snmpbridge_test(){
 	// 送信サイズが0の場合
 //	ret = test.reload_config();
 	// unit_test[] 戻り値は-1か？
-	BOOST_CHECK_EQUAL( ret, -1 );
+//	BOOST_CHECK_EQUAL( ret, -1 );
 
 	// unit_test[] 送信バッファのポインタはNULLか？
-	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
+	buffer = test.get_send_buffer();
+	BOOST_CHECK( buffer == (char *)NULL );
 
 	// unit_test[] 送信サイズは0か？
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
@@ -384,7 +456,8 @@ void change_loglevel_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( ret, -1 );
 
 	// unit_test[] 送信バッファのポインタはNULLか？
-	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
+//	buffer = test.get_send_buffer();
+//	BOOST_CHECK( buffer == (char *)NULL );
 
 	// unit_test[] 送信サイズは0か？
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
@@ -736,8 +809,8 @@ test_suite* init_unit_test_suite( int args, char* argv[]){
 	ts->add( BOOST_TEST_CASE( &create_snmpbridge_test ) );
 	ts->add( BOOST_TEST_CASE( &initialize_snmpbridge_test ) );
 	ts->add( BOOST_TEST_CASE( &finalize_snmpbridge_test ) );
-//	ts->add( BOOST_TEST_CASE( &send_trap_snmpbridge_test ) );
-//	ts->add( BOOST_TEST_CASE( &reload_config_snmpbridge_test ) );
+	ts->add( BOOST_TEST_CASE( &send_trap_snmpbridge_test ) );
+	ts->add( BOOST_TEST_CASE( &reload_config_snmpbridge_test ) );
 //	ts->add( BOOST_TEST_CASE( &change_loglevel_snmpbridge_test ) );
 //	ts->add( BOOST_TEST_CASE( &change_loglevel_allcategory_snmpbridge_test ) );
 //	ts->add( BOOST_TEST_CASE( &send_mibcollection_snmpbridge_test ) );

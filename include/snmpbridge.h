@@ -69,6 +69,7 @@ public:
 	//! @param[in]
 	//! @param[in]
 	snmpbridge( l7vsd& l7vsd_in, boost::asio::io_service& io_service_in ) :
+		send_buffer(NULL),
 		send_buffer_size(0),
 		snmp_io_service(io_service_in),
 		snmp_acceptor(io_service_in),
@@ -114,7 +115,7 @@ public:
 
 	//! connection status function
 	//! @return
-	bool				get_connectionstate();
+	bool			get_connectionstate();
 
 	//! loglevel getting function
 	//! @param[in]

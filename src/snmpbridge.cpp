@@ -168,6 +168,17 @@ void l7vs::snmpbridge::finalize(){
 	connection_state = false;
 	snmp_acceptor.close();
 	snmp_socket.close();
+//	if( snmp_acceptor.is_open() == true ){
+//		snmp_acceptor.close();
+//	}
+//	if( snmp_socket.is_open() == true ){
+//		snmp_socket.close();
+//	}
+    if( !send_buffer ){
+        free(send_buffer);
+        send_buffer      = NULL;
+        send_buffer_size = 0;
+	}
 }
 
 /*!
@@ -176,8 +187,10 @@ void l7vs::snmpbridge::finalize(){
  * @return      int
  */
 int l7vs::snmpbridge::send_trap( const std::string& message ){
-#if 0
-    if( !send_buffer ) free( send_buffer );
+#if 1
+	boost::mutex::scoped_lock lock( send_buffer_mutex );
+
+    if( send_buffer ) free( send_buffer );
     send_buffer_size = sizeof( struct l7ag_message_header ) +
                    sizeof( struct l7ag_payload_header ) +
                    sizeof( struct l7ag_traprequest_message );
@@ -209,7 +222,7 @@ int l7vs::snmpbridge::send_trap( const std::string& message ){
     //create message
     char oid[] = "1.3.6.1.4.1.60000.1.0.2";
     strncpy( trapmes->oid, oid , sizeof( oid ) );
-    strncpy( trapmes->message, message, TRAPREQUESTMESSAGESIZE );
+    strncpy( trapmes->message, message.c_str(), TRAPREQUESTMESSAGESIZE );
     trapmes->magic[0] = 0x54;   // T
     trapmes->magic[1] = 0x52;   // R
 
@@ -229,7 +242,9 @@ int l7vs::snmpbridge::send_trap( const std::string& message ){
  * Reload config command to subagent
  */
 void l7vs::snmpbridge::reload_config(){
-#if 0
+#if 1
+	boost::mutex::scoped_lock lock( send_buffer_mutex );
+
     if( send_buffer ) free( send_buffer );
     send_buffer_size = sizeof( struct l7ag_message_header ) +
                    sizeof( struct l7ag_payload_header ) +
@@ -275,7 +290,9 @@ void l7vs::snmpbridge::reload_config(){
  */
 int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_category, const l7vs::LOG_LEVEL_TAG loglevel ){
     int retval = 0;
-#if 0
+#if 1
+	boost::mutex::scoped_lock lock( send_buffer_mutex );
+
     if( send_buffer ) free( send_buffer );
     send_buffer_size = sizeof( struct l7ag_message_header ) +
                    sizeof( struct l7ag_payload_header ) +
@@ -326,7 +343,7 @@ int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_cat
  */
 int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG loglevel ){
     int retval = 0;
-#if 0
+#if 1
     std::vector<struct l7ag_settingcommand_message> settingcmd_vec;
     for( std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>::iterator it = snmp_param.loglevel.begin();
         it != snmp_param.loglevel.end();
@@ -338,6 +355,8 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
         param->log_level = loglevel;
         settingcmd_vec.push_back( cmd );
     }
+	boost::mutex::scoped_lock lock( send_buffer_mutex );
+
     if( send_buffer ) free( send_buffer );
     send_buffer_size = sizeof( struct l7ag_message_header ) +
                    sizeof( struct l7ag_payload_header ) * settingcmd_vec.size() +
@@ -346,7 +365,9 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
     struct l7ag_message_header* header = (struct l7ag_message_header*) send_buffer;
     struct l7ag_payload_header* payloadheader = (struct l7ag_payload_header*) (header + 1);
     struct l7ag_settingcommand_message* settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
+#if 0
     struct l7ag_changeloglevel_parameter* param = (l7ag_changeloglevel_parameter*) settingcmd->data;
+#endif
     //create message header
     header->magic[0] = 0x4d;    // M
     header->magic[1] = 0x47;    // G
@@ -390,6 +411,7 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
 int l7vs::snmpbridge::send_mibcollection(struct l7ag_mibrequest_message* payload){
     int retval = 0;
 #if 0
+	boost::mutex::scoped_lock lock( send_buffer_mutex );
 
     if (send_buffer) {
         free(send_buffer);
@@ -637,6 +659,7 @@ int l7vs_snmpbridge_callback( l7vs_iomux* iom ){
  *
  */
 void l7vs::snmpbridge::handle_accept(const boost::system::error_code& error){
+	std::cout << "handle_accept" << std::endl;//debug
 	connection_state = true;
 	snmp_socket.async_receive( boost::asio::buffer( recv_buffer, READBUF_SIZE ), 
 								boost::bind(&snmpbridge::handle_receive,
@@ -650,6 +673,11 @@ void l7vs::snmpbridge::handle_accept(const boost::system::error_code& error){
  */
 void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, size_t bytes_transferred){
 #if 0
+    size_t len = 0;
+    struct l7ag_message_header* message_header = NULL;
+    struct l7ag_payload_header* payload_header = NULL;
+
+	len = bytes_transferred;//
 	if ( len < sizeof( l7ag_message_header ) ) return;
 	message_header = (struct l7ag_message_header*)recv_buffer;
 	if ( message_header->version != 1 ) return;
@@ -658,14 +686,12 @@ void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, si
 		// TODO bug if payload_count = 2...
 		payload_header = (struct l7ag_payload_header*) (message_header + 1);
 		if (payload_header->magic[0] != 0x50 || payload_header->magic[1] != 0x59) {
-//			l7vs_iomux_mod( l7vs_snmp_iomux, iom_read );
 			continue;
 		}
 		struct l7ag_mibrequest_message* payload = (struct l7ag_mibrequest_message*) (payload_header + 1);
 		switch (payload_header->message_id) {
 		case MESSAGE_ID_MIBCOLLECTREQUEST:
 			if (payload->magic[0] != 0x52 || payload->magic[1] != 0x51) {
-//				l7vs_iomux_mod( l7vs_snmp_iomux, iom_read );
 				return;
 			}
 			l7vs::snmpbridge::send_mibcollection(payload);
@@ -698,12 +724,13 @@ int l7vs::snmpbridge::send_message(){
     if (send_buffer == NULL || send_buffer_size == 0)
         return -1;
 
+#if 1
 	snmp_socket.async_send( boost::asio::buffer( send_buffer, send_buffer_size ), 
 								boost::bind(&snmpbridge::handle_send,
 								this,
 								boost::asio::placeholders::error,
 								boost::asio::placeholders::bytes_transferred ) );
-
+#endif
     return 0;
 }
 
