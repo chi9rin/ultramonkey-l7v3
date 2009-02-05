@@ -57,11 +57,11 @@ void	constractor_test(){
 	module_base_test	module_base_test_1( module_name_1 );
 	module_base_test	module_base_test_2( module_name_2 );
 
-	// ## test [1]  constractor parameter set test ("cinsert")
+	// unit_test[01]  constractor( ModuleName = "cinsert" )
 	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_1.name, module_name_1 );
 
-	// ## test [2]  constractor parameter set test ("")
+	// unit_test[02]  constractor( ModuleName = "" )
 	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_2.name, module_name_2 );
 
@@ -78,19 +78,19 @@ void	get_name_test(){
 	module_base_test	module_base_test_1( module_name_1 );
 	module_base_test	module_base_test_2( module_name_2 );
 
-	// ## test [1]  get_name get test ("cinsert")
+	// unit_test[01]  get_name( ModuleName = "cinsert" )
 	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_1.get_name(), module_name_1 );
 
-	// ## test [2]  get_name get test ("cinsert")
+	// unit_test[02]  get_name( ModuleName = "cinsert" )
 	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_1.get_name(), module_base_test_1.name );
 
-	// ## test [3]  get_name get test ("")
+	// unit_test[03]  get_name( ModuleName = "" )
 	std::cout << "3----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_2.get_name(), module_name_2 );
 
-	// ## test [4]  get_name get test ("")
+	// unit_test[04]  get_name( ModuleName = "" )
 	std::cout << "4----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_2.get_name(), module_base_test_2.name );
 
@@ -125,32 +125,32 @@ void	init_logger_functions_test(
 												inputLogInfo,
 												inputLogDebug );
 
-	// ## test [1]  init_logger_functions call test (getloglevel)
+	// unit_test[01]  init_logger_functions( Function = getloglevel )
 	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.getloglevel != NULL );
 	module_base_test_1.getloglevel();
 
-	// ## test [2]  init_logger_functions call test (putLogFatal)
+	// unit_test[02]  init_logger_functions( Function = putLogFatal )
 	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.putLogFatal != NULL );
 	module_base_test_1.putLogFatal( 0, "", NULL, 0 );
 
-	// ## test [3]  init_logger_functions call test (putLogError)
+	// unit_test[03]  init_logger_functions( Function = putLogError )
 	std::cout << "3----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.putLogError != NULL );
 	module_base_test_1.putLogError( 0, "", NULL, 0 );
 
-	// ## test [4]  init_logger_functions call test (putLogWarn)
+	// unit_test[04]  init_logger_functions( Function = putLogWarn )
 	std::cout << "4----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.putLogWarn != NULL );
 	module_base_test_1.putLogWarn( 0, "", NULL, 0 );
 
-	// ## test [5]  init_logger_functions call test (putLogInfo)
+	// unit_test[05]  init_logger_functions( Function = putLogInfo )
 	std::cout << "5----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.putLogInfo != NULL );
 	module_base_test_1.putLogInfo( 0, "", NULL, 0 );
 
-	// ## test [6]  init_logger_functions call test (putLogDebug)
+	// unit_test[06]  init_logger_functions( Function = putLogDebug )
 	std::cout << "6----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.putLogDebug != NULL );
 	module_base_test_1.putLogDebug( 0, "", NULL, 0 );
@@ -181,26 +181,26 @@ void	init_replication_functions_test(
 												invirtual_service_endpoint_tcp,
 												invirtual_service_endpoint_udp );
 
-	// ## test [1]  init_replication_functions parameter set test (replication_pay_memory)
+	// unit_test[01]  init_replication_functions( Function = replication_pay_memory )
 	std::cout << "1----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.replication_pay_memory	!= NULL );
 	module_base_test_1.replication_pay_memory( "", NULL );
 
-	// ## test [1]  init_replication_functions call test (replication_area_lock)
+	// unit_test[02]  init_replication_functions( Function = replication_area_lock )
 	std::cout << "2----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.replication_area_lock	!= NULL );
 	module_base_test_1.replication_area_lock();
 
-	// ## test [1]  init_replication_functions call test (replication_area_unlock)
+	// unit_test[03]  init_replication_functions( Function = replication_area_unlock )
 	std::cout << "3----------------------------------------" << std::endl;
 	BOOST_CHECK( module_base_test_1.replication_area_unlock	!= NULL );
 	module_base_test_1.replication_area_unlock();
 
-	// ## test [1]  init_replication_functions parameter set test (virtual_service_endpoint_tcp)
+	// unit_test[04]  init_replication_functions( virtual_service_endpoint_tcp = invirtual_service_endpoint_tcp )
 	std::cout << "4----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_1.virtual_service_endpoint_tcp, invirtual_service_endpoint_tcp );
 
-	// ## test [1]  init_replication_functions parameter set test (virtual_service_endpoint_udp)
+	// unit_test[05]  init_replication_functions( virtual_service_endpoint_udp = invirtual_service_endpoint_udp )
 	std::cout << "5----------------------------------------" << std::endl;
 	BOOST_CHECK_EQUAL( module_base_test_1.virtual_service_endpoint_udp, invirtual_service_endpoint_udp );
 
