@@ -659,6 +659,7 @@ public:
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
 		this->lasttime_session_map.clear();
+		this_replication_data_processor->get_temp_list().clear();
 		this->session_endpoint_map[session_id] = old_saved_endpoint;
 		this->session_lasttime_map[session_id] = last_time;
 		this->lasttime_session_map.insert(std::make_pair(last_time, session_id));
@@ -829,6 +830,9 @@ public:
 		this->lasttime_session_map.insert(std::make_pair(test_time, session_id1));
 		this->lasttime_session_map.insert(std::make_pair(test_time, session_id2));
 		this->lasttime_session_map.insert(std::make_pair(test_time, session_id3));
+		// get the first item of session_endpoint_map
+		it1 = this->session_endpoint_map.begin();
+		std::string expecting_delete_session_id = it1->first;
 		result = this->clear_expired_session_data();
 		// get data which put into temp_list
 		first_temp_list_data = this_replication_data_processor->get_temp_list().front();
@@ -841,7 +845,7 @@ public:
 		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 2u);
 		// temp_list item check
 		BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id1);
+		BOOST_CHECK_EQUAL(first_temp_list_data.session_id, expecting_delete_session_id);
 	}
 
 	// read_session_data_from_replication_area_test
@@ -1195,7 +1199,7 @@ public:
 void sslid_session_data_processor_test(){
 
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
-	char *replication_data_area = new char(data_area_size);
+	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 	l7vs::sslid_replication_data_processor replication_data_processor(3,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
@@ -1313,6 +1317,8 @@ void read_session_data_from_replication_area_test(){
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+
+	memset(replication_data_area, 0, data_area_size);
 
 	l7vs::sslid_replication_data_processor replication_data_processor(1,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,

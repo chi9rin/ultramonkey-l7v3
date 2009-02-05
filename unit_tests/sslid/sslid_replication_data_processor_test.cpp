@@ -12,19 +12,20 @@ using namespace l7vs;
 #define SECTION_NUMBER	200
 #define STRUCT_NUMBER	256
 
-int test_value = 0;
+bool is_lock_function_called = false;
+bool is_unlock_function_called = true;
 bool is_put_into_temp_list_test_thread8_waiting = false;
 bool is_put_into_temp_list_test_thread9_waiting = false;
 bool is_put_into_temp_list_test_thread10_waiting = false;
 
 // function for testing register_replication_area_lock
 void lock_function(){
-	test_value = 1;
+	is_lock_function_called = true;
 }
 
 // function for testing register_replication_area_unlock
 void unlock_function(){
-	test_value = 2;
+	is_unlock_function_called = true;
 }
 
 LOG_LEVEL_TAG replication_getloglevel(){
@@ -407,6 +408,7 @@ public:
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread4,
 						this, session_id1, endpoint, last_time));
+			sleep(1);
 			thread_group.create_thread(boost::bind(&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread5, this));
 			thread_group.join_all();
 		} catch(...){
@@ -430,6 +432,7 @@ public:
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread6,
 						this, session_id1, endpoint, last_time));
+			sleep(1);
 			thread_group.create_thread(boost::bind(&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread7, this));
 			thread_group.join_all();
 		} catch(...){
@@ -546,18 +549,22 @@ public:
 		l7vs::sslid_replication_data temp_data;
 		l7vs::sslid_replication_temp_data test_data1;
 
+		this->replication_area_lock = lock_function;
+		this->replication_area_unlock = unlock_function;
+
 		// unit_test[11] when temp_list is empty, test it
 		try {
 			this->temp_list.clear();
-			boost::thread test_thread(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			test_thread.timed_join(boost::posix_time::milliseconds(100));
+			boost::thread test_thread1(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+			sleep(1);
+			test_thread1.interrupt();
 		} catch(...) {
 			BOOST_ERROR("exception: write_replicaion_area");
 		}
 
 		// unit_test[12] data add test(when data area has one sslip_replication_data)
-		temp_session_id = "temp_id1";
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
+		temp_session_id = "temp_id1rtrrrrtttttteeeeeeemmmmp";
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_data.last_time = time(0);
 		memcpy(temp_data.session_id, temp_session_id.c_str(), temp_session_id.length());
 		temp_data.valid = 1;
@@ -575,11 +582,15 @@ public:
 		l7vs::sslid_replication_data old_data;
 		memset(&old_data, 0, sizeof(sslid_replication_data));
 		memcpy(&old_data, this->replication_area, sizeof(sslid_replication_data));
-		boost::thread test_thread1(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread1.timed_join(boost::posix_time::milliseconds(100));
+		boost::thread test_thread2(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread2.interrupt();
 		// data add position: after the old existing data, check it
 		// get the added data information
-		std::string added_session_id((this->replication_area + 1)->session_id);
+		char session_id_array[SSLID_LENGTH + 1];
+		memcpy(session_id_array, (this->replication_area + 1)->session_id, SSLID_LENGTH);
+		temp_session_id[SSLID_LENGTH] = 0;
+		std::string added_session_id(session_id_array);
 		std::string added_address_ip((this->replication_area + 1)->realserver_ip);
 		unsigned short added_address_port = (this->replication_area + 1)->realserver_port;
 		// the old existing data does not changed, check it
@@ -597,13 +608,13 @@ public:
 		BOOST_CHECK_EQUAL(added_address_port, test_data1.realserver_addr.port());
 
 		// unit_test[13] data add test(when data area has two sslip_replication_data,and the first sslip_replication_data's valid flag is unused)
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
-		temp_session_id = "temp_id2";
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
+		temp_session_id = "temp_id2eeeeeetttteeeeeeemmmmuui";
 		temp_data.last_time = time(0);
 		memcpy(temp_data.session_id, temp_session_id.c_str(), temp_session_id.length());
 		temp_data.valid = 0;
 		memcpy(this->replication_area, &temp_data, sizeof(struct l7vs::sslid_replication_data));
-		temp_session_id = "temp_id3";
+		temp_session_id = "temp_id3333333333333333333333333";
 		temp_data.last_time = time(0);
 		memcpy(temp_data.session_id, temp_session_id.c_str(), temp_session_id.length());
 		temp_data.valid = 1;
@@ -620,11 +631,14 @@ public:
 		// get the second existing data
 		memset(&old_data, 0, sizeof(sslid_replication_data));
 		memcpy(&old_data, this->replication_area + 1, sizeof(sslid_replication_data));
-		boost::thread test_thread2(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread2.timed_join(boost::posix_time::milliseconds(100));
+		boost::thread test_thread3(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread3.interrupt();
 		// data add position: the first existing data position, check it
 		// get the added data information
-		added_session_id = std::string(this->replication_area->session_id);
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		added_session_id = std::string(session_id_array);
 		added_address_ip = std::string(this->replication_area->realserver_ip);
 		added_address_port = this->replication_area->realserver_port;
 		// the second existing data not changed, check it
@@ -642,7 +656,7 @@ public:
 		BOOST_CHECK_EQUAL(added_address_port, test_data1.realserver_addr.port());
 
 		// unit_test[14] data add test(when data area has no sslip_replication_data)
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
@@ -651,9 +665,13 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread3(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread3.timed_join(boost::posix_time::milliseconds(100));
-		std::string saved_session_id(this->replication_area->session_id);
+		boost::thread test_thread4(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread4.interrupt();
+		// get added data information
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		std::string saved_session_id(session_id_array);
 		std::string saved_address_ip(this->replication_area->realserver_ip);
 		unsigned short saved_address_port = this->replication_area->realserver_port;
 		// session_id is saved, check it
@@ -676,10 +694,13 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread4(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread4.timed_join(boost::posix_time::milliseconds(100));
+		boost::thread test_thread5(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread5.interrupt();
 		// get saved information
-		saved_session_id = std::string(this->replication_area->session_id);
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		saved_session_id = std::string(session_id_array);
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
 		saved_address_port = this->replication_area->realserver_port;
 		// session_id is not changed, check it
@@ -701,23 +722,26 @@ public:
 		test_data1.last_time = delete_time;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread5(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread5.timed_join(boost::posix_time::milliseconds(100));
+		boost::thread test_thread6(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread6.interrupt();
 		// get saved information
-		saved_session_id = std::string(this->replication_area->session_id);
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		saved_session_id = std::string(session_id_array);
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
 		saved_address_port = this->replication_area->realserver_port;
 		// sslid_replication_data is deleted logically, valid flag is setted to 0, check it
 		BOOST_CHECK_EQUAL(this->replication_area->valid, 0);
 		// last_time is not updated , check it
-		BOOST_CHECK_EQUAL(this->replication_area->last_time, last_time);
+		BOOST_CHECK_EQUAL(this->replication_area->last_time, update_time);
 		// realserver_addr ip is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("255.255.255.255"));
 		// realserver_addr port is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
 
 		// unit_test[17] when op_code is out of 'A','U','D', old data is not changed test
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(port);
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
@@ -729,55 +753,56 @@ public:
 		// get old session data
 		l7vs::sslid_replication_data old_session_data[3];
 		memcpy(&old_session_data, this->replication_area, 3*sizeof(sslid_replication_data));
-		boost::thread test_thread6(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread6.timed_join(boost::posix_time::milliseconds(100));
+		boost::thread test_thread7(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread7.interrupt();
 		// test_data1 is not saved, so old data is not changed, check it
 		// old data not changed check
 		compare_result = memcmp(&old_session_data, this->replication_area, 3*sizeof(sslid_replication_data));
 		BOOST_CHECK_EQUAL(compare_result, 0);
 
 		// unit_test[18] replication_area_lock function is called test
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		test_value = 0;
-		function_pointer = &lock_function;
-		this->replication_area_lock = function_pointer;
-		this->replication_area_unlock = NULL;
-		this->temp_list.clear();
-		this->put_into_temp_list(test_data1);
-		try{
-			boost::thread test_thread7(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			test_thread7.timed_join(boost::posix_time::milliseconds(100));
-		} catch(...) {
-			BOOST_ERROR("exception: write_replicaion_area_test");
-		}
-		// replication_area_lock function called check
-		BOOST_CHECK_EQUAL(test_value, 1);
-
-		// unit_test[19] replication_area_unlock function is called test
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
-		test_data1.op_code = 'A';
-		this->temp_list.clear();
-		this->put_into_temp_list(test_data1);
-		test_value = 0;
-		function_pointer = &unlock_function;
-		this->replication_area_lock = NULL;
+		is_lock_function_called = false;
+		this->replication_area_lock = lock_function;
 		this->replication_area_unlock = unlock_function;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		try{
 			boost::thread test_thread8(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			test_thread8.timed_join(boost::posix_time::milliseconds(100));
+			sleep(1);
+			test_thread8.interrupt();
 		} catch(...) {
 			BOOST_ERROR("exception: write_replicaion_area_test");
 		}
 		// replication_area_lock function called check
-		BOOST_CHECK_EQUAL(test_value, 2);
+		BOOST_CHECK(is_lock_function_called);
+
+		// unit_test[19] replication_area_unlock function is called test
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
+		test_data1.op_code = 'A';
+		this->temp_list.clear();
+		this->put_into_temp_list(test_data1);
+		is_unlock_function_called = false;
+		this->replication_area_lock = lock_function;
+		this->replication_area_unlock = unlock_function;
+		this->temp_list.clear();
+		this->put_into_temp_list(test_data1);
+		try{
+			boost::thread test_thread9(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+			sleep(1);
+			test_thread9.interrupt();
+		} catch(...) {
+			BOOST_ERROR("exception: write_replicaion_area_test");
+		}
+		// replication_area_unlock function called check
+		BOOST_CHECK(is_unlock_function_called);
 
 		// unit_test[20] ipv6 test(condition: while data area has no sslip_replication_data and one data will add to to the data area)
-		memset(this->replication_area, 0, 3*sizeof(struct l7vs::sslid_replication_data));
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		realserver_addr.port(80);
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
@@ -786,9 +811,12 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread9(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread9.timed_join(boost::posix_time::milliseconds(100));
-		saved_session_id = std::string(this->replication_area->session_id);
+		boost::thread test_thread10(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread10.interrupt();
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		saved_session_id = std::string(session_id_array);
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
 		saved_address_port = this->replication_area->realserver_port;
 		// session_id is saved, check it
@@ -803,21 +831,23 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_port, 80);
 
 		// unit_test[21] ipv6 test(condition: while update data)
-		realserver_addr.address(boost::asio::ip::address::from_string("0:21d0:0:4866:0:0:3a4b:1230"));
+		realserver_addr.address(boost::asio::ip::address::from_string("1:21d0:1:4866:1:1:3a4b:1230"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
 		test_data1.last_time = update_time;
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread10(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread10.timed_join(boost::posix_time::milliseconds(100));
-		saved_session_id = std::string(this->replication_area->session_id);
-		saved_address_ip = std::string(this->replication_area->realserver_ip);
+		boost::thread test_thread11(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread11.interrupt();
 		// get saved information
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
-		// realserver_addr ip is changed, check it
-		BOOST_CHECK_EQUAL(saved_address_ip, std::string("0:21d0:0:4866:0:0:3a4b:1230"));
+		saved_address_port = this->replication_area->realserver_port;
+		// realserver_addr ip is updated, check it
+		BOOST_CHECK_EQUAL(saved_address_ip, std::string("1:21d0:1:4866:1:1:3a4b:1230"));
+		// realserver_addr port check
+		BOOST_CHECK_EQUAL(saved_address_port, port);
 
 		// unit_test[22] ipv6 test(condition: while delete data)
 		realserver_addr.address(boost::asio::ip::address::from_string("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
@@ -826,14 +856,18 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread11(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		test_thread11.timed_join(boost::posix_time::milliseconds(100));
+		boost::thread test_thread12(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
+		sleep(1);
+		test_thread12.interrupt();
+		// get saved information
+		saved_address_ip = std::string(this->replication_area->realserver_ip);
+		saved_address_port = this->replication_area->realserver_port;
 		// sslid_replication_data is deleted logically, valid flag is setted to 0, check it
 		BOOST_CHECK_EQUAL(this->replication_area->valid, 0);
 		// last_time is not updated , check it
-		BOOST_CHECK_EQUAL(this->replication_area->last_time, last_time);
+		BOOST_CHECK_EQUAL(this->replication_area->last_time, update_time);
 		// realserver_addr ip is not changed, check it
-		BOOST_CHECK_EQUAL(saved_address_ip, std::string("0:21d0:0:4866:0:0:3a4b:1230"));
+		BOOST_CHECK_EQUAL(saved_address_ip, std::string("1:21d0:1:4866:1:1:3a4b:1230"));
 		// realserver_addr port is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
 	}
@@ -882,6 +916,8 @@ public:
 			this->temp_list.clear();
 			boost::thread test_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list, this, get_data));
 			test_thread.timed_join(boost::posix_time::milliseconds(100));
+			this->temp_list.push_back(test_data1);
+			sleep(1);
 		} catch(...) {
 			BOOST_ERROR("exception: get_from_temp_list");
 		}
@@ -974,6 +1010,8 @@ void sslid_replication_data_processor_test(){
 	char *real_data_start_address = header_start_address + 128*sizeof(struct l7vs::sslid_replication_data_header);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 	l7vs::sslid_replication_data_header* first_header = (sslid_replication_data_header*)header_start_address;
+
+	memset(replication_data_area, 0, data_area_size);
 
 	virtual_service_endpoint.port(999);
 	sslid_replication_data_processor_test_class test_object(maxlist_test,
@@ -1084,7 +1122,7 @@ void sslid_replication_data_processor_test(){
 			replication_inputLogInfo, replication_inputLogDebug);
 	// the virtual service's size is resetted, check it
 	size_t expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-	BOOST_CHECK_EQUAL(first_header->size, expecting_size);
+	BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
 
 	// unit_test[40] when resize the virtual service session information, if header area is full, nothing to do, test it
 	try {
@@ -1123,11 +1161,11 @@ void sslid_replication_data_processor_test(){
 	// the virtual service information's size is resized, get it
 	expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
 	// the virtual service information's offset is resized, get it
-	size_t expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + expecting_size);
+	size_t expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
 	// size check
-	BOOST_CHECK_EQUAL(first_header->size, expecting_size);
+	BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
 	// offset check
-	BOOST_CHECK_EQUAL(first_header->offset, expecting_offset);
+	BOOST_CHECK_EQUAL((first_header+1)->offset, expecting_offset);
 
 	// unit_test[42] when virtual service data is not exist and header area is not full and the
 	// unit_test[42] sslip replication data area there is no enough sapce to add data, nothing to do, test it
@@ -1206,7 +1244,7 @@ void sslid_replication_data_processor_test(){
 			replication_inputLogInfo, replication_inputLogDebug);
 	// the virtual service's size is resetted, check it
 	expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-	BOOST_CHECK_EQUAL(first_header->size, expecting_size);
+	BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
 
 	delete []replication_data_area;
 }
@@ -1217,6 +1255,8 @@ void put_into_temp_list_test(){
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+
+	memset(replication_data_area, 0, data_area_size);
 
 	sslid_replication_data_processor_test_class test_object(3,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
@@ -1235,7 +1275,9 @@ void write_replicaion_area_test(){
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
-	sslid_replication_data_processor_test_class test_object(1,
+	memset(replication_data_area, 0, data_area_size);
+
+	sslid_replication_data_processor_test_class test_object(3,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			replication_ingetloglevel, replication_inputLogFatal,
 			replication_inputLogError, replication_inputLogWarn,
@@ -1255,6 +1297,8 @@ void register_replication_area_lock_test(){
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
+	memset(replication_data_area, 0, data_area_size);
+
 	sslid_replication_data_processor_test_class test_object(1,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			replication_ingetloglevel, replication_inputLogFatal,
@@ -1272,6 +1316,8 @@ void register_replication_area_unlock_test(){
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
+	memset(replication_data_area, 0, data_area_size);
+
 	sslid_replication_data_processor_test_class test_object(1,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			replication_ingetloglevel, replication_inputLogFatal,
@@ -1288,6 +1334,8 @@ void get_from_temp_list_test(){
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+
+	memset(replication_data_area, 0, data_area_size);
 
 	sslid_replication_data_processor_test_class test_object(2,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
@@ -1310,6 +1358,8 @@ void get_replication_area_test() {
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
+	memset(replication_data_area, 0, data_area_size);
+
 	sslid_replication_data_processor_test_class test_object(2,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			replication_ingetloglevel, replication_inputLogFatal,
@@ -1321,7 +1371,7 @@ void get_replication_area_test() {
 					+ 128 * sizeof(struct l7vs::sslid_replication_data_header));
 
 	test_object.get_replication_area_test(expecting_result);
-	delete replication_data_area;
+	delete []replication_data_area;
 }
 
 void sslid_replication_data_processor_test_main()

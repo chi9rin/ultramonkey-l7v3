@@ -174,8 +174,6 @@ public:
 	//get_ssl_session_id
 	void get_ssl_session_id_test() {
 
-		const int MIN_RECV_LENGTH = 76;
-		const int SSL_SESSION_ID_FLAG = 43;
 		std::string session_id;
 		int ret = 0;
 		char *record_data;
@@ -186,35 +184,35 @@ public:
 		ret = this->get_ssl_session_id(NULL, 0, session_id);
 		BOOST_CHECK_EQUAL(ret, -1);
 
-		// unit_test[2] condition: recv_length = MIN_RECV_LENGTH, record_data != NULL, record_data has a session id
+		// unit_test[2] condition: recv_length = HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has a session id
 		// unit_test[2] check: get_ssl_session_id() return 0 (get a session id successed!)
-		record_data = new char[MIN_RECV_LENGTH];
-		record_data[SSL_SESSION_ID_FLAG] = 0x20;
-		ret = this->get_ssl_session_id(record_data, MIN_RECV_LENGTH, session_id);
+		record_data = new char[HELLO_MSG_HEADER_LENGTH];
+		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x20;
+		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH, session_id);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[3] condition: recv_length = MIN_RECV_LENGTH, record_data != NULL, record_data has not a session id
+		// unit_test[3] condition: recv_length = HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has not a session id
 		// unit_test[3] check: get_ssl_session_id() return 1 (get a session id failed!)
-		record_data = new char[MIN_RECV_LENGTH];
-		record_data[SSL_SESSION_ID_FLAG] = 0x00;
-		ret = this->get_ssl_session_id(record_data, MIN_RECV_LENGTH, session_id);
+		record_data = new char[HELLO_MSG_HEADER_LENGTH];
+		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x00;
+		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH, session_id);
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[4] condition: recv_length > MIN_RECV_LENGTH, record_data != NULL, record_data has a session id
+		// unit_test[4] condition: recv_length > HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has a session id
 		// unit_test[4] check: get_ssl_session_id() return 0 (get a session id successed!)
-		record_data = new char[MIN_RECV_LENGTH+1];
-		record_data[SSL_SESSION_ID_FLAG] = 0x20;
-		ret = this->get_ssl_session_id(record_data, MIN_RECV_LENGTH+1, session_id);
+		record_data = new char[HELLO_MSG_HEADER_LENGTH+1];
+		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x20;
+		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH+1, session_id);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[5] condition: recv_length > MIN_RECV_LENGTH, record_data != NULL, record_data has not a session id
+		// unit_test[5] condition: recv_length > HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has not a session id
 		// unit_test[5] check: get_ssl_session_id() return 1 (get a session id failed!)
-		record_data = new char[MIN_RECV_LENGTH+1];
-		record_data[SSL_SESSION_ID_FLAG] = 0x00;
-		ret = this->get_ssl_session_id(record_data, MIN_RECV_LENGTH+1, session_id);
+		record_data = new char[HELLO_MSG_HEADER_LENGTH+1];
+		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x00;
+		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH+1, session_id);
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 	}
@@ -224,14 +222,14 @@ public:
 
 		bool is_message_from_client;
 		char* record_data;
-		int recv_length;
-		int all_length;
+		size_t recv_length;
+		size_t all_length;
 		bool is_hello_message;
 		int ret;
 
-		// unit_test[6] condition: recv_length < 0, record_data = NULL, is_message_from_client = false
+		// unit_test[6] condition: recv_length = 0, record_data = NULL, is_message_from_client = false
 		// unit_test[6] check: check_ssl_record_sendable() return -1 (error)
-		recv_length = -1;
+		recv_length = 0u;
 		record_data = NULL;
 		is_message_from_client = false;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -240,7 +238,7 @@ public:
 
 		// unit_test[7] condition: 0 < recv_length < 6, record_data != NULL, is_message_from_client = false
 		// unit_test[7] check: check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 5;
+		recv_length = 5u;
 		record_data = new char[recv_length];
 		is_message_from_client = false;
 		is_hello_message = true;
@@ -252,7 +250,7 @@ public:
 
 		// unit_test[8] condition: recv_length < 6, record_data != NULL, is_message_from_client = true
 		// unit_test[8] check: check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 5;
+		recv_length = 5u;
 		record_data = new char[recv_length];
 		is_message_from_client = true;
 		is_hello_message = true;
@@ -264,7 +262,7 @@ public:
 
 		// unit_test[9] condition: recv_length = 6, record_data != NULL, is_message_from_client = true, record_data is not a ssl record
 		// unit_test[9] check: check_ssl_record_sendable() return -1 (異常)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
 		is_message_from_client = true;
@@ -277,7 +275,7 @@ public:
 
 		// unit_test[10] condition: recv_length = 6, record_data != NULL, is_message_from_client = false, record_data is not a ssl record
 		// unit_test[10] check: check_ssl_record_sendable() return -1 (異常)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
 		is_message_from_client = false;
@@ -290,7 +288,7 @@ public:
 
 		// unit_test[11] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
 		// unit_test[11] check: check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -298,19 +296,19 @@ public:
 		record_data[3] = 0x00;
 		record_data[4] = 0x9e;
 		record_data[5] = 0x00;
-		all_length = 0;
+		all_length = 0u;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK(!is_hello_message);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
 		// unit_test[12] condition: recv_length = 6, is_message_from_client = false, record_data is a ssl record(minimal size), but is not a hello message.
 		// unit_test[12] check: check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -318,19 +316,19 @@ public:
 		record_data[3] = 0x00;
 		record_data[4] = 0x9e;
 		record_data[5] = 0x00;
-		all_length = 0;
+		all_length = 0u;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK(!is_hello_message);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
 		// unit_test[13] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
 		// unit_test[13] check: check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -338,19 +336,19 @@ public:
 		record_data[3] = 0x00;
 		record_data[4] = 0x9e;
 		record_data[5] = 0x00;
-		all_length = 0;
+		all_length = 0u;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK(!is_hello_message);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
 		// unit_test[14] condition: recv_length = 6, is_message_from_client = false, record_data is a ssl record(minimal size), but is not a hello message.
 		// unit_test[14] check: check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -358,19 +356,19 @@ public:
 		record_data[3] = 0x00;
 		record_data[4] = 0x9e;
 		record_data[5] = 0x00;
-		all_length = 0;
+		all_length = 0u;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK(!is_hello_message);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
 		// unit_test[15] condition: recv_length = 6, is_message_from_client = true ,record_data is a ssl record(minimal size), and is a hello message.
 		// unit_test[15] check: check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -388,7 +386,7 @@ public:
 
 		// unit_test[16] condition: recv_length = 6, is_message_from_client = false ,record_data is a ssl record(minimal size), and is a hello message.
 		// unit_test[16] check: check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -406,7 +404,7 @@ public:
 
 		// unit_test[17] condition:recv_length = 6, is_message_from_client = true ,record_data is a ssl record(minimal size), and is a hello message.
 		// unit_test[17] check:check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -424,7 +422,7 @@ public:
 
 		// unit_test[18] condition:recv_length = 6, is_message_from_client = false ,record_data is a ssl record(minimal size), and is a hello message.
 		// unit_test[18] check:check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 6;
+		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -442,7 +440,7 @@ public:
 
 		// unit_test[19] condition:recv_length > 6, is_message_from_client = true ,record_data is  not ssl record data
 		// unit_test[19] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
 		is_hello_message = true;
@@ -455,7 +453,7 @@ public:
 
 		// unit_test[20] condition:recv_length > 6, is_message_from_client = false ,record_data is  not ssl record data
 		// unit_test[20] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
 		is_hello_message = true;
@@ -468,7 +466,7 @@ public:
 
 		// unit_test[21] condition:recv_length > 6, is_message_from_client = true ,record_data is ssl record data, but is not a hello message
 		// unit_test[21] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -478,7 +476,7 @@ public:
 		record_data[5] = 0x00;
 		is_hello_message = true;
 		is_message_from_client = true;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(!is_hello_message);
@@ -487,7 +485,7 @@ public:
 
 		// unit_test[22] condition:recv_length > 6, is_message_from_client = false ,record_data is ssl record data, but is not a hello message
 		// unit_test[22] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -497,7 +495,7 @@ public:
 		record_data[5] = 0x00;
 		is_hello_message = true;
 		is_message_from_client = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(!is_hello_message);
@@ -506,7 +504,7 @@ public:
 
 		// unit_test[23] condition:recv_length > 6, is_message_from_client = true, record_data is ssl record data, but is not a hello message
 		// unit_test[23] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -516,7 +514,7 @@ public:
 		record_data[5] = 0x00;
 		is_hello_message = true;
 		is_message_from_client = true;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(!is_hello_message);
@@ -525,7 +523,7 @@ public:
 
 		// unit_test[24] condition:recv_length > 6, is_message_from_client = false, record_data is ssl record data, but is not a hello message
 		// unit_test[24] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
 		record_data[1] = 0x03;
@@ -535,16 +533,16 @@ public:
 		record_data[5] = 0x00;
 		is_hello_message = true;
 		is_message_from_client = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(!is_hello_message);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[25] condition:recv_length > 6, recv_length < 76, is_message_from_client= true,record_data is ssl record data, is a hello message
+		// unit_test[25] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client= true,record_data is ssl record data, is a hello message
 		// unit_test[25] check:check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -560,9 +558,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[26] condition:recv_length > 6, recv_length < 76, is_message_from_client= false,record_data is ssl record data, is a hello message
+		// unit_test[26] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client= false,record_data is ssl record data, is a hello message
 		// unit_test[26] check:check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -578,9 +576,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[27] condition:recv_length > 6, recv_length < 76, is_message_from_client = false,record_data is ssl record data, is a hello message
+		// unit_test[27] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, is a hello message
 		// unit_test[27] check:check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -596,9 +594,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[28] condition:recv_length > 6, recv_length < 76, is_message_from_client = true, record_data is ssl record data, is a hello message
+		// unit_test[28] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client = true, record_data is ssl record data, is a hello message
 		// unit_test[28] check:check_ssl_record_sendable() return 1 (送信不可)
-		recv_length = 10;
+		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -614,9 +612,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[29] condition:recv_length = 76,is_message_from_client = true, record_data is ssl record data, but is a error hello message,
+		// unit_test[29] condition:recv_length = HELLO_MSG_HEADER_LENGTH,is_message_from_client = true, record_data is ssl record data, but is a error hello message,
 		// unit_test[29] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -634,9 +632,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[30] condition:recv_length = 76, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
+		// unit_test[30] condition:recv_length = HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
 		// unit_test[30] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -654,9 +652,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[31] condition:recv_length = 76, record_data is ssl record data, but is a error hello message,
+		// unit_test[31] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message,
 		// unit_test[31] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -673,9 +671,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[32] condition:recv_length = 76, is_message_from_client = true,record_data is ssl record data, but is a error hello message,
+		// unit_test[32] condition:recv_length = HELLO_MSG_HEADER_LENGTH, is_message_from_client = true,record_data is ssl record data, but is a error hello message,
 		// unit_test[32] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -693,9 +691,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[33] condition:recv_length = 76, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
+		// unit_test[33] condition:recv_length = HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
 		// unit_test[33] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -713,9 +711,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[34] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[34] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[34] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -733,9 +731,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[35] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[35] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[35] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -753,9 +751,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[36] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[36] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[36] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -773,9 +771,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[37] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[37] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[37] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -793,9 +791,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[38] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[38] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[38] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -813,9 +811,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[39] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[39] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[39] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -833,9 +831,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[40] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[40] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[40] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -853,9 +851,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[41] condition:recv_length = 76, record_data is ssl record data, but is a error hello message
+		// unit_test[41] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[41] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -873,9 +871,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[42] condition:recv_length = 76, record_data is ssl record data, and is client hello message
+		// unit_test[42] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[42] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -887,17 +885,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[43] condition:recv_length = 76, record_data is ssl record data, and is client hello message
+		// unit_test[43] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[43] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -909,17 +907,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[44] condition:recv_length = 76, record_data is ssl record data, and is client hello message
+		// unit_test[44] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[44] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -931,17 +929,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[45] condition:recv_length = 76, record_data is ssl record data, and is client hello message
+		// unit_test[45] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[45] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -953,17 +951,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[46] condition:recv_length = 76, record_data is ssl record data, and is server hello message
+		// unit_test[46] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[46] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -975,17 +973,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[47] condition:recv_length = 76, record_data is ssl record data, and is server hello message
+		// unit_test[47] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[47] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -997,17 +995,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[48] condition:recv_length = 76, record_data is ssl record data, and is server hello message
+		// unit_test[48] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[48] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1019,17 +1017,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[49] condition:recv_length = 76, record_data is ssl record data, and is server hello message
+		// unit_test[49] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[49] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 76;
+		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1041,17 +1039,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[50] condition:recv_length > 76, is_message_from_client = true,record_data is ssl record data, but is a error hello message,
+		// unit_test[50] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = true,record_data is ssl record data, but is a error hello message,
 		// unit_test[50] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1069,9 +1067,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[51] condition:recv_length > 76, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
+		// unit_test[51] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
 		// unit_test[51] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1089,9 +1087,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[52] condition:recv_length > 76, is_message_from_client = true, record_data is ssl record data, but is a error hello message,
+		// unit_test[52] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = true, record_data is ssl record data, but is a error hello message,
 		// unit_test[52] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1109,9 +1107,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[53] condition:recv_length > 76, is_message_from_client = false, record_data is ssl record data, but is a error hello message,
+		// unit_test[53] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = false, record_data is ssl record data, but is a error hello message,
 		// unit_test[53] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1129,9 +1127,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[54] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[54] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[54] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1149,9 +1147,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[55] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[55] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[55] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1169,9 +1167,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[56] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[56] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[56] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1189,9 +1187,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[57] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[57] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[57] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1209,9 +1207,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[58] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[58] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[58] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1229,9 +1227,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[59] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[59] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[59] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1249,9 +1247,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[60] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[60] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[60] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1269,9 +1267,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[61] condition:recv_length > 76, record_data is ssl record data, but is a error hello message
+		// unit_test[61] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
 		// unit_test[61] check:check_ssl_record_sendable() return -1 (異常)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1289,9 +1287,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[62] condition:recv_length > 76, record_data is ssl record data, and is client hello message
+		// unit_test[62] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[62] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1303,17 +1301,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[63] condition:recv_length > 76, record_data is ssl record data, and is client hello message
+		// unit_test[63] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[63] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1325,17 +1323,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[64] condition:recv_length > 76, record_data is ssl record data, and is client hello message
+		// unit_test[64] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[64] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1347,17 +1345,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[65] condition:recv_length > 76, record_data is ssl record data, and is client hello message
+		// unit_test[65] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
 		// unit_test[65] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1369,17 +1367,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = true;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[66] condition:recv_length > 76, record_data is ssl record data, and is server hello message
+		// unit_test[66] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[66] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1391,17 +1389,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[67] condition:recv_length > 76, record_data is ssl record data, and is server hello message
+		// unit_test[67] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[67] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1413,17 +1411,17 @@ public:
 		record_data[10] = 0x01;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[68] condition:recv_length > 76, record_data is ssl record data, and is server hello message
+		// unit_test[68] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[68] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1435,17 +1433,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[69] condition:recv_length > 76, record_data is ssl record data, and is server hello message
+		// unit_test[69] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
 		// unit_test[69] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = 100;
+		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1457,17 +1455,17 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[70] condition:recv_length = MAX_BUFFER_SIZE + 76, record_data is ssl record data, and is server hello message
+		// unit_test[70] condition:recv_length = MAX_SSLID_BUFFER_SIZE, record_data is ssl record data, and is server hello message
 		// unit_test[70] check:check_ssl_record_sendable() return 0 (送信可能)
-		recv_length = MAX_BUFFER_SIZE + 76;
+		recv_length = MAX_SSLID_BUFFER_SIZE;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
 		record_data[1] = 0x03;
@@ -1479,11 +1477,11 @@ public:
 		record_data[10] = 0x00;
 		is_message_from_client = false;
 		is_hello_message = false;
-		all_length = 0;
+		all_length = 0u;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK(is_hello_message);
-		BOOST_CHECK_EQUAL(all_length, 163);
+		BOOST_CHECK_EQUAL(all_length, 163u);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
@@ -1491,7 +1489,7 @@ public:
 		// unit_test[71] check:check_ssl_record_sendable() return -1 (異常)
 		record_data = NULL;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
-				record_data, 0, all_length, is_hello_message);
+				record_data, 0u, all_length, is_hello_message);
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 	}

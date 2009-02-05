@@ -5,7 +5,7 @@
 #
 TARGET		= http_protocol_module_base_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
+CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../../logger \
 				-I../../../parameter \
 				-I../../../include \

@@ -1,5 +1,6 @@
 #include "sslid_to_be_test_file.h"
 #include "../../include/protocol_module_base.h"
+#include <string.h>
 
 using namespace std;
 using namespace boost;
@@ -14,49 +15,49 @@ LOG_LEVEL_TAG	stb_getloglevel(){
 	return LOG_LV_NONE;
 }
 void	stb_putLogFatal( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_FATAL
-//				% message_id
-//				% message.c_str()
-//				% hostname;
-//    cout << endl;
+	cout << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_FATAL
+				% message_id
+				% message.c_str()
+				% hostname;
+    cout << endl;
 }
 void	stb_putLogError( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_ERROR
-//				% message_id
-//				% message.c_str()
-//				% hostname;
-//    cout << endl;
+	cout << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_ERROR
+				% message_id
+				% message.c_str()
+				% hostname;
+    cout << endl;
 }
 void	stb_putLogWarn( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_WARN
-//				% message_id
-//				% message.c_str()
-//				% hostname;
-//    cout << endl;
+	cout << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_WARN
+				% message_id
+				% message.c_str()
+				% hostname;
+    cout << endl;
 }
 void	stb_putLogInfo( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_INFO
-//				% message_id
-//				% message.c_str()
-//				% hostname;
-//    cout << endl;
+	cout << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_INFO
+				% message_id
+				% message.c_str()
+				% hostname;
+    cout << endl;
 }
 void	stb_putLogDebug( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_DEBUG
-//				% message_id
-//				% message.c_str()
-//				% hostname;
-//    cout << endl;
+	cout << boost::format( "%s%d%06d %s %s" )
+				% "PM"
+				% LOG_LV_DEBUG
+				% message_id
+				% message.c_str()
+				% hostname;
+    cout << endl;
 }
 
 //new operator function
@@ -243,10 +244,39 @@ class sslid_replication_data_processor_stub : public sslid_replication_data_proc
 			return replication_area;
 		}
 
-        std::deque<sslid_replication_temp_data> get_temp_list()
+        std::deque<sslid_replication_temp_data>& get_temp_list()
 		{
 			return temp_list;
 		}
+        void register_getloglevel(getloglevel_func_type stu_getloglevel)
+        {
+        	getloglevel=stu_getloglevel;
+        }
+
+        void register_putLogFatal(logger_func_type stu_putLogFatal)
+        {
+        	putLogFatal=stu_putLogFatal;
+        }
+
+        void register_putLogError(logger_func_type stu_putLogError)
+        {
+        	putLogError=stu_putLogError;
+        }
+
+        void register_putLogWarn(logger_func_type stu_putLogWarn)
+        {
+        	putLogWarn=stu_putLogWarn;
+        }
+
+        void register_putLogInfo(logger_func_type stu_putLogInfo)
+        {
+        	putLogInfo=stu_putLogInfo;
+        }
+
+        void register_putLogDebug(logger_func_type stu_putLogDebug)
+        {
+        	putLogDebug=stu_putLogDebug;
+        }
 
 };
 
@@ -408,7 +438,7 @@ void finalize_test() {
     BOOST_CHECK(this->session_data_processor == NULL);
     BOOST_CHECK(this->replication_data_processor == NULL);
 
-    // unit_test[9]
+    // unit_test[9] unnormal
     this->getloglevel = stb_getloglevel;
     this->putLogFatal = stb_putLogFatal;
     this->putLogError = stb_putLogError;
@@ -1905,7 +1935,7 @@ void handle_session_finalize_test() {
 //120end===========================================
 //handle_accept
 void handle_accept_test(){
-	//unit_test[5] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
+	//unit_test[121] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
 	boost::asio::ip::tcp::endpoint ep;
 	session_thread_data_sslid thread_up_data_value;
 	thread_up_data_value.thread_division=THREAD_DIVISION_UP_STREAM;
@@ -1927,12 +1957,12 @@ void handle_client_recv_test() {
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     int recvlen = 0;
     EVENT_TAG status;
+	char* mem_cmp_buffer;
+    int mem_cmp_result;
+	int mem_cmp_length;
 
-    // unit_test[10]
-    // unit_test[] condition:
-    // unit_test[] 	end_flag = END_FLAG_ON
-    // unit_test[] check:
-    // unit_test[] 	handle_client_recv() return CLIENT_RECV
+    // unit_test[122] end_flag = END_FLAG_ON
+    // unit_test[122] test data:handle_client_recv() return CLIENT_RECV
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_ON;
     this->session_thread_data_map[boost::this_thread::get_id()]
@@ -1943,33 +1973,34 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[11]
-    // unit_test[]  condition:
-    // unit_test[] 	end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size > 0, recvlen > 0
-    // unit_test[]   data_begain_offset = 0
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    // unit_test[123] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size > 0,
+    // unit_test[123] recvlen > 0,data_begain_offset = 0
+    // unit_test[123] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0;
     up_thread_data->data_begain_offset = 0;
     up_thread_data->current_record_rest_size = 10;
+    recvlen = 3;
+    for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x01;
+	}
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+    mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[12]
-    // unit_test[]  condition:
-    // unit_test[] 	end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size > 0, recvlen > 0
-    // unit_test[]   data_begain_offset > 0
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    // unit_test[124] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size > 0, recvlen > 0,
+    // unit_test[124] data_begain_offset > 0
+    // unit_test[124] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -1977,20 +2008,24 @@ void handle_client_recv_test() {
     up_thread_data->current_record_rest_size = 10u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
+	recvlen = 3;
+	for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x02;
+	}
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[13]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    // unit_test[125] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
+    // unit_test[125] data_begain_offset = 0,check_ssl_record_sendable() return -1 (異常)
+    // unit_test[125] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2000,20 +2035,23 @@ void handle_client_recv_test() {
             = up_thread_data;
     recvbuffer[0] = 0x00;
     recvlen = 6;
+	for(int i=1; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x03;
+	}
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[14]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset > 0
-    // unit_test[]   check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    // unit_test[126] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
+    // unit_test[126] data_begain_offset > 0,check_ssl_record_sendable() return -1 (異常)
+    // unit_test[126] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2023,20 +2061,23 @@ void handle_client_recv_test() {
             = up_thread_data;
     recvbuffer[0] = 0x00;
     recvlen = 6;
+	for(int i=1; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x04;
+	}
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
+    mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[15]
-    // unit_test[]  condition:
-    // unit_test[] 	end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    // unit_test[127] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
+    // unit_test[127] data_begain_offset = 0,check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[127] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2045,20 +2086,20 @@ void handle_client_recv_test() {
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 1;
+	recvbuffer[0] = 0x05;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 1u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, CLIENT_RECV);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[16]
-    // unit_test[]  condition:
-    // unit_test[] 	end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset > 0
-    // unit_test[]   check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    // unit_test[128] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
+    // unit_test[128] data_begain_offset > 0,check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[128] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2067,22 +2108,21 @@ void handle_client_recv_test() {
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 1;
+	recvbuffer[0] = 0x06;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 1u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, CLIENT_RECV);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[17]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is hello message
-    // unit_test[]  check:
-    // unit_test[]   hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[]   current_record_rest_size, data_size, data_begain_offset
+    // unit_test[129] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0,
+    // unit_test[129] check_ssl_record_sendable() return 0 (送信可能),is hello message
+    // unit_test[129] test data:hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT,
+    // unit_test[129] current_record_rest_size, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2097,10 +2137,19 @@ void handle_client_recv_test() {
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
     recvbuffer[5] = 0x01;
+	recvbuffer[6] = 0x07;
+	recvbuffer[7] = 0x07;
+	recvbuffer[8] = 0x07;
     recvbuffer[9] = 0x03;
     recvbuffer[10] = 0x01;
+	for(int i=11;i<recvlen;i++)
+	{
+		recvbuffer[i] = 0x07;
+	}
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
@@ -2109,14 +2158,10 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[18]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,data_begain_offset > 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is hello message
-    // unit_test[]  check:
-    // unit_test[]   hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[]   current_record_rest_size, data_size, data_begain_offset
+    // unit_test[130] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,data_begain_offset > 0
+    // unit_test[130] check_ssl_record_sendable() return 0 (送信可能), is hello message
+    // unit_test[130] test data:hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT,
+    // unit_test[130] current_record_rest_size, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2131,10 +2176,19 @@ void handle_client_recv_test() {
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
     recvbuffer[5] = 0x01;
+	recvbuffer[6] = 0x08;
+	recvbuffer[7] = 0x08;
+	recvbuffer[8] = 0x08;
     recvbuffer[9] = 0x03;
     recvbuffer[10] = 0x01;
+	for(int i=11; i< recvlen; i++)
+	{
+		recvbuffer[i] = 0x08;
+	}
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
@@ -2143,14 +2197,10 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[19]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is not hello message
-    // unit_test[]  check:
-    // unit_test[]   hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[]   current_record_rest_size, data_size, data_begain_offset
+    // unit_test[130] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0
+    // unit_test[130] check_ssl_record_sendable() return 0 (送信可能), is not hello message
+    // unit_test[130] test data:hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT,
+    // unit_test[130] current_record_rest_size, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2164,8 +2214,11 @@ void handle_client_recv_test() {
     recvbuffer[2] = 0x01;
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
+	recvbuffer[5] = 0x09;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
@@ -2174,14 +2227,10 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[20]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset > 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is not hello message
-    // unit_test[]  check:
-    // unit_test[]   hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[]   current_record_rest_size, data_size, data_begain_offset
+    // unit_test[131] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset > 0
+    // unit_test[131] check_ssl_record_sendable() return 0 (送信可能), is not hello message
+    // unit_test[131] test data:hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT,
+    // unit_test[131] current_record_rest_size, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2195,8 +2244,11 @@ void handle_client_recv_test() {
     recvbuffer[2] = 0x01;
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
+	recvbuffer[5] = 0x10;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
@@ -2205,11 +2257,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[21]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size != 0, data_begain_offset != 0
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    // unit_test[132] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size != 0,
+    // unit_test[132] data_begain_offset != 0
+    // unit_test[132] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2218,19 +2268,27 @@ void handle_client_recv_test() {
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 5;
+	for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x11;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[22]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size != 0, data_begain_offset = 0
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    // unit_test[133] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size != 0, data_begain_offset = 0
+    // unit_test[133] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2239,20 +2297,28 @@ void handle_client_recv_test() {
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 5;
+	for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x12;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[23]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
-    // unit_test[]   check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    // unit_test[134] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
+    // unit_test[134] check_ssl_record_sendable() return -1 (異常)
+    // unit_test[134] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2262,20 +2328,28 @@ void handle_client_recv_test() {
             = up_thread_data;
     recvlen = 5;
     recvbuffer[0] = 0x00;
+	for(int i=1; i< recvlen; i++)
+	{
+		recvbuffer[i] = 0x13;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[24]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    // unit_test[135] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
+    // unit_test[135] check_ssl_record_sendable() return -1 (異常)
+    // unit_test[135] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2285,20 +2359,28 @@ void handle_client_recv_test() {
             = up_thread_data;
     recvlen = 5;
     recvbuffer[0] = 0x00;
+	for(int i=1; i< recvlen; i++)
+	{
+		recvbuffer[i] = 0x13;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[25]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
-    // unit_test[]   check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    // unit_test[136] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
+    // unit_test[136] check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[136] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 1u;
@@ -2307,20 +2389,28 @@ void handle_client_recv_test() {
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 2;
+	for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x14;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, CLIENT_RECV);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[26]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    // unit_test[137] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
+    // unit_test[137] check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[137] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 1u;
@@ -2329,21 +2419,29 @@ void handle_client_recv_test() {
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 2;
+	for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x15;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, CLIENT_RECV);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[27]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size = 0,data_begain_offset != 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能), is hello message
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
-    // unit_test[]   hello_message_flag
+    // unit_test[138] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size = 0,data_begain_offset != 0
+    // unit_test[138] check_ssl_record_sendable() return 0 (送信可能), is hello message
+    // unit_test[138] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
+    // unit_test[138] current_record_rest_size, hello_message_flag
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2363,23 +2461,31 @@ void handle_client_recv_test() {
     recvbuffer[5] = 0x00;
     recvbuffer[6] = 0x03;
     recvbuffer[7] = 0x01;
+	for(int i=8; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x16;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 79u);
     BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[28]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能), is hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
-    // unit_test[]   hello_message_flag
+    // unit_test[139] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size = 0,data_begain_offset = 0
+    // unit_test[139] check_ssl_record_sendable() return 0 (送信可能), is hello message
+    // unit_test[139] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
+    // unit_test[139] current_record_rest_size, hello_message_flag
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2399,23 +2505,31 @@ void handle_client_recv_test() {
     recvbuffer[5] = 0x00;
     recvbuffer[6] = 0x03;
     recvbuffer[7] = 0x01;
+	for(int i=8; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x17;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 79u);
     BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[29]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF,data_size>0,current_record_rest_size=0,data_begain_offset != 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能), is not hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
-    // unit_test[]   hello_message_flag
+    // unit_test[140] end_flag = END_FLAG_OFF,data_size>0,current_record_rest_size=0,data_begain_offset != 0
+    // unit_test[140] check_ssl_record_sendable() return 0 (送信可能), is not hello message
+    // unit_test[140] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
+    // unit_test[140] current_record_rest_size, hello_message_flag
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2429,23 +2543,31 @@ void handle_client_recv_test() {
     recvlen = 6;
     recvbuffer[0] = 0x00;
     recvbuffer[1] = 0x9e;
+	for(int i=2; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x18;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
     BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[30]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF,data_size>0,current_record_rest_size=0,data_begain_offset = 0
-    // unit_test[]   check_ssl_record_sendable() return 0 (送信可能), is not hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,current_record_rest_size
-    // unit_test[]   hello_message_flag
+    // unit_test[141] end_flag = END_FLAG_OFF,data_size>0,current_record_rest_size=0,data_begain_offset = 0
+    // unit_test[141] check_ssl_record_sendable() return 0 (送信可能), is not hello message
+    // unit_test[141] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
+    // unit_test[141] current_record_rest_size, hello_message_flag
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2459,40 +2581,42 @@ void handle_client_recv_test() {
     recvlen = 6;
     recvbuffer[0] = 0x00;
     recvbuffer[1] = 0x9e;
+	for(int i=2; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x19;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = up_thread_data->data_size + recvlen;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
+	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
     BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[31]
-    // unit_test[]  condition:
-    // unit_test[]   recvlen > recvbuffer.size()
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE
+    // unit_test[142] recvlen > recvbuffer.size()
+    // unit_test[142] test data:handle_client_recv() return FINALIZE
     recvlen = recvbuffer.size() + 1;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[32]
-    // unit_test[]  condition:
-    // unit_test[]   boost::this_thread::get_id() is not in map
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE
+    // unit_test[143] thread id is not in map
+    // unit_test[143] test data:handle_client_recv() return FINALIZE
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[33]
-    // unit_test[]  condition:
-    // unit_test[]   end_flag = END_FLAG_OFF, data_size+recvlen > MAX_BUFFER_SIZE +76
-    // unit_test[]  check:
-    // unit_test[]   handle_client_recv() return FINALIZE, end_flag=END_FLAG_ON
+    // unit_test[144] end_flag = END_FLAG_OFF, data_size+recvlen > MAX_BUFFER_SIZE +76
+    // unit_test[144] test data:handle_client_recv() return FINALIZE, end_flag=END_FLAG_ON
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 76u;
@@ -2536,11 +2660,8 @@ void handle_realserver_select_tcp_test() {
     boost::function<void(const unsigned int, const std::string&,
             const char*, int)> inputLogDebug = stb_putLogDebug;
 
-    // unit_test[51]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = realserver_connect_failed_max_count
-    // unit_test[]  check:
-    // unit_test[]   end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[145] realserver_connect_failed_count = realserver_connect_failed_max_count
+    // unit_test[145] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
             = this->realserver_connect_failed_max_count;
@@ -2553,11 +2674,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[52]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count > realserver_connect_failed_max_count
-    // unit_test[]  check:
-    // unit_test[]   end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[146] realserver_connect_failed_count > realserver_connect_failed_max_count
+    // unit_test[146] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
             = this->realserver_connect_failed_max_count + 1;
@@ -2570,12 +2688,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[53]
-    // unit_test[]  condition:
-    // unit_test[]   0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 1(ON)
-    // unit_test[]   get endpoint OK !
-    // unit_test[]  check:
-    // unit_test[]   selected_realserver, handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[147] 0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 1(ON)
+    // unit_test[147] get endpoint OK !
+    // unit_test[147] test data:selected_realserver, handle_realserver_select() return REALSERVER_CONNECT
     this->schedule_tcp = schedule_tcp_func1;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
@@ -2590,12 +2705,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[54]
-    // unit_test[]  condition:
-    // unit_test[]   0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 1(ON)
-    // unit_test[]   get endpoint failed !
-    // unit_test[]  check:
-    // unit_test[]   end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[148] 0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 1(ON)
+    // unit_test[148] get endpoint failed !
+    // unit_test[148] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
     this->schedule_tcp = schedule_tcp_func2;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
@@ -2610,11 +2722,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[55]
-    // unit_test[]  condition:
-    // unit_test[]   0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 0 (OFF)
-    // unit_test[]  check:
-    // unit_test[]   end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[149] 0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 0 (OFF)
+    // unit_test[149] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
             = this->realserver_connect_failed_max_count - 1;
@@ -2628,11 +2737,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[56]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver != NULL
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[150] realserver_connect_failed_count = 0, selected_realserver != NULL
+    // unit_test[150] test data:handle_realserver_select() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep1;
@@ -2644,11 +2750,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[57]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = false
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return FINALIZE, end_flag = END_FLAG_ON
+    // unit_test[151] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = false
+    // unit_test[151] test data:handle_realserver_select() return FINALIZE, end_flag = END_FLAG_ON
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2663,12 +2766,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[58]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   no ssl session id, get endpoint OK!
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[152] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[152] no ssl session id, get endpoint OK!
+    // unit_test[152] test data:handle_realserver_select() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2685,12 +2785,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[59]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   no session id, get endpoint failed !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[153] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[153] no session id, get endpoint failed !
+    // unit_test[153] test data:handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2708,12 +2805,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[60]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint OK !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[154] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[154] have a ssl session id, get endpoint OK !
+    // unit_test[154] test data:handle_realserver_select() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2746,12 +2840,9 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[61]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint failed !reschedule, get endpoint OK !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[155] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[155] have a ssl session id, get endpoint failed !reschedule, get endpoint OK !
+    // unit_test[155] test data:handle_realserver_select() return REALSERVER_CONNECT
     this->schedule_tcp = schedule_tcp_func1;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
@@ -2775,12 +2866,9 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[62]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint failed !reschedule, get endpoint failed !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[156] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[156] have a ssl session id, get endpoint failed !reschedule, get endpoint failed !
+    // unit_test[156] test data:handle_realserver_select() return CLIENT_DISCONNECT
     this->schedule_tcp = schedule_tcp_func2;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
@@ -2804,12 +2892,9 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[63]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint failed! no reschedule
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[157] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[157] have a ssl session id, get endpoint failed! no reschedule
+    // unit_test[157] test data:handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2831,11 +2916,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[64]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver != NULL
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[158] realserver_connect_failed_count < 0, selected_realserver != NULL
+    // unit_test[158] test data:handle_realserver_select() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep1;
@@ -2847,11 +2929,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[65]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = false
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return FINALIZE, end_flag = END_FLAG_ON
+    // unit_test[159] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = false
+    // unit_test[159] test data:handle_realserver_select() return FINALIZE, end_flag = END_FLAG_ON
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
@@ -2866,12 +2945,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[66]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   no ssl session id, get endpoint OK!
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[160] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[160] no ssl session id, get endpoint OK!
+    // unit_test[160] test data:handle_realserver_select() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
@@ -2888,12 +2964,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[67]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   no session id, get endpoint failed !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[161] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[161] no session id, get endpoint failed !
+    // unit_test[161] test data:handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
@@ -2911,12 +2984,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[68]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint OK !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[162] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[162] have a ssl session id, get endpoint OK !
+    // unit_test[162] test data:handle_realserver_select() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
@@ -2946,12 +3016,9 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[69]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint failed !reschedule, get endpoint OK !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return REALSERVER_CONNECT
+    // unit_test[163] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[163] have a ssl session id, get endpoint failed !reschedule, get endpoint OK !
+    // unit_test[163] test data:handle_realserver_select() return REALSERVER_CONNECT
     this->schedule_tcp = schedule_tcp_func1;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
@@ -2975,12 +3042,9 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[70]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint failed !reschedule, get endpoint failed !
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[164] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[164] have a ssl session id, get endpoint failed !reschedule, get endpoint failed !
+    // unit_test[164] test data:handle_realserver_select() return CLIENT_DISCONNECT
     this->schedule_tcp = schedule_tcp_func2;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
@@ -3004,12 +3068,9 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[71]
-    // unit_test[]  condition:
-    // unit_test[]   realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[]   have a ssl session id, get endpoint failed! no reschedule
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return CLIENT_DISCONNECT
+    // unit_test[165] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
+    // unit_test[165] have a ssl session id, get endpoint failed! no reschedule
+    // unit_test[165] test data:handle_realserver_select() return CLIENT_DISCONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
@@ -3034,11 +3095,8 @@ void handle_realserver_select_tcp_test() {
 
 //handle_realserver_select(udp)
 void handle_realserver_select_udp_test(){
-    // unit_test[72]
-    // unit_test[]  condition:
-    // unit_test[]   for udp
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_select() return STOP
+    // unit_test[166] for udp
+    // unit_test[166] test data:handle_realserver_select() return STOP
     EVENT_TAG status;
     boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen;
@@ -3055,23 +3113,31 @@ void handle_realserver_connect_test() {
     size_t datalen = 0;
     session_thread_data_sslid* up_thread_data;
     EVENT_TAG status;
+	char* mem_cmp_buffer;
+	int mem_cmp_length;
+	int mem_cmp_result;
 
-    // unit_test[73]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size>data_size, data_size<送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[167] current_record_rest_size>data_size, data_size<送信バッファサイズ
+    // unit_test[167] test data:data_begain_offset,current_record_rest_size,data_size, datalen
+    // unit_test[167] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 20u;
     up_thread_data->data_size = 10u;
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x01;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = up_thread_data->data_size;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
@@ -3079,24 +3145,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, 10u);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[74]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size>data_size, data_size=送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[168] current_record_rest_size>data_size, data_size=送信バッファサイズ
+    // unit_test[168] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[168] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x02;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = up_thread_data->data_size;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 1u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
@@ -3104,24 +3176,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[75]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=data_size, data_size<送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[169] current_record_rest_size=data_size, data_size<送信バッファサイズ
+    // unit_test[169] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[169] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
     up_thread_data->data_size = 10u;
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x03;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = up_thread_data->data_size;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
@@ -3129,24 +3207,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, 10u);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[76]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=data_size, data_size=送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[170] current_record_rest_size=data_size, data_size=送信バッファサイズ
+    // unit_test[170] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[170] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x04;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = up_thread_data->data_size;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
@@ -3154,24 +3238,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[77]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size>data_size,data_size＞送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[171] current_record_rest_size>data_size,data_size＞送信バッファサイズ
+    // unit_test[171] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[171] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 5u;
     up_thread_data->data_begain_offset = 10u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x05;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = MAX_BUFFER_SIZE;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 5u);
@@ -3179,24 +3269,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[78]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=data_size,data_size＞送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[172] current_record_rest_size=data_size,data_size＞送信バッファサイズ
+    // unit_test[172] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[172] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
     up_thread_data->data_begain_offset = 10u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x06;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = MAX_BUFFER_SIZE;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
@@ -3204,24 +3300,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[79]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size＜data_size, current_record_rest_size<送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[173] current_record_rest_size＜data_size, current_record_rest_size<送信バッファサイズ
+    // unit_test[173] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[173] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
     up_thread_data->data_size = 20u;
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x07;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = up_thread_data->current_record_rest_size;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 15u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
@@ -3229,24 +3331,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, 10u);
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[80]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size<data_size, current_record_rest_size=送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[174] current_record_rest_size<data_size, current_record_rest_size=送信バッファサイズ
+    // unit_test[174] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[174] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x08;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = up_thread_data->current_record_rest_size;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
@@ -3254,24 +3362,30 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[81]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size＜data_size,current_record_rest_size＞送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
-    // unit_test[]   datalen
+    // unit_test[175] current_record_rest_size＜data_size,current_record_rest_size＞送信バッファサイズ
+    // unit_test[175] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[175] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
     up_thread_data->data_size =static_cast<size_t>(MAX_BUFFER_SIZE) + 20u;
     up_thread_data->data_begain_offset = 5u;
+	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+	{
+		up_thread_data->data_buffer[i] = 0x09;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+	mem_cmp_length = MAX_BUFFER_SIZE;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     status = this->handle_realserver_connect(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 20u);
@@ -3279,6 +3393,7 @@ void handle_realserver_connect_test() {
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
     BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
     delete up_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
 }
@@ -3299,30 +3414,30 @@ void handle_realserver_connection_fail_test(){
 	iter=this->session_thread_data_map.find(boost::this_thread::get_id());
 	session_thread_data_sslid* data=iter->second;
 
-	//unit_test[9] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-	//unit_test[9] test data:no rescheduleモードの場合,the first fail
+	//unit_test[176] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
+	//unit_test[176] test data:no rescheduleモードの場合,the first fail
 	this->reschedule=0;
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
 
-	//unit_test[7] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
-	//unit_test[7] test data:rescheduleモードの場合,the first fail
+	//unit_test[177] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
+	//unit_test[177] test data:rescheduleモードの場合,the first fail
 	this->reschedule=1;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,1);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
 
-	//unit_test[8] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-	//unit_test[8] test data:rescheduleモードの場合, the third fail
+	//unit_test[178] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+	//unit_test[178] test data:rescheduleモードの場合, the third fail
 	this->reschedule=1;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
 
-	//unit_test[9] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
-	//unit_test[9] test data:no rescheduleモードの場合,the forth fail
+	//unit_test[179] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
+	//unit_test[179] test data:no rescheduleモードの場合,the forth fail
 	this->reschedule=0;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
@@ -3336,40 +3451,31 @@ void handle_realserver_send_test() {
     session_thread_data_sslid* up_thread_data;
     EVENT_TAG status;
 
-    // unit_test[83]
-    // unit_test[]  condition:
-    // unit_test[]   data_size = 0
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_send() return CLIENT_RECV
+    // unit_test[180] data_size = 0
+    // unit_test[180] test data:handle_realserver_send() return CLIENT_RECV
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
+    status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, CLIENT_RECV);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[84]
-    // unit_test[]  condition:
-    // unit_test[]   data_size > 0, current_record_rest_size > 0
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_send() return REALSERVER_CONNECT
+    // unit_test[181] data_size > 0, current_record_rest_size > 0
+    // unit_test[181] test data:handle_realserver_send() return REALSERVER_CONNECT
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->current_record_rest_size = 10u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
+    status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[85]
-    // unit_test[]  condition:
-    // unit_test[]   data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_send() return FINALIZE, end_flag = END_FLAG_ON
+    // unit_test[182] data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常)
+    // unit_test[182] test data:handle_realserver_send() return FINALIZE, end_flag = END_FLAG_ON
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->data_begain_offset = 0u;
@@ -3377,33 +3483,28 @@ void handle_realserver_send_test() {
     up_thread_data->data_buffer[0] = 0x00;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
+    status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[86]
-    // unit_test[]  condition:
-    // unit_test[]   data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_send() return CLIENT_RECV
+    // unit_test[183] data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[183] test data:handle_realserver_send() return CLIENT_RECV
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 1u;
     up_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
+    status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, CLIENT_RECV);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[87]
-    // unit_test[]  condition:
-    // unit_test[]   data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能)
-    // unit_test[]   is a hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_send() return REALSERVER_CONNECT,current_record_rest_size,hello_message_flag
+    // unit_test[184] data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能)
+    // unit_test[184] is a hello message
+    // unit_test[184] test data:handle_realserver_send() return REALSERVER_CONNECT,current_record_rest_size,
+    // unit_test[184] hello_message_flag
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 76u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3418,19 +3519,17 @@ void handle_realserver_send_test() {
     up_thread_data->hello_message_flag = false;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
+    status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[88]
-    // unit_test[]  condition:
-    // unit_test[]   data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能)
-    // unit_test[]   is not a hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_send(0 return REALSERVER_CONNECT,current_record_rest_size,hello_message_flag
+    // unit_test[185] data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能)
+    // unit_test[185] is not a hello message
+    // unit_test[185] test data:handle_realserver_send(0 return REALSERVER_CONNECT,current_record_rest_size,
+    // unit_test[185] hello_message_flag
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3442,7 +3541,7 @@ void handle_realserver_send_test() {
     up_thread_data->hello_message_flag = true;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
+    status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
@@ -3454,72 +3553,60 @@ void handle_realserver_send_test() {
 //handle_realserver_recv(tcp)
 void handle_realserver_recv_tcp_test() {
 
-    boost::thread down_thread(down_thread_func);
     session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
     boost::asio::ip::tcp::endpoint rs_endpoint;
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     int recvlen;
 
-    // unit_test[89]
-    // unit_test[]  condition:
-    // unit_test[]   data_size = 0, current_record_rest_size > 0
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    // unit_test[186] data_size = 0, current_record_rest_size > 0
+    // unit_test[186] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 10u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    recvlen = 0;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[90]
-    // unit_test[]  condition:
-    // unit_test[]   data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return FINALIZE, end_flag = END_FLAG_ON
+    // unit_test[187] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常)
+    // unit_test[187] test data:handle_realserver_recv() return FINALIZE, end_flag = END_FLAG_ON
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x00;
     recvlen = 6;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[91]
-    // unit_test[]  condition:
-    // unit_test[]   data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return REALSERVER_RECV
+    // unit_test[188] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[188] test data:handle_realserver_recv() return REALSERVER_RECV
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = 3;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[92]
-    // unit_test[]  condition:
-    // unit_test[]   data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is a hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    // unit_test[189] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
+    // unit_test[189] is a hello message
+    // unit_test[189] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x16;
     recvbuffer[1] = 0x03;
     recvbuffer[2] = 0x01;
@@ -3529,67 +3616,58 @@ void handle_realserver_recv_tcp_test() {
     recvbuffer[9] = 0x03;
     recvbuffer[10] = 0x01;
     recvlen = 76;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[down_thread.get_id()]->hello_message_flag);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[93]
-    // unit_test[]  condition:
-    // unit_test[]   data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is not a hello message
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    // unit_test[190] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
+    // unit_test[190] is not a hello message
+    // unit_test[190] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x17;
     recvbuffer[1] = 0x03;
     recvbuffer[2] = 0x01;
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
     recvlen = 10;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[down_thread.get_id()]->hello_message_flag);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[94]
-    // unit_test[]  condition:
-    // unit_test[]   data_size > 0, current_record_rest_size > 0, data_begain_offset>0
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    // unit_test[191] data_size > 0, current_record_rest_size > 0, data_begain_offset>0
+    // unit_test[191] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10u;
     down_thread_data->data_begain_offset = 5;
     down_thread_data->current_record_rest_size = 10u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = 15;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->data_size, 25u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->data_begain_offset, 0u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 25u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[95]
-    // unit_test[]  condition:
-    // unit_test[]   data_size + recvlen > MAX_BUFFER_SIZE + 76
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return FINALIZE
+    // unit_test[192] data_size + recvlen > MAX_BUFFER_SIZE + 76
+    // unit_test[192] test data:handle_realserver_recv() return FINALIZE
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 76u + 1u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = MAX_BUFFER_SIZE;
-    status = this->handle_realserver_recv(down_thread.get_id(),
+    status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete down_thread_data;
@@ -3601,11 +3679,8 @@ void handle_realserver_recv_tcp_test() {
 
 //handle_realserver_recv(udp)
 void handle_realserver_recv_udp_test(){
-    // unit_test[96]
-    // unit_test[]  condition:
-    // unit_test[]   for udp
-    // unit_test[]  check:
-    // unit_test[]   handle_realserver_recv() return STOP
+    // unit_test[193] for udp
+    // unit_test[193] test data:handle_realserver_recv() return STOP
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     size_t recvlen;
     boost::asio::ip::udp::endpoint rs_endpoint_udp;
@@ -3617,14 +3692,16 @@ void handle_realserver_recv_udp_test(){
 //handle_client_connection_check
 void handle_client_connection_check_test() {
 
-    boost::thread down_thread(down_thread_func);
     boost::array<char, MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen = 0;
     session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
     int maxlist = 0;
     int timeout = 0;
-    sslid_replication_data_processor * replication_data_processor;
+    char* sslid_replication_area_begain;
+    int sslid_replication_area_size = 0;
+    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+    sslid_replication_data_processor * replication_data_processor = NULL;
     getloglevel_func_type ingetloglevel = stb_getloglevel;
     logger_func_type inputLogFatal = stb_putLogFatal;
     logger_func_type inputLogError = stb_putLogError;
@@ -3632,104 +3709,86 @@ void handle_client_connection_check_test() {
     logger_func_type inputLogInfo = stb_putLogInfo;
     logger_func_type inputLogDebug = stb_putLogDebug;
 
-    // unit_test[45]
-    // unit_test[]  condition:
-    // unit_test[]   down_thread_id is not in the map
-    // unit_test[]  check:
-    // unit_test[]   handle_client_connection return FINALIZE
-    status = this->handle_client_connection_check(down_thread.get_id(),
+    // unit_test[194] down_thread_id is not in the map
+    // unit_test[194] test data:handle_client_connection return FINALIZE
+    status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[46]
-    // unit_test[]  condition:
-    // unit_test[]  	current_record_rest_size>0
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_connection return CLIENT_SEND
+    // unit_test[195] current_record_rest_size>0
+    // unit_test[195] test data:handle_client_connection return CLIENT_SEND
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 10u;
     down_thread_data->data_size = 76u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(down_thread.get_id(),
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[47]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=0
-    // unit_test[]   hello_message_flag=true
-    // unit_test[]   data_size >= 76
-    // unit_test[]   get_ssl_session_id return 0 (have session id)
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_connection return CLIENT_SEND
+    // unit_test[196] current_record_rest_size=0,hello_message_flag=true,data_size >= 76
+    // unit_test[196] get_ssl_session_id return 0 (have session id)
+    // unit_test[196] test data:handle_client_connection return CLIENT_SEND
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[43] = 0x20;
     down_thread_data->data_size = 76u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
+    maxlist = 3;
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+    		sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+    		inputLogWarn, inputLogInfo, inputLogDebug);
     this->session_data_processor = new sslid_session_data_processor(
             maxlist, timeout, replication_data_processor, stb_getloglevel,
             stb_putLogFatal, stb_putLogError, stb_putLogWarn,
             stb_putLogInfo, stb_putLogDebug);
-    status = this->handle_client_connection_check(down_thread.get_id(),
+    status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
     delete down_thread_data;
+    delete replication_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[48]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=0
-    // unit_test[]   hello_message_flag=true
-    // unit_test[]   get_ssl_session_id return 1 (no session id)
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_connection return CLIENT_SEND
+    // unit_test[197] current_record_rest_size=0,hello_message_flag=true,
+    // unit_test[197] get_ssl_session_id return 1 (no session id)
+    // unit_test[197] test data:handle_client_connection return CLIENT_SEND
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[43] = 0x00;
     down_thread_data->data_size = 76u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(down_thread.get_id(),
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[49]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=0
-    // unit_test[]   hello_message_flag=true
-    // unit_test[]   get_ssl_session_id return -1 (error)
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_connection return FINALIZE
+    // unit_test[198] current_record_rest_size=0,hello_message_flag=true
+    // unit_test[198] get_ssl_session_id return -1 (error)
+    // unit_test[198] test data:handle_client_connection return FINALIZE
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[43] = 0x00;
     down_thread_data->data_size = 0u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(down_thread.get_id(),
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[50]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=0
-    // unit_test[]   hello_message_flag=false
-    // unit_test[]  check:
-    // unit_test[]   handle_client_connection return CLIENT_SEND
+    // unit_test[199] current_record_rest_size=0,hello_message_flag=false
+    // unit_test[199] test data:handle_client_connection return CLIENT_SEND
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = false;
     down_thread_data->data_size = 76u;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(down_thread.get_id(),
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
     delete down_thread_data;
@@ -3738,7 +3797,7 @@ void handle_client_connection_check_test() {
 
 //handle_client_select
 void handle_client_select_test(){
-	// unit_test[]
+	// unit_test[200] test data:handle_client_select() return STOP
 	boost::asio::ip::udp::endpoint cl_endpoint;
 	boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
 	size_t datalen;
@@ -3750,129 +3809,91 @@ void handle_client_select_test(){
 //handle_client_send
 void handle_client_send_test() {
 
-    boost::thread down_thread(down_thread_func);
     session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
 
-    // unit_test[34]
-    // unit_test[]  condition:
-    // unit_test[]  	down_thread_id is not in the map
-    // unit_test[]  check:
-    // unit_test[]   handle_client_send() return FINALIZE
+    // unit_test[201] down_thread_id is not in the map
+    // unit_test[201] test data:handle_client_send() return FINALIZE
     this->session_thread_data_map.clear();
-    status = this->handle_client_send(down_thread.get_id());
+    status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[36]
-    // unit_test[]  condition:
-    // unit_test[]  	data_size=0
-    // unit_test[]  	end_flag=END_FLAG_ON
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_send() return CLIENT_DISCONNECT
+    // unit_test[202] data_size=0,end_flag=END_FLAG_ON
+    // unit_test[202] test data:handle_client_send() return CLIENT_DISCONNECT
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0;
     down_thread_data->end_flag = END_FLAG_ON;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[38]
-    // unit_test[]  condition:
-    // unit_test[]  	data_size=0
-    // unit_test[]  	end_flag=END_FLAG_OFF
-    // unit_test[]  check:
-    // unit_test[]   handle_client_send() return REALSERVER_RECV
+    // unit_test[203] data_size=0,end_flag=END_FLAG_OFF
+    // unit_test[203] test data:handle_client_send() return REALSERVER_RECV
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0;
     down_thread_data->end_flag = END_FLAG_OFF;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[39]
-    // unit_test[]  condition:
-    // unit_test[]  	data_size>0
-    // unit_test[]  	current_record_rest_size>0
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_send() return CLIENT_CONNECTION_CHECK
+    // unit_test[204] data_size>0,current_record_rest_size>0
+    // unit_test[204] test data:handle_client_send() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10;
     down_thread_data->current_record_rest_size = 8;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[40]
-    // unit_test[]  condition:
-    // unit_test[]  	data_size>0
-    // unit_test[]  	current_record_rest_size=0
-    // unit_test[]  	check_ssl_record_sendable() return -1 (異常)
-    // unit_test[]  check:
-    // unit_test[]  	end_flag == END_FLAG_ON
-    // unit_test[]   handle_client_send() return FINALIZE
+    // unit_test[205] data_size>0,current_record_rest_size=0,check_ssl_record_sendable() return -1 (異常)
+    // unit_test[205] test data:end_flag == END_FLAG_ON,handle_client_send() return FINALIZE
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10;
     down_thread_data->current_record_rest_size = 0;
     down_thread_data->data_buffer[0] = 0x00;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->end_flag, END_FLAG_ON);
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[41]
-    // unit_test[]  condition:
-    // unit_test[]   data_size>0
-    // unit_test[]   current_record_rest_size=0
-    // unit_test[]   check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[]   end_flag=END_FLAG_ON
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_send() return CLIENT_DISCONNECT
+    // unit_test[206] data_size>0,current_record_rest_size=0,check_ssl_record_sendable() return 1 (送信不可)
+    // unit_test[206] end_flag=END_FLAG_ON
+    // unit_test[206] test data:handle_client_send() return CLIENT_DISCONNECT
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 3;
     down_thread_data->current_record_rest_size = 0;
     down_thread_data->end_flag = END_FLAG_ON;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[42]
-    // unit_test[]  condition:
-    // unit_test[]   data_size>0
-    // unit_test[]   current_record_rest_size=0
-    // unit_test[]   check_ssl_record_sendable()return 1 (送信不可)
-    // unit_test[]   end_flag=END_FLAG_OFF
-    // unit_test[]  check:
-    // unit_test[]  	handle_client_send() return REALSERVER_RECV
+    // unit_test[207] data_size>0,current_record_rest_size=0,check_ssl_record_sendable()return 1 (送信不可)
+    // unit_test[207] end_flag=END_FLAG_OFF
+    // unit_test[207] test data:handle_client_send() return REALSERVER_RECV
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 3;
     down_thread_data->current_record_rest_size = 0;
     down_thread_data->end_flag = END_FLAG_OFF;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[43]
-    // unit_test[]  condition:
-    // unit_test[]  	data_size>=76
-    // unit_test[]  	current_record_rest_size=0
-    // unit_test[]  	check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is hello message
-    // unit_test[]  check:
-    // unit_test[]   current_record_rest_size == all_length
-    // unit_test[]   hello_message_flag == TRUE
-    // unit_test[]  	handle_client_send() return CLIENT_CONNECTION_CHECK
+    // unit_test[208] data_size>=76,current_record_rest_size=0,check_ssl_record_sendable() return 0 (送信可能)
+    // unit_test[208] is hello message
+    // unit_test[208] test data:current_record_rest_size == all_length,hello_message_flag == TRUE
+    // unit_test[208] handle_client_send() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 76;
     down_thread_data->current_record_rest_size = 0;
@@ -3884,24 +3905,18 @@ void handle_client_send_test() {
     down_thread_data->data_buffer[5] = 0x02;
     down_thread_data->data_buffer[9] = 0x03;
     down_thread_data->data_buffer[10] = 0x01;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[down_thread.get_id()]->hello_message_flag);
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[44]
-    // unit_test[]  condition:
-    // unit_test[]  	data_size>=6
-    // unit_test[]  	current_record_rest_size=0
-    // unit_test[]  	check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[]   is not hello message
-    // unit_test[]  check:
-    // unit_test[]   current_record_rest_size == all_length
-    // unit_test[]   hello_message_flag == FALSE
-    // unit_test[]  	handle_client_send() return CLIENT_CONNECTION_CHECK
+    // unit_test[209] data_size>=6,current_record_rest_size=0,check_ssl_record_sendable() return 0 (送信可能)
+    // unit_test[209] is not hello message
+    // unit_test[209] test data:current_record_rest_size == all_length,hello_message_flag == FALSE
+    // unit_test[209] handle_client_send() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10;
     down_thread_data->current_record_rest_size = 0;
@@ -3910,10 +3925,10 @@ void handle_client_send_test() {
     down_thread_data->data_buffer[2] = 0x01;
     down_thread_data->data_buffer[3] = 0x00;
     down_thread_data->data_buffer[4] = 0x9e;
-    this->session_thread_data_map[down_thread.get_id()] = down_thread_data;
-    status = this->handle_client_send(down_thread.get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[down_thread.get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[down_thread.get_id()]->hello_message_flag);
+    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+    status = this->handle_client_send(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
     this->session_thread_data_map.clear();
@@ -3921,28 +3936,42 @@ void handle_client_send_test() {
 
 //handle_client_disconnect
 void handle_client_disconnect_test(){
-	//unit_test[6] handle_client_disconnect()メソッドのテスト,正常系で必ずFINALIZEを返す
-	EVENT_TAG disconn=this->handle_client_disconnect(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(disconn, protocol_module_base::FINALIZE);
+	//unit_test[210] handle_client_disconnect()メソッドのテスト,up and down threads,正常系で必ずFINALIZEを返す
+	boost::thread tdown_for_get_id(down_thread_func);
+	boost::thread_group threads;
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_disconnect_test_thread_func,
+                                   this,
+                                   boost::this_thread::get_id()));
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_disconnect_test_thread_func,
+                                   this,
+                                   tdown_for_get_id.get_id()));
+    	threads.join_all();
+
+	//unit_test[] one thread,return FINALIZE
+	BOOST_CHECK_EQUAL(this->handle_client_disconnect(boost::this_thread::get_id()),FINALIZE);
+}
+void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id){
+    EVENT_TAG ret = this->handle_client_disconnect(thread_id);
+    BOOST_CHECK_EQUAL(ret, FINALIZE);
 }
 
 //handle_realserver_disconnect
 void handle_realserver_disconnect_test(){
-	//unit_test[111] 正常系で必ずSTOPを返す
+	//unit_test[211] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_realserver_disconnect(boost::this_thread::get_id(),ep));
 }
 
 //handle_sorryserver_select
 void handle_sorryserver_select_test(){
-	//unit_test[112] 正常系で必ずSTOPを返す
+	//unit_test[212] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_select(boost::this_thread::get_id(),ep));
 }
 
 //handle_sorryserver_connect
 void handle_sorryserver_connect_test(){
-	//unit_test[113] 正常系で必ずSTOPを返す
+	//unit_test[213] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
@@ -3951,20 +3980,20 @@ void handle_sorryserver_connect_test(){
 
 //handle_sorryserver_connection_fail
 void handle_sorryserver_connection_fail_test(){
-	//unit_test[114] 正常系で必ずSTOPを返す
+	//unit_test[214] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep));
 }
 
 //handle_sorryserver_send
 void handle_sorryserver_send_test(){
-	//unit_test[115] 正常系で必ずSTOPを返す
+	//unit_test[215] 正常系で必ずSTOPを返す
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_send(boost::this_thread::get_id()));
 }
 
 //handle_sorryserver_recv
 void handle_sorryserver_recv_test(){
-	//unit_test[116] 正常系で必ずSTOPを返す
+	//unit_test[216] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
@@ -3973,29 +4002,29 @@ void handle_sorryserver_recv_test(){
 
 //handle_response_send_inform
 void handle_response_send_inform_test(){
-	//unit_test[117] 正常系で必ずSTOPを返す
+	//unit_test[217] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_response_send_inform(boost::this_thread::get_id()));
 }
 
 //handle_sorry_enable
 void handle_sorry_enable_test(){
-	//unit_test[77]	全部の場合,遷移先ステータスを設定する,status = STOP
-	//unit_test[77] test data:NULL
+	//unit_test[218] 全部の場合,遷移先ステータスを設定する,status = STOP
+	//unit_test[218] test data:NULL
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorry_enable(boost::this_thread::get_id()));
 }
 
 //handle_sorry_disable
 void handle_sorry_disable_test(){
-	//unit_test[118] 正常系で必ずSTOPを返す
+	//unit_test[219] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorry_disable(boost::this_thread::get_id()));
 }
 
 //handle_sorryserver_disconnect
 void handle_sorryserver_disconnect_test(){
-	//unit_test[119] 正常系で必ずSTOPを返す
+	//unit_test[220] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_disconnect(boost::this_thread::get_id(),ep));
 }
@@ -4011,51 +4040,82 @@ void replication_interrupt_test(){
 					1024, (char*)data_addr, data_size, ep, stb_getloglevel,
 					stb_putLogFatal, stb_putLogError, stb_putLogWarn, stb_putLogInfo,
 					stb_putLogDebug);
+
 	//unit_test[] add the replication_data to replication_area
 	//unit_test[] the replication_data is add
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[0].op_code='A';
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[0].session_id="1111";
-	time_t last_time_1 = time(0);
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[0].last_time=last_time_1;
-	boost::asio::ip::tcp::endpoint real_ep;
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[0].realserver_addr=real_ep;
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].valid=0;
-	this->replication_interrupt();
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].valid,1);
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].last_time,last_time_1);
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].session_id,"1111");
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].realserver_ip,ep.address().to_string().c_str());
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].realserver_port,ep.port());
+	time_t last_time_A = time(0);
+	boost::asio::ip::tcp::endpoint real_ep_A;
+	struct sslid_replication_temp_data replication_temp_data_add;
+	replication_temp_data_add.op_code='A';
+	replication_temp_data_add.session_id="11111111111111111111111111111111";
+	replication_temp_data_add.last_time=last_time_A;
+	replication_temp_data_add.realserver_addr=real_ep_A;
+	sslid_replication_data_processor_stub* pstub;
+	try
+	{
+		pstub = dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor);
+	}
+	catch(std::bad_cast& )
+	{
+		std::cout<<"bad_cast:::"<<std::endl;
+	}
+	pstub->register_replication_area_lock(replication_area_lock_stb);
+	pstub->register_replication_area_unlock(replication_area_unlock_stb);
+	pstub->register_getloglevel(stb_getloglevel);
+	pstub->register_putLogFatal(stb_putLogFatal);
+	pstub->register_putLogError(stb_putLogError);
+	pstub->register_putLogWarn(stb_putLogWarn);
+	pstub->register_putLogInfo(stb_putLogInfo);
+	pstub->register_putLogDebug(stb_putLogDebug);
+	pstub->get_temp_list().push_back(replication_temp_data_add);
+	pstub->get_replication_area()[0].valid=0;
+
+	boost::thread test_thread1(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
+	sleep(5);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,1);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].last_time,last_time_A);
+	BOOST_CHECK_EQUAL(memcmp(pstub->get_replication_area()[0].session_id,"11111111111111111111111111111111",SSLID_LENGTH),0);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_ip,real_ep_A.address().to_string().c_str());
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_port,real_ep_A.port());
+	test_thread1.interrupt();
 
 	//unit_test[] update the replication_data in the replication_area
 	//unit_test[] the replication_data is update
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].op_code='U';
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].session_id="1111";
 	time_t last_time_U = time(0);
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].last_time=last_time_U;
 	boost::asio::ip::tcp::endpoint real_ep_U;
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].realserver_addr=real_ep_U;
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[1].valid=1;
-
-	this->replication_interrupt();
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].valid,1);
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].last_time,last_time_1);
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].session_id,"1111");
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].realserver_ip,ep.address().to_string().c_str());
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[0].realserver_port,ep.port());
+	struct sslid_replication_temp_data replication_temp_data_update;
+	replication_temp_data_update.op_code='U';
+	replication_temp_data_update.session_id="11111111111111111111111111111111";
+	replication_temp_data_update.last_time=last_time_U;
+	replication_temp_data_update.realserver_addr=real_ep_U;
+	pstub->get_temp_list().push_back(replication_temp_data_update);
+	pstub->get_replication_area()[0].valid=1;
+	strcpy(pstub->get_replication_area()[0].session_id,"11111111111111111111111111111111");
+	boost::thread test_thread2(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
+	sleep(5);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,1);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].last_time,last_time_U);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_ip,real_ep_U.address().to_string().c_str());
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_port,real_ep_U.port());
+	test_thread2.interrupt();
 
 	//unit_test[] delete the replication_data in the replication_area
 	//unit_test[] the replication_data is delete
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].op_code='D';
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].session_id="1111";
 	time_t last_time_D = time(0);
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].last_time=last_time_D;
 	boost::asio::ip::tcp::endpoint real_ep_D;
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_temp_list()[1].realserver_addr=real_ep_D;
-	(dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()[1].valid=1;
-
-	this->replication_interrupt();
-	BOOST_CHECK((dynamic_cast<sslid_replication_data_processor_stub*> (replication_data_processor))->get_replication_area()==NULL);
+	struct sslid_replication_temp_data replication_temp_data_delete;
+	replication_temp_data_delete.op_code='D';
+	replication_temp_data_delete.session_id="11111111111111111111111111111111";
+	replication_temp_data_delete.last_time=last_time_D;
+	replication_temp_data_delete.realserver_addr=real_ep_D;
+	pstub->get_temp_list().push_back(replication_temp_data_delete);
+	pstub->get_replication_area()[0].valid=1;
+	strcpy(pstub->get_replication_area()[0].session_id,"11111111111111111111111111111111");
+	boost::thread test_thread3(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
+	sleep(5);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,0);
+	delete this->replication_data_processor;
+	test_thread3.interrupt();
 }
 
 //put_data_to_sendbuffer
@@ -4065,21 +4125,14 @@ void put_data_to_sendbuffer_test(){
     session_thread_data_sslid* up_thread_data;
     int ret = 0;
 
-    // unit_test[97]
-    // unit_test[]  condition:
-    // unit_test[]   thread id is not in the map
-    // unit_test[]  check:
-    // unit_test[]   put_data_to_sendbuffer() return -1
+    // unit_test[221] thread id is not in the map
+    // unit_test[221] test data:put_data_to_sendbuffer() return -1
     ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(), sendbuffer, datalen);
     BOOST_CHECK_EQUAL(ret, -1);
 
-    // unit_test[98]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size>data_size, data_size<送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[222] current_record_rest_size>data_size, data_size<送信バッファサイズ
+    // unit_test[222] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[222] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 20u;
@@ -4097,13 +4150,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[99]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size>data_size, data_size=送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[223] current_record_rest_size>data_size, data_size=送信バッファサイズ
+    // unit_test[223] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[223] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
@@ -4121,13 +4170,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[100]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=data_size, data_size<送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[234] current_record_rest_size=data_size, data_size<送信バッファサイズ
+    // unit_test[234] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[234] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
@@ -4145,13 +4190,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[101]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=data_size, data_size=送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[235] current_record_rest_size=data_size, data_size=送信バッファサイズ
+    // unit_test[235] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[235] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
@@ -4169,13 +4210,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[102]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size>data_size,data_size＞送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() 0
-    // unit_test[]   datalen
+    // unit_test[236] current_record_rest_size>data_size,data_size＞送信バッファサイズ
+    // unit_test[236] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[236] put_data_to_sendbuffer() 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -4193,13 +4230,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[103]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size=data_size,data_size＞送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[237] current_record_rest_size=data_size,data_size＞送信バッファサイズ
+    // unit_test[237] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[237] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -4217,13 +4250,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[104]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size＜data_size, current_record_rest_size<送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[238] current_record_rest_size＜data_size, current_record_rest_size<送信バッファサイズ
+    // unit_test[238] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[238] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
@@ -4241,13 +4270,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[105]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size<data_size, current_record_rest_size=送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[239] current_record_rest_size<data_size, current_record_rest_size=送信バッファサイズ
+    // unit_test[239] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[239] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
@@ -4255,7 +4280,7 @@ void put_data_to_sendbuffer_test(){
     up_thread_data->data_begain_offset = 5u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
-    ret = this->handle_realserver_connect(boost::this_thread::get_id(),
+    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
@@ -4265,13 +4290,9 @@ void put_data_to_sendbuffer_test(){
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[106]
-    // unit_test[]  condition:
-    // unit_test[]   current_record_rest_size＜data_size,current_record_rest_size＞送信バッファサイズ
-    // unit_test[]  check:
-    // unit_test[]   data_begain_offset,current_record_rest_size,data_size
-    // unit_test[]   put_data_to_sendbuffer() return 0
-    // unit_test[]   datalen
+    // unit_test[240] current_record_rest_size＜data_size,current_record_rest_size＞送信バッファサイズ
+    // unit_test[240] test data:data_begain_offset,current_record_rest_size,data_size,datalen
+    // unit_test[240] put_data_to_sendbuffer() return 0
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -4292,7 +4313,7 @@ void put_data_to_sendbuffer_test(){
 
 //realserver_selected
 void realserver_selected_test(){
-	//unit_test[120] 正常系で必ずFALSEを返す
+	//unit_test[241] 正常系で必ずFALSEを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(false, this->realserver_selected(ep));
 }
