@@ -2,7 +2,7 @@
 //	@file	replication.h
 //	@brief	Replication class
 //
-//	copyright (c) xxx corporation. 2008
+//	copyright (c) xxx corporation. 2009
 //	mail: 
 //
 //	Distributed under the Boost Software License, Version 1.0.(See accompanying
@@ -61,17 +61,6 @@
 
 namespace l7vs{
 
-//! Transfer data between active server and standby server.
-struct replication_data{
-	unsigned short					id;							//!< ID of Replication Function
-	char							pad1[6];
-	unsigned long long				serial;						//!< Serial Number
-	unsigned int					block_num;					//!< Block Number in Replication memory
-	char							pad2[4];
-	uint64_t						size;						//!< Data size for checking packet loss
-	char							data[DATA_SIZE];			//!< Raw data
-};
-
 class	replication{
 public:
 	enum REPLICATION_MODE_TAG{
@@ -84,8 +73,19 @@ public:
 	};
 
 	typedef	boost::shared_ptr<boost::mutex>		mutex_ptr;
-
+	typedef	boost::shared_ptr<boost::thread>	thread_ptr;
 protected:
+	//! Transfer data between active server and standby server.
+	struct replication_data_struct{
+		unsigned short					id;							//!< ID of Replication Function
+		char							pad1[6];
+		unsigned long long				serial;						//!< Serial Number
+		unsigned int					block_num;					//!< Block Number in Replication memory
+		char							pad2[4];
+		uint64_t						size;						//!< Data size for checking packet loss
+		char							data[DATA_SIZE];			//!< Raw data
+	};
+
 	//! Component information set to SG file.
 	struct replication_component{
 		std::string 					id;							//!< ID distinguishes Component
@@ -100,14 +100,14 @@ protected:
 	//! State Infomation struct to execute Replication.
 	struct replication_state_struct{
 		enum REPLICATION_MODE_TAG		service_status;				//!< States Type of Replication Function
-		unsigned long long				send_time;					//!< Completion last time to send data
+		unsigned long long				send_time;					//!< Completion last time to send data(no use)
 		unsigned int					last_send_block;			//!< Completion last Block Number to send data
 		unsigned int					last_recv_block;			//!< Completion last Block Number to receive data
 		unsigned int					total_block;				//!< The maximum Block Number of Components memory
 		void*							replication_memory;			//!< Top address in Replication memory
 		void*							component_memory;			//!< Top address in Component memory
-		uint64_t						sarface_block_no;			//!< Serial number for respect switch
-		uint64_t*						sarface_block_array_ptr;	//!< Serial number in received respect at every block
+		uint64_t						surface_block_no;			//!< Serial number for respect switch
+		uint64_t*						surface_block_array_ptr;	//!< Serial number in received respect at every block
 
 		replication_state_struct() :	service_status(REPLICATION_OUT),
 										send_time(0),
@@ -116,8 +116,8 @@ protected:
 										total_block(0),
 										replication_memory(NULL),
 										component_memory(NULL),
-										sarface_block_no(0),
-										sarface_block_array_ptr(NULL) {}
+										surface_block_no(0),
+										surface_block_array_ptr(NULL) {}
 	};
 
 	//! Essential information set to SG file.
@@ -143,15 +143,26 @@ protected:
 	boost::asio::ip::udp::socket		replication_send_socket;
 	struct replication_state_struct		replication_state;
 	struct replication_info_struct		replication_info;
-	boost::thread						replication_thread;
+
+	enum REPLICATION_THREAD_TAG{
+		WAIT = 0,
+		RUNNING,
+		EXIT
+	};
+
+	REPLICATION_THREAD_TAG				replication_flag;
+	thread_ptr							replication_thread_ptr;
 	boost::mutex						replication_thread_mutex;
 	boost::condition					replication_thread_condition;
-	int									replication_flag;
+
+	struct replication_data_struct		replication_data;
 
 public:
 	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
 															replication_receive_socket( inreceive_io ),
-															replication_send_socket( send_io ) {} ;
+															replication_send_socket( send_io ),
+															replication_flag(WAIT) {
+	} ;
 	~replication(){}
 
 	int							initialize();
@@ -165,9 +176,8 @@ public:
 	void						force_replicate();
 	void						reset();
 	REPLICATION_MODE_TAG		get_status();
-	int							check_interval();
 	int							handle_send();
-	int							handle_receive();
+	void						handle_receive( const boost::system::error_code& err, size_t size );
 	int							lock( const std::string& inid );
 	int							unlock( const std::string& inid );
 	int							refer_lock_mutex( const std::string& inid, mutex_ptr outmutex );
@@ -180,8 +190,8 @@ protected:
 	uint64_t*					getsrf();
 	int							sock_init();
 	unsigned long long			make_serial();
-	int							send_data( struct replication_data* indata );
-	int							recv_data( struct replication_data* outdata );
+	int							send_data();
+	int							recv_data();
 	void						releaserpl();
 	void						releasecmp();
 	void						releasesrf();
