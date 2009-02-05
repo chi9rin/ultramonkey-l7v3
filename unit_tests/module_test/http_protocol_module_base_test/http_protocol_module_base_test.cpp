@@ -152,7 +152,7 @@ EVENT_TAG	handle_realserver_close(
 
 void	check_http_method_test(){
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	buffer_ok[CHECK_METHOD_OK_STRING_NUM][256]
 				=	{
@@ -276,12 +276,12 @@ void	check_http_method_test(){
 
 }
 
-void	check_http_method_test_thread( int thread_no ){
+void	check_http_method_test_thread( int thread_no, bool* ret ){
 
 	boost::xtime	start_time;
 	boost::xtime	end_time;
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	buffer[5][256]
 				=	{
@@ -315,6 +315,8 @@ void	check_http_method_test_thread( int thread_no ){
 						CHECK_INPOSSIBLE,
 					};
 
+	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result;
+
 	size_t	buffer_len	= 0;
 
 	std::cout << "[Thread_" << thread_no << "] ";
@@ -334,7 +336,14 @@ void	check_http_method_test_thread( int thread_no ){
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
 	// [30] - [34]
-	BOOST_CHECK( check_http_method( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
+	check_result = check_http_method( (const char*)buffer[thread_no-1], buffer_len );
+	if( check_result == result[thread_no-1] ){
+		*ret = true;
+	}
+	else{
+		*ret = false;
+	}
+//	BOOST_CHECK( check_http_method( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	std::cout << "[Thread_" << thread_no << "] " << "StartTime = [" << start_time.nsec << "]" << std::endl;
 	std::cout << "[Thread_" << thread_no << "] " << "EndTime   = [" << end_time.nsec << "]" << std::endl;
@@ -344,7 +353,7 @@ void	check_http_method_test_thread( int thread_no ){
 
 void	check_http_version_test(){
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	buffer_ok[CHECK_VERSION_OK_STRING_NUM][256]
 				=	{
@@ -474,12 +483,12 @@ void	check_http_version_test(){
 
 }
 
-void	check_http_version_test_thread( int thread_no ){
+void	check_http_version_test_thread( int thread_no, bool* ret ){
 
 	boost::xtime	start_time;
 	boost::xtime	end_time;
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	buffer[5][256]
 				=	{
@@ -513,6 +522,8 @@ void	check_http_version_test_thread( int thread_no ){
 						CHECK_INPOSSIBLE,
 					};
 
+	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result;
+
 	size_t	buffer_len	= 0;
 
 	std::cout << "[Thread_" << thread_no << "] ";
@@ -532,7 +543,14 @@ void	check_http_version_test_thread( int thread_no ){
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
 	// [33] - [37]
-	BOOST_CHECK( check_http_version( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
+	check_result = check_http_version( (const char*)buffer[thread_no-1], buffer_len );
+	if( check_result == result[thread_no-1] ){
+		*ret = true;
+	}
+	else{
+		*ret = false;
+	}
+//	BOOST_CHECK( check_http_version( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	std::cout << "[Thread_" << thread_no << "] " << "StartTime = [" << start_time.nsec << "]" << std::endl;
 	std::cout << "[Thread_" << thread_no << "] " << "EndTime   = [" << end_time.nsec << "]" << std::endl;
@@ -543,7 +561,7 @@ void	check_http_version_test_thread( int thread_no ){
 
 void	check_status_code_test(){
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	buffer_ok[CHECK_STATUS_CODE_OK_STRING_NUM][256]
 				=	{
@@ -647,12 +665,12 @@ void	check_status_code_test(){
 
 }
 
-void	check_status_code_test_thread( int thread_no ){
+void	check_status_code_test_thread( int thread_no, bool* ret ){
 
 	boost::xtime	start_time;
 	boost::xtime	end_time;
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	buffer[5][256]
 				=	{
@@ -686,6 +704,8 @@ void	check_status_code_test_thread( int thread_no ){
 						CHECK_INPOSSIBLE,
 					};
 
+	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result;
+
 	size_t	buffer_len	= 0;
 
 	std::cout << "[Thread_" << thread_no << "] ";
@@ -705,7 +725,14 @@ void	check_status_code_test_thread( int thread_no ){
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
 	// [20] - [24]
-	BOOST_CHECK( check_status_code( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
+	check_result = check_status_code( (const char*)buffer[thread_no-1], buffer_len );
+	if( check_result == result[thread_no-1] ){
+		*ret = true;
+	}
+	else{
+		*ret = false;
+	}
+//	BOOST_CHECK( check_status_code( (const char*)buffer[thread_no-1], buffer_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	std::cout << "[Thread_" << thread_no << "] " << "StartTime = [" << start_time.nsec << "]" << std::endl;
 	std::cout << "[Thread_" << thread_no << "] " << "EndTime   = [" << end_time.nsec << "]" << std::endl;
@@ -820,12 +847,12 @@ void	find_uri_test(){
 
 }
 
-void	find_uri_test_thread( int thread_no ){
+void	find_uri_test_thread( int thread_no, bool* ret ){
 
 	boost::xtime	start_time;
 	boost::xtime	end_time;
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	disp_uri[256];
 
@@ -861,6 +888,8 @@ void	find_uri_test_thread( int thread_no ){
 						false,
 					};
 
+	bool	find_result;
+
 	size_t	buffer_len	= 0;
 	size_t	uri_offset	= 0;
 	size_t	uri_len		= 0;
@@ -885,7 +914,14 @@ void	find_uri_test_thread( int thread_no ){
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
 	// [11] - [15]
-	BOOST_CHECK( find_uri( (const char*)buffer[thread_no-1], buffer_len, uri_offset, uri_len ) == result[thread_no-1] );
+	find_result = find_uri( (const char*)buffer[thread_no-1], buffer_len, uri_offset, uri_len );
+	if( find_result == result[thread_no-1] ){
+		*ret = true;
+	}
+	else{
+		*ret = false;
+	}
+//	BOOST_CHECK( find_uri( (const char*)buffer[thread_no-1], buffer_len, uri_offset, uri_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	memcpy( disp_uri, buffer[thread_no-1] + uri_offset, uri_len );
 	std::cout << "[Thread_" << thread_no << "] " << "URI Offset = [" << uri_offset << "]" << std::endl;
@@ -1001,12 +1037,12 @@ void	find_status_code_test(){
 
 }
 
-void	find_status_code_test_thread( int thread_no ){
+void	find_status_code_test_thread( int thread_no, bool* ret ){
 
 	boost::xtime	start_time;
 	boost::xtime	end_time;
 
-	int count	= 1;
+	int		count	= 1;
 
 	char	disp_status_code[256];
 
@@ -1042,6 +1078,8 @@ void	find_status_code_test_thread( int thread_no ){
 						false,
 					};
 
+	bool	find_result;
+
 	size_t	buffer_len			= 0;
 	size_t	status_code_offset	= 0;
 	size_t	status_code_len		= 0;
@@ -1066,7 +1104,14 @@ void	find_status_code_test_thread( int thread_no ){
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
 	// [09] - [13]
-	BOOST_CHECK( find_status_code( (const char*)buffer[thread_no-1], buffer_len, status_code_offset, status_code_len ) == result[thread_no-1] );
+	find_result = find_status_code( (const char*)buffer[thread_no-1], buffer_len, status_code_offset, status_code_len );
+	if( find_result == result[thread_no-1] ){
+		*ret = true;
+	}
+	else{
+		*ret = false;
+	}
+//	BOOST_CHECK( find_status_code( (const char*)buffer[thread_no-1], buffer_len, status_code_offset, status_code_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	memcpy( disp_status_code, buffer[thread_no-1] + status_code_offset, status_code_len );
 	std::cout << "[Thread_" << thread_no << "] " << "STATUS CODE Offset = [" << status_code_offset << "]" << std::endl;
@@ -1331,7 +1376,7 @@ void	find_http_header_test(){
 
 }
 
-void	find_http_header_test_thread( int thread_no ){
+void	find_http_header_test_thread( int thread_no, bool* ret ){
 
 	boost::xtime	start_time;
 	boost::xtime	end_time;
@@ -1378,6 +1423,8 @@ void	find_http_header_test_thread( int thread_no ){
 						"X-Forwarded-For2: 40.40.40.40",
 					};
 
+	bool	find_result;
+
 	size_t	buffer_len			= 0;
 	size_t	http_header_offset	= 0;
 	size_t	http_header_len		= 0;
@@ -1406,7 +1453,14 @@ void	find_http_header_test_thread( int thread_no ){
 	}
 	boost::xtime_get(&start_time, boost::TIME_UTC);
 	// [63] - [67]
-	BOOST_CHECK( find_http_header( (const char*)buffer_all, buffer_len, http_header_name[thread_no-1], http_header_offset, http_header_len ) == result[thread_no-1] );
+	find_result = find_http_header( (const char*)buffer_all, buffer_len, http_header_name[thread_no-1], http_header_offset, http_header_len );
+	if( find_result == result[thread_no-1] ){
+		*ret = true;
+	}
+	else{
+		*ret = false;
+	}
+//	BOOST_CHECK( find_http_header( (const char*)buffer_all, buffer_len, http_header_name[thread_no-1], http_header_offset, http_header_len ) == result[thread_no-1] );
 	boost::xtime_get(&end_time, boost::TIME_UTC);
 	memcpy( disp_http_header, buffer_all + http_header_offset, http_header_len );
 
@@ -1422,14 +1476,20 @@ void	find_http_header_test_thread( int thread_no ){
 };
 
 //--test functions--
-void	check_http_method_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
+void	check_http_method_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no, bool* ret ){
 
 	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1->check_http_method_test_thread(thread_no);
+		http_protocol_module_base_test_1->check_http_method_test_thread( thread_no, ret );
 	}
 
 }
 void	check_http_method_test(){
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
@@ -1439,15 +1499,15 @@ void	check_http_method_test(){
 
 	BOOST_MESSAGE( "----- check_http_method test multi thread start -----" );
 	boost::thread	t1(	boost::bind(	&check_http_method_test_thread,
-										&http_protocol_module_base_test_1, 1));
+										&http_protocol_module_base_test_1, 1, &thread_1));
 	boost::thread	t2(	boost::bind(	&check_http_method_test_thread,
-										&http_protocol_module_base_test_1, 2));
+										&http_protocol_module_base_test_1, 2, &thread_2));
 	boost::thread	t3(	boost::bind(	&check_http_method_test_thread,
-										&http_protocol_module_base_test_1, 3));
+										&http_protocol_module_base_test_1, 3, &thread_3));
 	boost::thread	t4(	boost::bind(	&check_http_method_test_thread,
-										&http_protocol_module_base_test_1, 4));
+										&http_protocol_module_base_test_1, 4, &thread_4));
 	boost::thread	t5(	boost::bind(	&check_http_method_test_thread,
-										&http_protocol_module_base_test_1, 5));
+										&http_protocol_module_base_test_1, 5, &thread_5));
 
 	sleep(1);
 
@@ -1458,17 +1518,30 @@ void	check_http_method_test(){
 	t3.join();
 	t4.join();
 	t5.join();
+
+	BOOST_CHECK( thread_1 == true );
+	BOOST_CHECK( thread_2 == true );
+	BOOST_CHECK( thread_3 == true );
+	BOOST_CHECK( thread_4 == true );
+	BOOST_CHECK( thread_5 == true );
+
 	BOOST_MESSAGE( "----- check_http_method test multi thread end -----" );
 }
 //-------------------------------------------------------------------
-void	check_http_version_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
+void	check_http_version_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no, bool* ret ){
 
 	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1->check_http_version_test_thread(thread_no);
+		http_protocol_module_base_test_1->check_http_version_test_thread( thread_no, ret );
 	}
 
 }
 void	check_http_version_test(){
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
@@ -1478,15 +1551,15 @@ void	check_http_version_test(){
 
 	BOOST_MESSAGE( "----- check_http_version test multi thread start -----" );
 	boost::thread	t1(	boost::bind(	&check_http_version_test_thread,
-										&http_protocol_module_base_test_1, 1));
+										&http_protocol_module_base_test_1, 1, &thread_1));
 	boost::thread	t2(	boost::bind(	&check_http_version_test_thread,
-										&http_protocol_module_base_test_1, 2));
+										&http_protocol_module_base_test_1, 2, &thread_2));
 	boost::thread	t3(	boost::bind(	&check_http_version_test_thread,
-										&http_protocol_module_base_test_1, 3));
+										&http_protocol_module_base_test_1, 3, &thread_3));
 	boost::thread	t4(	boost::bind(	&check_http_version_test_thread,
-										&http_protocol_module_base_test_1, 4));
+										&http_protocol_module_base_test_1, 4, &thread_4));
 	boost::thread	t5(	boost::bind(	&check_http_version_test_thread,
-										&http_protocol_module_base_test_1, 5));
+										&http_protocol_module_base_test_1, 5, &thread_5));
 
 	sleep(1);
 
@@ -1497,17 +1570,30 @@ void	check_http_version_test(){
 	t3.join();
 	t4.join();
 	t5.join();
+
+	BOOST_CHECK( thread_1 == true );
+	BOOST_CHECK( thread_2 == true );
+	BOOST_CHECK( thread_3 == true );
+	BOOST_CHECK( thread_4 == true );
+	BOOST_CHECK( thread_5 == true );
+
 	BOOST_MESSAGE( "----- check_http_version test multi thread end -----" );
 }
 //-------------------------------------------------------------------
-void	check_status_code_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
+void	check_status_code_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no, bool* ret ){
 
 	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1->check_status_code_test_thread(thread_no);
+		http_protocol_module_base_test_1->check_status_code_test_thread( thread_no, ret );
 	}
 
 }
 void	check_status_code_test(){
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
@@ -1517,15 +1603,15 @@ void	check_status_code_test(){
 
 	BOOST_MESSAGE( "----- check_status_code test multi thread start -----" );
 	boost::thread	t1(	boost::bind(	&check_status_code_test_thread,
-										&http_protocol_module_base_test_1, 1));
+										&http_protocol_module_base_test_1, 1, &thread_1));
 	boost::thread	t2(	boost::bind(	&check_status_code_test_thread,
-										&http_protocol_module_base_test_1, 2));
+										&http_protocol_module_base_test_1, 2, &thread_2));
 	boost::thread	t3(	boost::bind(	&check_status_code_test_thread,
-										&http_protocol_module_base_test_1, 3));
+										&http_protocol_module_base_test_1, 3, &thread_3));
 	boost::thread	t4(	boost::bind(	&check_status_code_test_thread,
-										&http_protocol_module_base_test_1, 4));
+										&http_protocol_module_base_test_1, 4, &thread_4));
 	boost::thread	t5(	boost::bind(	&check_status_code_test_thread,
-										&http_protocol_module_base_test_1, 5));
+										&http_protocol_module_base_test_1, 5, &thread_5));
 
 	sleep(1);
 
@@ -1536,17 +1622,30 @@ void	check_status_code_test(){
 	t3.join();
 	t4.join();
 	t5.join();
+
+	BOOST_CHECK( thread_1 == true );
+	BOOST_CHECK( thread_2 == true );
+	BOOST_CHECK( thread_3 == true );
+	BOOST_CHECK( thread_4 == true );
+	BOOST_CHECK( thread_5 == true );
+
 	BOOST_MESSAGE( "----- check_status_code test multi thread end -----" );
 }
 //-------------------------------------------------------------------
-void	find_uri_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
+void	find_uri_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no, bool* ret ){
 
 	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1->find_uri_test_thread(thread_no);
+		http_protocol_module_base_test_1->find_uri_test_thread( thread_no, ret );
 	}
 
 }
 void	find_uri_test(){
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
@@ -1556,15 +1655,15 @@ void	find_uri_test(){
 
 	BOOST_MESSAGE( "----- find_uri test multi thread start -----" );
 	boost::thread	t1(	boost::bind(	&find_uri_test_thread,
-										&http_protocol_module_base_test_1, 1));
+										&http_protocol_module_base_test_1, 1, &thread_1));
 	boost::thread	t2(	boost::bind(	&find_uri_test_thread,
-										&http_protocol_module_base_test_1, 2));
+										&http_protocol_module_base_test_1, 2, &thread_2));
 	boost::thread	t3(	boost::bind(	&find_uri_test_thread,
-										&http_protocol_module_base_test_1, 3));
+										&http_protocol_module_base_test_1, 3, &thread_3));
 	boost::thread	t4(	boost::bind(	&find_uri_test_thread,
-										&http_protocol_module_base_test_1, 4));
+										&http_protocol_module_base_test_1, 4, &thread_4));
 	boost::thread	t5(	boost::bind(	&find_uri_test_thread,
-										&http_protocol_module_base_test_1, 5));
+										&http_protocol_module_base_test_1, 5, &thread_5));
 
 	sleep(1);
 
@@ -1575,17 +1674,30 @@ void	find_uri_test(){
 	t3.join();
 	t4.join();
 	t5.join();
+
+	BOOST_CHECK( thread_1 == true );
+	BOOST_CHECK( thread_2 == true );
+	BOOST_CHECK( thread_3 == true );
+	BOOST_CHECK( thread_4 == true );
+	BOOST_CHECK( thread_5 == true );
+
 	BOOST_MESSAGE( "----- find_uri test multi thread end -----" );
 }
 //-------------------------------------------------------------------
-void	find_status_code_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
+void	find_status_code_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no, bool* ret ){
 
 	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1->find_status_code_test_thread(thread_no);
+		http_protocol_module_base_test_1->find_status_code_test_thread( thread_no, ret );
 	}
 
 }
 void	find_status_code_test(){
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
@@ -1595,15 +1707,15 @@ void	find_status_code_test(){
 
 	BOOST_MESSAGE( "----- find_status_code test multi thread start -----" );
 	boost::thread	t1(	boost::bind(	&find_status_code_test_thread,
-										&http_protocol_module_base_test_1, 1));
+										&http_protocol_module_base_test_1, 1, &thread_1));
 	boost::thread	t2(	boost::bind(	&find_status_code_test_thread,
-										&http_protocol_module_base_test_1, 2));
+										&http_protocol_module_base_test_1, 2, &thread_2));
 	boost::thread	t3(	boost::bind(	&find_status_code_test_thread,
-										&http_protocol_module_base_test_1, 3));
+										&http_protocol_module_base_test_1, 3, &thread_3));
 	boost::thread	t4(	boost::bind(	&find_status_code_test_thread,
-										&http_protocol_module_base_test_1, 4));
+										&http_protocol_module_base_test_1, 4, &thread_4));
 	boost::thread	t5(	boost::bind(	&find_status_code_test_thread,
-										&http_protocol_module_base_test_1, 5));
+										&http_protocol_module_base_test_1, 5, &thread_5));
 
 	sleep(1);
 
@@ -1614,17 +1726,30 @@ void	find_status_code_test(){
 	t3.join();
 	t4.join();
 	t5.join();
+
+	BOOST_CHECK( thread_1 == true );
+	BOOST_CHECK( thread_2 == true );
+	BOOST_CHECK( thread_3 == true );
+	BOOST_CHECK( thread_4 == true );
+	BOOST_CHECK( thread_5 == true );
+
 	BOOST_MESSAGE( "----- find_status_code test multi thread end -----" );
 }
 //-------------------------------------------------------------------
-void	find_http_header_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no ){
+void	find_http_header_test_thread( http_protocol_module_base_test* http_protocol_module_base_test_1, int thread_no, bool* ret ){
 
 	for( int i = 0; i < THREAD_LOOP_NUM; i++ ){
-		http_protocol_module_base_test_1->find_http_header_test_thread(thread_no);
+		http_protocol_module_base_test_1->find_http_header_test_thread( thread_no, ret );
 	}
 
 }
 void	find_http_header_test(){
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
 
 	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
 
@@ -1634,15 +1759,15 @@ void	find_http_header_test(){
 
 	BOOST_MESSAGE( "----- find_http_header test multi thread start -----" );
 	boost::thread	t1(	boost::bind(	&find_http_header_test_thread,
-										&http_protocol_module_base_test_1, 1));
+										&http_protocol_module_base_test_1, 1, &thread_1));
 	boost::thread	t2(	boost::bind(	&find_http_header_test_thread,
-										&http_protocol_module_base_test_1, 2));
+										&http_protocol_module_base_test_1, 2, &thread_2));
 	boost::thread	t3(	boost::bind(	&find_http_header_test_thread,
-										&http_protocol_module_base_test_1, 3));
+										&http_protocol_module_base_test_1, 3, &thread_3));
 	boost::thread	t4(	boost::bind(	&find_http_header_test_thread,
-										&http_protocol_module_base_test_1, 4));
+										&http_protocol_module_base_test_1, 4, &thread_4));
 	boost::thread	t5(	boost::bind(	&find_http_header_test_thread,
-										&http_protocol_module_base_test_1, 5));
+										&http_protocol_module_base_test_1, 5, &thread_5));
 
 	sleep(1);
 
@@ -1653,6 +1778,13 @@ void	find_http_header_test(){
 	t3.join();
 	t4.join();
 	t5.join();
+
+	BOOST_CHECK( thread_1 == true );
+	BOOST_CHECK( thread_2 == true );
+	BOOST_CHECK( thread_3 == true );
+	BOOST_CHECK( thread_4 == true );
+	BOOST_CHECK( thread_5 == true );
+
 	BOOST_MESSAGE( "----- find_http_header test multi thread end -----" );
 }
 //-------------------------------------------------------------------
