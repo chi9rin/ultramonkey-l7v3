@@ -1062,6 +1062,10 @@ void	set_snmp_loglevel_test(){
 									rep( new l7vs::replication(io) );
 	vsd_test.set_replication( rep );
 
+	boost::shared_ptr< l7vs::snmpbridge >
+									bridge( new l7vs::snmpbridge( vsd_test, io ) );
+	vsd_test.set_snmpbridge( bridge );
+
 	std::vector< l7vs::LOG_CATEGORY_TAG > categories;
 	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_START_STOP );
 	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE );
@@ -1776,22 +1780,6 @@ void	set_sighandlers_test(){
 	BOOST_MESSAGE( "----- set_sighandlers test end -----" );
 }
 
-// void	usage_test(){
-// 	BOOST_MESSAGE( "----- usage test start -----" );
-// 
-// 	//正常系
-// 	// unit_tes[1] usage 正常系 stdout出力確認
-// 	usage(stdout);
-// 	// unit_tes[1] usage 正常系 stderr出力確認
-// 	usage(stderr);
-// 
-// 	//異常系
-// 	// unit_tes[1] usage 異常系 null出力確認
-// 	usage(NULL);
-// 
-// 	BOOST_MESSAGE( "----- usage test end -----" );
-// }
-
 void	test_handler(int sig){
 	std::cout << "test_handler called" << std::endl;
 	++call_count_test_handler;
@@ -1823,11 +1811,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	ts->add( BOOST_TEST_CASE( &replication_command_test ) );
 	ts->add( BOOST_TEST_CASE( &set_loglevel_test ) );
-
-
-
-
-
+	ts->add( BOOST_TEST_CASE( &set_snmp_loglevel_test) );
+	ts->add( BOOST_TEST_CASE( &reload_parameter_test ) );
 
 	ts->add( BOOST_TEST_CASE( &run_test ) );
 	ts->add( BOOST_TEST_CASE( &l7vsd_main_test ) );
