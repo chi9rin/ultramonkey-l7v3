@@ -25,8 +25,8 @@ public:
 	~vs_test(){};
 
 	void	initialize( error_code& err ){
-		protomod.reset( protocol_module_control::getInstance().load_module( "PMtest1" ) );
-		schedmod.reset( schedule_module_control::getInstance().load_module( "SMtest1" ) );
+		protomod = protocol_module_control::getInstance().load_module( "PMtest1" );
+		schedmod = schedule_module_control::getInstance().load_module( "SMtest1" );
 	}
 	void	finalize( error_code& err ){
 	}
@@ -80,9 +80,6 @@ public:
 		rs_list_ref_count = in;
 	}
 
-	unsigned long long	get_up_send_size(){ return sendsize_up; }
-	unsigned long long	get_down_send_size(){ return sendsize_down; }
-
 	unsigned long long	get_curr_up_recv_size(){
 		return current_up_recvsize;
 	}
@@ -100,7 +97,7 @@ public:
 		}
 	}
 	void	test_replication(){
-		//serialize出力(header&data)
+/*		//serialize出力(header&data)
 		virtualservice_base::replication_data	a1;
 		//set data
 		a1.udpflag		= true;
@@ -130,7 +127,7 @@ public:
 		BOOST_CHECK( a2.sorry_endpoint == a1.sorry_endpoint );
 		BOOST_CHECK( a2.sorry_flag == a1.sorry_flag );
 		BOOST_CHECK( a2.qos_up == a1.qos_up );
-		BOOST_CHECK( a2.qos_down == a1.qos_down );
+		BOOST_CHECK( a2.qos_down == a1.qos_down );*/
 	}
 	parameter_data&	get_param_data(){
 		return param_data;

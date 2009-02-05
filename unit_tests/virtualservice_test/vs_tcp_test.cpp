@@ -51,7 +51,8 @@ void	virtualservice_tcp_test1(){
 	//schedule_module_controlのモジュールロードを呼んでいるか(モジュールロード正常終了)
 	BOOST_CHECK( NULL != vs->get_schedule_module() );
 	//session_poolを作成しているか(デフォルトサイズで作成)
-	BOOST_CHECK( SESSION_POOL_NUM_DEFAULT == vs->get_pool_sessions().size() );
+	BOOST_CHECK( static_cast<unsigned int>(l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT)
+				 == vs->get_pool_sessions().size() );
 
 	// unit_test[3]  run method test
 	BOOST_MESSAGE( "-------3" );
@@ -76,7 +77,7 @@ void	virtualservice_tcp_test1(){
 	delete vs;
 }
 
-//test case2 
+//test case2 method call
 void	virtualservice_tcp_test2(){
 	l7vs::error_code	vs_err;
 
@@ -89,7 +90,7 @@ void	virtualservice_tcp_test2(){
 
 
 	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, element );
-	// unit_test[]  initialize method call(poolsize from parameter file:value = 512)
+	// unit_test[8]  initialize method call(poolsize from parameter file:value = 512)
 	BOOST_MESSAGE( "-------" );
 	session_pool_debugger::getInstance().param_exist_flag() = true;
 	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
@@ -101,7 +102,7 @@ void	virtualservice_tcp_test2(){
 
 
 	vs = new l7vs::vs_tcp( vsd, rep, element );
-	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
+	// unit_test[9]  initialize method call(procotol_module_control::module_load error case)
 	BOOST_MESSAGE( "-------" );
 	session_pool_debugger::getInstance().param_exist_flag() = false;
 	session_pool_debugger::getInstance().pmcontrol_err_flag()	= true;
@@ -118,7 +119,7 @@ void	virtualservice_tcp_test2(){
 	delete vs;
 
 	vs = new l7vs::vs_tcp( vsd, rep, element );
-	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
+	// unit_test[10]  initialize method call(procotol_module_control::module_load error case)
 	BOOST_MESSAGE( "-------" );
 	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
 	session_pool_debugger::getInstance().smcontrol_err_flag()	= true;
@@ -135,51 +136,161 @@ void	virtualservice_tcp_test2(){
 
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	l7vs::vs_tcp*	vs2 = new l7vs::vs_tcp( vsd, rep, element );
-	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
+	// unit_test[11]  initialize method call(procotol_module_control::module_load error case)
 	BOOST_MESSAGE( "-------" );
 	BOOST_CHECK( *vs == *vs2 );
 	delete vs;
 	delete vs2;
-	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
-	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), 8080 );
+	// unit_test[12]  initialize method call(procotol_module_control::module_load error case)
+	element.udpmode = false;
+	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (8080) );
 	vs = new l7vs::vs_tcp( vsd, rep, element );
-	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), 80 );
+	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (80) );
 	vs2 = new l7vs::vs_tcp( vsd, rep, element );
 	BOOST_MESSAGE( "-------" );
 	BOOST_CHECK( *vs != *vs2 );
 	delete vs;
 	delete vs2;
 
+	element.udpmode = false;
+	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (80) );
 	vs = new l7vs::vs_tcp( vsd, rep, element );
+	// unit_test[13]  add_realserver method call
+	BOOST_MESSAGE( "-------" );
 	l7vs::virtualservice_element	add_element;
+	add_element.udpmode = false;
+	add_element.tcp_accept_endpoint = element.tcp_accept_endpoint;
 	for( unsigned int i = 0; i < 10; ++i ){
 		l7vs::realserver_element	rs_elem;
 		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
 		add_element.realserver_vector.push_back( rs_elem );
 	}
-	// unit_test[]  add_realserver method call
-	BOOST_MESSAGE( "-------" );
 	vs->add_realserver( add_element, vs_err );
 	std::list<l7vs::realserver>&	rslist = vs->get_rs_list();
-	std::list<l7vs::realserver>::iterator	itr = rslist.begin();
-	for( unsigned int i = 0; i < rslist.size(); ++i ){
-		BOOST_CHECK( itr->tcp_endpoint == tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) ) );
+	//RSの数が10であることを確認
+	BOOST_CHECK( 10 == rslist.size() );
+	//vs_errがfalseであることを確認
+	BOOST_CHECK( vs_err == false );
+	BOOST_MESSAGE( vs_err.get_message() );
+	BOOST_MESSAGE( element.tcp_accept_endpoint );
+	BOOST_MESSAGE( add_element.tcp_accept_endpoint );
+	//各要素が一致するか確認
+	for( std::list<l7vs::realserver>::iterator	itr = rslist.begin();
+		itr != rslist.end(); ++itr ){
+		for( int i = 0; i <= 10; ++i ){
+			if( 10 <= i )BOOST_ERROR( "error add_realserver : endpoint unmatch" );
+			if( itr->tcp_endpoint == tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) ) ){
+				BOOST_CHECK( itr->tcp_endpoint == tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) ) );
+				break;
+			}
+		}
 	}
-//	edit_realserver
-	BOOST_MESSAGE( "-------" );
-	l7vs::virtualservice_element	edit_element;
-// 	vs->edit_realserver( edit_element, vs_err );
-//	del_realserver
-	BOOST_MESSAGE( "-------" );
-	l7vs::virtualservice_element	del_element;
-// 	vs->del_realserver( del_element, vs_err );
+	// unit_test[14]  add_realserver method call(VSのEndpointが違う場合はエラーが返ること)
+	l7vs::virtualservice_element	add_err_element;
+	add_err_element.tcp_accept_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (80) );
+	l7vs::realserver_element		rs_adderr_elem;
+	rs_adderr_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.100.10" ), (8080) );
+	add_err_element.realserver_vector.push_back( rs_adderr_elem );
+	vs->add_realserver( add_err_element, vs_err );
+	//RSの数が10のままであることを確認
+	BOOST_CHECK( 10 == rslist.size() );
+	//vs_errがtrueでメッセージが存在することを確認
+	BOOST_CHECK( vs_err == true );
+	BOOST_MESSAGE( vs_err.get_message() );
 
-//	connection_active
-// 	vs->connection_active( const tcp_endpoint_type& );
-//	connection_inactive
-// 	vs->connection_inactive( const tcp_endpoint_type& );
+	// unit_test[15]  add_realserver method call(既にあるRS(エンドポイントが同じ)追加はエラーが返ること)
+	add_err_element.tcp_accept_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (80) );
+	rs_adderr_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (8080) );
+	add_err_element.realserver_vector.clear();
+	add_err_element.realserver_vector.push_back( rs_adderr_elem );
+	vs->add_realserver( add_err_element, vs_err );
+	//RSの数が10のままであることを確認
+	BOOST_CHECK( 10 == rslist.size() );
+	//vs_errがtrueでメッセージが存在することを確認
+	BOOST_CHECK( vs_err == true );
+	BOOST_MESSAGE( vs_err.get_message() );
+
+	// unit_test[16]  del_realserver method call(VSのエンドポイントが異なる場合はエラーが返ること)
+	l7vs::virtualservice_element	del_err_element;
+	l7vs::realserver_element		rs_delerr_elem;
+	del_err_element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (80) );
+	rs_delerr_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (8080) );
+	del_err_element.realserver_vector.clear();
+	del_err_element.realserver_vector.push_back( rs_delerr_elem );
+	vs->del_realserver( del_err_element, vs_err );
+	//RSの数が10のままであることを確認
+	BOOST_CHECK( 10 == rslist.size() );
+	//vs_errがtrueでメッセージが存在することを確認
+	BOOST_CHECK( vs_err == true );
+	BOOST_MESSAGE( vs_err.get_message() );
+
+	// unit_test[17]  del_realserver method call(一致するRSが無い場合はエラーが返ること)
+	del_err_element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (80) );
+	rs_delerr_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "100.90.80.70" ), (60000) );
+	del_err_element.realserver_vector.clear();
+	del_err_element.realserver_vector.push_back( rs_delerr_elem );
+	vs->del_realserver( del_err_element, vs_err );
+	//RSの数が10のままであることを確認
+	BOOST_CHECK( 10 == rslist.size() );
+	//vs_errがtrueでメッセージが存在することを確認
+	BOOST_CHECK( vs_err == true );
+	BOOST_MESSAGE( vs_err.get_message() );
+
+	// unit_test[18]  del_realserver method call
+	//addしたものと同じものを指定して、全削除されることを確認
+	BOOST_MESSAGE( "-------" );
+	vs->del_realserver( add_element, vs_err );
+	//RSの数が0であることを確認
+	BOOST_CHECK( 0 == rslist.size() );
+	//vs_errがfalseでメッセージが存在しないことを確認
+	BOOST_CHECK( vs_err == false );
+	BOOST_MESSAGE( vs_err.get_message() );
+	BOOST_CHECK( vs_err.get_message() == "" );
+
+	// unit_test[19]  add_realserver method call(再度追加)
+	BOOST_MESSAGE( "-------" );
+	vs->add_realserver( add_element, vs_err );
+	//RSの数が10であることを確認
+	BOOST_CHECK( 10 == rslist.size() );
+	//各要素が一致するか確認
+	for( std::list<l7vs::realserver>::iterator	itr = rslist.begin();
+		itr != rslist.end(); ++itr ){
+		for( int i = 0; i <= 10; ++i ){
+			if( 10 <= i )BOOST_ERROR( "error add_realserver : endpoint unmatch" );
+			if( itr->tcp_endpoint == tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) ) ){
+				BOOST_CHECK( itr->tcp_endpoint == tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) ) );
+				break;
+			}
+		}
+	}
+
+	// unit_test[20]  connection_active method call
+	tcp_ep_type	ep = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (8080) );
+	vs->connection_active( ep );
+	for( std::list<l7vs::realserver>::iterator	itr = rslist.begin();
+		 itr != rslist.end(); ++itr ){
+		if( itr->tcp_endpoint == ep ){
+			BOOST_CHECK( 1 == itr->get_active() );
+			break;
+		}
+	}
+	// unit_test[21]  connection_inactive method call
+	vs->connection_inactive( ep );
+	for( std::list<l7vs::realserver>::iterator	itr = rslist.begin();
+		 itr != rslist.end(); ++itr ){
+		if( itr->tcp_endpoint == ep ){
+			BOOST_CHECK( 0 == itr->get_active() );
+			BOOST_CHECK( 1 == itr->get_inact() );
+			break;
+		}
+	}
+
 	delete vs;
 
+	// edit_realserver method call
+/*	BOOST_MESSAGE( "-------" );
+	l7vs::virtualservice_element	edit_element;*/
+// 	vs->edit_realserver( edit_element, vs_err );
 }
 
 //test case3
@@ -458,6 +569,7 @@ l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const st
 
 	return return_value;
 }
+
 void	l7vs::schedule_module_control::unload_module( schedule_module_base* module_ptr ){
 	delete module_ptr;
 }

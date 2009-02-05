@@ -30,8 +30,6 @@
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 
-#define	SESSION_POOL_NUM_DEFAULT	(256)
-
 #define	PARAM_POOLSIZE_KEY_NAME	"SESSION_POOL_SIZE"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
@@ -57,15 +55,22 @@ public:
 	typedef	boost::asio::ip::udp::endpoint					udp_endpoint_type;
 
 	typedef	boost::shared_ptr<boost::mutex>					mutex_ptr;
+
+	const static int	SESSION_POOL_NUM_DEFAULT	= 256;		//! Default count for number of session-pool size
+	const static int	MAX_REPLICATION_DATA_NUM	= 64;		//! Maximum count value of replication data array
+	const static int	OPERATION_TIMEOUT			= 1;		//! Operation timed out value
+	const static int	REFCOUNT_WAIT_INTERVAL		= 10000;	//! wait interval for rs_ref_count check
 protected:
-	//!	@class	vs_replication_header replication data structure for header data
+	//!	@class	vs_replication_header replication data structure
 	class	replication_data{
 	public:
 		replication_data() : udpflag( false ) {}
 		replication_data( const replication_data& in ){
 			udpflag			= in.udpflag;
-			tcp_endpoint	= in.tcp_endpoint;
-			udp_endpoint	= in.udp_endpoint;
+			memcpy( tcp_endpoint, in.tcp_endpoint, (48*sizeof(char)) );
+			memcpy( udp_endpoint, in.udp_endpoint, (48*sizeof(char)) );
+/*			tcp_endpoint	= in.tcp_endpoint;
+			udp_endpoint	= in.udp_endpoint;*/
 			sorry_maxconnection = in.sorry_maxconnection;
 			sorry_endpoint	= in.sorry_endpoint;
 			sorry_flag		= in.sorry_flag;
@@ -74,8 +79,10 @@ protected:
 		}
 		replication_data&	operator=( const replication_data& in ){
 			udpflag			= in.udpflag;
-			tcp_endpoint	= in.tcp_endpoint;
-			udp_endpoint	= in.udp_endpoint;
+			memcpy( tcp_endpoint, in.tcp_endpoint, (48*sizeof(char)) );
+			memcpy( udp_endpoint, in.udp_endpoint, (48*sizeof(char)) );
+/*			tcp_endpoint	= in.tcp_endpoint;
+			udp_endpoint	= in.udp_endpoint;*/
 			sorry_maxconnection = in.sorry_maxconnection;
 			sorry_endpoint	= in.sorry_endpoint;
 			sorry_flag		= in.sorry_flag;
@@ -84,29 +91,13 @@ protected:
 			return *this;
 		}
 		bool				udpflag;
-		tcp_endpoint_type	tcp_endpoint;
-		udp_endpoint_type	udp_endpoint;
+		char				tcp_endpoint[48];
+		char				udp_endpoint[48];
 		long long			sorry_maxconnection;
 		tcp_endpoint_type	sorry_endpoint;
 		bool				sorry_flag;
 		unsigned long long	qos_up;
 		unsigned long long	qos_down;
-	private:
-		friend class	boost::serialization::access;		//! friend boost serializable class
-		//! serializable
-		//! @brief using boost serialiable. class serializable function.
-		//! @param[in]	archive
-		//! @param[in]	version
-		template <class Archive > void serialize( Archive& ar, const unsigned int version ){
-			ar & udpflag;
-			ar & tcp_endpoint;
-			ar & udp_endpoint;
-			ar & sorry_maxconnection;
-			ar & sorry_endpoint;
-			ar & sorry_flag;
-			ar & qos_up;
-			ar & qos_down;
-		}
 	};
 
 	struct	parameter_data{
@@ -123,9 +114,10 @@ protected:
 
 	parameter_data				param_data;		//! virtual service parameter data
 	virtualservice_element		element;		//! virtual service element
+	boost::mutex				element_mutex;	//! mutex for virtual service element
 
-	boost::shared_ptr<protocol_module_base>	protomod;			//! protocol module smart pointer
-	boost::shared_ptr<schedule_module_base>	schedmod;			//! schedule module smart pointer
+	protocol_module_base*		protomod;			//! protocol module smart pointer
+	schedule_module_base*		schedmod;			//! schedule module smart pointer
 
 	std::list<realserver>		rs_list;						//! realserver list
 	std::map< tcp_endpoint_type,mutex_ptr >
@@ -160,6 +152,7 @@ protected:
 	void						handle_schedmod_replication( const boost::system::error_code& );
 
 	void						handle_throughput_update( const boost::system::error_code& );
+
 public:
 	virtualservice_base(	const l7vsd&,
 							const replication&,
@@ -182,7 +175,7 @@ public:
 	virtual	void				edit_realserver( const virtualservice_element&, error_code& ) = 0;
 	virtual	void				del_realserver( const virtualservice_element&, error_code& ) = 0;
 
-	virtualservice_element&		get_element(){ return element; }
+	virtualservice_element&		get_element();
 
 	virtual	void				run() = 0;
 	virtual	void				stop() = 0;
@@ -205,10 +198,8 @@ public:
 	void						update_down_recv_size( unsigned long long );
 	void						update_down_send_size( unsigned long long );
 
-	boost::shared_ptr<protocol_module_base>
-								get_protocol_module();
-	boost::shared_ptr<schedule_module_base>
-								get_schedule_module();
+	protocol_module_base*		get_protocol_module();
+	schedule_module_base*		get_schedule_module();
 };
 
 //!
@@ -347,10 +338,8 @@ public:
 	void						update_down_recv_size( unsigned long long );
 	void						update_down_send_size( unsigned long long );
 
-	boost::shared_ptr<protocol_module_base>
-								get_protocol_module();
-	boost::shared_ptr<schedule_module_base>
-								get_schedule_module();
+	protocol_module_base*		get_protocol_module();
+	schedule_module_base*		get_schedule_module();
 };
 
 }	//namespace l7vs
