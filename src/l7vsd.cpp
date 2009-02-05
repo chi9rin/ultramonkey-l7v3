@@ -55,7 +55,7 @@ void	l7vsd::list_virtual_service( vselist_type* out_vslist, error_code& err ){
 
 	if( !out_vslist ){
 		std::string msg("out_vslist pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -79,16 +79,38 @@ void	l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_code& 
 
 	if( !response ){
 		std::string msg("response pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
+	if( !bridge ){
+		std::string msg("bridge pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !rep ){
+		std::string msg("rep pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	unsigned long long	total_client_recv_byte = 0ULL;
+	unsigned long long	total_client_send_byte = 0ULL;
+	unsigned long long	total_realserver_recv_byte = 0ULL;
+	unsigned long long	total_realserver_send_byte = 0ULL;
 
 	// make vselement list
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
 		response->virtualservice_status_list.push_back( (*itr)->get_element() );
+		// calc send recv bytes
+		total_client_recv_byte += (*itr)->get_up_recv_size();
+		total_client_send_byte += (*itr)->get_down_send_size();
+		total_realserver_recv_byte += (*itr)->get_down_recv_size();
+		total_realserver_send_byte += (*itr)->get_up_send_size();
 	}
 
 	// get_replication_mode
@@ -109,6 +131,27 @@ void	l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_code& 
 		 ++itr ){
 		response->snmp_log_status_list.push_back( *itr );
 	}
+
+	// calc total bps
+	unsigned long long	total_bytes =
+		total_client_recv_byte +
+		total_client_send_byte +
+		total_realserver_recv_byte +
+		total_realserver_send_byte;
+
+	boost::posix_time::ptime	now =
+		boost::posix_time::second_clock::local_time();
+	boost::posix_time::time_duration	dur = ( now - starttime );
+	if( 0ULL != dur.total_seconds() )
+		response->total_bps = ( total_bytes / dur.total_seconds() );
+	else
+		response->total_bps = 0ULL;
+
+	response->total_client_recv_byte = total_client_recv_byte;
+	response->total_client_send_byte = total_client_send_byte;
+	response->total_realserver_recv_byte = total_realserver_recv_byte;
+	response->total_realserver_send_byte = total_realserver_send_byte;
+
 }
 
 //! virtual_service add command
@@ -122,7 +165,7 @@ void	l7vsd::add_virtual_service( const virtualservice_element* in_vselement, err
 
 	if( !in_vselement ){
 		std::string msg("in_vselement pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -131,7 +174,7 @@ void	l7vsd::add_virtual_service( const virtualservice_element* in_vselement, err
 		// replication null check
 		if( NULL == rep ){
 			std::string msg("replication pointer is null.");
-			Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+			Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 	
 			err.setter( true, msg );
 			return;
@@ -179,7 +222,7 @@ void	l7vsd::del_virtual_service( const virtualservice_element* in_vselement, err
 
 	if( !in_vselement ){
 		std::string msg("in_vselement pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -216,7 +259,7 @@ void	l7vsd::edit_virtual_service( const virtualservice_element* in_vselement, er
 
 	if( !in_vselement ){
 		std::string msg("in_vselement pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -247,7 +290,7 @@ void	l7vsd::add_real_server( const virtualservice_element* in_vselement, error_c
 
 	if( !in_vselement ){
 		std::string msg("in_vselement pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -278,7 +321,7 @@ void	l7vsd::del_real_server( const virtualservice_element* in_vselement, error_c
 
 	if( !in_vselement ){
 		std::string msg("in_vselement pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -309,7 +352,7 @@ void	l7vsd::edit_real_server( const virtualservice_element* in_vselement, error_
 
 	if( !in_vselement ){
 		std::string msg("in_vselement pointer is null.");
-		Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, msg, __FILE__, __LINE__);
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
 		err.setter( true, msg );
 		return;
 	}
@@ -358,11 +401,194 @@ void	l7vsd::flush_virtual_service( error_code& err ){
 	rep->switch_to_slave();
 }
 
+//! replication command
+//! @param[in]	replicaiton command
+//! @param[out]	error_code
+void	l7vsd::replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG* cmd, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::replication_command", __FILE__, __LINE__ );
 
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
 
+	if( !cmd ){
+		std::string msg("cmd pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !rep ){
+		std::string msg("rep pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
 
+	switch( *cmd ){
+	case	l7vsadm_request::REP_START:
+		rep->start();
+		break;
+	case	l7vsadm_request::REP_STOP:
+		rep->stop();
+		break;
+	case	l7vsadm_request::REP_FORCE:
+		rep->force_replicate();
+		break;
+	case	l7vsadm_request::REP_DUMP:
+		rep->dump_memory();
+		break;
+	default:
+		std::string msg("invalid replication command.");
+		Logger::putLogError(LOG_CAT_L7VSD_REPLICATION, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+}
 
+//! loglevel set command
+//! @param[in]	log category
+//! @param[in]	log level
+//! @param[out]	error_code
+void	l7vsd::set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* level, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::set_loglevel", __FILE__, __LINE__ );
 
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	if( !cat ){
+		std::string msg("cat pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !level ){
+		std::string msg("level pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( LOG_CAT_END == *cat ){
+		// set loglevel all
+		if( !Logger::setLogLevelAll( *level ) ){
+			std::string msg("set loglevel all failed.");
+			Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
+	}
+	else{
+		if( !Logger::setLogLevel( *cat, *level ) ){
+			std::string msg("set loglevel failed.");
+			Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
+	}
+}
+
+//! snmp loglevel set command
+//! @param[in]	log category
+//! @param[in]	log level
+//! @param[out]	error_code
+void	l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* level, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::snmp_set_loglevel", __FILE__, __LINE__ );
+
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	if( !cat ){
+		std::string msg("cat pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !level ){
+		std::string msg("level pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !bridge ){
+		std::string msg("bridge pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	if( LOG_CAT_END == *cat ){
+		// set loglevel all
+		if( 0 != bridge->change_loglevel_allcategory( *level ) ){
+			std::string msg("set snmp loglevel all failed.");
+			Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
+	}
+	else{
+		if( 0 != bridge->change_loglevel( *cat, *level ) ){
+			std::string msg("set snmp loglevel failed.");
+			Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
+	}
+}
+
+//! reload parameter command
+//! @param[in]	reload component
+//! @param[out]	error_code
+void	l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG* comp, error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::reload_parameter", __FILE__, __LINE__ );
+
+	boost::mutex::scoped_lock command_lock( command_mutex );
+	boost::mutex::scoped_lock vslist_lock( vslist_mutex );
+
+	if( !comp ){
+		std::string msg("comp pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !rep ){
+		std::string msg("rep pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+	if( !bridge ){
+		std::string msg("bridge pointer is null.");
+		Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+
+	Parameter	param;
+	Logger		logger_instance;
+	if( param.read_file( *comp ) ){
+		switch( *comp ){
+		case	PARAM_COMP_REPLICATION:
+			rep->reset();
+			break;
+		case	PARAM_COMP_LOGGER:
+			logger_instance.loadConf();
+			break;
+		case	PARAM_COMP_SNMPAGENT:
+			bridge->reload_config();
+			break;
+		default:
+			std::string msg("parameter reload command not found.");
+			Logger::putLogWarn(LOG_CAT_L7VSD_PARAMETER, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
+	}
+	else{
+		std::string msg("parameter reload failed.");
+		Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 1, msg, __FILE__, __LINE__);
+		err.setter( true, msg );
+		return;
+	}
+}
 
 //! vs_list search function
 //! @param[in]	vs_element

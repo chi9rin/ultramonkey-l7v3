@@ -33,21 +33,21 @@ public:
 	//! @enum COMMAND_CODE_TAG	request command code enum
 	enum	COMMAND_CODE_TAG{
 		CMD_NONE = 0,
-		CMD_LIST,               //!< List command(-l,--list)
-		CMD_LIST_VERBOSE,       //!< Verbose list command(-V,--verbose)
-		CMD_LIST_KEY,           //!< Key list command(-K, --key)
-		CMD_ADD_VS,             //!< Add VirtualService command(-A,--add-service)
-		CMD_DEL_VS,             //!< Delete VirtualService command(-D, --delete-service)
-		CMD_EDIT_VS,            //!< Edit VirtualService command(-E, --edit-service)
-		CMD_FLUSH_VS,           //!< Flush VirtualService command(-C, --flush)
-		CMD_ADD_RS,             //!< Add RealServer command(-a, --add-server)
-		CMD_DEL_RS,             //!< Delete RealServer command(-d, --delete-server)
-		CMD_EDIT_RS,            //!< Edit RealServer command(-e.--edit-server)
-		CMD_REPLICATION,        //!< Replication command(-R, --replication)
-		CMD_LOG,                //!< Logger command(-L, -log)
-		CMD_SNMP,               //!< SNMPAgent command(-S, --snmp)
-		CMD_PARAMETER,          //!< Parameter command(-P, --parameter)
-		CMD_HELP,               //!< Help command(-h, --help)
+		CMD_LIST,				//!< List command(-l,--list)
+		CMD_LIST_VERBOSE,		//!< Verbose list command(-V,--verbose)
+		CMD_LIST_KEY,			//!< Key list command(-K, --key)
+		CMD_ADD_VS,				//!< Add VirtualService command(-A,--add-service)
+		CMD_DEL_VS,				//!< Delete VirtualService command(-D, --delete-service)
+		CMD_EDIT_VS,			//!< Edit VirtualService command(-E, --edit-service)
+		CMD_FLUSH_VS,			//!< Flush VirtualService command(-C, --flush)
+		CMD_ADD_RS,				//!< Add RealServer command(-a, --add-server)
+		CMD_DEL_RS,				//!< Delete RealServer command(-d, --delete-server)
+		CMD_EDIT_RS,			//!< Edit RealServer command(-e.--edit-server)
+		CMD_REPLICATION,		//!< Replication command(-R, --replication)
+		CMD_LOG,				//!< Logger command(-L, -log)
+		CMD_SNMP,				//!< SNMPAgent command(-S, --snmp)
+		CMD_PARAMETER,			//!< Parameter command(-P, --parameter)
+		CMD_HELP,				//!< Help command(-h, --help)
 	};
 
 	//! @enum REPLICATION_COMMAND_TAG	replication request command enum

@@ -4,6 +4,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "error_code.h"
 #include "logger_wrapper.h"
@@ -40,11 +41,16 @@ public:
 	bool&	get_help() { return help; }
 	bool&	get_debug() { return debug; }
 
+	boost::posix_time::ptime&	get_starttime() { return starttime; }
+
 	vslist_type::iterator	search_vslist( l7vs::virtualservice_element& in_elem ){
 		return l7vsd::search_vslist( in_elem );
 	}
 	void	set_replication( boost::shared_ptr< l7vs::replication > inrep ){
 		rep = inrep;
+	}
+	void	set_snmpbridge( boost::shared_ptr< l7vs::snmpbridge > inbridge ){
+		bridge = inbridge;
 	}
 
 };
@@ -103,17 +109,17 @@ void	list_virtual_service_test(){
 	//virtualservice_element elem1;
 	//virtualservice_element elem2;
 
-	//正常系
+	//normal case
 	{
 		l7vs::error_code	err;
 		l7vs::l7vsd::vselist_type	vse_list;
 	
 		vsd_test.list_virtual_service( &vse_list, err );
-		// unit_test[1] list_virtual_service 正常系 エラーコード確認
+		// unit_test[1] list_virtual_service normal case error_code check
 		BOOST_CHECK( !err );
-		// unit_test[1] list_virtual_service 正常系 vse_list数確認
+		// unit_test[1] list_virtual_service normal case vse_list num check
 		BOOST_CHECK_EQUAL( vse_list.size(), 2U );
-		// unit_test[1] list_virtual_service 正常系 vse_list内容確認
+		// unit_test[1] list_virtual_service normal case vse_list content check
 		l7vs::l7vsd::vselist_type::iterator itr = vse_list.begin();
 		BOOST_CHECK_EQUAL( itr->protocol_module_name, "cinsert" );
 		itr++;
@@ -122,19 +128,121 @@ void	list_virtual_service_test(){
 
 	vsd_test.get_vslist().clear();
 
-	//正常系２
+	//normal case 2
 	{
 		l7vs::error_code	err;
 		l7vs::l7vsd::vselist_type	vse_list;
 
 		vsd_test.list_virtual_service( &vse_list, err );
-		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) エラーコード確認
+		// unit_test[1] list_virtual_service normal case 2(vslist empty) error_code check
 		BOOST_CHECK( !err );
-		// unit_test[1] list_virtual_service 正常系２(vslistが空の場合) vse_list数確認
+		// unit_test[1] list_virtual_service normal case 2(vslist empty) vse_list num check
 		BOOST_CHECK_EQUAL( vse_list.size(), 0U );
 	}
 
 	BOOST_MESSAGE( "----- list_virtual_service_test end -----" );
+
+}
+
+void	list_virtual_service_verbose_test(){
+	BOOST_MESSAGE( "----- list_virtual_service_verbose_test start -----" );
+
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service	io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+	//l7vs::replication	rep(io);
+	boost::shared_ptr< l7vs::snmpbridge >
+									bridge( new l7vs::snmpbridge( vsd_test, io ) );
+	vsd_test.set_snmpbridge( bridge );
+
+	l7vs::virtualservice_element	e;
+
+	boost::shared_ptr< l7vs::virtual_service > vs1( new l7vs::virtual_service( vsd_test, *rep, e ) );
+	vs1->element.protocol_module_name = "cinsert";
+
+	vsd_test.get_vslist().push_back(vs1);
+
+	l7vs::Logger::setLogLevel( l7vs::LOG_CAT_L7VSD_NETWORK, l7vs::LOG_LV_FATAL );
+	vsd_test.get_starttime() -= boost::posix_time::hours(1);
+
+	//normal case
+	{
+		l7vs::error_code	err;
+		l7vs::l7vsd_response	response;
+	
+		vsd_test.list_virtual_service_verbose( &response, err );
+		// unit_test[1] list_virtual_service_verbose normal case error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] list_virtual_service_verbose normal case vse_list num check
+		BOOST_CHECK_EQUAL( response.virtualservice_status_list.size(), 1U );
+		// unit_test[1] list_virtual_service_verbose normal case vse_list content check
+		l7vs::l7vsd::vselist_type::iterator itr = response.virtualservice_status_list.begin();
+		BOOST_CHECK_EQUAL( itr->protocol_module_name, "cinsert" );
+		// unit_test[1] list_virtual_service_verbose normal case replication_mode_status check
+		BOOST_CHECK_EQUAL( response.replication_mode_status, l7vs::replication::REPLICATION_MASTER );
+		// unit_test[1] list_virtual_service_verbose normal case log_status_list check
+		l7vs::l7vsd::logstatus_list_type::iterator logitr;
+		logitr = response.log_status_list.begin();
+		BOOST_CHECK_EQUAL( logitr->second, l7vs::LOG_LV_FATAL );
+		// unit_test[1] list_virtual_service_verbose normal case snmp_connection_status check
+		BOOST_CHECK_EQUAL( response.snmp_connection_status, true );
+		// unit_test[1] list_virtual_service_verbose normal case snmp_log_status_list check
+		l7vs::l7vsd::logstatus_list_type::iterator snmplogitr;
+		snmplogitr = response.snmp_log_status_list.begin();
+		BOOST_CHECK_EQUAL( logitr->second, l7vs::LOG_LV_FATAL );
+		// unit_test[1] list_virtual_service_verbose normal case total_client_recv_byte check
+		BOOST_CHECK_EQUAL( response.total_client_recv_byte, 12345ULL );
+		// unit_test[1] list_virtual_service_verbose normal case total_client_send_byte check
+		BOOST_CHECK_EQUAL( response.total_client_send_byte, 45678ULL );
+		// unit_test[1] list_virtual_service_verbose normal case total_realserver_recv_byte check
+		BOOST_CHECK_EQUAL( response.total_realserver_recv_byte, 34567ULL );
+		// unit_test[1] list_virtual_service_verbose normal case total_realserver_send_byte check
+		BOOST_CHECK_EQUAL( response.total_realserver_send_byte, 23456ULL );
+		// unit_test[1] list_virtual_service_verbose normal case total_bps check
+		BOOST_CHECK( response.total_bps > 0ULL );
+
+	}
+
+	vsd_test.get_vslist().clear();
+
+	//normal case 2
+	{
+		l7vs::error_code	err;
+		l7vs::l7vsd_response	response;
+
+		vsd_test.list_virtual_service_verbose( &response, err );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) vse_list num check
+		BOOST_CHECK_EQUAL( response.virtualservice_status_list.size(), 0U );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) replication_mode_status check
+		BOOST_CHECK_EQUAL( response.replication_mode_status, l7vs::replication::REPLICATION_MASTER );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) log_status_list check
+		l7vs::l7vsd::logstatus_list_type::iterator logitr;
+		logitr = response.log_status_list.begin();
+		BOOST_CHECK_EQUAL( logitr->second, l7vs::LOG_LV_FATAL );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) snmp_connection_status check
+		BOOST_CHECK_EQUAL( response.snmp_connection_status, true );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) snmp_log_status_list check
+		l7vs::l7vsd::logstatus_list_type::iterator snmplogitr;
+		snmplogitr = response.snmp_log_status_list.begin();
+		BOOST_CHECK_EQUAL( logitr->second, l7vs::LOG_LV_FATAL );
+		// unit_test[1] list_virtual_service_verbose normal 2(vslist empty) case total_client_recv_byte check
+		BOOST_CHECK_EQUAL( response.total_client_recv_byte, 0ULL );
+		// unit_test[1] list_virtual_service_verbose normal 2(vslist empty) case total_client_send_byte check
+		BOOST_CHECK_EQUAL( response.total_client_send_byte, 0ULL );
+		// unit_test[1] list_virtual_service_verbose normal 2(vslist empty) case total_realserver_recv_byte check
+		BOOST_CHECK_EQUAL( response.total_realserver_recv_byte, 0ULL );
+		// unit_test[1] list_virtual_service_verbose normal 2(vslist empty) case total_realserver_send_byte check
+		BOOST_CHECK_EQUAL( response.total_realserver_send_byte, 0ULL );
+		// unit_test[1] list_virtual_service_verbose normal case 2(vslist empty) total_bps check
+		BOOST_CHECK( response.total_bps == 0ULL );
+	}
+
+	BOOST_MESSAGE( "----- list_virtual_service_verbose_test end -----" );
 
 }
 
@@ -298,15 +406,15 @@ void	del_virtual_service_test(){
 		l7vs::virtual_service::finalize_fail = false;
 
 		vsd_test.del_virtual_service( &elem2, err );
-		// unit_test[1] del_virtual_service normal case 2 (delete last vs) error_code check
+		// unit_test[1] del_virtual_service normal case 2(delete last vs) error_code check
 		BOOST_CHECK( !err );
-		// unit_test[1] del_virtual_service normal case 2 (delete last vs) vslist num check
+		// unit_test[1] del_virtual_service normal case 2(delete last vs) vslist num check
 		BOOST_CHECK_EQUAL( vsd_test.get_vslist().size(), 0U );
-		// unit_test[1] del_virtual_service normal case 2 (delete last vs) stop call check
+		// unit_test[1] del_virtual_service normal case 2(delete last vs) stop call check
 		BOOST_CHECK_EQUAL( l7vs::virtual_service::stop_called, true );
-		// unit_test[1] del_virtual_service normal case 2 (delete last vs) finalize call check
+		// unit_test[1] del_virtual_service normal case 2(delete last vs) finalize call check
 		BOOST_CHECK_EQUAL( l7vs::virtual_service::finalize_called, true );
-		// unit_test[1] del_virtual_service normal case 2 (delete last vs) replication switch_to_slave call check
+		// unit_test[1] del_virtual_service normal case 2(delete last vs) replication switch_to_slave call check
 		BOOST_CHECK_EQUAL( rep->switch_to_slave_called, true );
 
 		l7vs::virtual_service::stop_called = false;
@@ -678,7 +786,275 @@ void	flush_virtual_service_test(){
 
 }
 
+void	replication_command_test(){
+	BOOST_MESSAGE( "----- replication_command_test start -----" );
+	l7vsd_test			vsd_test;
 
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	// REP_START
+	{
+		l7vs::replication::start_called = false;
+		l7vs::error_code err;
+		l7vs::l7vsadm_request::REPLICATION_COMMAND_TAG cmd = l7vs::l7vsadm_request::REP_START;
+		vsd_test.replication_command( &cmd, err );
+		// unit_test[1] replication_command normal case 1(REP_START) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] replication_command normal case 1(REP_START) start call check
+		BOOST_CHECK_EQUAL( l7vs::replication::start_called, true );
+	}
+
+	// REP_STOP
+	{
+		l7vs::replication::stop_called = false;
+		l7vs::error_code err;
+		l7vs::l7vsadm_request::REPLICATION_COMMAND_TAG cmd = l7vs::l7vsadm_request::REP_STOP;
+		vsd_test.replication_command( &cmd, err );
+		// unit_test[1] replication_command normal case 2(REP_STOP) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] replication_command normal case 2(REP_STOP) stop call check
+		BOOST_CHECK_EQUAL( l7vs::replication::stop_called, true );
+	}
+
+	// REP_FORCE
+	{
+		l7vs::replication::force_replicate_called = false;
+		l7vs::error_code err;
+		l7vs::l7vsadm_request::REPLICATION_COMMAND_TAG cmd = l7vs::l7vsadm_request::REP_FORCE;
+		vsd_test.replication_command( &cmd, err );
+		// unit_test[1] replication_command normal case 3(REP_FORCE) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] replication_command normal case 3(REP_FORCE) stop call check
+		BOOST_CHECK_EQUAL( l7vs::replication::force_replicate_called, true );
+	}
+
+	// REP_DUMP
+	{
+		l7vs::replication::dump_memory_called = false;
+		l7vs::error_code err;
+		l7vs::l7vsadm_request::REPLICATION_COMMAND_TAG cmd = l7vs::l7vsadm_request::REP_DUMP;
+		vsd_test.replication_command( &cmd, err );
+		// unit_test[1] replication_command normal case 4(REP_DUMP) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] replication_command normal case 4(REP_DUMP) stop call check
+		BOOST_CHECK_EQUAL( l7vs::replication::dump_memory_called, true );
+	}
+
+	// error case
+	{
+		l7vs::error_code err;
+		l7vs::l7vsadm_request::REPLICATION_COMMAND_TAG cmd = l7vs::l7vsadm_request::REP_NONE;
+		vsd_test.replication_command( &cmd, err );
+		// unit_test[1] replication_command error case (REP_NONE) error_code check
+		BOOST_CHECK( err );
+	}
+
+
+	BOOST_MESSAGE( "----- replication_command_test end -----" );
+
+}
+
+void	set_loglevel_test(){
+	BOOST_MESSAGE( "----- set_loglevel_test start -----" );
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	l7vs::LOG_CATEGORY_TAG	categories[] = {
+		l7vs::LOG_CAT_L7VSD_NETWORK,
+		l7vs::LOG_CAT_L7VSD_NETWORK_QOS,
+		l7vs::LOG_CAT_L7VSD_NETWORK_BANDWIDTH,
+		l7vs::LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION,
+		l7vs::LOG_CAT_L7VSD_NETWORK_ACCESS,
+		l7vs::LOG_CAT_L7VSD_MAINTHREAD,
+		l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE,
+		l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD,
+		l7vs::LOG_CAT_L7VSD_SESSION,
+		l7vs::LOG_CAT_L7VSD_SESSION_THREAD,
+		l7vs::LOG_CAT_L7VSD_REALSERVER,
+		l7vs::LOG_CAT_L7VSD_SORRYSERVER,
+		l7vs::LOG_CAT_L7VSD_MODULE,
+		l7vs::LOG_CAT_L7VSD_REPLICATION,
+		l7vs::LOG_CAT_L7VSD_REPLICATION_SENDTHREAD,
+		l7vs::LOG_CAT_L7VSD_PARAMETER,
+		l7vs::LOG_CAT_L7VSD_LOGGER,
+		l7vs::LOG_CAT_L7VSD_COMMAND,
+		l7vs::LOG_CAT_L7VSD_START_STOP,
+		l7vs::LOG_CAT_L7VSD_SYSTEM,
+		l7vs::LOG_CAT_L7VSD_SYSTEM_MEMORY,
+		l7vs::LOG_CAT_L7VSD_SYSTEM_ENDPOINT,
+		l7vs::LOG_CAT_L7VSD_SYSTEM_SIGNAL,
+		l7vs::LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT
+	};
+
+	for( unsigned int i = 0; i < sizeof(categories); ++i ){
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_DEBUG;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_DEBUG );
+
+		level = l7vs::LOG_LV_INFO;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_INFO );
+
+		level = l7vs::LOG_LV_WARN;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_WARN );
+
+		level = l7vs::LOG_LV_ERROR;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_ERROR );
+
+		level = l7vs::LOG_LV_FATAL;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_FATAL );
+	}
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_QOS) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_QOS) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_BANDWIDTH) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_BANDWIDTH) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_ACCESS) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK_ACCESS) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_MAINTHREAD) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_MAINTHREAD) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_VIRTUALSERVICE) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_VIRTUALSERVICE) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SESSION) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SESSION) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SESSION_THREAD) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SESSION_THREAD) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_REALSERVER) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_REALSERVER) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SORRYSERVER) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SORRYSERVER) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_MODULE) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_MODULE) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_REPLICATION) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_REPLICATION) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_REPLICATION_SENDTHREAD) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_REPLICATION_SENDTHREAD) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_PARAMETER) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_PARAMETER) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_LOGGER) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_LOGGER) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_COMMAND) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_COMMAND) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_START_STOP) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_START_STOP) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_MEMORY) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_MEMORY) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_ENDPOINT) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_ENDPOINT) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_SIGNAL) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_SIGNAL) loglevel check
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT) loglevel check
+
+	// set loglevel all(LOG_LV_DEBUG)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_DEBUG;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		for( unsigned int i = 0; i < sizeof(categories); ++i )
+			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_DEBUG );
+	}
+
+	// set loglevel all(LOG_LV_INFO)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_INFO;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		for( unsigned int i = 0; i < sizeof(categories); ++i )
+			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_INFO );
+	}
+
+	// set loglevel all(LOG_LV_WARN)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_WARN;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		for( unsigned int i = 0; i < sizeof(categories); ++i )
+			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_WARN );
+	}
+
+	// set loglevel all(LOG_LV_ERROR)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_ERROR;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		for( unsigned int i = 0; i < sizeof(categories); ++i )
+			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_ERROR );
+	}
+
+
+	// set loglevel all(LOG_LV_FATAL)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_FATAL;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		for( unsigned int i = 0; i < sizeof(categories); ++i )
+			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_FATAL );
+	}
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_END(all)) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_END(all)) loglevel check
+
+
+	BOOST_MESSAGE( "----- set_loglevel_test end -----" );
+
+}
 
 void	search_vslist_test(){
 	BOOST_MESSAGE( "----- search_vslist_test start -----" );
@@ -1199,13 +1575,13 @@ void	set_sighandlers_test(){
 // 	BOOST_MESSAGE( "----- usage test start -----" );
 // 
 // 	//正常系
-// 	// unit_test[1] usage 正常系 stdout出力確認
+// 	// unit_tes[1] usage 正常系 stdout出力確認
 // 	usage(stdout);
-// 	// unit_test[1] usage 正常系 stderr出力確認
+// 	// unit_tes[1] usage 正常系 stderr出力確認
 // 	usage(stderr);
 // 
 // 	//異常系
-// 	// unit_test[1] usage 異常系 null出力確認
+// 	// unit_tes[1] usage 異常系 null出力確認
 // 	usage(NULL);
 // 
 // 	BOOST_MESSAGE( "----- usage test end -----" );
@@ -1230,6 +1606,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	logger_instance.loadConf();
 
 	ts->add( BOOST_TEST_CASE( &list_virtual_service_test ) );
+	ts->add( BOOST_TEST_CASE( &list_virtual_service_verbose_test ) );
 	ts->add( BOOST_TEST_CASE( &search_vslist_test ) );
 	ts->add( BOOST_TEST_CASE( &add_virtual_service_test ) );
 	ts->add( BOOST_TEST_CASE( &del_virtual_service_test ) );
@@ -1238,6 +1615,11 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &del_real_server_test ) );
 	ts->add( BOOST_TEST_CASE( &edit_real_server_test ) );
 	ts->add( BOOST_TEST_CASE( &flush_virtual_service_test ) );
+
+	ts->add( BOOST_TEST_CASE( &replication_command_test ) );
+	ts->add( BOOST_TEST_CASE( &set_loglevel_test ) );
+
+
 
 
 

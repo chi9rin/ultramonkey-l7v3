@@ -25,6 +25,12 @@ public:
 
 	static	bool	finalize_called;
 
+	static	bool	dump_memory_called;
+	static	bool	start_called;
+	static	bool	stop_called;
+	static	bool	force_replicate_called;
+	static	bool	reset_called;
+
 //function
 	replication(	boost::asio::io_service& inreceive_io )
 				:	receive_io( inreceive_io ),
@@ -49,13 +55,18 @@ public:
 	{ switch_to_slave_called = true; }
 
 	void*						pay_memory( std::string& inid, unsigned int& outsize );
-	void						dump_memory();
-	void						start();
-	void						stop();
-	void						force_replicate();
-	void						reset();
+	void						dump_memory()
+	{ dump_memory_called = true; }
+	void						start()
+	{ start_called = true; }
+	void						stop()
+	{ stop_called = true; }
+	void						force_replicate()
+	{ force_replicate_called = true; }
+	void						reset()
+	{ reset_called = true; }
 	REPLICATION_MODE_TAG		get_status()
-	{ return REPLICATION_OUT; }
+	{ return REPLICATION_MASTER; }
 
 	int							check_interval();
 	int							handle_send();

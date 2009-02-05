@@ -40,6 +40,12 @@ bool	replication::initialize_called(false);
 bool	replication::initialize_fail(false);
 bool	replication::finalize_called(false);
 
+bool	replication::dump_memory_called(false);
+bool	replication::start_called(false);
+bool	replication::stop_called(false);
+bool	replication::force_replicate_called(false);
+bool	replication::reset_called(false);
+
 // snmpbridge
 bool	snmpbridge::initialize_called(false);
 bool	snmpbridge::initialize_fail(false);

@@ -128,6 +128,15 @@ public:
 	void						update_up_send_size( unsigned long long );
 	void						update_down_recv_size( unsigned long long );
 	void						update_down_send_size( unsigned long long );
+
+	unsigned long long			get_up_recv_size()
+	{ return 12345ULL; }
+	unsigned long long			get_up_send_size()
+	{ return 23456ULL; }
+	unsigned long long			get_down_recv_size()
+	{ return 34567ULL; }
+	unsigned long long			get_down_send_size()
+	{ return 45678ULL; }
 	
 // 	boost::shared_ptr<protocol_module_base>
 // 								get_protocol_module();

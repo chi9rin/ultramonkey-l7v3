@@ -88,12 +88,7 @@ protected:
 
 public:
 	void	list_virtual_service( vselist_type*, error_code&  );				//!< virtual_service list command
-	void	list_virtual_service_verbose(	vselist_type*,
-											replication::REPLICATION_MODE_TAG*,
-											logstatus_list_type*,
-											bool*,
-											logstatus_list_type*,
-											error_code&  );						//!< virtual_service verbose list command
+	void	list_virtual_service_verbose( l7vsd_response* response, error_code&  );		//!< virtual_service verbose list command
 	void	add_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service add command
 	void	del_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service del command
 	void	edit_virtual_service( const virtualservice_element*, error_code& );	//!< virtual_service edit command
@@ -105,10 +100,9 @@ public:
 	void	flush_virtual_service( error_code& );	//!< all virtual_service delete command
 
 	void	replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG*, error_code& );	//!< replication command
-	void	log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );		//!< log command
-	void	snmp_log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );	//!< snmp log command
+	void	set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );		//!< set loglevel command
+	void	snmp_set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );	//!< snmp set loglevel command
 	void	reload_parameter( const PARAMETER_COMPONENT_TAG*, error_code& );	//!< reload component parameter command
-
 
 	int		run( int, char*[] );		//!< l7vsd run method
 

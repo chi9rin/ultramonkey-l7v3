@@ -64,8 +64,8 @@ public:
 
 	//! connection status function
 	//! @return
-	int				get_connectionstate()
-	{ return 0; }
+	bool				get_connectionstate()
+	{ return true; }
 
 	//! loglevel getting function
 	//! @param[in]
@@ -73,8 +73,13 @@ public:
 	LOG_LEVEL_TAG	get_loglevel( const LOG_CATEGORY_TAG snmp_log_category )
 	{ return LOG_LV_DEBUG; }
 
-	void	get_loglevel_allcategory( std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>& )
-	{ }
+	//! loglevel getting function
+	//! @param[out]
+	//! @return
+	void	get_loglevel_allcategory( std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>&	loglevelmap )
+	{
+		loglevelmap.insert( std::pair< LOG_CATEGORY_TAG, LOG_LEVEL_TAG >( LOG_CAT_SNMPAGENT_START_STOP, LOG_LV_FATAL ) );
+	}
 
 };	//class
 
