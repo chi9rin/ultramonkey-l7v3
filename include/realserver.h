@@ -21,20 +21,16 @@ class	realserver : public realserver_element{
 public:
 	typedef	boost::shared_ptr<boost::mutex>		mutex_ptr;
 protected:
-	int					nactive;
-	int					ninact;
 	mutex_ptr			active_mutex_ptr;
 	mutex_ptr			inact_mutex_ptr;
 public:
 	unsigned long long	send_byte;
 
-	realserver() : nactive(0), ninact(0), send_byte(0LL){
+	realserver() : send_byte(0LL){
 		active_mutex_ptr = mutex_ptr( new boost::mutex );
 		inact_mutex_ptr = mutex_ptr( new boost::mutex );
 	}
 	realserver( const realserver& in ) : realserver_element( in ),
-										 nactive( in.nactive ),
-										 ninact( in.ninact ),
 										 send_byte( in.send_byte ){
 		active_mutex_ptr = mutex_ptr( new boost::mutex );
 		inact_mutex_ptr = mutex_ptr( new boost::mutex );
@@ -42,8 +38,6 @@ public:
 
 	realserver& operator=( const realserver& rs ){
 		realserver_element::operator= (rs);
-		nactive = rs.nactive;
-		ninact = rs.ninact;
 		send_byte = rs.send_byte;
 		return *this;
 	}
@@ -98,14 +92,6 @@ public:
 		if ( ninact == INT_MAX ){
 			ninact = 0;
 		}
-	}
-
-	int		get_active(){
-		return nactive;
-	}
-
-	int		get_inact(){
-		return ninact;
 	}
 };
 

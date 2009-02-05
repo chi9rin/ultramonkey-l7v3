@@ -19,15 +19,21 @@
 namespace l7vs{
 
 class	realserver_element{
+protected:
+	int								nactive;
+	int								ninact;
 public:
 	boost::asio::ip::tcp::endpoint	tcp_endpoint;
 	boost::asio::ip::udp::endpoint	udp_endpoint;
 	int								weight;
-	realserver_element() : weight(-1){}
-	realserver_element( const realserver_element& in ) : tcp_endpoint( in.tcp_endpoint ) ,
-															 udp_endpoint( in.udp_endpoint ) ,
-															 weight( in.weight ){}
+	realserver_element() : nactive(0), ninact(0), weight(-1){}
+	realserver_element( const realserver_element& in ) :	nactive( in.nactive ), ninact( in.ninact ),
+															tcp_endpoint( in.tcp_endpoint ) ,
+															udp_endpoint( in.udp_endpoint ) ,
+															weight( in.weight ){}
 	realserver_element& operator=( const realserver_element& elem ){
+		nactive = elem.nactive;
+		ninact = elem.ninact;
 		tcp_endpoint = elem.tcp_endpoint;
 		udp_endpoint = elem.udp_endpoint;
 		weight = elem.weight;
@@ -51,6 +57,14 @@ public:
 		return rselem1.weight < rselem2.weight;
 	}
 
+	int		get_active(){
+		return nactive;
+	}
+
+	int		get_inact(){
+		return ninact;
+	}
+
 private:
 	friend class	boost::serialization::access;		//! friend boost serializable class
 	//! serializable
@@ -58,6 +72,8 @@ private:
 	//! @param[in]	archive
 	//! @param[in]	version
 	template <class Archive > void serialize( Archive& ar, const unsigned int version ){
+		ar & nactive;
+		ar & ninact;
 		ar & tcp_endpoint;
 		ar & udp_endpoint;
 		ar & weight;
