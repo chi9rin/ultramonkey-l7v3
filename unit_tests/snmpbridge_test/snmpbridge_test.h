@@ -8,12 +8,7 @@ l7vs::l7vsd::~l7vsd(){}
 void l7vs::l7vsd::list_virtual_service( vselist_type* out_vslist, error_code& err ){
 }
 
-void l7vs::l7vsd::list_virtual_service_verbose(	vselist_type* out_vslist, 
-												replication::REPLICATION_MODE_TAG* repmode,
-												logstatus_list_type* logstatus,
-												bool*	snmpstatus,
-												logstatus_list_type* snmplogstatus,
-												error_code& err ){
+void l7vs::l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_code&  ){
 }
 
 void l7vs::l7vsd::add_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
@@ -45,6 +40,14 @@ l7vs::l7vsd::vslist_type::iterator l7vs::l7vsd::search_vslist( const virtualserv
 void l7vs::l7vsd::release_virtual_service( const virtualservice_element& in_vselement ) const {
 }
 
+l7vs::l7vsd::vslist_type& l7vs::l7vsd::get_virtualservice_list(){
+	return vslist;
+}
+
+boost::mutex& l7vs::l7vsd::get_virtualservice_list_mutex(){
+	return vslist_mutex;
+}
+
 int	l7vs::l7vsd::run( int argc, char* argv[] ) {
 	return 0;
 }
@@ -71,6 +74,28 @@ std::string	l7vs::l7vsd::usage(){
 	"   -h    --help         print this help messages and exit\n"
 	<< std::endl;
 	return stream.str();
+}
+
+l7vs::virtual_service::virtual_service(	const l7vsd& ,
+						const replication& ,
+						const virtualservice_element& ){
+}
+
+l7vs::virtual_service::~virtual_service(){
+}
+
+
+l7vs::virtualservice_element&	l7vs::virtual_service::get_element(){
+	return vs->get_element();
+}
+
+unsigned long long		l7vs::virtual_service::get_throughput_upstream(){
+//	return vs->get_throughput_upstream();
+	return 10;
+}
+unsigned long long		l7vs::virtual_service::get_throughput_downstream(){
+//	return vs->get_throughput_downstream();
+	return 10;
 }
 
 l7vs::Logger::Logger() :
@@ -119,15 +144,54 @@ void	l7vs::Logger::putLogDebug( l7vs::LOG_CATEGORY_TAG, const unsigned int, cons
 	std::cout << "DEBUG : " << msg << std::endl;
 }
 
-int portno = 60162;//temp
-int interval = 1000;//temp
+std::string nic = NIC_DEFAULT;
+std::string ip_addr = ADDR_DEFAULT;
+int portno = PORT_DEFAULT;
+int interval = INTERVAL_DEFAULT;
+int status = 0;
+std::string snmpagent_start_stop = "0";
+std::string snmpagent_manager_receive = "1";
+std::string snmpagent_manager_send = "2";
+std::string snmpagent_l7vsd_receive = "3";
+std::string snmpagent_l7vsd_send = "4";
+std::string snmpagent_logger = "5";
+std::string snmpagent_parameter = "6";
 
+void set_nic(std::string in){
+	nic = in;
+}
+void set_ip_addr(std::string in){
+	ip_addr = in;
+}
 void set_portno(int in){
 	portno = in;
 }
-
 void set_interval(int in){
 	interval = in;
+}
+void set_status(int in){
+	status = in;
+}
+void set_snmpagent_start_stop(std::string in){
+	snmpagent_start_stop = in;
+}
+void set_snmpagent_manager_receive(std::string in){
+	snmpagent_manager_receive = in;
+}
+void set_snmpagent_manager_send(std::string in){
+	snmpagent_manager_send = in;
+}
+void set_snmpagent_l7vsd_receive(std::string in){
+	snmpagent_l7vsd_receive = in;
+}
+void set_snmpagent_l7vsd_send(std::string in){
+	snmpagent_l7vsd_send = in;
+}
+void set_snmpagent_logger(std::string in){
+	snmpagent_logger = in;
+}
+void set_snmpagent_parameter(std::string in){
+	snmpagent_parameter = in;
 }
 
 l7vs::Parameter::Parameter(){}
@@ -142,11 +206,16 @@ int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 								const std::string& key,
 								l7vs::error_code& err ){
 	int ret = 0;
-	if(key == "port"){
-		ret = portno;
-	}
-	else if(key == "interval"){
-		ret = interval;
+	if( comp == l7vs::PARAM_COMP_SNMPAGENT ){
+		if( key == "port" ){
+			ret = portno;
+		}
+		else if( key == "interval" ){
+			ret = interval;
+		}
+		else if( key == "status" ){
+			ret = status;
+		}
 	}
 	return ret;
 }
@@ -154,7 +223,38 @@ int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG comp,
 												const std::string& key,
 												l7vs::error_code& err ){
-	std::string buf("parameter");
+	std::string buf( "" );
+	if( comp == l7vs::PARAM_COMP_SNMPAGENT ){
+		if( key == "nic" ){
+			buf = nic;
+		}
+		else if( key == "ip_addr" ){
+			buf = ip_addr;
+		}
+	}
+	else if( l7vs::PARAM_COMP_LOGGER ){
+		if( key == "snmpagent_start_stop" ){
+			buf = snmpagent_start_stop;
+		}
+		else if( key == "snmpagent_manager_receive" ){
+			buf = snmpagent_manager_receive;
+		}
+		else if( key == "snmpagent_manager_send" ){
+			buf = snmpagent_manager_send;
+		}
+		else if( key == "snmpagent_l7vsd_receive" ){
+			buf = snmpagent_l7vsd_receive;
+		}
+		else if( key == "snmpagent_l7vsd_send" ){
+			buf = snmpagent_l7vsd_send;
+		}
+		else if( key == "snmpagent_logger" ){
+			buf = snmpagent_logger;
+		}
+		else if( key == "snmpagent_parameter" ){
+			buf = snmpagent_parameter;
+		}
+	}
 	return buf;
 }
 

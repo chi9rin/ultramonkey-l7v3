@@ -32,6 +32,8 @@
 #include "l7ag_parameter.h"
 #include "message.h"
 
+#define NIC_DEFAULT			"eth0"
+#define ADDR_DEFAULT		"127.0.0.1"
 #define PORT_DEFAULT		60162
 #define INTERVAL_DEFAULT	1000
 #define READBUF_SIZE		2048
