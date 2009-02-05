@@ -14,6 +14,7 @@
 
 using namespace boost::unit_test;
 
+typedef	boost::asio::ip::tcp::endpoint	tcp_ep_type;
 
 //test case1  create,initialize,run,stop,finalize,destroy(normal case)
 void	virtualservice_tcp_test1(){
@@ -131,6 +132,54 @@ void	virtualservice_tcp_test2(){
 	BOOST_CHECK( SCHEDMOD_LOAD_ERROR_MSG == vs_err.get_message() );
 
 	delete vs;
+
+	vs = new l7vs::vs_tcp( vsd, rep, element );
+	l7vs::vs_tcp*	vs2 = new l7vs::vs_tcp( vsd, rep, element );
+	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
+	BOOST_MESSAGE( "-------" );
+	BOOST_CHECK( *vs == *vs2 );
+	delete vs;
+	delete vs2;
+	// unit_test[]  initialize method call(procotol_module_control::module_load error case)
+	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), 8080 );
+	vs = new l7vs::vs_tcp( vsd, rep, element );
+	element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), 80 );
+	vs2 = new l7vs::vs_tcp( vsd, rep, element );
+	BOOST_MESSAGE( "-------" );
+	BOOST_CHECK( *vs != *vs2 );
+	delete vs;
+	delete vs2;
+
+	vs = new l7vs::vs_tcp( vsd, rep, element );
+	l7vs::virtualservice_element	add_element;
+	for( unsigned int i = 0; i < 10; ++i ){
+		l7vs::realserver_element	rs_elem;
+		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
+		add_element.realserver_vector.push_back( rs_elem );
+	}
+	// unit_test[]  add_realserver method call
+	BOOST_MESSAGE( "-------" );
+	vs->add_realserver( add_element, vs_err );
+	std::list<l7vs::realserver>&	rslist = vs->get_rs_list();
+	std::list<l7vs::realserver>::iterator	itr = rslist.begin();
+	for( unsigned int i = 0; i < rslist.size(); ++i ){
+		BOOST_CHECK( itr->tcp_endpoint == tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) ) );
+	}
+//	edit_realserver
+	BOOST_MESSAGE( "-------" );
+	l7vs::virtualservice_element	edit_element;
+// 	vs->edit_realserver( edit_element, vs_err );
+//	del_realserver
+	BOOST_MESSAGE( "-------" );
+	l7vs::virtualservice_element	del_element;
+// 	vs->del_realserver( del_element, vs_err );
+
+//	connection_active
+// 	vs->connection_active( const tcp_endpoint_type& );
+//	connection_inactive
+// 	vs->connection_inactive( const tcp_endpoint_type& );
+	delete vs;
+
 }
 
 //test case3

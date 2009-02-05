@@ -9,6 +9,8 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 
+#include <vector>
+
 #include "virtualservice.h"
 #include "logger_enum.h"
 #include "logger.h"
@@ -439,6 +441,20 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 }
 
 void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+	//lock rs_list_ref_count_inc_mutex
+	boost::mutex::scoped_lock inc_lock( rs_list_ref_count_inc_mutex );
+
+	//waiting for become rs_list_ref_count to 0
+
+	l7vs::virtualservice_element&	in_element = const_cast<l7vs::virtualservice_element&>( in );
+
+	//add realserver
+	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
+		 itr != in_element.realserver_vector.end();
+		 ++itr ){
+		realserver	rs;
+		rs_list.push_back( rs );
+	}
 	err.setter( true, "" );
 }
 void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){

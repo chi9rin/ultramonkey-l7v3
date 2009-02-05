@@ -35,6 +35,9 @@ public:
 	session_map_type&	get_active_sessions(){
 		return	active_sessions;
 	}
+	std::list<realserver>&	get_rs_list(){
+		return rs_list;
+	}
 };
 
 }
