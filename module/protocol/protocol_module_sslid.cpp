@@ -11,6 +11,7 @@ const int protocol_module_sslid::THREAD_DIVISION_DOWN_STREAM = 1; // down thread
 const int protocol_module_sslid::END_FLAG_ON = 1;                 // end flag ON
 const int protocol_module_sslid::END_FLAG_OFF = 0;                // end flag OFF
 
+//! constructor
 protocol_module_sslid::protocol_module_sslid()
   :ssl_protocol_module_base( MODULE_NAME ),
   realserver_connect_failed_max_count( REALSERVER_CONNECT_FAILED_MAX_COUNT ),
@@ -20,11 +21,14 @@ protocol_module_sslid::protocol_module_sslid()
 
 }
 
+//! destructor
 protocol_module_sslid::~protocol_module_sslid()
 {
     //dtor
 }
 
+//! tcp protocol support check
+//! @return true(tcp support)
 bool protocol_module_sslid::is_tcp()
 {
     /*-------- DEBUG LOG --------*/
@@ -38,6 +42,8 @@ bool protocol_module_sslid::is_tcp()
     return true;
 }
 
+//! udp protocol support check
+//! @return false(udp not-support )
 bool protocol_module_sslid::is_udp()
 {
     /*-------- DEBUG LOG --------*/
@@ -51,20 +57,26 @@ bool protocol_module_sslid::is_udp()
     return false;
 }
 
+//! initialize function. called from module control. module loaded call
+//! @param[in] realserver list iterator begin function object type
+//! @param[in] realserver list iterator end function object type
+//! @param[in] realserver list iterator next function object type
+//! @param[in] realserver list mutex lock function object type.
+//! @param[in] realserver list mutex unlock function object type
 void protocol_module_sslid::initialize(
                                 rs_list_itr_func_type inlist_begin,
                                 rs_list_itr_func_type inlist_end,
                                 rs_list_itr_next_func_type inlist_next,
-                                boost::function< void( void ) >	inlist_lock,
-                                boost::function< void( void ) >	inlist_unlock )
+                                boost::function< void( void ) >    inlist_lock,
+                                boost::function< void( void ) >    inlist_unlock )
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
         putLogDebug( 30000, "in_function: void protocol_module_sslid::initialize("
                             "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end,"
-                            "rs_list_itr_next_func_type inlist_next,boost::function< void( void ) >	"
-                            "inlist_lock,boost::function< void( void ) >	inlist_unlock )" ,
+                            "rs_list_itr_next_func_type inlist_next,boost::function< void( void ) >    "
+                            "inlist_lock,boost::function< void( void ) > inlist_unlock )" ,
                             __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -80,41 +92,42 @@ void protocol_module_sslid::initialize(
     {
         putLogDebug( 30000, "out_function: void protocol_module_sslid::initialize("
                             "rs_list_itr_func_type inlist_begin,rs_list_itr_func_type inlist_end,"
-                            "rs_list_itr_next_func_type inlist_next,boost::function< void( void ) >	"
-                            "inlist_lock,boost::function< void( void ) >	inlist_unlock ) ",
+                            "rs_list_itr_next_func_type inlist_next,boost::function< void( void ) >    "
+                            "inlist_lock,boost::function< void( void ) > inlist_unlock ) ",
                             __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 }
 
+//! finalize called from module control. module unloaded call.
 void protocol_module_sslid::finalize()
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
-        putLogDebug( 30000, "in_function: void protocol_module_sslid::finalize()",
+        putLogDebug( 30000, "in_function: void protocol_module_sslid::finalize().",
                             __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
-	// realserver list function object initialize
-	rs_list_begin.clear();
-	rs_list_end.clear();
-	rs_list_next.clear();
-	rs_list_lock.clear();
-	rs_list_unlock.clear();
+    // realserver list function object initialize
+    rs_list_begin.clear();
+    rs_list_end.clear();
+    rs_list_next.clear();
+    rs_list_lock.clear();
+    rs_list_unlock.clear();
 
-	/*-------- DEBUG LOG --------*/
+    /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
         putLogDebug( 30000, "function: rs_list_begin.clear(), rs_list_end.clear(), "
-                            "rs_list_next.clear(), rs_list_lock.clear(), rs_list_unlock.clear() END" ,
+                            "rs_list_next.clear(), rs_list_lock.clear(), rs_list_unlock.clear() END." ,
                             __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
-	// replication function object initialize
-	replication_pay_memory.clear();
+    // replication function object initialize
+    replication_pay_memory.clear();
     replication_area_lock.clear();
     replication_area_unlock.clear();
 
@@ -122,7 +135,7 @@ void protocol_module_sslid::finalize()
     if ( LOG_LV_DEBUG == getloglevel() )
     {
         putLogDebug( 30000, "function: replication_pay_memory.clear(), "
-                            "replication_area_lock.clear(), replication_area_unlock.clear() END" ,
+                            "replication_area_lock.clear(), replication_area_unlock.clear() END." ,
                             __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -133,7 +146,7 @@ void protocol_module_sslid::finalize()
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
-        putLogDebug( 30000, "function: schedule_tcp.clear() END", __FILE__, __LINE__ );
+        putLogDebug( 30000, "function: schedule_tcp.clear() END.", __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -148,8 +161,8 @@ void protocol_module_sslid::finalize()
         /*-------- DEBUG LOG --------*/
         if ( LOG_LV_DEBUG == getloglevel() )
         {
-            boost::format formatter("delete: address=&(%d)" );
-            formatter % &replication_data_processor;
+            boost::format formatter("delete: address=&(%d)." );
+            formatter % reinterpret_cast<int>(replication_data_processor);
             putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -165,7 +178,7 @@ void protocol_module_sslid::finalize()
         if ( LOG_LV_DEBUG == getloglevel() )
         {
             boost::format formatter("delete: address=&(%d)" );
-            formatter % &session_data_processor;
+            formatter % reinterpret_cast<int>(session_data_processor);
             putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -184,13 +197,15 @@ void protocol_module_sslid::finalize()
 
     // logger function object initialize
     getloglevel.clear();
-	putLogFatal.clear();
+    putLogFatal.clear();
     putLogError.clear();
-	putLogWarn.clear();
-	putLogInfo.clear();
-	putLogDebug.clear();
+    putLogWarn.clear();
+    putLogInfo.clear();
+    putLogDebug.clear();
 }
 
+//! sorry support check
+//! @return false sorry mode is unsupported.
 bool protocol_module_sslid::is_use_sorry()
 {
     /*-------- DEBUG LOG --------*/
@@ -203,6 +218,10 @@ bool protocol_module_sslid::is_use_sorry()
     return false;
 }
 
+//! module parameter check.used by l7vsadm
+//! @param[in] module paramter string list
+//! @return result.flag true is parameter is noproblem.
+//! @return result.flag false is paramter is problem.
 protocol_module_sslid::check_message_result protocol_module_sslid::check_parameter(
                                                 const std::vector<std::string>& args )
 {
@@ -225,10 +244,10 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
     check_message_result result;
     // set check flag to true
     result.flag = true;
-    bool timeout_flag = false;               // timeout set flag
-    bool maxlist_flag = false;               // maxlist set flag
-    bool reschedule_flag = false;         // reschedule set flag
-    bool no_reschedule_flag = false;    // no-reschedule set flag
+    bool timeout_flag = false;
+    bool maxlist_flag = false;
+    bool reschedule_flag = false;
+    bool no_reschedule_flag = false;
 
     try
     {
@@ -270,7 +289,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                             else
                             {
                                 timeout_flag = true;
-				++itparam;
+                                ++itparam;
                                 continue;
                             }
                         }
@@ -332,7 +351,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                             else
                             {
                                 maxlist_flag = true;
-				++itparam;
+                                ++itparam;
                                 continue;
                             }
                         }
@@ -354,7 +373,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                 }
                 else
                 {
-                    // already set timeout
+                    // already set maxlist
                     result.flag = false;
                     result.message = "Cannot set multiple option '-M/--maxlist'.";
                     putLogError( 37000, result.message, __FILE__, __LINE__);
@@ -419,7 +438,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
     catch( ... )
     {
         result.flag = false;
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::check_parameter(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
                         "protocol_module_sslid::check_parameter() :"
                         "Unkown exception.", __FILE__, __LINE__ );
@@ -430,8 +449,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
     {
         boost::format formatter( "out_function: protocol_module_sslid::check_message_result "
                                             "protocol_module_sslid::check_parameter("
-                                            "const std::vector<std::string>& args ): return_value=("
-                                            "check_message_result.flag=%d, check_message_result.message=%s" );
+                                            "const std::vector<std::string>& args ): return_value="
+                                            "check_message_result.flag=%d, check_message_result.message=%s." );
         formatter % result.flag % result.message;
         putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
     }
@@ -440,6 +459,10 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
     return result;
 }
 
+//! parameter set
+//! @param[in] module paramter string list
+//! @return result.flag true is parameter is noproblem.
+//! @return result.flag false is paramter is problem.
 protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter(
                                                 const std::vector<std::string>& args )
 {
@@ -462,10 +485,10 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
     check_message_result result;
     // set check flag to true
     result.flag = true;
-    bool timeout_flag = false;               // timeout set flag
-    bool maxlist_flag = false;               // maxlist set flag
-    bool reschedule_flag = false;         // reschedule set flag
-    bool no_reschedule_flag = false;    // no-reschedule set flag
+    bool timeout_flag = false;
+    bool maxlist_flag = false;
+    bool reschedule_flag = false;
+    bool no_reschedule_flag = false;
 
     try
     {
@@ -697,15 +720,16 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             boost::format formatter( "function: protocol_module_sslid::check_message_result "
                                                 "protocol_module_sslid::set_parameter(): "
                                                 "data_addr=&(%d), data_size=%d." );
-            formatter % &data_addr % data_size;
+            formatter % reinterpret_cast<int>(data_addr) % data_size;
             putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
         if ( data_addr == NULL || data_size <= 0 )
         {
-            // replication area is full
-            putLogError( 37000, "Replication area is full.", __FILE__, __LINE__);
+            // waiting for jp response????????????????????
+            // replication area is null
+            putLogError( 37000, "Replication area is null.", __FILE__, __LINE__);
 
             /*-------- DEBUG LOG --------*/
             if ( LOG_LV_DEBUG == getloglevel() )
@@ -740,7 +764,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             if ( LOG_LV_DEBUG == getloglevel() )
             {
                 boost::format formatter("new: address=&(%d), size=%lu." );
-                formatter % &replication_data_processor % sizeof( sslid_session_data_processor );
+                formatter % reinterpret_cast<int>(replication_data_processor)
+                                % sizeof( sslid_session_data_processor );
                 putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -780,7 +805,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             if ( LOG_LV_DEBUG == getloglevel() )
             {
                 boost::format formatter("new: address=&(%d), size=%lu." );
-                formatter % &session_data_processor % sizeof( sslid_session_data_processor );
+                formatter % reinterpret_cast<int>(session_data_processor)
+                                % sizeof( sslid_session_data_processor );
                 putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -884,9 +910,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         }
 
         result.flag = false;
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::set_parameter(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::set_parameter() : "
+                        "protocol_module_sslid::set_parameter(): "
                         "Unkown exception.", __FILE__, __LINE__ );
     }
 
@@ -905,6 +931,10 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
     return result;
 }
 
+//! parameter add
+//! @param[in] module paramter string list
+//! @return result.flag true is parameter is noproblem.
+//! @return result.flag false is paramter is problem.
 protocol_module_sslid::check_message_result protocol_module_sslid::add_parameter(
                                                 const std::vector<std::string>& args )
 {
@@ -950,17 +980,20 @@ protocol_module_sslid::check_message_result protocol_module_sslid::add_parameter
     return result;
 }
 
+//! realserver list update event
 void protocol_module_sslid::handle_rslist_update()
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
-        putLogDebug( 30000, "in/out_function:void protocol_module_sslid::handle_rslist_update(): ",
+        putLogDebug( 30000, "in/out_function:void protocol_module_sslid::handle_rslist_update().",
                             __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 }
 
+//! TCP/IP scheduled function registation.
+//! @param[in] schedule module TCP/IP scheduled function object type
 void protocol_module_sslid::register_schedule( tcp_schedule_func_type inschedule )
 {
     /*-------- DEBUG LOG --------*/
@@ -982,6 +1015,8 @@ void protocol_module_sslid::register_schedule( tcp_schedule_func_type inschedule
     /*------DEBUG LOG END------*/
 }
 
+//! UDP scheduled function registation
+//! @param[in] schedule module UDP scheduled funtion object type
 void protocol_module_sslid::register_schedule( udp_schedule_func_type inschedule )
 {
     /*-------- DEBUG LOG --------*/
@@ -993,6 +1028,10 @@ void protocol_module_sslid::register_schedule( udp_schedule_func_type inschedule
     /*------DEBUG LOG END------*/
 }
 
+//! called from session initialzie use in upstream_thread
+//! @param[in] upstream thread id.
+//! @param[in] downstream thread id
+//! @return session use EVENT mode(ACCEPT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize(
                                                 const boost::thread::id up_thread_id,
                                                 const boost::thread::id down_thread_id,
@@ -1026,7 +1065,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
         if ( LOG_LV_DEBUG == getloglevel() )
         {
             boost::format formatter("new: address=&(%d), size=%lu" );
-            formatter % &threaddata_up % sizeof( session_thread_data_sslid );
+            formatter % reinterpret_cast<int>(threaddata_up) % sizeof( session_thread_data_sslid );
             putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -1067,7 +1106,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
         if ( LOG_LV_DEBUG == getloglevel() )
         {
             boost::format formatter("new: address=&(%d), size=%lu" );
-            formatter % &threaddata_down % sizeof( session_thread_data_sslid );
+            formatter % reinterpret_cast<int>(threaddata_down) % sizeof( session_thread_data_sslid );
             putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -1164,9 +1203,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
             threaddata_down = NULL;
         }
 
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_session_initialize(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_session_initialize() : "
+                        "protocol_module_sslid::handle_session_initialize(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -1188,6 +1227,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
     return status;
 }
 
+//! called from session finalize use in upstream thread.
+//! @param[in] upstream thread id.
+//! @param[in] downstream thread id
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
                                                 const boost::thread::id up_thread_id,
                                                 const boost::thread::id down_thread_id )
@@ -1217,7 +1260,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
             if ( LOG_LV_DEBUG == getloglevel() )
             {
                 boost::format formatter("delete: address=&(%d)" );
-                formatter % &itthread->second;
+                formatter % reinterpret_cast<int>(itthread->second);
                 putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -1234,7 +1277,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
             if ( LOG_LV_DEBUG == getloglevel() )
             {
                 boost::format formatter("delete: address=&(%d)" );
-                formatter % &itthread->second;
+                formatter % reinterpret_cast<int>(itthread->second);
                 putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -1254,9 +1297,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_session_finalize(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_session_finalize() : "
+                        "protocol_module_sslid::handle_session_finalize(): "
                         "Unkown exception.", __FILE__, __LINE__ );
     }
 
@@ -1274,6 +1317,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
     return STOP;
 }
 
+//! called from after session accept.in client socket use in upstream thread.
+//! @param[in] upstream thread id.
+//! @return session use EVENT mode(CLIENT_RECV, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
                                                 const boost::thread::id thread_id )
 {
@@ -1316,9 +1362,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_accept(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_accept() : "
+                        "protocol_module_sslid::handle_accept(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -1337,6 +1383,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
     return status;
 }
 
+//! called from after session recv in client socket. use in upstream thread.
+//! @param[in] upstream thread id
+//! @param[in] recive buffer refarence.
+//! @param[in] recive length
+//! @return session use EVENT mode(CLIENT_RECV, REALSERVER_SELECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                                                 const boost::thread::id thread_id,
                                                 const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
@@ -1536,7 +1587,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             if ( threaddata->current_record_rest_size == 0 )
             {
                 // new SSL Record start
-                int alllength = 0;
+                size_t alllength = 0;
                 bool ishellomessage = false;
                 int ret = check_ssl_record_sendable( true,
                                                                        threaddata->data_buffer.data(),
@@ -1597,9 +1648,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_client_recv(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_client_recv() : "
+                        "protocol_module_sslid::handle_client_recv(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -1620,7 +1671,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
     return status;
 }
 
-
+//! called from after realserver select.use in upstream thread.
+//! @param[in] upstream thread id
+//! @param[out] realserver TCP endpoint
+//! @return session use EVENT mode(REALSERVER_CONNECT, CLIENT_DISCONNECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                 const boost::thread::id thread_id,
                                                 boost::asio::ip::tcp::endpoint& rs_endpoint )
@@ -1920,9 +1974,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_realserver_select(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_realserver_select() : "
+                        "protocol_module_sslid::handle_realserver_select(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
@@ -1946,6 +2000,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     return status;
 }
 
+//! called from after realserver select
+//! @param[in] upstream thread id
+//! @param[out] realserver UDP endpoint
+//! @param[out] sendbudffer reference
+//! @param[out] send data length
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                 const boost::thread::id thread_id,
                                                 boost::asio::ip::udp::endpoint& rs_endpoint,
@@ -1967,6 +2027,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     return STOP;
 }
 
+//! called from after realserver connect
+//! @param[in] upstream thread id
+//! @param[out] sendbuffer reference
+//! @param[out] send data length
+//! @return session use EVENT mode(REALSERVER_SEND, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect(
                                                 const boost::thread::id thread_id,
                                                 boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
@@ -2022,9 +2087,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_realserver_connect(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_realserver_connect() : "
+                        "protocol_module_sslid::handle_realserver_connect(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -2045,6 +2110,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     return status;
 }
 
+//! called from after realserver connection fail
+//! @param[in] upstream thread id
+//! @param[in] fail realserver endpoint reference
+//! @return session use EVENT mode(REALSERVER_SELECT, CLIENT_DISCONNECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connection_fail(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::tcp::endpoint& rs_endpoint )
@@ -2124,9 +2193,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_realserver_connection_fail(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_realserver_connection_fail() : "
+                        "protocol_module_sslid::handle_realserver_connection_fail(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -2147,6 +2216,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     return status;
 }
 
+//! called from after realserver send.
+//! @param[in] upstream thread id
+//! @return session use EVENT mode(CLIENT_RECV, REALSERVER_CONNECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
                                                 const boost::thread::id thread_id )
 {
@@ -2202,7 +2274,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
             if ( threaddata->current_record_rest_size == 0 )
             {
                  // new SSL Record start
-                int alllength = 0;
+                size_t alllength = 0;
                 bool ishellomessage = false;
                 int ret = check_ssl_record_sendable( true,
                                                                         threaddata->data_buffer.data(),
@@ -2262,9 +2334,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_realserver_send(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_realserver_send() : "
+                        "protocol_module_sslid::handle_realserver_send(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -2284,9 +2356,13 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
    return status;
 }
 
+//! called from after sorryserver select
+//! @param[in] upstream thread id
+//! @param[in] sorryserver endppiont reference
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_select(
                                 const boost::thread::id thread_id,
-								boost::asio::ip::tcp::endpoint& sorry_endpoint )
+                                boost::asio::ip::tcp::endpoint& sorry_endpoint )
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
@@ -2303,10 +2379,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_select
     return STOP;
 }
 
+//! called from after sorryserver connect
+//! @param[in] upstream thread id
+//! @param[out] send buffer reference.
+//! @param[out] send length
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connect(
-								const boost::thread::id thread_id,
-								boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-								size_t& datalen )
+                                const boost::thread::id thread_id,
+                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                size_t& datalen )
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
@@ -2323,9 +2404,13 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
     return STOP;
 }
 
+//! called from after sorryserver connection fail
+//! @param[in] upstream thread id
+//! @param[in] sorryserver endpoint reference.
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connection_fail(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::tcp::endpoint& sorry_endpoint )
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::tcp::endpoint& sorry_endpoint )
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
@@ -2342,6 +2427,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
     return STOP;
 }
 
+//! called from after sorryserver send
+//! @param[in] upstream thread id
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
                                                 const boost::thread::id thread_id )
 {
@@ -2359,6 +2447,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
     return STOP;
 }
 
+//! called from after realserver recvive for TCP/IP
+//! @param[in] downstream thread id
+//! @param[in] realserver TCP/IP endpoint reference
+//! @param[in] realserver recive buffer reference.
+//! @param[in] recv data length
+//! @return session use EVENT mode(REALSERVER_RECV, CLIENT_CONNECTION_CHECK, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::tcp::endpoint& rs_endpoint,
@@ -2556,7 +2650,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
         if ( threaddata->current_record_rest_size == 0 )
         {
             // new SSL Record start
-            int alllength = 0;
+            size_t alllength = 0;
             bool ishellomessage = false;
             int ret = check_ssl_record_sendable( false,
                                                                     threaddata->data_buffer.data(),
@@ -2615,9 +2709,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_realserver_recv(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_realserver_recv() : "
+                        "protocol_module_sslid::handle_realserver_recv(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -2639,6 +2733,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     return status;
 }
 
+//! called from after realserver recive.for UDP
+//! @param[in] downstream thread id
+//! @param[in] realserver UDP endpoint reference
+//! @param[in] recive from realserver buffer reference
+//! @param[in] recv data length
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::udp::endpoint& rs_endpoint,
@@ -2661,6 +2761,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     return STOP;
 }
 
+//! called from after sorryserver recive
+//! @param[in] downstream thread id
+//! @param[in] sorryserver endpoint reference
+//! @param[in] recive from realserver buffer reference.
+//! @param[in] recv data length
+//! @return 	session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::tcp::endpoint& sorry_endpoint,
@@ -2683,6 +2789,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
     return STOP;
 }
 
+//! called from UPSTEEARM thread. make module original message.
+//! @param[in] downstream thread id.
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_inform(
                                                 const boost::thread::id thread_id )
 {
@@ -2700,6 +2809,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_info
     return STOP;
 }
 
+//! called from after client connection check. use TCP/IP only. create client send message.
+//! @param[in]	downstream thread id
+//! @param[out]	send budffer reference
+//! @param[out]	send data length
+//! @return 	session use EVENT mode(CLIENT_SEND, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_check(
                                                 const boost::thread::id thread_id,
                                                 boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
@@ -2838,9 +2952,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_client_connection_check(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_client_connection_check() : "
+                        "protocol_module_sslid::handle_client_connection_check(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -2861,6 +2975,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
     return status;
 }
 
+//! called from after client select. use UDP only
+//! @param[in] downstream thread id
+//! @param[in] client udp endpoint
+//! @param[out]	send buffer reference
+//! @param[out]	send data length
+//! @return 	session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_select(
                                                 const boost::thread::id thread_id,
                                                 boost::asio::ip::udp::endpoint& cl_endpoint,
@@ -2883,6 +3003,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_select(
     return STOP;
 }
 
+//! called from after client send
+//! @param[in] downstream thread id
+//! @return 	session use EVENT mode(CLIENT_DISCONNECT,
+//!              REALSERVER_RECV, CLIENT_CONNECTION_CHECK, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                                                 const boost::thread::id thread_id )
 {
@@ -2965,7 +3089,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
             if ( threaddata->current_record_rest_size == 0 )
             {
                 // new SSL Record start
-                int alllength = 0;
+                size_t alllength = 0;
                 bool ishellomessage = false;
                 int ret = check_ssl_record_sendable( false,
                                                                         threaddata->data_buffer.data(),
@@ -3040,9 +3164,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
     }
     catch( ... )
     {
-        std::cerr << "Unkown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_client_send(): Unkown exception." << std::endl;
         putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_client_send() : "
+                        "protocol_module_sslid::handle_client_send(): "
                         "Unkown exception.", __FILE__, __LINE__ );
 
         status = FINALIZE;
@@ -3062,6 +3186,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
     return status;
 }
 
+//! call from client disconnect event. use upstream thread and downstream thread.
+//! @param[in] upstream and downstream thread id( check! one thread one event! )
+//! @return 	session use EVENT mode(FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
                                                 const boost::thread::id thread_id )
 {
@@ -3079,6 +3206,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
     return FINALIZE;
 }
 
+//! call from sorry mode event. use upstream thread and downstream thread
+//! @param[in] upstream and downstream thread id( check! one thread one event and first time call pattern )
+//! @return 	session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
                                                 const boost::thread::id thread_id )
 {
@@ -3096,6 +3226,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
     return STOP;
 }
 
+//! call from sorry mode disable. use upstream thread and downstream thread.
+//! @param[in] upstream and downstream thread id( check! one thread one event )
+//! @return 	session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
                                                 const boost::thread::id thread_id )
 {
@@ -3113,6 +3246,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
     return STOP;
 }
 
+//! call from realserver disconnect. use upstream thread and downstream thread
+//! @param[in] upstream and downstream thread id( check! one thread one event )
+//! @param[in] disconnected realserver endpoint.
+//! @return 	session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_disconnect(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::tcp::endpoint& rs_endpoint )
@@ -3131,6 +3268,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_disconn
     return STOP;
 }
 
+//! call from sorry server disconnect. use upstraem thread and downstream thread
+//! @param[in] upstream and downstream thread id( check! one thread one event )
+//! @param[in] disconnect sorryserver endpoint
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_disconnect(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::tcp::endpoint& sorry_endpoint )
@@ -3149,6 +3290,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_discon
     return STOP;
 }
 
+//! call from realserver disconnect. use upstream thread and downstream thread.
+//! @param[in] upstream and downstream thread id( check! one thread one event )
+//! @param[in] disconnect realserver endpoint
+//! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_close(
                                                 const boost::thread::id thread_id,
                                                 const boost::asio::ip::udp::endpoint& rs_endpoint )
@@ -3167,6 +3312,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_close(
     return STOP;
 }
 
+//! replication interval interrrupt
+//! timer thread call this function. from virtualservice.
 void protocol_module_sslid::replication_interrupt()
 {
     /*-------- DEBUG LOG --------*/
@@ -3176,9 +3323,7 @@ void protocol_module_sslid::replication_interrupt()
                              __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
-
     replication_data_processor->write_replicaion_area();
-
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
@@ -3191,10 +3336,11 @@ void protocol_module_sslid::replication_interrupt()
 }
 
 //! put data into send buffer function
-//! @param const boost::thread::id& thread_id
-//! @param boost::array<char,MAX_BUFFER_SIZE>& sendbuffer
-//! @param size_t& datalen
-//! @return 0 : success -1: failed
+//! @param[in] upstream and downstream thread id
+//! @param[out] sendbudffer reference
+//! @param[out] send data length
+//! @return 0 : success
+//! @return -1: failed
 int protocol_module_sslid::put_data_to_sendbuffer(
                                 const boost::thread::id& thread_id,
                                 boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
@@ -3531,6 +3677,10 @@ int protocol_module_sslid::put_data_to_sendbuffer(
     return 0;
 }
 
+//! judge pointed endpoint whether selected
+//! @param[in] endpoint refrence
+//! @return false if endpoint is not selected
+//! @return true if endpoint is selected
 bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endpoint& rs_endpoint)
 {
     /*-------- DEBUG LOG --------*/

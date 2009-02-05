@@ -225,7 +225,7 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::c
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format formatter("int_function: protocol_module_sessionless::check_message_result "
+		boost::format formatter("in_function: protocol_module_sessionless::check_message_result "
 			"protocol_module_sessionless::check_parameter("
 			"const std::vector<std::string>& args ): args=%s");
 		std::string argsdump;
@@ -403,7 +403,7 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::s
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format formatter("int_function: protocol_module_sessionless::check_message_result "
+		boost::format formatter("in_function: protocol_module_sessionless::check_message_result "
 			"protocol_module_sessionless::set_parameter("
 			"const std::vector<std::string>& args ): args=%s");
 		std::string argsdump;
@@ -1143,18 +1143,16 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 	CHECK_RESULT_TAG check_result; //チェック結果
 	size_t header_offset = 0;
 	size_t header_offset_len = 0;
-	size_t count_length_header_value = 0;
+	size_t content_length_header_len = 0;
 	size_t content_len_value = 0;
 	std::string str_value;
 	const std::string http_header = "";
 	const std::string content_header = "Content-Length";
-	boost::regex reg("Content-Length: +(\\d+)\r\n");
-	boost::smatch what;
 	session_thread_data_sessionless* session_data = NULL;
 
 	char* buffer1 = NULL;
 	char* buffer2 = NULL;
-	//	size_t count = 0;
+	size_t pos = 0;
 
 	//パラメータチェック
 	if (recvlen > recvbuffer.size())
@@ -1728,18 +1726,44 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 					{
 						//HTTPヘッダ（ContentLength）を検索する
 						bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size,
-						        content_header, header_offset, count_length_header_value);
+						        content_header, header_offset, content_length_header_len);
 						//検索結果が該当ありの場合
 						if (bret)
 						{
-							str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset,
-							        count_length_header_value);
-							boost::regex_match(str_value, what, reg);
-							str_value.assign(what[1].first, what[1].second);
-							content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+
+							for (pos = 0; recv_data.recive_buffer[it->send_offset + header_offset + pos] != ':' && pos
+							        < content_length_header_len; ++pos)
+								;
+							if (pos == content_length_header_len)
+							{
+								throw std::string("Contend_Lenght field's value is invalid.");
+							}
+
+							++pos;
+
+							str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset + pos,
+							        content_length_header_len - pos);
+
+							size_t pos_end = str_value.find_last_of('\r');
+							if (pos_end != std::string::npos)
+							{
+								str_value = str_value.erase(pos_end);
+							}
+
+							for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos);
+
+							str_value = str_value.substr(pos);
+
+							try
+							{
+								content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+							} catch (const boost::bad_lexical_cast& ex)
+							{
+								throw std::string("Contend_Lenght field's value is invalid.");
+							}
 							//送信データ残サイズに
 							//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-							it->send_rest_size = header_offset_len + content_len_value;
+							it->send_rest_size = header_offset + header_offset_len + content_len_value;
 						}
 						//検索結果が該当なしの場合
 						else
@@ -1856,19 +1880,43 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 				{
 					//HTTPヘッダ（ContentLength）を検索する
 					bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset,
-					        request_data_remain_size, content_header, header_offset, count_length_header_value);
+					        request_data_remain_size, content_header, header_offset, content_length_header_len);
 
 					//検索結果が該当ありの場合
 					if (bret)
 					{
-						str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + header_offset,
-						        count_length_header_value);
-						boost::regex_match(str_value, what, reg);
-						str_value.assign(what[1].first, what[1].second);
-						content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+						for (pos = 0;
+							recv_data.recive_buffer[new_send_it->send_offset + header_offset + pos] != ':'
+								&& pos < content_length_header_len;
+							++pos);
+						if (pos == content_length_header_len)
+						{
+							throw std::string("Contend_Lenght field's value is invalid.");
+						}
+						++pos;
+
+						str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + header_offset + pos,
+								content_length_header_len - pos);
+
+						size_t pos_end = str_value.find_last_of('\r');
+						if (pos_end != std::string::npos)
+						{
+							str_value = str_value.erase(pos_end);
+						}
+
+						for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos);
+
+						str_value = str_value.substr(pos);
+						try
+						{
+							content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+						} catch(const boost::bad_lexical_cast& ex)
+						{
+							throw std::string("Contend_Lenght field's value is invalid.");
+						}
 						//送信データ残サイズに
 						//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-						new_send_it->send_rest_size = header_offset_len + content_len_value;
+						new_send_it->send_rest_size = header_offset + header_offset_len + content_len_value;
 					}
 					//検索結果が該当なしの場合
 					else
@@ -1965,7 +2013,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 			//遷移先ステータスを設定する
 			status = CLIENT_RECV;
 		}
-	} catch (const std::bad_alloc&)
+	}
+	catch (const std::string& ex)
+	{
+		std::cerr << "handle_client_recv exception:" << ex << std::endl;
+		putLogError(17000, ex.c_str(), __FILE__, __LINE__ );
+		status = FINALIZE;
+	}
+	catch (const std::bad_alloc&)
 	{
 		std::cerr << "handle_client_recv exception: Could not allocate memory." << std::endl;
 		putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
@@ -2952,6 +3007,12 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		}
 
 		recive_data& recv_data = session_data->recive_data_map[session_data->client_endpoint_tcp];
+
+		if (recv_data.recive_buffer == NULL)
+		{
+			putLogError(17000, "Invalid recive_buffer.", __FILE__, __LINE__ );
+			return FINALIZE;
+		}
 
 		//送信可能データありをチェック
 		send_status_it it = recv_data.send_status_list.begin();

@@ -3,8 +3,7 @@
 
 namespace l7vs
 {
-
-    ssl_protocol_module_base::ssl_protocol_module_base(std::string in_modulename)
+	ssl_protocol_module_base::ssl_protocol_module_base(std::string in_modulename)
 	:protocol_module_base(in_modulename)
     {
         //ctor
@@ -20,16 +19,16 @@ namespace l7vs
      * @param[in]  int           recv_length             ssl record data length
      * @param[out] std::string&  session_id              ssl session id
      */
-    int ssl_protocol_module_base::get_ssl_session_id(const char* record_data, int recv_length, std::string& session_id)
+    int ssl_protocol_module_base::get_ssl_session_id(const char* record_data, size_t recv_length, std::string& session_id)
     {
     	//check the ssl record data length
-    	if (recv_length >= 76 && record_data != NULL)
+    	if (recv_length >= HELLO_MSG_HEADER_LENGTH && record_data != NULL)
     	{
     		//check the length of ssl session id (session id length is 32 bytes)
-    		if (record_data[43] == 0x20)
+    		if (record_data[SESSION_ID_BEGAIN_OFFSET - 1] == 0x20)
     		{
     			//get session id
-    			session_id.assign(record_data + 44, record_data + 76);
+    			session_id.assign(record_data + SESSION_ID_BEGAIN_OFFSET, record_data + HELLO_MSG_HEADER_LENGTH);
     			return 0;
     		}
     		else
@@ -40,7 +39,7 @@ namespace l7vs
     	}
     	else
     	{
-    		//the ssl record data length < 76, error!
+    		//the ssl record data length < HELLO_MSG_HEADER_LENGTH, error!
     		return -1;
     	}
     }
@@ -53,18 +52,18 @@ namespace l7vs
      */
     int ssl_protocol_module_base::check_ssl_record_sendable( bool is_message_form_client,
                                                     const char* record_data,
-                                                    int recv_length,
-                                                    int& all_length,
+                                                    size_t recv_length,
+                                                    size_t& all_length,
                                                     bool& is_hello_message)
     {
     	//check record_data pointer
-    	if (record_data == NULL || recv_length < 0) {
+    	if (record_data == NULL) {
     		return -1;
     	}
     	//is_hello_messageを FALSEで設定する
 		is_hello_message = false;
 		//data_size≧6(SSL record のminimalサイズ)
-		if (recv_length >= 6)
+		if (recv_length >= SSL_RECORD_MIN_SIZE)
 		{
 			// SSL recordチェック
 			// SSLレコードデータの1バイト目が「20」、「21」、「22」、「23」で、
@@ -82,7 +81,7 @@ namespace l7vs
 				//  チェック結果がhandshake helloとして処理を行う。
 				if(record_data[0] == 0x16 && (record_data[5] == 0x01 || record_data[5] == 0x02))
 				{//handshake helloの場合
-					if(recv_length >= 76)
+					if(recv_length >= HELLO_MSG_HEADER_LENGTH)
 					{//data_size≧76の場合
 						//SSLレコードデータの10バイト目が「0x03」、
 						//且つ11バイト目が「0x00」、「0x01」をチェックする。
@@ -110,7 +109,7 @@ namespace l7vs
 						}
 					}
 					else
-					{//data_size<76の場合
+					{//data_size<HELLO_MSG_HEADER_LENGTH の場合
 						//SSL recordチェック結果を「送信不可」
 						return 1;
 					}
@@ -141,4 +140,5 @@ namespace l7vs
 			return 1;
 		}
     }
+
 }

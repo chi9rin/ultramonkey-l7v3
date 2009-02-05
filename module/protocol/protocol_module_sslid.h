@@ -36,11 +36,11 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         bool is_udp();
 
-        void initialize( rs_list_itr_func_type	inlist_begin,
-                         rs_list_itr_func_type	inlist_end,
-						 rs_list_itr_next_func_type inlist_next,
-						 boost::function< void( void ) >	inlist_lock,
-						 boost::function< void( void ) >	inlist_unlock );
+        void initialize( rs_list_itr_func_type    inlist_begin,
+                         rs_list_itr_func_type    inlist_end,
+                         rs_list_itr_next_func_type inlist_next,
+                         boost::function< void( void ) >    inlist_lock,
+                         boost::function< void( void ) >    inlist_unlock );
 
         void finalize();
 
@@ -80,10 +80,10 @@ class protocol_module_sslid : public ssl_protocol_module_base
                                 boost::asio::ip::tcp::endpoint& rs_endpoint );
 
         EVENT_TAG handle_realserver_select(
-								const boost::thread::id thread_id,
-								boost::asio::ip::udp::endpoint& rs_endpoint,
-								boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-								size_t& datalen );
+                                const boost::thread::id thread_id,
+                                boost::asio::ip::udp::endpoint& rs_endpoint,
+                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                size_t& datalen );
 
         EVENT_TAG handle_realserver_connect(
                                 const boost::thread::id thread_id,
@@ -98,49 +98,49 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         EVENT_TAG handle_sorryserver_select(
                                 const boost::thread::id thread_id,
-								boost::asio::ip::tcp::endpoint& sorry_endpoint );
+                                boost::asio::ip::tcp::endpoint& sorry_endpoint );
 
         EVENT_TAG handle_sorryserver_connect(
-								const boost::thread::id thread_id,
-								boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-								size_t& datalen );
+                                const boost::thread::id thread_id,
+                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                size_t& datalen );
 
         EVENT_TAG handle_sorryserver_connection_fail(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::tcp::endpoint& sorry_endpoint );
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::tcp::endpoint& sorry_endpoint );
 
         EVENT_TAG handle_sorryserver_send( const boost::thread::id thread_id );
 
         EVENT_TAG handle_realserver_recv(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::tcp::endpoint& rs_endpoint,
-								const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-								const size_t recvlen );
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::tcp::endpoint& rs_endpoint,
+                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const size_t recvlen );
 
         EVENT_TAG handle_realserver_recv(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::udp::endpoint& rs_endpoint,
-								const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-								const size_t recvlen );
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::udp::endpoint& rs_endpoint,
+                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const size_t recvlen );
 
         EVENT_TAG handle_sorryserver_recv(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::tcp::endpoint& sorry_endpoint,
-								const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-								const size_t recvlen );
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::tcp::endpoint& sorry_endpoint,
+                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const size_t recvlen );
 
         EVENT_TAG handle_response_send_inform( const boost::thread::id thread_id );
 
         EVENT_TAG handle_client_connection_check(
-								const boost::thread::id thread_id,
-								boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-								size_t& datalen );
+                                const boost::thread::id thread_id,
+                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                size_t& datalen );
 
         EVENT_TAG handle_client_select(
-								const boost::thread::id thread_id,
-								boost::asio::ip::udp::endpoint& cl_endpoint,
-								boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-								size_t& datalen );
+                                const boost::thread::id thread_id,
+                                boost::asio::ip::udp::endpoint& cl_endpoint,
+                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                size_t& datalen );
 
         EVENT_TAG handle_client_send( const boost::thread::id thread_id );
 
@@ -152,15 +152,15 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         EVENT_TAG handle_realserver_disconnect(
                                 const boost::thread::id thread_id,
-								const boost::asio::ip::tcp::endpoint& rs_endpoint );
+                                const boost::asio::ip::tcp::endpoint& rs_endpoint );
 
         EVENT_TAG handle_sorryserver_disconnect(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::tcp::endpoint& sorry_endpoint );
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::tcp::endpoint& sorry_endpoint );
 
         EVENT_TAG handle_realserver_close(
-								const boost::thread::id thread_id,
-								const boost::asio::ip::udp::endpoint& rs_endpoint );
+                                const boost::thread::id thread_id,
+                                const boost::asio::ip::udp::endpoint& rs_endpoint );
 
         void replication_interrupt();
 

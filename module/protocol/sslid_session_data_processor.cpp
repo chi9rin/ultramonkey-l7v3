@@ -3,12 +3,12 @@
 
 namespace l7vs
 {
-
+//! constructor
 sslid_session_data_processor::sslid_session_data_processor(
                                     int maxlist,
                                     int timeout,
                                     sslid_replication_data_processor* replication_data_processor,
-                                    getloglevel_func_type	ingetloglevel,
+                                    getloglevel_func_type ingetloglevel,
                                     logger_func_type inputLogFatal,
                                     logger_func_type inputLogError,
                                     logger_func_type inputLogWarn,
@@ -35,7 +35,7 @@ sslid_session_data_processor::sslid_session_data_processor(
                                             "logger_func_type		inputLogError, logger_func_type		inputLogWarn,"
                                             "logger_func_type		inputLogInfo, logger_func_type		inputLogDebug ): "
                                             "maxlist=%d, timeout=%d, replication_data_processor=&(%d)." );
-        formatter % maxlist % timeout % &replication_data_processor;
+        formatter % maxlist % timeout % reinterpret_cast<int>(replication_data_processor);
         putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -68,6 +68,7 @@ sslid_session_data_processor::sslid_session_data_processor(
     /*------DEBUG LOG END------*/
 }
 
+//! destructor
 sslid_session_data_processor::~sslid_session_data_processor()
 {
     //dtor
@@ -80,10 +81,12 @@ sslid_session_data_processor::~sslid_session_data_processor()
     /*------DEBUG LOG END------*/
 }
 
-//! get endpoint from session data function
-//! @param const std::string& session_id
-//! @param boost::asio::ip::tcp::endpoint& endpoint
-//! @return 0 : success 1: failed -1:exception
+//! get endpoint from session data
+//! @param[in] session_id refrence
+//! @param[out] endpoint refrence
+//! @return 0 : success
+//! @return 1: failed
+//! @return -1:exception
 int sslid_session_data_processor::get_endpoint_from_session_data(
                                     const std::string& session_id,
                                     boost::asio::ip::tcp::endpoint& endpoint )
@@ -205,6 +208,13 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     return ret;
 }
 
+//! write session data to map
+//! @param[in] session_id refrence
+//! @param[in] endpoint refrence
+//! @param[in] now time
+//! @return 0 : success
+//! @return 1: failed
+//! @return -1:exception
 int sslid_session_data_processor::write_session_data(
                                     const std::string& session_id,
                                     const boost::asio::ip::tcp::endpoint& endpoint,
@@ -227,6 +237,21 @@ int sslid_session_data_processor::write_session_data(
     boost::mutex::scoped_lock sclock( session_map_mutex );
     try
     {
+        // map size check
+        if ( maxlist <= 0 )
+        {
+             /*-------- DEBUG LOG --------*/
+            if ( LOG_LV_DEBUG == getloglevel() )
+            {
+                putLogDebug( 30000, "out_function: int sslid_session_data_processor::"
+                                "write_session_data( const std::string& session_id,"
+                                "const boost::asio::ip::tcp::endpoint& endpoint,  time_t now_time ): "
+                                "return_value=0", __FILE__, __LINE__ );
+            }
+            /*------DEBUG LOG END------*/
+            return 0;
+        }
+
         std::map<std::string, boost::asio::ip::tcp::endpoint>::iterator itendpoint;
         itendpoint = session_endpoint_map.find( session_id );
 
@@ -343,6 +368,10 @@ int sslid_session_data_processor::write_session_data(
     return 0;
 }
 
+//! read session data from replication area
+//! @param[in] sslid_replication_data pointer
+//! @return 0 : success
+//! @return -1:exception
 int sslid_session_data_processor::read_session_data_from_replication_area(
                                                     sslid_replication_data* replication_area  )
 {
@@ -353,7 +382,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
                                             "read_session_data_from_replication_area( "
                                             "sslid_replication_data* replication_area ): "
                                             "replication_area=&(%d) " );
-        formatter % &replication_area;
+        formatter % reinterpret_cast<int>(replication_area);
         putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -384,12 +413,13 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
             {
                 // valid session data
                 boost::asio::ip::address address;
+                char sessionid_temp[SSLID_LENGTH+1] = {0};
+                memcpy( sessionid_temp, replication_area[i].realserver_ip, SSLID_LENGTH );
                 address.from_string(replication_area[i].realserver_ip);
                 boost::asio::ip::tcp::endpoint endpoint( address, replication_area[i].realserver_port );
-                session_endpoint_map[replication_area[i].session_id] = endpoint;
-                session_lasttime_map[replication_area[i].session_id] = replication_area[i].last_time;
-                lasttime_session_map.insert( std::make_pair( replication_area[i].last_time,
-                                                                                  replication_area[i].session_id ) );
+                session_endpoint_map[sessionid_temp] = endpoint;
+                session_lasttime_map[sessionid_temp] = replication_area[i].last_time;
+                lasttime_session_map.insert( std::make_pair( replication_area[i].last_time, sessionid_temp ) );
             }
         }
     }
@@ -419,6 +449,8 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     return ret;
 }
 
+//! clear expired session data
+//! @return 0 : success
 int sslid_session_data_processor::clear_expired_session_data()
 {
     /*-------- DEBUG LOG --------*/
