@@ -1,5 +1,7 @@
 #ifndef	__SNMPBRIDGE_H__
 #define	__SNMPBRIDGE_H__
+#include	"logger_enum.h"
+
 namespace	l7vs{
 class	snmpbridge{
 public:
@@ -9,6 +11,12 @@ public:
 	static	bool	initialize_fail;
 
 	static	bool	finalize_called;
+	static	bool	reload_config_called;
+
+	static	LOG_CATEGORY_TAG	change_loglevel_category;
+	static	LOG_LEVEL_TAG		change_loglevel_level;
+
+	static	LOG_LEVEL_TAG		change_loglevel_all_level;
 
 //function
 	//! constractor
@@ -41,20 +49,27 @@ public:
 
 	//! param reload function
 	void			reload_config()
-	{}
+	{ reload_config_called  = true; }
 
 	//! change log level function
 	//! @param[in]
 	//! @param[in]
 	//! @return
 	int				change_loglevel( const LOG_CATEGORY_TAG snmp_log_category, const LOG_LEVEL_TAG loglevel )
-	{ return 0; }
+	{
+		change_loglevel_category = snmp_log_category;
+		change_loglevel_level =loglevel;
+		return 0;
+	}
 
 	//! view all log level function
 	//! @param[in]
 	//! @return
 	int				change_loglevel_allcategory( const LOG_LEVEL_TAG loglevel )
-	{ return 0; }
+	{
+		change_loglevel_all_level = loglevel;
+		return 0;
+	}
 
 	//! send mibcollection
 	//! @param[in]

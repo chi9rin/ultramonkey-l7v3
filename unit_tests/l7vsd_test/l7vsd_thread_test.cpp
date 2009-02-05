@@ -44,6 +44,9 @@ public:
 	void	set_replication( boost::shared_ptr< l7vs::replication > inrep ){
 		rep = inrep;
 	}
+	void	set_snmpbridge( boost::shared_ptr< l7vs::snmpbridge > inbridge ){
+		bridge = inbridge;
+	}
 
 };
 //variable
@@ -73,6 +76,16 @@ void	list_vs( unsigned int id ){
 		l7vs::l7vsd::vselist_type	vselist;
 
 		vsd_test.list_virtual_service( &vselist, err );
+		if( err )	++err_count[id];
+	}
+}
+
+void	list_vs_verbose( unsigned int id ){
+	for( size_t i = 0 ; i < 100; ++i ){
+		l7vs::error_code err;
+		l7vs::l7vsd_response	response;
+
+		vsd_test.list_virtual_service_verbose( &response, err );
 		if( err )	++err_count[id];
 	}
 }
@@ -180,6 +193,48 @@ void	flush_vs( unsigned int id ){
 	}
 }
 
+void	rep_command( unsigned int id ){
+	for( size_t i = 0 ; i < 100; ++i ){
+		l7vs::error_code err;
+		l7vs::l7vsadm_request::REPLICATION_COMMAND_TAG	cmd = l7vs::l7vsadm_request::REP_START;
+
+		vsd_test.replication_command( &cmd, err );
+		if( err )	++err_count[id];
+	}
+}
+
+void	set_loglevel( unsigned int id ){
+	for( size_t i = 0 ; i < 100; ++i ){
+		l7vs::error_code err;
+		l7vs::LOG_CATEGORY_TAG	cat		= l7vs::LOG_CAT_L7VSD_NETWORK;
+		l7vs::LOG_LEVEL_TAG		level	= l7vs::LOG_LV_INFO;
+
+		vsd_test.set_loglevel( &cat, &level, err );
+		if( err )	++err_count[id];
+	}
+}
+
+void	snmp_set_loglevel( unsigned int id ){
+	for( size_t i = 0 ; i < 100; ++i ){
+		l7vs::error_code err;
+		l7vs::LOG_CATEGORY_TAG	cat		= l7vs::LOG_CAT_SNMPAGENT_START_STOP;
+		l7vs::LOG_LEVEL_TAG		level	= l7vs::LOG_LV_INFO;
+
+		vsd_test.snmp_set_loglevel( &cat, &level, err );
+		if( err )	++err_count[id];
+	}
+}
+
+void	reload_parameter( unsigned int id ){
+	for( size_t i = 0 ; i < 100; ++i ){
+		l7vs::error_code err;
+		l7vs::PARAMETER_COMPONENT_TAG	comp = l7vs::PARAM_COMP_REPLICATION;
+
+		vsd_test.reload_parameter( &comp, err );
+		if( err )	++err_count[id];
+	}
+}
+
 void	thread_test(){
 	BOOST_MESSAGE( "----- thread_test start -----" );
 
@@ -187,6 +242,10 @@ void	thread_test(){
 	boost::shared_ptr< l7vs::replication >
 									rep( new l7vs::replication(io) );
 	vsd_test.set_replication( rep );
+
+	boost::shared_ptr< l7vs::snmpbridge >
+									bridge( new l7vs::snmpbridge( vsd_test, io ) );
+	vsd_test.set_snmpbridge( bridge );
 
 	//make element
 	for( size_t i = 0 ; i < 2; ++i ){
@@ -203,11 +262,17 @@ void	thread_test(){
 	func_map_type func_map;
 
 	func_map["list_vs"] = &list_vs;
+	func_map["list_vs_verbose"] = &list_vs_verbose;
 	func_map["add_vs_del_vs"] = &add_vs_del_vs;
 	func_map["add_vs_edit_vs"] = &add_vs_edit_vs;
 	func_map["add_vs_add_rs"] = &add_vs_add_rs;
 	func_map["add_vs_del_rs"] = &add_vs_del_rs;
 	func_map["add_vs_edit_rs"] = &add_vs_edit_rs;
+
+	func_map["rep_command"] = &rep_command;
+	func_map["set_loglevel"] = &set_loglevel;
+	func_map["snmp_set_loglevel"] = &snmp_set_loglevel;
+	func_map["reload_parameter"] = &reload_parameter;
 
 	// command combination test
 	for( func_map_type::iterator itr = func_map.begin();

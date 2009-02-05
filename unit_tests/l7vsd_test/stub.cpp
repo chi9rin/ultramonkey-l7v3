@@ -50,6 +50,10 @@ bool	replication::reset_called(false);
 bool	snmpbridge::initialize_called(false);
 bool	snmpbridge::initialize_fail(false);
 bool	snmpbridge::finalize_called(false);
+bool	snmpbridge::reload_config_called(false);
+LOG_CATEGORY_TAG	snmpbridge::change_loglevel_category(LOG_CAT_NONE);
+LOG_LEVEL_TAG		snmpbridge::change_loglevel_level(LOG_LV_NONE);
+LOG_LEVEL_TAG		snmpbridge::change_loglevel_all_level(LOG_LV_NONE);
 
 // protocol_module_control
 bool	protocol_module_control::initialize_called(false);

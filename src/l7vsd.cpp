@@ -615,8 +615,21 @@ void	l7vsd::release_virtual_service( const virtualservice_element& in_vselement 
 		vslist.remove( *vsitr );
 	}
 }
+//! virtualservice_list getter
+//! @return	vslist
+l7vsd::vslist_type&	l7vsd::get_virtualservice_list(){
+	return vslist;
+}
+
+//! virtualservice_list mutex getter
+//! @return	vslist_mutex
+boost::mutex&	l7vsd::get_virtualservice_list_mutex(){
+	return vslist_mutex;
+}
 
 //! l7vsd run method
+//! @param[in]	argument count
+//! @param[in]	argument value
 int	l7vsd::run( int argc, char* argv[] ) {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::run", __FILE__, __LINE__ );
 
@@ -697,6 +710,9 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	return 0;
 }
 
+//! command option check
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vsd::check_options( int argc, char* argv[] ){
 	for( int pos = 1; pos < argc; ++pos ){	// check options.
 		parse_opt_map_type::iterator itr = option_dic.find( argv[pos] );
@@ -715,11 +731,17 @@ bool	l7vsd::check_options( int argc, char* argv[] ){
 	return true;
 }
 
+//! command help parse
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vsd::parse_help(int& pos, int argc, char* argv[] ){
 	help = true;		//help_mode flag on
 	return true;
 }
 
+//! command debug parse
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vsd::parse_debug(int& pos, int argc, char* argv[] ){
 	debug = true;		//debug_mode flag on
 	return true;

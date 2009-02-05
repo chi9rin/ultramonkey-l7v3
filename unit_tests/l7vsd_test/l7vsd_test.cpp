@@ -866,60 +866,32 @@ void	set_loglevel_test(){
 									rep( new l7vs::replication(io) );
 	vsd_test.set_replication( rep );
 
-	l7vs::LOG_CATEGORY_TAG	categories[] = {
-		l7vs::LOG_CAT_L7VSD_NETWORK,
-		l7vs::LOG_CAT_L7VSD_NETWORK_QOS,
-		l7vs::LOG_CAT_L7VSD_NETWORK_BANDWIDTH,
-		l7vs::LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION,
-		l7vs::LOG_CAT_L7VSD_NETWORK_ACCESS,
-		l7vs::LOG_CAT_L7VSD_MAINTHREAD,
-		l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE,
-		l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD,
-		l7vs::LOG_CAT_L7VSD_SESSION,
-		l7vs::LOG_CAT_L7VSD_SESSION_THREAD,
-		l7vs::LOG_CAT_L7VSD_REALSERVER,
-		l7vs::LOG_CAT_L7VSD_SORRYSERVER,
-		l7vs::LOG_CAT_L7VSD_MODULE,
-		l7vs::LOG_CAT_L7VSD_REPLICATION,
-		l7vs::LOG_CAT_L7VSD_REPLICATION_SENDTHREAD,
-		l7vs::LOG_CAT_L7VSD_PARAMETER,
-		l7vs::LOG_CAT_L7VSD_LOGGER,
-		l7vs::LOG_CAT_L7VSD_COMMAND,
-		l7vs::LOG_CAT_L7VSD_START_STOP,
-		l7vs::LOG_CAT_L7VSD_SYSTEM,
-		l7vs::LOG_CAT_L7VSD_SYSTEM_MEMORY,
-		l7vs::LOG_CAT_L7VSD_SYSTEM_ENDPOINT,
-		l7vs::LOG_CAT_L7VSD_SYSTEM_SIGNAL,
-		l7vs::LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT
-	};
+	std::vector< l7vs::LOG_CATEGORY_TAG > categories;
+	categories.push_back( l7vs::LOG_CAT_L7VSD_NETWORK );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_NETWORK_QOS );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_NETWORK_BANDWIDTH );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_NETWORK_ACCESS );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_MAINTHREAD );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SESSION );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SESSION_THREAD );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_REALSERVER );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SORRYSERVER );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_MODULE );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_REPLICATION );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_REPLICATION_SENDTHREAD );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_PARAMETER );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_LOGGER );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_COMMAND );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_START_STOP );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SYSTEM );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SYSTEM_MEMORY );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SYSTEM_ENDPOINT );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SYSTEM_SIGNAL );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT );
 
-	for( unsigned int i = 0; i < sizeof(categories); ++i ){
-		l7vs::error_code err;
-		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_DEBUG;
-		vsd_test.set_loglevel( &categories[i], &level, err );
-		BOOST_CHECK( !err );
-		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_DEBUG );
-
-		level = l7vs::LOG_LV_INFO;
-		vsd_test.set_loglevel( &categories[i], &level, err );
-		BOOST_CHECK( !err );
-		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_INFO );
-
-		level = l7vs::LOG_LV_WARN;
-		vsd_test.set_loglevel( &categories[i], &level, err );
-		BOOST_CHECK( !err );
-		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_WARN );
-
-		level = l7vs::LOG_LV_ERROR;
-		vsd_test.set_loglevel( &categories[i], &level, err );
-		BOOST_CHECK( !err );
-		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_ERROR );
-
-		level = l7vs::LOG_LV_FATAL;
-		vsd_test.set_loglevel( &categories[i], &level, err );
-		BOOST_CHECK( !err );
-		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_FATAL );
-	}
 	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK) error_code check
 	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_NETWORK) loglevel check
 
@@ -992,6 +964,37 @@ void	set_loglevel_test(){
 	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT) error_code check
 	// unit_test[1] set_loglevel normal case (LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT) loglevel check
 
+	for( unsigned int i = 0; i < categories.size(); ++i ){
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_DEBUG;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_DEBUG );
+
+		level = l7vs::LOG_LV_INFO;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_INFO );
+
+		level = l7vs::LOG_LV_WARN;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_WARN );
+
+		level = l7vs::LOG_LV_ERROR;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_ERROR );
+
+		level = l7vs::LOG_LV_FATAL;
+		vsd_test.set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_FATAL );
+	}
+
+	// unit_test[1] set_loglevel normal case (LOG_CAT_END(all)) error_code check
+	// unit_test[1] set_loglevel normal case (LOG_CAT_END(all)) loglevel check
+
 	// set loglevel all(LOG_LV_DEBUG)
 	{
 		l7vs::error_code err;
@@ -999,7 +1002,7 @@ void	set_loglevel_test(){
 		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
 		vsd_test.set_loglevel( &category, &level, err );
 		BOOST_CHECK( !err );
-		for( unsigned int i = 0; i < sizeof(categories); ++i )
+		for( unsigned int i = 0; i < categories.size(); ++i )
 			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_DEBUG );
 	}
 
@@ -1036,7 +1039,6 @@ void	set_loglevel_test(){
 			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_ERROR );
 	}
 
-
 	// set loglevel all(LOG_LV_FATAL)
 	{
 		l7vs::error_code err;
@@ -1048,12 +1050,215 @@ void	set_loglevel_test(){
 			BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( categories[i] ), l7vs::LOG_LV_FATAL );
 	}
 
-	// unit_test[1] set_loglevel normal case (LOG_CAT_END(all)) error_code check
-	// unit_test[1] set_loglevel normal case (LOG_CAT_END(all)) loglevel check
-
-
 	BOOST_MESSAGE( "----- set_loglevel_test end -----" );
+}
 
+void	set_snmp_loglevel_test(){
+	BOOST_MESSAGE( "----- set_snmp_loglevel_test start -----" );
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+
+	std::vector< l7vs::LOG_CATEGORY_TAG > categories;
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_START_STOP );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_LOGGER );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_PARAMETER );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_SYSTEM );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_SYSTEM_MEMORY );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL );
+	categories.push_back( l7vs::LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT );
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_START_STOP) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_START_STOP) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_MANAGER_RECEIVE) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_MANAGER_RECEIVE) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_MANAGER_SEND) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_MANAGER_SEND) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_L7VSD_RECEIVE) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_L7VSD_RECEIVE) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_L7VSD_SEND) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_L7VSD_SEND) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_LOGGER) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_LOGGER) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_PARAMETER) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_PARAMETER) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_MEMORY) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_MEMORY) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL) loglevel check
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT) loglevel check
+
+	for( unsigned int i = 0; i < categories.size(); ++i ){
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_DEBUG;
+		vsd_test.snmp_set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_category, categories[i] );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_level, l7vs::LOG_LV_DEBUG );
+
+		level = l7vs::LOG_LV_INFO;
+		vsd_test.snmp_set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_category, categories[i] );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_level, l7vs::LOG_LV_INFO );
+
+		level = l7vs::LOG_LV_WARN;
+		vsd_test.snmp_set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_category, categories[i] );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_level, l7vs::LOG_LV_WARN );
+
+		level = l7vs::LOG_LV_ERROR;
+		vsd_test.snmp_set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_category, categories[i] );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_level, l7vs::LOG_LV_ERROR );
+
+		level = l7vs::LOG_LV_FATAL;
+		vsd_test.snmp_set_loglevel( &categories[i], &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_category, categories[i] );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_level, l7vs::LOG_LV_FATAL );
+	}
+
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_END(all)) error_code check
+	// unit_test[1] set_snmp_loglevel normal case (LOG_CAT_END(all)) loglevel check
+
+	// set loglevel all(LOG_LV_DEBUG)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_DEBUG;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.snmp_set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_all_level, l7vs::LOG_LV_DEBUG );
+	}
+
+	// set loglevel all(LOG_LV_INFO)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_INFO;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.snmp_set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_all_level, l7vs::LOG_LV_INFO );
+	}
+
+	// set loglevel all(LOG_LV_WARN)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_WARN;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.snmp_set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_all_level, l7vs::LOG_LV_WARN );
+	}
+
+	// set loglevel all(LOG_LV_ERROR)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_ERROR;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.snmp_set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_all_level, l7vs::LOG_LV_ERROR );
+	}
+
+	// set loglevel all(LOG_LV_FATAL)
+	{
+		l7vs::error_code err;
+		l7vs::LOG_LEVEL_TAG	level = l7vs::LOG_LV_FATAL;
+		l7vs::LOG_CATEGORY_TAG	category = l7vs::LOG_CAT_END;
+		vsd_test.snmp_set_loglevel( &category, &level, err );
+		BOOST_CHECK( !err );
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::change_loglevel_all_level, l7vs::LOG_LV_FATAL );
+	}
+
+	BOOST_MESSAGE( "----- set_snmp_loglevel_test end -----" );
+}
+
+void	reload_parameter_test(){
+	BOOST_MESSAGE( "----- reload_parameter_test start -----" );
+	l7vsd_test			vsd_test;
+
+	boost::asio::io_service			io;
+	boost::shared_ptr< l7vs::replication >
+									rep( new l7vs::replication(io) );
+	vsd_test.set_replication( rep );
+	boost::shared_ptr< l7vs::snmpbridge >
+									bridge( new l7vs::snmpbridge( vsd_test, io ) );
+	vsd_test.set_snmpbridge( bridge );
+
+	// replication reload
+	{
+		l7vs::replication::reset_called = false;
+		l7vs::PARAMETER_COMPONENT_TAG comp = l7vs::PARAM_COMP_REPLICATION;
+		l7vs::error_code err;
+		vsd_test.reload_parameter( &comp, err );
+		// unit_test[1] reload_parameter normal case (replication reload) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] reload_parameter normal case (replication reload) reset call check
+		BOOST_CHECK_EQUAL( l7vs::replication::reset_called, true );
+	}
+
+	// snmpbridge reload
+	{
+		l7vs::snmpbridge::reload_config_called = false;
+		l7vs::PARAMETER_COMPONENT_TAG comp = l7vs::PARAM_COMP_SNMPAGENT;
+		l7vs::error_code err;
+		vsd_test.reload_parameter( &comp, err );
+		// unit_test[1] reload_parameter normal case (snmpbridge reload) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] reload_parameter normal case (snmpbridge reload) reload_conf call check
+		BOOST_CHECK_EQUAL( l7vs::snmpbridge::reload_config_called, true );
+	}
+
+	// logger reload
+	{
+		l7vs::Logger::setLogLevel( l7vs::LOG_CAT_L7VSD_NETWORK, l7vs::LOG_LV_FATAL );
+		l7vs::PARAMETER_COMPONENT_TAG comp = l7vs::PARAM_COMP_LOGGER;
+		l7vs::error_code err;
+		vsd_test.reload_parameter( &comp, err );
+		// unit_test[1] reload_parameter normal case (logger reload) error_code check
+		BOOST_CHECK( !err );
+		// unit_test[1] reload_parameter normal case (logger reload) log level default check
+		BOOST_CHECK_EQUAL( l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_NETWORK ), l7vs::LOG_LV_INFO );
+	}
+
+	// error case
+	{
+		l7vs::PARAMETER_COMPONENT_TAG comp = l7vs::PARAM_COMP_NOCAT;
+		l7vs::error_code err;
+		vsd_test.reload_parameter( &comp, err );
+		// unit_test[1] reload_parameter error case error_code check
+		BOOST_CHECK( err );
+	}
+
+	BOOST_MESSAGE( "----- reload_parameter_test end -----" );
 }
 
 void	search_vslist_test(){

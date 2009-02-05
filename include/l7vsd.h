@@ -108,8 +108,8 @@ public:
 
 	void	release_virtual_service( const virtualservice_element& )	const;		//!< virtualservice release from vslist
 
-	vslist_type&	get_virtualservice_list();			//!< return virtualservice_list
-	boost::mutex&	get_virtualservice_list_mutex();	//!< return virtualservice_list mutex
+	vslist_type&	get_virtualservice_list();			//!< virtualservice_list getter
+	boost::mutex&	get_virtualservice_list_mutex();	//!< virtualservice_list mutex getter
 
 protected:
 	bool	is_exit_requested();		//!< check if exit requested
