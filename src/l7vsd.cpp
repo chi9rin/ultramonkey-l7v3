@@ -107,10 +107,10 @@ void	l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_code& 
 		 ++itr ){
 		response->virtualservice_status_list.push_back( (*itr)->get_element() );
 		// calc send recv bytes
-		total_client_recv_byte += (*itr)->get_up_recv_size();
-		total_client_send_byte += (*itr)->get_down_send_size();
-		total_realserver_recv_byte += (*itr)->get_down_recv_size();
-		total_realserver_send_byte += (*itr)->get_up_send_size();
+		// total_client_recv_byte += (*itr)->get_up_recv_size();
+		// total_client_send_byte += (*itr)->get_down_send_size();
+		// total_realserver_recv_byte += (*itr)->get_down_recv_size();
+		// total_realserver_send_byte += (*itr)->get_up_send_size();
 	}
 
 	// get_replication_mode
