@@ -39,13 +39,13 @@ int		l7vs::replication::handle_send(){
 int		l7vs::replication::handle_receive(){
 	return 0;
 }
-int		l7vs::replication::lock( std::string& inid ){
+int		l7vs::replication::lock( const std::string& inid ){
 	return 0;
 }
-int		l7vs::replication::unlock( std::string& inid ){
+int		l7vs::replication::unlock( const std::string& inid ){
 	return 0;
 }
-int		l7vs::replication::refer_lock_mutex( std::string& inid, boost::mutex& outmutex ){
+int		l7vs::replication::refer_lock_mutex( const std::string& inid, mutex_ptr outmutex ){
 	return 0;
 }
 

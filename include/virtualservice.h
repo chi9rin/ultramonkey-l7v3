@@ -12,7 +12,6 @@
 #define	VIRTUALSERVICE_H
 
 #include <string>
-#include <vector>
 #include <map>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -197,7 +196,9 @@ public:
 	unsigned long long			get_throughput_upstream();
 	unsigned long long			get_throughput_downstream();
 	unsigned long long			get_up_recv_size();
+	unsigned long long			get_up_send_size();
 	unsigned long long			get_down_recv_size();
+	unsigned long long			get_down_send_size();
 
 	void						update_up_recv_size( unsigned long long );
 	void						update_up_send_size( unsigned long long );
@@ -336,12 +337,16 @@ public:
 	unsigned long long			get_qos_downstream();
 	unsigned long long			get_throughput_upstream();
 	unsigned long long			get_throughput_downstream();
+	unsigned long long			get_up_recv_size();
+	unsigned long long			get_up_send_size();
+	unsigned long long			get_down_recv_size();
+	unsigned long long			get_down_send_size();
 
 	void						update_up_recv_size( unsigned long long );
 	void						update_up_send_size( unsigned long long );
 	void						update_down_recv_size( unsigned long long );
 	void						update_down_send_size( unsigned long long );
-	
+
 	boost::shared_ptr<protocol_module_base>
 								get_protocol_module();
 	boost::shared_ptr<schedule_module_base>

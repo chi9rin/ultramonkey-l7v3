@@ -217,6 +217,11 @@ unsigned long long	l7vs::virtualservice_base::get_up_recv_size(){
 	return recvsize_up;
 }
 
+unsigned long long	l7vs::virtualservice_base::get_up_send_size(){
+	boost::mutex::scoped_lock lock( sendsize_up_mutex );
+	return sendsize_up;
+}
+
 /*!
  * get downstream total receive size bit/sec value.
  *
@@ -227,6 +232,12 @@ unsigned long long	l7vs::virtualservice_base::get_down_recv_size(){
 	boost::mutex::scoped_lock lock( recvsize_down_mutex );
 	return recvsize_down;
 }
+
+unsigned long long	l7vs::virtualservice_base::get_down_send_size(){
+	boost::mutex::scoped_lock lock( sendsize_down_mutex );
+	return sendsize_down;
+}
+
 
 /*!
  * update upstream receive data size
@@ -666,6 +677,22 @@ unsigned long long		l7vs::virtual_service::get_throughput_upstream(){
 }
 unsigned long long		l7vs::virtual_service::get_throughput_downstream(){
 	return vs->get_throughput_downstream();
+}
+
+unsigned long long		l7vs::virtual_service::get_up_recv_size(){
+	return vs->get_up_recv_size();
+}
+
+unsigned long long		l7vs::virtual_service::get_up_send_size(){
+	return vs->get_up_send_size();
+}
+
+unsigned long long		l7vs::virtual_service::get_down_recv_size(){
+	return vs->get_down_recv_size();
+}
+
+unsigned long long		l7vs::virtual_service::get_down_send_size(){
+	return vs->get_down_send_size();
 }
 
 void		l7vs::virtual_service::update_up_recv_size( unsigned long long	datasize ){

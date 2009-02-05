@@ -64,37 +64,37 @@ void	stc_method_test1(){
 // 	BOOST_CHECK_EQUAL( session, stc->get_session() );
 
 //スレッドID取得のテスト
-// unit_test[3]  のぼりスレッドID取得
+// unit_test[3]  上りスレッドID取得
 	BOOST_MESSAGE( "-----3" );
 	std::cout << "upthread id : " << stc->get_upthread_id() << std::endl;
-// unit_test[4]  くだりスレッドID取得
+// unit_test[4]  下りスレッドID取得
 	BOOST_MESSAGE( "-----4" );
 	std::cout << "downthread id : " << stc->get_downthread_id() << std::endl;
 
-//のぼりスレッド
+//上りスレッド
 
 //パターン１
-// unit_test[5]  のぼりスレッドスタート
+// unit_test[5]  上りスレッドスタート
 	BOOST_MESSAGE( "-----5" );
 	stc->startupstream();
 //sleepを入れないとsessionのループに入る前にEXITしてしまう
 	usleep( 4000000 );
-// unit_test[6]  のぼりスレッドストップ
+// unit_test[6]  上りスレッドストップ
 	BOOST_MESSAGE( "-----6" );
 	stc->stopupstream();
-//くだりスレッド
+//下りスレッド
 
-// unit_test[7]  くだりスレッドスタート
+// unit_test[7]  下りスレッドスタート
 	BOOST_MESSAGE( "-----7" );
 	stc->startdownstream();
 //sleepを入れないとsessionのループに入る前にEXITしてしまう
 	usleep( 4000000 );
-// unit_test[8]  くだりスレッドストップ
+// unit_test[8]  下りスレッドストップ
 	BOOST_MESSAGE( "-----8" );
 	stc->stopdownstream();
 
 
-// unit_test[9]  sessionののぼりスレッドが外から停止された場合
+// unit_test[9]  sessionの上りスレッドが外から停止された場合
 	BOOST_MESSAGE( "-----9" );
 	stc->startupstream();
 //sleepを入れないとsessionのループに入る前にEXITしてしまう
@@ -104,7 +104,7 @@ void	stc_method_test1(){
 	stc->stopupstream();
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 
-// unit_test[10]  sessionのくだりスレッドが外から停止された場合
+// unit_test[10]  sessionの下りスレッドが外から停止された場合
 	BOOST_MESSAGE( "----10" );
 	stc->startdownstream();
 	usleep( 1000 );
@@ -132,13 +132,13 @@ void	stc_method_test2(){
 	stc_type		stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ) ) );
 
 
-// unit_test[12]  のぼりスレッドとくだりスレッドを開始し、順番に停止する(sessionループは自然に終了)
+// unit_test[12]  上りスレッドと下りスレッドを開始し、順番に停止する(sessionループは自然に終了)
 	BOOST_MESSAGE( "----12" );
 	stc->startupstream();
 	stc->startdownstream();
 	usleep( 5000000 );
 
-// unit_test[13]  のぼりスレッドとくだりスレッドを開始し、くだりスレッド・のぼりスレッドの順に停止する(sessionループは外から停止)
+// unit_test[13]  上りスレッドと下りスレッドを開始し、下りスレッド・上りスレッドの順に停止する(sessionループは外から停止)
 	BOOST_MESSAGE( "----13" );
 	stc->startupstream();
 	stc->startdownstream();
@@ -150,7 +150,7 @@ void	stc_method_test2(){
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 
-// unit_test[14]  のぼりスレッドを外部から停止後にのぼりスレッドを再開
+// unit_test[14]  上りスレッドを外部から停止後に上りスレッドを再開
 	BOOST_MESSAGE( "----14" );
 	stc->startupstream();
 	usleep( 100 );
@@ -164,7 +164,7 @@ void	stc_method_test2(){
 	usleep( 100 );
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 
-// unit_test[15]  くだりスレッドストップ後に再開
+// unit_test[15]  下りスレッドストップ後に再開
 	BOOST_MESSAGE( "----15" );
 	stc->startdownstream();
 	usleep( 100 );
@@ -178,7 +178,7 @@ void	stc_method_test2(){
 	usleep( 100 );
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
 
-// unit_test[16]  のぼりスレッドを連続で開始指示した場合
+// unit_test[16]  上りスレッドを連続で開始指示した場合
 	BOOST_MESSAGE( "----16" );
 	stc->startupstream();
 	stc->startupstream();
@@ -190,7 +190,7 @@ void	stc_method_test2(){
 	usleep( 100 );
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 
-// unit_test[17]  くだりスレッドを連続で開始指示した場合
+// unit_test[17]  下りスレッドを連続で開始指示した場合
 	BOOST_MESSAGE( "----17" );
 	stc->startdownstream();
 	stc->startdownstream();
@@ -202,14 +202,14 @@ void	stc_method_test2(){
 	usleep( 100 );
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
 
-// unit_test[18]  のぼりスレッドを連続で開始・停止指示した場合(ループカウント0で出力)
+// unit_test[18]  上りスレッドを連続で開始・停止指示した場合(ループカウント0で出力)
 	BOOST_MESSAGE( "----18" );
 	stc->startupstream();
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 	usleep( 100 );
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 
-// unit_test[19]  くだりスレッドを連続で開始・停止指示した場合(ループカウント0で出力)
+// unit_test[19]  下りスレッドを連続で開始・停止指示した場合(ループカウント0で出力)
 	BOOST_MESSAGE( "----19" );
 	stc->startdownstream();
 	stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
@@ -219,10 +219,10 @@ void	stc_method_test2(){
 //停止スレッドの待ち合わせ
 	stc->join();
 //join後のスレッドID取得のテスト
-// unit_test[20]  のぼりスレッドID取得
+// unit_test[20]  上りスレッドID取得
 	BOOST_MESSAGE( "-----20" );
 	std::cout << "upthread id : " << stc->get_upthread_id() << std::endl;
-// unit_test[21]  くだりスレッドID取得
+// unit_test[21]  下りスレッドID取得
 	BOOST_MESSAGE( "-----21" );
 	std::cout << "downthread id : " << stc->get_downthread_id() << std::endl;
 
@@ -286,7 +286,7 @@ void	stc_method_test5(){
 
 	test_thread	thread1;
 
-// unit_test[25]  スレッドを開始して、別スレッドからスレッド停止メソッドを呼ぶ(のぼりスレッド)
+// unit_test[25]  スレッドを開始して、別スレッドからスレッド停止メソッドを呼ぶ(上りスレッド)
 	BOOST_MESSAGE( "-----25" );
 	std::cout << "thread id : " << thread1.get_id() << std::endl; 
 	stc->startupstream();
@@ -297,7 +297,7 @@ void	stc_method_test5(){
 	std::cout << "thread id : " << thread1.get_id() << std::endl;
 	thread1.stop();
 
-// unit_test[26]  スレッドを開始して、別スレッドからスレッド停止メソッドを呼ぶ(くだりスレッド)
+// unit_test[26]  スレッドを開始して、別スレッドからスレッド停止メソッドを呼ぶ(下りスレッド)
 	BOOST_MESSAGE( "-----26" );
 	std::cout << "thread id : " << thread1.get_id() << std::endl; 
 	stc->startdownstream();
@@ -308,7 +308,7 @@ void	stc_method_test5(){
 	std::cout << "thread id : " << thread1.get_id() << std::endl;
 	thread1.stop();
 
-// unit_test[27]  スレッドが停止すると同時にべつすレッドから開始メソッドが呼ばれる(のぼりスレッド)
+// unit_test[27]  スレッドが停止すると同時に別スレッドから開始メソッドが呼ばれる(上りスレッド)
 	BOOST_MESSAGE( "-----27" );
 	std::cout << "thread id : " << thread1.get_id() << std::endl; 
 	stc->startupstream();
@@ -319,7 +319,7 @@ void	stc_method_test5(){
 	std::cout << "thread id : " << thread1.get_id() << std::endl;
 	thread1.stop();
 
-// unit_test[28]  スレッドが停止すると同時にべつすレッドから開始メソッドが呼ばれる(くだりスレッド)
+// unit_test[28]  スレッドが停止すると同時に別スレッドから開始メソッドが呼ばれる(下りスレッド)
 	BOOST_MESSAGE( "-----28" );
 	std::cout << "thread id : " << thread1.get_id() << std::endl; 
 	stc->startdownstream();
@@ -335,7 +335,7 @@ void	stc_method_test5(){
 	stc->join();
 }
 
-//test case6. スレッド停止と同時にjoinが呼ばれる・その１(のぼりスレッド)
+//test case6. スレッド停止と同時にjoinが呼ばれる・その１(上りスレッド)
 void	stc_method_test6(){
 //session_thread_controlオブジェクトの作成
 	l7vs::l7vsd					vsd;
@@ -348,7 +348,7 @@ void	stc_method_test6(){
 
 	test_thread	thread1;
 
-// unit_test[29]  
+// unit_test[29]  上りスレッド停止と同時にjoinを呼ぶ
 	BOOST_MESSAGE( "-----29" );
 	stc->startupstream();
 	usleep( 2000000 );
@@ -358,7 +358,7 @@ void	stc_method_test6(){
 	thread1.stop();
 }
 
-//test case6. スレッド停止と同時にjoinが呼ばれる・その2(くだりスレッド)
+//test case6. スレッド停止と同時にjoinが呼ばれる・その2(下りスレッド)
 void	stc_method_test7(){
 //session_thread_controlオブジェクトの作成
 	l7vs::l7vsd					vsd;
@@ -371,7 +371,7 @@ void	stc_method_test7(){
 
 	test_thread	thread1;
 
-// unit_test[30]  
+// unit_test[30]  下りスレッド停止と同時にjoinを呼ぶ
 	BOOST_MESSAGE( "-----30" );
 	stc->startdownstream();
 	usleep( 2000000 );
@@ -394,7 +394,7 @@ void	stc_method_test8(){
 
 	test_thread	thread1;
 
-// unit_test[31]  
+// unit_test[31]  上下スレッド停止と同時にjoinを呼ぶ
 	BOOST_MESSAGE( "-----31" );
 	stc->startupstream();
 	stc->startdownstream();
