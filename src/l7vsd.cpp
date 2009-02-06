@@ -664,22 +664,30 @@ int	l7vsd::run( int argc, char* argv[] ) {
 
 	// receiver initialize
 	receiver = command_receiver_ptr( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
+	if( NULL ==  receiver ){
+		logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "command receiver create error.", __FILE__, __LINE__ );
+		return -1;
+	}
 
 	// replication initialize
 	rep = replication_ptr( new replication( dispatcher ) );
+	if( NULL ==  rep ){
+		logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication create error.", __FILE__, __LINE__ );
+		return -1;
+	}
 	if( 0 > rep->initialize() ){
-		std::stringstream buf;
-		buf << "replication initialize failed.";
-		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication initialize failed.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// snmp bridge initialize
 	bridge = snmpbridge_ptr( new snmpbridge( *this, dispatcher ) );
+	if( NULL ==  bridge ){
+		logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge create error.", __FILE__, __LINE__ );
+		return -1;
+	}
 	if( 0 > bridge->initialize() ){
-		std::stringstream buf;
-		buf << "snmpbridge initialize failed.";
-		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge initialize failed.", __FILE__, __LINE__ );
 		return -1;
 	}
 
