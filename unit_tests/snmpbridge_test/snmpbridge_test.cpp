@@ -33,23 +33,23 @@ public:
 
 void create_snmpbridge_test(){
 //	BOOST_TEST_MESSAGE( "create_snmpbridge_test" );
-	// unit_test[1] snmpbridge ƒNƒ‰ƒX‚ğ¶¬‚·‚é
+	// unit_test[1] snmpbridge ã‚¯ãƒ©ã‚¹ã‚’ç”Ÿæˆã™ã‚‹
 	boost::asio::io_service io_service;
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
 
-	// unit_test[2] snmpbridge ¶¬‚Éİ’è‚³‚ê‚ésend_buffer_size‚Ì’l‚ğƒ`ƒFƒbƒN
+	// unit_test[2] snmpbridge ç”Ÿæˆæ™‚ã«è¨­å®šã•ã‚Œã‚‹send_buffer_sizeã®å€¤ã‚’ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
-	// unit_test[3] snmpbridge ¶¬‚Éİ’è‚³‚ê‚éconnection_state‚Ì’l‚ğƒ`ƒFƒbƒN
+	// unit_test[3] snmpbridge ç”Ÿæˆæ™‚ã«è¨­å®šã•ã‚Œã‚‹connection_stateã®å€¤ã‚’ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_connection_state(), false );
-	// unit_test[4] snmpbridge ¶¬‚Éİ’è‚³‚ê‚évsd‚Ì’l‚ğƒ`ƒFƒbƒN
+	// unit_test[4] snmpbridge ç”Ÿæˆæ™‚ã«è¨­å®šã•ã‚Œã‚‹vsdã®å€¤ã‚’ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( &(test.get_vsd()), &vsd );
-	// unit_test[5] snmpbridge ¶¬‚Éİ’è‚³‚ê‚ésnmp_io_service‚Ì’l‚ğƒ`ƒFƒbƒN
+	// unit_test[5] snmpbridge ç”Ÿæˆæ™‚ã«è¨­å®šã•ã‚Œã‚‹snmp_io_serviceã®å€¤ã‚’ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( &(test.get_snmp_io_service()), &io_service );
-	// unit_test[6] snmpbridge ¶¬‚Éİ’è‚³‚ê‚ésnmp_loglevel_map‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚ğƒ`ƒFƒbƒN
+	// unit_test[6] snmpbridge ç”Ÿæˆæ™‚ã«è¨­å®šã•ã‚Œã‚‹snmp_loglevel_mapã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã‚’ãƒã‚§ãƒƒã‚¯
 	std::map<LOG_CATEGORY_TAG, std::string> logcategory_map = test.get_snmp_loglevel_map();
 	BOOST_CHECK_EQUAL( logcategory_map.size(), (size_t)0 );
-	// unit_test[7] snmpbridge ¶¬‚Éİ’è‚³‚ê‚élevelstring_map‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚ğƒ`ƒFƒbƒN
+	// unit_test[7] snmpbridge ç”Ÿæˆæ™‚ã«è¨­å®šã•ã‚Œã‚‹levelstring_mapã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã‚’ãƒã‚§ãƒƒã‚¯
 	std::map<std::string, LOG_LEVEL_TAG> levelstring_map = test.get_levelstring_map();
 	BOOST_CHECK_EQUAL( levelstring_map.size(), (size_t)0 );
 
@@ -61,14 +61,14 @@ void initialize_snmpbridge_test(){
 	l7vsd vsd;
 	snmpbridge_testclass test(vsd, io_service);
 
-	// unit_test[8] initialize ‰Šú‰»‘O‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[8] initialize åˆæœŸåŒ–å‰ã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	std::map<LOG_CATEGORY_TAG, std::string> logcategory_map = test.get_snmp_loglevel_map();
 	BOOST_CHECK_EQUAL( logcategory_map.size(), (size_t)0 );
-	// unit_test[9] initialize ‰Šú‰»‘O‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[9] initialize åˆæœŸåŒ–å‰ã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	std::map<std::string, LOG_LEVEL_TAG> levelstring_map = test.get_levelstring_map();
 	BOOST_CHECK_EQUAL( levelstring_map.size(), (size_t)0 );
 
-	// unit_test[10] initialize –ß‚è’l‚ª0‚Å‚ ‚é‚±‚Æ‚ğŠm”Fi³íŒnj
+	// unit_test[10] initialize æˆ»ã‚Šå€¤ãŒ0ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆæ­£å¸¸ç³»ï¼‰
 	int ret = 0;
 	int set_portno_val = 60162;
 	int set_interval_val = 1000;
@@ -78,100 +78,100 @@ void initialize_snmpbridge_test(){
 	ret = test.initialize();
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	logcategory_map = test.get_snmp_loglevel_map();
 	BOOST_CHECK_EQUAL( logcategory_map.size(), (size_t)7 );
 
 	std::map<LOG_CATEGORY_TAG, std::string>::iterator logcategory_map_it = logcategory_map.begin();
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_START_STOPj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_START_STOPï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_START_STOP );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_START_STOP );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_start_stop" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_MANAGER_RECEIVEj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_MANAGER_RECEIVEï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_MANAGER_RECEIVE );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_MANAGER_RECEIVE );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_manager_receive" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_MANAGER_SENDj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_MANAGER_SENDï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_MANAGER_SEND );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_MANAGER_SEND );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_manager_send" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_L7VSD_RECEIVEj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_L7VSD_RECEIVEï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_L7VSD_RECEIVE );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_L7VSD_RECEIVE );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_l7vsd_receive" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_L7VSD_SENDj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_L7VSD_SENDï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_L7VSD_SEND );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_L7VSD_SEND );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_l7vsd_send" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_LOGGERj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_LOGGERï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_LOGGER );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_LOGGER );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_logger" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiLOG_CAT_SNMPAGENT_PARAMETERj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆLOG_CAT_SNMPAGENT_PARAMETERï¼‰
 	logcategory_map_it = logcategory_map.find( LOG_CAT_SNMPAGENT_PARAMETER );
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_PARAMETER );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_parameter" );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚ğƒ`ƒFƒbƒN
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã‚’ãƒã‚§ãƒƒã‚¯
 	levelstring_map = test.get_levelstring_map();
 	BOOST_CHECK_EQUAL( levelstring_map.size(), (size_t)5 );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNidebugj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆdebugï¼‰
 	std::map<std::string, LOG_LEVEL_TAG>::iterator levelstring_map_it = levelstring_map.begin();
 	levelstring_map_it = levelstring_map.find( "debug" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->first, "debug" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->second, LOG_LV_DEBUG );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiinfoj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆinfoï¼‰
 	levelstring_map_it = levelstring_map.find( "info" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->first, "info" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->second, LOG_LV_INFO );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNiwarnj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆwarnï¼‰
 	levelstring_map_it = levelstring_map.find( "warn" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->first, "warn" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->second, LOG_LV_WARN );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNierrorj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆerrorï¼‰
 	levelstring_map_it = levelstring_map.find( "error" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->first, "error" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->second, LOG_LV_ERROR );
 
-	// unit_test[] initialize ‰Šú‰»Œã‚ÌƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚Ì’l‚Ìƒ`ƒFƒbƒNifatalj
+	// unit_test[] initialize åˆæœŸåŒ–å¾Œã®ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®å€¤ã®ãƒã‚§ãƒƒã‚¯ï¼ˆfatalï¼‰
 	levelstring_map_it = levelstring_map.find( "fatal" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->first, "fatal" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->second, LOG_LV_FATAL );
 
-	// initialize snmp_param‚ÌŠm”F
+	// initialize snmp_paramã®ç¢ºèª
 	l7ag_parameter& snmpparam = test.get_snmp_param();
-	// unit_test[] initialize ƒ|[ƒg”Ô†‚Ì’l‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize ãƒãƒ¼ãƒˆç•ªå·ã®å€¤ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( snmpparam.portno, set_portno_val );
-	// unit_test[] initialize ƒCƒ“ƒ^[ƒoƒ‹‚Ì’l‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã®å€¤ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( snmpparam.interval, set_interval_val );
 
-	// unit_test[] initialize snmp_acceptor‚Ìopen‚³‚ê‚Ä‚¢‚é‚±‚Æ‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize snmp_acceptorã®openã•ã‚Œã¦ã„ã‚‹ã“ã¨ã®ãƒã‚§ãƒƒã‚¯
 	boost::asio::ip::tcp::acceptor& acc = test.get_snmp_acceptor();
 	BOOST_CHECK_EQUAL( acc.is_open(), true );
-	// unit_test[] initialize snmp_acceptor‚Ìreuse_address‚Ìİ’è‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize snmp_acceptorã®reuse_addressã®è¨­å®šã®ãƒã‚§ãƒƒã‚¯
 	boost::asio::socket_base::reuse_address option(true);
 	boost::asio::socket_base::reuse_address option1;
 	acc.get_option(option1);
 	BOOST_CHECK_EQUAL( option1, option );
 
-	// ƒpƒ‰ƒ[ƒ^‚ªˆÙí‚Èê‡‚ÌŠm”F
+	// ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãŒç•°å¸¸ãªå ´åˆã®ç¢ºèª
 	// set_parameter
 	// ret = test.initialize();
 #if 0
-	// unit_test[] initialize –ß‚è’l‚ª|1‚Å‚ ‚é‚±‚Æ‚ğŠm”FiˆÙíŒnj
+	// unit_test[] initialize æˆ»ã‚Šå€¤ãŒâˆ’1ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆç•°å¸¸ç³»ï¼‰
 //	BOOST_CHECK_EQUAL( ret, -1 );
 #endif
-	// unit_test[] initialize ƒJƒeƒSƒŠ–¼‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚Æ’l‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize ã‚«ãƒ†ã‚´ãƒªåã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã¨å€¤ã®ãƒã‚§ãƒƒã‚¯
 	logcategory_map = test.get_snmp_loglevel_map();
 	BOOST_CHECK_EQUAL( logcategory_map.size(), (size_t)7 );
 
@@ -203,7 +203,7 @@ void initialize_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( logcategory_map_it->first, LOG_CAT_SNMPAGENT_PARAMETER );
 	BOOST_CHECK_EQUAL( logcategory_map_it->second, "snmpagent_parameter" );
 
-	// unit_test[] initialize ƒƒOƒŒƒxƒ‹‚Ìƒ}ƒbƒv‚ÌƒTƒCƒY‚Æ’l‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize ãƒ­ã‚°ãƒ¬ãƒ™ãƒ«ã®ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚ºã¨å€¤ã®ãƒã‚§ãƒƒã‚¯
 	levelstring_map = test.get_levelstring_map();
 	BOOST_CHECK_EQUAL( levelstring_map.size(), (size_t)5 );
 
@@ -227,12 +227,12 @@ void initialize_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( levelstring_map_it->first, "fatal" );
 	BOOST_CHECK_EQUAL( levelstring_map_it->second, LOG_LV_FATAL );
 
-	// initialize snmp_param‚ÌŠm”F
+	// initialize snmp_paramã®ç¢ºèª
 	snmpparam = test.get_snmp_param();
-	// unit_test[] initialize ƒ|[ƒg”Ô†‚ÌƒfƒtƒHƒ‹ƒgİ’è’l‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize ãƒãƒ¼ãƒˆç•ªå·ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆè¨­å®šå€¤ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( snmpparam.portno, PORT_DEFAULT );
 
-	// unit_test[] initialize ƒCƒ“ƒ^[ƒoƒ‹‚ÌƒfƒtƒHƒ‹ƒgİ’è’l‚Ìƒ`ƒFƒbƒN
+	// unit_test[] initialize ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆè¨­å®šå€¤ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( snmpparam.interval, INTERVAL_DEFAULT );
 
 	test.finalize();
@@ -246,13 +246,13 @@ void finalize_snmpbridge_test(){
 
 	test.initialize();
 
-	// unit_test[] finalize‚ÌŒÄ‚Ño‚µ‚Ìƒ`ƒFƒbƒN
+	// unit_test[] finalizeã®å‘¼ã³å‡ºã—ã®ãƒã‚§ãƒƒã‚¯
 	test.finalize();
-	// unit_test[] finalize connection_state‚Ì’l‚ğƒ`ƒFƒbƒN
+	// unit_test[] finalize connection_stateã®å€¤ã‚’ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
-	// unit_test[] finalize snmp_acceptor‚ªclose‚³‚ê‚Ä‚¢‚é‚±‚Æ‚Ìƒ`ƒFƒbƒN
+	// unit_test[] finalize snmp_acceptorãŒcloseã•ã‚Œã¦ã„ã‚‹ã“ã¨ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_snmp_acceptor().is_open(), false );
-	// unit_test[] finalize snmp_socket‚ªclose‚³‚ê‚Ä‚¢‚é‚±‚Æ‚Ìƒ`ƒFƒbƒN
+	// unit_test[] finalize snmp_socketãŒcloseã•ã‚Œã¦ã„ã‚‹ã“ã¨ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_snmp_socket().is_open(), false );
 }
 
@@ -268,18 +268,18 @@ void send_trap_snmpbridge_test(){
 	std::string msg = "error message";
 	int ret = 0;
 	ret = test.send_trap(msg);
-	// unit_test[] send_trap –ß‚è’l‚ª0‚Å‚ ‚é‚±‚Æ‚ğŠm”Fi³íŒnj
+	// unit_test[] send_trap æˆ»ã‚Šå€¤ãŒ0ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆæ­£å¸¸ç³»ï¼‰
 	BOOST_CHECK_EQUAL( ret, 0 );
-	// send_trap ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// send_trap é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 	char * buffer;
 	buffer = test.get_send_buffer();
 	struct l7ag_message_header* header        = (struct l7ag_message_header*) buffer;
 	struct l7ag_payload_header* payloadheader = (struct l7ag_payload_header*) (header + 1);
 	struct l7ag_traprequest_message* trapmes  = (struct l7ag_traprequest_message*) (payloadheader + 1);
 
-	// unit_test[] send_trap header->magic[0]‚Ìƒ`ƒFƒbƒN
+	// unit_test[] send_trap header->magic[0]ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( header->magic[0], 0x4d );
-	// unit_test[] send_trap header->magic[1]‚Ìƒ`ƒFƒbƒN
+	// unit_test[] send_trap header->magic[1]ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( header->magic[1], 0x47 );
 	// unit_test[] send_trap 
 	BOOST_CHECK_EQUAL( header->version, (unsigned long long)1 );
@@ -305,35 +305,35 @@ void send_trap_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( trapmes->magic[0], 0x54 );
 	// unit_test[] send_trap 
 	BOOST_CHECK_EQUAL( trapmes->magic[1], 0x52 );
-	// unit_test[] send_trap ‘—MƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] send_trap é€ä¿¡ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	size_t size = 0;
 	size = sizeof( struct l7ag_message_header ) +
 			sizeof( struct l7ag_payload_header ) +
 			sizeof( struct l7ag_traprequest_message );
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
-	// ƒƒ‚ƒŠ‚ªŠm•Û‚Å‚«‚È‚©‚Á‚½ê‡
+	// ãƒ¡ãƒ¢ãƒªãŒç¢ºä¿ã§ããªã‹ã£ãŸå ´åˆ
 //	ret = test.send_trap();
-	// unit_test[] send_trap –ß‚è’l‚ª|1‚Å‚ ‚é‚±‚Æ‚ğŠm”FiˆÙíŒnj
+	// unit_test[] send_trap æˆ»ã‚Šå€¤ãŒâˆ’1ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆç•°å¸¸ç³»ï¼‰
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] send_trap ‘—Mƒoƒbƒtƒ@‚ÌNULLƒ`ƒFƒbƒN
+	// unit_test[] send_trap é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®NULLãƒã‚§ãƒƒã‚¯
 	buffer = test.get_send_buffer();
 	BOOST_CHECK( buffer == (char *)NULL );
 
-	// unit_test[] send_trap ‘—MƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] send_trap é€ä¿¡ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
-	// ‘—MƒTƒCƒY‚ª0‚Ìê‡
+	// é€ä¿¡ã‚µã‚¤ã‚ºãŒ0ã®å ´åˆ
 //	ret = test.send_trap();
-	// unit_test[] send_trap –ß‚è’l‚ª|1‚Å‚ ‚é‚±‚Æ‚ğŠm”FiˆÙíŒnj
+	// unit_test[] send_trap æˆ»ã‚Šå€¤ãŒâˆ’1ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆç•°å¸¸ç³»ï¼‰
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] send_trap ‘—Mƒoƒbƒtƒ@‚ÌNULLƒ`ƒFƒbƒN
+	// unit_test[] send_trap é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®NULLãƒã‚§ãƒƒã‚¯
 	buffer = test.get_send_buffer();
 	BOOST_CHECK( buffer == (char *)NULL );
 
-	// unit_test[] send_trap ‘—MƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] send_trap é€ä¿¡ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 	test.finalize();
@@ -351,19 +351,19 @@ void reload_config_snmpbridge_test(){
 //	int ret = 0;
 //	ret = test.reload_config();
 	test.reload_config();
-	// unit_test[] reload_config –ß‚è’l‚ª0‚Å‚ ‚é‚±‚Æ‚ğŠm”Fi³íŒnj
+	// unit_test[] reload_config æˆ»ã‚Šå€¤ãŒ0ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆæ­£å¸¸ç³»ï¼‰
 //	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// reload_config ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// reload_config é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 	char * buffer;
 	buffer = test.get_send_buffer();
     struct l7ag_message_header* header             = (struct l7ag_message_header*) buffer;
     struct l7ag_payload_header* payloadheader      = (struct l7ag_payload_header*) (header + 1);
     struct l7ag_settingcommand_message* settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
 
-	// unit_test[] reload_config header->magic[0]‚Ìƒ`ƒFƒbƒN
+	// unit_test[] reload_config header->magic[0]ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( header->magic[0], 0x4d );
-	// unit_test[] reload_config header->magic[1]‚Ìƒ`ƒFƒbƒN
+	// unit_test[] reload_config header->magic[1]ã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( header->magic[1], 0x47 );
 	// unit_test[] reload_config 
 	BOOST_CHECK_EQUAL( header->version, (unsigned long long)1 );
@@ -394,36 +394,36 @@ void reload_config_snmpbridge_test(){
 	// unit_test[] reload_config 
 	BOOST_CHECK_EQUAL( settingcmd->magic[1], 0x54 );
 
-	// unit_test[] reload_config ‘—MƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] reload_config é€ä¿¡ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	size_t size = 0;
 	size = sizeof( struct l7ag_message_header ) +
 			sizeof( struct l7ag_payload_header ) +
 			sizeof( struct l7ag_settingcommand_message );
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
-	// ƒƒ‚ƒŠ‚ªŠm•Û‚Å‚«‚È‚©‚Á‚½ê‡
+	// ãƒ¡ãƒ¢ãƒªãŒç¢ºä¿ã§ããªã‹ã£ãŸå ´åˆ
 //	ret = test.reload_config();
-	// unit_test[] reload_config –ß‚è’l‚ª|1‚Å‚ ‚é‚±‚Æ‚ğŠm”FiˆÙíŒnj
+	// unit_test[] reload_config æˆ»ã‚Šå€¤ãŒâˆ’1ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆç•°å¸¸ç³»ï¼‰
 //	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] reload_config ‘—Mƒoƒbƒtƒ@‚ÌNULLƒ`ƒFƒbƒN
+	// unit_test[] reload_config é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®NULLãƒã‚§ãƒƒã‚¯
 	buffer = test.get_send_buffer();
 	BOOST_CHECK( buffer == (char *)NULL );
 
-	// unit_test[] reload_config ‘—MƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] reload_config é€ä¿¡ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 
-	// ‘—MƒTƒCƒY‚ª0‚Ìê‡
+	// é€ä¿¡ã‚µã‚¤ã‚ºãŒ0ã®å ´åˆ
 //	ret = test.reload_config();
-	// unit_test[] reload_config –ß‚è’l‚ª|1‚Å‚ ‚é‚±‚Æ‚ğŠm”FiˆÙíŒnj
+	// unit_test[] reload_config æˆ»ã‚Šå€¤ãŒâˆ’1ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆç•°å¸¸ç³»ï¼‰
 //	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] reload_config ‘—Mƒoƒbƒtƒ@‚ÌNULLƒ`ƒFƒbƒN
+	// unit_test[] reload_config é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®NULLãƒã‚§ãƒƒã‚¯
 	buffer = test.get_send_buffer();
 	BOOST_CHECK( buffer == (char *)NULL );
 
-	// unit_test[] reload_config ‘—MƒTƒCƒY‚Ìƒ`ƒFƒbƒN
+	// unit_test[] reload_config é€ä¿¡ã‚µã‚¤ã‚ºã®ãƒã‚§ãƒƒã‚¯
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 	test.finalize();
@@ -441,12 +441,12 @@ void change_loglevel_snmpbridge_test(){
 	// change_loglevel 
 	int ret = 0;
 //	ret = test.change_loglevel();
-	// unit_test[]  change_loglevel –ß‚è’l‚ª0‚Å‚ ‚é‚±‚Æ‚ğŠm”Fi³íŒnj
+	// unit_test[]  change_loglevel æˆ»ã‚Šå€¤ãŒ0ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªï¼ˆæ­£å¸¸ç³»ï¼‰
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] change_loglevel ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// unit_test[] change_loglevel é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 
-	// unit_test[] change_loglevel ‘—MƒTƒCƒY‚Í³‚µ‚¢‚©H
+	// unit_test[] change_loglevel é€ä¿¡ã‚µã‚¤ã‚ºã¯æ­£ã—ã„ã‹ï¼Ÿ
 	size_t size = 0;
 	size = sizeof( struct l7ag_message_header ) +
 			sizeof( struct l7ag_payload_header ) +
@@ -454,27 +454,27 @@ void change_loglevel_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
 
-	// ƒƒ‚ƒŠ‚ªŠm•Û‚Å‚«‚È‚©‚Á‚½ê‡
+	// ãƒ¡ãƒ¢ãƒªãŒç¢ºä¿ã§ããªã‹ã£ãŸå ´åˆ
 //	ret = test.change_loglevel();
-	// unit_test[] change_loglevel –ß‚è’l‚ª|1‚Å‚ ‚é‚±‚Æ‚ğŠm”F
+	// unit_test[] change_loglevel æˆ»ã‚Šå€¤ãŒâˆ’1ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèª
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] change_loglevel ‘—Mƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ÍNULL‚©H
+	// unit_test[] change_loglevel é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¯NULLã‹ï¼Ÿ
 //	buffer = test.get_send_buffer();
 //	BOOST_CHECK( buffer == (char *)NULL );
 
-	// unit_test[] change_loglevel ‘—MƒTƒCƒY‚Í0‚©H
+	// unit_test[] change_loglevel é€ä¿¡ã‚µã‚¤ã‚ºã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
-	// ‘—MƒTƒCƒY‚ª0‚Ìê‡
+	// é€ä¿¡ã‚µã‚¤ã‚ºãŒ0ã®å ´åˆ
 //	ret = test.change_loglevel();
-	// unit_test[] change_loglevel –ß‚è’l‚Í-1‚©H
+	// unit_test[] change_loglevel æˆ»ã‚Šå€¤ã¯-1ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] change_loglevel ‘—Mƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ÍNULL‚©H
+	// unit_test[] change_loglevel é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¯NULLã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
 
-	// unit_test[] change_loglevel ‘—MƒTƒCƒY‚Í0‚©H
+	// unit_test[] change_loglevel é€ä¿¡ã‚µã‚¤ã‚ºã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 	test.finalize();
@@ -489,15 +489,15 @@ void change_loglevel_allcategory_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 	int ret = 0;
 //	ret = test.change_loglevel_allcategory();
-	// unit_test[] –ß‚è’l‚Í0‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯æ­£ã—ã„ã‹ï¼Ÿ
 	size_t size = 0;
 #if 0
 	size = sizeof( struct l7ag_message_header ) +
@@ -507,26 +507,26 @@ void change_loglevel_allcategory_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
 
-	// ƒƒ‚ƒŠ‚ªŠm•Û‚Å‚«‚È‚©‚Á‚½ê‡
+	// ãƒ¡ãƒ¢ãƒªãŒç¢ºä¿ã§ããªã‹ã£ãŸå ´åˆ
 //	ret = test.change_loglevel_allcategory();
-	// unit_test[] –ß‚è’l‚Í-1‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯-1ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] ‘—Mƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ÍNULL‚©H
+	// unit_test[] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¯NULLã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í0‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 //	ret = test.change_loglevel_allcategory();
-	// ‘—MƒTƒCƒY‚ª0‚Ìê‡
-	// unit_test[] –ß‚è’l‚Í-1‚©H
+	// é€ä¿¡ã‚µã‚¤ã‚ºãŒ0ã®å ´åˆ
+	// unit_test[] æˆ»ã‚Šå€¤ã¯-1ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] ‘—Mƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ÍNULL‚©H
+	// unit_test[] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¯NULLã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í0‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 	test.finalize();
@@ -541,17 +541,17 @@ void send_mibcollection_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 	int ret = 0;
-	// virtualservice‚P‚Â‚¾‚¯‚Ìê‡
+	// virtualserviceï¼‘ã¤ã ã‘ã®å ´åˆ
 	struct l7ag_mibrequest_message payload;
 	ret = test.send_mibcollection(&payload);
-	// unit_test[] –ß‚è’l‚Í0‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯æ­£ã—ã„ã‹ï¼Ÿ
 	size_t size = 0;
 #if 1
 	size = sizeof( struct l7ag_message_header ) +
@@ -560,14 +560,14 @@ void send_mibcollection_snmpbridge_test(){
 #endif
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
-	// virtualservice‚P‚ÂArealserver‚P‚Â‚Ìê‡
+	// virtualserviceï¼‘ã¤ã€realserverï¼‘ã¤ã®å ´åˆ
 //	ret = test.send_mibcollection();
-	// unit_test[] –ß‚è’l‚Í0‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯æ­£ã—ã„ã‹ï¼Ÿ
 //	size_t size = 0;
 #if 1
 	size = sizeof( struct l7ag_message_header ) +
@@ -576,14 +576,14 @@ void send_mibcollection_snmpbridge_test(){
 #endif
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
-	// virtualservice‚Q‚Â‚Ìê‡
+	// virtualserviceï¼’ã¤ã®å ´åˆ
 //	ret = test.send_mibcollection();
-	// unit_test[] –ß‚è’l‚Í0‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯æ­£ã—ã„ã‹ï¼Ÿ
 //	size_t size = 0;
 #if 1
 	size = sizeof( struct l7ag_message_header ) +
@@ -592,14 +592,14 @@ void send_mibcollection_snmpbridge_test(){
 #endif
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
-	// virtualservice‚Q‚ÂArealserver‚Q‚Â‚Ìê‡
+	// virtualserviceï¼’ã¤ã€realserverï¼’ã¤ã®å ´åˆ
 //	ret = test.send_mibcollection();
-	// unit_test[] –ß‚è’l‚Í0‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, 0 );
 
-	// unit_test[] ‘—Mƒf[ƒ^‚Ìİ’è‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã®è¨­å®šã¯æ­£ã—ã„ã‹ï¼Ÿ
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í³‚µ‚¢‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯æ­£ã—ã„ã‹ï¼Ÿ
 //	size_t size = 0;
 #if 1
 	size = sizeof( struct l7ag_message_header ) +
@@ -609,26 +609,26 @@ void send_mibcollection_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), size );
 
 
-	// ƒƒ‚ƒŠ‚ªŠm•Û‚Å‚«‚È‚©‚Á‚½ê‡
+	// ãƒ¡ãƒ¢ãƒªãŒç¢ºä¿ã§ããªã‹ã£ãŸå ´åˆ
 //	ret = test.send_mibcollection();
-	// unit_test[] –ß‚è’l‚Í-1‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯-1ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] ‘—Mƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ÍNULL‚©H
+	// unit_test[] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¯NULLã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í0‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
-	// ‘—MƒTƒCƒY‚ª0‚Ìê‡
+	// é€ä¿¡ã‚µã‚¤ã‚ºãŒ0ã®å ´åˆ
 //	ret = test.send_mibcollection();
-	// unit_test[] –ß‚è’l‚Í-1‚©H
+	// unit_test[] æˆ»ã‚Šå€¤ã¯-1ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( ret, -1 );
 
-	// unit_test[] ‘—Mƒoƒbƒtƒ@‚Ìƒ|ƒCƒ“ƒ^‚ÍNULL‚©H
+	// unit_test[] é€ä¿¡ãƒãƒƒãƒ•ã‚¡ã®ãƒã‚¤ãƒ³ã‚¿ã¯NULLã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer(), (char *)NULL );
 
-	// unit_test[] ‘—MƒTƒCƒY‚Í0‚©H
+	// unit_test[] é€ä¿¡ã‚µã‚¤ã‚ºã¯0ã‹ï¼Ÿ
 	BOOST_CHECK_EQUAL( test.get_send_buffer_size(), (size_t)0 );
 
 	test.finalize();
@@ -642,14 +642,14 @@ void get_connectionstate_snmpbridge_test(){
 
 	test.initialize();
 
-	// unit_test[] snmpbridge get_connectionstate‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge get_connectionstateã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 
-	// unit_test[] snmpbridge get_connectionstate‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge get_connectionstateã®ãƒ†ã‚¹ãƒˆ
 	test.set_connection_state(true);
 	BOOST_CHECK_EQUAL( test.get_connectionstate(), true );
 
-	// unit_test[] snmpbridge get_connectionstate‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge get_connectionstateã®ãƒ†ã‚¹ãƒˆ
 	test.set_connection_state(false);
 	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 
@@ -663,23 +663,23 @@ void get_loglevel_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_START_STOP ), LOG_LV_NONE );
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_MANAGER_RECEIVE ), LOG_LV_NONE );
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_MANAGER_SEND ), LOG_LV_NONE );
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_L7VSD_RECEIVE ), LOG_LV_NONE );
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_L7VSD_SEND ), LOG_LV_NONE );
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_LOGGER ), LOG_LV_NONE );
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_PARAMETER ), LOG_LV_NONE );
 
 
-	// unit_test[] snmpbridge loglevel‚ÌƒeƒXƒg
+	// unit_test[] snmpbridge loglevelã®ãƒ†ã‚¹ãƒˆ
 //	test.change_loglevel( LOG_CAT_SNMPAGENT_START_STOP, LOG_LV_DEBUG );
 	l7ag_parameter& snmpparam = test.get_snmp_param();
 	std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>::iterator it = snmpparam.loglevel.find(LOG_CAT_SNMPAGENT_START_STOP);
@@ -729,11 +729,11 @@ void handle_accept_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 //	BOOST_CHECK_EQUAL( test.get_connectionstate(), false );
 //	test.handle_accept();
 
-	// unit_test[] handle_accept‚ªŒÄ‚Î‚ê‚½‚Æ‚«‚Éó‘Ô‚ª•Ï‚í‚Á‚Ä‚¢‚é‚±‚Æ‚ÌŠm”F
+	// unit_test[] handle_acceptãŒå‘¼ã°ã‚ŒãŸã¨ãã«çŠ¶æ…‹ãŒå¤‰ã‚ã£ã¦ã„ã‚‹ã“ã¨ã®ç¢ºèª
 //	BOOST_CHECK_EQUAL( test.get_connectionstate(), true );
 
 	test.finalize();
@@ -748,7 +748,7 @@ void handle_receive_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 //	test.handle_receive();
 
 	test.finalize();
@@ -763,7 +763,7 @@ void handle_send_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 //	test.handle_send();
 
 	test.finalize();
@@ -778,7 +778,7 @@ void load_config_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 //	test.load_config();
 
 	test.finalize();
@@ -793,14 +793,14 @@ void load_loglevel_snmpbridge_test(){
 	test.initialize();
 
 	// unit_test[]
-	// ³í
+	// æ­£å¸¸
 //	test.load_loglevel();
-	// ƒ[ƒh‚µ‚½İ’è’l‚ÌŠm”F
+	// ãƒ­ãƒ¼ãƒ‰ã—ãŸè¨­å®šå€¤ã®ç¢ºèª
 
 	// unit_test[]
-	// ƒpƒ‰ƒ[ƒ^‚ªˆÙí‚Èê‡	
+	// ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãŒç•°å¸¸ãªå ´åˆ	
 //	test.load_loglevel();
-	// ƒfƒtƒHƒ‹ƒg’l‚ªİ’è‚³‚ê‚Ä‚¢‚é‚±‚Æ‚ğŠm”F
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ãŒè¨­å®šã•ã‚Œã¦ã„ã‚‹ã“ã¨ã‚’ç¢ºèª
 
 	test.finalize();
 }

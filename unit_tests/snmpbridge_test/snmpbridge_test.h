@@ -149,13 +149,13 @@ std::string ip_addr = ADDR_DEFAULT;
 int portno = PORT_DEFAULT;
 int interval = INTERVAL_DEFAULT;
 int status = 0;
-std::string snmpagent_start_stop = "0";
-std::string snmpagent_manager_receive = "1";
-std::string snmpagent_manager_send = "2";
-std::string snmpagent_l7vsd_receive = "3";
-std::string snmpagent_l7vsd_send = "4";
-std::string snmpagent_logger = "5";
-std::string snmpagent_parameter = "6";
+std::string snmpagent_start_stop = "snmpagent_start_stop";
+std::string snmpagent_manager_receive = "snmpagent_manager_receive";
+std::string snmpagent_manager_send = "snmpagent_manager_send";
+std::string snmpagent_l7vsd_receive = "snmpagent_l7vsd_receive";
+std::string snmpagent_l7vsd_send = "snmpagent_l7vsd_send";
+std::string snmpagent_logger = "snmpagent_logger";
+std::string snmpagent_parameter = "snmpagent_parameter";
 
 void set_nic(std::string in){
 	nic = in;
