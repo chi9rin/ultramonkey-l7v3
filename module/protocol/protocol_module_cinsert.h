@@ -1,4 +1,5 @@
 #include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
 #include "http_protocol_module_base.h"
 
 #ifndef PROTOCOL_MODULE_CINSERT_H
@@ -11,74 +12,6 @@ namespace l7vs
 
 class protocol_module_cinsert : public http_protocol_module_base
 {
-public:
-	enum SEND_STATUS_TAG
-	{
-		SEND_OK= 0,
-		SEND_NG,
-		SEND_END,
-		SEND_CONTINUE
-	};
-	struct edit_data
-	{
-		std::string		data;
-		size_t			data_size;
-		size_t			insert_position;
-		size_t			replace_size;
-	} ;
-    struct send_status
-	{
-		SEND_STATUS_TAG		status;
-		size_t				send_end_size;
-		size_t				send_rest_size;
-		size_t				send_possible_size;
-		size_t				send_offset;
-		size_t				unsend_size;
-		int					edit_division;
-		boost::asio::ip::tcp::endpoint	send_endpoint;
-		std::list< edit_data >			edit_data_list;
-	};
-
-	struct recive_data
-	{
-		char*		recive_buffer;
-		char*		recive_buffer_1;
-		char*		recive_buffer_2;
-		size_t		recive_buffer_max_size;
-		size_t		recive_buffer_rest_size;
-		std::list< send_status >	send_status_list;
-	};
-
-
-	struct session_thread_data_cinsert
-	{
-		boost::thread::id	thread_id;
-		int					thread_division;
-		boost::thread::id	pair_thread_id;
-		std::map< boost::asio::ip::tcp::endpoint, recive_data* >	recive_data_map;
-		int		end_flag;
-		int		accept_end_flag;
-		int		sorry_flag;
-		int		sorryserver_switch_flag;
-		int		realserver_switch_flag;
-		boost::asio::ip::tcp::endpoint		client_endpoint_tcp;
-		EVENT_TAG			last_status;
-	};
-
-	typedef		std::list< send_status >::iterator
-								send_status_itr;
-	typedef		std::map< boost::thread::id, session_thread_data_cinsert* >::iterator
-								session_thread_data_map_itr;
-	typedef		std::map< boost::asio::ip::tcp::endpoint, recive_data* >::iterator
-								recive_data_map_itr;
-protected:
-	int	cookie_expire;
-	int	forwarded_for;
-	int	reschedule;
-	boost::array< char, MAX_OPTION_SIZE >	cookie_name;
-	boost::array< char, MAX_OPTION_SIZE >	sorry_uri;
-	std::map< boost::thread::id, session_thread_data_cinsert* >	session_thread_data_map;
-	boost::mutex	session_thread_data_map_mutex;
 public:
 	static const int	THREAD_DIVISION_UP_STREAM	= 0;
 	static const int	THREAD_DIVISION_DOWN_STREAM	= 1;
@@ -100,6 +33,237 @@ public:
 
 	static const int	EDIT_DIVISION_NO_EDIT		= 0;
 	static const int	EDIT_DIVISION_EDIT			= 1;
+
+public:
+	enum SEND_STATUS_TAG
+	{
+		SEND_OK= 0,
+		SEND_NG,
+		SEND_END,
+		SEND_CONTINUE
+	};
+
+	struct edit_data
+	{
+		std::string		data;
+		size_t			data_size;
+		size_t			insert_position;
+		size_t			replace_size;
+
+		bool	operator==( const edit_data& in )
+				{	return	(	( data == in.data )							&&
+								( data_size == in.data_size )				&&
+								( insert_position == in.insert_position )	&&
+								( replace_size == in.replace_size )	);
+				}
+
+		bool	operator!=( const edit_data& in )
+				{	return	(	( data != in.data )							||
+								( data_size != in.data_size )				||
+								( insert_position != in.insert_position )	||
+								( replace_size != in.replace_size )	);
+				}
+
+		edit_data() :
+										data_size( 0 ),
+										insert_position( 0 ),
+										replace_size( 0 )	{}
+
+		edit_data( const edit_data& in ) :
+										data( in.data ),
+										data_size( in.data_size ),
+										insert_position( in.insert_position ),
+										replace_size( in.replace_size )	{}
+	} ;
+
+    struct send_status
+	{
+		SEND_STATUS_TAG		status;
+		size_t				send_end_size;
+		size_t				send_rest_size;
+		size_t				send_possible_size;
+		size_t				send_offset;
+		size_t				unsend_size;
+		int					edit_division;
+		boost::asio::ip::tcp::endpoint	send_endpoint;
+		std::list< edit_data >			edit_data_list;
+
+		bool	operator==( const send_status& in )
+				{
+					return	(	( status == in.status )							&&
+								( send_end_size == in.send_end_size )			&&
+								( send_rest_size == in.send_rest_size )			&&
+								( send_possible_size == in.send_possible_size )	&&
+								( send_offset == in.send_offset )				&&
+								( unsend_size == in.unsend_size )				&&
+								( edit_division == in.edit_division )			&&
+								( send_endpoint == in.send_endpoint )	);
+// 								( send_endpoint == in.send_endpoint )			&&
+// 								( edit_data_list == in.edit_data_list )	);
+				}
+
+		bool	operator!=( const send_status& in )
+				{
+					return	(	( status != in.status )							||
+								( send_end_size != in.send_end_size )			||
+								( send_rest_size != in.send_rest_size )			||
+								( send_possible_size != in.send_possible_size )	||
+								( send_offset != in.send_offset )				||
+								( unsend_size != in.unsend_size )				||
+								( edit_division != in.edit_division )			||
+								( send_endpoint != in.send_endpoint )	);
+// 								( send_endpoint != in.send_endpoint )			||
+// 								( edit_data_list != in.edit_data_list )	);
+				}
+
+		send_status() :
+										status( SEND_END ),
+										send_end_size( 0 ),
+										send_rest_size( 0 ),
+										send_possible_size( 0 ),
+										send_offset( 0 ),
+										unsend_size( 0 ),
+										edit_division( EDIT_DIVISION_NO_EDIT )	{}
+
+		send_status( const send_status& in ) :
+										status( in.status ),
+										send_end_size( in.send_end_size ),
+										send_rest_size( in.send_rest_size ),
+										send_possible_size( in.send_possible_size ),
+										send_offset( in.send_offset ),
+										unsend_size( in.unsend_size ),
+										edit_division( in.edit_division ),
+										send_endpoint( in.send_endpoint ),
+										edit_data_list( in.edit_data_list )	{}
+	};
+
+	struct recive_data
+	{
+		char*		recive_buffer;
+		char*		recive_buffer_1;
+		char*		recive_buffer_2;
+		size_t		recive_buffer_max_size;
+		size_t		recive_buffer_rest_size;
+		std::list< send_status >	send_status_list;
+
+		bool	operator==( const recive_data& in )
+				{
+					return	(	( recive_buffer == in.recive_buffer )						&&
+								( recive_buffer_1 == in.recive_buffer_1 )					&&
+								( recive_buffer_2 == in.recive_buffer_2 )					&&
+								( recive_buffer_max_size == in.recive_buffer_max_size )		&&
+								( recive_buffer_rest_size == in.recive_buffer_rest_size ));
+// 								( recive_buffer_rest_size == in.recive_buffer_rest_size )	&&
+// 								( send_status_list == in.send_status_list )	);
+				}
+
+		bool	operator!=( const recive_data& in )
+				{
+					return	(	( recive_buffer != in.recive_buffer )						||
+								( recive_buffer_1 != in.recive_buffer_1 )					||
+								( recive_buffer_2 != in.recive_buffer_2 )					||
+								( recive_buffer_max_size != in.recive_buffer_max_size )		||
+								( recive_buffer_rest_size != in.recive_buffer_rest_size )	);
+// 								( recive_buffer_rest_size != in.recive_buffer_rest_size )	||
+// 								( send_status_list != in.send_status_list )	);
+				}
+
+		recive_data() :
+										recive_buffer( NULL ),
+										recive_buffer_1( NULL ),
+										recive_buffer_2( NULL ),
+										recive_buffer_max_size( MAX_BUFFER_SIZE ),
+										recive_buffer_rest_size( recive_buffer_max_size )	{}
+
+		recive_data( const recive_data& in ) :
+										recive_buffer( in.recive_buffer ),
+										recive_buffer_1( in.recive_buffer_1 ),
+										recive_buffer_2( in.recive_buffer_2 ),
+										recive_buffer_max_size( in.recive_buffer_max_size ),
+										recive_buffer_rest_size( in.recive_buffer_rest_size ),
+										send_status_list( in.send_status_list )	{}
+	};
+
+
+	struct session_thread_data_cinsert
+	{
+		boost::thread::id	thread_id;
+		int					thread_division;
+		boost::thread::id	pair_thread_id;
+		std::map< boost::asio::ip::tcp::endpoint, recive_data >	recive_data_map;
+		int		end_flag;
+		int		accept_end_flag;
+		int		sorry_flag;
+		int		sorryserver_switch_flag;
+		int		realserver_switch_flag;
+		boost::asio::ip::tcp::endpoint		client_endpoint_tcp;
+		EVENT_TAG			last_status;
+
+		bool	operator==( const session_thread_data_cinsert& in )
+				{	return	(	( thread_id == in.thread_id )								&&
+								( thread_division == in.thread_division )					&&
+								( pair_thread_id == in.pair_thread_id )						&&
+// 								( recive_data_map == in.recive_data_map )					&&
+								( end_flag == in.end_flag )									&&
+								( accept_end_flag == in.accept_end_flag )					&&
+								( sorry_flag == in.sorry_flag )								&&
+								( sorryserver_switch_flag == in.sorryserver_switch_flag )	&&
+								( realserver_switch_flag == in.realserver_switch_flag )		&&
+								( client_endpoint_tcp == in.client_endpoint_tcp )			&&
+								( last_status == in.last_status )	);
+				}
+
+		bool	operator!=( const session_thread_data_cinsert& in )
+				{	
+					return	(	( thread_id != in.thread_id )								||
+								( thread_division != in.thread_division )					||
+								( pair_thread_id != in.pair_thread_id )						||
+// 								( recive_data_map != in.recive_data_map )					||
+								( end_flag != in.end_flag )									||
+								( accept_end_flag != in.accept_end_flag )					||
+								( sorry_flag != in.sorry_flag )								||
+								( sorryserver_switch_flag != in.sorryserver_switch_flag )	||
+								( realserver_switch_flag != in.realserver_switch_flag )		||
+								( client_endpoint_tcp != in.client_endpoint_tcp )			||
+								( last_status != in.last_status )	);
+				}
+
+		session_thread_data_cinsert() :
+										end_flag( END_FLAG_OFF ),
+										accept_end_flag( ACCEPT_END_FLAG_OFF ),
+										sorry_flag( SORRY_FLAG_OFF ),
+										sorryserver_switch_flag( SORRYSERVER_SWITCH_FLAG_OFF ),
+										realserver_switch_flag( REALSERVER_SWITCH_FLAG_OFF ),
+										last_status( STOP )	{}
+
+		session_thread_data_cinsert( const session_thread_data_cinsert& in ) :
+										thread_id( in.thread_id ),
+										thread_division( in.thread_division ),
+										pair_thread_id( in.pair_thread_id ),
+										recive_data_map( in.recive_data_map ),
+										end_flag( in.end_flag ),
+										accept_end_flag( in.accept_end_flag ),
+										sorry_flag( in.sorry_flag ),
+										sorryserver_switch_flag( in.sorryserver_switch_flag ),
+										realserver_switch_flag( in.realserver_switch_flag ),
+										client_endpoint_tcp( in.client_endpoint_tcp ),
+										last_status( in.last_status )	{}
+	};
+
+	typedef		std::list< send_status >::iterator
+								send_status_itr;
+	typedef		std::map< boost::thread::id, session_thread_data_cinsert* >::iterator
+								session_thread_data_map_itr;
+	typedef		std::map< boost::asio::ip::tcp::endpoint, recive_data >::iterator
+								recive_data_map_itr;
+protected:
+	int	cookie_expire;
+	int	forwarded_for;
+	int	reschedule;
+	boost::array< char, MAX_OPTION_SIZE >	cookie_name;
+	boost::array< char, MAX_OPTION_SIZE >	sorry_uri;
+	std::map< boost::thread::id, session_thread_data_cinsert* >	session_thread_data_map;
+	boost::mutex	session_thread_data_map_mutex;
 
 public:
 	protocol_module_cinsert();
