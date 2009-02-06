@@ -1,5 +1,10 @@
+#ifndef	SCHEDULE_MODULE_TEST1_H
+#define	SCHEDULE_MODULE_TEST1_H
+
 #include	"schedule_module_base.h"
 #include <iostream>
+
+#include "stub.h"
 
 namespace l7vs{
 
@@ -35,8 +40,11 @@ public:
 							boost::asio::ip::udp::endpoint&	outendpoint ){}
 
 	void	replication_interrupt(){
+		debugg_flug_struct::getInstance().sm_rep_count_inc();
 		std::cout << "Schedule Module Replication." << std::endl;
 	}
 };
 
 }
+
+#endif

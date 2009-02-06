@@ -1,21 +1,31 @@
 #ifndef	STUB_H
 #define	STUB_H
 
+#include "virtualservice.h"
+
 #define	SESSION_POOL_NUM_PARAM	(512)
 
-class	session_pool_debugger{
+class	debugg_flug_struct{
 protected:
-	bool session_pool_param_flg;
-	bool pmcontrol_error_flag;
-	bool smcontrol_error_flag;
-	bool pm_function_called;
+	bool	session_pool_param_flg;
+	bool	pmcontrol_error_flag;
+	bool	smcontrol_error_flag;
+	bool	pm_function_called;
 
-	session_pool_debugger() : session_pool_param_flg( false ) {}
-	session_pool_debugger( const session_pool_debugger & in ){}
-	session_pool_debugger& operator=( const session_pool_debugger & in ){ return *this; }
+	int		pm_rep_count;
+	int		sm_rep_count;
+
+	char*	rep_area;
+
+	debugg_flug_struct() : session_pool_param_flg( false ),
+								pm_rep_count( 0 ),
+								sm_rep_count( 0 ) {
+	}
+	debugg_flug_struct( const debugg_flug_struct & in ){}
+	debugg_flug_struct& operator=( const debugg_flug_struct & in ){ return *this; }
 public:
-	static session_pool_debugger&	getInstance(){
-		static	session_pool_debugger	instance;
+	static debugg_flug_struct&	getInstance(){
+		static	debugg_flug_struct	instance;
 		return	instance;
 	}
 	bool&	param_exist_flag(){
@@ -29,6 +39,27 @@ public:
 	}
 	bool&	pm_function_called_flag(){
 		return pm_function_called;
+	}
+	void	pm_rep_count_inc(){
+		pm_rep_count = pm_rep_count+1;
+	}
+	int		get_pm_rep_count(){
+		return pm_rep_count;
+	}
+	void	sm_rep_count_inc(){
+		sm_rep_count = sm_rep_count+1;
+	}
+	int		get_sm_rep_count(){
+		return sm_rep_count;
+	}
+	void	create_rep_area(){
+		rep_area = new char[(l7vs::virtualservice_base::MAX_REPLICATION_DATA_NUM)*480];
+	}
+	void*	get_rep_area(){
+		return reinterpret_cast<void*>( rep_area );
+	}
+	void	destroy_rep_area(){
+		delete [] rep_area;
 	}
 };
 

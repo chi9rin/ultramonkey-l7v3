@@ -3,6 +3,8 @@
 
 #include	"protocol_module_base.h"
 
+#include "stub.h"
+
 namespace l7vs{
 
 class	protocol_module_test1 : public protocol_module_base{
@@ -41,7 +43,7 @@ public:
 	}
 	check_message_result	add_parameter( const std::vector<std::string>& args ){
 		protocol_module_base::check_message_result	result;
-		result.flag = true;
+		result.flag = false;
 		return result;
 	}
 
@@ -54,6 +56,7 @@ public:
 									boost::function< void( void ) > inunlock_func ){}
 
 	void	replication_interrupt(){
+		debugg_flug_struct::getInstance().pm_rep_count_inc();
 		std::cout << "Protocol Module Replication." << std::endl;
 	}
 

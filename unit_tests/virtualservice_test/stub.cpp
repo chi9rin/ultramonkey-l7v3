@@ -11,6 +11,48 @@
 #include "replication.h"
 #include "stub.h"
 
+#include "protocol_module_test1.h"
+#include "schedule_module_test1.h"
+
+// protocol_module_control　STUB code
+l7vs::protocol_module_control&	l7vs::protocol_module_control::getInstance(){
+	static	protocol_module_control	instance;
+	return	instance;
+}
+void	l7vs::protocol_module_control::initialize( const std::string& infile_path ){}
+void	l7vs::protocol_module_control::finalize(){}
+l7vs::protocol_module_base*	l7vs::protocol_module_control::load_module( const std::string& modulename ){
+	l7vs::protocol_module_base* return_value = NULL;
+
+	if( !debugg_flug_struct::getInstance().pmcontrol_err_flag() )
+		return_value = new protocol_module_test1;
+
+	return return_value;
+}
+void	l7vs::protocol_module_control::unload_module( protocol_module_base* module_ptr ){
+	delete	module_ptr;
+}
+
+l7vs::schedule_module_control&	l7vs::schedule_module_control::getInstance(){
+	static	schedule_module_control	instance;
+	return	instance;
+}
+void	l7vs::schedule_module_control::initialize( const std::string& infile_path ){}
+void	l7vs::schedule_module_control::finalize(){}
+l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const std::string& modulename ){
+	l7vs::schedule_module_base* return_value = NULL;
+
+	if( !debugg_flug_struct::getInstance().smcontrol_err_flag() )
+		return_value = new schedule_module_test1;
+
+	return return_value;
+}
+
+void	l7vs::schedule_module_control::unload_module( schedule_module_base* module_ptr ){
+	delete module_ptr;
+}
+
+
 
 int		l7vs::replication::initialize(){
 	return 0;
@@ -30,14 +72,10 @@ l7vs::replication::REPLICATION_MODE_TAG	l7vs::replication::get_status(){
 	l7vs::replication::REPLICATION_MODE_TAG	retmode = l7vs::replication::REPLICATION_OUT;
 	return retmode;
 }
-int		l7vs::replication::check_interval(){
-	return 0;
-}
 int		l7vs::replication::handle_send(){
 	return 0;
 }
-int		l7vs::replication::handle_receive(){
-	return 0;
+void		l7vs::replication::handle_receive( const boost::system::error_code& err, size_t size ){
 }
 int		l7vs::replication::lock( const std::string& inid ){
 	return 0;
@@ -61,7 +99,7 @@ int		l7vs::Parameter::get_int(	const PARAMETER_COMPONENT_TAG in_tag,
 									const std::string& in_str,
 									error_code& err ){
 	int	retval = 0;
-	if( session_pool_debugger::getInstance().param_exist_flag() ){
+	if( debugg_flug_struct::getInstance().param_exist_flag() ){
 		retval = SESSION_POOL_NUM_PARAM;
 	}else{
 		err.setter( true, "not exist value." );

@@ -9,18 +9,19 @@
 #include "virtualservice.h"
 #include "vs_tcp.h"
 
-// #include "protocol_module_test1.h"
+#include "protocol_module_test1.h"
 #include "schedule_module_test1.h"
 
 using namespace boost::unit_test;
 
 typedef	boost::asio::ip::tcp::endpoint	tcp_ep_type;
+typedef	boost::asio::ip::udp::endpoint	udp_ep_type;
 
 //test case1  create,initialize,run,stop,finalize,destroy(normal case)
 void	virtualservice_tcp_test1(){
-	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
-	session_pool_debugger::getInstance().smcontrol_err_flag()	= false;
-	session_pool_debugger::getInstance().param_exist_flag() = false;
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
@@ -58,6 +59,14 @@ void	virtualservice_tcp_test1(){
 	BOOST_MESSAGE( "-------3" );
 	boost::thread	vs_main( &l7vs::vs_tcp::run, vs );
 
+	usleep( 1500000 );
+	//1秒待って、ProtocolModule/ScheduleModuleのreplication_interruptが呼ばれることを確認
+	//デフォルト設定は500msなので2回
+	BOOST_MESSAGE( debugg_flug_struct::getInstance().get_pm_rep_count() );
+	BOOST_MESSAGE( debugg_flug_struct::getInstance().get_sm_rep_count() );
+	BOOST_CHECK( 2 == debugg_flug_struct::getInstance().get_pm_rep_count() );
+	BOOST_CHECK( 2 == debugg_flug_struct::getInstance().get_sm_rep_count() );
+
 	// unit_test[4]  stop method test
 	BOOST_MESSAGE( "-------4" );
 	vs->stop();
@@ -92,9 +101,9 @@ void	virtualservice_tcp_test2(){
 	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, element );
 	// unit_test[8]  initialize method call(poolsize from parameter file:value = 512)
 	BOOST_MESSAGE( "-------" );
-	session_pool_debugger::getInstance().param_exist_flag() = true;
-	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
-	session_pool_debugger::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = true;
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
 	vs->initialize( vs_err );
 	BOOST_CHECK( SESSION_POOL_NUM_PARAM == vs->get_pool_sessions().size() );
 	BOOST_CHECK( vs_err == false );
@@ -104,9 +113,9 @@ void	virtualservice_tcp_test2(){
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	// unit_test[9]  initialize method call(procotol_module_control::module_load error case)
 	BOOST_MESSAGE( "-------" );
-	session_pool_debugger::getInstance().param_exist_flag() = false;
-	session_pool_debugger::getInstance().pmcontrol_err_flag()	= true;
-	session_pool_debugger::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= true;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
 	BOOST_CHECK( NULL == vs->get_protocol_module() );
 	BOOST_CHECK( NULL == vs->get_schedule_module() );
 	vs->initialize( vs_err );
@@ -121,8 +130,8 @@ void	virtualservice_tcp_test2(){
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	// unit_test[10]  initialize method call(procotol_module_control::module_load error case)
 	BOOST_MESSAGE( "-------" );
-	session_pool_debugger::getInstance().pmcontrol_err_flag()	= false;
-	session_pool_debugger::getInstance().smcontrol_err_flag()	= true;
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= true;
 	BOOST_CHECK( NULL == vs->get_protocol_module() );
 	BOOST_CHECK( NULL == vs->get_schedule_module() );
 	vs->initialize( vs_err );
@@ -286,17 +295,197 @@ void	virtualservice_tcp_test2(){
 	}
 
 	delete vs;
-
-	// edit_realserver method call
-/*	BOOST_MESSAGE( "-------" );
-	l7vs::virtualservice_element	edit_element;*/
-// 	vs->edit_realserver( edit_element, vs_err );
 }
 
 //test case3
 void	virtualservice_tcp_test3(){
-	//実際にAcceptさせる試験
+	l7vs::error_code	vs_err;
 
+	l7vs::l7vsd					vsd;
+	boost::asio::io_service		dispatcher;
+	l7vs::replication			rep( dispatcher );
+	l7vs::virtualservice_element	element;
+	//set element value
+
+	element.udpmode					= false;
+	element.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	element.udp_recv_endpoint		= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	element.realserver_vector.clear();
+	element.protocol_module_name	= "PMtest1";
+	element.schedule_module_name	= "SMtest1";
+	element.protocol_args.clear();
+	element.sorry_maxconnection		= 1234LL;
+	element.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
+	element.sorry_flag				= false;
+	element.qos_upstream			= 65535ULL;
+	element.qos_downstream			= 32767ULL;
+
+	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, element );
+	vs->initialize( vs_err );
+
+	// unit_test[22]  replication dataが作成できるか確認(初回作成)
+	//まず、stubのレプリケーションエリア作成をする
+	debugg_flug_struct::getInstance().create_rep_area();
+	//data_numが1になってることを確認
+	
+	//udpmode
+	//tcp_endpoint
+	//udp_endpoint
+	//sorry_maxconnection
+	//sorry_endpoint
+	//sorry_flag
+	//qos_up
+	//qos_down
+
+	// unit_test[23]  edit_virtualserviceのテスト
+	//変更前の値確認
+	BOOST_CHECK( false == vs->get_element().udpmode );
+	BOOST_CHECK( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) ) ==  vs->get_element().tcp_accept_endpoint );
+	BOOST_CHECK( udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) ) ==  vs->get_element().udp_recv_endpoint );
+	BOOST_CHECK( "PMtest1" == vs->get_element().protocol_module_name );
+	BOOST_CHECK( "SMtest1" == vs->get_element().schedule_module_name );
+	BOOST_CHECK( 1234LL == vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) ) == vs->get_element().sorry_endpoint );
+	BOOST_CHECK( false == vs->get_element().sorry_flag );
+	BOOST_CHECK( 65535ULL == vs->get_element().qos_upstream );
+	BOOST_CHECK( 32767ULL == vs->get_element().qos_downstream );
+
+	//変更値の設定
+	l7vs::virtualservice_element	elem2;
+	elem2.udpmode					= false;
+	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
+	elem2.realserver_vector.clear();
+	elem2.protocol_module_name		= "PMtest1";
+	elem2.schedule_module_name		= "SMtest2";
+	elem2.protocol_args.clear();
+	elem2.sorry_maxconnection		= 5678LL;
+	elem2.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.86" ), (80) );
+	elem2.sorry_flag				= true;
+	elem2.qos_upstream				= 1024ULL;
+	elem2.qos_downstream			= 4096ULL;
+
+	debugg_flug_struct::getInstance().smcontrol_err_flag() = false;
+	vs->edit_virtualservice( elem2, vs_err );
+	BOOST_CHECK( vs_err == false );
+	BOOST_MESSAGE( vs_err.get_message() );
+	//変更後の確認
+	BOOST_CHECK( false == vs->get_element().udpmode );
+	BOOST_CHECK( elem2.tcp_accept_endpoint	==  vs->get_element().tcp_accept_endpoint );
+	BOOST_CHECK( element.udp_recv_endpoint	==  vs->get_element().udp_recv_endpoint );
+	BOOST_CHECK( "PMtest1" == vs->get_element().protocol_module_name );
+	BOOST_CHECK( "SMtest2" == vs->get_element().schedule_module_name );
+	BOOST_CHECK( 5678LL == vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( elem2.sorry_endpoint == vs->get_element().sorry_endpoint );
+	BOOST_CHECK( true == vs->get_element().sorry_flag );
+	BOOST_CHECK( 1024ULL == vs->get_element().qos_upstream );
+	BOOST_CHECK( 4096ULL == vs->get_element().qos_downstream );
+
+	// unit_test[24]  edit_virtualserviceのテスト(udpmodeが一致しないものはエラーが返る＆値が反映されない)
+	l7vs::virtualservice_element	elem3;
+	elem3.udpmode					= true;
+	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
+	elem3.realserver_vector.clear();
+	elem3.protocol_module_name		= "PMtest1";
+	elem3.schedule_module_name		= "SMtest2";
+	elem3.protocol_args.clear();
+	elem3.sorry_maxconnection		= 65535LL;
+	elem3.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.86" ), (80) );
+	elem3.sorry_flag				= false;
+	elem3.qos_upstream				= 1024ULL;
+	elem3.qos_downstream			= 4096ULL;
+
+	vs->edit_virtualservice( elem3, vs_err );
+	//vs_errがtrueなのをチェック
+	BOOST_CHECK( vs_err == true );
+
+	BOOST_CHECK( false == vs->get_element().udpmode );
+	BOOST_CHECK( elem2.tcp_accept_endpoint	==  vs->get_element().tcp_accept_endpoint );
+	BOOST_CHECK( element.udp_recv_endpoint	==  vs->get_element().udp_recv_endpoint );
+	BOOST_CHECK( "PMtest1" == vs->get_element().protocol_module_name );
+	BOOST_CHECK( "SMtest2" == vs->get_element().schedule_module_name );
+	BOOST_CHECK( 5678LL == vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( elem2.sorry_endpoint == vs->get_element().sorry_endpoint );
+	BOOST_CHECK( true == vs->get_element().sorry_flag );
+	BOOST_CHECK( 1024ULL == vs->get_element().qos_upstream );
+	BOOST_CHECK( 4096ULL == vs->get_element().qos_downstream );
+
+	// unit_test[25]  edit_virtualserviceのテスト(tcp_accept_endpointが一致しないものはエラーが返る＆値が反映されない)
+	elem3.udpmode					= false;
+	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (8080) );
+	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
+	elem3.protocol_module_name		= "PMtest1";
+
+	vs->edit_virtualservice( elem3, vs_err );
+	//vs_errがtrueなのをチェック
+	BOOST_CHECK( vs_err == true );
+
+	BOOST_CHECK( false == vs->get_element().udpmode );
+	BOOST_CHECK( elem2.tcp_accept_endpoint	==  vs->get_element().tcp_accept_endpoint );
+	BOOST_CHECK( element.udp_recv_endpoint	==  vs->get_element().udp_recv_endpoint );
+	BOOST_CHECK( "PMtest1" == vs->get_element().protocol_module_name );
+	BOOST_CHECK( "SMtest2" == vs->get_element().schedule_module_name );
+	BOOST_CHECK( 5678LL == vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( elem2.sorry_endpoint == vs->get_element().sorry_endpoint );
+	BOOST_CHECK( true == vs->get_element().sorry_flag );
+	BOOST_CHECK( 1024ULL == vs->get_element().qos_upstream );
+	BOOST_CHECK( 4096ULL == vs->get_element().qos_downstream );
+
+	// unit_test[26]  edit_virtualserviceのテスト(protocol_module_nameが一致しないものはエラーが返る＆値が反映されない)
+	elem3.udpmode					= false;
+	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
+	elem3.protocol_module_name		= "PMtest2";
+
+	vs->edit_virtualservice( elem3, vs_err );
+	//vs_errがtrueなのをチェック
+	BOOST_CHECK( vs_err == true );
+
+	BOOST_CHECK( false == vs->get_element().udpmode );
+	BOOST_CHECK( elem2.tcp_accept_endpoint	==  vs->get_element().tcp_accept_endpoint );
+	BOOST_CHECK( element.udp_recv_endpoint	==  vs->get_element().udp_recv_endpoint );
+	BOOST_CHECK( "PMtest1" == vs->get_element().protocol_module_name );
+	BOOST_CHECK( "SMtest2" == vs->get_element().schedule_module_name );
+	BOOST_CHECK( 5678LL == vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( elem2.sorry_endpoint == vs->get_element().sorry_endpoint );
+	BOOST_CHECK( true == vs->get_element().sorry_flag );
+	BOOST_CHECK( 1024ULL == vs->get_element().qos_upstream );
+	BOOST_CHECK( 4096ULL == vs->get_element().qos_downstream );
+
+	// unit_test[]  replication dataが作成できるか確認(既にあるデータを上書き)
+	//data_numが1になってることを確認
+	//udpmode
+	//tcp_endpoint
+	//udp_endpoint
+	//sorry_maxconnection
+	//sorry_endpoint
+	//sorry_flag
+	//qos_up
+	//qos_down
+
+	// unit_test[]  vsをもう一つ作って、そこからもレプリケーションデータを作成する
+	l7vs::vs_tcp*	vs2 = new l7vs::vs_tcp( vsd, rep, element );
+
+	//data_numが2になってることを確認
+	//udpmode
+	//tcp_endpoint
+	//udp_endpoint
+	//sorry_maxconnection
+	//sorry_endpoint
+	//sorry_flag
+	//qos_up
+	//qos_down
+
+
+	//テストが終わったらStubのレプリケーションエリアを削除
+	debugg_flug_struct::getInstance().create_rep_area();
+
+	// unit_test[]  edit_virtualserviceのテスト(schedule_moduleのロードに失敗するケース：致命的エラー)
+	debugg_flug_struct::getInstance().smcontrol_err_flag() = false;
+
+	delete vs2;
+	delete vs;
 }
 
 void	session_pool_access_test(){
@@ -369,208 +558,4 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 
 
-
-// protocol_module stub
-namespace l7vs{
-
-class	protocol_module_test1 : public protocol_module_base{
-public:
-	protocol_module_test1() : protocol_module_base( "PMtest1" ) {
-		BOOST_MESSAGE( "PMtest1 create" );
-	}
-	~protocol_module_test1(){
-		BOOST_MESSAGE( "PMtest1 destroy" );
-	}
-
-	void	initialize(
-							rs_list_itr_func_type		inlist_begin,
-							rs_list_itr_func_type		inlist_end,
-							rs_list_itr_next_func_type	inlist_next,
-							boost::function< void( void ) >	inlist_lock,
-							boost::function< void( void ) >	inlist_unlock ){}
-
-	void	finalize(){}
-
-	bool	is_tcp(){ return true; }
-	bool	is_udp(){ return false; }
-	bool	is_use_sorry(){ return true; }
-	check_message_result	check_parameter( const std::vector<std::string>& args ){
-		protocol_module_base::check_message_result	result;
-		result.flag = true;
-		return result;
-	}
-
-	void	handle_rslist_update(){}
-
-	check_message_result	set_parameter( const std::vector<std::string>& args ){
-		protocol_module_base::check_message_result	result;
-		result.flag = true;
-		return result;
-	}
-	check_message_result	add_parameter( const std::vector<std::string>& args ){
-		protocol_module_base::check_message_result	result;
-		result.flag = true;
-		return result;
-	}
-
-	void	register_schedule( tcp_schedule_func_type inschedule ){}
-
-	void	register_replication_area_lock(
-									boost::function< void( void ) > inlock_func ){}
-
-	void	register_replication_area_unlock(
-									boost::function< void( void ) > inunlock_func ){}
-
-	void	replication_interrupt(){
-		std::cout << "Protocol Module Replication." << std::endl;
-	}
-
-	//use in upstream_thread
-	EVENT_TAG	handle_session_initialize(
-									const boost::thread::id up_thread_id,
-									const boost::thread::id down_thread_id,
-									const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
-									const boost::asio::ip::udp::endpoint& client_endpoint_udp ){return STOP;}
-
-	EVENT_TAG	handle_session_finalize(
-									const boost::thread::id up_thread_id,
-									const boost::thread::id down_thread_id ){return STOP;}
-
-	EVENT_TAG	handle_accept( const boost::thread::id thread_id ){return STOP;}
-
-	EVENT_TAG	handle_client_recv(
-									const boost::thread::id thread_id,
-									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-									const size_t recvlen ){return STOP;}
-
-	EVENT_TAG	handle_realserver_select(
-									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint& rs_endpoint ){return STOP;}
-
-	EVENT_TAG	handle_realserver_connect(
-									const boost::thread::id thread_id,
-									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									size_t& datalen ){return STOP;}
-	
-	EVENT_TAG	handle_realserver_connection_fail(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint& rs_endpoint ){return STOP;}
-	
-	EVENT_TAG	handle_realserver_send( const boost::thread::id thread_id ){return STOP;}
-	
-	EVENT_TAG	handle_sorryserver_select(
-									const boost::thread::id thread_id,
-									boost::asio::ip::tcp::endpoint & sorry_endpoint ){return STOP;}
-
-	EVENT_TAG	handle_sorryserver_connect(
-									const boost::thread::id thread_id,
-									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									size_t& datalen ){return STOP;}
-
-	EVENT_TAG	handle_sorryserver_connection_fail(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint& sorry_endpoint ){return STOP;}
-	
-	EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id ){return STOP;}
-
-	//use in downstream_thread
-	EVENT_TAG	handle_realserver_recv(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & rs_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
-									const size_t recvlen ){return STOP;}
-	
-	EVENT_TAG	handle_sorryserver_recv(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & sorry_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-									const size_t recvlen ){return STOP;}
-	
-	EVENT_TAG	handle_response_send_inform( const boost::thread::id thread_id ){return STOP;}
-
-	EVENT_TAG	handle_client_connection_check(
-									const boost::thread::id thread_id,
-									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									size_t& datalen ){return STOP;}
-
-	EVENT_TAG	handle_client_send( const boost::thread::id thread_id ){return STOP;}
-
-	//use in upstream/downstream thread
-	EVENT_TAG	handle_client_disconnect( const boost::thread::id thread_id ){return STOP;}
-	
-	EVENT_TAG	handle_sorry_enable( const boost::thread::id upthread_id ){return STOP;}
-
-	EVENT_TAG	handle_sorry_disable( const boost::thread::id upthread_id ){return STOP;}
-
-	EVENT_TAG	handle_realserver_disconnect(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & rs_endpoint ){return STOP;}
-	
-	EVENT_TAG	handle_sorryserver_disconnect(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::tcp::endpoint & sorry_endpoint ){return STOP;}
-
-	//unuse method
-	void	register_schedule( udp_schedule_func_type inschedule ){}
-	EVENT_TAG	handle_realserver_select(
-									const boost::thread::id thread_id,
-									boost::asio::ip::udp::endpoint& rs_endpoint,
-									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									size_t& datalen ){return STOP;}
-	EVENT_TAG	handle_realserver_recv(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::udp::endpoint & rs_endpoint,
-									const boost::array<char,MAX_BUFFER_SIZE>& readbuffer,
-									const size_t recvlen ){return STOP;}
-	EVENT_TAG	handle_client_select(
-									const boost::thread::id thread_id,
-									boost::asio::ip::udp::endpoint& rs_endpoint,
-									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
-									size_t& datalen ){return STOP;}
-	EVENT_TAG	handle_realserver_close(
-									const boost::thread::id thread_id,
-									const boost::asio::ip::udp::endpoint & rs_endpoint ){return STOP;};
-};
-
-}
-
-
-
-// protocol_module_control　STUB code
-l7vs::protocol_module_control&	l7vs::protocol_module_control::getInstance(){
-	static	protocol_module_control	instance;
-	return	instance;
-}
-void	l7vs::protocol_module_control::initialize( const std::string& infile_path ){}
-void	l7vs::protocol_module_control::finalize(){}
-l7vs::protocol_module_base*	l7vs::protocol_module_control::load_module( const std::string& modulename ){
-	l7vs::protocol_module_base* return_value = NULL;
-
-	if( !session_pool_debugger::getInstance().pmcontrol_err_flag() )
-		return_value = new protocol_module_test1;
-
-	return return_value;
-}
-void	l7vs::protocol_module_control::unload_module( protocol_module_base* module_ptr ){
-	delete	module_ptr;
-}
-
-l7vs::schedule_module_control&	l7vs::schedule_module_control::getInstance(){
-	static	schedule_module_control	instance;
-	return	instance;
-}
-void	l7vs::schedule_module_control::initialize( const std::string& infile_path ){}
-void	l7vs::schedule_module_control::finalize(){}
-l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const std::string& modulename ){
-	l7vs::schedule_module_base* return_value = NULL;
-
-	if( !session_pool_debugger::getInstance().smcontrol_err_flag() )
-		return_value = new schedule_module_test1;
-
-	return return_value;
-}
-
-void	l7vs::schedule_module_control::unload_module( schedule_module_base* module_ptr ){
-	delete module_ptr;
-}
 

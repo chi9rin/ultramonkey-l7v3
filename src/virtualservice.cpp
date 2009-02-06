@@ -10,6 +10,8 @@
 //
 
 #include <vector>
+#include <sstream>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "virtualservice.h"
 #include "logger_enum.h"
@@ -38,6 +40,8 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
 													throughput_down( 0 ) {
 	calc_bps_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	replication_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
+	protomod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
+	schedmod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	rs_list.clear();
 	rs_mutex_list.clear();
 	element = inelement;
@@ -57,10 +61,16 @@ void	l7vs::virtualservice_base::load_parameter(){
 	int	int_val;
 	//get session pool size value
 	int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_POOLSIZE_KEY_NAME, vs_err );
-	if( vs_err )
-		param_data.session_pool_size = SESSION_POOL_NUM_DEFAULT;
-	else
+	if( !vs_err )
 		param_data.session_pool_size = int_val;
+	//get bps calc interval
+	int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_BPS_CALC_INTERVAL, vs_err );
+	if( !vs_err )
+		param_data.bps_interval = int_val;
+	//get replication interval
+	int_val	= param.get_int( l7vs::PARAM_COMP_REPLICATION, PARAM_REP_INTERVAL, vs_err );
+	if( !vs_err )
+		param_data.rep_interval = int_val;
 }
 
 /*!
@@ -70,9 +80,13 @@ void	l7vs::virtualservice_base::load_parameter(){
  * @return  void
  */
 void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system::error_code& ){
-	if( NULL != protomod )
+	if( NULL != protomod ){
 		protomod->replication_interrupt();
-	else{
+		//register handle_protomod_replication
+		protomod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+		protomod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_protomod_replication, 
+												this, boost::asio::placeholders::error ) );
+	}else{
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
 	}
 }
@@ -84,9 +98,13 @@ void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system
  * @return  void
  */
 void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system::error_code& ){
-	if( NULL != schedmod )
+	if( NULL != schedmod ){
 		schedmod->replication_interrupt();
-	else{
+		//register handle_schedmod_replication
+		schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+		schedmod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_schedmod_replication, 
+												this, boost::asio::placeholders::error ) );
+	}else{
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
 	}
 }
@@ -143,6 +161,10 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		}else throughput_down = 0ULL;
 		current_down_recvsize = 0ULL;
 	}
+	//register timer event
+	calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
+	calc_bps_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_throughput_update, 
+											 this, boost::asio::placeholders::error ) );
 }
 
 /*!
@@ -385,9 +407,82 @@ l7vs::virtualservice_tcp::virtualservice_tcp(	const l7vsd& invsd,
 /*!
  * virtualservice_tcp class destructor.
  */
-l7vs::virtualservice_tcp::~virtualservice_tcp(){}
+l7vs::virtualservice_tcp::~virtualservice_tcp(){
+	stop();
+}
 
 void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
+	bool	newdata	= true;
+	l7vs::replication&	replication = const_cast<l7vs::replication&>( rep );
+
+	std::stringstream	tmp_tcp_ep;
+	tmp_tcp_ep		<< element.tcp_accept_endpoint;
+	std::stringstream	tmp_udp_ep;
+	tmp_udp_ep		<< element.udp_recv_endpoint;
+	std::stringstream	tmp_sorry_ep;
+	tmp_sorry_ep	<< element.sorry_endpoint;
+
+	//get replication area
+	unsigned int	rep_size = 0;
+	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
+	if( 0 == rep_size ){
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		return;
+	}
+
+	//check maxdatasize
+	if( ( rep_size * DATA_SIZE ) <
+		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		return;
+	}
+
+	//lock replication area
+	replication.lock( REP_AREA_NAME );
+
+	//read header value and set loop count
+	unsigned int loop_cnt = rep_header_ptr->data_num;
+
+	//set start pointer(pointer of replication_data)
+	replication_data*	rep_data_ptr = reinterpret_cast<replication_data*>( ++rep_header_ptr );
+
+	//find vs(loop)
+	for( unsigned int i = 0; i < loop_cnt; ++i ){
+		//check equal udpmode and tcp_accept_endpoint
+		if( (rep_data_ptr->udpmode == element.udpmode )&&
+			( 0 == strncmp( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 ) ) ){
+			newdata = false;
+			break;
+		}
+		//increment data pointer
+		++rep_data_ptr;
+	}
+
+	//if it is new data, increment data num.
+	if( newdata ){
+		rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
+		++(rep_header_ptr->data_num);
+	}
+	//write replication data
+	rep_data_ptr->udpmode		= element.udpmode;
+	memset( rep_data_ptr->tcp_endpoint, 0, 48 );
+	memcpy( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 );
+	memset( rep_data_ptr->tcp_endpoint, 0, 48 );
+	memcpy( rep_data_ptr->udp_endpoint, tmp_udp_ep.str().c_str(), 47 );
+	rep_data_ptr->sorry_maxconnection	= element.sorry_maxconnection;
+	memset( rep_data_ptr->sorry_endpoint, 0, 48 );
+	memcpy( rep_data_ptr->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 );
+	rep_data_ptr->sorry_flag	= element.sorry_flag;
+	rep_data_ptr->qos_up		= element.qos_upstream;
+	rep_data_ptr->qos_down		= element.qos_downstream;
+
+	//unlock replication area
+	replication.unlock( REP_AREA_NAME );
+
+	//register handle_replication_interrupt
+	replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+	replication_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_replication_interrupt, 
+											 this, boost::asio::placeholders::error ) );
 }
 bool	l7vs::virtualservice_tcp::read_replicationdata( l7vs::virtualservice_base::replication_data& out ){
 	return true;
@@ -425,29 +520,22 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	load_parameter();
 
 	//load protocol module
-	try{
-		protomod = l7vs::protocol_module_control::getInstance().load_module( element.protocol_module_name );
-	}
-	catch( ... ){ //bad alloc exception catch
-		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
-		return;
-	}
+	protomod = l7vs::protocol_module_control::getInstance().load_module( element.protocol_module_name );
 	if( NULL == protomod ){
 		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
 		return;
 	}
+	//Protocol Module Initialize
+
 	//load schedule module	
-	try{
-		schedmod = l7vs::schedule_module_control::getInstance().load_module( element.schedule_module_name );
-	}
-	catch( ... ){ //bad alloc exception catch
-		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
-		return;
-	}
+	schedmod = l7vs::schedule_module_control::getInstance().load_module( element.schedule_module_name );
 	if( NULL == schedmod ){
 		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
 		return;
 	}
+
+	//Schedule Module Initialize
+
 	//create session pool
 	for( int i = 0; i < param_data.session_pool_size; ++i ){
 		l7vs::tcp_session*	sess;
@@ -498,10 +586,64 @@ bool	l7vs::virtualservice_tcp::operator!=( const l7vs::virtualservice_base& in )
 			||	( element.udpmode != vs.get_element().udpmode ) );
 }
 
+/*!
+ * add VirtualService( not-imprement )
+ *
+ * @param   virtualservice_element
+ * @param   err
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::set_virtualservice( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
 	err.setter( false, "" );
 }
+
+/*!
+ * edit VirtualService( not-imprement )
+ *
+ * @param   virtualservice_element
+ * @param   err
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+	l7vs::virtualservice_element&	elem = const_cast<l7vs::virtualservice_element&>( in );
+	//パラメータがVirtualServiceに一致するか検査
+	//udpmodeとtcp_accept_endpointとprotocol_module_nameが一致すること
+	if( ( element.udpmode != elem.udpmode ) ||
+		( element.tcp_accept_endpoint != elem.tcp_accept_endpoint ) ||
+		( element.protocol_module_name != elem.protocol_module_name ) ){
+		err.setter( true, "Virtual Service does not exist." );
+		return;
+	}
+	//scuedule_moduleが変更されていたらロードしなおす
+	if( element.schedule_module_name != elem.schedule_module_name ){
+		schedule_module_control::getInstance().unload_module( schedmod );
+		schedmod = schedule_module_control::getInstance().load_module( elem.schedule_module_name );
+		if( NULL == schedmod ){
+			//FATAL case
+			l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+			err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
+			return;
+		}
+		element.schedule_module_name = elem.schedule_module_name;
+	}
+
+	//additional PM options(for protomod_url)
+	l7vs::protocol_module_base::check_message_result result;
+	if( !protomod ){
+		result = protomod->add_parameter( elem.protocol_args );
+		if( result.flag ){
+			for( size_t i = 0; i < elem.protocol_args.size(); ++i ){
+				element.protocol_args.push_back( elem.protocol_args[i] );
+			}
+		}
+	}
+	//変更可能な値を上書きする
+	element.sorry_maxconnection	= elem.sorry_maxconnection;
+	element.sorry_endpoint		= elem.sorry_endpoint;
+	element.sorry_flag			= elem.sorry_flag;
+	element.qos_upstream		= elem.qos_upstream;
+	element.qos_downstream		= elem.qos_downstream;
+
 	err.setter( false, "" );
 }
 
@@ -515,7 +657,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
-		err.setter( true, "Virtual Service is not equal." );
+		err.setter( true, "Virtual Service does not exist." );
 		return;
 	}	
 
@@ -542,7 +684,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 		for( std::list<realserver>::iterator rs_itr = rs_list.begin();
 			 rs_itr != rs_list.end(); ++rs_itr ){
 			if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
-				err.setter( true, "Real Server is already exist." );
+				err.setter( true, "Real Server already exist." );
 				return;
 			}
 		}
@@ -589,6 +731,14 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 	}
 	err.setter( false, "" );
 }
+
+/*!
+ * delete realserver
+ *
+ * @param   virtualservice_element
+ * @param   err
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
@@ -624,7 +774,7 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 			}
 		}
 		if( !exist_flag ){
-			err.setter( true, "Real Server is not exist." );
+			err.setter( true, "Real Server does not exist." );
 			return;
 		}
 	}
@@ -676,8 +826,22 @@ void	l7vs::virtualservice_tcp::run(){
 	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
 							boost::bind( &l7vs::virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
 	//regist timer event handler
-// 	handle_replication_interrupt
+	calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
+	calc_bps_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_throughput_update, 
+											 this, boost::asio::placeholders::error ) );
 
+	//register handle_replication_interrupt
+	replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+	replication_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_replication_interrupt, 
+											 this, boost::asio::placeholders::error ) );
+	//register handle_protomod_replication
+	protomod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+	protomod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_protomod_replication, 
+											 this, boost::asio::placeholders::error ) );
+	//register handle_schedmod_replication
+	schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+	schedmod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_schedmod_replication, 
+											 this, boost::asio::placeholders::error ) );
 
 	//run dispatcher(start io_service loop)
 	dispatcher.run();
@@ -760,8 +924,7 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 l7vs::virtualservice_udp::virtualservice_udp(	const l7vs::l7vsd& invsd,
 												const l7vs::replication& inrep,
 												const l7vs::virtualservice_element& inelement) : 
-													l7vs::virtualservice_base( invsd, inrep, inelement ),
-													session( *this, dispatcher ){}
+													l7vs::virtualservice_base( invsd, inrep, inelement ){}
 l7vs::virtualservice_udp::~virtualservice_udp(){}
 
 void	l7vs::virtualservice_udp::handle_replication_interrupt( const boost::system::error_code& in ){

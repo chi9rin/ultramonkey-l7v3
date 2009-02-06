@@ -198,12 +198,12 @@ void	virtualservice_base_test2(){
 	BOOST_MESSAGE( "bps down : " << vs->get_throughput_downstream() );
 
 	// unit_test[36]  load_parameterでパラメータをロードする(パラメータが存在しないケース)
-	session_pool_debugger::getInstance().param_exist_flag() = false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
 	vs->call_load_parameter();
 	BOOST_CHECK( vs->get_param_data().session_pool_size == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT );
 
 	// unit_test[37]  load_parameterでパラメータをロードする(パラメータが存在するケース)
-	session_pool_debugger::getInstance().param_exist_flag() = true;
+	debugg_flug_struct::getInstance().param_exist_flag() = true;
 	vs->call_load_parameter();
 	BOOST_CHECK( vs->get_param_data().session_pool_size == SESSION_POOL_NUM_PARAM );
 }
@@ -221,39 +221,3 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	return 0;
 }
-
-// protocol_module_control　STUB code
-l7vs::protocol_module_control&	l7vs::protocol_module_control::getInstance(){
-	static	protocol_module_control	instance;
-	return	instance;
-}
-void	l7vs::protocol_module_control::initialize( const std::string& infile_path ){}
-void	l7vs::protocol_module_control::finalize(){}
-l7vs::protocol_module_base*	l7vs::protocol_module_control::load_module( const std::string& modulename ){
-	l7vs::protocol_module_base* return_value = NULL;
-
-	return_value = new protocol_module_test1;
-
-	return return_value;
-}
-void	l7vs::protocol_module_control::unload_module( protocol_module_base* module_ptr ){
-	delete	module_ptr;
-}
-
-l7vs::schedule_module_control&	l7vs::schedule_module_control::getInstance(){
-	static	schedule_module_control	instance;
-	return	instance;
-}
-void	l7vs::schedule_module_control::initialize( const std::string& infile_path ){}
-void	l7vs::schedule_module_control::finalize(){}
-l7vs::schedule_module_base*	l7vs::schedule_module_control::load_module( const std::string& modulename ){
-	l7vs::schedule_module_base* return_value = NULL;
-
-	return_value = new schedule_module_test1;
-
-	return return_value;
-}
-void	l7vs::schedule_module_control::unload_module( schedule_module_base* module_ptr ){
-	delete module_ptr;
-}
-

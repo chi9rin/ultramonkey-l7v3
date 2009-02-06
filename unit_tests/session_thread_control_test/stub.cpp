@@ -145,14 +145,10 @@ l7vs::replication::REPLICATION_MODE_TAG	l7vs::replication::get_status(){
 	l7vs::replication::REPLICATION_MODE_TAG	retmode = l7vs::replication::REPLICATION_OUT;
 	return retmode;
 }
-int		l7vs::replication::check_interval(){
-	return 0;
-}
 int		l7vs::replication::handle_send(){
 	return 0;
 }
-int		l7vs::replication::handle_receive(){
-	return 0;
+void		l7vs::replication::handle_receive( const boost::system::error_code& err, size_t size ){
 }
 int		l7vs::replication::lock( const std::string& inid ){
 	return 0;

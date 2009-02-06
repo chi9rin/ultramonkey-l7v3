@@ -30,12 +30,19 @@
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 
-#define	PARAM_POOLSIZE_KEY_NAME	"SESSION_POOL_SIZE"
+#define	PARAM_POOLSIZE_KEY_NAME	"session_pool_size"
+#define	PARAM_BPS_CALC_INTERVAL	"bps_calc_interval"
+#define	PARAM_REP_INTERVAL		"interval"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
 #define	SCHEDMOD_NOTLOAD_ERROR_MSG	"Schedule Module not loaded"
-#define	PROTOMOD_LOAD_ERROR_MSG	"Protocol Module load error"
-#define	SCHEDMOD_LOAD_ERROR_MSG "Schedule Module load error"
+#define	PROTOMOD_LOAD_ERROR_MSG		"Protocol Module load error"
+#define	SCHEDMOD_LOAD_ERROR_MSG		"Schedule Module load error"
+
+#define	REP_BLOCK_SIZE_ERR_MSG		"Replication area block size error"
+#define	REP_AREA_SIZE_ERR_MSG		"Replication area size error"
+
+#define	REP_AREA_NAME				"virtualservice"
 
 namespace l7vs{
 
@@ -57,52 +64,35 @@ public:
 	typedef	boost::shared_ptr<boost::mutex>					mutex_ptr;
 
 	const static int	SESSION_POOL_NUM_DEFAULT	= 256;		//! Default count for number of session-pool size
+	const static long	BPS_INTERVAL_DEFAULT		= 500;		//! bps calcurate interval(500ms)
+	const static long	REP_INTERVAL_DEFAULT		= 500;		//! replication-data create interval(500ms)
 	const static int	MAX_REPLICATION_DATA_NUM	= 64;		//! Maximum count value of replication data array
 	const static int	OPERATION_TIMEOUT			= 1;		//! Operation timed out value
 	const static int	REFCOUNT_WAIT_INTERVAL		= 10000;	//! wait interval for rs_ref_count check
 protected:
-	//!	@class	vs_replication_header replication data structure
-	class	replication_data{
-	public:
-		replication_data() : udpflag( false ) {}
-		replication_data( const replication_data& in ){
-			udpflag			= in.udpflag;
-			memcpy( tcp_endpoint, in.tcp_endpoint, (48*sizeof(char)) );
-			memcpy( udp_endpoint, in.udp_endpoint, (48*sizeof(char)) );
-/*			tcp_endpoint	= in.tcp_endpoint;
-			udp_endpoint	= in.udp_endpoint;*/
-			sorry_maxconnection = in.sorry_maxconnection;
-			sorry_endpoint	= in.sorry_endpoint;
-			sorry_flag		= in.sorry_flag;
-			qos_up			= in.qos_up;
-			qos_down		= in.qos_down;
-		}
-		replication_data&	operator=( const replication_data& in ){
-			udpflag			= in.udpflag;
-			memcpy( tcp_endpoint, in.tcp_endpoint, (48*sizeof(char)) );
-			memcpy( udp_endpoint, in.udp_endpoint, (48*sizeof(char)) );
-/*			tcp_endpoint	= in.tcp_endpoint;
-			udp_endpoint	= in.udp_endpoint;*/
-			sorry_maxconnection = in.sorry_maxconnection;
-			sorry_endpoint	= in.sorry_endpoint;
-			sorry_flag		= in.sorry_flag;
-			qos_up			= in.qos_up;
-			qos_down		= in.qos_down;
-			return *this;
-		}
-		bool				udpflag;
+	//!	@struct	replication_header replication header structure
+	struct	replication_header{
+		unsigned int	data_num;
+	};
+	//!	@struct	replication_data replication data structure
+	struct	replication_data{
+		bool				udpmode;
 		char				tcp_endpoint[48];
 		char				udp_endpoint[48];
 		long long			sorry_maxconnection;
-		tcp_endpoint_type	sorry_endpoint;
+		char				sorry_endpoint[48];
 		bool				sorry_flag;
 		unsigned long long	qos_up;
 		unsigned long long	qos_down;
 	};
 
 	struct	parameter_data{
-		int	session_pool_size;
-		parameter_data() : session_pool_size( SESSION_POOL_NUM_DEFAULT ){}
+		int		session_pool_size;
+		long	bps_interval;
+		long	rep_interval;
+		parameter_data() :	session_pool_size( SESSION_POOL_NUM_DEFAULT ),
+							bps_interval( BPS_INTERVAL_DEFAULT ),
+							rep_interval( REP_INTERVAL_DEFAULT ) {}
 	};
 
 	const	l7vsd&				vsd;			//! l7vsd reference
@@ -111,6 +101,8 @@ protected:
 	boost::asio::io_service		dispatcher;		//! dispatcer service
 	deadline_timer_ptr_type		calc_bps_timer;	//! timer object
 	deadline_timer_ptr_type		replication_timer;	//! timer object
+	deadline_timer_ptr_type		protomod_rep_timer;	//! timer object
+	deadline_timer_ptr_type		schedmod_rep_timer;	//! timer object
 
 	parameter_data				param_data;		//! virtual service parameter data
 	virtualservice_element		element;		//! virtual service element
@@ -257,7 +249,8 @@ public:
 //! @class	virtualservice_udp is class of virtual service for UDP transfer.
 class	virtualservice_udp : public virtualservice_base{
 protected:
-	udp_session					session;
+	boost::shared_ptr<udp_session>
+								session;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	bool						read_replicationdata( virtualservice_base::replication_data& );
