@@ -17,6 +17,11 @@
 #include <boost/bind.hpp>
 #include "l7vsadm.h"
 #include "protocol_module_control.h"
+#include "schedule_module_control.h"
+
+#ifndef	L7VS_MODULE_PATH
+#define	L7VS_MODULE_PATH	"./"
+#endif
 
 //
 // command functions.
@@ -37,13 +42,14 @@ bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 	}
 	return true;
 }
-	//
-	// option list functions.
-	//
-	//! list numeric flag check.
-	bool	l7vs::l7vsadm::parse_opt_list_numeric_func( int& pos, int argc, char* argv[] ){
-		numeric_flag = true;	//numeric flag on.
-	}
+//
+// option list functions.
+//
+//! list numeric flag check.
+bool	l7vs::l7vsadm::parse_opt_list_numeric_func( int& pos, int argc, char* argv[] ){
+	numeric_flag = true;	//numeric flag on.
+	return true;
+}
 //! virtualservice command parsing.
 bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;	// set command
@@ -80,192 +86,205 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 	}
 	return true;
 }
-	//
-	// option virtualservice functions.
-	//
-	//! target option check
-	bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			//don't rarget recvaddress:port
-			return false;
-		}
-		// get host endpoint from string
-		std::string	src_str = argv[pos];
-		try{
-			if( request.vs_element.udpmode ){
- 				request.vs_element.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( src_str );
-			}
-			else{
-				request.vs_element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( src_str );
-			}
-		}
-		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & err ){
-			return false;
-		}
-		return true;
+//
+// option virtualservice functions.
+//
+//! target option check
+bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		//don't rarget recvaddress:port
+		return false;
 	}
-	//! module option check
-	bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			//don't rarget shcedule name.
-			return false;
+	// get host endpoint from string
+	std::string	src_str = argv[pos];
+	try{
+		if( request.vs_element.udpmode ){
+			request.vs_element.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( src_str );
 		}
-		std::string	module_name = argv[pos];
-		protocol_module_control&	ctrl = protocol_module_control::getInstance();
-		ctrl.initialize( L7VS_MODULE_PATH );
-		protocol_module_base* module = ctrl.load( module_name );
-		if( !message.flag ){
-			//don't find protocol module.
-			return false;
+		else{
+			request.vs_element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( src_str );
 		}
-		protocol_module_base* module = ctrl.get_module();
-		// create module args.
-		std::vector< std::string > module_args;
-		while( true ){
-			if( ++pos == argc ) break; //module option end.
-			parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
-			if( itr != vs_option_dic.end() ) break;	// module option end.
+	}
+	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & err ){
+		return false;
+	}
+	return true;
+}
+//! module option check
+bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		//don't rarget shcedule name.
+		return false;
+	}
+	std::string	module_name = argv[pos];
+	protocol_module_control&	ctrl = protocol_module_control::getInstance();
+	ctrl.initialize( L7VS_MODULE_PATH );
+	protocol_module_base* module;
+	try{
+		module = ctrl.load_module( module_name );
+	}
+	catch( ... ){
+		return false;
+	}
+	if( !module ){
+		//don't find protocol module.
+		return false;
+	}
+	// create module args.
+	std::vector< std::string > module_args;
+	while( true ){
+		if( ++pos == argc ) break; //module option end.
+		parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
+		if( itr != vs_option_dic.end() ) break;	// module option end.
 
-			module_args.push_back( argv[pos] );
-		}
-		protocol_module_base::message module_message = module->check_args( module_args );
-		if( !module_message.flag ){
-			// args is not suppoted.
-		}
-		request.vs_list.front().module_name = module_name;
-		ctrl.unload( module_name );
+		module_args.push_back( argv[pos] );
+	}
+	protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
+	if( !module_message.flag ){
+		// args is not suppoted.
+	}
+	request.vs_element.protocol_module_name = module_name;
+	BOOST_FOREACH( std::string str,	module_args ){
+		request.vs_element.protocol_args.push_back( str );
+	}
+	ctrl.unload_module( module );
 
-		request.vs_list.front().module_name = module_name;
-		BOOST_FOREACH( std::string str,	module_args ){
-			request.vs_list.front().module_args.push_back( str );
-		}
 
-		return true;
-	}
+	return true;
+}
 
-	//! scheduler option check.
-	bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			// don't target scheduler name.
-			return false;
-		}
-		//schedule module check.
-		std::string	scheduler_name = argv[pos];
-		schedule_module_control&	ctrl = schedule_module_control::getInstance();
-		schedule_module_control::message message = ctrl.load( scheduler_name );
-		if( !message.flag ){
-			// don't find schedule module 
-			return false;
-		}
-		ctrl.unload( shceduler_name );
-		request.vs_list.front().scheduler_name = scheduler_name;
-		return true;
+//! scheduler option check.
+bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't target scheduler name.
+		return false;
 	}
-	//! upper flag check
-	bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			// don't target maxconnection_num
-			return false;
-		}
+	//schedule module check.
+	std::string	scheduler_name = argv[pos];
+	schedule_module_control&	ctrl = schedule_module_control::getInstance();
+	ctrl.initialize( L7VS_MODULE_PATH );
+	schedule_module_base* module;
+	try{
+		module = ctrl.load_module( scheduler_name );
+	}
+	catch( ... ){
+		return false;
+	}
+	if( !module ){
+		// don't find schedule module 
+		return false;
+	}
+	ctrl.unload_module( module );
+	request.vs_element.schedule_module_name = scheduler_name;
+	return true;
+}
+//! upper flag check
+bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't target maxconnection_num
+		return false;
+	}
+	try{
+		request.vs_element.sorry_maxconnection = boost::lexical_cast< long long >( argv[pos] );
+	}
+	catch( boost::bad_lexical_cast& e ){
+		// don't convert argv[pos] is 
+	}
+	//check connection limit and zero
+	return true;
+}
+//! bypass(SorryServer) option check
+bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		//don't rarget sorryserver:port
+		return false;
+	}
+	try{
+		std::string sorry_endpoint = argv[pos];
+		request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( sorry_endpoint );
+	}
+	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & err ){
+		//don't resolve sorryserver endpoint
+		return false;
+	}
+	return true;	//
+}
+//! virtualservice option flag function
+bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
+	request.vs_element.sorry_flag = true;
+	return true;
+}
+//! virtualservice option qosupstream function
+bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		//don't rarget QoS upstream value.
+		return false;
+	}
+	try{
+		virtualservice_element& elem = request.vs_element;	// request virtualservice element refalence get.
+		elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );	// set qos_upstream
+	}
+	catch( boost::bad_lexical_cast& ex ){	// don't convert string to qos_upsatream
+		// don't conv qos upstream
+		return false;
+	}
+	return true;		
+}
+//! virtualservice option qosdownstream functipn
+bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't target QoS downstream value
+		return false;
+	}
+	try{
+		virtualservice_element& elem = request.vs_element;	// request virtualservice element refarence get.
+		elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );
+	}
+	catch( boost::bad_lexical_cast& ex ){
+		// don' conv qos downstream
+		return false;
+	}
+	return true;
+}
+//! virtualservice option udp func.
+bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
+	virtualservice_element& elem = request.vs_element;	// request virtualservie element reference get.
+	elem.udpmode = true;	// udpmode on.
+	boost::asio::ip::tcp::endpoint	zeropoint;
+	if( zeropoint != elem.tcp_accept_endpoint ){ // adddress tcp_acceptor endpoint
+		std::stringstream	sstream;
+		sstream	<< elem.tcp_accept_endpoint;
 		try{
-			request.maxconnection_no = boost::lexical_cast< unsigned long long >( argv[pos] );
+			std::string	endpoint	= sstream.str();
+			elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( endpoint );
+			elem.tcp_accept_endpoint = zeropoint;
 		}
-		catch( boost::bad_lexical_cast& e ){
-			// don't convert argv[pos] is 
-		}
-		//check connection limit and zero
-		return true;
-	}
-	//! bypass(SorryServer) option check
-	bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			//don't rarget sorryserver:port
+		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
 			return false;
 		}
+	}
+	if( elem.realserver_vector.size() != 0 && elem.realserver_vector.front().tcp_endpoint != zeropoint ){
+		std::stringstream 	sstream;
+		sstream << elem.realserver_vector.front().tcp_endpoint;
 		try{
-			request.sorryserver_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( argc[pos] );
+			std::string	endpoint = sstream.str();
+			elem.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp > ( endpoint );
 		}
-		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & err ){
-			//don't resolve sorryserver endpoint
+		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
 			return false;
 		}
-		return true;	//
 	}
-	//! virtualservice option flag function
-	bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
-		request.sorry_flag = true;
-		return true;
-	}
-	//! virtualservice option qosupstream function
-	bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			//don't rarget QoS upstream value.
-			return false;
-		}
-		try{
-			virtualservice_element& elem = request.vs_list.front();	// request virtualservice element refalence get.
-			elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );	// set qos_upstream
-		}
-		catch( boost::bad_lexical_cast& ex ){	// don't convert string to qos_upsatream
-			// don't conv qos upstream
-			return false;
-		}
-		return true;		
-	}
-	//! virtualservice option qosdownstream functipn
-	bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] ){
-		if( ++pos >= argc ){
-			// don't target QoS downstream value
-			return false;
-		}
-		try{
-			virtualservice_element& elem = request.vs_list.front();	// request virtualservice element refarence get.
-			elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );
-		}
-		catch( boost::bad_lexical_cast& ex ){
-			// don' conv qos downstream
-			return false;
-		}
-		return true;
-	}
-	//! virtualservice option udp func.
-	bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc. char* argv[] ){
-		virtualservice_element& elem = request.vs_list.front();	// request virtualservie element reference get.
-		elem.udpmode = true;	// udpmode on.
-		boost::asio::ip::tcp::endpoint	zeropoint;
-		if( zeropoint != request.tcp_acceptor_endpoint ){ // adddress tcp_acceptor endpoint
-			std::stringstream	sstream;
-			sstream	<< elem.tcp_acceptor_endpoint;
-			try{
-				elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( sstream.str() );
-				elem.tcp_acceptor_endpoint = zeropoint;
-			}
-			catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
-				return false;
-			}
-		}
-		if( elem.rs_list.size() != 0 && elem.rs_list.front().tcp_endpoint != zeropoint ){
-			std::stringstream 	sstream;
-			sstream << elem.rs_list.front().tcp_endpoint;
-			try{
-				elem.rs_list.front().udp_ednpoint = string_to_endpoint< boost::asio::ip::udp > ( sstream.str() );
-			}
-			catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
-				return false;
-			}
-		}
-		return true;
-	}
+	return true;
+}
 
 //! realserver command parsing.
 bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;
-	request.vs_list.push_back( virtualservice_element() );
-	request.vs_list.front().rs_list.push_back( realserver_element() );
+	request.vs_element.realserver_vector.push_back( realserver_element() );
 	for( int pos = 3; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = rs_option_dic.find( argv[pos] );
-		if( itr != rs_opt_dic.end() ){
-			if( ! itr( pos, argc, argv ) ) return false;
+		if( itr != rs_option_dic.end() ){
+			if( ! itr->second( pos, argc, argv ) ) return false;
 		}
 		else{
 			return false;
@@ -273,214 +292,213 @@ bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 	}
 	return true;
 }
-	//
-	// realserver option functions.
-	//
-	//! realserver target set
-	
-	//! weight is set 
-	bool	l7vs::l7vsadm::parse_opt_rs_weight_func( int& pos, int argc, char* argv[] ){
-		if( ++pos <= argv ){
-			//don't target weight value
-			return false;
-		}
-		try{
-			request.vs_list.front().rs_list.front().weight = boost::lexical_cast<int>( argv[pos] );
-		}
-		catch( boost::bad_lexical_cast& ex ){
-			// lexical cast error
-			return false;
-		}
-		return true;
+//
+// realserver option functions.
+//
+//! realserver target set
+
+//! weight is set 
+bool	l7vs::l7vsadm::parse_opt_rs_weight_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		//don't target weight value
+		return false;
 	}
-	//! realserver target set
-	bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argc[] ){
-		if( ++pos <= argv ){
-			// don't rarget realserver address
-			return false;
-		}
-		try{
-			if( request.vs_list.front().udp_mode ){
-				request.vs_list.front().rs_list.front().udp_endpoint = string_to_endpoint< boost::asio::ip::ucp >( argv[pos] );
-			}
-			else{
-				request.vs_list.gront().rs_list.front().tcp_ednpoint = string_to_endpoint< boost::asio::ip::tcp >( argv[pos] );
-			}
-		catch(  ){
-			// address string error.
-			return false;
-		}
-		return true;
+	try{
+		request.vs_element.realserver_vector.front().weight = boost::lexical_cast<int>( argv[pos] );
 	}
+	catch( boost::bad_lexical_cast& ex ){
+		// lexical cast error
+		return false;
+	}
+	return true;
+}
+//! realserver target set
+bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't rarget realserver address
+		return false;
+	}
+	try{
+		if( request.vs_element.udpmode ){
+			std::string	endpoint = argv[pos];
+			request.vs_element.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp >( endpoint );
+		}
+		else{
+			std::string	endpoint = argv[pos];
+			request.vs_element.realserver_vector.front().tcp_endpoint = string_to_endpoint< boost::asio::ip::tcp >( endpoint );
+		}
+	}
+	catch( ... ){
+		// address string error.
+		return false;
+	}
+	return true;
+}
 	
 //! replication command parsing.
 bool	l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;
 	for( int pos = 3; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = replication_option_dic.find( argv[pos] );
-		if( ! itr( pos, argc, argv ) ) return false;
-	}
-	else{
-		return false;
+		if( ! itr->second( pos, argc, argv ) ) return false;
 	}
 	return true;
 }
-	//
-	//	replication option functions.
-	//
-	//! switch function
-	bool	l7vs::l7vsadm::parse_opt_replication_switch_func( int& pos, int argc, char* argv[] ){
-		if( request.replication_command != l7vs_request::REP_NONE ){ 
-			// double command target.
-			return false;
-		}
-		request.replication_command = l7vs_request::REP_SWICH;
+
+//
+//	replication option functions.
+//
+//! start function
+bool	l7vs::l7vsadm::parse_opt_replication_start_func( int& pos, int argc, char* argv[] ){
+	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
+		// double command target.
+		return false;
 	}
-	//! start function
-	bool	l7vs::l7vsadm::parse_opt_replication_start_func( int& pos, int argc, char* argv[] ){
-		if( request.replication_command != l7vs_request::REP_NONE ){ 
-			// double command target.
-			return false;
-		}
-		request.replication_command = l7vs_request::REP_START;
+	request.replication_command = l7vsadm_request::REP_START;
+	return true;
+}
+//! stop function
+bool	l7vs::l7vsadm::parse_opt_replication_stop_func( int& pos, int argc, char* argv[] ){
+	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
+		// double command target.
+		return false;
 	}
-	//! stop function
-	bool	l7vs::l7vsadm::parse_opt_replication_stop_func( int& pos, int argc, char* argv[] ){
-		if( request.replication_command != l7vs_request::REP_NONE ){ 
-			// double command target.
-			return false;
-		}
-		request.replication_command = l7vs_request::REP_stop;
+	request.replication_command = l7vsadm_request::REP_STOP;
+	return true;
+}
+//! force function
+bool	l7vs::l7vsadm::parse_opt_replication_force_func( int& pos, int argc, char* argv[] ){
+	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
+		// double command target.
+		return false;
 	}
-	//! dump function
-	bool	l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char* argv[] ){
-		if( request.replication_command != l7vs_request::REP_NONE ){ 
-			// double command target.
-			return false;
-		}
-		request.replication_command = l7vs_request::REP_DUMP;
+	request.replication_command = l7vsadm_request::REP_FORCE;
+	return true;
+}
+//! dump function
+bool	l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char* argv[] ){
+	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
+		// double command target.
+		return false;
 	}
+	request.replication_command = l7vsadm_request::REP_DUMP;
+	return true;
+}
 
 //! log command parsing.
 bool	l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;
 	for( int pos = 3; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = log_option_dic.find( argv[pos] );
-		if( ! itr( pos, argc, argv ) ) return false;
+		if( ! itr->second( pos, argc, argv ) ) return false;
 	}
-	else{
+	return true;
+}
+//
+//	log option function
+//
+//! log category set function
+bool	l7vs::l7vsadm::parse_opt_log_category_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't target logcategory
+		return false;
+	}
+	if( request.log_category != LOG_CAT_NONE ){
+		// double target commands.
+		return false;
+	}
+	string_logcategory_map_type::iterator itr = string_logcategory_dic.find( argv[pos] );
+	if( itr != string_logcategory_dic.end() ){
+		request.log_category = itr->second;
+		return true;
+	}
+	return false;
+}
+//! log level set function
+bool	l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't rarget logcategory
+		return false;
+	}
+	if( request.log_level != LOG_LV_NONE ){
+		// double target commands.
+		return false;
+	}
+	string_loglevel_map_type::iterator itr = string_loglevel_dic.find( argv[pos] );
+	if( itr != string_loglevel_dic.end() ){
+		request.log_level = itr->second;
 		return false;
 	}
 	return true;
 }
-	//
-	//	log option function
-	//
-	//! log category set function
-	bool	l7vs::l7vsadm::parse_opt_log_category_fnc( int& pos, int argc, char* argv[] {
-		if( ++pos <= argv ){
-			// don't target logcategory
-			return false;
-		}
-		if( request.log_category != LOG_CAT_NONE ){
-			// double target commands.
-			return false;
-		}
-		string_logcategory_type::iterator itr = string_logcategory_dic.find( argv[pos] );
-		if( itr != string_logcategory_dic.end() ){
-			request.logcategory = itr->second;
-			return true;
-		}
-		return false;
-	}
-	//! log level set function
-	bool	l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, cha* argv[] ){
-		if( ++pos <= argv ){
-			// don't rarget logcategory
-			return false;
-		}
-		if( request.log_level != LOG_LV_NONE ){
-			// double target commands.
-			return false;
-		}
-		string_loglevel_type::iterator itr = string_loglevel_dic.find( argv[pos] );
-		if( itr != string_logcategory_dic.end() ){
-			request.loglevel = itr->second;
-			return false;
-		}
-	}
+
 //! snmp command parsing
 bool	l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;
 	for( int pos = 3; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = log_option_dic.find( argv[pos] );
-		if( !itr( pos, argc, argv ) ) return false;
+		if( !itr->second( pos, argc, argv ) ) return false;
 	}
-	else{
+	return true;
+}
+//! snmp log category set function
+bool	l7vs::l7vsadm::parse_opt_snmp_log_category_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't target logcategory
+		return false;
+	}
+	if( request.snmp_log_category != LOG_CAT_NONE ){
+		// double target commands.
+		return false;
+	}
+	string_logcategory_map_type::iterator itr = string_snmp_logcategory_dic.find( argv[pos] );
+	if( itr != string_snmp_logcategory_dic.end() ){
+		request.snmp_log_category = itr->second;
+		return true;
+	}
+	return false;
+}
+//! log level set function
+bool	l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't rarget logcategory
+		return false;
+	}
+	if( request.snmp_log_level != LOG_LV_NONE ){
+		// double target commands.
+		return false;
+	}
+	string_loglevel_map_type::iterator itr = string_loglevel_dic.find( argv[pos] );
+	if( itr != string_loglevel_dic.end() ){
+		request.snmp_log_level = itr->second;
 		return false;
 	}
 	return true;
 }
-	//! snmp log category set function
-	bool	l7vs::l7vsadm::parse_snmp_log_category_fnc( int& pos, int argc, char* argv[] {
-		if( ++pos <= argv ){
-			// don't target logcategory
-			return false;
-		}
-		if( request.snmp_log_category != LOG_CAT_NONE ){
-			// double target commands.
-			return false;
-		}
-		string_logcategory_type::iterator itr = string_snmp_logcategory_dic.find( argv[pos] );
-		if( itr != string_snmp_logcategory_dic.end() ){
-			request.snmp_logcategory = itr->second;
-			return true;
-		}
-		return false;
-	}
-	//! log level set function
-	bool	l7vs::l7vsadm::parse_snmp_log_level_func( int& pos, int argc, cha* argv[] ){
-		if( ++pos <= argv ){
-			// don't rarget logcategory
-			return false;
-		}
-		if( request.snmp_log_level != LOG_LV_NONE ){
-			// double target commands.
-			return false;
-		}
-		string_loglevel_type::iterator itr = string_snmp_loglevel_dic.find( argv[pos] );
-		if( itr != string_snmp_logcategory_dic.end() ){
-			request.snmp_loglevel = itr->second;
-			return false;
-		}
-	}
 
 //! parameter command parsing
-bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request cmd, int argc, char* argv[] ){
+bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;
 	for( int pos = 3; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = parameter_option_dic.find( argv[pos] );
-		if( !itr( pos, argc, argv ) ) return false;
-	}
-	else{
-		return false;
+		if( !itr->second( pos, argc, argv ) ) return false;
 	}
 	return true;
 }
-	//
-	//	parameter command 
-	//
-	bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* argv[] ){
-		if( ++pos <= argv ){
-			// don't rarget logcategory
-			return false;
-		}
-		string_parameter_map_type::iterator itr = string_parameter_dic.find( argv[pos] );
-		if( itr != string_parameter_dic.end() ){
-			request.parameter_category = itr->second;
-		}
-		return false;	
+//
+//	parameter command 
+//
+bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* argv[] ){
+	if( ++pos >= argc ){
+		// don't rarget logcategory
+		return false;
 	}
+	string_parameter_map_type::iterator itr = string_parameter_dic.find( argv[pos] );
+	if( itr != string_parameter_dic.end() ){
+		request.reload_param = itr->second;
+	}
+	return false;	
+}
 
 //! help command parsing
 bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
@@ -517,7 +535,7 @@ bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 	"  --flag          -f sorry-flag          sorry status set to virtual service\n"
 	"  --qos-up        -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
 	"  --qos-down      -q QoSval-down         QoS Threshold(bps) set to client direction\n"
-	"  --udp           -p                     VirtualService UDP mode on\n";
+	"  --udp           -p                     VirtualService UDP mode on\n"
 	"  --real-server   -r server-address      server-address is host:port\n"
 	"  --weight        -w weight              scheduling weight set to real server\n"
 	"  --switch        -s replication-switch  start or stop replication\n"
@@ -527,6 +545,7 @@ bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 	"  --level         -l log-level           set log level for l7vsd or SNMP Agent\n"
 	"  --reload        -r reload-parameter    reload specified config parameter\n"
 	"  --numeric       -n                     list the table in numeric\n"
+	<< std::endl;
 
 	return true;
 }
@@ -563,100 +582,100 @@ std::string	l7vs::l7vsadm::usage(){
 //
 // l7vsadm constractor.
 // create including all dictionary.
-l7vs::l7vsadm() : l7vs::l7vsadm::numeric_flag(false){
+l7vs::l7vsadm::l7vsadm() : numeric_flag(false){
 
 	// create command dictionary.
-	command_dic["-l"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _3, _4 );
-	command_dic["--list"]			= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _3, _4 );
-	command_dic["-V"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _3, _4 );
-	command_dic["--verbose"]		= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _3, _4 );
-	command_dic["-K"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _3, _4 );
-	command_dic["--key"]			= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _3, _4 );
-	command_dic["-A"] 				= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_ADD_VS, _3, _4 );
-	command_dic["--add-service"]	= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_ADD_VS, _3, _4 );
-	command_dic["-D"]				= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_DEL_VS, _3, _4 );
-	command_dic["--delete-service"]	= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_DEL_VS, _3, _4 );
-	command_dic["-E"]				= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_EDIT_VS, _3, _4 );
-	command_dic["--edit-service"]	= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_EDIT_VS, _3, _4 );
-	command_dic["-C"]				= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_FLUSH_VS, _3, _4 );
-	command_dic["--flush"]			= boost::bind( &l7vsadm::parse_virtualservice_func, this, l7vsadm_request::CMD_FLUSH_VS, _3, _4 );
-	command_dic["-a"]				= boost::bind( &l7vsadm::parse_realserver_func, this, l7vsadm_request::CMD_ADD_RS, _3, _4 );
-	command_dic["--add-server"]		= boost::bind( &l7vsadm::parse_realserver_func, this, l7vsadm_request::CMD_ADD_RS, _3, _4 );
-	command_dic["-d"]				= boost::bind( &l7vsadm::parse_realserver_func, this, l7vsadm_request::CMD_DEL_RS, _3, _4 );
-	command_dic["--delete-server"]	= boost::bind( &l7vsadm::parse_realserver_func, this, l7vsadm_request::CMD_DEL_RS, _3, _4 );
-	command_dic["-e"]				= boost::bind( &l7vsadm::parse_realserver_func, this, l7vsadm_request::CMD_EDIT_RS, _3, _4 );
-	command_dic["--edit-server"]	= boost::bind( &l7vsadm::parse_realserver_func, this, l7vsadm_request::CMD_EDIT_RS, _3, _4 );
-	command_dic["-R"]				= boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION. _3, _4 );
-	command_dic["--replication"]	= boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION, _3, _4 );
-	command_dic["-L"]				= boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _3, _4 );
-	command_dic["--log"]			= boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _3, _4 );
-	command_dic["-S"]				= boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _3, _4 );
-	command_dic["--snmp"]			= boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _3, _4 );
-	command_dic["-P"]				= boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _3, _4 );
-	command_dic["--parameter"]		= boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _3, _4 );
-	command_dic["-h"]				= boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _3, _4 );
-	command_dic["--help"]			= boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _3, _4 );
+	command_dic["-l"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
+	command_dic["--list"]			= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
+	command_dic["-V"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _1, _2 );
+	command_dic["--verbose"]		= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _1, _2 );
+	command_dic["-K"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _1, _2 );
+	command_dic["--key"]			= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _1, _2 );
+	command_dic["-A"] 				= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_ADD_VS, _1, _2 );
+	command_dic["--add-service"]	= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_ADD_VS, _1, _2 );
+	command_dic["-D"]				= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_DEL_VS, _1, _2 );
+	command_dic["--delete-service"]	= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_DEL_VS, _1, _2 );
+	command_dic["-E"]				= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_EDIT_VS, _1, _2 );
+	command_dic["--edit-service"]	= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_EDIT_VS, _1, _2 );
+	command_dic["-C"]				= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_FLUSH_VS, _1, _2 );
+	command_dic["--flush"]			= boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_FLUSH_VS, _1, _2 );
+	command_dic["-a"]				= boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_ADD_RS, _1, _2 );
+	command_dic["--add-server"]		= boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_ADD_RS, _1, _2 );
+	command_dic["-d"]				= boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_DEL_RS, _1, _2 );
+	command_dic["--delete-server"]	= boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_DEL_RS, _1, _2 );
+	command_dic["-e"]				= boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_EDIT_RS, _1, _2 );
+	command_dic["--edit-server"]	= boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_EDIT_RS, _1, _2 );
+	command_dic["-R"]				= boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION, _1, _2 );
+	command_dic["--replication"]	= boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION, _1, _2 );
+	command_dic["-L"]				= boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _1, _2 );
+	command_dic["--log"]			= boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _1, _2 );
+	command_dic["-S"]				= boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _1, _2 );
+	command_dic["--snmp"]			= boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _1, _2 );
+	command_dic["-P"]				= boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _1, _2 );
+	command_dic["--parameter"]		= boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _1, _2 );
+	command_dic["-h"]				= boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _1, _2 );
+	command_dic["--help"]			= boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _1, _2 );
 
 	// create list option dictionary.
-	list_option_dic["-n"]			= boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _2. _3 );
-	list_option_dic["--numeric"]	= boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _2, _3 );
+	list_option_dic["-n"]			= boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _1, _2, _3 );
+	list_option_dic["--numeric"]	= boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _1, _2, _3 );
 	// create virtualservice option dictionary
-	vs_option_dic["-t"]				= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _2. _3 );
-	vs_option_dic["--target"]		= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _2. _3 );
-	vs_option_dic["-m"]				= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _2, _3 );
-	vs_option_dic["--module"]		= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _2, _3 );
-	vs_option_dic["-s"]				= boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _2, _3 );
-	vs_option_dic["--scheduler"]	= boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _2, _3 );
-	vs_option_dic["-u"]				= boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _2, _3 );
-	vs_option_dic["--upper"]		= boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _2, _3 );
-	vs_option_dic["-b"]				= boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _2, _3 );
-	vs_option_dic["--bypass"]		= boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _2, _3 );
-	vs_option_dic["-f"]				= boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _2, _3 );
-	vs_option_dic["--flag"]			= boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _2, _3 );
-	vs_option_dic["-Q"]				= boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _2, _3 );
-	vs_option_dic["--qos-up"]		= boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _2, _3 );
-	vs_option_dic["-q"]				= boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _2, _3 );
-	vs_option_dic["--qos-down"]		= boost::bind( &l7vsadm::parse_opt_vs_dosdown_func, this, _2, _3 );
-	vs_option_dic["-p"]				= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _2, _3 );
-	vs_option_dic["--udp"]			= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _2. _3 );
+	vs_option_dic["-t"]				= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+	vs_option_dic["--target"]		= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+	vs_option_dic["-m"]				= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+	vs_option_dic["--module"]		= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+	vs_option_dic["-s"]				= boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
+	vs_option_dic["--scheduler"]	= boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
+	vs_option_dic["-u"]				= boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3 );
+	vs_option_dic["--upper"]		= boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3 );
+	vs_option_dic["-b"]				= boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3 );
+	vs_option_dic["--bypass"]		= boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3 );
+	vs_option_dic["-f"]				= boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3 );
+	vs_option_dic["--flag"]			= boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3 );
+	vs_option_dic["-Q"]				= boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _1, _2, _3 );
+	vs_option_dic["--qos-up"]		= boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _1, _2, _3 );
+	vs_option_dic["-q"]				= boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
+	vs_option_dic["--qos-down"]		= boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
+	vs_option_dic["-p"]				= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+	vs_option_dic["--udp"]			= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
 	// create realserver option dictionary
-	rs_option_dic["-t"]				= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _2. _3 );
-	rs_option_dic["--target"]		= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _2. _3 );
-	rs_option_dic["-w"]				= boost::bind( &l7vsadm::parse_opt_rs_weight, this, _2, _3 );
-	rs_option_dic["--weight"]		= boost::bind( &l7vsadm::parse_opt_rs_weight, this, _2, _3 );
-	rs_option_dic["-m"]				= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _2, _3 );
-	rs_option_dic["--module"]		= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _2, _3 );
-	vs_option_dic["-p"]				= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _2, _3 );
-	vs_option_dic["--udp"]			= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _2. _3 );
-	rs_option_dic["-r"]				= boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _2, _3 );
-	rs_option_dic["--real-server"]	= boost::bind( &l7vsadm::parse_opt_vs_realserver_func, this, _2, _3 );
+	rs_option_dic["-t"]				= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+	rs_option_dic["--target"]		= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+	rs_option_dic["-w"]				= boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
+	rs_option_dic["--weight"]		= boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
+	rs_option_dic["-m"]				= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+	rs_option_dic["--module"]		= boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+	vs_option_dic["-p"]				= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+	vs_option_dic["--udp"]			= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+	rs_option_dic["-r"]				= boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
+	rs_option_dic["--real-server"]	= boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
 	// create replication option dictionary
-	replication_option_dic["-s"]	= boost::bind( &l7vsadm::parse_opt_replication_switch_func, this, _2, _3 );
-	replication_option_dic["--switch"]
-									= boost::bind( &l7vsadm::parse_opt_replication_switch_func, this, _2. _3 );
-	replication_option_dic["f"]		= boost::bind( &l7vsadm::parse_opt_replication_force_func, this, _2, _3 );
+	//replication_option_dic["-s"]	= boost::bind( &l7vsadm::parse_opt_replication_switch_func, this, _1, _2, _3 );
+	//replication_option_dic["--switch"]
+	//								= boost::bind( &l7vsadm::parse_opt_replication_switch_func, this, _1, _2, _3 );
+	replication_option_dic["f"]		= boost::bind( &l7vsadm::parse_opt_replication_force_func, this, _1, _2, _3 );
 	replication_option_dic["--force"]
-									= boost::bind( &l7vsadm::parse_opt_replication_force_func, this, _2. _3 );
-	replication_option_dic["-d"]	= boost::bind( &l7vsadm::parse_opt_replication_dump_func, this, _2. _3 );
+									= boost::bind( &l7vsadm::parse_opt_replication_force_func, this, _1, _2, _3 );
+	replication_option_dic["-d"]	= boost::bind( &l7vsadm::parse_opt_replication_dump_func, this, _1, _2, _3 );
 	replication_option_dic["--dump"]
-									= boost::bind( &l7vsadm::parse_opt_replication_dump_func, this, _2, _3 );
+									= boost::bind( &l7vsadm::parse_opt_replication_dump_func, this, _1, _2, _3 );
 	// create log option function dictionary create
-	log_option_dic["-c"]			= boost::bind( &l7vsadm::parse_opt_log_category_func, this, _2, _3 );
-	log_option_dic["--category"]	= boost::bind( &l7vsadm::parse_opt_log_category_func, this, _2, _3 );
-	log_option_dic["-l"]			= boost::bind( &l7vsadm::parse_opt_log_level_func, this, _2, _3 );
-	log_option_dic["--level"]		= boost::bind( &l7vsadm::parse_opt_log_level_func, this, _2, _3 );
+	log_option_dic["-c"]			= boost::bind( &l7vsadm::parse_opt_log_category_func, this, _1, _2, _3 );
+	log_option_dic["--category"]	= boost::bind( &l7vsadm::parse_opt_log_category_func, this, _1, _2, _3 );
+	log_option_dic["-l"]			= boost::bind( &l7vsadm::parse_opt_log_level_func, this, _1, _2, _3 );
+	log_option_dic["--level"]		= boost::bind( &l7vsadm::parse_opt_log_level_func, this, _1, _2, _3 );
 	// snmp agent option function dictionary create
-	snmp_option_dic["-c"]			= boost::bind( &l7vsadm::parse_snmp_log_category_func, this, _2, _3 );
-	snmp_option_dic["--category"]	= boost::bind( &l7vsadm::parse_snmp_log_category_func, this, _2, _3 );
-	snmp_option_dic["-l"]			= boost::bind( &l7vsadm::parse_snmp_log_level_func, this, _2, _3 );
-	snmp_option_dic["--level"]		= boost::bind( &l7vsadm::parse_snmp_log_level_func, this, _2, _3 );
+	snmp_option_dic["-c"]			= boost::bind( &l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3 );
+	snmp_option_dic["--category"]	= boost::bind( &l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3 );
+	snmp_option_dic["-l"]			= boost::bind( &l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3 );
+	snmp_option_dic["--level"]		= boost::bind( &l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3 );
 	// parameter option function dictionary create
-	parameter_option_dic["-r"]		= boost::bind( &l7vsadm::parse_parameter_reload_func, this, _2, _3 );
+	parameter_option_dic["-r"]		= boost::bind( &l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3 );
 	parameter_option_dic["--reload"]
-									= boost::bind( &l7vsadm::parse_paramater_reload_func, this, _2. _3 );
+									= boost::bind( &l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3 );
 	// string logcategory dictionary create
-	string_logcategory_dic["l7vsd_network"]	= LOG_CAT_NETWORK;
-	string_logcategory_dic["nw"]			= LOG_CAT_NETWORK;
+	string_logcategory_dic["l7vsd_network"]	= LOG_CAT_L7VSD_NETWORK;
+	string_logcategory_dic["nw"]			= LOG_CAT_L7VSD_NETWORK;
 		// also, another log category is not commit.
 
 	// string snmp logcategory dictionary create 
@@ -688,15 +707,52 @@ l7vs::l7vsadm() : l7vs::l7vsadm::numeric_flag(false){
 }
 
 
-bool	l7vs::l7vsadm::execute( int argc. char* argv[] ){
+bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
+	// no argument, display usage
+	if( 1 == argc ){
+		std::cout << usage() << std::endl;
+		return true;
+	}
 
+	// analyze command line
+	int pos = 1;
+	parse_cmd_map_type::iterator itr = command_dic.find( argv[pos] );
+	if( itr != command_dic.end() ){
+		itr->second( argc, argv );
+	}
+	else{
+		err.setter( true, "command not found." );
+	}
+
+	// display analyze result
+	if( err ){
+
+		return false;
+	}
+
+	if( help_mode ){
+		// display help
+
+		return true;
+	}
+	else{
+		// communicate to l7vsd
+	
+		// display result
+	}
 	return true;
 }
 
 #ifndef	UNIT_TEST
 int main( int argc, char* argv[] ){
-	
+	Logger		logger;
+	Parameter	param;
+	logger.reloadConf();
 
+	l7vsadm	adm;
+	if( !adm.execute( argc, argv ) ){
+		return -1;
+	}
 	return 0;
 }
 #endif	//UNIT_TEST

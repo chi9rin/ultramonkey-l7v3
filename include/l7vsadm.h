@@ -49,44 +49,47 @@ protected:
 	bool	parse_log_func( l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
 	//! snmpagent command parse function
 	bool	parse_snmp_func( l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
+	//! parameter parse function
+	bool	parse_parameter_func( l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
 	//! help command parse func
 	bool	parse_help_func( l7vsadm_request::COMMAND_CODE_TAG, int, char*[] );
 
 	//
 	//	option parse functions.
 	//
-		//
-		// list option functions.
-		bool	parse_opt_list_numeric_func( int&, int, char*[] );
-		//
-		// virtualservice option functions.
-		bool	parse_opt_vs_target_func( int&, int, char*[] );
-		bool	parse_opt_vs_module_func( int&, int, char*[] );
-		bool	parse_opt_vs_scheduler_func( int&, int, char*[] );
-		bool	parse_opt_vs_upper_func( int&, int, char*[] );
-		bool	parse_opt_vs_bypass_func( int&, int, char*[] );
-		bool	parse_opt_vs_flag_func( int&, int, char*[] );
-		bool	parse_opt_vs_qosup_func( int&, int, char*[] );
-		bool	parse_opt_vs_qosdown_func( int&, int, char*[] );
-		bool	parse_opt_vs_udp_func( int&, int, char*[] );
-		// realserver option function
-		bool	parse_opt_rs_weight_func( int&, int, char*[] );
-		bool	parse_opt_rs_realserver_func( int&, int, char*[] );
-		// replication option function
-		bool	parse_opt_replication_switch_func( int&, int, char*[] );
-		bool	parse_opt_replication_force_func( int&, int, char*[] );
-		bool	parse_opt_replication_dump_func( int&, int, char*[] );
-		// log option function
-		bool	parse_opt_log_category_func( int&, int, char*[] );
-		bool	parse_opt_log_level_func( int&, int, char*[] );
-		// snmp option function
-		bool	parse_opt_snmp_category_func( int&, int, char*[] );
-		bool	parse_opt_snmp_level_func( int&, int, char*[] );
-		// parameter option function
-		bool	parse_opt_parameter_reload_func( int&, int, char*[] );
+	//
+	// list option functions.
+	bool	parse_opt_list_numeric_func( int&, int, char*[] );
+	//
+	// virtualservice option functions.
+	bool	parse_opt_vs_target_func( int&, int, char*[] );
+	bool	parse_opt_vs_module_func( int&, int, char*[] );
+	bool	parse_opt_vs_scheduler_func( int&, int, char*[] );
+	bool	parse_opt_vs_upper_func( int&, int, char*[] );
+	bool	parse_opt_vs_bypass_func( int&, int, char*[] );
+	bool	parse_opt_vs_flag_func( int&, int, char*[] );
+	bool	parse_opt_vs_qosup_func( int&, int, char*[] );
+	bool	parse_opt_vs_qosdown_func( int&, int, char*[] );
+	bool	parse_opt_vs_udp_func( int&, int, char*[] );
+	// realserver option function
+	bool	parse_opt_rs_weight_func( int&, int, char*[] );
+	bool	parse_opt_rs_realserver_func( int&, int, char*[] );
+	// replication option function
+	bool	parse_opt_replication_start_func( int&, int, char*[] );
+	bool	parse_opt_replication_stop_func( int&, int, char*[] );
+	bool	parse_opt_replication_force_func( int&, int, char*[] );
+	bool	parse_opt_replication_dump_func( int&, int, char*[] );
+	// log option function
+	bool	parse_opt_log_category_func( int&, int, char*[] );
+	bool	parse_opt_log_level_func( int&, int, char*[] );
+	// snmp option function
+	bool	parse_opt_snmp_log_category_func( int&, int, char*[] );
+	bool	parse_opt_snmp_log_level_func( int&, int, char*[] );
+	// parameter option function
+	bool	parse_opt_parameter_reload_func( int&, int, char*[] );
 
 	// command parse function object.type.
-	typedef	boost::function< bool ( l7vsadm_request::COMMAND_CODE_TAG, int, char* [] ) >
+	typedef	boost::function< bool ( int, char*[] ) >
 			parse_cmd_func_type;
 	// command string - parse function object map type. 
 	typedef	std::map< std::string, parse_cmd_func_type >
@@ -144,6 +147,9 @@ protected:
 	// l7vsadm using datas.
 	bool					numeric_flag;	//! numeric flag
 	boost::asio::io_service	io_service;		//! io_service
+
+	error_code	err;
+	bool	help_mode;
 
 public:
 	//! execute function 
