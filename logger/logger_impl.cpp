@@ -72,7 +72,7 @@
 #elif defined(LOGGER_PROCESS_ADM)
 	#define	LOGGER_LOG_FILENAME_KEY					"l7vsadm_log_filename"
 	#define LOGGER_ROTATION_KEY						"l7vsadm_rotation"
-	#define LOGGER_MAX_BACKUP_INDEX_KEY				"l7vsdm_max_backup_index"
+	#define LOGGER_MAX_BACKUP_INDEX_KEY				"l7vsadm_max_backup_index"
 	#define LOGGER_MAX_FILE_SIZE_KEY				"l7vsadm_max_filesize"
 	#define LOGGER_ROTATION_TIMING_KEY				"l7vsadm_rotation_timing"
 	#define LOGGER_ROTATION_TIMING_VALUE_KEY		"l7vsadm_rotation_timing_value"
@@ -567,8 +567,10 @@ void l7vs::LoggerImpl::loadConf(){
 	appender_property* property = &normal_log_property;
 
 	for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
-		// filename check
+		// setting keyname check
+		if( "" == property->log_filename_key )	break;	// no conn_log setting.
 
+		// filename check
 		l7vs::error_code ec;
 		property->log_filename_value = param.get_string(PARAM_COMP_LOGGER, property->log_filename_key, ec);
 		if( ec ){
@@ -1057,7 +1059,12 @@ void l7vs::LoggerImpl::loadConf(){
 					sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
 	
 					// set Log Filename
-					sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					try{
+						sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					}
+					catch( const std::exception& e ){
+						throw std::logic_error( "File Create Failed." );
+					}
 		
 					// activate appender options
 					sizeAppender->activateOptions(pool);
@@ -1101,7 +1108,12 @@ void l7vs::LoggerImpl::loadConf(){
 					dateAppender->setRollingPolicy(strictRollingPolicy);
 		
 					// set Log Filename
-					dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					try{
+						dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					}
+					catch( const std::exception& e ){
+						throw std::logic_error( "File Create Failed." );
+					}
 		
 					// activate appender options
 					dateAppender->activateOptions(pool);
@@ -1148,7 +1160,12 @@ void l7vs::LoggerImpl::loadConf(){
 					dateSizeAppender->setRollingPolicy(timeSizeRollingPolicy);
 		
 					// set Log Filename
-					dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					try{
+						dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+					}
+					catch( const std::exception& e ){
+						throw std::logic_error( "File Create Failed." );
+					}
 		
 					// activate appender options
 					dateSizeAppender->activateOptions(pool);
