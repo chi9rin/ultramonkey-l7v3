@@ -89,6 +89,13 @@ l7vs::virtualservice_element&	l7vs::virtual_service::get_element(){
 	return vs->get_element();
 }
 
+l7vs::virtualservice_element&	l7vs::virtualservice_base::get_element(){
+	boost::mutex::scoped_lock lk( element_mutex );
+	return element;
+}
+
+
+
 unsigned long long		l7vs::virtual_service::get_throughput_upstream(){
 //	return vs->get_throughput_upstream();
 	return 10;
