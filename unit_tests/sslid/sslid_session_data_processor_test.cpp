@@ -314,7 +314,7 @@ public:
 		this_replication_data_processor->get_temp_list().clear();
 		this->session_endpoint_map[session_id] = saved_endpoint;
 		this->session_lasttime_map[session_id] = temp_last_time;
-		this->lasttime_session_map.insert(std::make_pair(last_time, session_id));
+		this->lasttime_session_map.insert(std::make_pair(temp_last_time, session_id));
 		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
 		// get the item which put into the temp_list
 		this_replication_data_processor->to_get_from_temp_list(temp_list_data);
@@ -336,8 +336,10 @@ public:
 		this->timeout = 10000;
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
+		this->lasttime_session_map.clear();
 		this->session_endpoint_map[session_id] = saved_endpoint;
 		this->session_lasttime_map[session_id] = last_time;
+		this->lasttime_session_map.insert(std::make_pair(last_time, session_id));
 		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
 		// got endpoint check
 		BOOST_CHECK_EQUAL(get_endpoint, saved_endpoint);
@@ -821,6 +823,7 @@ public:
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
 		this->lasttime_session_map.clear();
+		this_replication_data_processor->get_temp_list().clear();
 		this->session_endpoint_map.insert(std::make_pair(session_id1, saved_endpoint1));
 		this->session_endpoint_map.insert(std::make_pair(session_id2, saved_endpoint1));
 		this->session_endpoint_map.insert(std::make_pair(session_id3, saved_endpoint1));
@@ -1074,21 +1077,18 @@ public:
 		it3 = this->lasttime_session_map.begin();
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
-		// session_endpoint_map check(only maxlist(2) data can read)
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 2u);
-		// session_lasttime_map check(only maxlist(2) data can read)
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 2u);
-		// lasttime_session_map check(only maxlist(2) data can read)
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 2u);
+		// session_endpoint_map check(only maxlist(2) data can read and if the valid is 0 not to read)
+		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 1u);
+		// session_lasttime_map check(only maxlist(2) data can read and if the valid is 0 not to read)
+		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 1u);
+		// lasttime_session_map check(only maxlist(2) data can read and if the valid is 0 not to read)
+		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 1u);
 		// session_endpoint_map items check
 		while(it1 != this->session_endpoint_map.end()){
 			std::string temp = it1->first;
 			if(temp == session_id2){
 				BOOST_CHECK_EQUAL(it1->second.address().to_string(), realserver_ip2);
 				BOOST_CHECK_EQUAL(it1->second.port(), port2);
-			} else if(temp == session_id4){
-				BOOST_CHECK_EQUAL(it1->second.address().to_string(), realserver_ip4);
-				BOOST_CHECK_EQUAL(it1->second.port(), port4);
 			} else {
 				BOOST_ERROR("error: read_session_data_from_replication_area");
 			}
@@ -1099,8 +1099,6 @@ public:
 			std::string temp = it2->first;
 			if(temp == session_id2){
 				BOOST_CHECK_EQUAL(it2->second, last_time2);
-			} else if(temp == session_id4){
-				BOOST_CHECK_EQUAL(it2->second, last_time4);
 			} else {
 				BOOST_ERROR("error: read_session_data_from_replication_area");
 			}
@@ -1111,8 +1109,6 @@ public:
 			time_t temp = it3->first;
 			if(temp == last_time2){
 				it3->second = session_id2;
-			} else if(temp == last_time4){
-				it3->second = session_id4;
 			} else {
 				BOOST_ERROR("error: read_session_data_from_replication_area");
 			}
@@ -1131,21 +1127,18 @@ public:
 		it3 = this->lasttime_session_map.begin();
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
-		// session_endpoint_map check(only maxlist(2) data can read)
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 2u);
-		// session_lasttime_map check(only maxlist(2) data can read)
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 2u);
-		// lasttime_session_map check(only maxlist(2) data can read)
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 2u);
+		// session_endpoint_map check(only maxlist(2) data can read and if the valid is 0 not to read)
+		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 1u);
+		// session_lasttime_map check(only maxlist(2) data can read and if the valid is 0 not to read)
+		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 1u);
+		// lasttime_session_map check(only maxlist(2) data can read and if the valid is 0 not to read)
+		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 1u);
 		// session_endpoint_map items check
 		while(it1 != this->session_endpoint_map.end()){
 			std::string temp = it1->first;
 			if(temp == session_id4){
 				BOOST_CHECK_EQUAL(it1->second.address().to_string(), realserver_ip4);
 				BOOST_CHECK_EQUAL(it1->second.port(), port4);
-			} else if(temp == session_id5){
-				BOOST_CHECK_EQUAL(it1->second.address().to_string(), realserver_ip5);
-				BOOST_CHECK_EQUAL(it1->second.port(), port5);
 			} else {
 				BOOST_ERROR("error: read_session_data_from_replication_area");
 			}
@@ -1156,8 +1149,6 @@ public:
 			std::string temp = it2->first;
 			if(temp == session_id4){
 				BOOST_CHECK_EQUAL(it2->second, last_time4);
-			} else if(temp == session_id5){
-				BOOST_CHECK_EQUAL(it2->second, last_time5);
 			} else {
 				BOOST_ERROR("error: read_session_data_from_replication_area");
 			}
@@ -1168,8 +1159,6 @@ public:
 			time_t temp = it3->first;
 			if(temp == last_time4){
 				it3->second = session_id4;
-			} else if(temp == last_time5){
-				it3->second = session_id5;
 			} else {
 				BOOST_ERROR("error: read_session_data_from_replication_area");
 			}
@@ -1201,6 +1190,7 @@ void sslid_session_data_processor_test(){
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+	memset(replication_data_area, 0, data_area_size);
 	l7vs::sslid_replication_data_processor replication_data_processor(3,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			ingetloglevel1, inputLogFatal1, inputLogError1, inputLogWarn1,
@@ -1261,6 +1251,8 @@ void get_endpoint_from_session_data_test(){
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
+	memset(replication_data_area, 0, data_area_size);
+
 	sslid_replication_data_processor_replacement replication_data_processor(5,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			ingetloglevel1, inputLogFatal1, inputLogError1, inputLogWarn1,
@@ -1280,6 +1272,8 @@ void write_session_data_test(){
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
+	memset(replication_data_area, 0, data_area_size);
+
 	sslid_replication_data_processor_replacement replication_data_processor(3,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,
 			ingetloglevel1, inputLogFatal1, inputLogError1, inputLogWarn1,
@@ -1298,6 +1292,8 @@ void clear_expired_session_data_test(){
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+
+	memset(replication_data_area, 0, data_area_size);
 
 	sslid_replication_data_processor_replacement replication_data_processor(2,
 			replication_data_area, SECTION_NUMBER, virtual_service_endpoint,

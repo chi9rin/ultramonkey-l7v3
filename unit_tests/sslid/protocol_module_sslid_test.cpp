@@ -210,6 +210,11 @@ class sslid_session_data_processor_stub : public sslid_session_data_processor
 			return session_lasttime_map;
 		}
 
+		std::multimap<time_t, std::string>& get_lasttime_session_map()
+		{
+			return lasttime_session_map;
+		}
+
 };
 
 class sslid_replication_data_processor_stub : public sslid_replication_data_processor
@@ -248,35 +253,6 @@ class sslid_replication_data_processor_stub : public sslid_replication_data_proc
 		{
 			return temp_list;
 		}
-        void register_getloglevel(getloglevel_func_type stu_getloglevel)
-        {
-        	getloglevel=stu_getloglevel;
-        }
-
-        void register_putLogFatal(logger_func_type stu_putLogFatal)
-        {
-        	putLogFatal=stu_putLogFatal;
-        }
-
-        void register_putLogError(logger_func_type stu_putLogError)
-        {
-        	putLogError=stu_putLogError;
-        }
-
-        void register_putLogWarn(logger_func_type stu_putLogWarn)
-        {
-        	putLogWarn=stu_putLogWarn;
-        }
-
-        void register_putLogInfo(logger_func_type stu_putLogInfo)
-        {
-        	putLogInfo=stu_putLogInfo;
-        }
-
-        void register_putLogDebug(logger_func_type stu_putLogDebug)
-        {
-        	putLogDebug=stu_putLogDebug;
-        }
 
 };
 
@@ -340,10 +316,8 @@ void is_udp_test(){
 
 //get_name
 void get_name_test(){
-	std::string name=this->get_name();
-	std::string sslidname="sslid";
 	//unit_test[5]　get_name()メソッドのテスト,正常系で必ず"sslid"を返す
-	BOOST_CHECK_EQUAL(name, sslidname);
+	BOOST_CHECK_EQUAL(this->get_name(), "sslid");
 }
 
 //initialize
@@ -506,25 +480,25 @@ void check_parameter_test(){
 	//unit_test[11] オプション文字列が存在しない場合, チェック結果フラグにTRUEを設定する
 	protocol_module_base::check_message_result check_message;
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[12] オプション文字列 = "-T", timeout設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
 	args.push_back("-T");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[13] オプション文字列 = "--T", timeout設定フラグ = OFFの場合,チェック結果フラグにFALSEを設定する
 	args.clear();
 	args.push_back("--T");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 
 	//unit_test[14] オプション文字列 = "-T -T", timeout設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-T");
 	args.push_back("-T");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[15] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2ewqt' is not numeric character."を設定する
 	//unit_test[15] data test:オプション文字列 = "-T 2ewqt" timeout設定フラグ = OFFの場合
@@ -532,7 +506,7 @@ void check_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2ewqt");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2ewqt' is not numeric character.");
 
 	//unit_test[16] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '$@#' is not numeric character."を設定する
@@ -541,7 +515,7 @@ void check_parameter_test(){
 	args.push_back("-T");
 	args.push_back("$@#");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '$@#' is not numeric character.");
 
 	//unit_test[17] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2148583647' is too large."を設定する
@@ -550,7 +524,7 @@ void check_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2148583647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2148583647' is too large.");
 
 	//unit_test[18] チェック結果フラグにTRUEを設定する
@@ -559,7 +533,7 @@ void check_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2000");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[19] チェック結果フラグにTRUEを設定する
 	//unit_test[19] test data:オプション文字列 = "-T 2147483647" timeout設定フラグ = OFF の場合
@@ -567,7 +541,7 @@ void check_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2147483647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[20] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[20] test data:オプション文字列 = "-T 2000 -T" timeout設定フラグ = ON の場合
@@ -576,7 +550,7 @@ void check_parameter_test(){
 	args.push_back("2000");
 	args.push_back("-T");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
 	//unit_test[21] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
@@ -587,7 +561,7 @@ void check_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2000");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
 	//unit_test[22] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
@@ -598,21 +572,21 @@ void check_parameter_test(){
 	args.push_back("20");
 	args.push_back("-T");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
 	//unit_test[23] オプション文字列 = "--timeout" timeout設定フラグ = OFF 次要素が存在しない場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--timeout");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[24] オプション文字列 = "--timeout --timeout" の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--timeout");
 	args.push_back("--timeout");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[25] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2ewqt' is not numeric character."を設定する
 	//unit_test[25] test data:オプション文字列 = "--timeout 2ewqt" timeout設定フラグ = OFF の場合
@@ -620,7 +594,7 @@ void check_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2ewqt");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2ewqt' is not numeric character.");
 
 	//unit_test[26] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2148583647' is too large."を設定する
@@ -629,7 +603,7 @@ void check_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2148583647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2148583647' is too large.");
 
 	//unit_test[27] チェック結果フラグにTRUEを設定する
@@ -638,7 +612,7 @@ void check_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2000");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[28] チェック結果フラグにTRUEを設定する
 	//unit_test[28] test data:オプション文字列 = "--timeout 2147483647" timeout設定フラグ = OFFの場合
@@ -646,7 +620,7 @@ void check_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2147483647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[29] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[29] test data:オプション文字列 = "--timeout 2000 --timeout" timeout設定フラグ = ONの場合
@@ -655,7 +629,7 @@ void check_parameter_test(){
 	args.push_back("2000");
 	args.push_back("--timeout");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
 	//unit_test[30] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
@@ -666,7 +640,7 @@ void check_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2000");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
 	//unit_test[31] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
@@ -677,7 +651,7 @@ void check_parameter_test(){
 	args.push_back("2000");
 	args.push_back("--timeout");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
 	//unit_test[32] オプション文字列 = "-M" maxlist設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
@@ -691,7 +665,7 @@ void check_parameter_test(){
 	args.push_back("-M");
 	args.push_back("-M");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[34] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '1st' is not numeric character."を設定する
 	//unit_test[34] test data:オプション文字列 = "-M 1st" maxlist設定フラグ = OFFの場合
@@ -699,7 +673,7 @@ void check_parameter_test(){
 	args.push_back("-M");
 	args.push_back("1st");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '1st' is not numeric character.");
 
 	//unit_test[35] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '2148583647' is too large."を設定する
@@ -708,7 +682,7 @@ void check_parameter_test(){
 	args.push_back("-M");
 	args.push_back("2148583647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2148583647' is too large.");
 
 	//unit_test[36] チェック結果フラグにTRUEを設定する
@@ -717,7 +691,7 @@ void check_parameter_test(){
 	args.push_back("-M");
 	args.push_back("100");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[37] チェック結果フラグにTRUEを設定する
 	//unit_test[37] test data:オプション文字列 = "-M 2147483647" maxlist設定フラグ = OFFの場合
@@ -725,7 +699,7 @@ void check_parameter_test(){
 	args.push_back("-M");
 	args.push_back("2147483647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[38] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[38] test data:オプション文字列 = "-M 100 -M"の場合
@@ -734,7 +708,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("-M");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
 	//unit_test[39] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
@@ -745,7 +719,7 @@ void check_parameter_test(){
 	args.push_back("-M");
 	args.push_back("100");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
 	//unit_test[40] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
@@ -756,7 +730,7 @@ void check_parameter_test(){
 	args.push_back("20");
 	args.push_back("-M");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
 	//unit_test[41] チェック結果フラグにTRUEを設定する
@@ -764,7 +738,7 @@ void check_parameter_test(){
 	args.clear();
 	args.push_back("--maxlist");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[42] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist option' value 1st is not numeric character."を設定する
 	//unit_test[42] test data:オプション文字列 = "--maxlist 1st" maxlist設定フラグ = OFFの場合
@@ -772,7 +746,7 @@ void check_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("1st");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '1st' is not numeric character.");
 
 	//unit_test[43] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist option' value 2148583647 is too large."を設定する
@@ -781,7 +755,7 @@ void check_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("2148583647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2148583647' is too large.");
 
 	//unit_test[44] チェック結果フラグにTRUEを設定する
@@ -790,7 +764,7 @@ void check_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("100");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[45] チェック結果フラグにTRUEを設定する
 	//unit_test[45] test data:オプション文字列 = "--maxlist 2147483647" maxlist設定フラグ = OFFの場合
@@ -798,7 +772,7 @@ void check_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("2147483647");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 
 	//unit_test[46] チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
@@ -808,7 +782,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("--maxlist");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
 	//unit_test[47] チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
@@ -819,7 +793,7 @@ void check_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("100");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
 	//unit_test[48] チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
@@ -830,7 +804,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("--maxlist");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
 	//unit_test[49] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
@@ -839,7 +813,7 @@ void check_parameter_test(){
 	args.push_back("-N");
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
 	//unit_test[50] オプション文字列 ="-N",reschedule設定フラグ = ON,チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
@@ -848,7 +822,7 @@ void check_parameter_test(){
 	args.push_back("-R");
 	args.push_back("-N");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
 	//unit_test[51] オプション文字列 ="-T -M -R -N"の場合,チェック結果フラグにFALSEを設定する
@@ -858,7 +832,7 @@ void check_parameter_test(){
 	args.push_back("-R");
 	args.push_back("-N");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 
 	//unit_test[52] オプション文字列 ="-M -T -N -R"の場合,チェック結果フラグにFALSEを設定する
 	args.clear();
@@ -867,7 +841,7 @@ void check_parameter_test(){
 	args.push_back("-N");
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 
 	//unit_test[53] オプション文字列 ="-T 2000 -M 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
@@ -877,7 +851,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[54] オプション文字列 ="--timeout 2000 -M 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
@@ -887,7 +861,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[55] オプション文字列 ="-T 2000 --maxlist 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
@@ -897,7 +871,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[56] オプション文字列 ="--timeout 2000 --maxlist 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
@@ -907,7 +881,7 @@ void check_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 	//unit_test[57] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
 	//unit_test[57] test data:オプション文字列 ="-T 2000 --maxlist 100 -R -N"の場合
@@ -919,14 +893,14 @@ void check_parameter_test(){
 	args.push_back("-R");
 	args.push_back("-N");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
 	//unit_test[58] オプション文字列 = 上記以外の場合,チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error"を設定する
 	args.clear();
 	args.push_back("-A");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Option error.",check_message.message);
 }
 
@@ -938,12 +912,12 @@ void set_parameter_test(){
 	vector<string> args;
 	install_stb_replication_func();
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -953,12 +927,12 @@ void set_parameter_test(){
 	args.clear();
 	args.push_back("-T");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -968,9 +942,9 @@ void set_parameter_test(){
 	args.clear();
 	args.push_back("--T");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -981,12 +955,12 @@ void set_parameter_test(){
 	args.push_back("-T");
 	args.push_back("-T");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -997,10 +971,10 @@ void set_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2ewqt");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2ewqt' is not numeric character.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1011,10 +985,10 @@ void set_parameter_test(){
 	args.push_back("-T");
 	args.push_back("$@#");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '$@#' is not numeric character.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1025,7 +999,7 @@ void set_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2148583647");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2148583647' is too large.");
 	this->timeout=111;
 	this->maxlist=111;
@@ -1041,8 +1015,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1057,8 +1031,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1074,8 +1048,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1087,11 +1061,11 @@ void set_parameter_test(){
 	args.push_back("2147483647");
 	args.push_back("-T");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->timeout,INT_MAX);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1104,7 +1078,7 @@ void set_parameter_test(){
 	args.push_back("-T");
 	args.push_back("2147483647");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->timeout,INT_MAX);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 	this->timeout=111;
@@ -1119,11 +1093,11 @@ void set_parameter_test(){
 	args.push_back("2147483647");
 	args.push_back("-T");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->timeout,INT_MAX);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1133,7 +1107,7 @@ void set_parameter_test(){
 	args.clear();
 	args.push_back("--timeout");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
@@ -1147,12 +1121,12 @@ void set_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("--timeout");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1163,10 +1137,10 @@ void set_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2ewqt");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2ewqt' is not numeric character.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1177,10 +1151,10 @@ void set_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2148583647");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2148583647' is too large.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1195,8 +1169,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1211,8 +1185,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1228,8 +1202,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1241,11 +1215,11 @@ void set_parameter_test(){
 	args.push_back("2147483647");
 	args.push_back("--timeout");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->timeout,INT_MAX);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1258,11 +1232,11 @@ void set_parameter_test(){
 	args.push_back("--timeout");
 	args.push_back("2147483647");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->timeout,INT_MAX);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1275,10 +1249,10 @@ void set_parameter_test(){
 	args.push_back("2147483647");
 	args.push_back("--timeout");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1288,12 +1262,12 @@ void set_parameter_test(){
 	args.clear();
 	args.push_back("-M");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1304,12 +1278,12 @@ void set_parameter_test(){
 	args.push_back("-M");
 	args.push_back("-M");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1320,10 +1294,10 @@ void set_parameter_test(){
 	args.push_back("-M");
 	args.push_back("2ewqt");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2ewqt' is not numeric character.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1334,10 +1308,10 @@ void set_parameter_test(){
 	args.push_back("-M");
 	args.push_back("2148583647");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2148583647' is too large.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1352,8 +1326,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1369,8 +1343,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1385,8 +1359,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1398,11 +1372,11 @@ void set_parameter_test(){
 	args.push_back("200");
 	args.push_back("-M");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->maxlist,200);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1415,11 +1389,11 @@ void set_parameter_test(){
 	args.push_back("-M");
 	args.push_back("200");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->maxlist,200);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1432,11 +1406,11 @@ void set_parameter_test(){
 	args.push_back("200");
 	args.push_back("-M");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->maxlist,200);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1446,12 +1420,12 @@ void set_parameter_test(){
 	args.clear();
 	args.push_back("--maxlist");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1462,12 +1436,12 @@ void set_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("--maxlist");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1478,10 +1452,10 @@ void set_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("2ewqt");
 	check_message=this->check_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2ewqt' is not numeric character.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1492,10 +1466,10 @@ void set_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("2148583647");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2148583647' is too large.");
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1510,8 +1484,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1527,8 +1501,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1543,8 +1517,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1556,10 +1530,10 @@ void set_parameter_test(){
 	args.push_back("20");
 	args.push_back("--maxlist");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1572,10 +1546,10 @@ void set_parameter_test(){
 	args.push_back("--maxlist");
 	args.push_back("20");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1588,10 +1562,10 @@ void set_parameter_test(){
 	args.push_back("20");
 	args.push_back("--maxlist");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1605,8 +1579,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(this->reschedule,1);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1618,10 +1592,10 @@ void set_parameter_test(){
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
 	BOOST_CHECK_EQUAL(this->reschedule,0);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1635,8 +1609,8 @@ void set_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,3600);
 	BOOST_CHECK_EQUAL(this->maxlist,1024);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1648,10 +1622,10 @@ void set_parameter_test(){
 	args.push_back("-N");
 	check_message=this->set_parameter(args);
 	BOOST_CHECK_EQUAL(this->reschedule,1);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1664,9 +1638,9 @@ void set_parameter_test(){
 	args.push_back("-R");
 	args.push_back("-N");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1679,9 +1653,9 @@ void set_parameter_test(){
 	args.push_back("-N");
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1695,12 +1669,12 @@ void set_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,2000);
 	BOOST_CHECK_EQUAL(this->maxlist,100);
 	BOOST_CHECK_EQUAL(this->reschedule,1);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1714,12 +1688,12 @@ void set_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,2000);
 	BOOST_CHECK_EQUAL(this->maxlist,100);
 	BOOST_CHECK_EQUAL(this->reschedule,1);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1733,12 +1707,12 @@ void set_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,2000);
 	BOOST_CHECK_EQUAL(this->maxlist,100);
 	BOOST_CHECK_EQUAL(this->reschedule,1);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1752,12 +1726,12 @@ void set_parameter_test(){
 	args.push_back("100");
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(true,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,true);
 	BOOST_CHECK_EQUAL(this->timeout,2000);
 	BOOST_CHECK_EQUAL(this->maxlist,100);
 	BOOST_CHECK_EQUAL(this->reschedule,1);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1772,11 +1746,11 @@ void set_parameter_test(){
 	args.push_back("-R");
 	args.push_back("-N");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(this->timeout,2000);
 	BOOST_CHECK_EQUAL(this->maxlist,100);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1786,10 +1760,10 @@ void set_parameter_test(){
 	args.clear();
 	args.push_back("-A");
 	check_message=this->set_parameter(args);
-	BOOST_CHECK_EQUAL(false,check_message.flag);
+	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Option error.",check_message.message);
-	BOOST_CHECK(NULL!=this->session_data_processor);
-	BOOST_CHECK(NULL!=this->replication_data_processor);
+	BOOST_CHECK(this->session_data_processor!=NULL);
+	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
@@ -1852,7 +1826,7 @@ void register_schedule_tcp_test(){
 	BOOST_CHECK(this->schedule_tcp==NULL);
 	//unit_test[117] schedule_tcpにt_scheduleを設定する
 	//unit_test[117] test data:NULL
-    tcp_schedule=&t_schedule;
+    	tcp_schedule=&t_schedule;
 	this->register_schedule(tcp_schedule);
 	this->schedule_tcp(boost::this_thread::get_id(),rs_1,rs_2,rs_3,ep);
 	BOOST_CHECK(check_register_schedule);
@@ -1946,8 +1920,8 @@ void handle_accept_test(){
 	thread_up_data_value.hello_message_flag=false;
 	session_thread_data_sslid* thread_up_data=&thread_up_data_value;
 	this->session_thread_data_map.insert(std::pair<const boost::thread::id,session_thread_data_sslid*>(boost::this_thread::get_id(),thread_up_data));
-	EVENT_TAG accept=this->handle_accept(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(accept, protocol_module_base::CLIENT_RECV);
+	BOOST_CHECK_EQUAL(this->handle_accept(boost::this_thread::get_id()), protocol_module_base::CLIENT_RECV);
+	this->session_thread_data_map.clear();
 }
 
 //handle_client_recv
@@ -3558,6 +3532,9 @@ void handle_realserver_recv_tcp_test() {
     boost::asio::ip::tcp::endpoint rs_endpoint;
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     int recvlen;
+	int mem_cmp_result;
+	int mem_cmp_length;
+	char* mem_cmp_buffer;
 
     // unit_test[186] data_size = 0, current_record_rest_size > 0
     // unit_test[186] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
@@ -3577,27 +3554,51 @@ void handle_realserver_recv_tcp_test() {
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 0u;
+	down_thread_data->data_begain_offset = 0;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x00;
     recvlen = 6;
+	for(int i=1; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x01;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = down_thread_data->data_size + recvlen;
     status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
     BOOST_CHECK_EQUAL(status, FINALIZE);
     delete down_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
     // unit_test[188] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可)
     // unit_test[188] test data:handle_realserver_recv() return REALSERVER_RECV
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
+	down_thread_data->data_begain_offset = 0;
     down_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = 3;
+	for(int i=0; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x02;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = down_thread_data->data_size + recvlen;
     status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
+	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
     delete down_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
     // unit_test[189] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
@@ -3605,6 +3606,7 @@ void handle_realserver_recv_tcp_test() {
     // unit_test[189] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
+	down_thread_data->data_begain_offset = 0;
     down_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x16;
@@ -3613,15 +3615,29 @@ void handle_realserver_recv_tcp_test() {
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
     recvbuffer[5] = 0x02;
+	recvbuffer[6] = 0x03;
+	recvbuffer[7] = 0x03;
+	recvbuffer[8] = 0x03;
     recvbuffer[9] = 0x03;
     recvbuffer[10] = 0x01;
     recvlen = 76;
+	for(int i=11; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x03;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = down_thread_data->data_size + recvlen;
     status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
+	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
     // unit_test[190] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
@@ -3629,6 +3645,7 @@ void handle_realserver_recv_tcp_test() {
     // unit_test[190] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
+	down_thread_data->data_begain_offset = 0;
     down_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x17;
@@ -3637,12 +3654,23 @@ void handle_realserver_recv_tcp_test() {
     recvbuffer[3] = 0x00;
     recvbuffer[4] = 0x9e;
     recvlen = 10;
+	for(int i=5; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x04;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = down_thread_data->data_size + recvlen;
     status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
+	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
     BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
     // unit_test[191] data_size > 0, current_record_rest_size > 0, data_begain_offset>0
@@ -3653,12 +3681,23 @@ void handle_realserver_recv_tcp_test() {
     down_thread_data->current_record_rest_size = 10u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = 15;
+	for(int i=5; i<recvlen; i++)
+	{
+		recvbuffer[i] = 0x05;
+	}
+	mem_cmp_buffer = new char[MAX_BUFFER_SIZE+76];
+	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+	mem_cmp_length = down_thread_data->data_size + recvlen;
     status = this->handle_realserver_recv(boost::this_thread::get_id(),
             rs_endpoint, recvbuffer, recvlen);
+	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 25u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
     BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
     delete down_thread_data;
+	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
     // unit_test[192] data_size + recvlen > MAX_BUFFER_SIZE + 76
@@ -3700,6 +3739,7 @@ void handle_client_connection_check_test() {
     int timeout = 0;
     char* sslid_replication_area_begain;
     int sslid_replication_area_size = 0;
+    std::string session_id;
     boost::asio::ip::tcp::endpoint virtual_service_endpoint;
     sslid_replication_data_processor * replication_data_processor = NULL;
     getloglevel_func_type ingetloglevel = stb_getloglevel;
@@ -3708,6 +3748,7 @@ void handle_client_connection_check_test() {
     logger_func_type inputLogWarn = stb_putLogWarn;
     logger_func_type inputLogInfo = stb_putLogInfo;
     logger_func_type inputLogDebug = stb_putLogDebug;
+	boost::asio::ip::tcp::endpoint rs_endpoint(boost::asio::ip::address::from_string("192.168.120.249"), 12345);
 
     // unit_test[194] down_thread_id is not in the map
     // unit_test[194] test data:handle_client_connection return FINALIZE
@@ -3720,10 +3761,14 @@ void handle_client_connection_check_test() {
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 10u;
     down_thread_data->data_size = 76u;
+    down_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
@@ -3735,18 +3780,29 @@ void handle_client_connection_check_test() {
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[43] = 0x20;
     down_thread_data->data_size = 76u;
+    down_thread_data->data_begain_offset = 0;
+    for(size_t i=44; i<down_thread_data->data_size; i++)
+    {
+    	down_thread_data->data_buffer[i] = 0x01;
+	}
+	session_id.assign(down_thread_data->data_buffer.c_array()+44,down_thread_data->data_buffer.c_array()+76);
+    down_thread_data->selected_realserver = rs_endpoint;
     maxlist = 3;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+    this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
     		sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
     		inputLogWarn, inputLogInfo, inputLogDebug);
-    this->session_data_processor = new sslid_session_data_processor(
-            maxlist, timeout, replication_data_processor, stb_getloglevel,
+    this->session_data_processor = new sslid_session_data_processor_stub(
+            maxlist, timeout, this->replication_data_processor, stb_getloglevel,
             stb_putLogFatal, stb_putLogError, stb_putLogWarn,
             stb_putLogInfo, stb_putLogDebug);
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
+	BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
     delete replication_data_processor;
     this->session_thread_data_map.clear();
@@ -3759,10 +3815,14 @@ void handle_client_connection_check_test() {
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[43] = 0x00;
     down_thread_data->data_size = 76u;
+    down_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
@@ -3774,6 +3834,7 @@ void handle_client_connection_check_test() {
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[43] = 0x00;
     down_thread_data->data_size = 0u;
+    down_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
@@ -3791,6 +3852,9 @@ void handle_client_connection_check_test() {
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 }
@@ -3959,14 +4023,14 @@ void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id
 void handle_realserver_disconnect_test(){
 	//unit_test[211] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_realserver_disconnect(boost::this_thread::get_id(),ep));
+	BOOST_CHECK_EQUAL(this->handle_realserver_disconnect(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_select
 void handle_sorryserver_select_test(){
 	//unit_test[212] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_select(boost::this_thread::get_id(),ep));
+	BOOST_CHECK_EQUAL(this->handle_sorryserver_select(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_connect
@@ -3975,20 +4039,20 @@ void handle_sorryserver_connect_test(){
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_connect(boost::this_thread::get_id(),buffer,datalen));
+	BOOST_CHECK_EQUAL(this->handle_sorryserver_connect(boost::this_thread::get_id(),buffer,datalen), STOP);
 }
 
 //handle_sorryserver_connection_fail
 void handle_sorryserver_connection_fail_test(){
 	//unit_test[214] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep));
+	BOOST_CHECK_EQUAL(this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_send
 void handle_sorryserver_send_test(){
 	//unit_test[215] 正常系で必ずSTOPを返す
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_send(boost::this_thread::get_id()));
+	BOOST_CHECK_EQUAL(this->handle_sorryserver_send(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorryserver_recv
@@ -3997,14 +4061,14 @@ void handle_sorryserver_recv_test(){
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_recv(boost::this_thread::get_id(),ep,buffer,datalen));
+	BOOST_CHECK_EQUAL(this->handle_sorryserver_recv(boost::this_thread::get_id(),ep,buffer,datalen), STOP);
 }
 
 //handle_response_send_inform
 void handle_response_send_inform_test(){
 	//unit_test[217] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_response_send_inform(boost::this_thread::get_id()));
+	BOOST_CHECK_EQUAL(this->handle_response_send_inform(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorry_enable
@@ -4012,21 +4076,21 @@ void handle_sorry_enable_test(){
 	//unit_test[218] 全部の場合,遷移先ステータスを設定する,status = STOP
 	//unit_test[218] test data:NULL
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorry_enable(boost::this_thread::get_id()));
+	BOOST_CHECK_EQUAL(this->handle_sorry_enable(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorry_disable
 void handle_sorry_disable_test(){
 	//unit_test[219] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorry_disable(boost::this_thread::get_id()));
+	BOOST_CHECK_EQUAL(this->handle_sorry_disable(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorryserver_disconnect
 void handle_sorryserver_disconnect_test(){
 	//unit_test[220] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(protocol_module_base::STOP, this->handle_sorryserver_disconnect(boost::this_thread::get_id(),ep));
+	BOOST_CHECK_EQUAL(this->handle_sorryserver_disconnect(boost::this_thread::get_id(),ep), STOP);
 }
 
 //replication_interrupt
@@ -4061,12 +4125,6 @@ void replication_interrupt_test(){
 	}
 	pstub->register_replication_area_lock(replication_area_lock_stb);
 	pstub->register_replication_area_unlock(replication_area_unlock_stb);
-	pstub->register_getloglevel(stb_getloglevel);
-	pstub->register_putLogFatal(stb_putLogFatal);
-	pstub->register_putLogError(stb_putLogError);
-	pstub->register_putLogWarn(stb_putLogWarn);
-	pstub->register_putLogInfo(stb_putLogInfo);
-	pstub->register_putLogDebug(stb_putLogDebug);
 	pstub->get_temp_list().push_back(replication_temp_data_add);
 	pstub->get_replication_area()[0].valid=0;
 
@@ -4114,8 +4172,9 @@ void replication_interrupt_test(){
 	boost::thread test_thread3(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
 	sleep(5);
 	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,0);
-	delete this->replication_data_processor;
 	test_thread3.interrupt();
+	sleep(5);
+	delete this->replication_data_processor;
 }
 
 //put_data_to_sendbuffer
@@ -4315,7 +4374,7 @@ void put_data_to_sendbuffer_test(){
 void realserver_selected_test(){
 	//unit_test[241] 正常系で必ずFALSEを返す
 	boost::asio::ip::tcp::endpoint ep;
-	BOOST_CHECK_EQUAL(false, this->realserver_selected(ep));
+	BOOST_CHECK_EQUAL(this->realserver_selected(ep), false);
 }
 
 
