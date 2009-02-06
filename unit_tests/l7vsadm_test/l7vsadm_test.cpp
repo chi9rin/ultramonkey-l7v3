@@ -37,7 +37,11 @@ public:
 	bool	parse_opt_vs_module_func_wp( int& pos, int argc, char* argv[] )
 	{ return parse_opt_vs_module_func( pos, argc, argv ); }
 
+	bool	parse_opt_vs_scheduler_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_vs_scheduler_func( pos, argc, argv ); }
 
+	bool	parse_opt_vs_upper_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_vs_upper_func( pos, argc, argv ); }
 
 
 };
@@ -242,7 +246,7 @@ void	parse_opt_vs_module_func_test(){
 
 	}
 
-	// parse_opt_vs_module_func normal case 3 (no protocol module option)
+	// parse_opt_vs_module_func normal case 3 (no protocol module arg)
 	{
 		l7vsadm_test	adm;
 		int		pos		= 2;
@@ -254,13 +258,13 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module option) return value check
+		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module arg) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module option) check_parameter call check
+		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module arg) check_parameter call check
 		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
-		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module option) module name check
+		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module arg) module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module option) module arg check
+		// unit_test[1] parse_opt_vs_module_func normal case 3 (no protocol module arg) module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.size(), 0U );
 
 	}
@@ -318,7 +322,115 @@ void	parse_opt_vs_module_func_test(){
 
 	}
 
+	l7vs::protocol_module_control::load_module_fail = false;
+	l7vs::protocol_module_stub::check_parameter_called = false;
+	l7vs::protocol_module_stub::check_parameter_fail = false;
+
 	BOOST_MESSAGE( "----- parse_opt_vs_module_func_test end -----" );
+
+}
+
+void	parse_opt_vs_scheduler_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_vs_scheduler_func_test start -----" );
+
+	// parse_opt_vs_scheduler_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-s", "rr" };
+		l7vs::schedule_module_control::load_module_fail = false;
+	
+		bool ret = adm.parse_opt_vs_scheduler_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_vs_scheduler_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_vs_scheduler_func normal case 1 module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "rr" );
+	}
+
+	// parse_opt_vs_scheduler_func error case 1 (no schedule module name)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-s" };
+		l7vs::schedule_module_control::load_module_fail = false;
+	
+		bool ret = adm.parse_opt_vs_scheduler_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_vs_scheduler_func error case 1 (no schedule module name) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+
+	}
+
+	// parse_opt_vs_scheduler_func error case 2 (schedule module load failed)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-s", "rr" };
+		l7vs::schedule_module_control::load_module_fail = true;
+	
+		bool ret = adm.parse_opt_vs_scheduler_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_vs_scheduler_func error case 2 (schedule module load failed) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+
+	}
+
+	l7vs::schedule_module_control::load_module_fail = false;
+
+	BOOST_MESSAGE( "----- parse_opt_vs_scheduler_func_test end -----" );
+
+}
+
+void	parse_opt_vs_upper_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_vs_upper_func_test start -----" );
+
+	// parse_opt_vs_upper_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-u", "128" };
+	
+		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_vs_upper_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_vs_upper_func normal case 1 sorry_maxconnection check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_maxconnection, 128 );
+	}
+
+	// parse_opt_vs_upper_func error case 1 (invalid maxconnection value (charactor))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-u", "a" };
+	
+		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_vs_upper_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_upper_func error case 1 (invalid maxconnection value(long long over))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-u", "" };
+	
+		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_vs_upper_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+
+	BOOST_MESSAGE( "----- parse_opt_vs_upper_func_test end -----" );
 
 }
 
@@ -335,6 +447,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &parse_list_func_test ) );
 	ts->add( BOOST_TEST_CASE( &parse_opt_vs_target_func_test ) );
 	ts->add( BOOST_TEST_CASE( &parse_opt_vs_module_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_vs_scheduler_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_vs_upper_func_test ) );
 
 	framework::master_test_suite().add( ts );
 
