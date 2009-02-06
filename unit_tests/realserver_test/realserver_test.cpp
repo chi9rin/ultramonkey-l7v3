@@ -464,6 +464,7 @@ void	realserver_test(){
 	BOOST_MESSAGE( "sleep in" );
 	sleep( 1 );
 	rush_server.starting_condition.notify_all();
+	sleep( 2 );
 
 	thread_item1.join();
 	thread_item2.join();
@@ -472,6 +473,32 @@ void	realserver_test(){
 	thread_item5.join();
 
 	BOOST_CHECK_EQUAL( rush_server.get_inact(), 5 );
+
+
+	// nactive, ninactをelement時のみsettter有効にする評価
+	l7vs::realserver			rs;
+	rs.increment_active();
+//	rs.set_active( 10 );		// protectedなので変更できない（コンパイルエラー）
+	BOOST_CHECK( rs.get_active() != 10 );
+	rs.increment_inact();
+//	rs.set_inact( 10 );			// protectedなので変更できない（コンパイルエラー）
+	BOOST_CHECK( rs.get_inact() != 10 );
+
+	// こんなことするとrealserver上からも変更できてしまうけどそれは不正なので無視とする
+//	l7vs::realserver_element&	rs_elem2( rs );
+//	rs_elem2.set_active( 10 );
+//	BOOST_CHECK( rs.get_active() != 10 );
+//	rs_elem2.set_inact( 10 );
+//	BOOST_CHECK( rs.get_inact() != 10 );
+
+
+	l7vs::realserver_element	rs_elem( rs );
+	BOOST_CHECK_EQUAL( rs_elem.get_active(), 1 );
+	BOOST_CHECK_EQUAL( rs_elem.get_inact(), 1 );
+	rs_elem.set_active( 0 );		// publicなので設定可能
+	rs_elem.set_inact( 0 );			// publicなので設定可能
+	BOOST_CHECK_EQUAL( rs_elem.get_active(), 0 );
+	BOOST_CHECK_EQUAL( rs_elem.get_inact(), 0 );
 }
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){

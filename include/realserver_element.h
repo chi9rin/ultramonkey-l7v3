@@ -65,6 +65,14 @@ public:
 		return ninact;
 	}
 
+    void	set_active( const int in_active ){ 
+		nactive = in_active ;
+	}
+
+    void	set_inact( const int in_inact ){
+		ninact = in_inact ;
+	}
+
 private:
 	friend class	boost::serialization::access;		//! friend boost serializable class
 	//! serializable
