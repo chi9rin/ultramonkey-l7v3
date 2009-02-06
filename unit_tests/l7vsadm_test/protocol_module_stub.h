@@ -12,6 +12,9 @@ public:
 	protocol_module_stub() : protocol_module_base( "stub" ){}
 	~protocol_module_stub(){}
 
+	static	bool	check_parameter_called;
+	static	bool	check_parameter_fail;
+
 	bool is_tcp()	{ return true; }
 	bool is_udp()	{ return false; }
 	void replication_interrupt() {}
@@ -24,8 +27,12 @@ public:
 	bool is_use_sorry() { return true; }
 	check_message_result check_parameter(const std::vector<std::string>& args)
 	{
+		check_parameter_called = true;
 		protocol_module_base::check_message_result	res;
-		res.flag = true;
+		if( check_parameter_fail )
+			res.flag = false;
+		else
+			res.flag = true;
 		return res;
 	}
 

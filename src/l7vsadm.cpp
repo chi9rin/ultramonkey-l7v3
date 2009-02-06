@@ -28,15 +28,18 @@
 //
 //! list command parsing.
 bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
-	request.command = cmd;	// set response
-	if( argc < 4 ) return true;	// optin is none. this pattern is true
-	for( int pos = 3; pos < argc; ++pos ){ 	//sarch option function from argv strings
+	request.command = cmd;	// set command
+	if( argc < 3 ) return true;	// option is none. this pattern is true
+	for( int pos = 2; pos < argc; ++pos ){ 	//search option function from argv strings
 		parse_opt_map_type::iterator itr = list_option_dic.find( argv[pos] );
-		if( itr != list_option_dic.end() ){	// option strign function find.
+		if( itr != list_option_dic.end() ){	// option string function find.
 			if( ! itr->second( pos, argc, argv ) ) return false;	// option string function error.
 		}
 		else{	//option string function don't find.
 			// print option not found message.
+			std::stringstream buf;
+			buf << "list option not found:" << argv[pos];
+			err.setter( true, buf.str() );
 			return false;
 		}
 	}
@@ -50,37 +53,45 @@ bool	l7vs::l7vsadm::parse_opt_list_numeric_func( int& pos, int argc, char* argv[
 	numeric_flag = true;	//numeric flag on.
 	return true;
 }
+
 //! virtualservice command parsing.
 bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	request.command = cmd;	// set command
-	for( int pos = 3; pos < argc; ++pos ){	// check options.
+	for( int pos = 2; pos < argc; ++pos ){	// check options.
 		parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
 		if( itr != vs_option_dic.end() ){	// find option
 			if( ! itr->second( pos, argc, argv ) ) return false;	// option function execute.
 		}
 		else{	// don't find option function.
+			std::stringstream buf;
+			buf << "virtualservice option not found:" << argv[pos];
+			err.setter( true, buf.str() );
 			return false;
 		}
 	}
 	// check vertualservice on response
 	// 
 	if( request.vs_element.schedule_module_name.length() == 0 ){
-		//scheduker name error
+		//scheduler module name error
+		err.setter( true, "scheduler module not specified." );
 		return false;
 	}
 	if( request.vs_element.protocol_module_name.length() == 0 ){
-		//module name error
+		//protocol module name error
+		err.setter( true, "protocol module not specified." );
 		return false;
 	}
 	if( request.vs_element.udpmode ){
 		if( request.vs_element.udp_recv_endpoint == boost::asio::ip::udp::endpoint() ){
 			// udp mode,but not acceptor endpoint
+			err.setter( true, "udp recv endpoint not specified." );
 			return false;
 		}
 	}
 	else{
 		if( request.vs_element.tcp_accept_endpoint == boost::asio::ip::tcp::endpoint() ){
 			// tcp mode, but not acceptor endpoint
+			err.setter( true, "tcp accpeptor endpoint not specified." );
 			return false;
 		}
 	}
@@ -92,7 +103,7 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 //! target option check
 bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
-		//don't rarget recvaddress:port
+		//don't target recvaddress:port
 		return false;
 	}
 	// get host endpoint from string
@@ -113,7 +124,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 //! module option check
 bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
-		//don't rarget shcedule name.
+		//don't target protomod name.
 		return false;
 	}
 	std::string	module_name = argv[pos];
@@ -142,6 +153,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 	protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
 	if( !module_message.flag ){
 		// args is not suppoted.
+		return false;
 	}
 	request.vs_element.protocol_module_name = module_name;
 	BOOST_FOREACH( std::string str,	module_args ){
@@ -708,25 +720,26 @@ l7vs::l7vsadm::l7vsadm() : numeric_flag(false){
 
 
 bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
-	// no argument, display usage
+	// no argument, assume list command
 	if( 1 == argc ){
-		std::cout << usage() << std::endl;
-		return true;
+		request.command = l7vsadm_request::CMD_LIST;
 	}
+	else {
 
-	// analyze command line
-	int pos = 1;
-	parse_cmd_map_type::iterator itr = command_dic.find( argv[pos] );
-	if( itr != command_dic.end() ){
-		itr->second( argc, argv );
-	}
-	else{
-		err.setter( true, "command not found." );
+		// analyze command line
+		int pos = 1;
+		parse_cmd_map_type::iterator itr = command_dic.find( argv[pos] );
+		if( itr != command_dic.end() ){
+			itr->second( argc, argv );
+		}
+		else{
+			err.setter( true, "command not found." );
+		}
 	}
 
 	// display analyze result
 	if( err ){
-
+		std::cerr << "PARSE ERROR : ";
 		return false;
 	}
 
