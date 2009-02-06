@@ -207,6 +207,17 @@ public:
 	}
 };
 
+class data_send_ok_incorrect
+{
+public:
+	inline bool operator ()(const protocol_module_sessionless::send_status& send_status_first,
+	        const protocol_module_sessionless::send_status& send_status_second)
+	{
+		return send_status_first.status == protocol_module_sessionless::SEND_OK
+		&& send_status_first.send_rest_size > 0;
+	}
+};
+
 }
 
 #endif  //PROTOCOL_MODULE_SESSIONLESS_H

@@ -18,6 +18,7 @@ namespace l7vs
      * @param[in]  const char*   record_data             ssl record data pointer
      * @param[in]  int           recv_length             ssl record data length
      * @param[out] std::string&  session_id              ssl session id
+	 * @return 0 get session id, 1 no session id, -1 recv data error 
      */
     int ssl_protocol_module_base::get_ssl_session_id(const char* record_data, size_t recv_length, std::string& session_id)
     {
@@ -49,6 +50,7 @@ namespace l7vs
      * @param[in]  const char* record_data              ssl record data pointer
      * @param[out] int&        all_length               ssl record data length
      * @param[out] bool&       is_hello_message         is ssl client/server hello record data
+	 * @return 0 送信可能, 1 送信不可, -1 異常
      */
     int ssl_protocol_module_base::check_ssl_record_sendable( bool is_message_form_client,
                                                     const char* record_data,

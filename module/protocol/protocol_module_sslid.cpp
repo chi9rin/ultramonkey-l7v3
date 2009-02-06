@@ -1319,68 +1319,21 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
 
 //! called from after session accept.in client socket use in upstream thread.
 //! @param[in] upstream thread id.
-//! @return session use EVENT mode(CLIENT_RECV, FINALIZE).
+//! @return session use EVENT mode(CLIENT_RECV).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
                                                 const boost::thread::id thread_id )
 {
     /*-------- DEBUG LOG --------*/
     if ( LOG_LV_DEBUG == getloglevel() )
     {
-        boost::format formatter( "in_function: protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                            "handle_accept( const boost::thread::id thread_id ): thread_id=%d" );
-        formatter % thread_id;
+        boost::format formatter( "in/out_function: protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                            "handle_accept( const boost::thread::id thread_id ): thread_id=%d, return_value=%d." );
+        formatter % thread_id % CLIENT_RECV;
         putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
-    EVENT_TAG status = FINALIZE;
-    // find thread id from map
-    boost::mutex::scoped_lock sclock( session_thread_data_map_mutex );
-    try
-    {
-        session_thread_data_map_type::iterator it = session_thread_data_map.find( thread_id );
-        if ( it == session_thread_data_map.end() )
-        {
-            // waiting for jp response.....??????????????????
-            putLogError( 37000, "Invalid thread id.", __FILE__, __LINE__ );
-            status = FINALIZE;
-        }
-        else
-        {
-            status = CLIENT_RECV;
-        }
-    }
-    catch ( const std::exception& e )
-    {
-        std::cerr << "handle_accept exception: error=%s" << e.what() << "." << std::endl;
-        boost::format formatter( "function: protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                            "handle_accept() exception: result=%d, error=%s." );
-        formatter % FINALIZE % e.what();
-        putLogError( 37000, formatter.str(), __FILE__, __LINE__ );
-
-        status = FINALIZE;
-    }
-    catch( ... )
-    {
-        std::cerr << "protocol_module_sslid::handle_accept(): Unkown exception." << std::endl;
-        putLogError( 37000, "function protocol_module_sslid::check_message_result "
-                        "protocol_module_sslid::handle_accept(): "
-                        "Unkown exception.", __FILE__, __LINE__ );
-
-        status = FINALIZE;
-    }
-
-    /*-------- DEBUG LOG --------*/
-    if ( LOG_LV_DEBUG == getloglevel() )
-    {
-        boost::format formatter("out_function: protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                            "handle_accept( const boost::thread::id thread_id ): return_value=%d.");
-        formatter % status;
-        putLogDebug( 30000, formatter.str(), __FILE__, __LINE__ );
-    }
-    /*------DEBUG LOG END------*/
-
-    return status;
+    return CLIENT_RECV;
 }
 
 //! called from after session recv in client socket. use in upstream thread.

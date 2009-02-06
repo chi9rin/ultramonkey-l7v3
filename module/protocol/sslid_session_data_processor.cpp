@@ -412,11 +412,11 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
             if ( replication_area[i].valid == 1 )
             {
                 // valid session data
-                boost::asio::ip::address address;
                 char sessionid_temp[SSLID_LENGTH+1] = {0};
-                memcpy( sessionid_temp, replication_area[i].realserver_ip, SSLID_LENGTH );
-                address.from_string(replication_area[i].realserver_ip);
-                boost::asio::ip::tcp::endpoint endpoint( address, replication_area[i].realserver_port );
+                memcpy( sessionid_temp, replication_area[i].session_id, SSLID_LENGTH );
+                boost::asio::ip::tcp::endpoint endpoint(
+                                                                    boost::asio::ip::address::from_string(replication_area[i].realserver_ip),
+                                                                    replication_area[i].realserver_port );
                 session_endpoint_map[sessionid_temp] = endpoint;
                 session_lasttime_map[sessionid_temp] = replication_area[i].last_time;
                 lasttime_session_map.insert( std::make_pair( replication_area[i].last_time, sessionid_temp ) );

@@ -48,7 +48,7 @@ bool protocol_module_sessionless::is_tcp()
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010003, "in/out_function: bool protocol_module_sessionless::is_tcp(): "
+		putLogDebug(10003, "in/out_function: bool protocol_module_sessionless::is_tcp(): "
 			"return_value=true", __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
@@ -63,7 +63,7 @@ bool protocol_module_sessionless::is_udp()
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010004, "in/out_function: bool protocol_module_sessionless::is_udp(): "
+		putLogDebug(10004, "in/out_function: bool protocol_module_sessionless::is_udp(): "
 			"return_value=false", __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
@@ -76,7 +76,7 @@ void protocol_module_sessionless::replication_interrupt()
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010002, "in/out_function: protocol_module_sessionless::"
+		putLogDebug(10002, "in/out_function: protocol_module_sessionless::"
 			"replication_interrupt()", __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
@@ -99,7 +99,7 @@ void protocol_module_sessionless::initialize(rs_list_itr_func_type	inlist_begin,
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010005, "in_function: void protocol_module_sessionless::initialize("
+		putLogDebug(10005, "in_function: void protocol_module_sessionless::initialize("
 			"rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end,"
 			"rs_list_itr_next_func_type inlist_next,boost::function< void( void ) >	"
 			"inlist_lock,boost::function< void( void ) >	inlist_unlock )", __FILE__, __LINE__ );
@@ -121,7 +121,7 @@ void protocol_module_sessionless::initialize(rs_list_itr_func_type	inlist_begin,
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010006, "out_function: void protocol_module_sessionless::initialize("
+		putLogDebug(00006, "out_function: void protocol_module_sessionless::initialize("
 			"rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end,"
 			"rs_list_itr_next_func_type inlist_next,boost::function< void( void ) >	"
 			"inlist_lock,boost::function< void( void ) >	inlist_unlock )", __FILE__, __LINE__ );
@@ -138,7 +138,7 @@ void protocol_module_sessionless::finalize()
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010007, "int_function: void protocol_module_sessionless::finalize()", __FILE__,
+		putLogDebug(00007, "int_function: void protocol_module_sessionless::finalize()", __FILE__,
 		__LINE__ );
 	}
 	/*------DEBUG LOG END------*/
@@ -187,14 +187,6 @@ void protocol_module_sessionless::finalize()
 	forwarded_for = 0;
 	//sorry-uri
 	sorry_uri.assign('\0');
-
-	/*-------- DEBUG LOG --------*/
-	if (LOG_LV_DEBUG == getloglevel())
-	{
-		putLogDebug(010007, "out_function: void protocol_module_sessionless::finalize()", __FILE__,
-		__LINE__ );
-	}
-	/*------DEBUG LOG END------*/
 }
 
 /*!
@@ -206,7 +198,7 @@ bool protocol_module_sessionless::is_use_sorry()
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
 	{
-		putLogDebug(010007, "in/out_function: bool protocol_module_sessionless::is_use_sorry(): "
+		putLogDebug(10007, "in/out_function: bool protocol_module_sessionless::is_use_sorry(): "
 			"return_value=true", __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
@@ -234,7 +226,7 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::c
 			argsdump += *it;
 		}
 		formatter % argsdump;
-		putLogDebug(010010, formatter.str(), __FILE__, __LINE__ );
+		putLogDebug(10010, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
 
@@ -385,7 +377,7 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::c
 			"const std::vector<std::string>& args ): return_value=("
 			"check_message_result.flag=%d, check_message_result.message=%s");
 		formatter % check_result.flag % check_result.message;
-		putLogDebug(010005, formatter.str(), __FILE__, __LINE__ );
+		putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
 	return check_result;
@@ -412,7 +404,7 @@ protocol_module_sessionless::check_message_result protocol_module_sessionless::s
 			argsdump += *it;
 		}
 		formatter % argsdump;
-		putLogDebug(010010, formatter.str(), __FILE__, __LINE__ );
+		putLogDebug(10010, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
 	//チェック結果フラグにTRUEを設定する
@@ -708,6 +700,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 		putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
+	EVENT_TAG status;
 	session_thread_data_sessionless* p_up = NULL;
 	session_thread_data_sessionless* p_down = NULL;
 
@@ -797,14 +790,22 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 
 		session_thread_data_map[up_thread_id] = p_up;
 		session_thread_data_map[down_thread_id] = p_down;
-	} catch (const std::exception& ex)
+
+		status = ACCEPT;
+	}catch (const std::bad_alloc&)
 	{
-		std::cerr << "handle_session_initialize exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_session_initialize exception: Could not allocate memory." << std::endl;
+		putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
+		status = FINALIZE;
+	}
+	catch (const std::exception& ex)
+	{
+		std::cerr << "handle_session_initialize exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_session_initialize() exception: result=%d, error=%s.");
 		formatter % ex.what();
 		putLogError(17000, formatter.str(), __FILE__, __LINE__ );
-		return FINALIZE;
+		status = FINALIZE;
 	} catch (...)
 	{
 		std::cerr << "Unkown exception." << std::endl;
@@ -812,7 +813,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 			"protocol_module_sessionless::handle_session_initialize() : "
 			"Unkown exception.", __FILE__, __LINE__ );
 
-		return FINALIZE;
+		status = FINALIZE;
 	}
 	/*-------- DEBUG LOG --------*/
 	if (LOG_LV_DEBUG == getloglevel())
@@ -821,12 +822,12 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 			"handle_session_initialize( const boost::thread::id up_thread_id, "
 			"const boost::thread::id down_thread_id , const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,"
 			"const boost::asio::ip::udp::endpoint& client_endpoint_udp ): return_value=%d");
-		formatter % ACCEPT;
-		putLogDebug(030005, formatter.str(), __FILE__, __LINE__ );
+		formatter % status;
+		putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
 
-	return ACCEPT;
+	return status;
 }
 /*!
  *handle_session_finalize
@@ -850,6 +851,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 		putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
+	EVENT_TAG status;
 	session_thread_data_sessionless* p_up = NULL;
 	session_thread_data_sessionless* p_down = NULL;
 	boost::asio::ip::tcp::endpoint endpoint;
@@ -997,13 +999,15 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 			delete p_down;
 			session_thread_data_map.erase(down_thread_id);
 		}
+		status = STOP;
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_session_finalize exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_session_finalize exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_session_finalize() exception: result=%d, error=%s.");
 		formatter % STOP % ex.what();
 		putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+		status = STOP;
 	} catch (...)
 	{
 		std::cerr << "Unkown exception." << std::endl;
@@ -1011,6 +1015,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 			"handle_session_finalize() exception: result=%d.");
 		formatter % STOP;
 		putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+		status = STOP;
 	}
 
 	/*-------- DEBUG LOG --------*/
@@ -1019,11 +1024,11 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sessi
 		boost::format formatter("out_function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_session_finalize( const boost::thread::id up_thread_id,"
 			"const boost::thread::id down_thread_id ): return_value=%d");
-		formatter % STOP;
-		putLogDebug(030005, formatter.str(), __FILE__, __LINE__ );
+		formatter % status;
+		putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
 	}
 	/*------DEBUG LOG END------*/
-	return STOP;
+	return status;
 }
 
 /*!
@@ -1066,7 +1071,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_accep
 
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_accept exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_accept exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_accept() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -1153,6 +1158,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 	char* buffer1 = NULL;
 	char* buffer2 = NULL;
 	size_t pos = 0;
+	const size_t cr_lf_len = strlen("\r\n\r\n");
 
 	//パラメータチェック
 	if (recvlen > recvbuffer.size())
@@ -1263,7 +1269,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 		it = std::find_if(it, it_end, data_send_ok());
 		if (it != it_end)
 		{
-			putLogError(17000, "send data is not correct.", __FILE__, __LINE__ );
+			putLogError(17000, "sending data is not correct.", __FILE__, __LINE__ );
 			/*-------- DEBUG LOG --------*/
 			if (LOG_LV_DEBUG == getloglevel())
 			{
@@ -1283,7 +1289,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 		it = std::adjacent_find(it, it_end, data_send_repeated());
 		if (it != it_end)
 		{
-			putLogError(17000, "send data is not correct.", __FILE__, __LINE__ );
+			putLogError(17000, "sending data is not correct.", __FILE__, __LINE__ );
 			/*-------- DEBUG LOG --------*/
 			if (LOG_LV_DEBUG == getloglevel())
 			{
@@ -1300,7 +1306,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 		}
 
 		it = recv_data.send_status_list.begin();
-		it_end = recv_data.send_status_list.end();
 
 		//送信状態リストの要素数分繰り返し
 		for (; it != it_end; ++it)
@@ -1763,7 +1768,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 							}
 							//送信データ残サイズに
 							//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-							it->send_rest_size = header_offset + header_offset_len + content_len_value;
+							it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
 						}
 						//検索結果が該当なしの場合
 						else
@@ -1850,6 +1855,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 		{
 			//送信状態を生成する
 			send_status new_send_state;
+			new_send_state.edit_division = EDIT_DIVISION_NO_EDIT;
+			new_send_state.send_end_size = 0;
+			new_send_state.send_offset = 0;
+			new_send_state.send_possible_size = 0;
+			new_send_state.unsend_size = 0;
+			new_send_state.send_rest_size = 0;
 			//送信状態に送信不可を設定する
 			new_send_state.status = SEND_NG;
 			//送信状態リストに送信状態を設定する
@@ -1916,7 +1927,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 						}
 						//送信データ残サイズに
 						//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-						new_send_it->send_rest_size = header_offset + header_offset_len + content_len_value;
+						new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
 					}
 					//検索結果が該当なしの場合
 					else
@@ -2027,7 +2038,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 		status = FINALIZE;
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_client_recv exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_client_recv exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_client_recv() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -2211,7 +2222,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		}
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_realserver_select exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_select exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_realserver_select() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -2355,6 +2366,9 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 			{
 				//編集データ情報を生成する
 				edit_data edata;
+				edata.data_size = 0;
+				edata.insert_posission = 0;
+				edata.replace_size = 0;
 				//送信可能データからHTTPヘッダ（X-Forwarded-For）を検索する
 				ret = find_http_header(recv_data.recive_buffer + it->send_offset, it->send_possible_size,
 				        str_forword_for, header_offset, header_offset_len);
@@ -2407,7 +2421,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 					if (send_buffer_remian_size > 0 && it->send_possible_size > 0)
 					{
 						//送信バッファ残サイズ　≧　送信可能データサイズ
-						if (send_buffer_remian_size > it->send_possible_size)
+						if (send_buffer_remian_size >= it->send_possible_size)
 						{
 							//送信可能データを送信データオフセット＋送信済サイズの位置から
 							//送信可能データサイズ分、送信バッファにコピーする
@@ -2538,7 +2552,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_realserver_connect exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_connect exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_realserver_connect() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -2615,7 +2629,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		status = CLIENT_DISCONNECT;
 	} catch (std::exception& ex)
 	{
-		std::cerr << "handle_realserver_connection_fail exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_connection_fail exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_realserver_connection_fail() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -2694,7 +2708,14 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		send_status_it it = recv_data.send_status_list.begin();
 		send_status_it it_end = recv_data.send_status_list.end();
 
-		it = find_if(it, it_end, data_send_ok());
+        it = std::adjacent_find(it, it_end, data_send_ok_incorrect());
+		if(it != it_end)
+		{
+			putLogError(17000, "sending possible data is invalid.", __FILE__, __LINE__ );
+			return FINALIZE;
+		}
+
+		it = std::find_if(it, it_end, data_send_ok());
 		if (it == it_end)
 		{
 			putLogError(17000, "sending possible data is not existed.", __FILE__, __LINE__ );
@@ -2738,9 +2759,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		}
 
 		it = recv_data.send_status_list.begin();
-		it_end = recv_data.send_status_list.end();
-
-		it = find_if(it, it_end, data_send_possible());
+		it = find_if(it, it_end, data_send_ok());
 		if (it != it_end)
 		{
 			//送信可能データあり
@@ -2756,7 +2775,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_realserver_send exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_send exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_realserver_send() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -2913,7 +2932,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		status = FINALIZE;
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_sorryserver_select exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorryserver_select exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorryserver_select() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -3035,6 +3054,9 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 			{
 				//編集データ情報を生成する
 				edit_data edata;
+                edata.data_size = 0;
+				edata.insert_posission = 0;
+				edata.replace_size = 0;
 				//送信可能データからURIを検索する
 				ret = find_uri(recv_data.recive_buffer + it->send_offset, it->send_possible_size, url_offset,
 				        url_offset_len);
@@ -3237,7 +3259,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_sorryserver_connect exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorryserver_connect exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorryserver_connect() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -3316,7 +3338,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		status = CLIENT_DISCONNECT;
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_sorryserver_connection_fail exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorryserver_connection_fail exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorryserver_connection_fail() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -3397,6 +3419,15 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 
 		send_status_it it = recv_data.send_status_list.begin();
 		send_status_it it_end = recv_data.send_status_list.end();
+
+		it = std::adjacent_find(it, it_end, data_send_ok_incorrect());
+		if(it != it_end)
+		{
+			putLogError(17000, "sending possible data is invalid.", __FILE__, __LINE__ );
+			return FINALIZE;
+		}
+
+		it = recv_data.send_status_list.begin();
 		it = find_if(it, it_end, data_send_ok());
 		if (it == it_end)
 		{
@@ -3456,7 +3487,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_sorryserver_send exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorryserver_send exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorryserver_send() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -3519,8 +3550,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 	CHECK_RESULT_TAG check_result; //チェック結果
 	size_t header_offset = 0;
 	size_t header_offset_len = 0;
-	size_t count_length_header_value = 0;
-	size_t value = 0;
+	size_t content_length_header_len = 0;
+	size_t content_len_value = 0;
 	std::string str_value;
 	const std::string http_header = "";
 	const std::string content_header = "Content-Length";
@@ -3528,7 +3559,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 
 	char* buffer1 = NULL;
 	char* buffer2 = NULL;
-	size_t count = 0;
+	size_t pos = 0;
+	const size_t cr_lf_len = strlen("\r\n\r\n");
 
 	//パラメータチェック
 	if (recvlen > recvbuffer.size())
@@ -3635,10 +3667,10 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		send_status_it it = recv_data.send_status_list.begin();
 		send_status_it it_end = recv_data.send_status_list.end();
 
-		count = std::count_if(it, it_end, data_send_continue());
-		if (count >= 2)
+		it = std::find_if(it, it_end, data_send_ok());
+		if (it != it_end)
 		{
-			putLogError(17000, "send continue data >= 2.", __FILE__, __LINE__ );
+			putLogError(17000, "sending data is not correct.", __FILE__, __LINE__ );
 			/*-------- DEBUG LOG --------*/
 			if (LOG_LV_DEBUG == getloglevel())
 			{
@@ -3655,12 +3687,10 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		}
 
 		it = recv_data.send_status_list.begin();
-		it_end = recv_data.send_status_list.end();
-
-		count = std::count_if(it, it_end, data_send_ng());
-		if (count >= 2)
+		it = std::adjacent_find(it, it_end, data_send_repeated());
+		if (it != it_end)
 		{
-			putLogError(17000, "send ng data >= 2.", __FILE__, __LINE__ );
+			putLogError(17000, "sending data is not correct.", __FILE__, __LINE__ );
 			/*-------- DEBUG LOG --------*/
 			if (LOG_LV_DEBUG == getloglevel())
 			{
@@ -3677,7 +3707,6 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		}
 
 		it = recv_data.send_status_list.begin();
-		it_end = recv_data.send_status_list.end();
 
 		//送信状態リストの要素数分繰り返し
 		for (; it != it_end; ++it)
@@ -4076,8 +4105,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 					//送信データ残サイズに0を設定する
 					it->send_rest_size = 0;
 				}
-				//編集区分に編集なしを設定する
-				it->edit_division = EDIT_DIVISION_NO_EDIT;
+//				//編集区分に編集なしを設定する
+//				it->edit_division = EDIT_DIVISION_NO_EDIT;
 				//送信状態に送信待を設定する
 				it->status = SEND_OK;
 			}
@@ -4103,16 +4132,44 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 					{
 						//HTTPヘッダ（ContentLength）を検索する
 						bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size,
-						        content_header, header_offset, count_length_header_value);
+								content_header, header_offset, content_length_header_len);
 						//検索結果が該当ありの場合
 						if (bret)
 						{
-							str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset,
-							        count_length_header_value);
-							value = boost::lexical_cast<size_t>(str_value.c_str());
+							for (pos = 0; recv_data.recive_buffer[it->send_offset + header_offset + pos] != ':' && pos
+							        < content_length_header_len; ++pos)
+								;
+							if (pos == content_length_header_len)
+							{
+								throw std::string("Contend_Lenght field's value is invalid.");
+							}
+
+							++pos;
+
+							str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset + pos,
+							        content_length_header_len - pos);
+
+							size_t pos_end = str_value.find_last_of('\r');
+							if (pos_end != std::string::npos)
+							{
+								str_value = str_value.erase(pos_end);
+							}
+
+							for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+								;
+
+							str_value = str_value.substr(pos);
+
+							try
+							{
+								content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+							} catch (const boost::bad_lexical_cast& ex)
+							{
+								throw std::string("Contend_Lenght field's value is invalid.");
+							}
 							//送信データ残サイズに
 							//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-							it->send_rest_size = header_offset_len + value;
+							it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
 						}
 						//検索結果が該当なしの場合
 						else
@@ -4120,15 +4177,14 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 							//送信データ残サイズに未送信データサイズ + リクエストデータ残サイズを設定する
 							it->send_rest_size = it->unsend_size + request_data_remain_size;
 						}
-						//編集区分に編集ありを設定する
-						it->edit_division = EDIT_DIVISION_EDIT;
+//						//編集区分に編集ありを設定する
+//						it->edit_division = EDIT_DIVISION_EDIT;
 					}
 					//検索結果が該当なしの場合
 					else
 					{
 						//未送信データサイズにリクエストデータ残サイズを加算する
-						data_remain_size += request_data_remain_size;
-						it->unsend_size = data_remain_size;
+						it->unsend_size += request_data_remain_size;
 						//リクエストデータ残サイズに0を設定する
 						request_data_remain_size = 0;
 						//繰り返し処理を終了する
@@ -4138,8 +4194,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 				//チェック結果が異常の場合
 				else if (check_result == CHECK_NG)
 				{
-					//編集区分に編集なしを設定する
-					it->edit_division = EDIT_DIVISION_NO_EDIT;
+//					//編集区分に編集なしを設定する
+//					it->edit_division = EDIT_DIVISION_NO_EDIT;
 					//送信データ残サイズにリクエストデータ残サイズを設定する
 					it->send_rest_size = request_data_remain_size;
 				}
@@ -4148,8 +4204,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 				else
 				{
 					//未送信データサイズにリクエストデータ残サイズを加算する
-					data_remain_size += request_data_remain_size;
-					it->unsend_size = data_remain_size;
+					it->unsend_size += request_data_remain_size;
 					//リクエストデータ残サイズに0を設定する
 					request_data_remain_size = 0;
 					//繰り返し処理を終了する
@@ -4157,12 +4212,12 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 				}
 
 				//送信データ残サイズ　＞　未送信データサイズ+リクエストデータ残サイズ
-				if (it->send_rest_size > data_remain_size + request_data_remain_size)
+				if (it->send_rest_size > it->unsend_size + request_data_remain_size)
 				{
 					//送信可能データサイズに未送信データサイズ＋リクエストデータ残サイズを設定する
-					it->send_possible_size = data_remain_size + request_data_remain_size;
+					it->send_possible_size = it->unsend_size+ request_data_remain_size;
 					//送信データ残サイズから未送信データサイズ　＋　リクエストデータ残サイズを減算する
-					it->send_rest_size -= (data_remain_size + request_data_remain_size);
+					it->send_rest_size -= (it->unsend_size + request_data_remain_size);
 					//送信済データサイズに0を設定する
 					it->send_end_size = 0;
 					//未送信データサイズに0を設定する
@@ -4177,7 +4232,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 					it->send_possible_size = it->send_rest_size;
 					//リクエストデータ残サイズに
 					//「未送信データサイズ＋リクエストデータ残サイズ－送信データ残サイズ」を設定する
-					request_data_remain_size = data_remain_size + request_data_remain_size - it->send_rest_size;
+					request_data_remain_size = it->unsend_size + request_data_remain_size - it->send_rest_size;
 					//送信済データサイズに0を設定する
 					it->send_end_size = 0;
 					//未送信データサイズに0を設定する
@@ -4201,6 +4256,12 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		{
 			//送信状態を生成する
 			send_status new_send_state;
+			new_send_state.edit_division = EDIT_DIVISION_NO_EDIT;
+			new_send_state.send_end_size = 0;
+			new_send_state.send_offset = 0;
+			new_send_state.send_possible_size = 0;
+			new_send_state.unsend_size = 0;
+			new_send_state.send_rest_size = 0;
 			//送信状態に送信不可を設定する
 			new_send_state.status = SEND_NG;
 			//送信状態リストに送信状態を設定する
@@ -4231,17 +4292,43 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 				{
 					//HTTPヘッダ（ContentLength）を検索する
 					bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset,
-					        request_data_remain_size, content_header, header_offset, count_length_header_value);
+					        request_data_remain_size, content_header, header_offset, content_length_header_len);
 
 					//検索結果が該当ありの場合
 					if (bret)
 					{
-						str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset,
-						        count_length_header_value);
-						value = boost::lexical_cast<size_t>(str_value.c_str());
+						for (pos = 0; recv_data.recive_buffer[new_send_it->send_offset + header_offset + pos] != ':'
+						        && pos < content_length_header_len; ++pos)
+							;
+						if (pos == content_length_header_len)
+						{
+							throw std::string("Contend_Lenght field's value is invalid.");
+						}
+						++pos;
+
+						str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + header_offset + pos,
+						        content_length_header_len - pos);
+
+						size_t pos_end = str_value.find_last_of('\r');
+						if (pos_end != std::string::npos)
+						{
+							str_value = str_value.erase(pos_end);
+						}
+
+						for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+							;
+
+						str_value = str_value.substr(pos);
+						try
+						{
+							content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+						} catch (const boost::bad_lexical_cast& ex)
+						{
+							throw std::string("Contend_Lenght field's value is invalid.");
+						}
 						//送信データ残サイズに
 						//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-						new_send_it->send_rest_size = header_offset_len + value;
+						new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
 					}
 					//検索結果が該当なしの場合
 					else
@@ -4249,8 +4336,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 						//送信データ残サイズにリクエストデータ残サイズを設定する
 						new_send_it->send_rest_size = request_data_remain_size;
 					}
-					//編集区分に編集ありを設定する
-					new_send_it->edit_division = EDIT_DIVISION_EDIT;
+//					//編集区分に編集ありを設定する
+//					new_send_it->edit_division = EDIT_DIVISION_EDIT;
 				}
 				//検索結果が該当なしの場合
 				else
@@ -4266,8 +4353,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 			//チェック結果が異常の場合
 			else if (check_result == CHECK_NG)
 			{
-				//編集区分に編集なしを設定する
-				new_send_it->edit_division = EDIT_DIVISION_NO_EDIT;
+//				//編集区分に編集なしを設定する
+//				new_send_it->edit_division = EDIT_DIVISION_NO_EDIT;
 				//送信データ残サイズにリクエストデータ残サイズを設定する
 				new_send_it->send_rest_size = request_data_remain_size;
 			}
@@ -4333,9 +4420,14 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		std::cerr << "handle_realserver_recv exception: Could not allocate memory." << std::endl;
 		putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
 		status = FINALIZE;
+	} catch (const std::string& ex)
+	{
+		std::cerr << "handle_realserver_recv exception:" << ex << std::endl;
+		putLogError(17000, ex.c_str(), __FILE__, __LINE__ );
+		status = FINALIZE;
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_realserver_recv exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_recv exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_realserver_recv() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -4428,8 +4520,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 	CHECK_RESULT_TAG check_result; //チェック結果
 	size_t header_offset = 0;
 	size_t header_offset_len = 0;
-	size_t count_length_header_value = 0;
-	size_t value = 0;
+	size_t content_length_header_len = 0;
+	size_t content_len_value = 0;
 	std::string str_value;
 	const std::string http_header = "";
 	const std::string content_header = "Content-Length";
@@ -4437,6 +4529,8 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 
 	char* buffer1 = NULL;
 	char* buffer2 = NULL;
+	size_t pos = 0;
+	const size_t cr_lf_len = strlen("\r\n\r\n");
 
 	//パラメータチェック
 	if (recvlen > recvbuffer.size())
@@ -5008,16 +5102,44 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 					{
 						//HTTPヘッダ（ContentLength）を検索する
 						bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size,
-						        content_header, header_offset, count_length_header_value);
+						        content_header, header_offset, content_length_header_len);
 						//検索結果が該当ありの場合
 						if (bret)
 						{
-							str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset,
-							        count_length_header_value);
-							value = boost::lexical_cast<size_t>(str_value.c_str());
+							for (pos = 0; recv_data.recive_buffer[it->send_offset + header_offset + pos] != ':' && pos
+							        < content_length_header_len; ++pos)
+								;
+							if (pos == content_length_header_len)
+							{
+								throw std::string("Contend_Lenght field's value is invalid.");
+							}
+
+							++pos;
+
+							str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset + pos,
+							        content_length_header_len - pos);
+
+							size_t pos_end = str_value.find_last_of('\r');
+							if (pos_end != std::string::npos)
+							{
+								str_value = str_value.erase(pos_end);
+							}
+
+							for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+								;
+
+							str_value = str_value.substr(pos);
+
+							try
+							{
+								content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+							} catch (const boost::bad_lexical_cast& ex)
+							{
+								throw std::string("Contend_Lenght field's value is invalid.");
+							}
 							//送信データ残サイズに
 							//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-							it->send_rest_size = header_offset_len + value;
+							it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
 						}
 						//検索結果が該当なしの場合
 						else
@@ -5104,6 +5226,12 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		{
 			//送信状態を生成する
 			send_status new_send_state;
+			new_send_state.edit_division = EDIT_DIVISION_NO_EDIT;
+			new_send_state.send_end_size = 0;
+			new_send_state.send_offset = 0;
+			new_send_state.send_possible_size = 0;
+			new_send_state.unsend_size = 0;
+			new_send_state.send_rest_size = 0;
 			//送信状態に送信不可を設定する
 			new_send_state.status = SEND_NG;
 			//送信状態リストに送信状態を設定する
@@ -5134,17 +5262,43 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 				{
 					//HTTPヘッダ（ContentLength）を検索する
 					bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset,
-					        request_data_remain_size, content_header, header_offset, count_length_header_value);
+					        request_data_remain_size, content_header, header_offset, content_length_header_len);
 
 					//検索結果が該当ありの場合
 					if (bret)
 					{
-						str_value.assign(recv_data.recive_buffer + it->send_offset + header_offset,
-						        count_length_header_value);
-						value = boost::lexical_cast<size_t>(str_value.c_str());
+						for (pos = 0; recv_data.recive_buffer[new_send_it->send_offset + header_offset + pos] != ':'
+						        && pos < content_length_header_len; ++pos)
+							;
+						if (pos == content_length_header_len)
+						{
+							throw std::string("Contend_Lenght field's value is invalid.");
+						}
+						++pos;
+
+						str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + header_offset + pos,
+						        content_length_header_len - pos);
+
+						size_t pos_end = str_value.find_last_of('\r');
+						if (pos_end != std::string::npos)
+						{
+							str_value = str_value.erase(pos_end);
+						}
+
+						for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+							;
+
+						str_value = str_value.substr(pos);
+						try
+						{
+							content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+						} catch (const boost::bad_lexical_cast& ex)
+						{
+							throw std::string("Contend_Lenght field's value is invalid.");
+						}
 						//送信データ残サイズに
 						//「HTTPヘッダサイズ　＋　ContentLength」を設定する
-						new_send_it->send_rest_size = header_offset_len + value;
+						new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
 					}
 					//検索結果が該当なしの場合
 					else
@@ -5236,9 +5390,14 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		std::cerr << "handle_sorryserver_recv exception: Could not allocate memory." << std::endl;
 		putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
 		status = FINALIZE;
-	} catch (const std::exception& ex)
+	} catch (const std::string& ex)
 	{
-		std::cerr << "handle_sorryserver_recv exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_recv exception:" << ex << std::endl;
+		putLogError(17000, ex.c_str(), __FILE__, __LINE__ );
+		status = FINALIZE;
+	}  catch (const std::exception& ex)
+	{
+		std::cerr << "handle_sorryserver_recv exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorryserver_recv() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -5383,7 +5542,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_clien
 		status = CLIENT_SEND;
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_client_connection_check exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_client_connection_check exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_client_connection_check() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -5485,6 +5644,15 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_clien
 
 		send_status_it it = recv_data.send_status_list.begin();
 		send_status_it it_end = recv_data.send_status_list.end();
+
+		it = std::adjacent_find(it, it_end, data_send_ok_incorrect());
+		if(it != it_end)
+		{
+			putLogError(17000, "sending possible data is invalid.", __FILE__, __LINE__ );
+			return FINALIZE;
+		}
+
+		it = recv_data.send_status_list.begin();
 		it = find_if(it, it_end, data_send_ok());
 		if (it == it_end)
 		{
@@ -5563,7 +5731,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_clien
 		}
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_client_send exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_client_send exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_client_send() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -5792,7 +5960,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		}
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_sorry_enable exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorry_enable exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorry_enable() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -6002,7 +6170,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		}
 	} catch (std::exception& ex)
 	{
-		std::cerr << "handle_sorry_disable exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorry_disable exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorry_disable() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -6061,19 +6229,21 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 			boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
 			if (session_thread_data_map.find(thread_id) == session_thread_data_map.end())
 			{
-
+			    putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
 				return FINALIZE;
 			}
 
 			session_data = session_thread_data_map[thread_id];
 			if (session_data == NULL)
 			{
+			    putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
 				return FINALIZE;
 			}
 		}
 
 		if (session_data->recive_data_map.find(endpoint) == session_data->recive_data_map.end())
 		{
+		    putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
 			return FINALIZE;
 		}
 
@@ -6144,7 +6314,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_reals
 		}
 	} catch (std::exception& ex)
 	{
-		std::cerr << "handle_realserver_disconnect exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_realserver_disconnect exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_realserver_disconnect() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
@@ -6288,7 +6458,7 @@ protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::handle_sorry
 		}
 	} catch (const std::exception& ex)
 	{
-		std::cerr << "handle_sorryserver_disconnect exception: error=%s" << ex.what() << "." << std::endl;
+		std::cerr << "handle_sorryserver_disconnect exception: error=" << ex.what() << "." << std::endl;
 		boost::format formatter("function: protocol_module_sessionless::EVENT_TAG protocol_module_sessionless::"
 			"handle_sorryserver_disconnect() exception: result=%d, error=%s.");
 		formatter % FINALIZE % ex.what();
