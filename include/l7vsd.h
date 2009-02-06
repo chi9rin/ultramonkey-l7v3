@@ -112,13 +112,11 @@ public:
 	boost::mutex&	get_virtualservice_list_mutex();	//!< virtualservice_list mutex getter
 
 protected:
-	bool	is_exit_requested();		//!< check if exit requested
-
+	bool	check_options( int, char*[] );			//!< check option func
 	bool	parse_help( int&, int, char*[] );		//!< parse help func
 	bool	parse_debug( int&, int, char*[] );		//!< parse debug func
 
-	bool	check_options( int, char*[] );		//!< check option func
-	std::string	usage();				//!< make usage message
+	std::string	usage();							//!< make usage message
 
 };
 
