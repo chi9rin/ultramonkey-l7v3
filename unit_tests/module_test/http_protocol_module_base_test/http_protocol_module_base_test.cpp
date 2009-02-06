@@ -1,3 +1,10 @@
+    memcpy(recive_data_global.recive_buffer, "GET / HTTP/1.0\r\nCook", 20);
+
+    //リクエストデータ
+    memcpy(request.c_array(), "ie: monkey=1\r\n\r\nGET / HTTP/1.0\r\nCookie: monkey=1\r\n\r\nGET / HTTP/1.0\r\nCookie: monk", 80);
+
+
+
 #define	TEST_CASE
 
 #include <boost/test/included/unit_test.hpp>
@@ -222,7 +229,7 @@ void	check_http_method_test(){
 	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
 		std::cout.width(2);
 		std::cout.fill('0');
-		
+		std::cout << count << "---------------------------------------" << std::endl;
 		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
