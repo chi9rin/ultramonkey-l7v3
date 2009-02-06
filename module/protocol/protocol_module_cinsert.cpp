@@ -132,48 +132,53 @@ protocol_module_cinsert::handle_session_initialize(
 
 	session_thread_data_cinsert*	up_thread_data		= NULL;
 	session_thread_data_cinsert*	down_thread_data	= NULL;
-	recive_data*					client_recv_data	= NULL;
+	recive_data						client_recv_data;
 	char*							buffer				= NULL;
 
 	try
 	{
-		up_thread_data	= new session_thread_data_cinsert;
+		up_thread_data = new session_thread_data_cinsert;
 
 		up_thread_data->thread_id				= up_thread_id;
 		up_thread_data->thread_division			= THREAD_DIVISION_UP_STREAM;
 		up_thread_data->pair_thread_id			= down_thread_id;
-		up_thread_data->end_flag				= END_FLAG_OFF;
-		up_thread_data->accept_end_flag			= ACCEPT_END_FLAG_OFF;
-		up_thread_data->sorry_flag				= SORRY_FLAG_OFF;
-		up_thread_data->sorryserver_switch_flag	= SORRYSERVER_SWITCH_FLAG_OFF;
-		up_thread_data->realserver_switch_flag	= REALSERVER_SWITCH_FLAG_OFF;
+// 		up_thread_data->end_flag				= END_FLAG_OFF;
+// 		up_thread_data->accept_end_flag			= ACCEPT_END_FLAG_OFF;
+// 		up_thread_data->sorry_flag				= SORRY_FLAG_OFF;
+// 		up_thread_data->sorryserver_switch_flag	= SORRYSERVER_SWITCH_FLAG_OFF;
+// 		up_thread_data->realserver_switch_flag	= REALSERVER_SWITCH_FLAG_OFF;
 		up_thread_data->client_endpoint_tcp		= client_endpoint_tcp;
 
-		client_recv_data = new recive_data;
-		client_recv_data->recive_buffer_max_size	= MAX_BUFFER_SIZE;
-		client_recv_data->recive_buffer_rest_size	= MAX_BUFFER_SIZE;
+// 		client_recv_data.recive_buffer_max_size		= MAX_BUFFER_SIZE;
+// 		client_recv_data.recive_buffer_rest_size	= MAX_BUFFER_SIZE;
+//		client_recv_data = new recive_data;
+//		client_recv_data->recive_buffer_max_size	= MAX_BUFFER_SIZE;
+//		client_recv_data->recive_buffer_rest_size	= MAX_BUFFER_SIZE;
 
-		buffer = (char*)malloc( MAX_BUFFER_SIZE );
+		buffer = (char*)malloc( client_recv_data.recive_buffer_max_size );
 
-		client_recv_data->recive_buffer		= buffer;
-		client_recv_data->recive_buffer_1	= buffer;
+		client_recv_data.recive_buffer		= buffer;
+		client_recv_data.recive_buffer_1	= buffer;
+//		client_recv_data->recive_buffer		= buffer;
+//		client_recv_data->recive_buffer_1	= buffer;
 
-		buffer = (char*)malloc( MAX_BUFFER_SIZE );
+		buffer = (char*)malloc( client_recv_data.recive_buffer_max_size );
 
-		client_recv_data->recive_buffer_2	= buffer;
+		client_recv_data.recive_buffer_2	= buffer;
+//		client_recv_data->recive_buffer_2	= buffer;
 
 		up_thread_data->recive_data_map[ client_endpoint_tcp ] = client_recv_data;
 
-		down_thread_data	= new session_thread_data_cinsert;
+		down_thread_data = new session_thread_data_cinsert;
 
 		down_thread_data->thread_id					= down_thread_id;
 		down_thread_data->thread_division			= THREAD_DIVISION_DOWN_STREAM;
 		down_thread_data->pair_thread_id			= up_thread_id;
-		down_thread_data->end_flag					= END_FLAG_OFF;
-		down_thread_data->accept_end_flag			= ACCEPT_END_FLAG_OFF;
-		down_thread_data->sorry_flag				= SORRY_FLAG_OFF;
-		down_thread_data->sorryserver_switch_flag	= SORRYSERVER_SWITCH_FLAG_OFF;
-		down_thread_data->realserver_switch_flag	= REALSERVER_SWITCH_FLAG_OFF;
+// 		down_thread_data->end_flag					= END_FLAG_OFF;
+// 		down_thread_data->accept_end_flag			= ACCEPT_END_FLAG_OFF;
+// 		down_thread_data->sorry_flag				= SORRY_FLAG_OFF;
+// 		down_thread_data->sorryserver_switch_flag	= SORRYSERVER_SWITCH_FLAG_OFF;
+// 		down_thread_data->realserver_switch_flag	= REALSERVER_SWITCH_FLAG_OFF;
 		down_thread_data->client_endpoint_tcp		= client_endpoint_tcp;
 
 		{
@@ -199,23 +204,108 @@ protocol_module_cinsert::handle_session_finalize(
 				const boost::thread::id up_thread_id,
 				const boost::thread::id down_thread_id )
 {
-	session_thread_data_cinsert*	thread_data = NULL;
-	session_thread_data_map_itr			thread_data_itr;
 
+	session_thread_data_cinsert*	up_thread_data		= NULL;
+	session_thread_data_cinsert*	down_thread_data	= NULL;
+	session_thread_data_map_itr		thread_data_itr;
+	recive_data_map_itr				recive_data_itr;
+std::cout	<< "check_point_1" << std::endl;
 	try
 	{
 		{
 			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+
 			thread_data_itr = session_thread_data_map.find( up_thread_id );
+
 			if( thread_data_itr != session_thread_data_map.end() )
 			{
-				thread_data = thread_data_itr->second;
+				up_thread_data = thread_data_itr->second;
 				session_thread_data_map.erase( up_thread_id );
+std::cout	<< "check_point_2" << std::endl;
+			}
+
+			thread_data_itr = session_thread_data_map.find( down_thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				down_thread_data = thread_data_itr->second;
+				session_thread_data_map.erase( down_thread_id );
+std::cout	<< "check_point_3" << std::endl;
 			}
 		}
 
-		if( thread_data != NULL )
+std::cout	<< "check_point_4" << std::endl;
+
+
+
+
+		if( up_thread_data != NULL )
 		{
+std::cout	<< "check_point_5" << std::endl;
+			recive_data_itr = up_thread_data->recive_data_map.begin();
+
+			while( !up_thread_data->recive_data_map.empty() )
+			{
+std::cout	<< "check_point_6" << std::endl;
+				if( recive_data_itr->second.recive_buffer_1 != NULL )
+				{
+					free( recive_data_itr->second.recive_buffer_1 );
+					recive_data_itr->second.recive_buffer_1 = NULL;
+std::cout	<< "check_point_7" << std::endl;
+				}
+
+				if( recive_data_itr->second.recive_buffer_2 != NULL )
+				{
+					free( recive_data_itr->second.recive_buffer_2 );
+					recive_data_itr->second.recive_buffer_2 = NULL;
+std::cout	<< "check_point_8" << std::endl;
+				}
+
+				recive_data_itr->second.recive_buffer = NULL;
+
+				up_thread_data->recive_data_map.erase( recive_data_itr );
+
+				recive_data_itr++;
+
+			}
+
+			delete up_thread_data;
+
+		}
+std::cout	<< "check_point_9" << std::endl;
+		if( down_thread_data != NULL )
+		{
+std::cout	<< "check_point_10" << std::endl;
+			recive_data_itr = down_thread_data->recive_data_map.begin();
+
+			while( !down_thread_data->recive_data_map.empty() )
+			{
+std::cout	<< "check_point_11" << std::endl;
+				if( recive_data_itr->second.recive_buffer_1 != NULL )
+				{
+					free( recive_data_itr->second.recive_buffer_1 );
+					recive_data_itr->second.recive_buffer_1 = NULL;
+std::cout	<< "check_point_12" << std::endl;
+				}
+
+				if( recive_data_itr->second.recive_buffer_2 != NULL )
+				{
+					free( recive_data_itr->second.recive_buffer_2 );
+					recive_data_itr->second.recive_buffer_2 = NULL;
+std::cout	<< "check_point_13" << std::endl;
+				}
+
+				recive_data_itr->second.recive_buffer = NULL;
+
+				down_thread_data->recive_data_map.erase( recive_data_itr );
+
+				recive_data_itr++;
+
+			}
+
+std::cout	<< "check_point_14" << std::endl;
+			delete down_thread_data;
+
 		}
 
 	} catch (const std::exception& ex)
