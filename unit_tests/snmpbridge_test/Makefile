@@ -17,8 +17,9 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
-SRCS		=	snmpbridge_test.cpp \
-				../../src/snmpbridge.cpp
+SRCS		=	\
+				../../src/snmpbridge.cpp \
+				snmpbridge_test.cpp
 
 .SUFFIX:	.cpp .o
 .cpp.o:

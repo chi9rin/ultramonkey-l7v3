@@ -12,6 +12,16 @@ void l7vs::l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_
 }
 
 void l7vs::l7vsd::add_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
+//temp
+	// create virtualservice
+	boost::shared_ptr< virtual_service >
+		vsptr( new virtual_service( *this, *rep, *in_vselement ) );
+	// vs initialize
+//	vsptr->initialize( err );
+//	vsptr->set_virtualservice( *in_vselement, err );
+
+	vslist.push_back( vsptr );
+//temp
 }
 
 void l7vs::l7vsd::del_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
@@ -151,18 +161,20 @@ void	l7vs::Logger::putLogDebug( l7vs::LOG_CATEGORY_TAG, const unsigned int, cons
 	std::cout << "DEBUG : " << msg << std::endl;
 }
 
+bool get_int_errorflag = false;
+bool get_string_errorflag = false;
 std::string nic = NIC_DEFAULT;
 std::string ip_addr = ADDR_DEFAULT;
 int portno = PORT_DEFAULT;
 int interval = INTERVAL_DEFAULT;
 int status = 0;
-std::string snmpagent_start_stop = "snmpagent_start_stop";
-std::string snmpagent_manager_receive = "snmpagent_manager_receive";
-std::string snmpagent_manager_send = "snmpagent_manager_send";
-std::string snmpagent_l7vsd_receive = "snmpagent_l7vsd_receive";
-std::string snmpagent_l7vsd_send = "snmpagent_l7vsd_send";
-std::string snmpagent_logger = "snmpagent_logger";
-std::string snmpagent_parameter = "snmpagent_parameter";
+std::string snmpagent_start_stop = "info";
+std::string snmpagent_manager_receive = "info";
+std::string snmpagent_manager_send = "info";
+std::string snmpagent_l7vsd_receive = "info";
+std::string snmpagent_l7vsd_send = "info";
+std::string snmpagent_logger = "info";
+std::string snmpagent_parameter = "info";
 
 void set_nic(std::string in){
 	nic = in;
@@ -201,6 +213,8 @@ void set_snmpagent_parameter(std::string in){
 	snmpagent_parameter = in;
 }
 
+std::map<std::string, l7vs::LOG_LEVEL_TAG> levelstring_map;
+
 l7vs::Parameter::Parameter(){}
 
 l7vs::Parameter::~Parameter(){}
@@ -213,6 +227,10 @@ int l7vs::Parameter::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 								const std::string& key,
 								l7vs::error_code& err ){
 	int ret = 0;
+	if( get_int_errorflag ){
+		err.setter( true, "" );
+		return ret;
+	}
 	if( comp == l7vs::PARAM_COMP_SNMPAGENT ){
 		if( key == "port" ){
 			ret = portno;
@@ -231,6 +249,10 @@ std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG co
 												const std::string& key,
 												l7vs::error_code& err ){
 	std::string buf( "" );
+	if( get_string_errorflag ){
+		err.setter( true, "" );
+		return buf;
+	}
 	if( comp == l7vs::PARAM_COMP_SNMPAGENT ){
 		if( key == "nic" ){
 			buf = nic;

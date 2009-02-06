@@ -47,8 +47,6 @@
  */
 int l7vs::snmpbridge::initialize(){
 	int retval =  0;
-//	int fd     = -1;
-//	int on     =  1;
 
 	//cleate log level table
 	snmp_loglevel_map.clear();
@@ -69,8 +67,11 @@ int l7vs::snmpbridge::initialize(){
 
 	if( load_config() != 0 ) return -1;//don't read config
 
+#if 0
 	boost::asio::ip::tcp::endpoint recv_endpoint( boost::asio::ip::tcp::v4(), snmp_param.portno );
-//	boost::asio::ip::tcp::endpoint recv_endpoint( boost::asio::ip::address::from_string(snmp_param.address), snmp_param.portno );
+#else
+	boost::asio::ip::tcp::endpoint recv_endpoint( boost::asio::ip::address::from_string(snmp_param.address), snmp_param.portno );
+#endif
 	if( snmp_acceptor.is_open() == false ){
 		snmp_acceptor.open( recv_endpoint.protocol() );
 		snmp_acceptor.set_option( boost::asio::socket_base::reuse_address(true) );
@@ -108,42 +109,26 @@ int l7vs::snmpbridge::initialize(){
 		retval = -3;
 		goto initialize_error_end;
 	}
-
 	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char*) &on, sizeof(int));
-
 	//bind socket
 	if( bind( fd, res->ai_addr, res->ai_addrlen ) < 0 ){
 		retval = -4;
 		goto initialize_error_end;
 	}
-
 	//lisen
 	if( listen( fd, 1 ) < 0 ){
 		retval = -5;
 		goto initialize_error_end;
 	}
-
-	// get iomux
-	l7vs_snmp_listen_iomux = l7vs_iomux_get_from_avail_list();
-	if (!l7vs_snmp_listen_iomux) {
-		retval = -6;
-		goto initialize_error_end;
-	};
 	//iom setting
 	l7vs_snmp_listen_iomux->fd = fd;
 	l7vs_snmp_listen_iomux->data = NULL;
 	l7vs_snmp_listen_iomux->status = iomux_snmp_waiting;
 	l7vs_snmp_listen_iomux->callback = l7vs_snmpbridge_listen_callback;
-
 	//register iomux
 	l7vs_iomux_add( l7vs_snmp_listen_iomux, iom_read );
-
 	freeaddrinfo( res );
 	return 0;
-
-initialize_error_end:
-	close( fd );
-	freeaddrinfo( res );
 #endif
 	return retval;
 }
@@ -155,14 +140,17 @@ initialize_error_end:
  */
 void l7vs::snmpbridge::finalize(){
 	connection_state = false;
+#if 0
+	if( snmp_acceptor.is_open() == true ){
+		snmp_acceptor.close();
+	}
+	if( snmp_socket.is_open() == true ){
+		snmp_socket.close();
+	}
+#else
 	snmp_acceptor.close();
 	snmp_socket.close();
-//	if( snmp_acceptor.is_open() == true ){
-//		snmp_acceptor.close();
-//	}
-//	if( snmp_socket.is_open() == true ){
-//		snmp_socket.close();
-//	}
+#endif
 	if( !send_buffer ){
 		free(send_buffer);
 		send_buffer      = NULL;
@@ -176,7 +164,6 @@ void l7vs::snmpbridge::finalize(){
  * @return      int
  */
 int l7vs::snmpbridge::send_trap( const std::string& message ){
-#if 1
 	boost::mutex::scoped_lock lock( send_buffer_mutex );
 
 	if( send_buffer ) free( send_buffer );
@@ -222,8 +209,6 @@ int l7vs::snmpbridge::send_trap( const std::string& message ){
 		send_buffer_size = 0;
 		return -1;
 	}
-#endif
-
 	return 0;
 }
 
@@ -231,7 +216,6 @@ int l7vs::snmpbridge::send_trap( const std::string& message ){
  * Reload config command to subagent
  */
 void l7vs::snmpbridge::reload_config(){
-#if 1
 	boost::mutex::scoped_lock lock( send_buffer_mutex );
 
 	if( send_buffer ) free( send_buffer );
@@ -240,6 +224,10 @@ void l7vs::snmpbridge::reload_config(){
 				sizeof( struct l7ag_settingcommand_message );
 
 	send_buffer = (char*) calloc( 1, send_buffer_size );
+	if( !send_buffer ){
+		//malloc error!
+		return;
+	}
 	struct l7ag_message_header* header             = (struct l7ag_message_header*) send_buffer;
 	struct l7ag_payload_header* payloadheader      = (struct l7ag_payload_header*) (header + 1);
 	struct l7ag_settingcommand_message* settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
@@ -273,7 +261,6 @@ void l7vs::snmpbridge::reload_config(){
 	}
 
 	load_config();
-#endif
 }
 
 /*!
@@ -281,7 +268,6 @@ void l7vs::snmpbridge::reload_config(){
  */
 int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_category, const l7vs::LOG_LEVEL_TAG loglevel ){
 	int retval = 0;
-#if 1
 	if( snmp_param.loglevel.end() != snmp_param.loglevel.find( snmp_log_category ) ){
 		boost::mutex::scoped_lock lock( send_buffer_mutex );
 
@@ -291,6 +277,10 @@ int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_cat
 			sizeof( struct l7ag_settingcommand_message );
 
 		send_buffer = (char*) calloc( 1, send_buffer_size );
+		if( !send_buffer ){
+			//malloc error!
+			return -1;
+		}
 		struct l7ag_message_header* header             = (struct l7ag_message_header*) send_buffer;
 		struct l7ag_payload_header* payloadheader      = (struct l7ag_payload_header*) (header + 1);
 		struct l7ag_settingcommand_message* settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
@@ -326,18 +316,11 @@ int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_cat
 			send_buffer      = NULL;
 			send_buffer_size = 0;
 		}else{
-#if 1
-//			std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>::iterator it = snmp_param.loglevel.find( snmp_log_category );
-//			if( it != snmp_param.loglevel.end() ){
-//				it->second = loglevel;
-//			}
 			snmp_param.loglevel.find( snmp_log_category )->second = loglevel;
-#endif
 		}
 	}else{
 		retval = -1;
 	}
-#endif
 	return retval;
 }
 
@@ -346,7 +329,6 @@ int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_cat
  */
 int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG loglevel ){
 	int retval = 0;
-#if 1
 	std::vector<struct l7ag_settingcommand_message> settingcmd_vec;
 	for( std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>::iterator it = snmp_param.loglevel.begin();
 		it != snmp_param.loglevel.end(); ++it ){
@@ -365,12 +347,13 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
 				sizeof( struct l7ag_payload_header ) * settingcmd_vec.size() +
 				sizeof( struct l7ag_settingcommand_message ) * settingcmd_vec.size();
 	send_buffer = (char*) calloc( 1, send_buffer_size );
+	if( !send_buffer ){
+		//malloc error!
+		return -1;
+	}
 	struct l7ag_message_header* header = (struct l7ag_message_header*) send_buffer;
 	struct l7ag_payload_header* payloadheader = (struct l7ag_payload_header*) (header + 1);
 	struct l7ag_settingcommand_message* settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
-#if 0
-	struct l7ag_changeloglevel_parameter* param = (l7ag_changeloglevel_parameter*) settingcmd->data;
-#endif
 	//create message header
 	header->magic[0] = 0x4d;    // M
 	header->magic[1] = 0x47;    // G
@@ -381,6 +364,7 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
 	header->payload_count = settingcmd_vec.size();
 	header->size = send_buffer_size;
 
+#if 1
 	//datas
 	for( std::vector<struct l7ag_settingcommand_message>::iterator itr = settingcmd_vec.begin();
 		itr != settingcmd_vec.end(); ++itr ){
@@ -392,11 +376,12 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
 		settingcmd->command_id  = COMMAND_LOGLEVEL_CHANGE;
 		settingcmd->magic[0]    = 0x4c;    // L
 		settingcmd->magic[1]    = 0x4c;    // L
-		memcpy( settingcmd->data, &(*itr), sizeof( struct l7ag_settingcommand_message) );
+		memcpy( settingcmd->data, &(*itr), sizeof( struct l7ag_changeloglevel_parameter) );
 		payloadheader = (struct l7ag_payload_header*) (settingcmd + 1);
 		settingcmd = (struct l7ag_settingcommand_message*) (payloadheader + 1);
 	}
 
+#endif
 	// register iom (send)
 	retval = send_message();
 	if( retval != 0 ){
@@ -411,7 +396,6 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
 			it->second = loglevel;
 		}
 	}
-#endif
 	return retval;
 }
 
@@ -455,6 +439,10 @@ int l7vs::snmpbridge::send_mibcollection(struct l7ag_mibrequest_message* payload
 				 ( sizeof( struct l7ag_payload_header ) + sizeof( struct l7ag_mibdata_payload_rs ) ) * payload_rs_count;
 
 	send_buffer = (char*) calloc( 1, send_buffer_size );
+	if( !send_buffer ){
+		//malloc error!
+		return -1;
+	}
 	struct l7ag_message_header* header = (struct l7ag_message_header*) send_buffer;
 
 	//create message header

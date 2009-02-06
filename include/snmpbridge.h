@@ -129,11 +129,22 @@ public:
 	//! @return
 	void	get_loglevel_allcategory( std::map<LOG_CATEGORY_TAG, LOG_LEVEL_TAG>&	loglevelmap );
 
-protected:
-	void			handle_accept(const boost::system::error_code& error);
-	void			handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
-	void			handle_send(const boost::system::error_code& error, size_t bytes_transferred);
+	//! accept callback function
+	//! @param[in]
+	//! @return
+	void	handle_accept( const boost::system::error_code& error );
 
+	//! receive callback function
+	//! @param[in]
+	//! @return
+	void	handle_receive( const boost::system::error_code& error, size_t bytes_transferred );
+
+	//! send callback function
+	//! @param[in]
+	//! @return
+	void	handle_send( const boost::system::error_code& error, size_t bytes_transferred );
+
+protected:
 	int				send_message();
 	int				load_config();
 	void			load_loglevel();
