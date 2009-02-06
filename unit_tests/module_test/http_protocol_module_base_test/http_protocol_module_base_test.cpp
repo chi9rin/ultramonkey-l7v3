@@ -222,7 +222,7 @@ void	check_http_method_test(){
 	for( int i = 0; i < CHECK_METHOD_OK_STRING_NUM; i++, count++ ){
 		std::cout.width(2);
 		std::cout.fill('0');
-		std::cout << count << "---------------------------------------" << std::endl;
+		
 		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
 		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
 		buffer_len = strlen( buffer_ok[i] );
@@ -947,7 +947,6 @@ void	find_status_code_test(){
 						"HTTP/1.0 000 abcdff",
 						"HTTP/1.0 999 abcdff",
 					};
-	size_t	size_OK[FIND_STATUS_CODE_OK_STRING_NUM][2];
 
 	char	buffer_ng[FIND_STATUS_CODE_NG_STRING_NUM][256]
 				=	{
