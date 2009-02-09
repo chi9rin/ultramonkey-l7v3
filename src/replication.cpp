@@ -140,7 +140,7 @@ int			replication::initialize(){
 			replication_state.service_status = REPLICATION_SINGLE;
 			return -1;
 		}
-			
+
 		// Count block head number
 		replication_info.component_info[i].block_head = ( 0 == i ? 0 :
 				( replication_info.component_info[i-1].block_head + replication_info.component_info[i-1].block_size ) );
@@ -460,7 +460,9 @@ int		replication::set_slave()
 //		replication_receive_socket.open();
 //	}
 
-	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), boost::bind( &replication::handle_receive, this, _1, _2 ) );
+//	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), boost::bind( &replication::handle_receive, this, _1, _2 ) );
+	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ),
+											boost::bind( &replication::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
 
 	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Initialization of receive socket is success.", __FILE__, __LINE__ );
 
@@ -782,7 +784,6 @@ END:
 		}
 		replication_thread_condition.notify_all();
 	}
-
 }
 
 //! Interval Re-setting
@@ -899,8 +900,7 @@ int			replication::handle_send(){
 void		replication::handle_receive( const boost::system::error_code& err, size_t size ){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::handle_receive", __FILE__, __LINE__ );
 
-	struct replication_data_struct replication_data;
-	int recv_ret = -1;
+	int recv_ret;
 	std::string buf;
 
 	// Check by continuous initialize.
@@ -938,6 +938,7 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	}
 	if ( size != sizeof ( struct replication_data_struct ) ){
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Failed in the reception processing of data because of illegal receive size.", __FILE__, __LINE__ );
+		return;
 	}
 
 	recv_ret = recv_data();
@@ -949,7 +950,7 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	// set surface block
 	replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
 
-	// set last send block number
+	// set last recv block number
 	if ( replication_state.last_recv_block < replication_state.total_block-1 ){
 		replication_state.last_recv_block += 1;
 	}else if(replication_state.last_recv_block == replication_state.total_block-1){
@@ -962,7 +963,7 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), boost::bind( &replication::handle_receive, this, _1, _2 ) );
 }
 
-//! Lock replication memory 
+//! Lock replication memory
 //! @param[in] component_id is the one to identify the component.
 //! @retval 0 Success
 //! @retval -1 Error
@@ -984,7 +985,7 @@ int			replication::lock( const std::string& inid ){
 	return 0;
 }
 
-//! Unlock replication memory 
+//! Unlock replication memory
 //! @param[in] component_id is the one to identify the component.
 //! @retval 0 Success
 //! @retval -1 Error
@@ -1032,7 +1033,7 @@ int			replication::refer_lock_mutex( const std::string& inid, mutex_ptr outmutex
 
 //! Parameter Check
 //! @retval 0 Success
-//! @retval -1 Error 
+//! @retval -1 Error
 int			replication::check_parameter(){
 
 	int ret = -1;
@@ -1139,7 +1140,7 @@ void*		replication::getcmp(){
 	return memory;
 }
 
-//! Get Surface Number Memory 
+//! Get Surface Number Memory
 //! @return memory Component memory
 //! @retval memory memory get Success
 //! @retval NULL Error
@@ -1254,15 +1255,15 @@ int			replication::recv_data(){
 	if ( replication_data.serial < replication_state.surface_block_array_ptr[replication_data.block_num] ){
 		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Recv replication data is too old.", __FILE__, __LINE__ );
 		return -1;
-	} else {
-		// Substitution of version
-		replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
 	}
+
+	// Substitution of version
+	replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
 
 	// set recv data
 	recv_memory = ( char * )replication_state.replication_memory + DATA_SIZE * replication_data.block_num;
 
-	// received data. 
+	// received data.
 	memcpy( recv_memory, &replication_data.data, DATA_SIZE );
 
 	// set surface block
@@ -1329,8 +1330,10 @@ void		replication::send_thread(){
 			}
 			mode = !mode;
 		}
-		boost::mutex::scoped_lock	lock( replication_thread_mutex );
-		flag = replication_flag;
+		{
+			boost::mutex::scoped_lock	lock( replication_thread_mutex );
+			flag = replication_flag;
+		}
 	}
 }
 

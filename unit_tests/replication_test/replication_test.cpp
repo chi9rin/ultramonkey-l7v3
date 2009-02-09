@@ -110,6 +110,256 @@ extern "C"
 	}
 }
 
+//! emun States Type string
+static const char* replication_mode[] = {
+	"REPLICATION_OUT",
+	"REPLICATION_SINGLE",
+	"REPLICATION_MASTER",
+	"REPLICATION_SLAVE",
+	"REPLICATION_MASTER_STOP",
+	"REPLICATION_SLAVE_STOP"
+};
+
+bool receiver_end = false;
+boost::asio::io_service global_io;
+
+void receiver_thread()
+{
+std::cout << "receiver_thread 0\n";
+	boost::asio::ip::udp::endpoint udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
+	boost::asio::ip::udp::socket	receiver_socket( global_io, udp_endpoint );
+
+	char	*recv_memory;
+	size_t	size;
+
+	//! Transfer data between active server and standby server.
+	struct replication_data_struct{
+		unsigned short					id;							//!< ID of Replication Function
+		char							pad1[6];
+		unsigned long long				serial;						//!< Serial Number
+		unsigned int					block_num;					//!< Block Number in Replication memory
+		char							pad2[4];
+		uint64_t						size;						//!< Data size for checking packet loss
+		char							data[DATA_SIZE];			//!< Raw data
+	} replication_data;
+
+	//! State Infomation struct to execute Replication.
+	struct replication_state_struct{
+		enum l7vs::replication::REPLICATION_MODE_TAG		service_status;				//!< States Type of Replication Function
+		unsigned long long				send_time;					//!< Completion last time to send data(no use)
+		unsigned int					last_send_block;			//!< Completion last Block Number to send data
+		unsigned int					last_recv_block;			//!< Completion last Block Number to receive data
+		unsigned int					total_block;				//!< The maximum Block Number of Components memory
+		void*							replication_memory;			//!< Top address in Replication memory
+		void*							component_memory;			//!< Top address in Component memory
+		uint64_t						surface_block_no;			//!< Serial number for respect switch
+		uint64_t*						surface_block_array_ptr;	//!< Serial number in received respect at every block
+
+		replication_state_struct() :	service_status(l7vs::replication::REPLICATION_OUT),
+										send_time(0),
+										last_send_block(0),
+										last_recv_block(0),
+										total_block(0),
+										replication_memory(NULL),
+										component_memory(NULL),
+										surface_block_no(0),
+										surface_block_array_ptr(NULL) {}
+	} replication_state;
+
+
+	l7vs::Parameter	param;
+	std::string key_id;
+	std::string key_size;
+	l7vs::error_code	size_ret;
+
+std::cout << "receiver_thread 1\n";
+	// Conponent exists
+	// Get Component infomation
+	for ( int i=0; i<CMP_MAX; i++)
+	{
+		key_size = boost::io::str( boost::format( "cmponent_size_%02d" ) % i );
+		replication_state.total_block += param.get_int( l7vs::PARAM_COMP_REPLICATION, key_size, size_ret );
+	}
+
+std::cout << "receiver_thread 2\n";
+	// Replication memory is NULL
+	if ( NULL == ( replication_state.replication_memory = malloc( replication_state.total_block*DATA_SIZE ) ))	{
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is NULL.", __FILE__, __LINE__ );
+		goto END;
+	}
+
+std::cout << "receiver_thread 3\n";
+	// Component memory is NULL
+//	if ( NULL == ( replication_state.component_memory = malloc( replication_state.total_block*DATA_SIZE ) ) ){
+//		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Component memory is NULL.", __FILE__, __LINE__ );
+//		goto END;
+//	}
+
+std::cout << "receiver_thread 4\n";
+	// Surface block array memory is NULL
+	if ( NULL == ( replication_state.surface_block_array_ptr = ( uint64_t* )malloc( replication_state.total_block*sizeof(uint64_t) ) ))	{
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Surface block array pointer is NULL.", __FILE__, __LINE__ );
+		goto END;
+	}
+
+std::cout << "receiver_thread 5\n";
+	for ( ; ; ){
+		size = receiver_socket.receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ) );
+		if ( size != sizeof ( struct replication_data_struct ) ){
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_SYSTEM, 1, "Failed in the reception processing of data because of illegal receive size.", __FILE__, __LINE__ );
+			goto END;
+		}
+
+std::cout << "receiver_thread 5-1\n";
+		// Check replication ID
+		if ( replication_data.id != REPLICATION_ID ){
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Get invalid data.", __FILE__, __LINE__ );
+			goto END;
+		} else if ( replication_data.block_num > replication_state.total_block ){
+			// block number is over
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Recv block number is too large.", __FILE__, __LINE__ );
+			goto END;
+		} else if ( replication_data.serial < replication_state.surface_block_array_ptr[replication_data.block_num] ){
+			// Comparison of serial numbers
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Recv replication data is too old.", __FILE__, __LINE__ );
+			goto END;
+		} else {
+			// Substitution of version
+			replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
+		}
+std::cout << "receiver_thread 5-2\n";
+
+		// set recv data
+		recv_memory = ( char * )replication_state.replication_memory + DATA_SIZE * replication_data.block_num;
+
+		// received data.
+		memcpy( recv_memory, &replication_data.data, DATA_SIZE );
+
+		// set surface block
+		replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
+std::cout << "receiver_thread 5-3\n";
+
+		// Surface numbers are compared.
+		for ( unsigned int i = 0; i < replication_state.total_block-1; i++ ){
+			if ( replication_state.surface_block_array_ptr[i] != replication_state.surface_block_array_ptr[i+1] ){
+				break;
+			}
+			if ( i == replication_state.total_block-2 ){
+				// Synchronization is executed.
+//				memcpy(replication_state.component_memory, replication_state.replication_memory, replication_state.total_block*DATA_SIZE );
+				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Replication stub receiving is success.", __FILE__, __LINE__ );
+
+				int size;
+				char* p;
+				char* head;
+				int h = 0;
+				int i = 0;
+				std::string	buf;
+
+				// Memory Dump
+				p = ( char * )replication_state.replication_memory;
+
+				// Output mode
+				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Replication check Start ----------------------------", __FILE__, __LINE__ );
+				buf = boost::io::str( boost::format( "Mode is [ %s ]." ) % replication_mode[(int)replication_state.service_status] );
+				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+				buf = boost::io::str( boost::format( "Total Block is [ %u ]" ) % replication_state.total_block );
+				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+
+				// Converts into the binary, and writes it to the file. 
+				for ( h = 0; h < size / DATA_SIZE; h++ ){
+					buf = boost::io::str( boost::format( "Block Number [ %d ]" ) % h );
+					l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+
+					for ( i = 0; i < DATA_SIZE / LOG_DATA_WIDTH; i++ ){
+						head = p + h * DATA_SIZE + i * LOG_DATA_WIDTH;
+
+						// have to cast char to int. because boost::format ignore char with appointed width.
+						buf = boost::io::str( boost::format(	"%02hhX %02hhX %02hhX %02hhX  %02hhX %02hhX %02hhX %02hhX  "
+																"%02hhX %02hhX %02hhX %02hhX  %02hhX %02hhX %02hhX %02hhX" )
+																% ( int )*head % ( int )*(head+1) % ( int )*(head+2) % ( int )*(head+3)
+																% ( int )*(head+4) % ( int )*(head+5) % ( int )*(head+6)% ( int )*(head+7)
+																% ( int )*(head+8) % ( int )*(head+9) % ( int )*(head+10) % ( int )*(head+11)
+																% ( int )*(head+12) % ( int )*(head+13) % ( int )*(head+14) % ( int )*(head+15) );
+						l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+					}
+				}
+				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Replication check End ------------------------------", __FILE__, __LINE__ );
+
+				goto END;
+			}
+		}
+
+		// set surface block
+		replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
+
+		// set last recv block number
+		if ( replication_state.last_recv_block < replication_state.total_block-1 ){
+			replication_state.last_recv_block += 1;
+		}else if(replication_state.last_recv_block == replication_state.total_block-1){
+			replication_state.last_recv_block = 0;
+		}else{
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Last send block number is illegal.", __FILE__, __LINE__ );
+			goto END;
+		}
+	}
+std::cout << "receiver_thread 6\n";
+
+END:
+	if ( NULL != replication_state.replication_memory){
+		free(replication_state.replication_memory);
+	}
+	replication_state.replication_memory = NULL;
+	if ( NULL != replication_state.component_memory){
+		free(replication_state.component_memory);
+	}
+	replication_state.component_memory = NULL;
+	if ( NULL != replication_state.surface_block_array_ptr ){
+		free(replication_state.surface_block_array_ptr);
+	}
+	replication_state.surface_block_array_ptr=NULL;
+std::cout << "receiver_thread 7\n";
+
+	receiver_end = true;
+};
+
+void	sender_thread(){
+	l7vs::replication	repli1(global_io);
+
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
+	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	repli1.switch_to_master();
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
+
+	unsigned int	size;
+	void*			ptr;
+
+	ptr = repli1.pay_memory( "virtualservice", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
+	memset( ptr, '1', size );
+	repli1.unlock( "virtualservice" );
+
+	ptr = repli1.pay_memory( "chash", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
+	memset( ptr, '2', size );
+	repli1.unlock( "chash" );
+
+	ptr = repli1.pay_memory( "sslid", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
+	memset( ptr, '3', size );
+	repli1.unlock( "sslid" );
+
+	repli1.force_replicate();
+
+	repli1.finalize();
+}
+
+
 //test case1.
 void	replication_initialize_test(){
 //	int	loop;
@@ -175,7 +425,7 @@ void	replication_initialize_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-	// unit_test[8]  initializeのテスト(全部存在しない　initializeはOK)
+	// unit_test[8]  initializeのテスト(全部存在しない initializeはOK)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1000;
 	get_int_stubmode = 1000;
@@ -244,7 +494,7 @@ void	replication_initialize_test(){
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
 	get_int_stubmode = 0;
-	// unit_test[17]  initializeのテスト(cmponent_id_01が存在しない　OK)
+	// unit_test[17]  initializeのテスト(cmponent_id_01が存在しない OK)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 5;
 	repli1.finalize();
@@ -259,7 +509,7 @@ void	replication_initialize_test(){
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
 	get_string_stubmode = 0;
-	// unit_test[19]  initializeのテスト(cmponent_size_01が存在しない　OK)
+	// unit_test[19]  initializeのテスト(cmponent_size_01が存在しない OK)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_stubmode = 3;
 	repli1.finalize();
@@ -274,7 +524,7 @@ void	replication_initialize_test(){
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
 	get_int_stubmode = 0;
-	// unit_test[21]  initializeのテスト(cmponent_id_02が存在しない　OK)
+	// unit_test[21]  initializeのテスト(cmponent_id_02が存在しない OK)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 6;
 	repli1.finalize();
@@ -289,7 +539,7 @@ void	replication_initialize_test(){
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
 	get_string_stubmode = 0;
-	// unit_test[23]  initializeのテスト(cmponent_size_02が存在しない　OK)
+	// unit_test[23]  initializeのテスト(cmponent_size_02が存在しない OK)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_stubmode = 4;
 	repli1.finalize();
@@ -569,7 +819,7 @@ void	replication_pay_memory_test(){
 	BOOST_CHECK( NULL != ptr );
 	BOOST_CHECK_EQUAL( size, ( unsigned int )get_int_table[3] );
 
-	// unit_test[50]  pay_memoryのテスト(virtualservice時　サイズ0)
+	// unit_test[50]  pay_memoryのテスト(virtualservice時 サイズ0)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[1] = 0;							//	"cmponent_size_00"
 	repli1.finalize();
@@ -580,7 +830,7 @@ void	replication_pay_memory_test(){
 
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 
-	// unit_test[51]  pay_memoryのテスト(chash時　サイズ0)
+	// unit_test[51]  pay_memoryのテスト(chash時 サイズ0)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[2] = 0;							//	"cmponent_size_01"
 	repli1.finalize();
@@ -591,7 +841,7 @@ void	replication_pay_memory_test(){
 
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 
-	// unit_test[52]  pay_memoryのテスト(sslid時　サイズ0)
+	// unit_test[52]  pay_memoryのテスト(sslid時 サイズ0)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[3] = 0;							//	"cmponent_size_02"
 	repli1.finalize();
@@ -850,28 +1100,21 @@ void	replication_force_replicate_test(){
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[74]  force_replicateのテスト(MASTER時)
-	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
-	repli1.start();
-	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
-//	repli1.force_replicate();
-	BOOST_CHECK( 1 );
-
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
-
-	// unit_test[75]  force_replicateのテスト(MASTER時　"compulsorily_interval"が存在しない)
+	// unit_test[74]  force_replicateのテスト(MASTER時 "compulsorily_interval"が存在しない)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_stubmode = 5;
+	repli1.start();
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[76]  force_replicateのテスト(MASTER時　"compulsorily_interval"が上限以上)
+	// unit_test[75]  force_replicateのテスト(MASTER時 "compulsorily_interval"が上限以上)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[4] = 401;
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[77]  force_replicateのテスト(MASTER時　"compulsorily_interval"が下限未満)
+	// unit_test[76]  force_replicateのテスト(MASTER時 "compulsorily_interval"が下限未満)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[4] = 3;
 	repli1.force_replicate();
@@ -879,13 +1122,13 @@ void	replication_force_replicate_test(){
 
 	get_int_table[4] = 10;
 
-	// unit_test[78]  force_replicateのテスト(未初期化)
+	// unit_test[77]  force_replicateのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[79]  force_replicateのテスト(SINGLE時)
+	// unit_test[78]  force_replicateのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -893,6 +1136,26 @@ void	replication_force_replicate_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
+
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
+
+	// unit_test[79]  force_replicateのテスト(MASTER時)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	receiver_end = false;
+//	boost::thread	thread_item1( boost::bind ( &receiver_thread ) );
+	boost::thread	thread_item2( boost::bind ( &sender_thread ) );
+
+	while( !receiver_end ){
+		global_io.run();
+	}
+
+	thread_item2.join();
+//	thread_item1.join();
+	BOOST_CHECK( 1 );
+
+	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+
 }
 
 //test case9.
@@ -1236,6 +1499,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "replication_test" );
 
 	// add test case to test suite
+/*
 	ts->add( BOOST_TEST_CASE( &replication_initialize_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_switch_to_master_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_switch_to_slave_test ) );
@@ -1243,9 +1507,10 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &replication_dump_memory_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_start_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_stop_test ) );
-
+*/
+count = 70;
 	ts->add( BOOST_TEST_CASE( &replication_force_replicate_test ) );
-
+/*
 	ts->add( BOOST_TEST_CASE( &replication_reset_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_get_status_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_lock_test ) );
@@ -1257,9 +1522,9 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 
 
-
 	ts->add( BOOST_TEST_CASE( &replication_handle_send_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
+*/
 
 	framework::master_test_suite().add( ts );
 
