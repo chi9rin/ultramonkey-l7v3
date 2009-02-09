@@ -529,8 +529,8 @@ void	log_test(){
 	{
 		// init
 		response.status = l7vs::l7vsd_response::RESPONSE_NONE;
-		l7vs::l7vsd::log_cmd_called = false;
-		l7vs::l7vsd::log_cmd_fail = false;
+		l7vs::l7vsd::set_loglevel_called = false;
+		l7vs::l7vsd::set_loglevel_fail = false;
 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LOG;
 
 		//execute	
@@ -539,15 +539,15 @@ void	log_test(){
 		// unit_test[45] command_session_test normal case CMD_LOG response check
 		BOOST_CHECK_EQUAL( response.status, l7vs::l7vsd_response::RESPONSE_OK );
 		// unit_test[46] command_session_test normal case CMD_LOG vsd_method call check
-		BOOST_CHECK_EQUAL( l7vs::l7vsd::log_cmd_called, true );
+		BOOST_CHECK_EQUAL( l7vs::l7vsd::set_loglevel_called, true );
 	}
 
 	// CMD_LOG error case
 	{
 		// init
 		response.status = l7vs::l7vsd_response::RESPONSE_NONE;
-		l7vs::l7vsd::log_cmd_called = false;
-		l7vs::l7vsd::log_cmd_fail = true;
+		l7vs::l7vsd::set_loglevel_called = false;
+		l7vs::l7vsd::set_loglevel_fail = true;
 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LOG;
 
 		//execute	
@@ -556,7 +556,7 @@ void	log_test(){
 		// unit_test[47] command_session_test error case CMD_LOG response check
 		BOOST_CHECK_EQUAL( response.status, l7vs::l7vsd_response::RESPONSE_LOG_ERROR );
 		// unit_test[48] command_session_test error case CMD_LOG vsd_method call check
-		BOOST_CHECK_EQUAL( l7vs::l7vsd::log_cmd_called, true );
+		BOOST_CHECK_EQUAL( l7vs::l7vsd::set_loglevel_called, true );
 	}
 }
 
@@ -566,8 +566,8 @@ void	snmp_test(){
 	{
 		// init
 		response.status = l7vs::l7vsd_response::RESPONSE_NONE;
-		l7vs::l7vsd::snm_cmd_called = false;
-		l7vs::l7vsd::snm_cmd_fail = false;
+		l7vs::l7vsd::snmp_set_loglevel_called = false;
+		l7vs::l7vsd::snmp_set_loglevel_fail = false;
 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_SNMP;
 
 		//execute	
@@ -576,15 +576,15 @@ void	snmp_test(){
 		// unit_test[49] command_session_test normal case CMD_SNMP response check
 		BOOST_CHECK_EQUAL( response.status, l7vs::l7vsd_response::RESPONSE_OK );
 		// unit_test[50] command_session_test normal case CMD_SNMP vsd_method call check
-		BOOST_CHECK_EQUAL( l7vs::l7vsd::snm_cmd_called, true );
+		BOOST_CHECK_EQUAL( l7vs::l7vsd::snmp_set_loglevel_called, true );
 	}
 
 	// CMD_SNMP error case
 	{
 		// init
 		response.status = l7vs::l7vsd_response::RESPONSE_NONE;
-		l7vs::l7vsd::snm_cmd_called = false;
-		l7vs::l7vsd::snm_cmd_fail = true;
+		l7vs::l7vsd::snmp_set_loglevel_called = false;
+		l7vs::l7vsd::snmp_set_loglevel_fail = true;
 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_SNMP;
 
 		//execute	
@@ -593,7 +593,7 @@ void	snmp_test(){
 		// unit_test[51] command_session_test error case CMD_SNMP response check
 		BOOST_CHECK_EQUAL( response.status, l7vs::l7vsd_response::RESPONSE_SNMP_ERROR );
 		// unit_test[52] command_session_test error case CMD_SNMP vsd_method call check
-		BOOST_CHECK_EQUAL( l7vs::l7vsd::snm_cmd_called, true );
+		BOOST_CHECK_EQUAL( l7vs::l7vsd::snmp_set_loglevel_called, true );
 	}
 }
 

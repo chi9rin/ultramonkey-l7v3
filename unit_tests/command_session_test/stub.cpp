@@ -13,8 +13,8 @@ bool	l7vsd::del_rs_called(false);
 bool	l7vsd::edit_rs_called(false);
 bool	l7vsd::flush_vs_called(false);
 bool	l7vsd::rep_cmd_called(false);
-bool	l7vsd::log_cmd_called(false);
-bool	l7vsd::snm_cmd_called(false);
+bool	l7vsd::set_loglevel_called(false);
+bool	l7vsd::snmp_set_loglevel_called(false);
 bool	l7vsd::param_called(false);
 
 bool	l7vsd::list_vs_fail(false);
@@ -27,8 +27,8 @@ bool	l7vsd::del_rs_fail(false);
 bool	l7vsd::edit_rs_fail(false);
 bool	l7vsd::flush_vs_fail(false);
 bool	l7vsd::rep_cmd_fail(false);
-bool	l7vsd::log_cmd_fail(false);
-bool	l7vsd::snm_cmd_fail(false);
+bool	l7vsd::set_loglevel_fail(false);
+bool	l7vsd::snmp_set_loglevel_fail(false);
 bool	l7vsd::param_fail(false);
 
 

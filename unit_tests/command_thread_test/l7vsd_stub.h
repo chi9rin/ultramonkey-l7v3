@@ -100,8 +100,8 @@ public:
 	void	flush_virtual_service( error_code& );	//!< all virtual_service delete command
 
 	void	replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG*, error_code& );	//!< replication command
-	void	log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );		//!< log command
-	void	snmp_log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );	//!< snmp log command
+	void	set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );		//!< log command
+	void	snmp_set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& );	//!< snmp log command
 	void	reload_parameter( const PARAMETER_COMPONENT_TAG*, error_code& );	//!< reload component parameter command
 
 	int		run( int, char*[] );		//!< l7vsd run method

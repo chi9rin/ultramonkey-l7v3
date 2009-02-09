@@ -96,13 +96,13 @@ void	l7vsd::replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG*
 	++call_num_map[l7vs::l7vsadm_request::CMD_REPLICATION];
 }
 
-void	l7vsd::log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& )
+void	l7vsd::set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& )
 {
 	boost::mutex::scoped_lock lock(command_mutex);
 	++call_num_map[l7vs::l7vsadm_request::CMD_LOG];
 }
 
-void	l7vsd::snmp_log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& )
+void	l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& )
 {
 	boost::mutex::scoped_lock lock(command_mutex);
 	++call_num_map[l7vs::l7vsadm_request::CMD_SNMP];

@@ -28,8 +28,8 @@ public:
 	static	bool	edit_rs_called;
 	static	bool	flush_vs_called;
 	static	bool	rep_cmd_called;
-	static	bool	log_cmd_called;
-	static	bool	snm_cmd_called;
+	static	bool	set_loglevel_called;
+	static	bool	snmp_set_loglevel_called;
 	static	bool	param_called;
 
 	static	bool	list_vs_fail;
@@ -42,8 +42,8 @@ public:
 	static	bool	edit_rs_fail;
 	static	bool	flush_vs_fail;
 	static	bool	rep_cmd_fail;
-	static	bool	log_cmd_fail;
-	static	bool	snm_cmd_fail;
+	static	bool	set_loglevel_fail;
+	static	bool	snmp_set_loglevel_fail;
 	static	bool	param_fail;
 
 public:
@@ -100,15 +100,15 @@ public:
 		rep_cmd_called = true;
 		if(rep_cmd_fail)	err.setter( true, "");
 	}
-	void	log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& err )
+	void	set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& err )
 	{
-		log_cmd_called = true;
-		if(log_cmd_fail)	err.setter( true, "");
+		set_loglevel_called = true;
+		if(set_loglevel_fail)	err.setter( true, "");
 	}
-	void	snmp_log_command( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& err )
+	void	snmp_set_loglevel( const LOG_CATEGORY_TAG*, const LOG_LEVEL_TAG*, error_code& err )
 	{
-		snm_cmd_called = true;
-		if(snm_cmd_fail)	err.setter( true, "");
+		snmp_set_loglevel_called = true;
+		if(snmp_set_loglevel_fail)	err.setter( true, "");
 	}
 	void	reload_parameter( const PARAMETER_COMPONENT_TAG*, error_code& err )
 	{
