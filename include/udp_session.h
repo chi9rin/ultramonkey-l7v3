@@ -8,7 +8,6 @@
 
 #include "protocol_module_base.h"
 #include "session_result_message.h"
-#include "virtualservice.h"
 
 #define UDP_SESSION_THREAD_STATE_BIT 8
 
