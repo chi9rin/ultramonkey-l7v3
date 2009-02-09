@@ -41,15 +41,15 @@ public:
 	long long				sorry_maxconnection;
 	boost::asio::ip::tcp::endpoint
 							sorry_endpoint;
-	bool					sorry_flag;
+	int						sorry_flag;
 	unsigned long long		qos_upstream;
 	unsigned long long		qos_downstream;
 	
 	virtualservice_element() :	udpmode(false),
 				sorry_maxconnection(0LL),
-				sorry_flag(false),
-				qos_upstream(0),
-				qos_downstream(0){}
+				sorry_flag(0),
+				qos_upstream(0ULL),
+				qos_downstream(0ULL){}
 				
 	virtualservice_element( const virtualservice_element& in )
 			:	udpmode( in.udpmode ),
