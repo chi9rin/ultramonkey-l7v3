@@ -16,6 +16,8 @@
 #include <exception>
 #include <boost/bind.hpp>
 #include "l7vsadm.h"
+#include "logger.h"
+#include "parameter.h"
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
 
@@ -886,11 +888,11 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 
 #ifndef	UNIT_TEST
 int main( int argc, char* argv[] ){
-	Logger		logger;
-	Parameter	param;
-	logger.reloadConf();
+	l7vs::Logger		logger;
+	l7vs::Parameter		param;
+	logger.loadConf();
 
-	l7vsadm	adm;
+	l7vs::l7vsadm	adm;
 	if( !adm.execute( argc, argv ) ){
 		return -1;
 	}

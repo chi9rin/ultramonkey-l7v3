@@ -50,6 +50,7 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
 am_l7vsadm_OBJECTS = l7vsadm-protocol_module_control.$(OBJEXT) \
+	l7vsadm-schedule_module_control.$(OBJEXT) \
 	l7vsadm-l7vsadm.$(OBJEXT)
 l7vsadm_OBJECTS = $(am_l7vsadm_OBJECTS)
 l7vsadm_DEPENDENCIES = ../logger/libl7vsadm_logger.a \
@@ -279,7 +280,8 @@ l7vsd_LDADD = \
 			-llog4cxx \
 			-lrt \
 			-lboost_thread-gcc41-mt \
-			-lboost_system-gcc41-mt
+			-lboost_system-gcc41-mt \
+			-lboost_serialization-gcc41-mt
 
 l7vsadm_CPPFLAGS = \
 			-O2 -g -Wall -Werror \
@@ -295,9 +297,10 @@ l7vsadm_CPPFLAGS = \
 			-DVERSION=\"$(VERSION)\"
 
 l7vsadm_SOURCES = \
-			../logger/logger_wrapper.h \
-			../parameter/parameter_wrapper.h \
+			../logger/logger.h \
+			../parameter/parameter.h \
 			protocol_module_control.cpp \
+			schedule_module_control.cpp \
 			l7vsadm.cpp
 
 l7vsadm_LDADD = \
@@ -306,7 +309,8 @@ l7vsadm_LDADD = \
 			-llog4cxx \
 			-lrt \
 			-lboost_thread-gcc41-mt \
-			-lboost_system-gcc41-mt
+			-lboost_system-gcc41-mt \
+			-lboost_serialization-gcc41-mt
 
 all: all-am
 
@@ -384,6 +388,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-l7vsadm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-protocol_module_control.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsadm-schedule_module_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-command_receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-command_session.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-data_buff_base.Po@am__quote@
@@ -439,6 +444,20 @@ l7vsadm-protocol_module_control.obj: protocol_module_control.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocol_module_control.cpp' object='l7vsadm-protocol_module_control.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-protocol_module_control.obj `if test -f 'protocol_module_control.cpp'; then $(CYGPATH_W) 'protocol_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/protocol_module_control.cpp'; fi`
+
+l7vsadm-schedule_module_control.o: schedule_module_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-schedule_module_control.o -MD -MP -MF "$(DEPDIR)/l7vsadm-schedule_module_control.Tpo" -c -o l7vsadm-schedule_module_control.o `test -f 'schedule_module_control.cpp' || echo '$(srcdir)/'`schedule_module_control.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsadm-schedule_module_control.Tpo" "$(DEPDIR)/l7vsadm-schedule_module_control.Po"; else rm -f "$(DEPDIR)/l7vsadm-schedule_module_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='schedule_module_control.cpp' object='l7vsadm-schedule_module_control.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-schedule_module_control.o `test -f 'schedule_module_control.cpp' || echo '$(srcdir)/'`schedule_module_control.cpp
+
+l7vsadm-schedule_module_control.obj: schedule_module_control.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-schedule_module_control.obj -MD -MP -MF "$(DEPDIR)/l7vsadm-schedule_module_control.Tpo" -c -o l7vsadm-schedule_module_control.obj `if test -f 'schedule_module_control.cpp'; then $(CYGPATH_W) 'schedule_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/schedule_module_control.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsadm-schedule_module_control.Tpo" "$(DEPDIR)/l7vsadm-schedule_module_control.Po"; else rm -f "$(DEPDIR)/l7vsadm-schedule_module_control.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='schedule_module_control.cpp' object='l7vsadm-schedule_module_control.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsadm-schedule_module_control.obj `if test -f 'schedule_module_control.cpp'; then $(CYGPATH_W) 'schedule_module_control.cpp'; else $(CYGPATH_W) '$(srcdir)/schedule_module_control.cpp'; fi`
 
 l7vsadm-l7vsadm.o: l7vsadm.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-l7vsadm.o -MD -MP -MF "$(DEPDIR)/l7vsadm-l7vsadm.Tpo" -c -o l7vsadm-l7vsadm.o `test -f 'l7vsadm.cpp' || echo '$(srcdir)/'`l7vsadm.cpp; \

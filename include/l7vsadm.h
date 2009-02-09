@@ -14,6 +14,7 @@
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <sstream>
+#include "error_code.h"
 #include "l7vs_command.h"
 
 namespace l7vs{
@@ -132,9 +133,6 @@ protected:
 	typedef	std::map< std::string, PARAMETER_COMPONENT_TAG >	string_parameter_map_type;
 	string_parameter_map_type	string_parameter_dic;
 
-	// constractor
-	l7vsadm();
-
 	// usage function
 	std::string	usage();
 
@@ -152,6 +150,9 @@ protected:
 	bool	help_mode;
 
 public:
+	// constractor
+	l7vsadm();
+
 	//! execute function 
 	bool	execute( int, char*[] );
 };

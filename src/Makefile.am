@@ -78,7 +78,8 @@ l7vsd_LDADD	= \
 			-llog4cxx \
 			-lrt \
 			-lboost_thread-gcc41-mt \
-			-lboost_system-gcc41-mt
+			-lboost_system-gcc41-mt \
+			-lboost_serialization-gcc41-mt
 
 l7vsadm_CPPFLAGS	= \
 			-O2 -g -Wall -Werror \
@@ -94,9 +95,10 @@ l7vsadm_CPPFLAGS	= \
 			-DVERSION=\"$(VERSION)\"
 
 l7vsadm_SOURCES	=	\
-			../logger/logger_wrapper.h \
-			../parameter/parameter_wrapper.h \
+			../logger/logger.h \
+			../parameter/parameter.h \
 			protocol_module_control.cpp \
+			schedule_module_control.cpp \
 			l7vsadm.cpp
 
 l7vsadm_LDADD	=	\
@@ -105,7 +107,8 @@ l7vsadm_LDADD	=	\
 			-llog4cxx \
 			-lrt \
 			-lboost_thread-gcc41-mt \
-			-lboost_system-gcc41-mt
+			-lboost_system-gcc41-mt \
+			-lboost_serialization-gcc41-mt
 
 install:
 	$(INSTALL) -m 755 -d $(CONFIG_SOCK_PATH)
