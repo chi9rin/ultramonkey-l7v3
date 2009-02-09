@@ -59,8 +59,10 @@ am_libprotomod_cinsert_la_OBJECTS = http_protocol_module_base.lo \
 	protocol_module_cinsert.lo
 libprotomod_cinsert_la_OBJECTS = $(am_libprotomod_cinsert_la_OBJECTS)
 libprotomod_sessionless_la_DEPENDENCIES =
-libprotomod_sessionless_la_SOURCES = libprotomod_sessionless.c
-libprotomod_sessionless_la_OBJECTS = libprotomod_sessionless.lo
+am_libprotomod_sessionless_la_OBJECTS = http_protocol_module_base.lo \
+	protocol_module_sessionless.lo
+libprotomod_sessionless_la_OBJECTS =  \
+	$(am_libprotomod_sessionless_la_OBJECTS)
 libprotomod_sslid_la_DEPENDENCIES =
 am_libprotomod_sslid_la_OBJECTS = ssl_protocol_module_base.lo \
 	protocol_module_sslid.lo
@@ -68,14 +70,6 @@ libprotomod_sslid_la_OBJECTS = $(am_libprotomod_sslid_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
@@ -84,10 +78,20 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libprotomod_cinsert_la_SOURCES) libprotomod_sessionless.c \
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(libprotomod_cinsert_la_SOURCES) \
+	$(libprotomod_sessionless_la_SOURCES) \
 	$(libprotomod_sslid_la_SOURCES)
 DIST_SOURCES = $(libprotomod_cinsert_la_SOURCES) \
-	libprotomod_sessionless.c $(libprotomod_sslid_la_SOURCES)
+	$(libprotomod_sessionless_la_SOURCES) \
+	$(libprotomod_sslid_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -196,7 +200,14 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 L7VS_MODDIR = @l7vs_dir@
-AM_CFLAGS = -g -O2 -Wall -Werror -fPIC -pthread -I../../include -I../../logger -I../../parameter
+MAX_BUFFER_SIZE = @l7vs_max_buffer_size@
+AM_CPPFLAGS = \
+		-g -O2 -Wall -Werror -fPIC -pthread \
+		-I../../include \
+		-I../../logger \
+		-I../../parameter \
+		-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE)
+
 lib_LTLIBRARIES = libprotomod_cinsert.la \
 					libprotomod_sslid.la \
 					libprotomod_sessionless.la
@@ -213,7 +224,7 @@ libprotomod_sslid_la_SOURCES = protocol_module_base.h \
 									protocol_module_sslid.cpp
 
 libprotomod_sslid_la_LIBADD = -lrt -lboost_thread
-libprotomod_sessionless_la_SOURCE = protocol_module_base.h \
+libprotomod_sessionless_la_SOURCES = protocol_module_base.h \
 									http_protocol_module_base.h \
 									http_protocol_module_base.cpp \
 									protocol_module_sessionless.cpp
@@ -222,7 +233,7 @@ libprotomod_sessionless_la_LIBADD = -lrt -lboost_thread
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cpp .lo .o .obj
+.SUFFIXES: .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -282,7 +293,7 @@ clean-libLTLIBRARIES:
 libprotomod_cinsert.la: $(libprotomod_cinsert_la_OBJECTS) $(libprotomod_cinsert_la_DEPENDENCIES) 
 	$(CXXLINK) -rpath $(libdir) $(libprotomod_cinsert_la_LDFLAGS) $(libprotomod_cinsert_la_OBJECTS) $(libprotomod_cinsert_la_LIBADD) $(LIBS)
 libprotomod_sessionless.la: $(libprotomod_sessionless_la_OBJECTS) $(libprotomod_sessionless_la_DEPENDENCIES) 
-	$(LINK) -rpath $(libdir) $(libprotomod_sessionless_la_LDFLAGS) $(libprotomod_sessionless_la_OBJECTS) $(libprotomod_sessionless_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libprotomod_sessionless_la_LDFLAGS) $(libprotomod_sessionless_la_OBJECTS) $(libprotomod_sessionless_la_LIBADD) $(LIBS)
 libprotomod_sslid.la: $(libprotomod_sslid_la_OBJECTS) $(libprotomod_sslid_la_DEPENDENCIES) 
 	$(CXXLINK) -rpath $(libdir) $(libprotomod_sslid_la_LDFLAGS) $(libprotomod_sslid_la_OBJECTS) $(libprotomod_sslid_la_LIBADD) $(LIBS)
 
@@ -293,31 +304,10 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/http_protocol_module_base.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libprotomod_sessionless.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_module_cinsert.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_module_sessionless.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_module_sslid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ssl_protocol_module_base.Plo@am__quote@
-
-.c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
-
-.c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
-
-.c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -522,7 +512,7 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
 
 install:
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -D 755 -D $(L7VS_MODDIR)/*
+	$(INSTALL) -D 755 -D $(L7VS_MODDIR)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

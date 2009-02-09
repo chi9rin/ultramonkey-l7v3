@@ -60,7 +60,7 @@ libsched_lc_la_OBJECTS = $(am_libsched_lc_la_OBJECTS)
 libsched_rr_la_DEPENDENCIES =
 am_libsched_rr_la_OBJECTS = schedule_module_rr.lo
 libsched_rr_la_OBJECTS = $(am_libsched_rr_la_OBJECTS)
-libsched_wrr_la_LIBADD =
+libsched_wrr_la_DEPENDENCIES =
 am_libsched_wrr_la_OBJECTS = schedule_module_wrr.lo
 libsched_wrr_la_OBJECTS = $(am_libsched_wrr_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -193,29 +193,34 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-L7VS_MODDIR = @l7vs_moddir@
-AM_CFLAGS = -g -O2 -fPIC -pthread -Wall -Werror -I../../include -I../../logger -I../../parameter
-lib_LTLIBRARIES = libsched_lc.la \
-					 	libsched_rr.la \
-						libsched_wrr.la
+L7VS_MODDIR = @l7vs_dir@
+MAX_BUFFER_SIZE = @l7vs_max_buffer_size@
+AM_CPPFLAGS = \
+		-g -O2 -Wall -Werror -fPIC -pthread \
+		-I../../include \
+		-I../../logger \
+		-I../../parameter \
+		-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE)
 
-libsched_lc_la_SOURCES = module_base.h \
-							schedule_module_base.h \
+lib_LTLIBRARIES = libsched_lc.la \
+					libsched_rr.la \
+					libsched_wrr.la
+
+libsched_lc_la_SOURCES = schedule_module_base.h \
 							schedule_module_lc.h \
 							schedule_module_lc.cpp
 
 libsched_lc_la_LIBADD = -lrt -lboost_thread
-libsched_rr_la_SOURCES = module_base.h \
-							schedule_module_base.h \
+libsched_rr_la_SOURCES = schedule_module_base.h \
 							schedule_module_rr.h \
 							schedule_module_rr.cpp
 
 libsched_rr_la_LIBADD = -lrt -lboost_thread
-libsched_wrr_la_SOURCES = module_base.h \
-							schedule_module_base.h \
+libsched_wrr_la_SOURCES = schedule_module_base.h \
 							schedule_module_wrr.h \
 							schedule_module_wrr.cpp
 
+libsched_wrr_la_LIBADD = -lrt -lboost_thread
 all: all-am
 
 .SUFFIXES:
@@ -496,7 +501,7 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
 
 install:
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -m 755 -D $(L7VS_MODDIR) ./.libs/* $(l7VS_MODDIR)
+	$(INSTALL) -D 755 -D $(L7VS_MODDIR)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
