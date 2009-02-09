@@ -18,6 +18,7 @@
 
 namespace l7vs{
 class	l7vsd;
+class	command_session;
 
 //!	@class	command_receiver
 //!	@brief	l7vsadm message receiver class

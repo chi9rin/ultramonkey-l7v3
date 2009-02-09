@@ -24,7 +24,7 @@
 
 #include "error_code.h"
 #include "l7vs_command.h"
-//#include "l7vsd.h"
+#include "l7vsd.h"
 
 namespace l7vs{
 

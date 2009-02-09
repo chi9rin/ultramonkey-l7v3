@@ -48,11 +48,11 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 											= boost::bind(	&l7vsd::replication_command, &vsd,
 															&request_data.replication_command, _1 );
 	command_handler_map[l7vsadm_request::CMD_LOG]
-											= boost::bind(	&l7vsd::log_command, &vsd,
+											= boost::bind(	&l7vsd::set_loglevel, &vsd,
 															&request_data.log_category,
 															&request_data.log_level, _1 );
 	command_handler_map[l7vsadm_request::CMD_SNMP]
-											= boost::bind(	&l7vsd::snmp_log_command, &vsd,
+											= boost::bind(	&l7vsd::snmp_set_loglevel, &vsd,
 															&request_data.snmp_log_category,
 															&request_data.snmp_log_level, _1 );
 	command_handler_map[l7vsadm_request::CMD_PARAMETER]
