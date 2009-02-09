@@ -4,7 +4,7 @@
 
 namespace l7vs{
 
-	udp_session::udp_session(virtual_service_udp& vs, boost::asio::io_service& session_io) : 
+	udp_session::udp_session(virtualservice_udp& vs, boost::asio::io_service& session_io) : 
 		io(session_io),
 		parent_service(vs),
 		client_side_socket(session_io){
