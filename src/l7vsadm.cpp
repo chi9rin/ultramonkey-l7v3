@@ -69,12 +69,33 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			return false;
 		}
 	}
-	// check vertualservice on response
+	// check virtualservice on response
 	// 
 	if( request.vs_element.schedule_module_name.length() == 0 ){
-		//scheduler module name error
-		err.setter( true, "scheduler module not specified." );
-		return false;
+		//scheduler module not specified
+		//scheduler module check.
+		std::string	scheduler_name = "rr";		//default scheduler
+		schedule_module_control&	ctrl = schedule_module_control::getInstance();
+		ctrl.initialize( L7VS_MODULE_PATH );
+		schedule_module_base* module;
+		try{
+			module = ctrl.load_module( scheduler_name );
+		}
+		catch( ... ){
+			std::stringstream buf;
+			buf << "scheduler module load error:" << scheduler_name;
+			err.setter( true, buf.str() );
+			return false;
+		}
+		if( !module ){
+			// don't find schedule module
+			std::stringstream buf;
+			buf << "scheduler module not found:" << scheduler_name;
+			err.setter( true, buf.str() );
+			return false;
+		}
+		ctrl.unload_module( module );
+		request.vs_element.schedule_module_name = scheduler_name;
 	}
 	if( request.vs_element.protocol_module_name.length() == 0 ){
 		//protocol module name error
@@ -104,6 +125,7 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
 		//don't target recvaddress:port
+		err.setter( true, "target endpoint is not specified." );
 		return false;
 	}
 	// get host endpoint from string
@@ -116,7 +138,10 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 			request.vs_element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( src_str );
 		}
 	}
-	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & err ){
+	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & sys_err ){
+		std::stringstream buf;
+		buf << "target endpoint parse error:" << src_str;
+		err.setter( true, buf.str() );
 		return false;
 	}
 	return true;
@@ -125,6 +150,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
 		//don't target protomod name.
+		err.setter( true, "protomod name is not specified." );
 		return false;
 	}
 	std::string	module_name = argv[pos];
@@ -146,7 +172,10 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 	while( true ){
 		if( ++pos == argc ) break; //module option end.
 		parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
-		if( itr != vs_option_dic.end() ) break;	// module option end.
+		if( itr != vs_option_dic.end() ){
+			--pos;	// back for next option
+			break;	// module option end.
+		}
 
 		module_args.push_back( argv[pos] );
 	}
@@ -169,6 +198,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
 		// don't target scheduler name.
+		err.setter( true, "scheduler name is not specified." );
 		return false;
 	}
 	//schedule module check.
@@ -180,10 +210,16 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 		module = ctrl.load_module( scheduler_name );
 	}
 	catch( ... ){
+		std::stringstream buf;
+		buf << "scheduler module load error:" << scheduler_name;
+		err.setter( true, buf.str() );
 		return false;
 	}
 	if( !module ){
-		// don't find schedule module 
+		// don't find schedule module
+		std::stringstream buf;
+		buf << "scheduler module not found:" << scheduler_name;
+		err.setter( true, buf.str() );
 		return false;
 	}
 	ctrl.unload_module( module );
@@ -194,6 +230,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
 		// don't target maxconnection_num
+		err.setter( true, "maxconnection value is not specified." );
 		return false;
 	}
 	try{
@@ -201,6 +238,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
 	}
 	catch( boost::bad_lexical_cast& e ){
 		// don't convert argv[pos] is 
+		return false;
 	}
 	//check connection limit and zero
 	return true;
@@ -208,36 +246,89 @@ bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
 //! bypass(SorryServer) option check
 bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
-		//don't rarget sorryserver:port
+		//don't target sorryserver:port
+		err.setter( true, "sorryserver endpoint is not specified." );
 		return false;
 	}
+	std::string sorry_endpoint = argv[pos];
 	try{
-		std::string sorry_endpoint = argv[pos];
 		request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( sorry_endpoint );
+		// clear endpoint check
+		if( request.vs_element.sorry_endpoint == boost::asio::ip::tcp::endpoint() ){
+			std::string	clear_endpoint = "255.255.255.255:0";
+			request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( clear_endpoint );
+		}
 	}
-	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & err ){
+	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & sys_err ){
 		//don't resolve sorryserver endpoint
+		std::stringstream buf;
+		buf << "sorryserver endpoint parse error:" << sorry_endpoint;
+		err.setter( true, buf.str() );
 		return false;
 	}
 	return true;	//
 }
 //! virtualservice option flag function
 bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
-	request.vs_element.sorry_flag = true;
-	return true;
+	if( ++pos >= argc ){
+		//don't target sorry flag
+		err.setter( true, "sorryflag value is not specified." );
+		return false;
+	}
+	try{
+		request.vs_element.sorry_flag = boost::lexical_cast< bool >( argv[pos] );
+	}
+	catch( boost::bad_lexical_cast& e ){
+		// don't convert argv[pos] is 
+		return false;
+	}
+	return true;	//
 }
 //! virtualservice option qosupstream function
 bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
 		//don't rarget QoS upstream value.
+		err.setter( true, "qos_upstream value is not specified." );
 		return false;
 	}
 	try{
 		virtualservice_element& elem = request.vs_element;	// request virtualservice element refalence get.
-		elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );	// set qos_upstream
+		std::string	tmp	= argv[pos];
+		std::string::reverse_iterator ritr = tmp.rbegin();
+		if( *ritr == 'G' || *ritr == 'g' ){
+			std::string	strval = tmp.substr(0, tmp.length() - 1);
+			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
+			if( ( ULLONG_MAX / 1024 / 1024 / 1024 ) < ullval ){
+				err.setter( true, "qos_upstream value is too big." );
+				return false;
+			}
+			elem.qos_upstream = ullval * 1024 * 1024 * 1024;		// set qos_upstream
+		}
+		else if( *ritr == 'M' || *ritr == 'm' ){
+			std::string	strval = tmp.substr(0, tmp.length() - 1);
+			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
+			if( ( ULLONG_MAX / 1024 / 1024 ) < ullval ){
+				err.setter( true, "qos_upstream value is too big." );
+				return false;
+			}
+			elem.qos_upstream = ullval * 1024 * 1024;		// set qos_upstream
+		}
+		else if( *ritr == 'K' || *ritr == 'k' ){
+			std::string	strval = tmp.substr(0, tmp.length() - 1);
+			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
+			if( ( ULLONG_MAX / 1024 ) < ullval ){
+				err.setter( true, "qos_upstream value is too big." );
+				return false;
+			}
+			elem.qos_upstream = ullval * 1024;		// set qos_upstream
+		}
+		else{
+			elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );	// set qos_upstream
+		}
 	}
 	catch( boost::bad_lexical_cast& ex ){	// don't convert string to qos_upsatream
 		// don't conv qos upstream
+		err.setter( true, "invalid qos_upstream value." );
 		return false;
 	}
 	return true;		
@@ -246,14 +337,47 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] ){
 	if( ++pos >= argc ){
 		// don't target QoS downstream value
+		err.setter( true, "qos_downstream value is not specified." );
 		return false;
 	}
 	try{
-		virtualservice_element& elem = request.vs_element;	// request virtualservice element refarence get.
-		elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );
+		virtualservice_element& elem = request.vs_element;	// request virtualservice element refalence get.
+		std::string	tmp	= argv[pos];
+		std::string::reverse_iterator ritr = tmp.rbegin();
+		if( *ritr == 'G' || *ritr == 'g' ){
+			std::string	strval = tmp.substr(0, tmp.length() - 1);
+			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
+			if( ( ULLONG_MAX / 1024 / 1024 / 1024 ) < ullval ){
+				err.setter( true, "qos_downstream value is too big." );
+				return false;
+			}
+			elem.qos_downstream = ullval * 1024 * 1024 * 1024;		// set qos_upstream
+		}
+		else if( *ritr == 'M' || *ritr == 'm' ){
+			std::string	strval = tmp.substr(0, tmp.length() - 1);
+			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
+			if( ( ULLONG_MAX / 1024 / 1024 ) < ullval ){
+				err.setter( true, "qos_downstream value is too big." );
+				return false;
+			}
+			elem.qos_downstream = ullval * 1024 * 1024;		// set qos_upstream
+		}
+		else if( *ritr == 'K' || *ritr == 'k' ){
+			std::string	strval = tmp.substr(0, tmp.length() - 1);
+			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
+			if( ( ULLONG_MAX / 1024 ) < ullval ){
+				err.setter( true, "qos_downstream value is too big." );
+				return false;
+			}
+			elem.qos_downstream = ullval * 1024;		// set qos_upstream
+		}
+		else{
+			elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );	// set qos_downstream
+		}
 	}
 	catch( boost::bad_lexical_cast& ex ){
 		// don' conv qos downstream
+		err.setter( true, "invalid qos_downstream value." );
 		return false;
 	}
 	return true;
@@ -266,12 +390,15 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 	if( zeropoint != elem.tcp_accept_endpoint ){ // adddress tcp_acceptor endpoint
 		std::stringstream	sstream;
 		sstream	<< elem.tcp_accept_endpoint;
+		std::string	endpoint	= sstream.str();
 		try{
-			std::string	endpoint	= sstream.str();
 			elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( endpoint );
 			elem.tcp_accept_endpoint = zeropoint;
 		}
 		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
+			std::stringstream buf;
+			buf << "target endpoint parse error:" << endpoint;
+			err.setter( true, buf.str() );
 			return false;
 		}
 	}
@@ -281,6 +408,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 		try{
 			std::string	endpoint = sstream.str();
 			elem.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp > ( endpoint );
+			elem.realserver_vector.front().tcp_endpoint = zeropoint;
 		}
 		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
 			return false;
