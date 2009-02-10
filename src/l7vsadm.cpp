@@ -17,6 +17,7 @@
 #include <boost/bind.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include <boost/format.hpp>
 #include "l7vsadm.h"
 #include "logger.h"
 #include "parameter.h"
@@ -899,6 +900,38 @@ std::string	l7vs::l7vsadm::usage(){
 	return stream.str();
 }
 
+//!	disp_list function
+void	l7vs::l7vsadm::disp_list(){
+	std::stringstream buf;
+	buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % L7VS_VERSION_STRING;
+	buf << "Prot LocalAddress:Port ProtoMod Scheduler\n";
+	buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
+	BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
+		buf << boost::format( "TCP %s %s %s\n" )
+			% vse.tcp_accept_endpoint
+			% vse.protocol_module_name
+			% vse.schedule_module_name;
+		BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
+			buf << boost::format( "  -> %-28s %-7s %-6d %-10d %-10d\n" )
+				% rse.tcp_endpoint
+				% "Masq"
+				% rse.weight
+				% rse.get_active()
+				% rse.get_inact();
+		}
+	}
+	std::cout << buf.str() << std::endl;
+}
+
+//!	disp_list_key function
+void	l7vs::l7vsadm::disp_list_key(){
+
+}
+
+//!	disp_list_verbose function
+void	l7vs::l7vsadm::disp_list_verbose(){
+
+}
 //
 // l7vsadm constractor.
 // create including all dictionary.
@@ -1100,6 +1133,28 @@ l7vs::l7vsadm::l7vsadm()
 	string_parameter_dic["l7vsadm"]			= PARAM_COMP_L7VSADM;
 	string_parameter_dic["snmpagent"]		= PARAM_COMP_SNMPAGENT;
 	string_parameter_dic["sslproxy"]		= PARAM_COMP_SSLPROXY;
+
+	// create disp_result dictionary.
+	disp_result_dic[l7vsadm_request::CMD_LIST]			= boost::bind( &l7vsadm::disp_list, this );
+	disp_result_dic[l7vsadm_request::CMD_LIST_KEY]		= boost::bind( &l7vsadm::disp_list_key, this );
+	disp_result_dic[l7vsadm_request::CMD_LIST_VERBOSE]	= boost::bind( &l7vsadm::disp_list_verbose, this );
+
+	// response_message_dic create
+	response_error_message_dic[l7vsd_response::RESPONSE_ERROR]				= "command error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_LIST_ERROR]			= "list command error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_LIST_VERBOSE_ERROR]	= "list verbose error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_LIST_KEY_ERROR]		= "list key error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_ADD_VS_ERROR]		= "add vs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_DEL_VS_ERROR]		= "del vs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_EDIT_VS_ERROR]		= "edit vs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_FLUSH_VS_ERROR]		= "flush vs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_ADD_RS_ERROR]		= "add rs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_DEL_RS_ERROR]		= "del rs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_EDIT_RS_ERROR]		= "edit rs error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_REPLICATION_ERROR]	= "replication command error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_LOG_ERROR]			= "log command error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_SNMP_ERROR]			= "snmp command error : ";
+	response_error_message_dic[l7vsd_response::RESPONSE_PARAMETER_ERROR]	= "parameter error : ";
 }
 
 bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
@@ -1108,7 +1163,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 		request.command = l7vsadm_request::CMD_LIST;
 	}
 	else {
-		// analyze command line
+		// parse command line
 		int pos = 1;
 		parse_cmd_map_type::iterator itr = command_dic.find( argv[pos] );
 		if( itr != command_dic.end() ){
@@ -1119,7 +1174,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 		}
 	}
 
-	// display analyze result
+	// display command parse result
 	if( err ){
 		std::cerr << "PARSE ERROR : " << err.get_message() << std::endl;
 		std::cerr << usage() << std::endl;
@@ -1155,8 +1210,17 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 	
 		// display result
 		if( l7vsd_response::RESPONSE_OK == response.status ){
-
-
+			disp_result_map_type::iterator	itr = disp_result_dic.find( request.command );
+			if( itr != disp_result_dic.end() )
+				itr->second();
+		}
+		else{
+			response_error_message_map_type::iterator	itr = response_error_message_dic.find( response.status );
+			if( itr != response_error_message_dic.end() )
+				std::cerr << itr->second << response.message << std::endl;
+			else
+				std::cerr << "command error : " << response.message << std::endl;
+			return false;
 		}
 	}
 	return true;

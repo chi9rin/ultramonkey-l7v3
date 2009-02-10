@@ -103,6 +103,11 @@ protected:
 	// parameter option function
 	bool	parse_opt_parameter_reload_func( int&, int, char*[] );
 
+	// display result function
+	void	disp_list();
+	void	disp_list_key();
+	void	disp_list_verbose();
+
 	// command parse function object.type.
 	typedef	boost::function< bool ( int, char*[] ) >
 			parse_cmd_func_type;
@@ -148,6 +153,19 @@ protected:
 	// parameter category string -> parameter category enum convert map type
 	typedef	std::map< std::string, PARAMETER_COMPONENT_TAG >	string_parameter_map_type;
 	string_parameter_map_type	string_parameter_dic;
+	// COMMAND_RESPONSE_CODE -> message convert map type
+	typedef	std::map< l7vsd_response::COMMAND_RESPONSE_CODE, std::string >	response_error_message_map_type;
+	response_error_message_map_type	response_error_message_dic;
+
+	// disp result function object type.
+	typedef	boost::function< void () >
+			disp_result_func_type;
+	// command - disp result function object map type
+	typedef	std::map< l7vsadm_request::COMMAND_CODE_TAG, disp_result_func_type >
+			disp_result_map_type;
+	// disp result function map dictionary.
+	disp_result_map_type	disp_result_dic;
+
 
 	// usage function
 	std::string	usage();
