@@ -207,14 +207,15 @@ public:
 	}
 };
 
-class data_send_ok_incorrect
+class data_send_list_incorrect
 {
 public:
 	inline bool operator ()(const protocol_module_sessionless::send_status& send_status_first,
 	        const protocol_module_sessionless::send_status& send_status_second)
 	{
-		return send_status_first.status == protocol_module_sessionless::SEND_OK
-		&& send_status_first.send_rest_size > 0;
+		return (send_status_first.status == protocol_module_sessionless::SEND_OK
+		&& send_status_first.send_rest_size > 0)
+		|| (send_status_first.status == protocol_module_sessionless::SEND_CONTINUE);
 	}
 };
 
