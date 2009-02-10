@@ -13,8 +13,7 @@ protected:
 	boost::xtime	diffelencial_time;
 	void	handle_replication_interrupt( const boost::system::error_code& err ){
 	}
-	bool	read_replicationdata( replication_data& in_rep_data ){
-		return true;
+	void	read_replicationdata(){
 	}
 
 public:

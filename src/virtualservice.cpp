@@ -9,9 +9,11 @@
 //	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 //
 
+#include <new>
 #include <vector>
 #include <sstream>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/bind.hpp>
 
 #include "virtualservice.h"
 #include "logger_enum.h"
@@ -411,6 +413,12 @@ l7vs::virtualservice_tcp::~virtualservice_tcp(){
 	stop();
 }
 
+/*!
+ * replication interrupt event
+ *
+ * @param   err
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
 	bool	newdata	= true;
 	l7vs::replication&	replication = const_cast<l7vs::replication&>( rep );
@@ -425,7 +433,7 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 	//get replication area
 	unsigned int	rep_size = 0;
 	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
-	if( 0 == rep_size ){
+	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		return;
 	}
@@ -442,6 +450,9 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 
 	//read header value and set loop count
 	unsigned int loop_cnt = rep_header_ptr->data_num;
+	//if data_num over MAX_REPLICATION_DATA_NUM, data_num = 0
+	if( static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt )
+		loop_cnt = 0;
 
 	//set start pointer(pointer of replication_data)
 	replication_data*	rep_data_ptr = reinterpret_cast<replication_data*>( ++rep_header_ptr );
@@ -467,7 +478,7 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 	rep_data_ptr->udpmode		= element.udpmode;
 	memset( rep_data_ptr->tcp_endpoint, 0, 48 );
 	memcpy( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 );
-	memset( rep_data_ptr->tcp_endpoint, 0, 48 );
+	memset( rep_data_ptr->udp_endpoint, 0, 48 );
 	memcpy( rep_data_ptr->udp_endpoint, tmp_udp_ep.str().c_str(), 47 );
 	rep_data_ptr->sorry_maxconnection	= element.sorry_maxconnection;
 	memset( rep_data_ptr->sorry_endpoint, 0, 48 );
@@ -484,10 +495,87 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 	replication_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_replication_interrupt, 
 											 this, boost::asio::placeholders::error ) );
 }
-bool	l7vs::virtualservice_tcp::read_replicationdata( l7vs::virtualservice_base::replication_data& out ){
-	return true;
+
+/*!
+ * read replication data
+ *
+ * @param   session_thread_control
+ * @param	error_code
+ * @return  void
+ */
+void	l7vs::virtualservice_tcp::read_replicationdata(){
+	l7vs::replication&	replication = const_cast<l7vs::replication&>( rep );
+
+	unsigned int	rep_size = 0;
+	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
+	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		return;
+	}
+
+	//check maxdatasize
+	if( ( rep_size * DATA_SIZE ) <
+		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		return;
+	}
+	//lock replication area
+	replication.lock( REP_AREA_NAME );
+
+	//read header value and set loop count
+	unsigned int loop_cnt = rep_header_ptr->data_num;
+	//if data_num over MAX_REPLICATION_DATA_NUM, data_num = 0
+	if( static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt ){
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		return;
+	}
+
+	//set start pointer(pointer of replication_data)
+	replication_data*	rep_data_ptr = reinterpret_cast<replication_data*>( ++rep_header_ptr );
+
+	//find vs(loop)
+	for( unsigned int i = 0; i < loop_cnt; ++i ){
+		//get tcp endpointdata
+		std::string	tmpstr = rep_data_ptr->tcp_endpoint;
+		std::string	ipaddr;
+		if( tmpstr[0] == '[' ){
+			//IPv6 endpoint
+		}else{
+			//IPv4 endpoint
+//			ipaddr	= tmpstr.substr();
+		}
+// 		//check equal udpmode and tcp_accept_endpoint
+// 		if( (rep_data_ptr->udpmode == element.udpmode )&&
+// 			( 0 == strncmp( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 ) ) ){
+// 			
+// 			if(){
+// 				element.sorry_maxconnection	= rep_data_ptr->sorry_maxconnection;
+// 				
+// 				element.sorry_endpoint		= 
+// 						tcp_endpoint_type( boost::asio::ip::address::from_string(  ), ());
+// 				memset( rep_data_ptr->sorry_endpoint, 0, 48 );
+// 				memcpy( rep_data_ptr->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 );
+// 			}
+// 			rep_data_ptr->sorry_flag	= element.sorry_flag;
+// 			element.qos_upstream		= rep_data_ptr->qos_up;
+// 			element.qos_downstream		= rep_data_ptr->qos_down;
+// 			break;
+// 		}
+// 		//increment data pointer
+// 		++rep_data_ptr;
+	}
+
+	//unlock replication area
+	replication.unlock( REP_AREA_NAME );
 }
 
+/*!
+ * accept event
+ *
+ * @param   session_thread_control
+ * @param	error_code
+ * @return  void
+ */
 void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
 													const boost::system::error_code& in_error ){
 
@@ -498,11 +586,14 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 	//switch active a session
 	boost::thread::id			t_id;
 	session_thread_control_ptr	stc_ptr;
-	t_id	= pool_sessions.begin()->first;
-	stc_ptr	= pool_sessions.begin()->second;
-
-	pool_sessions.erase( t_id );
-	active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+	{
+		boost::mutex::scoped_lock lk( sessions_mutex );
+		t_id	= pool_sessions.begin()->first;
+		stc_ptr	= pool_sessions.begin()->second;
+	
+		pool_sessions.erase( t_id );
+		active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+	}
 
 	//regist accept event handler
 	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
@@ -516,8 +607,12 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
  * @return  void
  */
 void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
+// 	l7vs::replication&	tmp_rep = const_cast<l7vs::replication&>( rep );
 	//load parameter value
 	load_parameter();
+
+	//read replication data
+	
 
 	//load protocol module
 	protomod = l7vs::protocol_module_control::getInstance().load_module( element.protocol_module_name );
@@ -526,6 +621,37 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 		return;
 	}
 	//Protocol Module Initialize
+	protomod->init_logger_functions(
+					boost::bind( &l7vs::Logger::getLogLevel, l7vs::LOG_CAT_PROTOCOL ),
+					boost::bind( &l7vs::Logger::putLogFatal, l7vs::LOG_CAT_PROTOCOL, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogError, l7vs::LOG_CAT_PROTOCOL, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogWarn, l7vs::LOG_CAT_PROTOCOL, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogInfo, l7vs::LOG_CAT_PROTOCOL, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogDebug, l7vs::LOG_CAT_PROTOCOL, _1, _2, _3, _4 ) );
+	protomod->initialize(
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_begin, this ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_end, this ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_next, this, _1 ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_lock, this ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_unlock, this ) );
+	protomod->init_replication_functions(
+					boost::bind( &l7vs::virtualservice_tcp::replication_pay_memory, this, _1, _2 ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_lock, this ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_unlock, this ),
+					element.tcp_accept_endpoint,
+					element.udp_recv_endpoint );
+
+	l7vs::protocol_module_base::check_message_result pm_result;
+	pm_result	=	protomod->check_parameter( element.protocol_args );
+	if( !pm_result.flag ){
+		err.setter( true, "Protocol Module argument error." );
+		return;
+	}
+	pm_result	=	protomod->set_parameter( element.protocol_args );
+	if( !pm_result.flag ){
+		err.setter( true, "Protocol Module argument error." );
+		return;
+	}
 
 	//load schedule module	
 	schedmod = l7vs::schedule_module_control::getInstance().load_module( element.schedule_module_name );
@@ -533,25 +659,42 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
 		return;
 	}
-
 	//Schedule Module Initialize
+	schedmod->init_logger_functions(
+					boost::bind( &l7vs::Logger::getLogLevel, l7vs::LOG_CAT_SCHEDULE ),
+					boost::bind( &l7vs::Logger::putLogFatal, l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogError, l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogWarn, l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogInfo, l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 ),
+					boost::bind( &l7vs::Logger::putLogDebug, l7vs::LOG_CAT_SCHEDULE, _1, _2, _3, _4 ) );
+	schedmod->initialize();
+	schedmod->init_replication_functions(
+					boost::bind( &l7vs::virtualservice_tcp::replication_pay_memory, this, _1, _2 ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_lock, this ),
+					boost::bind( &l7vs::virtualservice_tcp::rs_list_unlock, this ),
+					element.tcp_accept_endpoint,
+					element.udp_recv_endpoint );
+
 
 	//create session pool
-	for( int i = 0; i < param_data.session_pool_size; ++i ){
-		l7vs::tcp_session*	sess;
-		try{
-			sess	= new l7vs::tcp_session( *this, dispatcher );
-		}
-		catch( ... ){ //bad alloc exception catch
-			err.setter( true, "error, create session pool." );
-			return;
-		}
-		boost::shared_ptr<session_thread_control>	stc( new l7vs::session_thread_control( sess ) );
-		std::pair<session_map_type::iterator,bool> retval;
-		retval	= pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
-		if( !retval.second ){
-			err.setter( true, "error, create session pool." );
-			return;
+	{
+		boost::mutex::scoped_lock lk( sessions_mutex );
+		for( int i = 0; i < param_data.session_pool_size; ++i ){
+			l7vs::tcp_session*	sess;
+			try{
+				sess	= new l7vs::tcp_session( *this, dispatcher );
+			}
+			catch( std::bad_alloc ){ //bad alloc exception catch
+				err.setter( true, "error, create session pool." );
+				return;
+			}
+			boost::shared_ptr<session_thread_control>	stc( new l7vs::session_thread_control( sess ) );
+			std::pair<session_map_type::iterator,bool> retval;
+			retval	= pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
+			if( !retval.second ){
+				err.setter( true, "error, create session pool." );
+				return;
+			}
 		}
 	}
 
@@ -559,6 +702,36 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 }
 
 void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
+
+	//stop main loop
+	stop();
+
+	if( protomod ){
+		//finalize ProtocolModule
+		protomod->finalize();
+		//unload ProtocolModule
+		l7vs::protocol_module_control::getInstance().unload_module( protomod );
+	}
+	//unload ScheduleModule
+	if( protomod )
+		l7vs::schedule_module_control::getInstance().unload_module( schedmod );
+
+	//セッションプール開放
+	boost::mutex::scoped_lock lk( sessions_mutex );
+
+	for( session_map_type::iterator itr = pool_sessions.begin();
+		 itr != pool_sessions.end();
+		 ++itr ){
+		itr->second->join();
+	}
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->join();
+	}
+	active_sessions.clear();
+	pool_sessions.clear();
+
 	err.setter( false, "" );
 }
 
@@ -614,7 +787,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		err.setter( true, "Virtual Service does not exist." );
 		return;
 	}
-	//scuedule_moduleが変更されていたらロードしなおす
+	//if change ScueduleModule Name, unload old ScheduleModule and load new ScheduleModule
 	if( element.schedule_module_name != elem.schedule_module_name ){
 		schedule_module_control::getInstance().unload_module( schedmod );
 		schedmod = schedule_module_control::getInstance().load_module( elem.schedule_module_name );
@@ -637,12 +810,23 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			}
 		}
 	}
-	//変更可能な値を上書きする
-	element.sorry_maxconnection	= elem.sorry_maxconnection;
-	element.sorry_endpoint		= elem.sorry_endpoint;
-	element.sorry_flag			= elem.sorry_flag;
-	element.qos_upstream		= elem.qos_upstream;
-	element.qos_downstream		= elem.qos_downstream;
+
+	//update values
+	element.qos_upstream	= elem.qos_upstream;
+	element.qos_downstream	= elem.qos_downstream;
+	//if endpoint of SorryServer equal 255.255.255.255:0,not update
+	if( elem.sorry_endpoint !=
+			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "255.255.255.255" ), (0)) ){
+		element.sorry_endpoint		= elem.sorry_endpoint;
+		//if equal endpoint 255.255.255.255:0, clear sorry parameters
+		if( elem.sorry_endpoint == boost::asio::ip::tcp::endpoint() ){
+			element.sorry_maxconnection	= 0LL;
+			element.sorry_flag			= false;
+		}else{
+			element.sorry_maxconnection	= elem.sorry_maxconnection;
+			element.sorry_flag			= elem.sorry_flag;
+		}
+	}
 
 	err.setter( false, "" );
 }
@@ -655,12 +839,18 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
  * @return  void
  */
 void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+	l7vs::virtualservice_element&	in_element = const_cast<l7vs::virtualservice_element&>( in );
+
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
 		err.setter( true, "Virtual Service does not exist." );
 		return;
 	}	
-
+	//check rs num
+	if( in.realserver_vector.size() == 0U ){
+		err.setter( true, "." );
+		return;
+	}
 	//lock rs_list_ref_count_inc_mutex
 	boost::mutex::scoped_lock inc_lock( rs_list_ref_count_inc_mutex );
 
@@ -674,8 +864,6 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 	while( 0ULL != rs_list_ref_count ){
 		cond.timed_wait( lk, interval );
 	}
-
-	l7vs::virtualservice_element&	in_element = const_cast<l7vs::virtualservice_element&>( in );
 
 	//check duplication realserver
 	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
@@ -717,17 +905,56 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
  * @return  void
  */
 void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+	//check equal virtualservice
+	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
+		err.setter( true, "Virtual Service does not exist." );
+		return;
+	}	
+
 	//lock rs_list_ref_count_inc_mutex
 	boost::mutex::scoped_lock inc_lock( rs_list_ref_count_inc_mutex );
 
 	//waiting, rs_list_ref_count become 0
+	boost::xtime		interval;
+	boost::mutex		mtx;
+	boost::condition	cond;
+
+	interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
+	boost::mutex::scoped_lock lk( mtx );
+	while( 0ULL != rs_list_ref_count ){
+		cond.timed_wait( lk, interval );
+	}
 
 	l7vs::virtualservice_element&	in_element = const_cast<l7vs::virtualservice_element&>( in );
 
+	//check is exist realserver
+	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
+		 itr != in_element.realserver_vector.end();
+		 ++itr ){
+		bool	exist_flag = false;
+		for( std::list<realserver>::iterator rs_itr = rs_list.begin();
+			 rs_itr != rs_list.end(); ++rs_itr ){
+			if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
+				exist_flag = true;
+			}
+		}
+		if( !exist_flag ){
+			err.setter( true, "Real Server does not exist." );
+			return;
+		}
+	}
 	//edit realserver
 	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
 		 itr != in_element.realserver_vector.end();
 		 ++itr ){
+		for( std::list<realserver>::iterator rs_itr = rs_list.begin();
+			 rs_itr != rs_list.end(); ++rs_itr ){
+			if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
+				rs_itr->tcp_endpoint	= itr->tcp_endpoint;
+				rs_itr->udp_endpoint	= itr->udp_endpoint;
+				rs_itr->weight			= itr->weight;
+			}
+		}
 	}
 	err.setter( false, "" );
 }
@@ -816,11 +1043,14 @@ void	l7vs::virtualservice_tcp::run(){
 	//switch active a session
 	boost::thread::id			t_id;
 	session_thread_control_ptr	stc_ptr;
-	t_id	= pool_sessions.begin()->first;
-	stc_ptr	= pool_sessions.begin()->second;
-
-	pool_sessions.erase( t_id );
-	active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+	{
+		boost::mutex::scoped_lock	lk( sessions_mutex );
+		t_id	= pool_sessions.begin()->first;
+		stc_ptr	= pool_sessions.begin()->second;
+	
+		pool_sessions.erase( t_id );
+		active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+	}
 
 	//regist accept event handler
 	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
@@ -913,7 +1143,23 @@ void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::
 	rs_list_unlock();
 }
 
-void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_id ){}
+/*!
+ * increment in-active-connection (and decrement active-connection count)
+ *
+ * @param   endpoint
+ * @return  void
+ */
+void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_id ){
+	boost::mutex::scoped_lock lk( sessions_mutex );
+	session_map_type::iterator	itr = active_sessions.find( thread_id );
+	if( itr != active_sessions.end() ){
+		session_thread_control_ptr	stc_ptr;
+		stc_ptr	= itr->second;
+	
+		active_sessions.erase( thread_id );
+		pool_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+	}
+}
 
 
 
@@ -929,8 +1175,7 @@ l7vs::virtualservice_udp::~virtualservice_udp(){}
 
 void	l7vs::virtualservice_udp::handle_replication_interrupt( const boost::system::error_code& in ){
 }
-bool	l7vs::virtualservice_udp::read_replicationdata( l7vs::virtualservice_base::replication_data& out ){
-	return true;
+void	l7vs::virtualservice_udp::read_replicationdata(){
 }
 
 void	l7vs::virtualservice_udp::initialize( l7vs::error_code& err ){

@@ -21,7 +21,7 @@ protected:
 								pm_rep_count( 0 ),
 								sm_rep_count( 0 ) {
 	}
-	debugg_flug_struct( const debugg_flug_struct & in ){}
+	debugg_flug_struct( const debugg_flug_struct & in ){ rep_area = NULL; }
 	debugg_flug_struct& operator=( const debugg_flug_struct & in ){ return *this; }
 public:
 	static debugg_flug_struct&	getInstance(){
@@ -53,13 +53,16 @@ public:
 		return sm_rep_count;
 	}
 	void	create_rep_area(){
-		rep_area = new char[(l7vs::virtualservice_base::MAX_REPLICATION_DATA_NUM)*480];
+		if( NULL == rep_area )
+			rep_area = new char[(l7vs::virtualservice_base::MAX_REPLICATION_DATA_NUM)*480];
+			memset( rep_area, 0, (sizeof(char)*480*l7vs::virtualservice_base::MAX_REPLICATION_DATA_NUM) );
 	}
 	void*	get_rep_area(){
 		return reinterpret_cast<void*>( rep_area );
 	}
 	void	destroy_rep_area(){
-		delete [] rep_area;
+		if( NULL != rep_area )
+			delete [] rep_area;
 	}
 };
 

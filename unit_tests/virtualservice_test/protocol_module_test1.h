@@ -31,6 +31,7 @@ public:
 	check_message_result	check_parameter( const std::vector<std::string>& args ){
 		protocol_module_base::check_message_result	result;
 		result.flag = true;
+		std::cout << "ProtocolModule check parameter called." << std::endl;
 		return result;
 	}
 
@@ -39,11 +40,13 @@ public:
 	check_message_result	set_parameter( const std::vector<std::string>& args ){
 		protocol_module_base::check_message_result	result;
 		result.flag = true;
+		std::cout << "ProtocolModule set parameter called." << std::endl;
 		return result;
 	}
 	check_message_result	add_parameter( const std::vector<std::string>& args ){
 		protocol_module_base::check_message_result	result;
 		result.flag = false;
+		std::cout << "ProtocolModule add parameter called." << std::endl;
 		return result;
 	}
 

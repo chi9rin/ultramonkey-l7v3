@@ -63,16 +63,10 @@ public:
 
 	typedef	boost::shared_ptr<boost::mutex>					mutex_ptr;
 
-	const static int	SESSION_POOL_NUM_DEFAULT	= 256;		//! Default count for number of session-pool size
-	const static long	BPS_INTERVAL_DEFAULT		= 500;		//! bps calcurate interval(500ms)
-	const static long	REP_INTERVAL_DEFAULT		= 500;		//! replication-data create interval(500ms)
-	const static int	MAX_REPLICATION_DATA_NUM	= 64;		//! Maximum count value of replication data array
-	const static int	OPERATION_TIMEOUT			= 1;		//! Operation timed out value
-	const static int	REFCOUNT_WAIT_INTERVAL		= 10000;	//! wait interval for rs_ref_count check
-protected:
 	//!	@struct	replication_header replication header structure
 	struct	replication_header{
 		unsigned int	data_num;
+		replication_header() : data_num( 0 ) {}
 	};
 	//!	@struct	replication_data replication data structure
 	struct	replication_data{
@@ -86,6 +80,14 @@ protected:
 		unsigned long long	qos_down;
 	};
 
+	const static int	SESSION_POOL_NUM_DEFAULT	= 256;		//! Default count for number of session-pool size
+	const static long	BPS_INTERVAL_DEFAULT		= 500;		//! bps calcurate interval(500ms)
+	const static long	REP_INTERVAL_DEFAULT		= 500;		//! replication-data create interval(500ms)
+	const static int	MAX_REPLICATION_DATA_NUM	= 64;		//! Maximum count value of replication data array
+	const static int	OPERATION_TIMEOUT			= 1;		//! Operation timed out value
+	const static int	REFCOUNT_WAIT_INTERVAL		= 10000;	//! wait interval for rs_ref_count check
+protected:
+
 	struct	parameter_data{
 		int		session_pool_size;
 		long	bps_interval;
@@ -97,6 +99,8 @@ protected:
 
 	const	l7vsd&				vsd;			//! l7vsd reference
 	const	replication&		rep;			//! replication reference
+
+	Logger						log;
 
 	boost::asio::io_service		dispatcher;		//! dispatcer service
 	deadline_timer_ptr_type		calc_bps_timer;	//! timer object
@@ -138,12 +142,29 @@ protected:
 	void						load_parameter();
 
 	virtual	void				handle_replication_interrupt( const boost::system::error_code& ) = 0;
-	virtual	bool				read_replicationdata( replication_data& ) = 0;
+	virtual	void				read_replicationdata() = 0;
 
 	void						handle_protomod_replication( const boost::system::error_code& );
 	void						handle_schedmod_replication( const boost::system::error_code& );
 
 	void						handle_throughput_update( const boost::system::error_code& );
+
+	std::list<realserver>::iterator
+								rs_list_begin(){
+		return rs_list.begin();
+	}
+	std::list<realserver>::iterator
+								rs_list_end(){
+		return rs_list.end();
+	}
+	std::list<realserver>::iterator
+								rs_list_next( std::list<realserver>::iterator in_itr ){
+		return ++in_itr;
+	}
+	void*						replication_pay_memory( const std::string& inid, unsigned int* outsize ){
+		l7vs::replication&	tmp_rep = const_cast<l7vs::replication&>( rep );
+		return tmp_rep.pay_memory( inid, *outsize );
+	}
 
 public:
 	virtualservice_base(	const l7vsd&,
@@ -210,9 +231,10 @@ protected:
 
 	session_map_type			pool_sessions;
 	session_map_type			active_sessions;
+	boost::mutex				sessions_mutex;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
-	bool						read_replicationdata( replication_data& );
+	void						read_replicationdata();
 
 	void						handle_accept(	const session_thread_control_ptr,
 												const boost::system::error_code& );
@@ -253,7 +275,7 @@ protected:
 								session;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
-	bool						read_replicationdata( virtualservice_base::replication_data& );
+	void						read_replicationdata();
 
 public:
 	virtualservice_udp(		const l7vsd&,

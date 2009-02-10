@@ -22,8 +22,8 @@ public:
 		handle_replication_interrupt( in_err );
 	}
 
-	bool	call_read_replicationdata( replication_data& in_rep ){
-		return	read_replicationdata( in_rep );
+	void	call_read_replicationdata(){
+		read_replicationdata();
 	}
 
 	void	call_handle_accept(	const session_thread_control_ptr,
@@ -38,6 +38,16 @@ public:
 	std::list<realserver>&	get_rs_list(){
 		return rs_list;
 	}
+	void	release_session( const boost::thread::id in_id ){
+		std::cout << "release_session called." << std::endl;
+		virtualservice_tcp::release_session( in_id );
+	}
+	void	handle_accept(	const session_thread_control_ptr stc_ptr,
+							const boost::system::error_code& err ){
+		std::cout << "handle accept called." << std::endl;
+		virtualservice_tcp::handle_accept( stc_ptr, err );
+	}
+
 };
 
 }

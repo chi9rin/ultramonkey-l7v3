@@ -3,7 +3,7 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= vs_base_ut vs_tcp_ut
+TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../logger \
@@ -29,6 +29,11 @@ TCPSRCS		=	\
 				../../src/virtualservice.cpp \
 				vs_tcp_test.cpp
 
+TCPTSRCS		=	\
+				stub.cpp \
+				../../src/virtualservice.cpp \
+				vs_tcp_thread_test.cpp
+
 # UDPSRCS		=	\
 # 				stub.cpp \
 # 				../../src/virtualservice.cpp \
@@ -42,6 +47,8 @@ BASEOBJS	= $(BASESRCS:.cpp=.o)
 
 TCPOBJS		= $(TCPSRCS:.cpp=.o)
 
+TPCTOBJS	= $(TCPTSRCS:.cpp=.o)
+
 # UDPOBJS		= $(UDPSRCS:.cpp=.o)
 
 all:	$(TARGET)
@@ -51,6 +58,10 @@ vs_base_ut:	$(BASEOBJS)
 
 vs_tcp_ut:	$(TCPOBJS)
 	$(CPP) $(INCLUDES) -o vs_tcp_ut $(TCPOBJS) $(LDFLAGS) $(LIBS)
+
+vs_tcp_thread_ut: $(TPCTOBJS)
+	$(CPP) $(INCLUDES) -o vs_tcp_thread_ut $(TPCTOBJS) $(LDFLAGS) $(LIBS)
+
 
 # $(TARGET):	$(OBJS)
 # 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
