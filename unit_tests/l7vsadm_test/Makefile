@@ -5,12 +5,13 @@
 #
 TARGET		= l7vsadm_ut
 CPP			= g++
-CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./sample.ini"' -D MAX_BUFFER_SIZE='(65535)' -DLOGGER_PROCESS_ADM
+CPPFLAGS	= -Wall -O0 -g -Werror -pthread -DPARAMETER_FILE='"./sample.ini"' -DLOGGER_PROCESS_ADM -DL7VS_CONFIG_SOCK_PATH='"./"' -DMAX_BUFFER_SIZE='(65535)'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
+				-lboost_serialization-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt \
 				-llog4cxx 
 

@@ -17,6 +17,19 @@
 #include "error_code.h"
 #include "l7vs_command.h"
 
+#ifndef	L7VS_MODULE_PATH
+	#define	L7VS_MODULE_PATH	"./"
+#endif
+
+#ifndef	COMMAND_BUFFER_SIZE
+	#define	COMMAND_BUFFER_SIZE (65535)
+#endif
+
+#ifndef	L7VS_CONFIG_SOCK_PATH
+	#define L7VS_CONFIG_SOCK_PATH	"/var/run/l7vs"
+#endif
+#define L7VS_CONFIG_SOCKNAME		L7VS_CONFIG_SOCK_PATH "/l7vs"
+
 namespace l7vs{
 
 template < class T >
@@ -76,6 +89,7 @@ protected:
 	bool	parse_opt_rs_weight_func( int&, int, char*[] );
 	bool	parse_opt_rs_realserver_func( int&, int, char*[] );
 	// replication option function
+	bool	parse_opt_replication_switch_func( int&, int, char*[] );
 	bool	parse_opt_replication_start_func( int&, int, char*[] );
 	bool	parse_opt_replication_stop_func( int&, int, char*[] );
 	bool	parse_opt_replication_force_func( int&, int, char*[] );
@@ -112,6 +126,8 @@ protected:
 	parse_opt_map_type	rs_option_dic;
 	// replication option function map dictionary
 	parse_opt_map_type	replication_option_dic;
+	// replication switch option function map dictionary
+	parse_opt_map_type	replication_switch_option_dic;
 	// log option function map dictionary
 	parse_opt_map_type	log_option_dic;
 	// snmp option_function map dictionary

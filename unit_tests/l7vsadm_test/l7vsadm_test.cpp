@@ -61,6 +61,52 @@ public:
 	bool	parse_vs_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
 	{ return parse_vs_func( cmd, argc, argv ); }
 
+	bool	parse_opt_rs_weight_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_rs_weight_func( pos, argc, argv ); }
+
+	bool	parse_opt_rs_realserver_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_rs_realserver_func( pos, argc, argv ); }
+
+	bool	parse_rs_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
+	{ return parse_rs_func( cmd, argc, argv ); }
+
+	bool	parse_opt_replication_switch_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_replication_switch_func( pos, argc, argv ); }
+
+	bool	parse_opt_replication_force_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_replication_force_func( pos, argc, argv ); }
+
+	bool	parse_opt_replication_dump_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_replication_dump_func( pos, argc, argv ); }
+
+	bool	parse_replication_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
+	{ return parse_replication_func( cmd, argc, argv ); }
+
+	bool	parse_opt_log_category_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_log_category_func( pos, argc, argv ); }
+
+	bool	parse_opt_log_level_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_log_level_func( pos, argc, argv ); }
+
+	bool	parse_log_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
+	{ return parse_log_func( cmd, argc, argv ); }
+
+	bool	parse_opt_snmp_log_category_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_snmp_log_category_func( pos, argc, argv ); }
+
+	bool	parse_opt_snmp_log_level_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_snmp_log_level_func( pos, argc, argv ); }
+
+	bool	parse_snmp_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
+	{ return parse_snmp_func( cmd, argc, argv ); }
+
+	bool	parse_opt_parameter_reload_func_wp( int& pos, int argc, char* argv[] )
+	{ return parse_opt_parameter_reload_func( pos, argc, argv ); }
+
+	bool	parse_parameter_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
+	{ return parse_parameter_func( cmd, argc, argv ); }
+
+
 
 };
 
@@ -593,9 +639,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 1 (no unit prefix) return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 1 (no unit postfix) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 1 (no unit prefix) qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 1 (no unit postfix) qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 128ULL );
 	}
 
@@ -608,9 +654,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 2 (unit prefix 'G') return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 2 (unit prefix 'G') qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 137438953472ULL );
 	}
 
@@ -623,9 +669,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 3 (unit prefix 'g') return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 3 (unit prefix 'g') qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 137438953472ULL );
 	}
 
@@ -638,9 +684,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 4 (unit prefix 'M') return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 4 (unit prefix 'M') qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 134217728ULL );
 	}
 
@@ -653,9 +699,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 5 (unit prefix 'm') return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 5 (unit prefix 'm') qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 134217728ULL );
 	}
 
@@ -668,9 +714,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 6 (unit prefix 'K') return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 6 (unit prefix 'K') qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 131072ULL );
 	}
 
@@ -683,9 +729,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosup_func normal case 7 (unit prefix 'k') return value check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosup_func normal case 7 (unit prefix 'k') qos_upstream check
+		// unit_test[1] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 131072ULL );
 	}
 
@@ -791,9 +837,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 1 (no unit prefix) return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 1 (no unit prefix) qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 128ULL );
 	}
 
@@ -806,9 +852,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 2 (unit prefix 'G') return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 2 (unit prefix 'G') qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 137438953472ULL );
 	}
 
@@ -821,9 +867,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 3 (unit prefix 'g') return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 3 (unit prefix 'g') qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 137438953472ULL );
 	}
 
@@ -836,9 +882,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 4 (unit prefix 'M') return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 4 (unit prefix 'M') qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 134217728ULL );
 	}
 
@@ -851,9 +897,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 5 (unit prefix 'm') return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 5 (unit prefix 'm') qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 134217728ULL );
 	}
 
@@ -866,9 +912,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 6 (unit prefix 'K') return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 6 (unit prefix 'K') qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 131072ULL );
 	}
 
@@ -881,9 +927,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 7 (unit prefix 'k') return value check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] parse_opt_vs_qosdown_func normal case 7 (unit prefix 'k') qos_downstream check
+		// unit_test[1] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 131072ULL );
 	}
 
@@ -1063,8 +1109,6 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		std::cout << adm.get_error().get_message() << std::endl;
-
 		// unit_test[1] parse_vs_func normal case 1 (CMD_ADD_VS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[1] parse_vs_func normal case 1 (CMD_ADD_VS short_option) request check
@@ -1167,8 +1211,6 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		std::cout << adm.get_error().get_message() << std::endl;
-
 		// unit_test[1] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[1] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) request check
@@ -1265,8 +1307,6 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		std::cout << adm.get_error().get_message() << std::endl;
-
 		// unit_test[1] parse_vs_func normal case 5 (CMD_DEL_VS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[1] parse_vs_func normal case 5 (CMD_DEL_VS short_option) request check
@@ -1286,7 +1326,7 @@ void	parse_vs_func_test(){
 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_DEL_VS;
 		int		argc	= 7;
 		char*	argv[]	= {	"l7vsadm_test",
-							"--edit-service",
+							"--delete-service",
 							"--target",
 							"10.144.169.86:11500",
 							"--module",
@@ -1309,58 +1349,1120 @@ void	parse_vs_func_test(){
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "specified_url" );
 	}
 
+	// parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_VS;
+		int		argc	= 7;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-A",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg"
+							};
+	
+		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-// 	// parse_list_func normal case 2 (with num option short)
-// 	{
-// 		l7vsadm_test	adm;
-// 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LIST;
-// 		int		argc	= 3;
-// 		char*	argv[]	= { "l7vsadm_test", "-l", "-n" };
-// 	
-// 		bool ret = adm.parse_list_func_wp( cmd, argc, argv );
-// 
-// 		// unit_test[1] parse_list_func normal case 2 (with num option short) return value check
-// 		BOOST_CHECK_EQUAL( ret, true );	
-// 		// unit_test[1] parse_list_func normal case 2 (with num option short) request check
-// 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_LIST );
-// 		// unit_test[1] parse_list_func normal case 2 (with num option short) nummeric flag check
-// 		BOOST_CHECK_EQUAL( adm.get_numeric(), true );
-// 	}
-// 
-// 	// parse_list_func normal case 3 (with num option long)
-// 	{
-// 		l7vsadm_test	adm;
-// 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LIST;
-// 		int		argc	= 3;
-// 		char*	argv[]	= { "l7vsadm_test", "-l", "--numeric" };
-// 	
-// 		bool ret = adm.parse_list_func_wp( cmd, argc, argv );
-// 
-// 		// unit_test[1] parse_list_func normal case 3 (with num option long) return value check
-// 		BOOST_CHECK_EQUAL( ret, true );	
-// 		// unit_test[1] parse_list_func normal case 3 (with num option long) request check
-// 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_LIST );
-// 		// unit_test[1] parse_list_func normal case 3 (with num option long) nummeric flag check
-// 		BOOST_CHECK_EQUAL( adm.get_numeric(), true );
-// 	}
-// 
-// 	// parse_list_func error case 1 (invarid option)
-// 	{
-// 		l7vsadm_test	adm;
-// 		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LIST;
-// 		int		argc	= 3;
-// 		char*	argv[]	= { "l7vsadm_test", "-l", "-z" };
-// 	
-// 		bool ret = adm.parse_list_func_wp( cmd, argc, argv );
-// 
-// 		// unit_test[1] parse_list_func error case 1 (invarid option) return value check
-// 		BOOST_CHECK_EQUAL( ret, false );	
-// 	}
+		// unit_test[1] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_VS );
+		// unit_test[1] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) schedule module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "rr" );
+	}
+
+	// parse_vs_func normal case 8 (CMD_FLUSH_VS)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_FLUSH_VS;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-C"
+							};
+	
+		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_vs_func normal case 8 (CMD_FLUSH_VS) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_vs_func normal case 8 (CMD_FLUSH_VS) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_FLUSH_VS );
+	}
+
+	// parse_vs_func error case 1 (CMD_ADD_VS protocol module not specified)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_VS;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-A",
+							"-t",
+							"10.144.169.87:22100"
+							};
+	
+		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_vs_func error case 1 (CMD_ADD_VS protocol module not specified) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_vs_func error case 2 (CMD_ADD_VS target address not specified)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_VS;
+		int		argc	= 5;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-A",
+							"-m",
+							"cinsert",
+							"mod_arg"
+							};
+	
+		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_vs_func error case 2 (CMD_ADD_VS target address not specified) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
 
 	BOOST_MESSAGE( "----- parse_vs_func_test end -----" );
 
 }
 
+void	parse_opt_rs_weight_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_rs_weight_func_test start -----" );
+
+	// parse_opt_rs_weight_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-w", "128" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_weight_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_rs_weight_func normal case 1 weight check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 128 );
+	}
+
+	// parse_opt_rs_weight_func error case 1 (invalid weight value (charactor))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-w", "a" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+	
+		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_weight_func error case 1 (invalid weight value (charactor)) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	// parse_opt_rs_weight_func error case 2 (invalid weight value(int over))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		std::stringstream	ss;
+		ss << (1ULL) + INT_MAX;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-w", const_cast<char*>( ss.str().c_str() ) };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+	
+		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_weight_func error case 2 (invalid weight value(int over)) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	// parse_opt_rs_weight_func error case 3 (no weight value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-w" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+	
+		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_weight_func error case 3 (no weight value) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_rs_weight_func_test end -----" );
+
+}
+
+void	parse_opt_rs_realserver_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_rs_realserver_func_test start -----" );
+
+	// parse_opt_rs_realserver_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "10.144.169.87:8080" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+	
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_realserver_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_rs_realserver_func normal case 1 endpoint check
+		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8080" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, ep );
+	}
+
+	// parse_opt_rs_realserver_func error case 1 (invalid endpoint)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "10.144.169.257:8080" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_realserver_func error case 1 (invalid endpoint) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_rs_realserver_func error case 2 (no endpoint)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_rs_realserver_func error case 2 (no endpoint) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_rs_realserver_func_test end -----" );
+
+}
+
+void	parse_rs_func_test(){
+	BOOST_MESSAGE( "----- parse_rs_func_test start -----" );
+
+	// parse_rs_func normal case 1 (CMD_ADD_RS short_option)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+		int		argc	= 11;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-a",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080",
+							"-w",
+							"10"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_RS );
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+		// unit_test[1] parse_rs_func normal case 1 (CMD_ADD_RS short_option) weight check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 10 );
+	}
+
+	// parse_rs_func normal case 2 (CMD_ADD_RS long_option)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+		int		argc	= 11;
+		char*	argv[]	= {	"l7vsadm_test",
+							"--add-server",
+							"--target",
+							"10.144.169.86:11500",
+							"--module",
+							"cinsert",
+							"mod_arg",
+							"--real-server",
+							"10.144.169.87:8888",
+							"--weight",
+							"20"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_RS );
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8888" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+		// unit_test[1] parse_rs_func normal case 2 (CMD_ADD_RS long_option) weight check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 20 );
+	}
+
+	// parse_rs_func normal case 3 (CMD_EDIT_RS short_option)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_EDIT_RS;
+		int		argc	= 11;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-e",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080",
+							"-w",
+							"20"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_EDIT_RS );
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+		// unit_test[1] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) weight check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 20 );
+	}
+
+	// parse_rs_func normal case 4 (CMD_EDIT_RS long_option)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_EDIT_RS;
+		int		argc	= 11;
+		char*	argv[]	= {	"l7vsadm_test",
+							"--edit-server",
+							"--target",
+							"10.144.169.86:11500",
+							"--module",
+							"cinsert",
+							"mod_arg",
+							"--real-server",
+							"10.144.169.87:8888",
+							"--weight",
+							"30"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_EDIT_RS );
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8888" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+		// unit_test[1] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) weight check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 30 );
+	}
+
+	// parse_rs_func normal case 5 (CMD_DEL_RS short_option)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_DEL_RS;
+		int		argc	= 9;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-d",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func normal case 5 (CMD_DEL_RS short_option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_rs_func normal case 5 (CMD_DEL_RS short_option) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_DEL_RS );
+		// unit_test[1] parse_rs_func normal case 5 (CMD_DEL_RS short_option) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_rs_func normal case 5 (CMD_DEL_RS short_option) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_rs_func normal case 5 (CMD_DEL_RS short_option) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_rs_func normal case 5 (CMD_DEL_RS short_option) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+	}
+
+	// parse_rs_func normal case 6 (CMD_DEL_RS long_option)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_DEL_RS;
+		int		argc	= 9;
+		char*	argv[]	= {	"l7vsadm_test",
+							"--delete-server",
+							"--target",
+							"10.144.169.86:11500",
+							"--module",
+							"cinsert",
+							"mod_arg",
+							"--real-server",
+							"10.144.169.87:8888"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func normal case 6 (CMD_DEL_RS long_option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_rs_func normal case 6 (CMD_DEL_RS long_option) request check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_DEL_RS );
+		// unit_test[1] parse_rs_func normal case 6 (CMD_DEL_RS long_option) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] parse_rs_func normal case 6 (CMD_DEL_RS long_option) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] parse_rs_func normal case 6 (CMD_DEL_RS long_option) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] parse_rs_func normal case 6 (CMD_DEL_RS long_option) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8888" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+	}
+
+	// parse_rs_func error case 1 (CMD_ADD_RS protocol module not specified)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+		int		argc	= 6;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-a",
+							"-t",
+							"10.144.169.87:22100",
+							"-r",
+							"10.144.169.86:8080"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func error case 1 (CMD_ADD_RS protocol module not specified) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	// parse_rs_func error case 2 (CMD_ADD_RS target address not specified)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+		int		argc	= 7;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-a",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080"
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func error case 2 (CMD_ADD_RS target address not specified) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	// parse_rs_func error case 3 (CMD_ADD_RS realserver address not specified)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+		int		argc	= 7;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-a",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							};
+	
+		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_rs_func error case 3 (CMD_ADD_RS realserver address not specified) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	BOOST_MESSAGE( "----- parse_rs_func_test end -----" );
+
+}
+
+void	parse_opt_replication_switch_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_replication_switch_func_test start -----" );
+
+	// parse_opt_replication_switch_func normal case 1 (replication start)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-s", "start" };
+
+		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
+	
+		// unit_test[1] parse_opt_replication_switch_func normal case 1 (replication start) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_replication_switch_func normal case 1 (replication start) replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_START );
+	}
+
+	// parse_opt_replication_switch_func normal case 2 (replication stop)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-s", "stop" };
+
+		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
+	
+		// unit_test[1] parse_opt_replication_switch_func normal case 2 (replication stop) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_replication_switch_func normal case 2 (replication stop) replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_STOP );
+	}
+
+	// parse_opt_replication_switch_func error case 1 (invalid switch option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-s", "end" };
+
+		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
+	
+		// unit_test[1] parse_opt_replication_switch_func error case 1 (invalid switch option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_replication_switch_func error case 2 (no switch option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-s" };
+
+		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
+	
+		// unit_test[1] parse_opt_replication_switch_func error case 2 (no switch option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_replication_switch_func_test end -----" );
+
+}
+
+void	parse_opt_replication_force_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_replication_force_func_test start -----" );
+
+	// parse_opt_replication_force_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-f" };
+
+		bool ret = adm.parse_opt_replication_force_func_wp( pos, argc, argv );
+	
+		// unit_test[1] parse_opt_replication_force_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_replication_force_func normal case 1 replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_FORCE );
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_replication_force_func_test end -----" );
+
+}
+
+void	parse_opt_replication_dump_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_replication_dump_func_test start -----" );
+
+	// parse_opt_replication_dump_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-d" };
+
+		bool ret = adm.parse_opt_replication_dump_func_wp( pos, argc, argv );
+	
+		// unit_test[1] parse_opt_replication_dump_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_replication_dump_func normal case 1 replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_DUMP );
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_replication_dump_func_test end -----" );
+
+}
+
+void	parse_replication_func_test(){
+	BOOST_MESSAGE( "----- parse_replication_func_test start -----" );
+
+	// parse_replication_func normal case 1 (replication start)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_REPLICATION;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-s", "start" };
+	
+		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_replication_func normal case 1 (replication start) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_replication_func normal case 1 (replication start) request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
+		// unit_test[1] parse_replication_func normal case 1 (replication start) replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_START );
+	}
+
+	// parse_replication_func normal case 2 (replication stop)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_REPLICATION;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-s", "stop" };
+	
+		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
+	
+		// unit_test[1] parse_replication_func normal case 2 (replication stop) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_replication_func normal case 2 (replication stop) request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
+		// unit_test[1] parse_replication_func normal case 2 (replication stop) replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_STOP );
+	}
+
+	// parse_replication_func normal case 3 (replication force)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_REPLICATION;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-f" };
+	
+		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
+	
+		// unit_test[1] parse_replication_func normal case 3 (replication force) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_replication_func normal case 3 (replication force) request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
+		// unit_test[1] parse_replication_func normal case 3 (replication force) replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_FORCE );
+	}
+
+	// parse_replication_func normal case 4 (replication dump)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_REPLICATION;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-d" };
+	
+		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
+	
+		// unit_test[1] parse_replication_func normal case 4 (replication dump) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_replication_func normal case 4 (replication dump) request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
+		// unit_test[1] parse_replication_func normal case 4 (replication dump) replication command check
+		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_DUMP );
+	}
+
+	// parse_replication_func error case 1 (replication command duplicate)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_REPLICATION;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-R", "-f", "-d" };
+	
+		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
+	
+		// unit_test[1] parse_replication_func error case 1 (command duplicate) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_replication_func error case 2 (no replication command)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_REPLICATION;
+		int		argc	= 2;
+		char*	argv[]	= { "l7vsadm_test", "-R" };
+	
+		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
+		
+		// unit_test[1] parse_replication_func error case 2 (no replication command) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+	}
+
+	BOOST_MESSAGE( "----- parse_replication_func_test end -----" );
+
+}
+
+void	parse_opt_log_category_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_log_category_func_test start -----" );
+
+	// parse_opt_log_category_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-L", "-c", "l7vsd_network" };
+	
+		bool ret = adm.parse_opt_log_category_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_log_category_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_log_category_func normal case 1 logcategory check
+		BOOST_CHECK_EQUAL( adm.get_request().log_category, l7vs::LOG_CAT_L7VSD_NETWORK );
+	}
+
+	// parse_opt_log_category_func error case 1 (invalid logcategory value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-L", "-c", "l7vsd" };
+	
+		bool ret = adm.parse_opt_log_category_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_log_category_func error case 1 (invalid logcategory value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_log_category_func error case 2 (no logcategory value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-L", "-c" };
+	
+		bool ret = adm.parse_opt_log_category_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_log_category_func error case 2 (no logcategory value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_log_category_func_test end -----" );
+
+}
+
+void	parse_opt_log_level_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_log_level_func_test start -----" );
+
+	// parse_opt_log_level_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-L", "-l", "error" };
+	
+		bool ret = adm.parse_opt_log_level_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_log_level_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_log_level_func normal case 1 loglevel check
+		BOOST_CHECK_EQUAL( adm.get_request().log_level, l7vs::LOG_LV_ERROR );
+	}
+
+	// parse_opt_log_level_func error case 1 (invalid loglevel value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-L", "-l", "l7vsd" };
+	
+		bool ret = adm.parse_opt_log_level_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_log_level_func error case 1 (invalid loglevel value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_log_level_func error case 2 (no loglevel value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-L", "-l" };
+	
+		bool ret = adm.parse_opt_log_level_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_log_level_func error case 2 (no loglevel value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_log_level_func_test end -----" );
+
+}
+
+void	parse_log_func_test(){
+	BOOST_MESSAGE( "----- parse_log_func_test start -----" );
+
+	// parse_log_func normal case 1
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LOG;
+		int		argc	= 6;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-L",
+							"-c",
+							"l7vsd_network",
+							"-l",
+							"debug"
+							};
+	
+		bool ret = adm.parse_log_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_log_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_log_func normal case 1 request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_LOG );
+		// unit_test[1] parse_log_func normal case 1 logcategory check
+		BOOST_CHECK_EQUAL( adm.get_request().log_category, l7vs::LOG_CAT_L7VSD_NETWORK );
+		// unit_test[1] parse_log_func normal case 1 logcategory check
+		BOOST_CHECK_EQUAL( adm.get_request().log_level, l7vs::LOG_LV_DEBUG );
+	}
+
+	// parse_log_func error case 1 (no logcategory)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LOG;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-L",
+							"-l",
+							"debug"
+							};
+	
+		bool ret = adm.parse_log_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_log_func error case 1 (no logcategory) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_log_func error case 2 (no loglevel)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_LOG;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-L",
+							"-c",
+							"l7vsd_network"
+							};
+	
+		bool ret = adm.parse_log_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_log_func error case 2 (no loglevel) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_log_func_test end -----" );
+
+}
+
+void	parse_opt_snmp_log_category_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_snmp_log_category_func_test start -----" );
+
+	// parse_opt_snmp_log_category_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-S", "-c", "snmpagent_start_stop" };
+	
+		bool ret = adm.parse_opt_snmp_log_category_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_snmp_log_category_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_snmp_log_category_func normal case 1 logcategory check
+		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_category, l7vs::LOG_CAT_SNMPAGENT_START_STOP );
+	}
+
+	// parse_opt_snmp_log_category_func error case 1 (invalid logcategory value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-S", "-c", "snmpagent" };
+	
+		bool ret = adm.parse_opt_snmp_log_category_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_snmp_log_category_func error case 1 (invalid logcategory value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_snmp_log_category_func error case 2 (no logcategory value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-S", "-c" };
+	
+		bool ret = adm.parse_opt_snmp_log_category_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_snmp_log_category_func error case 2 (no logcategory value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_snmp_log_category_func_test end -----" );
+
+}
+
+void	parse_opt_snmp_log_level_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_snmp_log_level_func_test start -----" );
+
+	// parse_opt_snmp_log_level_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-S", "-l", "info" };
+	
+		bool ret = adm.parse_opt_snmp_log_level_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_snmp_log_level_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_snmp_log_level_func normal case 1 loglevel check
+		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_level, l7vs::LOG_LV_INFO );
+	}
+
+	// parse_opt_snmp_log_level_func error case 1 (invalid loglevel value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-S", "-l", "snmpagent" };
+	
+		bool ret = adm.parse_opt_snmp_log_level_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_snmp_log_level_func error case 1 (invalid loglevel value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_snmp_log_level_func error case 2 (no loglevel value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-S", "-l" };
+	
+		bool ret = adm.parse_opt_snmp_log_level_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_snmp_log_level_func error case 2 (no loglevel value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_snmp_log_level_func_test end -----" );
+
+}
+
+void	parse_snmp_func_test(){
+	BOOST_MESSAGE( "----- parse_snmp_func_test start -----" );
+
+	// parse_snmp_func normal case 1
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_SNMP;
+		int		argc	= 6;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-S",
+							"-c",
+							"snmpagent_start_stop",
+							"-l",
+							"warn"
+							};
+	
+		bool ret = adm.parse_snmp_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_snmp_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_snmp_func normal case 1 request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_SNMP );
+		// unit_test[1] parse_snmp_func normal case 1 logcategory check
+		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_category, l7vs::LOG_CAT_SNMPAGENT_START_STOP );
+		// unit_test[1] parse_snmp_func normal case 1 logcategory check
+		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_level, l7vs::LOG_LV_WARN );
+	}
+
+	// parse_snmp_func error case 1 (no logcategory)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_SNMP;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-S",
+							"-l",
+							"debug"
+							};
+	
+		bool ret = adm.parse_snmp_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_snmp_func error case 1 (no logcategory) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_snmp_func error case 2 (no loglevel)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_SNMP;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-S",
+							"-c",
+							"snmpagent_start_stop"
+							};
+	
+		bool ret = adm.parse_snmp_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_snmp_func error case 2 (no loglevel) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_snmp_func_test end -----" );
+
+}
+
+void	parse_opt_parameter_reload_func_test(){
+	BOOST_MESSAGE( "----- parse_opt_parameter_reload_func_test start -----" );
+
+	// parse_opt_parameter_reload_func normal case 1
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-P", "-r", "replication" };
+	
+		bool ret = adm.parse_opt_parameter_reload_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_parameter_reload_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_opt_parameter_reload_func normal case 1 reload_component check
+		BOOST_CHECK_EQUAL( adm.get_request().reload_param, l7vs::PARAM_COMP_REPLICATION );
+	}
+
+	// parse_opt_parameter_reload_func error case 1 (invalid reload_component value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-P", "-r", "lsock" };
+	
+		bool ret = adm.parse_opt_parameter_reload_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_parameter_reload_func error case 1 (invalid reload_component value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_parameter_reload_func error case 2 (no reload_component value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 3;
+		char*	argv[]	= { "l7vsadm_test", "-P", "-r" };
+	
+		bool ret = adm.parse_opt_parameter_reload_func_wp( pos, argc, argv );
+
+		// unit_test[1] parse_opt_parameter_reload_func error case 2 (no reload_component value) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_opt_parameter_reload_func_test end -----" );
+
+}
+
+void	parse_parameter_func_test(){
+	BOOST_MESSAGE( "----- parse_parameter_func_test start -----" );
+
+	// parse_parameter_func normal case 1
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_PARAMETER;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-P",
+							"-r",
+							"logger"
+							};
+	
+		bool ret = adm.parse_parameter_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_parameter_func normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] parse_parameter_func normal case 1 request command check
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_PARAMETER );
+		// unit_test[1] parse_parameter_func normal case 1 reload_component check
+		BOOST_CHECK_EQUAL( adm.get_request().reload_param, l7vs::PARAM_COMP_LOGGER );
+	}
+
+	// parse_parameter_func error case 1 (no reload_component)
+	{
+		l7vsadm_test	adm;
+		l7vs::l7vsadm_request::COMMAND_CODE_TAG	cmd = l7vs::l7vsadm_request::CMD_PARAMETER;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-P"
+							};
+	
+		bool ret = adm.parse_parameter_func_wp( cmd, argc, argv );
+
+		// unit_test[1] parse_parameter_func error case 1 (no reload_component) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	BOOST_MESSAGE( "----- parse_parameter_func_test end -----" );
+
+}
 
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -1371,6 +2473,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	logger_instance.loadConf();
 
 	ts->add( BOOST_TEST_CASE( &parse_list_func_test ) );
+
 	ts->add( BOOST_TEST_CASE( &parse_opt_vs_target_func_test ) );
 	ts->add( BOOST_TEST_CASE( &parse_opt_vs_module_func_test ) );
 	ts->add( BOOST_TEST_CASE( &parse_opt_vs_scheduler_func_test ) );
@@ -1381,7 +2484,25 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &parse_opt_vs_udp_func_test ) );
 	ts->add( BOOST_TEST_CASE( &parse_vs_func_test ) );
 
+	ts->add( BOOST_TEST_CASE( &parse_opt_rs_weight_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_rs_realserver_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_rs_func_test ) );
 
+	ts->add( BOOST_TEST_CASE( &parse_opt_replication_switch_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_replication_force_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_replication_dump_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_replication_func_test ) );
+
+	ts->add( BOOST_TEST_CASE( &parse_opt_log_category_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_log_level_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_log_func_test ) );
+
+	ts->add( BOOST_TEST_CASE( &parse_opt_snmp_log_category_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_opt_snmp_log_level_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_snmp_func_test ) );
+
+	ts->add( BOOST_TEST_CASE( &parse_opt_parameter_reload_func_test ) );
+	ts->add( BOOST_TEST_CASE( &parse_parameter_func_test ) );
 
 	framework::master_test_suite().add( ts );
 
