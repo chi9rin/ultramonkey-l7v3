@@ -1,7 +1,17 @@
 #ifndef SNMPBRIDGE_TEST
 #define SNMPBRIDGE_TEST
 
-l7vs::l7vsd::l7vsd(){}
+#include <boost/thread/condition.hpp>
+#include "snmpbridge.h"
+
+class l7vs::snmpbridge;
+
+
+l7vs::l7vsd::l7vsd(){
+	rep = replication_ptr( new replication( dispatcher ) );
+	bridge = snmpbridge_ptr( new snmpbridge( *this, dispatcher ) );
+	vslist.clear();
+}
 
 l7vs::l7vsd::~l7vsd(){}
 
@@ -12,25 +22,28 @@ void l7vs::l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_
 }
 
 void l7vs::l7vsd::add_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
-//temp
 	// create virtualservice
-	boost::shared_ptr< virtual_service >
-		vsptr( new virtual_service( *this, *rep, *in_vselement ) );
-	// vs initialize
-//	vsptr->initialize( err );
-//	vsptr->set_virtualservice( *in_vselement, err );
-
+	boost::shared_ptr< virtual_service > vsptr( new virtual_service( *this, *rep, *in_vselement ) );
 	vslist.push_back( vsptr );
-//temp
 }
 
 void l7vs::l7vsd::del_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
+	if( vslist.end() !=  vsitr ){
+		vslist.erase(vsitr);
+	}
 }
 
 void l7vs::l7vsd::edit_virtual_service( const virtualservice_element* in_vselement, error_code& err ){
 }
 
 void l7vs::l7vsd::add_real_server( const virtualservice_element* in_vselement, error_code& err ){
+	vslist_type::iterator vsitr = search_vslist( *in_vselement );
+	if( vslist.end() !=  vsitr ){
+		// add realserver
+		(*vsitr)->add_realserver( *in_vselement, err );
+		if( err )	return;
+	}
 }
 
 void l7vs::l7vsd::del_real_server( const virtualservice_element* in_vselement, error_code& err ){
@@ -43,8 +56,12 @@ void l7vs::l7vsd::flush_virtual_service( error_code& err ){
 }
 
 l7vs::l7vsd::vslist_type::iterator l7vs::l7vsd::search_vslist( const virtualservice_element& in_vselement ) const {
-	vslist_type::iterator itr = vslist.begin();
-	return itr;
+	for( vslist_type::iterator itr = vslist.begin();
+		 itr != vslist.end();
+		 ++itr ){
+		if( (*itr)->get_element() == in_vselement )	return itr;
+	}
+	return vslist.end();
 }
 
 void l7vs::l7vsd::release_virtual_service( const virtualservice_element& in_vselement ) const {
@@ -86,25 +103,56 @@ std::string	l7vs::l7vsd::usage(){
 	return stream.str();
 }
 
-l7vs::virtual_service::virtual_service(	const l7vsd& ,
-						const replication& ,
-						const virtualservice_element& ){
+l7vs::virtual_service::virtual_service(	const l7vsd& invsd,
+						const replication& inrep,
+						const virtualservice_element& inelement){
+//	if( inelement.udpmode ){
+//		vs = boost::shared_ptr<l7vs::virtualservice_base>(
+//				dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_tcp( invsd, inrep, inelement ) ) );
+//	}else{
+//		vs = boost::shared_ptr<l7vs::virtualservice_base>(
+//				dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_tcp( invsd, inrep, inelement ) ) );
+//	}
+	vs = boost::shared_ptr<l7vs::virtualservice_base>(
+			dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_tcp( invsd, inrep, inelement ) ) );
 }
 
 l7vs::virtual_service::~virtual_service(){
 }
 
+void	l7vs::virtual_service::add_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+	vs->add_realserver( in, err );
+}
 
 l7vs::virtualservice_element&	l7vs::virtual_service::get_element(){
 	return vs->get_element();
+}
+
+l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
+							const l7vs::replication& inrep,
+							const l7vs::virtualservice_element& inelement)
+												 :	vsd( invsd ),
+													rep( inrep ),
+													rs_list_ref_count( 0 ),
+													recvsize_up( 0 ),
+													current_up_recvsize( 0 ),
+													sendsize_up( 0 ),
+													recvsize_down( 0 ),
+													current_down_recvsize( 0 ),
+													sendsize_down( 0 ),
+													throughput_up( 0 ),
+													throughput_down( 0 ) {
+	rs_list.clear();
+	rs_mutex_list.clear();
+	element = inelement;
+	protomod = NULL;
+	schedmod = NULL;
 }
 
 l7vs::virtualservice_element&	l7vs::virtualservice_base::get_element(){
 	boost::mutex::scoped_lock lk( element_mutex );
 	return element;
 }
-
-
 
 unsigned long long		l7vs::virtual_service::get_throughput_upstream(){
 //	return vs->get_throughput_upstream();
@@ -114,6 +162,84 @@ unsigned long long		l7vs::virtual_service::get_throughput_downstream(){
 //	return vs->get_throughput_downstream();
 	return 10;
 }
+
+l7vs::virtualservice_tcp::virtualservice_tcp(	const l7vsd& invsd,
+												const replication& inrep,
+												const virtualservice_element& inelement )
+												 :	virtualservice_base( invsd, inrep, inelement ),
+													acceptor_( dispatcher ) {}
+
+l7vs::virtualservice_tcp::~virtualservice_tcp(){
+}
+
+void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
+}
+
+bool	l7vs::virtualservice_tcp::read_replicationdata( l7vs::virtualservice_base::replication_data& out ){
+	return true;
+}
+
+void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
+													const boost::system::error_code& in_error ){
+}
+
+void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
+}
+
+void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
+}
+
+bool	l7vs::virtualservice_tcp::operator==( const l7vs::virtualservice_base& in ){
+	return true;
+}
+
+bool	l7vs::virtualservice_tcp::operator!=( const l7vs::virtualservice_base& in ){
+	return false;
+}
+
+void	l7vs::virtualservice_tcp::set_virtualservice( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+}
+
+void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+}
+
+void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+	l7vs::virtualservice_element&	in_element = const_cast<l7vs::virtualservice_element&>( in );
+	for( std::vector<l7vs::realserver_element>::iterator itr = in_element.realserver_vector.begin();
+		 itr != in_element.realserver_vector.end();
+		 ++itr ){
+		l7vs::realserver	rs;
+		rs.tcp_endpoint		= itr->tcp_endpoint;
+		rs.udp_endpoint		= itr->udp_endpoint;
+		rs.weight			= itr->weight;
+		rs_list.push_back( rs );
+//		rs_mutex_list.insert( std::pair<tcp_endpoint_type,mutex_ptr>( rs.tcp_endpoint,
+//																		mutex_ptr( new boost::mutex ) ) );
+	}
+}
+
+void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+}
+
+void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
+}
+
+void	l7vs::virtualservice_tcp::run(){
+}
+
+void	l7vs::virtualservice_tcp::stop(){
+}
+
+void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::endpoint& in ){
+}
+
+void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){
+}
+
+void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_id ){}
+
+
+
 
 l7vs::Logger::Logger() :
 	scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
@@ -175,6 +301,11 @@ std::string snmpagent_l7vsd_receive = "info";
 std::string snmpagent_l7vsd_send = "info";
 std::string snmpagent_logger = "info";
 std::string snmpagent_parameter = "info";
+std::string snmpagent_system = "info";
+std::string snmpagent_system_memory = "info";
+std::string snmpagent_system_endpoint = "info";
+std::string snmpagent_system_signal = "info";
+std::string snmpagent_system_environment = "info";
 
 void set_nic(std::string in){
 	nic = in;
@@ -211,6 +342,21 @@ void set_snmpagent_logger(std::string in){
 }
 void set_snmpagent_parameter(std::string in){
 	snmpagent_parameter = in;
+}
+void set_snmpagent_system(std::string in){
+	snmpagent_system = in;
+}
+void set_snmpagent_system_memory(std::string in){
+	snmpagent_system_memory = in;
+}
+void set_snmpagent_system_endpoint(std::string in){
+	snmpagent_system_endpoint = in;
+}
+void set_snmpagent_system_signal(std::string in){
+	snmpagent_system_signal = in;
+}
+void set_snmpagent_system_environment(std::string in){
+	snmpagent_system_environment = in;
 }
 
 std::map<std::string, l7vs::LOG_LEVEL_TAG> levelstring_map;
@@ -283,8 +429,24 @@ std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG co
 		else if( key == "snmpagent_parameter" ){
 			buf = snmpagent_parameter;
 		}
+		else if( key == "snmpagent_system" ){
+			buf = snmpagent_system;
+		}
+		else if( key == "snmpagent_system_memory" ){
+			buf = snmpagent_system_memory;
+		}
+		else if( key == "snmpagent_system_endpoint" ){
+			buf = snmpagent_system_endpoint;
+		}
+		else if( key == "snmpagent_system_signal" ){
+			buf = snmpagent_system_signal;
+		}
+		else if( key == "snmpagent_system_environment" ){
+			buf = snmpagent_system_environment;
+		}
 	}
 	return buf;
 }
+
 
 #endif // SNMPBRIDGE_TEST
