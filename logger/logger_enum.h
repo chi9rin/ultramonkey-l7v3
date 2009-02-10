@@ -62,7 +62,7 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_NETWORK_ACCESS,			//!< logcategory is access log
 	LOG_CAT_L7VSD_MAINTHREAD,				//!< logcategory is mainthread
 	LOG_CAT_L7VSD_VIRTUALSERVICE,			//!< logcategory is virtualservice
-	LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD,		//!< logcategory is virtualservice thread
+	LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD,	//!< logcategory is virtualservice thread
 	LOG_CAT_L7VSD_SESSION,					//!< logcategory is session
 	LOG_CAT_L7VSD_SESSION_THREAD,			//!< logcategory is session thread
 	LOG_CAT_L7VSD_REALSERVER,				//!< logcategory is realserver
