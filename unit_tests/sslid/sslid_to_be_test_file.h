@@ -1,10 +1,3 @@
-/*
- * sslid_to_be_test_file.h
- *
- *  Created on: Jan 20, 2009
- *      Author: root
- */
-
 #ifndef SSLID_TO_BE_TEST_FILE_H_
 #define SSLID_TO_BE_TEST_FILE_H_
 

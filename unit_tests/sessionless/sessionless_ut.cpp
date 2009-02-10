@@ -1556,27 +1556,27 @@ void handle_client_recv_test(){
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
-    memcpy(request.c_array(), "GET / HTTP/1.0\r\nCookie: monkey=123456789012345678901"
-        "234567890123456789012345678901234567890123456789012345678901", 112);
-    request_len = 112;
+    memcpy(request.c_array(), "GET / HTTP/1.0\r\nHOST: 192.168.120.1\r\nCookie: "
+            "monkey=1\r\nContent-Length: 43\r\n\r\n0123456789012345678901234567890123456789012", 120);
+    request_len = 120;
 
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
 
-    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+    BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 112u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 120u);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
 
     //メモリの内容をチェックする
-    int cmp_ret = memcmp(request.c_array(), recive_data_global.recive_buffer, 112u);
+    int cmp_ret = memcmp(request.c_array(), recive_data_global.recive_buffer, 120u);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 120u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 112u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
 
     cout << "[106]------------------------------------------" << endl;
     // unit_test[106] データバッファ残サイズ　<　リクエストデータサイズ
@@ -2375,7 +2375,7 @@ void handle_client_recv_test(){
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -2410,7 +2410,7 @@ void handle_client_recv_test(){
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -2449,15 +2449,15 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 52u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 56u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 8u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->edit_division, EDIT_DIVISION_NO_EDIT);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 56u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 4u);
 
     cout << "[131]------------------------------------------" << endl;
     // unit_test[131] リクエストデータ残サイズ　=　0
@@ -2483,7 +2483,7 @@ void handle_client_recv_test(){
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -2540,7 +2540,7 @@ void handle_client_recv_test(){
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
-    memcpy(request.c_array(), "EST / HTTP/1.0234567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
+    memcpy(request.c_array(), "EST / HTTP/1.0\r\n4567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
     request_len = REQUEST_BUFFER_SIZE;
 
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
@@ -2595,17 +2595,17 @@ void handle_client_recv_test(){
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
-    memcpy(request.c_array(), "GET / HTTP/1.2234567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
+    memcpy(request.c_array(), "GET / HTTP/1.22\r\n567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
     request_len = REQUEST_BUFFER_SIZE;
 
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
 
-    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+    BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 50u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
 
     cout << "[136]------------------------------------------" << endl;
     // unit_test[136] リクエストデータ残サイズ　＞　0
@@ -2665,7 +2665,7 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[139]------------------------------------------" << endl;
     // unit_test[139] リクエストデータ残サイズ　＞　0
@@ -2685,7 +2685,7 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[140]------------------------------------------" << endl;
     // unit_test[140] リクエストデータ残サイズ　＞　0
@@ -2707,10 +2707,10 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 38u);
 
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 38u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 12u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 38u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 12u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
 
     cout << "[141]------------------------------------------" << endl;
     // unit_test[141] リクエストデータ残サイズ　＞　0
@@ -2737,7 +2737,7 @@ void handle_client_recv_test(){
     // unit_test[142] リクエストデータ残サイズ　＞　0
     // unit_test[142]  ●出力の送信状態リスト：　１：送信待　２：送信待
     recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 78;
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
@@ -2804,13 +2804,6 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 48u);
-    init_send_status(send_status_temp);
-    send_status_temp.status = SEND_NG;
-    send_status_temp.send_offset = 0;
-    send_status_temp.send_end_size = 0;
-    send_status_temp.unsend_size = 12;
-    recive_data_global.send_status_list.push_back(send_status_temp);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 2u);
 
     cout << "[144]------------------------------------------" << endl;
     // unit_test[144] リクエストデータ残サイズ　＞　0
@@ -2844,12 +2837,12 @@ void handle_client_recv_test(){
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
-    memcpy(request.c_array(), "GET / HTTP/1.0234567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
+    memcpy(request.c_array(), "GET / HTTP/1.0\r\n4567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
     request_len = REQUEST_BUFFER_SIZE;
 
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
@@ -3581,7 +3574,7 @@ void handle_realserver_connect_test(){
 
     init_send_status(send_status_temp);
     send_status_temp.status = SEND_OK;
-    send_status_temp.send_offset = 10;
+    send_status_temp.send_offset = 0;
     send_status_temp.send_end_size = 0;
     send_status_temp.send_possible_size = MAX_BUFFER_SIZE - 10;
     send_status_temp.edit_division = EDIT_DIVISION_EDIT;
@@ -3602,7 +3595,7 @@ void handle_realserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, MAX_BUFFER_SIZE - 12u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 2u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 10u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
 
     cout << "[170]------------------------------------------" << endl;
@@ -3710,7 +3703,7 @@ void handle_realserver_connect_test(){
 
     init_send_status(send_status_temp);
     send_status_temp.status = SEND_OK;
-    send_status_temp.send_offset = 10;
+    send_status_temp.send_offset = 0;
     send_status_temp.send_end_size = 0;
     send_status_temp.send_possible_size = MAX_BUFFER_SIZE - 10;
     send_status_temp.edit_division = EDIT_DIVISION_EDIT;
@@ -3731,7 +3724,7 @@ void handle_realserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, MAX_BUFFER_SIZE - 12u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 2u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 10u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
 
     cout << "[173]------------------------------------------" << endl;
@@ -3779,11 +3772,11 @@ void handle_realserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data,
-            "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n");
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 40u);
+            "X-Forwarded-For: 10.10.2.2, 10.10.10.1");
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 38u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->insert_posission,
             MAX_BUFFER_SIZE - 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 28u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 26u);
 
     cout << "[174]------------------------------------------" << endl;
     // unit_test[174] 編集データリストが空でない場合
@@ -3825,15 +3818,15 @@ void handle_realserver_connect_test(){
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, MAX_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 32u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 30u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data,
-            "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n");
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 40u);
+            "X-Forwarded-For: 10.10.2.2, 10.10.10.1");
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 38u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->insert_posission,
             MAX_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 28u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 26u);
 
     cout << "[175]------------------------------------------" << endl;
     // unit_test[175] 編集データリストが空でない場合
@@ -3877,11 +3870,11 @@ void handle_realserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data,
-            "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n");
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 40u);
+            "X-Forwarded-For: 10.10.2.2, 10.10.10.1");
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 38u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->insert_posission,
             MAX_BUFFER_SIZE + 2u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 28u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 26u);
 
     cout << "[176]------------------------------------------" << endl;
     // unit_test[176] 編集区分 = 編集なし
@@ -4276,7 +4269,7 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
 
-     thread_data.client_endpoint_tcp = endpoint;
+    thread_data.client_endpoint_tcp = endpoint;
     thread_data.recive_data_map.clear();
     thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
@@ -4327,7 +4320,6 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
@@ -4372,7 +4364,6 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
@@ -4416,9 +4407,9 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
 
-    BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
+    BOOST_CHECK_EQUAL(event_status, REALSERVER_CONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信データ残サイズ　> 0,送信状態に送信継続を設定する
 
     cout << "[198]------------------------------------------" << endl;
@@ -4439,10 +4430,10 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信データ残サイズ　= 0,送信状態に送信済を設定する
+    BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信データ残サイズ　> 0,送信状態に送信済を設定する
 
     cout << "[199]------------------------------------------" << endl;
     //unit_test[199] 送信状態->SEND_END
@@ -4458,7 +4449,6 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
@@ -4479,9 +4469,9 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
 
-    BOOST_CHECK_EQUAL(event_status,  REALSERVER_CONNECT); //遷移先ステータスを設定する
+    BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信済を設定する
 
     cout << "[201]------------------------------------------" << endl;
@@ -4710,7 +4700,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 30u);
     //送信バッファの内容をチェックする。
     int cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), 30);
@@ -4759,7 +4749,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 30u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), 30);
@@ -4799,7 +4789,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 50u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), 50);
@@ -4846,7 +4836,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm HTTP/1.0\r\nX-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 66);
@@ -4893,7 +4883,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm HTTP/1.0\r\nX-Forwarded-For: 10.10.10.1\r\n", 55);
@@ -4945,7 +4935,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 44u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), recive_data_global.recive_buffer + MAX_BUFFER_SIZE, 2);
@@ -4999,7 +4989,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 44u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), recive_data_global.recive_buffer + MAX_BUFFER_SIZE, 2);
@@ -5045,7 +5035,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST ", 5);
@@ -5094,7 +5084,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm HTTP/1.0\r\nX-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 66);
@@ -5142,7 +5132,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm", 15);
@@ -5186,7 +5176,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 88u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(),
@@ -5226,7 +5216,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 88u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(),
@@ -5269,7 +5259,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm", 15);
@@ -5317,7 +5307,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE - 2u);
 
     //送信バッファの内容をチェックする。
@@ -5370,7 +5360,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm", 15);
@@ -5420,7 +5410,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm", 15);
@@ -5468,7 +5458,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 50u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), 50);
@@ -5506,7 +5496,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), MAX_BUFFER_SIZE);
@@ -5544,7 +5534,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), MAX_BUFFER_SIZE);
@@ -5582,7 +5572,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 78u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(),
@@ -5623,7 +5613,7 @@ void handle_sorryserver_connect_test(){
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
     BOOST_CHECK_EQUAL(send_buffer_len, 49u);
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), "GET /sorry.htm HTTP/1.0\r\nHOST: KKKKKKKKKKKKKK\r\n\r\n", 49);
@@ -5898,7 +5888,7 @@ void handle_sorryserver_send_test() {
     //unit_test[247] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     sorr_send_status.send_possible_size = 0u;//送信可能データサイズ　=　0
     sorr_send_status.status = SEND_OK;
-    sorr_send_status.send_rest_size = 1u;//送信データ残サイズ　> 0
+    sorr_send_status.send_rest_size = 0u;//送信データ残サイズ　= 0
     sorr_send_status1.status = SEND_OK;//送信状態->SEND_OK
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
@@ -5979,7 +5969,7 @@ void handle_sorryserver_send_test() {
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
-    BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
+    BOOST_CHECK_EQUAL(event_status, SORRYSERVER_CONNECT); //遷移先ステータスを設定する
 
     cout << "[251]------------------------------------------" << endl;
     //unit_test[251] 送信状態->SEND_END,SEND_OK/送信可能データサイズ = 0
@@ -6062,6 +6052,7 @@ void handle_sorryserver_send_test() {
 
     BOOST_CHECK_EQUAL(event_status,FINALIZE); //送信状態に送信待を設定する
 }
+
 //handle_realserver_recv(tcp) 郎希倹
 void handle_realserver_recv_tcp_test() {
     boost::asio::ip::tcp::endpoint rs_endpoint;
@@ -6175,7 +6166,7 @@ void handle_realserver_recv_tcp_test() {
     response_len = 80;
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
-    BOOST_CHECK_EQUAL(ret, FINALIZE);;
+    BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[261]------------------------------------------" << endl;
     // unit_test[261] new失敗の場合
@@ -6246,7 +6237,6 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE);
 
     // unit_test_part1 begin:
-    //（異常系）
     send_status status_END;
     init_send_status(status_END);
     status_END.status = SEND_END;
@@ -6358,7 +6348,7 @@ void handle_realserver_recv_tcp_test() {
         }
 
         ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
-        std::cout << "[" << 259 + i << "]------------------------------------------" << std::endl;
+        std::cout << "[" << 345 + i << "]------------------------------------------" << std::endl;
         BOOST_CHECK_EQUAL(ret, FINALIZE);
     }
 
@@ -7005,7 +6995,7 @@ void handle_realserver_recv_tcp_test() {
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_RECV);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 18u);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
 
     //メモリの内容をチェックする
@@ -7177,7 +7167,7 @@ void handle_realserver_recv_tcp_test() {
     send_status_temp.status = SEND_CONTINUE;
     send_status_temp.send_offset = 40;
     send_status_temp.send_end_size = 39;
-    send_status_temp.send_rest_size = 20;
+    send_status_temp.send_rest_size = 50;
     recive_data_global.send_status_list.push_back(send_status_temp);
     //未送信データを生成する
     memcpy(recive_data_global.recive_buffer + 40, "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\n", 39);
@@ -7244,16 +7234,16 @@ void handle_realserver_recv_tcp_test() {
     //未送信データを生成する
     recive_data_global.recive_buffer[89] = 'H';
 
-    memcpy(response.c_array(), "TTP/1.9 200 OK234567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
+    memcpy(response.c_array(), "TTP/1.9 200 OK\r\n4567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
     response_len = REQUEST_BUFFER_SIZE;
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 51u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 51u);
 
     cout << "[317]------------------------------------------" << endl;
     // unit_test[317] 送信状態が送信不可の場合
@@ -7408,14 +7398,14 @@ void handle_realserver_recv_tcp_test() {
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 52u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 57u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 8u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 57u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 3u);
 
     cout << "[322]------------------------------------------" << endl;
     // unit_test[322] 送信状態が送信不可の場合
@@ -7442,7 +7432,7 @@ void handle_realserver_recv_tcp_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -7476,7 +7466,7 @@ void handle_realserver_recv_tcp_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -7513,15 +7503,15 @@ void handle_realserver_recv_tcp_test() {
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 52u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 57u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
 
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 8u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 57u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 3u);
 
     cout << "[325]------------------------------------------" << endl;
     // unit_test[325] レスポンスデータ残サイズ　=　0
@@ -7547,7 +7537,7 @@ void handle_realserver_recv_tcp_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -7578,15 +7568,15 @@ void handle_realserver_recv_tcp_test() {
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 48u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 49u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
 
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 48u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 2u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 49u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 1u);
 
     cout << "[327]------------------------------------------" << endl;
     // unit_test[327] レスポンスデータ残サイズ　＞　0
@@ -7664,7 +7654,7 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[331]------------------------------------------" << endl;
     // unit_test[331] レスポンスデータ残サイズ　＞　0
@@ -7684,7 +7674,7 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[332]------------------------------------------" << endl;
     // unit_test[332] レスポンスデータ残サイズ　＞　0
@@ -7706,10 +7696,10 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 38u);
 
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 38u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 12u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 38u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 12u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
 
     cout << "[333]------------------------------------------" << endl;
     // unit_test[333] レスポンスデータ残サイズ　＞　0
@@ -7735,7 +7725,7 @@ void handle_realserver_recv_tcp_test() {
     // unit_test[334] レスポンスデータ残サイズ　＞　0
     // unit_test[334]  ●出力の送信状態リスト：　１：送信待　２：送信待
     recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 76;
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
@@ -7747,7 +7737,7 @@ void handle_realserver_recv_tcp_test() {
     recive_data_global.send_status_list.push_back(send_status_temp);
 
     //未送信データ
-    memcpy(recive_data_global.recive_buffer, "HTTP/1.0 200 O", 12);
+    memcpy(recive_data_global.recive_buffer, "HTTP/1.0 200 O", 14);
 
     memcpy(response.c_array(), "K\r\nCookie: m=1\r\n\r\nHTTP/1.0 200 OK\r\nCookie: m=1\r\n\r\n", 50);
     response_len = 50;
@@ -7835,7 +7825,7 @@ void handle_realserver_recv_tcp_test() {
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
+    BOOST_CHECK_EQUAL(ret, REALSERVER_RECV);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
@@ -7857,7 +7847,7 @@ void handle_realserver_recv_tcp_test() {
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
+    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
 
     cout << "[339]------------------------------------------" << endl;
     // unit_test[339] 送信可能データなし
@@ -7871,7 +7861,7 @@ void handle_realserver_recv_tcp_test() {
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
+    BOOST_CHECK_EQUAL(ret, REALSERVER_RECV);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
@@ -9089,9 +9079,9 @@ void handle_sorryserver_recv_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 51u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 51u);
 
     cout << "[403]------------------------------------------" << endl;
     // unit_test[403] 送信状態が送信不可の場合
@@ -9246,14 +9236,14 @@ void handle_sorryserver_recv_test() {
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 52u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 57u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 8u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 57u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 3u);
 
     cout << "[408]------------------------------------------" << endl;
     // unit_test[408] 送信状態が送信不可の場合
@@ -9280,7 +9270,7 @@ void handle_sorryserver_recv_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -9314,7 +9304,7 @@ void handle_sorryserver_recv_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -9351,15 +9341,15 @@ void handle_sorryserver_recv_test() {
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 52u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 57u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
 
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 8u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 57u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 3u);
 
     cout << "[411]------------------------------------------" << endl;
     // unit_test[411] レスポンスデータ残サイズ　=　0
@@ -9385,7 +9375,7 @@ void handle_sorryserver_recv_test() {
 
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, USE_BUFFER_SIZE);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 20u);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
@@ -9416,15 +9406,15 @@ void handle_sorryserver_recv_test() {
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 48u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 49u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
 
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 48u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 2u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 49u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 1u);
 
     cout << "[413]------------------------------------------" << endl;
     // unit_test[413] レスポンスデータ残サイズ　＞　0
@@ -9502,7 +9492,7 @@ void handle_sorryserver_recv_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[417]------------------------------------------" << endl;
     // unit_test[417] レスポンスデータ残サイズ　＞　0
@@ -9522,7 +9512,7 @@ void handle_sorryserver_recv_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[418]------------------------------------------" << endl;
     // unit_test[418] レスポンスデータ残サイズ　＞　0
@@ -9544,10 +9534,10 @@ void handle_sorryserver_recv_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 38u);
 
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 38u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 12u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 38u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->unsend_size, 12u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 0u);
 
     cout << "[419]------------------------------------------" << endl;
     // unit_test[419] レスポンスデータ残サイズ　＞　0
@@ -9573,7 +9563,7 @@ void handle_sorryserver_recv_test() {
     // unit_test[420] レスポンスデータ残サイズ　＞　0
     // unit_test[420]  ●出力の送信状態リスト：　１：送信待　２：送信待
     recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 76;
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
@@ -9585,7 +9575,7 @@ void handle_sorryserver_recv_test() {
     recive_data_global.send_status_list.push_back(send_status_temp);
 
     //未送信データ
-    memcpy(recive_data_global.recive_buffer, "HTTP/1.0 200 O", 12);
+    memcpy(recive_data_global.recive_buffer, "HTTP/1.0 200 O", 14);
 
     memcpy(response.c_array(), "K\r\nCookie: m=1\r\n\r\nHTTP/1.0 200 OK\r\nCookie: m=1\r\n\r\n", 50);
     response_len = 50;
@@ -9673,7 +9663,7 @@ void handle_sorryserver_recv_test() {
 
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_RECV);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
@@ -9695,7 +9685,7 @@ void handle_sorryserver_recv_test() {
 
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
+    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
 
     cout << "[425]------------------------------------------" << endl;
     // unit_test[425] 送信可能データなし
@@ -9709,7 +9699,7 @@ void handle_sorryserver_recv_test() {
 
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_RECV);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
@@ -9786,7 +9776,7 @@ void handle_client_connection_check_test(){
 
     std::string chk1 = "bc";
     //送信可能データを先頭から送信可能データサイズ分、送信バッファにコピーする
-    BOOST_CHECK_EQUAL(sbf1.data(), chk1.c_str());
+    BOOST_CHECK_EQUAL(memcmp(sbf1.data(), chk1.c_str(), 2u), 0);
     //送信済データサイズに送信可能データサイズを設定する
     BOOST_CHECK_EQUAL(data1.recive_data_map[ep1].send_status_list.rbegin()->send_end_size, 2u);
     //送信可能データサイズに0を設定する
@@ -9822,7 +9812,7 @@ void handle_client_connection_check_test(){
 
     std::string chk2 = "bcdefg";
     //送信可能データを先頭から送信バッファサイズ分、送信バッファにコピーする
-    BOOST_CHECK_EQUAL(sbf2.data(), chk2.c_str());
+    BOOST_CHECK_EQUAL(memcmp(sbf2.data(), chk2.c_str(), 6u), 0);
 
     std::size_t sbfsize = sbf2.max_size();
     //送信済データサイズに送信バッファサイズを設定する
@@ -9864,7 +9854,7 @@ void handle_client_connection_check_test(){
     chk3 = (char*)malloc(sbf_size - 2);
     memset(chk3, 'a', sbf_size - 2);
     //送信可能データを先頭から送信可能データサイズ分、送信バッファにコピーする
-    BOOST_CHECK_EQUAL(sbf3.data(), chk3);
+    BOOST_CHECK_EQUAL(memcmp(sbf3.data(), chk3, sbf_size - 2), 0);
     //送信済データサイズに送信可能データサイズを設定する
     BOOST_CHECK_EQUAL(data3.recive_data_map[ep3].send_status_list.rbegin()->send_end_size, sbf_size);
     //送信可能データサイズに0を設定する
@@ -10171,7 +10161,6 @@ void handle_client_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
@@ -10263,7 +10252,7 @@ void handle_client_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status,  CLIENT_CONNECTION_CHECK); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_OK);
@@ -10272,7 +10261,7 @@ void handle_client_send_test(){
     //unit_test[451] 送信状態->SEND_END,SEND_OK/送信可能データサイズ　=　0/編集データリスト=0,送信データ残サイズ > 0/送信可能データなし/終了フラグがONの場合
     //unit_test[451] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     client_send_status.status = SEND_END;//送信状態->SEND_END
-    client_send_status1.send_rest_size = 0u; //送信データ残サイズ = 0
+    client_send_status1.send_rest_size = 1u; //送信データ残サイズ > 0
     client_send_status1.send_possible_size = 0u; //送信可能データサイズ　=　0
     client_send_status1.status = SEND_OK;
     client_recive_data.send_status_list.clear();
@@ -10287,7 +10276,7 @@ void handle_client_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信可能データサイズ　=　0,送信データ残サイズ > 0,送信状態に送信待を設定する
@@ -10311,10 +10300,10 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[453]------------------------------------------" << endl;
-    //unit_test[453] 送信状態->SEND_END,SEND_OK/送信可能データあり/終了フラグがONの場合
+    //unit_test[453] 送信状態->SEND_END,SEND_OK/終了フラグがONの場合
     //unit_test[453] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     client_send_status.status = SEND_END;// 送信状態->SEND_END
-    client_send_status.status = SEND_OK; //送信状態->SEND_OK
+    client_send_status1.status = SEND_OK; //送信状態->SEND_OK
     client_send_status1.send_possible_size = 0u;
     client_send_status1.send_rest_size = 0u;
     client_recive_data.send_status_list.clear();
@@ -10329,7 +10318,7 @@ void handle_client_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する

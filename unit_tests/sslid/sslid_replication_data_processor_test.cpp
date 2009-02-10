@@ -1,9 +1,3 @@
-/*
- * sslid_replication_data_processor_test.cpp
- *
- *  Created on: Jan 20, 2009
- *      Author: root
- */
 #include "sslid_to_be_test_file.h"
 
 using namespace boost::unit_test;

@@ -7,12 +7,10 @@ using namespace l7vs;
 
 class ssl_protocol_module_base_test_class: public ssl_protocol_module_base {
 public:
-	ssl_protocol_module_base_test_class() :
-		ssl_protocol_module_base("sslid") {
-
+	ssl_protocol_module_base_test_class() : ssl_protocol_module_base("sslid") {
 	}
-	~ssl_protocol_module_base_test_class() {
 
+	~ssl_protocol_module_base_test_class() {
 	}
 
 	bool is_tcp() {
@@ -27,10 +25,10 @@ public:
 	}
 
 	void initialize(rs_list_itr_func_type inlist_begin,
-			rs_list_itr_func_type inlist_end,
-			rs_list_itr_next_func_type inlist_next,
-			boost::function<void(void)> inlist_lock,
-			boost::function<void(void)> inlist_unlock) {
+					rs_list_itr_func_type inlist_end,
+					rs_list_itr_next_func_type inlist_next,
+					boost::function<void(void)> inlist_lock,
+					boost::function<void(void)> inlist_unlock) {
 	}
 
 	void finalize() {
@@ -52,120 +50,151 @@ public:
 		check_message_result result;
 		return result;
 	}
+
 	check_message_result add_parameter(const std::vector<std::string>& args) {
 		check_message_result result;
 		return result;
 	}
+
 	void register_schedule(tcp_schedule_func_type inschedule) {
 	}
-	void register_schedule(udp_schedule_func_type inschedule) {
 
+	void register_schedule(udp_schedule_func_type inschedule) {
 	}
+
 	EVENT_TAG handle_session_initialize(const boost::thread::id up_thread_id,
-			const boost::thread::id down_thread_id,
-			const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
-			const boost::asio::ip::udp::endpoint& client_endpoint_udp) {
+										const boost::thread::id down_thread_id,
+										const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
+										const boost::asio::ip::udp::endpoint& client_endpoint_udp) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_session_finalize(const boost::thread::id up_thread_id,
-			const boost::thread::id down_thread_id) {
+									const boost::thread::id down_thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_accept(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_client_recv(const boost::thread::id thread_id,
-			const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-			const size_t recvlen) {
+								const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+								const size_t recvlen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_select(const boost::thread::id thread_id,
-			boost::asio::ip::tcp::endpoint& rs_endpoint) {
+									boost::asio::ip::tcp::endpoint& rs_endpoint) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_select(const boost::thread::id thread_id,
-			boost::asio::ip::udp::endpoint& rs_endpoint, boost::array<char,
-					MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) {
+									boost::asio::ip::udp::endpoint& rs_endpoint,
+									boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+									size_t& datalen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_connect(const boost::thread::id thread_id,
-			boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) {
+										boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+										size_t& datalen) {
 		return STOP;
 	}
-	EVENT_TAG handle_realserver_connection_fail(
-			const boost::thread::id thread_id,
-			const boost::asio::ip::tcp::endpoint& rs_endpoint) {
+
+	EVENT_TAG handle_realserver_connection_fail(const boost::thread::id thread_id,
+												const boost::asio::ip::tcp::endpoint& rs_endpoint) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_send(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorryserver_select(const boost::thread::id thread_id,
-			boost::asio::ip::tcp::endpoint& sorry_endpoint) {
+										boost::asio::ip::tcp::endpoint& sorry_endpoint) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorryserver_connect(const boost::thread::id thread_id,
-			boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) {
+										boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+										size_t& datalen) {
 		return STOP;
 	}
-	EVENT_TAG handle_sorryserver_connection_fail(
-			const boost::thread::id thread_id,
-			const boost::asio::ip::tcp::endpoint& sorry_endpoint) {
+
+	EVENT_TAG handle_sorryserver_connection_fail(const boost::thread::id thread_id,
+												const boost::asio::ip::tcp::endpoint& sorry_endpoint) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorryserver_send(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_recv(const boost::thread::id thread_id,
-			const boost::asio::ip::tcp::endpoint& rs_endpoint,
-			const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-			const size_t recvlen) {
+									const boost::asio::ip::tcp::endpoint& rs_endpoint,
+									const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_recv(const boost::thread::id thread_id,
-			const boost::asio::ip::udp::endpoint& rs_endpoint,
-			const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-			const size_t recvlen) {
+									const boost::asio::ip::udp::endpoint& rs_endpoint,
+									const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorryserver_recv(const boost::thread::id thread_id,
-			const boost::asio::ip::tcp::endpoint& sorry_endpoint,
-			const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-			const size_t recvlen) {
+									const boost::asio::ip::tcp::endpoint& sorry_endpoint,
+									const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+									const size_t recvlen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_response_send_inform(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_client_connection_check(const boost::thread::id thread_id,
-			boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) {
+											boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+											size_t& datalen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_client_select(const boost::thread::id thread_id,
-			boost::asio::ip::udp::endpoint& cl_endpoint, boost::array<char,
-					MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) {
+								boost::asio::ip::udp::endpoint& cl_endpoint,
+								boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+								size_t& datalen) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_client_send(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_client_disconnect(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorry_enable(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorry_disable(const boost::thread::id thread_id) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_disconnect(const boost::thread::id thread_id,
 			const boost::asio::ip::tcp::endpoint& rs_endpoint) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_sorryserver_disconnect(const boost::thread::id thread_id,
 			const boost::asio::ip::tcp::endpoint& sorry_endpoint) {
 		return STOP;
 	}
+
 	EVENT_TAG handle_realserver_close(const boost::thread::id thread_id,
 			const boost::asio::ip::udp::endpoint& rs_endpoint) {
 		return STOP;
@@ -291,6 +320,46 @@ public:
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
+		record_data[1] = 0x03;
+		record_data[2] = 0x01;
+		record_data[3] = 0x00;
+		record_data[4] = 0x9e;
+		record_data[5] = 0x00;
+		all_length = 0u;
+		is_message_from_client = true;
+		is_hello_message = true;
+		ret = this->check_ssl_record_sendable(is_message_from_client,
+				record_data, recv_length, all_length, is_hello_message);
+		BOOST_CHECK_EQUAL(all_length, 163u);
+		BOOST_CHECK(!is_hello_message);
+		BOOST_CHECK_EQUAL(ret, 0);
+		delete[] record_data;
+
+		// unit_test[11] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
+		// unit_test[11] check: check_ssl_record_sendable() return 0 (送信可能)
+		recv_length = 6u;
+		record_data = new char[recv_length];
+		record_data[0] = 0x14;
+		record_data[1] = 0x03;
+		record_data[2] = 0x01;
+		record_data[3] = 0x00;
+		record_data[4] = 0x9e;
+		record_data[5] = 0x00;
+		all_length = 0u;
+		is_message_from_client = true;
+		is_hello_message = true;
+		ret = this->check_ssl_record_sendable(is_message_from_client,
+				record_data, recv_length, all_length, is_hello_message);
+		BOOST_CHECK_EQUAL(all_length, 163u);
+		BOOST_CHECK(!is_hello_message);
+		BOOST_CHECK_EQUAL(ret, 0);
+		delete[] record_data;
+
+		// unit_test[11] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
+		// unit_test[11] check: check_ssl_record_sendable() return 0 (送信可能)
+		recv_length = 6u;
+		record_data = new char[recv_length];
+		record_data[0] = 0x15;
 		record_data[1] = 0x03;
 		record_data[2] = 0x01;
 		record_data[3] = 0x00;
@@ -612,6 +681,7 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
+/*---------------------------------------------------------------------------------------*/
 		// unit_test[29] condition:recv_length = HELLO_MSG_HEADER_LENGTH,is_message_from_client = true, record_data is ssl record data, but is a error hello message,
 		// unit_test[29] check:check_ssl_record_sendable() return -1 (異常)
 		recv_length = HELLO_MSG_HEADER_LENGTH;
@@ -624,6 +694,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		is_message_from_client = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -644,6 +715,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		is_message_from_client = false;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -664,6 +736,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, recv_length, all_length, is_hello_message);
@@ -683,6 +756,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		is_message_from_client = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -703,6 +777,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		is_message_from_client = false;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -723,6 +798,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -743,6 +819,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -763,6 +840,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -783,6 +861,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -803,6 +882,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -823,6 +903,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -843,6 +924,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -863,6 +945,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -883,6 +966,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1059,6 +1143,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		is_message_from_client = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1079,6 +1164,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_hello_message = true;
 		is_message_from_client = false;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1099,6 +1185,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1119,6 +1206,7 @@ public:
 		record_data[5] = 0x01;
 		record_data[9] = 0x00;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1139,6 +1227,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1159,6 +1248,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1179,6 +1269,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1199,6 +1290,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1219,6 +1311,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1239,6 +1332,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1259,6 +1353,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1279,6 +1374,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = true;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
@@ -1299,6 +1395,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1321,6 +1418,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1343,6 +1441,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1365,6 +1464,7 @@ public:
 		record_data[5] = 0x01; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = true;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1387,6 +1487,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1409,6 +1510,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x01;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1431,6 +1533,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1453,6 +1556,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1475,6 +1579,7 @@ public:
 		record_data[5] = 0x02; // client hello = 0x01, server hello = 0x02
 		record_data[9] = 0x03;
 		record_data[10] = 0x00;
+		record_data[43] = 0x20;
 		is_message_from_client = false;
 		is_hello_message = false;
 		all_length = 0u;
@@ -1492,6 +1597,47 @@ public:
 				record_data, 0u, all_length, is_hello_message);
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
+
+		// unit_test[72] condition:recv_length=SESSION_ID_BEGAIN_OFFSET, record_data is ssl record data, but no session id
+		// uint_test[72] check:check_ssl_record_sendable() return 0 (送信可能)
+		recv_length = SESSION_ID_BEGAIN_OFFSET;
+		record_data = new char[SESSION_ID_BEGAIN_OFFSET];
+		record_data[0] = 0x16;
+		record_data[1] = 0x03;
+		record_data[2] = 0x01;
+		record_data[3] = 0x00;
+		record_data[4] = 0x27;
+		record_data[5] = 0x01;
+		record_data[43] = 0x00;
+		is_message_from_client = true;
+		is_hello_message = false;
+		ret = this->check_ssl_record_sendable(is_message_from_client,
+            record_data, recv_length, all_length, is_hello_message);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK(is_hello_message);
+        BOOST_CHECK_EQUAL(all_length, 44u);
+        delete[] record_data;
+
+        // unit_test[73] condition:recv_length>SESSION_ID_BEGAIN_OFFSET, record_data is ssl record data, but no session id
+		// uint_test[73] check:check_ssl_record_sendable() return 0 (送信可能)
+		recv_length = SESSION_ID_BEGAIN_OFFSET+1;
+		record_data = new char[SESSION_ID_BEGAIN_OFFSET];
+		record_data[0] = 0x16;
+		record_data[1] = 0x03;
+		record_data[2] = 0x01;
+		record_data[3] = 0x00;
+		record_data[4] = 0x28;
+		record_data[5] = 0x01;
+		record_data[43] = 0x00;
+		is_message_from_client = true;
+		is_hello_message = false;
+		ret = this->check_ssl_record_sendable(is_message_from_client,
+            record_data, recv_length, all_length, is_hello_message);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK(is_hello_message);
+        BOOST_CHECK_EQUAL(all_length, 45u);
+        delete[] record_data;
+
 	}
 
 };
