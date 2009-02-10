@@ -116,7 +116,7 @@ protected:
 										total_block(0),
 										replication_memory(NULL),
 										component_memory(NULL),
-										surface_block_no(0),
+										surface_block_no(1),
 										surface_block_array_ptr(NULL) {}
 	};
 
@@ -138,7 +138,6 @@ protected:
 
 	std::map<std::string, mutex_ptr>	replication_mutex;
 	boost::asio::io_service&			receive_io;
-	boost::asio::io_service				send_io;
 	boost::asio::ip::udp::socket		replication_receive_socket;
 	boost::asio::ip::udp::socket		replication_send_socket;
 	struct replication_state_struct		replication_state;
@@ -160,7 +159,7 @@ protected:
 public:
 	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
 															replication_receive_socket( inreceive_io ),
-															replication_send_socket( send_io ),
+															replication_send_socket( inreceive_io ),
 															replication_flag(WAIT) {
 	} ;
 	~replication(){}
@@ -176,19 +175,18 @@ public:
 	void						force_replicate();
 	void						reset();
 	REPLICATION_MODE_TAG		get_status();
-	int							handle_send();
 	void						handle_receive( const boost::system::error_code& err, size_t size );
 	int							lock( const std::string& inid );
 	int							unlock( const std::string& inid );
-	int							refer_lock_mutex( const std::string& inid, mutex_ptr outmutex );
+	int							refer_lock_mutex( const std::string& inid, mutex_ptr& outmutex );
 protected:
+	int							handle_send();
 	int							set_master();
 	int							set_slave();
 	int							check_parameter();
 	void*						getrpl();
 	void*						getcmp();
 	uint64_t*					getsrf();
-	int							sock_init();
 	unsigned long long			make_serial();
 	int							send_data();
 	int							recv_data();
