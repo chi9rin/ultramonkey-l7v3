@@ -181,9 +181,9 @@ l7vs::LoggerImpl::LoggerImpl()
 	category_name_map[LOG_CAT_L7VSD_VIRTUALSERVICE] = "l7vsd_virtualservice";
 
 	//l7vsd virtualservice thread category initialize
-	category_level_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_virtualservice_thread"] = LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD;
-	category_name_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD] = "l7vsd_virtualservice_thread";
+	category_level_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_virtualservice_thread"] = LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
+	category_name_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD] = "l7vsd_virtualservice_thread";
 
 	//l7vsd session category initialize
 	category_level_map[LOG_CAT_L7VSD_SESSION] = LOG_LV_DEBUG;
