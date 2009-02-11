@@ -175,8 +175,7 @@ l7vs::virtualservice_tcp::~virtualservice_tcp(){
 void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
 }
 
-bool	l7vs::virtualservice_tcp::read_replicationdata( l7vs::virtualservice_base::replication_data& out ){
-	return true;
+void	l7vs::virtualservice_tcp::read_replicationdata(){
 }
 
 void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
