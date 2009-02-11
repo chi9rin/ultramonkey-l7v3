@@ -247,9 +247,10 @@ void		replication::finalize(){
 	}
 
 	// Socket finalaize
-	if ( REPLICATION_SLAVE == replication_state.service_status || REPLICATION_SLAVE_STOP == replication_state.service_status ){
-		replication_receive_socket.cancel();
-	}
+//	if ( REPLICATION_SLAVE == replication_state.service_status || REPLICATION_SLAVE_STOP == replication_state.service_status ){
+//std::cout << "cancel1\n";
+//		replication_receive_socket.cancel();
+//	}
 	replication_receive_socket.close();
 	replication_send_socket.close();
 	// Release replication memory
@@ -357,7 +358,7 @@ int		replication::set_master()
 	boost::system::error_code err;
 
 	// close socket
-	replication_receive_socket.cancel();
+//	replication_receive_socket.cancel();
 	replication_receive_socket.close();
 
 	// make send socket
@@ -367,10 +368,6 @@ int		replication::set_master()
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
 		return -1;
 	}
-
-//	if ( false == replication_send_socket.is_open() ){
-//		replication_send_socket.open();
-//	}
 
 	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Initialization of send socket is success.", __FILE__, __LINE__ );
 
@@ -445,19 +442,18 @@ int		replication::set_slave()
 
 	// make receive socket
 	boost::asio::ip::udp::endpoint udp_endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
-std::cout << "slave " << udp_endpoint.address() << ":" << udp_endpoint.port() << "\n";
 	replication_receive_socket.connect( udp_endpoint, err );
 	if ( err ){
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
 		return -1;
 	}
-//	if ( false == replication_receive_socket.is_open() ){
-//		replication_receive_socket.open();
-//	}
 
-//	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), boost::bind( &handle_receive, this, _1, _2 ) );
+std::cout << "slave " << udp_endpoint.address() << ":" << udp_endpoint.port() << "\n";
 	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ),
 											boost::bind( &replication::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+//	replication_receive_socket.async_receive_from( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ),
+//											udp_endpoint,
+//											boost::bind( &replication::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
 
 	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Initialization of receive socket is success.", __FILE__, __LINE__ );
 
@@ -902,6 +898,11 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	std::string buf;
 
 std::cout << "receive1\n";
+	if ( err ){
+		Logger::putLogInfo( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
+		return;
+	}
+
 	// Check by continuous initialize.
 	if ( REPLICATION_SLAVE != replication_state.service_status && REPLICATION_SLAVE_STOP != replication_state.service_status ){
 		// Initialization has already been done.
@@ -931,10 +932,6 @@ std::cout << "receive1\n";
 		return;
 	}
 
-	if ( err ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
-		return;
-	}
 	if ( size != sizeof ( struct replication_data_struct ) ){
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Failed in the reception processing of data because of illegal receive size.", __FILE__, __LINE__ );
 		return;
@@ -955,13 +952,16 @@ std::cout << "receive1\n";
 	}else if(replication_state.last_recv_block == replication_state.total_block-1){
 		replication_state.last_recv_block = 0;
 	}else{
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Last send block number is illegal.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Last receive block number is illegal.", __FILE__, __LINE__ );
 		return;
 	}
 
-//	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), boost::bind( &replication::handle_receive, this, _1, _2 ) );
 	replication_receive_socket.async_receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ),
 											boost::bind( &replication::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+//	boost::asio::ip::udp::endpoint udp_endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+//	replication_receive_socket.async_receive_from( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ),
+//											udp_endpoint,
+//											boost::bind( &replication::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
 }
 
 //! Lock replication memory
@@ -1224,16 +1224,23 @@ int			replication::send_data(){
 	send_memory = (char *)replication_state.replication_memory + DATA_SIZE*replication_data.block_num;
 	memcpy( replication_data.data, send_memory, DATA_SIZE );
 
-boost::asio::ip::udp::endpoint udp_endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
-replication_send_socket.connect( udp_endpoint );
+	boost::system::error_code err;
+
+	// make send socket
+	boost::asio::ip::udp::endpoint udp_endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+	replication_send_socket.connect( udp_endpoint, err );
+	if ( err ){
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
+		return -1;
+	}
+
 	// send to data
 	send_byte = replication_send_socket.send( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ) );
-//	send_byte = replication_send_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint );
 	if ( sizeof( struct replication_data_struct ) != send_byte ){
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Data send error.", __FILE__, __LINE__ );
 		return -1;
 	}
-replication_send_socket.close();
+//	replication_send_socket.close();
 
 	return 0;
 }
