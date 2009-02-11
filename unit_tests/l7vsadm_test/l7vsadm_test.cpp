@@ -14,6 +14,13 @@
 
 #include "../../src/l7vsadm.cpp"
 
+#ifndef	COMMAND_BUFFER_SIZE
+	#define	COMMAND_BUFFER_SIZE (65535)
+#endif
+#ifndef	L7VS_CONFIG_SOCKNAME
+	#define L7VS_CONFIG_SOCKNAME		"./l7vs"
+#endif
+
 using namespace boost::unit_test_framework;
 
 
@@ -106,9 +113,64 @@ public:
 	bool	parse_parameter_func_wp( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] )
 	{ return parse_parameter_func( cmd, argc, argv ); }
 
+	bool	execute_wp( int argc, char* argv[] )
+	{ return execute( argc, argv ); }
+
 
 
 };
+
+//variables
+boost::mutex		accept_mutex;
+boost::condition	accept_condition;
+//volatile	bool	accept_ready;
+
+l7vs::l7vsadm_request		test_request;
+l7vs::l7vsd_response		test_response;
+
+//functions
+void	server_thread(){
+	using boost::asio::local::stream_protocol;
+
+	boost::array< char,COMMAND_BUFFER_SIZE >	buf;
+
+	// accept
+	std::cout << "sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
+	boost::asio::io_service		server_io;
+	stream_protocol::acceptor	acc(	server_io,
+										stream_protocol::endpoint( L7VS_CONFIG_SOCKNAME ) );
+	stream_protocol::socket	s( server_io );
+
+	// ready to accept
+	//accept_ready = true;
+	accept_condition.notify_all();
+	std::cout << "accept_ready" << std::endl;
+
+	acc.accept( s );
+	std::cout << "accepted" << std::endl;
+
+	// recv request
+	s.read_some( boost::asio::buffer( buf ) );
+	std::cout << "read_done" << std::endl;
+	
+	std::stringstream	recv_stream;
+	recv_stream << &(buf[0]);
+	boost::archive::text_iarchive	ia( recv_stream );
+	ia >> test_request;
+
+	std::stringstream	send_stream;
+	boost::archive::text_oarchive	oa( send_stream );
+	oa << (const l7vs::l7vsd_response&) test_response;
+
+	// send response
+	boost::asio::write( s, boost::asio::buffer( send_stream.str() ) );
+	std::cout << "write_done" << std::endl;
+
+	s.close();
+
+	unlink( L7VS_CONFIG_SOCKNAME );
+	std::cout << "unlink" << std::endl;
+}
 
 //util
 template< typename InternetProtocol >
@@ -2464,6 +2526,84 @@ void	parse_parameter_func_test(){
 
 }
 
+void	execute_test(){
+	BOOST_MESSAGE( "----- execute_test start -----" );
+
+	// execute normal case 1 (no option)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 1;
+		char*	argv[]	= {	"l7vsadm_test" };
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+
+		boost::thread	thd1( &server_thread );
+		{
+			// accept ready wait
+			boost::mutex::scoped_lock	lock( accept_mutex );
+			accept_condition.wait( lock );
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 1 (no option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 1 (no option) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST );
+		// unit_test[1] execute normal case 1 (no option) response value check
+		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
+	}
+
+
+	// execute normal case 1
+	{
+		l7vsadm_test	adm;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-P",
+							"-r",
+							"logger"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		//accept_ready = false;
+		std::cout << "thread_start" << std::endl;
+		boost::thread	thd1( &server_thread );
+		{
+			boost::mutex::scoped_lock	lock( accept_mutex );
+			accept_condition.wait( lock );
+		}
+// 		for(;;){
+// 			std::cout << "waiting..." << std::endl;
+// 			if(accept_ready)	break;
+// 			// wait
+// 			boost::xtime xt;
+// 			xtime_get(&xt, boost::TIME_UTC);
+// 			xt.sec += 1;
+// 			boost::thread::sleep(xt);
+// 		}
+		std::cout << "execute" << std::endl;
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 1 return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 1 request check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_PARAMETER );
+	}
+
+
+	BOOST_MESSAGE( "----- execute_test end -----" );
+
+}
+
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "l7vsd class test" );
@@ -2503,6 +2643,9 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	ts->add( BOOST_TEST_CASE( &parse_opt_parameter_reload_func_test ) );
 	ts->add( BOOST_TEST_CASE( &parse_parameter_func_test ) );
+
+	ts->add( BOOST_TEST_CASE( &execute_test ) );
+
 
 	framework::master_test_suite().add( ts );
 

@@ -903,17 +903,18 @@ std::string	l7vs::l7vsadm::usage(){
 //!	disp_list function
 void	l7vs::l7vsadm::disp_list(){
 	std::stringstream buf;
-	buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % L7VS_VERSION_STRING;
+	buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % VERSION;
 	buf << "Prot LocalAddress:Port ProtoMod Scheduler\n";
 	buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
 	BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
-		buf << boost::format( "TCP %s %s %s\n" )
-			% vse.tcp_accept_endpoint
+		buf << boost::format( "%s %s %s %s\n" )
+			% ( vse.udpmode ? "UDP" : "TCP" )
+			% ( vse.tcp_accept_endpoint )
 			% vse.protocol_module_name
 			% vse.schedule_module_name;
 		BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
 			buf << boost::format( "  -> %-28s %-7s %-6d %-10d %-10d\n" )
-				% rse.tcp_endpoint
+				% ( rse.tcp_endpoint )
 				% "Masq"
 				% rse.weight
 				% rse.get_active()
@@ -1187,18 +1188,28 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 		boost::array< char, COMMAND_BUFFER_SIZE >	buf;
 
 		// connect
+		// debug
+		std::cout << "adm_connect" << std::endl;
 		boost::asio::io_service	io;
 		stream_protocol::socket	s( io );
-		s.connect(stream_protocol::endpoint( L7VS_CONFIG_SOCK_PATH ));
+		// debug
+		std::cout << "adm_sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
+		s.connect(stream_protocol::endpoint( L7VS_CONFIG_SOCKNAME ));
+		// debug
+		std::cout << "adm_connect_done" << std::endl;
 
 		// write sockfile
 		std::stringstream	send_stream;
 		boost::archive::text_oarchive	oa( send_stream );
 		oa << (const l7vs::l7vsadm_request&) request;
 		boost::asio::write( s, boost::asio::buffer( send_stream.str() ) );
+		// debug
+		std::cout << "adm_write_done" << std::endl;
 
 		// read sockfile
 		s.read_some( boost::asio::buffer( buf ) );
+		// debug
+		std::cout << "adm_read_done" << std::endl;
 		
 		std::stringstream	recv_stream;
 		recv_stream << &(buf[0]);
@@ -1207,6 +1218,8 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 
 		// close socket
 		s.close();
+		// debug
+		std::cout << "adm_close_done" << std::endl;
 	
 		// display result
 		if( l7vsd_response::RESPONSE_OK == response.status ){

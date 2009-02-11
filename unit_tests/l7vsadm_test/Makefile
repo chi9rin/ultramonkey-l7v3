@@ -5,7 +5,7 @@
 #
 TARGET		= l7vsadm_ut
 CPP			= g++
-CPPFLAGS	= -Wall -O0 -g -Werror -pthread -DPARAMETER_FILE='"./sample.ini"' -DLOGGER_PROCESS_ADM -DL7VS_CONFIG_SOCK_PATH='"./"' -DMAX_BUFFER_SIZE='(65535)' -DL7VS_VERSION_STRING='"3.0.0.0"'
+CPPFLAGS	= -Wall -O0 -g -Werror -pthread -DPARAMETER_FILE='"./sample.ini"' -DLOGGER_PROCESS_ADM -DL7VS_CONFIG_SOCK_PATH='"."' -DMAX_BUFFER_SIZE='(65535)' -DVERSION=\"3.0.0-0\"
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include
