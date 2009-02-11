@@ -239,7 +239,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 	cregex	uri_regex
 		=	+alpha >> _s >>
-			(s1 = +~_s) >> _s >>
+			(s1 = *~_s) >> _s >>
 			"HTTP/" >> _d >> "." >> _d;
 
 	if( buffer != NULL ){
