@@ -1063,7 +1063,9 @@ void l7vs::LoggerImpl::loadConf(){
 						sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 					}
 					catch( const std::exception& e ){
-						throw std::logic_error( "File Create Failed." );
+						std::stringstream	buf;
+						buf << "File Create Failed:" << property->log_filename_value;
+						throw std::logic_error( buf.str() );
 					}
 		
 					// activate appender options
@@ -1112,7 +1114,9 @@ void l7vs::LoggerImpl::loadConf(){
 						dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 					}
 					catch( const std::exception& e ){
-						throw std::logic_error( "File Create Failed." );
+						std::stringstream	buf;
+						buf << "File Create Failed:" << property->log_filename_value;
+						throw std::logic_error( buf.str() );
 					}
 		
 					// activate appender options
@@ -1164,7 +1168,9 @@ void l7vs::LoggerImpl::loadConf(){
 						dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 					}
 					catch( const std::exception& e ){
-						throw std::logic_error( "File Create Failed." );
+						std::stringstream	buf;
+						buf << "File Create Failed:" << property->log_filename_value;
+						throw std::logic_error( buf.str() );
 					}
 		
 					// activate appender options

@@ -180,8 +180,22 @@ void	l7vsd::add_virtual_service( const virtualservice_element* in_vselement, err
 			return;
 		}
 		// create virtualservice
-		boost::shared_ptr< virtual_service >
-			vsptr( new virtual_service( *this, *rep, *in_vselement ) );
+		virtualservice_ptr	vsptr;
+		try{
+			vsptr.reset( new virtual_service( *this, *rep, *in_vselement ) );
+		}
+		catch( std::bad_alloc& ){
+			std::string msg("virtualservice create failed.");
+			Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
+		if( NULL == vsptr ){
+			std::string msg("virtualservice pointer is null.");
+			Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 1, msg, __FILE__, __LINE__);
+			err.setter( true, msg );
+			return;
+		}
 
 		// vs initialize
 		vsptr->initialize( err );

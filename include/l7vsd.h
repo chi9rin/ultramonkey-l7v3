@@ -46,10 +46,10 @@ public:
 	typedef boost::shared_ptr< command_receiver >	command_receiver_ptr;	//!< shared_ptr command_receiver typedef
 	typedef boost::shared_ptr< replication >		replication_ptr;		//!< shared_ptr replication typedef
 	typedef boost::shared_ptr< snmpbridge >			snmpbridge_ptr;			//!< shared_ptr snmp_bridge typedef
+	typedef	boost::shared_ptr< virtual_service >	virtualservice_ptr;		//!< shared_ptr	virtualservice typedef
 
-	typedef std::list< boost::shared_ptr< virtual_service > >	vslist_type;	//!< virtual service list typedef
-	//typedef std::vector< virtualservice_element >				vsvec_type;		//!< virtual service element vector typedef
-	typedef std::list< virtualservice_element >					vselist_type;	//!< virtual service element list typedef
+	typedef std::list< virtualservice_ptr >			vslist_type;			//!< virtual service list typedef
+	typedef std::list< virtualservice_element >		vselist_type;			//!< virtual service element list typedef
 
 	typedef	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >	logstatus_list_type;	//!< logstatus list typedef
 

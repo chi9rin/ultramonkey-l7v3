@@ -874,7 +874,7 @@ void	set_loglevel_test(){
 	categories.push_back( l7vs::LOG_CAT_L7VSD_NETWORK_ACCESS );
 	categories.push_back( l7vs::LOG_CAT_L7VSD_MAINTHREAD );
 	categories.push_back( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE );
-	categories.push_back( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THRAD );
+	categories.push_back( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD );
 	categories.push_back( l7vs::LOG_CAT_L7VSD_SESSION );
 	categories.push_back( l7vs::LOG_CAT_L7VSD_SESSION_THREAD );
 	categories.push_back( l7vs::LOG_CAT_L7VSD_REALSERVER );
