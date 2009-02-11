@@ -20,14 +20,12 @@ typedef	boost::asio::ip::udp::endpoint	udp_ep_type;
 
 //Acceptテスト用Client
 void	client(){
-// 	boost::system::error_code	b_err;
-// 
-// 	boost::asio::io_service	dispatcher;
-// 	boost::asio::ip::tcp::socket	sock( dispatcher );
-// 	sock.bind( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ) );
-// 	sock.open();
+	boost::system::error_code	b_err;
 
-	boost::asio::ip::tcp::iostream	s( "10.144.169.87", "60000" );
+	boost::asio::io_service	dispatcher;
+	boost::asio::ip::tcp::socket	sock( dispatcher );
+	std::cout << "connect" << std::endl;
+	sock.connect( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ) );
 	
 }
 
@@ -693,6 +691,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_MESSAGE( "-------31" );
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	vs->initialize( vs_err );
+
 	//replication dataの確認
 	vs2->call_handle_replication_interrupt( test_err );
 	rep_head =	reinterpret_cast<l7vs::virtualservice_base::replication_header*>( debugg_flug_struct::getInstance().get_rep_area() );
@@ -795,15 +794,49 @@ void	virtualservice_tcp_test4(){
 	BOOST_CHECK( vs_err == false );
 	BOOST_MESSAGE( vs_err.get_message() );
 
+	// unit_test[34]  IPv6アドレスでレプリケーションデータ作成
+	//まず、stubのレプリケーションエリア作成をする
+	debugg_flug_struct::getInstance().create_rep_area();
+	BOOST_MESSAGE( "-------34" );
+	vs->call_handle_replication_interrupt( test_err );
+	l7vs::virtualservice_base::replication_header*	rep_head =	
+		reinterpret_cast<l7vs::virtualservice_base::replication_header*>( debugg_flug_struct::getInstance().get_rep_area() );
+	//data_numが0になってることを確認
+	BOOST_CHECK( rep_head->data_num == 1 );
+	l7vs::virtualservice_base::replication_data*	rep_data =	
+		reinterpret_cast<l7vs::virtualservice_base::replication_data*>( ++rep_head );
+	//udpmode
+	BOOST_CHECK( rep_data->udpmode == false );
+	//tcp_endpoint
+	tmp_tcp_ep.str( "" );
+	tmp_tcp_ep << elem1.tcp_accept_endpoint;
+	BOOST_CHECK( 0 == strncmp( rep_data->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 ) );
+	//udp_endpoint
+	tmp_udp_ep.str( "" );
+	tmp_udp_ep << elem1.udp_recv_endpoint;
+	BOOST_CHECK( 0 == strncmp( rep_data->udp_endpoint, tmp_udp_ep.str().c_str(), 47 ) );
+	//sorry_maxconnection
+	BOOST_CHECK( rep_data->sorry_maxconnection == elem1.sorry_maxconnection );
+	//sorry_endpoint
+	tmp_sorry_ep.str( "" );
+	tmp_sorry_ep << elem1.sorry_endpoint;
+	BOOST_CHECK( 0 == strncmp( rep_data->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 ) );
+	//sorry_flag
+	BOOST_CHECK( rep_data->sorry_flag == elem1.sorry_flag );
+	//qos_up
+	BOOST_CHECK( rep_data->qos_up == elem1.qos_upstream );
+	//qos_down
+	BOOST_CHECK( rep_data->qos_down == elem1.qos_downstream );
+
 	//比較用VS作成
 	l7vs::vs_tcp*	vs2 = new l7vs::vs_tcp( vsd, rep, elem1 );
 	bool	chkflg;
-	// unit_test[34]  IPv6アドレスでoperator==のテスト(VSが一致するケース)
-	BOOST_MESSAGE( "-------34" );
+	// unit_test[35]  IPv6アドレスでoperator==のテスト(VSが一致するケース)
+	BOOST_MESSAGE( "-------35" );
 	chkflg = ( *vs == *vs2 );
 	BOOST_CHECK( chkflg );
-	// unit_test[35]  IPv6アドレスでoperator!=のテスト(VSが一致するケース)
-	BOOST_MESSAGE( "-------35" );
+	// unit_test[36]  IPv6アドレスでoperator!=のテスト(VSが一致するケース)
+	BOOST_MESSAGE( "-------36" );
 	chkflg = ( *vs != *vs2 );
 	BOOST_CHECK( !chkflg );
 	delete vs2;
@@ -827,19 +860,19 @@ void	virtualservice_tcp_test4(){
 	elem2.qos_upstream				= 65535ULL;
 	elem2.qos_downstream			= 32767ULL;
 	vs2 = new l7vs::vs_tcp( vsd, rep, elem2 );
-	// unit_test[36]  IPv6アドレスでoperator==のテスト(VSが一致しないケース)
-	BOOST_MESSAGE( "-------36" );
+	// unit_test[37]  IPv6アドレスでoperator==のテスト(VSが一致しないケース)
+	BOOST_MESSAGE( "-------37" );
 	chkflg = ( *vs == *vs2 );
 	BOOST_CHECK( !chkflg );
-	// unit_test[37]  IPv6アドレスでoperator!=のテスト(VSが一致しないケース)
-	BOOST_MESSAGE( "-------37" );
+	// unit_test[38]  IPv6アドレスでoperator!=のテスト(VSが一致しないケース)
+	BOOST_MESSAGE( "-------38" );
 	chkflg = ( *vs != *vs2 );
 	BOOST_CHECK( chkflg );
 	delete vs2;
 	vs2 = NULL;
 
-	// unit_test[38]  IPv6アドレスでVS編集
-	BOOST_MESSAGE( "-------38" );
+	// unit_test[39]  IPv6アドレスでVS編集
+	BOOST_MESSAGE( "-------39" );
 	l7vs::virtualservice_element	elem3;
 	elem3.udpmode					= false;
 	elem3.tcp_accept_endpoint		= 
@@ -853,8 +886,8 @@ void	virtualservice_tcp_test4(){
 	elem3.sorry_maxconnection		= 3333LL;
 	elem3.sorry_endpoint			= tcp_ep_type();
 	elem3.sorry_flag				= true;
-	elem3.qos_upstream				= 65535ULL;
-	elem3.qos_downstream			= 32767ULL;
+	elem3.qos_upstream				= 10ULL;
+	elem3.qos_downstream			= 20ULL;
 
 	vs->edit_virtualservice( elem3, vs_err );
 	BOOST_CHECK( vs_err == false );
@@ -864,9 +897,30 @@ void	virtualservice_tcp_test4(){
 	BOOST_CHECK( vs->get_element().qos_upstream == elem3.qos_upstream );
 	BOOST_CHECK( vs->get_element().qos_downstream == elem3.qos_downstream );
 
+	// unit_test[40]  IPv6アドレスでレプリケーションデータの読み出し
+	//一旦VSを削除
+	vs->finalize( vs_err );
+	delete vs;
+	//elem3でVS作成
+	vs = new l7vs::vs_tcp( vsd, rep, elem3 );
+	BOOST_CHECK( vs_err == false );
+	vs->call_read_replicationdata();
+	BOOST_CHECK( vs->get_element().udpmode == elem1.udpmode );
+	BOOST_CHECK( vs->get_element().tcp_accept_endpoint == elem1.tcp_accept_endpoint );
+	BOOST_CHECK( vs->get_element().udp_recv_endpoint == elem1.udp_recv_endpoint );
+	BOOST_CHECK( vs->get_element().protocol_module_name == elem1.protocol_module_name );
+	BOOST_CHECK( vs->get_element().schedule_module_name == elem1.schedule_module_name );
+	BOOST_CHECK( vs->get_element().sorry_maxconnection == elem1.sorry_maxconnection );
+	BOOST_CHECK( vs->get_element().sorry_endpoint == elem1.sorry_endpoint );
+	BOOST_CHECK( vs->get_element().sorry_flag == elem1.sorry_flag );
+	BOOST_CHECK( vs->get_element().qos_upstream == elem1.qos_upstream );
+	BOOST_CHECK( vs->get_element().qos_downstream == elem1.qos_downstream );
 
-	// unit_test[39]  IPv6アドレスでVS変更(TCP endpoint不一致による失敗ケース)
-	BOOST_MESSAGE( "-------39" );
+	vs->initialize( vs_err );
+	BOOST_CHECK( vs_err == false );
+
+	// unit_test[41]  IPv6アドレスでVS変更(TCP endpoint不一致による失敗ケース)
+	BOOST_MESSAGE( "-------41" );
 	l7vs::virtualservice_element	elem4;
 	elem4.udpmode					= false;
 	elem4.tcp_accept_endpoint		= 
@@ -885,14 +939,19 @@ void	virtualservice_tcp_test4(){
 
 	vs->edit_virtualservice( elem4, vs_err );
 	BOOST_CHECK( vs_err == true );
-	BOOST_CHECK( vs->get_element().sorry_endpoint == tcp_ep_type() );
-	BOOST_CHECK( vs->get_element().sorry_maxconnection == 0LL );
-	BOOST_CHECK( vs->get_element().sorry_flag == false );
-	BOOST_CHECK( vs->get_element().qos_upstream == elem3.qos_upstream );
-	BOOST_CHECK( vs->get_element().qos_downstream == elem3.qos_downstream );
+	BOOST_MESSAGE( vs->get_element().sorry_endpoint );
+	BOOST_CHECK( vs->get_element().sorry_endpoint == elem1.sorry_endpoint );
+	BOOST_MESSAGE( vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( vs->get_element().sorry_maxconnection == elem1.sorry_maxconnection );
+	BOOST_MESSAGE( vs->get_element().sorry_flag );
+	BOOST_CHECK( vs->get_element().sorry_flag == elem1.sorry_flag );
+	BOOST_MESSAGE( vs->get_element().qos_upstream );
+	BOOST_CHECK( vs->get_element().qos_upstream == elem1.qos_upstream );
+	BOOST_MESSAGE( vs->get_element().qos_downstream );
+	BOOST_CHECK( vs->get_element().qos_downstream == elem1.qos_downstream );
 
-	// unit_test[40]  IPv6アドレスでRS追加
-	BOOST_MESSAGE( "-------40" );
+	// unit_test[42]  IPv6アドレスでRS追加
+	BOOST_MESSAGE( "-------42" );
 	//RSパラメータ設定
 	l7vs::virtualservice_element	elem_add_rs1;
 	elem_add_rs1.udpmode					= false;
@@ -919,8 +978,8 @@ void	virtualservice_tcp_test4(){
 	vs->add_realserver( elem_add_rs1, vs_err );
 	BOOST_CHECK( vs_err == false );
 
-	// unit_test[41]  IPv6アドレスでRS追加(既に追加されているendpointを追加しようとして失敗ケース)
-	BOOST_MESSAGE( "-------41" );
+	// unit_test[43]  IPv6アドレスでRS追加(既に追加されているendpointを追加しようとして失敗ケース)
+	BOOST_MESSAGE( "-------43" );
 	//RSパラメータ設定
 	l7vs::virtualservice_element	elem_add_rs2;
 	{
@@ -940,8 +999,8 @@ void	virtualservice_tcp_test4(){
 	vs->add_realserver( elem_add_rs2, vs_err );
 	BOOST_CHECK( vs_err == true );
 
-	// unit_test[42]  IPv6アドレスでRS追加(VSが不一致で失敗ケース)
-	BOOST_MESSAGE( "-------42" );
+	// unit_test[44]  IPv6アドレスでRS追加(VSが不一致で失敗ケース)
+	BOOST_MESSAGE( "-------44" );
 	l7vs::virtualservice_element	elem_add_rs3;
 	{
 		elem_add_rs3.udpmode					= false;
@@ -960,8 +1019,8 @@ void	virtualservice_tcp_test4(){
 	vs->add_realserver( elem_add_rs2, vs_err );
 	BOOST_CHECK( vs_err == true );
 
-	// unit_test[43]  IPv6アドレスでRS編集
-	BOOST_MESSAGE( "-------43" );
+	// unit_test[45]  IPv6アドレスでRS編集
+	BOOST_MESSAGE( "-------45" );
 	l7vs::virtualservice_element	elem_edit_rs1;
 	{
 		elem_edit_rs1.udpmode					= false;
@@ -981,8 +1040,8 @@ void	virtualservice_tcp_test4(){
 	BOOST_CHECK( vs_err == false );
 	BOOST_CHECK( vs->get_rs_list().begin()->weight == 10 );
 
-	// unit_test[44]  IPv6アドレスでRS編集(リストに一致するRSが存在しないので失敗する)
-	BOOST_MESSAGE( "-------44" );
+	// unit_test[46]  IPv6アドレスでRS編集(リストに一致するRSが存在しないので失敗する)
+	BOOST_MESSAGE( "-------46" );
 	l7vs::virtualservice_element	elem_edit_rs2;
 	{
 		elem_edit_rs2.udpmode					= false;
@@ -1001,8 +1060,8 @@ void	virtualservice_tcp_test4(){
 	vs->edit_realserver( elem_edit_rs2, vs_err );
 	BOOST_CHECK( vs_err == true );
 
-	// unit_test[45]  IPv6アドレスでRS編集(VSが不一致で失敗する)
-	BOOST_MESSAGE( "-------45" );
+	// unit_test[47]  IPv6アドレスでRS編集(VSが不一致で失敗する)
+	BOOST_MESSAGE( "-------47" );
 	l7vs::virtualservice_element	elem_edit_rs3;
 	{
 		elem_edit_rs3.udpmode					= false;
@@ -1021,8 +1080,8 @@ void	virtualservice_tcp_test4(){
 	vs->edit_realserver( elem_edit_rs3, vs_err );
 	BOOST_CHECK( vs_err == true );
 
-	// unit_test[46]  IPv6アドレスでRS削除(VSが一致しないので失敗する)
-	BOOST_MESSAGE( "-------46" );
+	// unit_test[48]  IPv6アドレスでRS削除(VSが一致しないので失敗する)
+	BOOST_MESSAGE( "-------48" );
 	l7vs::virtualservice_element	elem_del_rs1;
 	{
 		elem_del_rs1.udpmode					= false;
@@ -1041,8 +1100,8 @@ void	virtualservice_tcp_test4(){
 	vs->del_realserver( elem_del_rs1, vs_err );
 	BOOST_CHECK( vs_err == true );
 
-	// unit_test[47]  IPv6アドレスでRS削除(リストに一致するRSが存在しないので失敗する)
-	BOOST_MESSAGE( "-------47" );
+	// unit_test[49]  IPv6アドレスでRS削除(リストに一致するRSが存在しないので失敗する)
+	BOOST_MESSAGE( "-------49" );
 	l7vs::virtualservice_element	elem_del_rs2;
 	{
 		elem_del_rs2.udpmode					= false;
@@ -1061,8 +1120,8 @@ void	virtualservice_tcp_test4(){
 	vs->del_realserver( elem_del_rs2, vs_err );
 	BOOST_CHECK( vs_err == true );
 
-	// unit_test[48]  IPv6アドレスでRS削除
-	BOOST_MESSAGE( "-------48" );
+	// unit_test[50]  IPv6アドレスでRS削除
+	BOOST_MESSAGE( "-------50" );
 	l7vs::virtualservice_element	elem_del_rs3;
 	{
 		elem_del_rs3.udpmode					= false;
@@ -1082,14 +1141,17 @@ void	virtualservice_tcp_test4(){
 	BOOST_CHECK( vs_err == false );
 	BOOST_CHECK( vs->get_rs_list().size() == 9 );
 
+	//テストが終わったらStubのレプリケーションエリアを削除
+	debugg_flug_struct::getInstance().create_rep_area();
+
 	vs->finalize( vs_err );
 	delete vs;
 }
 
 //実際にAcceptさせるテスト
 void	virtualservice_tcp_test5(){
-	// unit_test[49]  ClientからConnectさせてAcceptすることを確認する
-	BOOST_MESSAGE( "-------49" );
+	// unit_test[51]  ClientからConnectさせてAcceptすることを確認する
+	BOOST_MESSAGE( "-------51" );
 	debugg_flug_struct::getInstance().param_exist_flag() = false;
 	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
@@ -1129,8 +1191,12 @@ void	virtualservice_tcp_test5(){
 	boost::thread	vs_main( &l7vs::vs_tcp::run, vs );
 	boost::thread	cl_thread( &client );
 
-	//3秒待ってmainをSTOP
-	usleep( 3000000 );
+	//2秒待ってsessionプールのサイズをチェック
+	usleep( 2000000 );
+	BOOST_CHECK( vs->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-2 );
+
+	//1秒待ってmainをSTOP
+	usleep( 1000000 );
 	vs->stop();
 
 	usleep( 1000 );

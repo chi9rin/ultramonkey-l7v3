@@ -21,17 +21,26 @@ LDFLAGS		= -lrt -ldl
 
 BASESRCS		=	\
 				stub.cpp \
-				../../src/virtualservice.cpp \
+				../../src/virtualservice_base.cpp \
+				virtualservice_tcp.cpp \
+				virtualservice_udp.cpp \
+				virtualservice.cpp \
 				vs_base_test.cpp
 
 TCPSRCS		=	\
 				stub.cpp \
-				../../src/virtualservice.cpp \
+				../../src/virtualservice_base.cpp \
+				../../src/virtualservice_tcp.cpp \
+				virtualservice_udp.cpp \
+				virtualservice.cpp \
 				vs_tcp_test.cpp
 
 TCPTSRCS		=	\
 				stub.cpp \
-				../../src/virtualservice.cpp \
+				../../src/virtualservice_base.cpp \
+				../../src/virtualservice_tcp.cpp \
+				virtualservice_udp.cpp \
+				virtualservice.cpp \
 				vs_tcp_thread_test.cpp
 
 # UDPSRCS		=	\
@@ -67,4 +76,4 @@ vs_tcp_thread_ut: $(TPCTOBJS)
 # 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS)
+	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS)

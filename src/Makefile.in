@@ -56,6 +56,9 @@ l7vsadm_OBJECTS = $(am_l7vsadm_OBJECTS)
 l7vsadm_DEPENDENCIES = ../logger/libl7vsadm_logger.a \
 	../parameter/libl7vsadm_parameter.a
 am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
+	l7vsd-virtualservice_base.$(OBJEXT) \
+	l7vsd-virtualservice_tcp.$(OBJEXT) \
+	l7vsd-virtualservice_udp.$(OBJEXT) \
 	l7vsd-virtualservice.$(OBJEXT) \
 	l7vsd-session_thread_control.$(OBJEXT) \
 	l7vsd-protocol_module_control.$(OBJEXT) \
@@ -254,6 +257,9 @@ l7vsd_SOURCES = \
 			../include/udp_session.h \
 			../include/snmpbridge.h \
 			l7vsd.cpp \
+			virtualservice_base.cpp \
+			virtualservice_tcp.cpp \
+			virtualservice_udp.cpp \
 			virtualservice.cpp \
 			session_thread_control.cpp \
 			protocol_module_control.cpp \
@@ -409,6 +415,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_request_thread_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_session.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-virtualservice.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-virtualservice_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-virtualservice_tcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-virtualservice_udp.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -486,6 +495,48 @@ l7vsd-l7vsd.obj: l7vsd.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='l7vsd.cpp' object='l7vsd-l7vsd.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-l7vsd.obj `if test -f 'l7vsd.cpp'; then $(CYGPATH_W) 'l7vsd.cpp'; else $(CYGPATH_W) '$(srcdir)/l7vsd.cpp'; fi`
+
+l7vsd-virtualservice_base.o: virtualservice_base.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice_base.o -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice_base.Tpo" -c -o l7vsd-virtualservice_base.o `test -f 'virtualservice_base.cpp' || echo '$(srcdir)/'`virtualservice_base.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-virtualservice_base.Tpo" "$(DEPDIR)/l7vsd-virtualservice_base.Po"; else rm -f "$(DEPDIR)/l7vsd-virtualservice_base.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='virtualservice_base.cpp' object='l7vsd-virtualservice_base.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-virtualservice_base.o `test -f 'virtualservice_base.cpp' || echo '$(srcdir)/'`virtualservice_base.cpp
+
+l7vsd-virtualservice_base.obj: virtualservice_base.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice_base.obj -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice_base.Tpo" -c -o l7vsd-virtualservice_base.obj `if test -f 'virtualservice_base.cpp'; then $(CYGPATH_W) 'virtualservice_base.cpp'; else $(CYGPATH_W) '$(srcdir)/virtualservice_base.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-virtualservice_base.Tpo" "$(DEPDIR)/l7vsd-virtualservice_base.Po"; else rm -f "$(DEPDIR)/l7vsd-virtualservice_base.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='virtualservice_base.cpp' object='l7vsd-virtualservice_base.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-virtualservice_base.obj `if test -f 'virtualservice_base.cpp'; then $(CYGPATH_W) 'virtualservice_base.cpp'; else $(CYGPATH_W) '$(srcdir)/virtualservice_base.cpp'; fi`
+
+l7vsd-virtualservice_tcp.o: virtualservice_tcp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice_tcp.o -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice_tcp.Tpo" -c -o l7vsd-virtualservice_tcp.o `test -f 'virtualservice_tcp.cpp' || echo '$(srcdir)/'`virtualservice_tcp.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-virtualservice_tcp.Tpo" "$(DEPDIR)/l7vsd-virtualservice_tcp.Po"; else rm -f "$(DEPDIR)/l7vsd-virtualservice_tcp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='virtualservice_tcp.cpp' object='l7vsd-virtualservice_tcp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-virtualservice_tcp.o `test -f 'virtualservice_tcp.cpp' || echo '$(srcdir)/'`virtualservice_tcp.cpp
+
+l7vsd-virtualservice_tcp.obj: virtualservice_tcp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice_tcp.obj -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice_tcp.Tpo" -c -o l7vsd-virtualservice_tcp.obj `if test -f 'virtualservice_tcp.cpp'; then $(CYGPATH_W) 'virtualservice_tcp.cpp'; else $(CYGPATH_W) '$(srcdir)/virtualservice_tcp.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-virtualservice_tcp.Tpo" "$(DEPDIR)/l7vsd-virtualservice_tcp.Po"; else rm -f "$(DEPDIR)/l7vsd-virtualservice_tcp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='virtualservice_tcp.cpp' object='l7vsd-virtualservice_tcp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-virtualservice_tcp.obj `if test -f 'virtualservice_tcp.cpp'; then $(CYGPATH_W) 'virtualservice_tcp.cpp'; else $(CYGPATH_W) '$(srcdir)/virtualservice_tcp.cpp'; fi`
+
+l7vsd-virtualservice_udp.o: virtualservice_udp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice_udp.o -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice_udp.Tpo" -c -o l7vsd-virtualservice_udp.o `test -f 'virtualservice_udp.cpp' || echo '$(srcdir)/'`virtualservice_udp.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-virtualservice_udp.Tpo" "$(DEPDIR)/l7vsd-virtualservice_udp.Po"; else rm -f "$(DEPDIR)/l7vsd-virtualservice_udp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='virtualservice_udp.cpp' object='l7vsd-virtualservice_udp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-virtualservice_udp.o `test -f 'virtualservice_udp.cpp' || echo '$(srcdir)/'`virtualservice_udp.cpp
+
+l7vsd-virtualservice_udp.obj: virtualservice_udp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice_udp.obj -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice_udp.Tpo" -c -o l7vsd-virtualservice_udp.obj `if test -f 'virtualservice_udp.cpp'; then $(CYGPATH_W) 'virtualservice_udp.cpp'; else $(CYGPATH_W) '$(srcdir)/virtualservice_udp.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-virtualservice_udp.Tpo" "$(DEPDIR)/l7vsd-virtualservice_udp.Po"; else rm -f "$(DEPDIR)/l7vsd-virtualservice_udp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='virtualservice_udp.cpp' object='l7vsd-virtualservice_udp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-virtualservice_udp.obj `if test -f 'virtualservice_udp.cpp'; then $(CYGPATH_W) 'virtualservice_udp.cpp'; else $(CYGPATH_W) '$(srcdir)/virtualservice_udp.cpp'; fi`
 
 l7vsd-virtualservice.o: virtualservice.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-virtualservice.o -MD -MP -MF "$(DEPDIR)/l7vsd-virtualservice.Tpo" -c -o l7vsd-virtualservice.o `test -f 'virtualservice.cpp' || echo '$(srcdir)/'`virtualservice.cpp; \

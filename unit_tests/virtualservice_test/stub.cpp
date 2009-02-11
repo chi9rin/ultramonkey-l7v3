@@ -86,7 +86,7 @@ int		l7vs::replication::lock( const std::string& inid ){
 int		l7vs::replication::unlock( const std::string& inid ){
 	return 0;
 }
-int		l7vs::replication::refer_lock_mutex( const std::string& inid, mutex_ptr outmutex ){
+int		l7vs::replication::refer_lock_mutex( const std::string& inid, mutex_ptr& outmutex ){
 	return 0;
 }
 

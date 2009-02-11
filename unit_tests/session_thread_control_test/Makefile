@@ -22,6 +22,9 @@ LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
 			stub.cpp \
+			../../src/virtualservice_base.cpp \
+			../../src/virtualservice_tcp.cpp \
+			../../src/virtualservice_udp.cpp \
 			../../src/virtualservice.cpp \
 			../../src/session_thread_control.cpp \
 			stc_test.cpp

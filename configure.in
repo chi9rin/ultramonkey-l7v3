@@ -96,6 +96,7 @@ AC_CONFIG_FILES([parameter/Makefile]
                 [module/schedule/Makefile]
                 [module/protocol/Makefile]
                 [src/Makefile]
+                [snmpagent/Makefile]
                 [Makefile]
                 [conf/Makefile])
 

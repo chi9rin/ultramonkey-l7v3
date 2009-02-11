@@ -42,12 +42,6 @@ public:
 		std::cout << "release_session called." << std::endl;
 		virtualservice_tcp::release_session( in_id );
 	}
-	void	handle_accept(	const session_thread_control_ptr stc_ptr,
-							const boost::system::error_code& err ){
-		std::cout << "handle accept called." << std::endl;
-		virtualservice_tcp::handle_accept( stc_ptr, err );
-	}
-
 };
 
 }

@@ -53,6 +53,9 @@ l7vsd_SOURCES	=	\
 			../include/udp_session.h \
 			../include/snmpbridge.h \
 			l7vsd.cpp \
+			virtualservice_base.cpp \
+			virtualservice_tcp.cpp \
+			virtualservice_udp.cpp \
 			virtualservice.cpp \
 			session_thread_control.cpp \
 			protocol_module_control.cpp \
