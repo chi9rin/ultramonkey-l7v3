@@ -42,6 +42,9 @@ public:
 		std::cout << "release_session called." << std::endl;
 		virtualservice_tcp::release_session( in_id );
 	}
+	unsigned long long	get_ref_count(){
+		return rs_list_ref_count;
+	}
 };
 
 }

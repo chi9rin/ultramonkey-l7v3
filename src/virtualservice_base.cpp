@@ -177,7 +177,9 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
  * @return  void
  */
 void	l7vs::virtualservice_base::rs_list_lock(){
-	boost::mutex::scoped_lock refcnt_inc_lock( rs_list_ref_count_inc_mutex );
+	{
+		boost::mutex::scoped_lock refcnt_inc_lock( rs_list_ref_count_inc_mutex );
+	}
 	boost::mutex::scoped_lock refcnt_lock( rs_list_ref_count_mutex );
 	if( ULLONG_MAX > rs_list_ref_count )
 		++rs_list_ref_count;
@@ -208,19 +210,19 @@ void	l7vs::virtualservice_base::rs_list_unlock(){
 l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 	boost::mutex::scoped_lock lk( element_mutex );
 	//update element
-// 	rs_list_lock();
-// 	element.realserver_vector.clear();
-// 	for( std::list<realserver>::iterator itr = rs_list.begin();
-// 		 itr != rs_list.end(); ++itr ){
-// 		l7vs::realserver_element	rs_element;
-// 		rs_element.nactive		= itr->get_active();
-// 		rs_element.ninact		= itr->get_inact();
-// 		rs_element.tcp_endpoint	= itr->tcp_endpoint;
-// 		rs_element.udp_endpoint	= itr->udp_endpoint;
-// 		rs_element.weight		= itr->weight;
-// 		element.realserver_vector.push_back( rs_element );
-// 	}
-// 	rs_list_unlock();
+	rs_list_lock();
+	element.realserver_vector.clear();
+	for( std::list<realserver>::iterator itr = rs_list.begin();
+		 itr != rs_list.end(); ++itr ){
+		l7vs::realserver_element	rs_element;
+		rs_element.set_active( itr->get_active() );
+		rs_element.set_inact( itr->get_inact() );
+		rs_element.tcp_endpoint	= itr->tcp_endpoint;
+		rs_element.udp_endpoint	= itr->udp_endpoint;
+		rs_element.weight		= itr->weight;
+		element.realserver_vector.push_back( rs_element );
+	}
+	rs_list_unlock();
 
 	return element;
 }

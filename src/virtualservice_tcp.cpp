@@ -247,6 +247,10 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
  * @return  void
  */
 void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
+	if( pool_sessions.size() != 0 ){
+		err.setter( true, "VirtualService already initialized." );
+		return;
+	}
 // 	l7vs::replication&	tmp_rep = const_cast<l7vs::replication&>( rep );
 	//load parameter value
 	load_parameter();
@@ -685,6 +689,10 @@ void	l7vs::virtualservice_tcp::run(){
 	session_thread_control_ptr	stc_ptr;
 	{
 		boost::mutex::scoped_lock	lk( sessions_mutex );
+		if( pool_sessions.begin() == pool_sessions.end() ){
+			l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialize.", __FILE__, __LINE__ );
+			return;
+		}
 		t_id	= pool_sessions.begin()->first;
 		stc_ptr	= pool_sessions.begin()->second;
 	
