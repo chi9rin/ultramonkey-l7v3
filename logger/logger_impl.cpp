@@ -237,8 +237,8 @@ l7vs::LoggerImpl::LoggerImpl()
 
 	//l7vsd start stop category initialize
 	category_level_map[LOG_CAT_L7VSD_START_STOP] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_startstop"] = LOG_CAT_L7VSD_START_STOP;
-	category_name_map[LOG_CAT_L7VSD_START_STOP] = "l7vsd_startstop";
+	name_category_map["l7vsd_start_stop"] = LOG_CAT_L7VSD_START_STOP;
+	category_name_map[LOG_CAT_L7VSD_START_STOP] = "l7vsd_start_stop";
 
 	//l7vsd system category initialize
 	category_level_map[LOG_CAT_L7VSD_SYSTEM] = LOG_LV_DEBUG;
@@ -262,8 +262,8 @@ l7vs::LoggerImpl::LoggerImpl()
 
 	//l7vsd system enviroment category initialize
 	category_level_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = LOG_LV_DEBUG;
-	name_category_map["l7vsd_system_enviroment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
-	category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_enviroment";
+	name_category_map["l7vsd_system_environment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
+	category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_environment";
 
 	//l7vsd protocol module category initialize
 	category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_DEBUG;

@@ -73,7 +73,7 @@ l7vsd_system					= "info"
 l7vsd_system_memory				= "info"
 l7vsd_system_endpoint			= "info"
 l7vsd_system_signal				= "info"
-l7vsd_environment				= "info"
+l7vsd_system_environment		= "info"
 
 l7vsd_protocol					= "info"
 l7vsd_schedule					= "info"
