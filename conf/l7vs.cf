@@ -40,30 +40,43 @@ l7vsd_max_backup_index = "10"
 # l7vsd rotate file size
 l7vsd_max_filesize = "10M"
 
+# l7vsd connection logfile base name
+l7vsd_conn_log_filename = "/var/log/l7vs/l7vsd_conn.log"
+# l7vsd connection log rotate pattern
+l7vsd_conn_rotation = "size"
+# l7vsd connection rotate max backup number
+l7vsd_conn_max_backup_index = "10"
+# l7vsd connection rotate file size
+l7vsd_conn_max_filesize = "10M"
+
 # l7vsd log categories level
-l7vsd_network			= "info"
-l7vsd_network.bandwidth		= "info"
-l7vsd_network.num_connection	= "info"
-l7vsd_network.qos		= "info"
-l7vsd_virtual_service		= "info"
-l7vsd_real_server		= "info"
-l7vsd_sorry_server		= "info"
-l7vsd_real_server.balancing	= "info"
-l7vsd_replication		= "info"
-l7vsd_start_stop		= "info"
-l7vsd_system			= "info"
-l7vsd_system.memory		= "info"
-l7vsd_system.socket		= "info"
-l7vsd_system.signal		= "info"
-l7vsd_environment		= "info"
-l7vsd_environment.parameter	= "info"
-l7vsd_logger			= "info"
-l7vsd_parameter			= "info"
-l7vsd_event			= "info"
-l7vsd_schedule			= "info"
-l7vsd_program			= "info"
-l7vsd_protocol			= "info"
-l7vsd_module			= "info"
+l7vsd_network					= "info"
+l7vsd_network_qos				= "info"
+l7vsd_network_bandwidth			= "info"
+l7vsd_network_num_connection	= "info"
+l7vsd_network_access			= "info"
+l7vsd_mainthread				= "info"
+l7vsd_virtualservice			= "info"
+l7vsd_virtualservice_thread		= "info"
+l7vsd_session					= "info"
+l7vsd_session_thread			= "info"
+l7vsd_realserver				= "info"
+l7vsd_sorryserver				= "info"
+l7vsd_module					= "info"
+l7vsd_replication				= "info"
+l7vsd_replication_sendthread	= "info"
+l7vsd_parameter					= "info"
+l7vsd_logger					= "info"
+l7vsd_command					= "info"
+l7vsd_start_stop				= "info"
+l7vsd_system					= "info"
+l7vsd_system_memory				= "info"
+l7vsd_system_endpoint			= "info"
+l7vsd_system_signal				= "info"
+l7vsd_environment				= "info"
+
+l7vsd_protocol					= "info"
+l7vsd_schedule					= "info"
 
 # l7vsadm log file base name
 l7vsadm_log_filename = "/var/log/l7vs/l7vsadm.log"
@@ -79,35 +92,80 @@ l7vsadm_rotation_timing_value = "1 0:01"
 # l7vsadm log categories level
 l7vsadm_parse			= "info"
 l7vsadm_operate			= "info"
-l7vsadm_communicate		= "info"
-l7vsadm_config_result		= "info"
+l7vsadm_config_result	= "info"
 l7vsadm_common			= "info"
 l7vsadm_logger			= "info"
 l7vsadm_parameter		= "info"
-l7vsadm_protocol		= "info"
 l7vsadm_module			= "info"
 
+l7vsadm_protocol		= "info"
+l7vsadm_schedule		= "info"
+
 # snmpagent log file base name
-snmpagent_log_filename = "/var/log/l7vs/snmpagent.log"
+snmp_log_filename = "/var/log/l7vs/snmpagent.log"
 # snmpagent log rotate pattern
-snmpagent_rotation = "datesize"
+snmp_rotation = "datesize"
 # snmpagent log rotate max backup num
-snmpagent_max_backup_index = "10"
+snmp_max_backup_index = "10"
 # snmpagent max logfile size
-snmpagent_max_filesize = "30M"
+snmp_max_filesize = "30M"
 # snmpagent log rotate timing ( every week )
-snmpagent_rotation_timing = "week"
+snmp_rotation_timing = "week"
 # snmpagent log rotate timing ( a day of week and time )
-snmpagent_rotation_timing_value = "wed 23:59"
+snmp_rotation_timing_value = "wed 23:59"
+
+# snmpagent connection log file base name
+snmp_conn_log_filename = "/var/log/l7vs/snmpagent.log"
+# snmpagent connection log rotate pattern
+snmp_conn_rotation = "datesize"
+# snmpagent connection log rotate max backup num
+snmp_conn_max_backup_index = "10"
+# snmpagent connection max logfile size
+snmp_conn_max_filesize = "30M"
+# snmpagent connection log rotate timing ( every week )
+snmp_conn_rotation_timing = "week"
+# snmpagent connection log rotate timing ( a day of week and time )
+snmp_conn_rotation_timing_value = "wed 23:59"
 
 # snmpagent log categories level
-snmpagent_start_stop		= "info"
-snmpagent_manager_receive	= "info"
-snmpagent_manager_send		= "info"
-snmpagent_l7vsd_receive		= "info"
-snmpagent_l7vsd_send		= "info"
-snmpagent_logger		= "info"
-snmpagent_parameter		= "info"
+snmpagent_start_stop			= "info"
+snmpagent_manager_receive		= "info"
+snmpagent_manager_send			= "info"
+snmpagent_l7vsd_receive			= "info"
+snmpagent_l7vsd_send			= "info"
+snmpagent_logger				= "info"
+snmpagent_parameter				= "info"
+snmpagent_system				= "info"
+snmpagent_system_memory			= "info"
+snmpagent_system_endpoint		= "info"
+snmpagent_system_signal			= "info"
+snmpagent_system_environment	= "info"
+
+# sslproxy logfile base name
+sslproxy_log_filename = "/var/log/l7vs/sslproxy.log"
+# sslproxy log rotate pattern
+sslproxy_rotation = "size"
+# sslproxy rotate max backup number
+sslproxy_max_backup_index = "10"
+# sslproxy rotate file size
+sslproxy_max_filesize = "10M"
+
+# sslproxy connection logfile base name
+sslproxy_conn_log_filename = "/var/log/l7vs/sslproxy_conn.log"
+# sslproxy connection log rotate pattern
+sslproxy_conn_rotation = "size"
+# sslproxy connection rotate max backup number
+sslproxy_conn_max_backup_index = "10"
+# sslproxy connection rotate file size
+sslproxy_conn_max_filesize = "10M"
+
+# l7vsadm log categories level
+sslproxy_logger			= "info"
+sslproxy_parameter		= "info"
+sslproxy_common			= "info"
+sslproxy_server			= "info"
+sslproxy_session		= "info"
+sslproxy_connection		= "info"
 
 #
 # l7vsadm setting

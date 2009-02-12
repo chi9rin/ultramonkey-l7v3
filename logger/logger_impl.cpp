@@ -357,6 +357,31 @@ l7vs::LoggerImpl::LoggerImpl()
 	name_category_map["snmpagent_parameter"] = LOG_CAT_SNMPAGENT_PARAMETER;
 	category_name_map[LOG_CAT_SNMPAGENT_PARAMETER] = "snmpagent_parameter";
 
+	//snmpagent system category initialize
+	category_level_map[LOG_CAT_SNMPAGENT_SYSTEM] = LOG_LV_DEBUG;
+	name_category_map["snmpagent_system"] = LOG_CAT_SNMPAGENT_SYSTEM;
+	category_name_map[LOG_CAT_SNMPAGENT_SYSTEM] = "snmpagent_system";
+
+	//snmpagent system category initialize
+	category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = LOG_LV_DEBUG;
+	name_category_map["snmpagent_system_memory"] = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
+	category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = "snmpagent_system_memory";
+
+	//snmpagent system category initialize
+	category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = LOG_LV_DEBUG;
+	name_category_map["snmpagent_system_endpoint"] = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
+	category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = "snmpagent_system_endpoint";
+
+	//snmpagent system category initialize
+	category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = LOG_LV_DEBUG;
+	name_category_map["snmpagent_system_signal"] = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
+	category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = "snmpagent_system_signal";
+
+	//snmpagent system category initialize
+	category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = LOG_LV_DEBUG;
+	name_category_map["snmpagent_system_environment"] = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
+	category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = "snmpagent_system_environment";
+
 #elif defined(LOGGER_PROCESS_SSL)
 	// sslproxy logger category initialize
 	category_level_map[LOG_CAT_SSLPROXY_LOGGER] = LOG_LV_DEBUG;
