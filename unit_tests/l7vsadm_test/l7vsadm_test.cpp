@@ -135,7 +135,7 @@ void	server_thread(){
 	boost::array< char,COMMAND_BUFFER_SIZE >	buf;
 
 	// accept
-	std::cout << "sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
+	//std::cout << "sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
 	boost::asio::io_service		server_io;
 	stream_protocol::acceptor	acc(	server_io,
 										stream_protocol::endpoint( L7VS_CONFIG_SOCKNAME ) );
@@ -144,14 +144,14 @@ void	server_thread(){
 	// ready to accept
 	//accept_ready = true;
 	accept_condition.notify_all();
-	std::cout << "accept_ready" << std::endl;
+	//std::cout << "accept_ready" << std::endl;
 
 	acc.accept( s );
-	std::cout << "accepted" << std::endl;
+	//std::cout << "accepted" << std::endl;
 
 	// recv request
 	s.read_some( boost::asio::buffer( buf ) );
-	std::cout << "read_done" << std::endl;
+	//std::cout << "read_done" << std::endl;
 	
 	std::stringstream	recv_stream;
 	recv_stream << &(buf[0]);
@@ -164,12 +164,12 @@ void	server_thread(){
 
 	// send response
 	boost::asio::write( s, boost::asio::buffer( send_stream.str() ) );
-	std::cout << "write_done" << std::endl;
+	//std::cout << "write_done" << std::endl;
 
 	s.close();
 
 	unlink( L7VS_CONFIG_SOCKNAME );
-	std::cout << "unlink" << std::endl;
+	//std::cout << "unlink" << std::endl;
 }
 
 //util
@@ -2574,7 +2574,7 @@ void	execute_test(){
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
 		//accept_ready = false;
-		std::cout << "thread_start" << std::endl;
+		//std::cout << "thread_start" << std::endl;
 		boost::thread	thd1( &server_thread );
 		{
 			boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2589,7 +2589,7 @@ void	execute_test(){
 // 			xt.sec += 1;
 // 			boost::thread::sleep(xt);
 // 		}
-		std::cout << "execute" << std::endl;
+		//std::cout << "execute" << std::endl;
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 

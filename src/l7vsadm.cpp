@@ -1538,8 +1538,6 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 			boost::array< char, COMMAND_BUFFER_SIZE >	buf;
 	
 			// connect
-			// debug
-			std::cout << "adm_connect" << std::endl;
 			boost::asio::io_service	io;
 			stream_protocol::socket	s( io );
 
@@ -1554,8 +1552,6 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 				}
 		
 				// Try connect to config socket.
-				// debug
-				std::cout << "adm_sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
 				boost::system::error_code err;
 				s.connect(stream_protocol::endpoint( L7VS_CONFIG_SOCKNAME ), err );
 				if( !err ){
@@ -1575,21 +1571,14 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 				boost::thread::sleep(xt);
 			}
 
-			// debug
-			std::cout << "adm_connect_done" << std::endl;
-	
 			// write sockfile
 			std::stringstream	send_stream;
 			boost::archive::text_oarchive	oa( send_stream );
 			oa << (const l7vs::l7vsadm_request&) request;
 			boost::asio::write( s, boost::asio::buffer( send_stream.str() ) );
-			// debug
-			std::cout << "adm_write_done" << std::endl;
-	
+
 			// read sockfile
 			s.read_some( boost::asio::buffer( buf ) );
-			// debug
-			std::cout << "adm_read_done" << std::endl;
 			
 			std::stringstream	recv_stream;
 			recv_stream << &(buf[0]);
@@ -1598,8 +1587,6 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 	
 			// close socket
 			s.close();
-			// debug
-			std::cout << "adm_close_done" << std::endl;
 		
 			// display result
 			if( l7vsd_response::RESPONSE_OK == response.status ){
