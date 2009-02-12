@@ -182,6 +182,7 @@ public:
 										recive_buffer_max_size( in.recive_buffer_max_size ),
 										recive_buffer_rest_size( in.recive_buffer_rest_size ),
 										send_status_list( in.send_status_list )	{}
+
 	};
 
 
@@ -197,6 +198,8 @@ public:
 		int		sorryserver_switch_flag;
 		int		realserver_switch_flag;
 		boost::asio::ip::tcp::endpoint		client_endpoint_tcp;
+		boost::asio::ip::tcp::endpoint		last_endpoint_tcp;
+		boost::shared_ptr<boost::mutex>		session_thread_data_mutex;
 		EVENT_TAG			last_status;
 
 		bool	operator==( const session_thread_data_cinsert& in )
@@ -234,6 +237,7 @@ public:
 										sorry_flag( SORRY_FLAG_OFF ),
 										sorryserver_switch_flag( SORRYSERVER_SWITCH_FLAG_OFF ),
 										realserver_switch_flag( REALSERVER_SWITCH_FLAG_OFF ),
+										session_thread_data_mutex( new boost::mutex() ),
 										last_status( STOP )	{}
 
 		session_thread_data_cinsert( const session_thread_data_cinsert& in ) :
@@ -250,9 +254,13 @@ public:
 										last_status( in.last_status )	{}
 	};
 
+	typedef		boost::shared_ptr<session_thread_data_cinsert>
+								session_thread_data_cinsert_sp;
+	typedef		std::list< edit_data >::iterator
+								edit_data_list_itr;
 	typedef		std::list< send_status >::iterator
-								send_status_itr;
-	typedef		std::map< boost::thread::id, session_thread_data_cinsert* >::iterator
+								send_status_list_itr;
+	typedef		std::map< boost::thread::id, session_thread_data_cinsert_sp>::iterator
 								session_thread_data_map_itr;
 	typedef		std::map< boost::asio::ip::tcp::endpoint, recive_data >::iterator
 								recive_data_map_itr;
@@ -262,7 +270,7 @@ protected:
 	int	reschedule;
 	boost::array< char, MAX_OPTION_SIZE >	cookie_name;
 	boost::array< char, MAX_OPTION_SIZE >	sorry_uri;
-	std::map< boost::thread::id, session_thread_data_cinsert* >	session_thread_data_map;
+	std::map< boost::thread::id, session_thread_data_cinsert_sp>	session_thread_data_map;
 	boost::mutex	session_thread_data_map_mutex;
 
 public:
