@@ -9,7 +9,7 @@ int get_string_stubmode = 0;
 int get_int_stubmode = 0;
 
 char	*get_string_table[] = {
-	"192.168.0.20",				//	"ip_addr"
+	"10.144.169.86",				//	"ip_addr"
 	"40000",					//	"service_name"
 	"eth1",						//	"nic"
 	"virtualservice",			//	"cmponent_id_00"
@@ -17,7 +17,7 @@ char	*get_string_table[] = {
 	"sslid",					//	"cmponent_id_02"
 };
 int		get_int_table[] = {
-	1000,						//	"interval"
+	10000,						//	"interval"
 	64,							//	"cmponent_size_00"
 	1,							//	"cmponent_size_01"
 	200,						//	"cmponent_size_02"
@@ -167,21 +167,25 @@ static const char* replication_mode[] = {
 	"REPLICATION_SLAVE_STOP"
 };
 
+bool locked_end = false;
+
 bool receiver_end = false;
 bool io_end = false;
-boost::asio::io_service global_io;
-boost::asio::io_service global_io2;
+boost::asio::io_service global_receive_io;
+boost::asio::io_service global_send_io;
 
 void io_thread(){
-	while( !io_end ){
-		global_io.run();
-		global_io2.run();
+	while( false == io_end ){
+		global_receive_io.run();
+		global_send_io.run();
 	}
 }
 
+boost::thread	global_thread_item( boost::bind ( &io_thread ) );
+
 void receiver_thread(){
 	boost::asio::ip::udp::endpoint	udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
-	boost::asio::ip::udp::socket	receiver_socket( global_io, udp_endpoint );
+	boost::asio::ip::udp::socket	receiver_socket( global_receive_io, udp_endpoint );
 
 	char	*recv_memory;
 	size_t	size;
@@ -257,7 +261,8 @@ void receiver_thread(){
 	memset(replication_state.surface_block_array_ptr,0,replication_state.total_block*sizeof(uint64_t));
 
 	for ( ; ; ){
-		size = receiver_socket.receive( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ) );
+//		size = receiver_socket.receive_from ( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint );
+		size = receiver_socket.receive ( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ) );
 		if ( size != sizeof ( struct replication_data_struct ) ){
 			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_SYSTEM, 1, "Failed in the reception processing of data because of illegal receive size.", __FILE__, __LINE__ );
 			goto END;
@@ -378,47 +383,13 @@ END:
 	}
 	replication_state.surface_block_array_ptr=NULL;
 
+	receiver_socket.close();
+
 	receiver_end = true;
 };
 
 void	sender_thread(){
-	l7vs::replication	repli1(global_io);
-
-	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
-	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
-	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
-
-	unsigned int	size;
-	void*			ptr;
-
-	ptr = repli1.pay_memory( "virtualservice", size );
-	BOOST_CHECK( NULL != ptr );
-	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
-	memset( ptr, '1', size * DATA_SIZE );
-	repli1.unlock( "virtualservice" );
-
-	ptr = repli1.pay_memory( "chash", size );
-	BOOST_CHECK( NULL != ptr );
-	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
-	memset( ptr, '2', size * DATA_SIZE );
-	repli1.unlock( "chash" );
-
-	ptr = repli1.pay_memory( "sslid", size );
-	BOOST_CHECK( NULL != ptr );
-	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
-	memset( ptr, '3', size * DATA_SIZE );
-	repli1.unlock( "sslid" );
-
-	repli1.switch_to_master();
-	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
-	repli1.force_replicate();
-
-	repli1.finalize();
-}
-
-void	sender_thread2(){
-	l7vs::replication	repli2(global_io2);
-//	l7vs::replication	repli2(global_io);
+	l7vs::replication	repli2(global_send_io);
 
 	BOOST_CHECK_EQUAL( repli2.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli2.initialize(), 0 );
@@ -448,16 +419,16 @@ void	sender_thread2(){
 	repli2.switch_to_master();
 	BOOST_CHECK_EQUAL( repli2.get_status(), l7vs::replication::REPLICATION_MASTER );
 
-	sleep(3);
+	sleep(1);
 
 	repli2.finalize();
 }
 
-void	sender_thread3(){
-std::cout << "sender3 in\n";
+void	sender2_thread(){
+std::cout << "sender2 in\n";
 	boost::asio::ip::udp::endpoint	udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
-//	boost::asio::ip::udp::socket	sender_socket( global_io2, udp_endpoint );
-	boost::asio::ip::udp::socket	sender_socket( global_io2 );
+//	boost::asio::ip::udp::socket	sender_socket( global_send_io, udp_endpoint );
+	boost::asio::ip::udp::socket	sender_socket( global_send_io );
 
 	//! Transfer data between active server and standby server.
 	struct replication_data_struct{
@@ -473,7 +444,7 @@ std::cout << "sender3 in\n";
 	size_t send_byte;
 	boost::system::error_code err;
 
-std::cout << "sender3 " << udp_endpoint.address() << ":" << udp_endpoint.port() << "\n";
+std::cout << "sender2 " << udp_endpoint.address() << ":" << udp_endpoint.port() << "\n";
 	memset( &replication_data, 0, sizeof( struct replication_data_struct ) );
 	// Set replication id
 	replication_data.id = REPLICATION_ID;
@@ -493,16 +464,17 @@ std::cout << "send 1st block\n";
 //	send_byte = sender_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint );
 	send_byte = sender_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint, 0, err );
 	if ( err ){
-std::cout << err.message() << "\n";
+		std::cout << err.message() << "\n";
+		sender_socket.close();
 		return;
 	}
 	if ( sizeof( struct replication_data_struct ) != send_byte ){
+		sender_socket.close();
 		return;
 	}
-	usleep( 1000 );
+	usleep( 10000 );
 	
 	replication_data.block_num = 1;
-	// set serial
 
 	// set replication data (1 block)
 	memset( replication_data.data, '8', DATA_SIZE );
@@ -512,16 +484,17 @@ std::cout << "send 2nd block\n";
 //	send_byte = sender_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint );
 	send_byte = sender_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint, 0, err );
 	if ( err ){
-std::cout << err.message() << "\n";
+		std::cout << err.message() << "\n";
+		sender_socket.close();
 		return;
 	}
 	if ( sizeof( struct replication_data_struct ) != send_byte ){
+		sender_socket.close();
 		return;
 	}
-	usleep( 1000 );
+	usleep( 10000 );
 
 	replication_data.block_num = 2;
-	// set serial
 
 	// set replication data (1 block)
 	memset( replication_data.data, '9', DATA_SIZE );
@@ -531,15 +504,24 @@ std::cout << "send 3rd block\n";
 //	send_byte = sender_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint );
 	send_byte = sender_socket.send_to( boost::asio::buffer( &replication_data, sizeof( struct replication_data_struct ) ), udp_endpoint, 0, err );
 	if ( err ){
-std::cout << err.message() << "\n";
+		std::cout << err.message() << "\n";
+		sender_socket.close();
 		return;
 	}
 	if ( sizeof( struct replication_data_struct ) != send_byte ){
+		sender_socket.close();
 		return;
 	}
+	sleep(1);
+
+	sender_socket.close();
 }
 
-
+void lock_thread( l7vs::replication_fake* p_repliX, const char* name ){
+	std::string	id( name );
+	p_repliX->lock( id );
+	locked_end = true;
+}
 
 
 
@@ -553,13 +535,13 @@ void	replication_initialize_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -763,7 +745,7 @@ void	replication_initialize_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	// unit_test[28]  check_parameterのテスト(component_idが重複)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_table[4] = "virtualservice";			//	"cmponent_id_01"
@@ -777,9 +759,9 @@ void	replication_initialize_test(){
 
 	// unit_test[29]  check_parameterのテスト(total_blockが上限以上)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
-	get_int_table[1] = 40000;						//	"cmponent_size_00"
-	get_int_table[2] = 40000;						//	"cmponent_size_01"
-	get_int_table[3] = 40000;						//	"cmponent_size_02"
+	get_int_table[1] = 33334;						//	"cmponent_size_00"
+	get_int_table[2] = 33334;						//	"cmponent_size_01"
+	get_int_table[3] = 33334;						//	"cmponent_size_02"
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
@@ -835,13 +817,13 @@ void	replication_switch_to_master_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -891,6 +873,10 @@ void	replication_switch_to_master_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case3.
@@ -899,13 +885,13 @@ void	replication_switch_to_slave_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -959,6 +945,10 @@ void	replication_switch_to_slave_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	repli1.switch_to_slave();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case4.
@@ -969,13 +959,13 @@ void	replication_pay_memory_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1106,14 +1096,26 @@ void	replication_pay_memory_test(){
 	BOOST_CHECK( NULL != ptr );
 	BOOST_CHECK_EQUAL( size, ( unsigned int )get_int_table[3] );
 
-	// unit_test[63]  pay_memoryのテスト(未初期化)
+	// unit_test[63]  pay_memoryのテスト(未初期化 virtualservice時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	ptr = repli1.pay_memory( "virtualservice", size );
 	BOOST_CHECK( NULL == ptr );
 	BOOST_CHECK_EQUAL( size, 0U );
 
-	// unit_test[64]  pay_memoryのテスト(SINGLE時)
+	// unit_test[64]  pay_memoryのテスト(未初期化 chash時)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	ptr = repli1.pay_memory( "chash", size );
+	BOOST_CHECK( NULL == ptr );
+	BOOST_CHECK_EQUAL( size, 0U );
+
+	// unit_test[65]  pay_memoryのテスト(未初期化 sslid時)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	ptr = repli1.pay_memory( "sslid", size );
+	BOOST_CHECK( NULL == ptr );
+	BOOST_CHECK_EQUAL( size, 0U );
+
+	// unit_test[66]  pay_memoryのテスト(SINGLE virtualservice時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -1122,6 +1124,22 @@ void	replication_pay_memory_test(){
 	ptr = repli1.pay_memory( "virtualservice", size );
 	BOOST_CHECK( NULL == ptr );
 	BOOST_CHECK_EQUAL( size, 0U );
+
+	// unit_test[67]  pay_memoryのテスト(SINGLE chash時)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	ptr = repli1.pay_memory( "chash", size );
+	BOOST_CHECK( NULL == ptr );
+	BOOST_CHECK_EQUAL( size, 0U );
+
+	// unit_test[68]  pay_memoryのテスト(SINGLE sslid時)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	ptr = repli1.pay_memory( "sslid", size );
+	BOOST_CHECK( NULL == ptr );
+	BOOST_CHECK_EQUAL( size, 0U );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case5.
@@ -1130,13 +1148,13 @@ void	replication_dump_memory_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1152,39 +1170,39 @@ void	replication_dump_memory_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[65]  dump_memoryのテスト(SLAVE時)
+	// unit_test[69]  dump_memoryのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
-	// unit_test[66]  dump_memoryのテスト(SLAVE_STOP時)
+	// unit_test[70]  dump_memoryのテスト(SLAVE_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
-	// unit_test[67]  dump_memoryのテスト(MASTER_STOP時)
+	// unit_test[71]  dump_memoryのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
-	// unit_test[68]  dump_memoryのテスト(MASTER時)
+	// unit_test[72]  dump_memoryのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
-	// unit_test[69]  dump_memoryのテスト(未初期化)
+	// unit_test[73]  dump_memoryのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
-	// unit_test[70]  dump_memoryのテスト(SINGLE時)
+	// unit_test[74]  dump_memoryのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -1192,6 +1210,10 @@ void	replication_dump_memory_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case6.
@@ -1200,13 +1222,13 @@ void	replication_start_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1218,39 +1240,39 @@ void	replication_start_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[71]  startのテスト(SLAVE時)
+	// unit_test[75]  startのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[72]  startのテスト(SLAVE_STOP時)
+	// unit_test[76]  startのテスト(SLAVE_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[73]  startのテスト(MASTER時)
+	// unit_test[77]  startのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 
-	// unit_test[74]  startのテスト(MASTER_STOP時)
+	// unit_test[78]  startのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 
-	// unit_test[75]  startのテスト(未初期化)
+	// unit_test[79]  startのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[76]  startのテスト(SINGLE時)
+	// unit_test[80]  startのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -1258,6 +1280,10 @@ void	replication_start_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case7.
@@ -1266,13 +1292,13 @@ void	replication_stop_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1284,37 +1310,37 @@ void	replication_stop_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[77]  stopのテスト(SLAVE時)
+	// unit_test[81]  stopのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 
-	// unit_test[78]  stopのテスト(SLAVE_STOP時)
+	// unit_test[82]  stopのテスト(SLAVE_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 
-	// unit_test[79]  stopのテスト(MASTER_STOP時)
+	// unit_test[83]  stopのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 
-	// unit_test[80]  stopのテスト(MASTER時)
+	// unit_test[84]  stopのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 
-	// unit_test[81]  stopのテスト(未初期化)
+	// unit_test[85]  stopのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[82]  stopのテスト(SINGLE時)
+	// unit_test[86]  stopのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -1322,30 +1348,32 @@ void	replication_stop_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case8.
 void	replication_force_replicate_test(){
-	boost::asio::io_service io;
+//	boost::asio::io_service io;
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1(global_send_io);
 
-	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
-	get_string_table[1] = "40000";					//	"service_name"
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 1;							//	"cmponent_size_02"
@@ -1354,26 +1382,26 @@ void	replication_force_replicate_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[83]  force_replicateのテスト(SLAVE時)
+	// unit_test[87]  force_replicateのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[84]  force_replicateのテスト(SLAVE_STOP時)
+	// unit_test[88]  force_replicateのテスト(SLAVE_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[85]  force_replicateのテスト(MASTER_STOP時)
+	// unit_test[89]  force_replicateのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[86]  force_replicateのテスト(MASTER時 "compulsorily_interval"が存在しない)
+	// unit_test[90]  force_replicateのテスト(MASTER時 "compulsorily_interval"が存在しない)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_stubmode = 5;
 	repli1.start();
@@ -1381,13 +1409,13 @@ void	replication_force_replicate_test(){
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[87]  force_replicateのテスト(MASTER時 "compulsorily_interval"が上限以上)
+	// unit_test[91]  force_replicateのテスト(MASTER時 "compulsorily_interval"が上限以上)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[4] = 401;
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[88]  force_replicateのテスト(MASTER時 "compulsorily_interval"が下限未満)
+	// unit_test[92]  force_replicateのテスト(MASTER時 "compulsorily_interval"が下限未満)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[4] = 3;
 	repli1.force_replicate();
@@ -1395,14 +1423,14 @@ void	replication_force_replicate_test(){
 
 	get_int_table[4] = 10;
 
-	// unit_test[89]  force_replicateのテスト(未初期化)
+	// unit_test[93]  force_replicateのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
-	// unit_test[90]  force_replicateのテスト(SINGLE時)
+	// unit_test[94]  force_replicateのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -1412,24 +1440,52 @@ void	replication_force_replicate_test(){
 	repli1.force_replicate();
 	BOOST_CHECK( 1 );
 
+	repli1.finalize();
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 
-	// unit_test[91]  force_replicate&handle_sendのテスト(MASTER時)
+	// unit_test[95]  force_replicate&handle_sendのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+
+	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	unsigned int	size;
+	void*			ptr;
+
+	ptr = repli1.pay_memory( "virtualservice", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
+	memset( ptr, '1', size * DATA_SIZE );
+	repli1.unlock( "virtualservice" );
+
+	ptr = repli1.pay_memory( "chash", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
+	memset( ptr, '2', size * DATA_SIZE );
+	repli1.unlock( "chash" );
+
+	ptr = repli1.pay_memory( "sslid", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
+	memset( ptr, '3', size * DATA_SIZE );
+	repli1.unlock( "sslid" );
+
+	repli1.switch_to_master();
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
+
 	receiver_end = false;
 	boost::thread	thread_item1( boost::bind ( &receiver_thread ) );
-	boost::thread	thread_item2( boost::bind ( &sender_thread ) );
+
+	repli1.force_replicate();
+
+	repli1.finalize();
 
 	while( !receiver_end );
 
-	thread_item2.join();
 	thread_item1.join();
 
 	BOOST_CHECK( 1 );
-
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
-
 }
 
 //test case9.
@@ -1438,13 +1494,13 @@ void	replication_reset_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1456,40 +1512,40 @@ void	replication_reset_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[92]  resetのテスト(SLAVE時)
+	// unit_test[96]  resetのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[93]  resetのテスト(SLAVE_STOP時)
+	// unit_test[97]  resetのテスト(SLAVE_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[94]  resetのテスト(MASTER_STOP時)
+	// unit_test[98]  resetのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[95]  resetのテスト(MASTER時)
+	// unit_test[99]  resetのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[96]  resetのテスト(未初期化)
+	// unit_test[100]  resetのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[97]  resetのテスト(SINGLE時)
+	// unit_test[101]  resetのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -1506,32 +1562,32 @@ void	replication_reset_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[98]  resetのテスト(intervalが存在しない)
+	// unit_test[102]  resetのテスト(intervalが存在しない)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_stubmode = 1;
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[99]  resetのテスト(intervalが不正)
+	// unit_test[103]  resetのテスト(intervalが不正)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_stubmode = 101;
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
 	get_int_stubmode = 0;
-	// unit_test[100]  resetのテスト(intervalが上限以上)
+	// unit_test[104]  resetのテスト(intervalが上限以上)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[0] = 10001;						//	"interval"
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	// unit_test[101]  resetのテスト(intervalが下限未満)
+	// unit_test[105]  resetのテスト(intervalが下限未満)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_int_table[0] = 9;							//	"interval"
 	repli1.reset();
 	BOOST_CHECK( 1 );
 
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	repli1.finalize();
 }
 
@@ -1541,13 +1597,13 @@ void	replication_get_status_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1555,37 +1611,41 @@ void	replication_get_status_test(){
 
 	l7vs::replication	repli1(io);
 
-	// unit_test[102]  get_statusのテスト(未初期化)
+	// unit_test[106]  get_statusのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[103]  get_statusのテスト(SLAVE時)
+	// unit_test[107]  get_statusのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 	
-	// unit_test[104]  get_statusのテスト(MASTER時)
+	// unit_test[108]  get_statusのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 
-	// unit_test[105]  get_statusのテスト(MASTER_STOP時)
+	// unit_test[109]  get_statusのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER_STOP );
 	
-	// unit_test[106]  get_statusのテスト(SLAVE_STOP)
+	// unit_test[110]  get_statusのテスト(SLAVE_STOP)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_slave();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 
-	// unit_test[107]  get_statusのテスト(SINGLE時)
+	// unit_test[111]  get_statusのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
+
+	repli1.finalize();
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 //test case11.
@@ -1594,13 +1654,13 @@ void	replication_lock_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1612,55 +1672,97 @@ void	replication_lock_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
+	// unit_test[112]  lockのテスト(初期状態)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[108]  lockのテスト("virtualservice")
+	// unit_test[113]  lockのテスト("virtualservice")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[109]  lockのテスト(再度"virtualservice")
+	// unit_test[114]  lockのテスト(再度"virtualservice")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 //	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );		// 一度帰ってこなくなるのを確認したらオミット
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[110]  lockのテスト("chash")
+	// unit_test[115]  lockのテスト("chash")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[111]  lockのテスト(再度"chash")
+	// unit_test[116]  lockのテスト(再度"chash")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 //	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );					// 一度帰ってこなくなるのを確認したらオミット
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[112]  lockのテスト("sslid")
+	// unit_test[117]  lockのテスト("sslid")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[113]  lockのテスト(再度"sslid")
+	// unit_test[118]  lockのテスト(再度"sslid")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 //	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );					// 一度帰ってこなくなるのを確認したらオミット
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[114]  lockのテスト(不正なid)
+	// unit_test[119]  lockのテスト(不正なid)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.lock( "unknown" ), -1 );
+
+	// unit_test[120]  lockのテスト(他スレッド "virtualservice")
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	locked_end = false;
+	boost::thread	thread_item1( boost::bind ( &lock_thread, &repli1, "virtualservice" ) );
+	BOOST_CHECK_EQUAL( locked_end, false );
+	repli1.unlock( "virtualservice" );
+
+	thread_item1.join();
+	thread_item1.detach();
+
+	BOOST_CHECK_EQUAL( locked_end, true );
+	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
+
+	// unit_test[121]  lockのテスト(他スレッド "sslid")
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	locked_end = false;
+	boost::thread	thread_item2( boost::bind ( &lock_thread, &repli1, "chash" ) );
+	BOOST_CHECK_EQUAL( locked_end, false );
+	repli1.unlock( "chash" );
+
+	thread_item2.join();
+	thread_item2.detach();
+
+	BOOST_CHECK_EQUAL( locked_end, true );
+	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
+
+	// unit_test[122]  lockのテスト(他スレッド "sslid")
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+	locked_end = false;
+	boost::thread	thread_item3( boost::bind ( &lock_thread, &repli1, "sslid" ) );
+	BOOST_CHECK_EQUAL( locked_end, false );
+	repli1.unlock( "sslid" );
+
+	thread_item3.join();
+	thread_item3.detach();
+
+	BOOST_CHECK_EQUAL( locked_end, true );
+	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
+
 
 	repli1.unlock( "virtualservice" );
 	repli1.unlock( "chash" );
@@ -1679,13 +1781,13 @@ void	replication_unlock_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1697,6 +1799,8 @@ void	replication_unlock_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
+	// unit_test[123]  unlockのテスト(lock済み状態)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
@@ -1704,49 +1808,49 @@ void	replication_unlock_test(){
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[115]  unlockのテスト("virtualservice")
+	// unit_test[124]  unlockのテスト("virtualservice")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "virtualservice" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[116]  unlockのテスト(再度"virtualservice")
+	// unit_test[125]  unlockのテスト(再度"virtualservice")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "virtualservice" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[117]  unlockのテスト("chash")
+	// unit_test[126]  unlockのテスト("chash")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "chash" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[118]  unlockのテスト(再度"chash")
+	// unit_test[127]  unlockのテスト(再度"chash")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "chash" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[119]  unlockのテスト("sslid")
+	// unit_test[128]  unlockのテスト("sslid")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "sslid" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[120]  unlockのテスト(再度"sslid")
+	// unit_test[129]  unlockのテスト(再度"sslid")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "sslid" ), 0 );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[121]  unlockのテスト(不正なid)
+	// unit_test[130]  unlockのテスト(不正なid)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.unlock( "unknown" ), -1 );
 
@@ -1759,13 +1863,13 @@ void	replication_refer_lock_mutex_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1780,7 +1884,7 @@ void	replication_refer_lock_mutex_test(){
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
 
-	// unit_test[122]  refer_lock_mutexのテスト("virtualservice")
+	// unit_test[131]  refer_lock_mutexのテスト("virtualservice")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "virtualservice", mutex1 ), 0 );
 	mutex1->lock();
@@ -1788,7 +1892,7 @@ void	replication_refer_lock_mutex_test(){
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[123]  refer_lock_mutexのテスト(再度"virtualservice")
+	// unit_test[132]  refer_lock_mutexのテスト(再度"virtualservice")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "virtualservice", mutex1 ), 0 );
 //	mutex1->lock();														// 一度帰ってこなくなるのを確認したらオミット
@@ -1798,7 +1902,7 @@ void	replication_refer_lock_mutex_test(){
 	mutex1->unlock();
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), false );
 
-	// unit_test[124]  refer_lock_mutexのテスト("chash")
+	// unit_test[133]  refer_lock_mutexのテスト("chash")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "chash", mutex2 ), 0 );
 	mutex2->lock();
@@ -1806,7 +1910,7 @@ void	replication_refer_lock_mutex_test(){
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[125]  refer_lock_mutexのテスト(再度"chash")
+	// unit_test[134]  refer_lock_mutexのテスト(再度"chash")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "chash", mutex2 ), 0 );
 //	mutex2->lock();														// 一度帰ってこなくなるのを確認したらオミット
@@ -1816,7 +1920,7 @@ void	replication_refer_lock_mutex_test(){
 	mutex2->unlock();
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 
-	// unit_test[126]  refer_lock_mutexのテスト("sslid")
+	// unit_test[135]  refer_lock_mutexのテスト("sslid")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "sslid", mutex3 ), 0 );
 	mutex3->lock();
@@ -1824,7 +1928,7 @@ void	replication_refer_lock_mutex_test(){
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), false );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
 
-	// unit_test[127]  refer_lock_mutexのテスト(再度"sslid")
+	// unit_test[136]  refer_lock_mutexのテスト(再度"sslid")
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "sslid", mutex3 ), 0 );
 //	mutex3->lock();														// 一度帰ってこなくなるのを確認したらオミット
@@ -1834,7 +1938,7 @@ void	replication_refer_lock_mutex_test(){
 	mutex3->unlock();
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), false );
 
-	// unit_test[128]  refer_lock_mutexのテスト(不正なid)
+	// unit_test[137]  refer_lock_mutexのテスト(不正なid)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.refer_lock_mutex( "unknown", mutex4 ), -1 );
 
@@ -1847,28 +1951,27 @@ void	replication_handle_send_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(global_io);
+	l7vs::replication	repli1(global_send_io);
 
-	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 1;							//	"cmponent_size_02"
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[129]  send_thread&handle_sendのテスト(SLAVE時)
+	// unit_test[138]  send_thread&handle_sendのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
@@ -1897,16 +2000,16 @@ void	replication_handle_send_test(){
 	memset( ptr, '6', size * DATA_SIZE );
 	repli1.unlock( "sslid" );
 
-	// unit_test[130]  send_thread&handle_sendのテスト(SLAVE_STOP時)
+	// unit_test[139]  send_thread&handle_sendのテスト(SLAVE_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.stop();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE_STOP );
 
-	// unit_test[131]  send_thread&handle_sendのテスト(MASTER_STOP時)
+	// unit_test[140]  send_thread&handle_sendのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 
-	// unit_test[132]  send_thread&handle_sendのテスト(MASTER時)
+	// unit_test[141]  send_thread&handle_sendのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
@@ -1916,8 +2019,6 @@ void	replication_handle_send_test(){
 	BOOST_CHECK( 1 );
 
 	repli1.finalize();
-
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
 }
 
 //test case15.
@@ -1926,13 +2027,13 @@ void	replication_set_master_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1944,14 +2045,14 @@ void	replication_set_master_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[133]  set_masterのテスト(SLAVE時)
+	// unit_test[142]  set_masterのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK_EQUAL( repli1.set_master_wrapper(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );	// switch_toではないのでSLAVEのまま
 	BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), 0 );								// socket.cancel2重回避
 
-	// unit_test[134]  set_masterのテスト(ip_adrが不正)
+	// unit_test[143]  set_masterのテスト(ip_adrが不正)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	get_string_table[0] = "192:168:0:20";			//	"ip_addr"
@@ -1963,7 +2064,7 @@ void	replication_set_master_test(){
 
 //	BOOST_CHECK_EQUAL( repli1.set_master_wrapper(), -1 );							// 不正なip_addrはruntime errorになるのでオミット
 
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 
 	repli1.finalize();
 }
@@ -1974,13 +2075,13 @@ void	replication_set_slave_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -1994,13 +2095,14 @@ void	replication_set_slave_test(){
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 
-	// unit_test[135]  set_slaveのテスト(MASTER時)
+	// unit_test[144]  set_slaveのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );	// switch_toではないのでMASTERのまま
+	repli1.switch_to_slave();															// 保険
 
-	// unit_test[136]  set_slaveのテスト(ip_adrが不正)
+	// unit_test[145]  set_slaveのテスト(ip_adrが不正)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	get_string_table[0] = "192:168:0:20";			//	"ip_addr"
@@ -2010,7 +2112,7 @@ void	replication_set_slave_test(){
 
 //	BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), -1 );								// 不正なip_addrはruntime errorになるのでオミット
 
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 
 	repli1.finalize();
 }
@@ -2021,13 +2123,13 @@ void	replication_check_parameter_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2039,7 +2141,7 @@ void	replication_check_parameter_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[137]  check_parameterのテスト(正常系)
+	// unit_test[146]  check_parameterのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK_EQUAL( repli1.check_parameter_wrapper(), 0 );	// 異常系はinitializeにて評価済み
@@ -2053,13 +2155,13 @@ void	replication_getrpl_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2073,7 +2175,7 @@ void	replication_getrpl_test(){
 
 	repli1.finalize();
 
-	// unit_test[138]  getrplのテスト(正常系)
+	// unit_test[147]  getrplのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getrpl_wrapper() );	// 異常系はinitializeにて評価済み
@@ -2087,13 +2189,13 @@ void	replication_getcmp_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2107,7 +2209,7 @@ void	replication_getcmp_test(){
 
 	repli1.finalize();
 
-	// unit_test[139]  getcmpのテスト(正常系)
+	// unit_test[148]  getcmpのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getcmp_wrapper() );	// 異常系はinitializeにて評価済み
@@ -2121,13 +2223,13 @@ void	replication_getsrf_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2141,7 +2243,7 @@ void	replication_getsrf_test(){
 
 	repli1.finalize();
 
-	// unit_test[140]  getsrfのテスト(正常系)
+	// unit_test[149]  getsrfのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getsrf_wrapper() );	// 異常系はinitializeにて評価済み
@@ -2155,13 +2257,13 @@ void	replication_make_serial_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2170,13 +2272,13 @@ void	replication_make_serial_test(){
 	l7vs::replication_fake	repli1(io);
 	unsigned long long		value1, value2;
 
-	// unit_test[141]  make_serialのテスト(正常系)
+	// unit_test[150]  make_serialのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	value1 = repli1.make_serial_wrapper();
 	BOOST_CHECK( 0 != value1 );
 
-	// unit_test[142]  make_serialのテスト(再実行)
+	// unit_test[151]  make_serialのテスト(再実行)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	value2 = repli1.make_serial_wrapper();
@@ -2192,13 +2294,13 @@ void	replication_releaserpl_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2212,7 +2314,7 @@ void	replication_releaserpl_test(){
 
 	repli1.finalize();
 
-	// unit_test[143]  releaserplのテスト(正常系)
+	// unit_test[152]  releaserplのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getrpl_wrapper() );
@@ -2227,13 +2329,13 @@ void	replication_releasecmp_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2247,7 +2349,7 @@ void	replication_releasecmp_test(){
 
 	repli1.finalize();
 
-	// unit_test[144]  releasecmpのテスト(正常系)
+	// unit_test[153]  releasecmpのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getcmp_wrapper() );
@@ -2261,13 +2363,13 @@ void	replication_releasesrf_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2281,7 +2383,7 @@ void	replication_releasesrf_test(){
 
 	repli1.finalize();
 
-	// unit_test[145]  releasesrfのテスト(正常系)
+	// unit_test[154]  releasesrfのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getsrf_wrapper() );
@@ -2296,13 +2398,13 @@ void	replication_finalize_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2310,20 +2412,20 @@ void	replication_finalize_test(){
 
 	l7vs::replication	repli1(io);
 
-	// unit_test[146]  finalizeのテスト(未初期化)
+	// unit_test[155]  finalizeのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[147]  finalizeのテスト(SLAVE時)
+	// unit_test[156]  finalizeのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	
-	// unit_test[148]  finalizeのテスト(MASTER時)
+	// unit_test[157]  finalizeのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
@@ -2332,7 +2434,7 @@ void	replication_finalize_test(){
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[149]  finalizeのテスト(MASTER_STOP時)
+	// unit_test[158]  finalizeのテスト(MASTER_STOP時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
@@ -2343,7 +2445,7 @@ void	replication_finalize_test(){
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	
-	// unit_test[150]  finalizeのテスト(SLAVE_STOP)
+	// unit_test[159]  finalizeのテスト(SLAVE_STOP)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
@@ -2352,7 +2454,7 @@ void	replication_finalize_test(){
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
-	// unit_test[151]  finalizeのテスト(SINGLE時)
+	// unit_test[160]  finalizeのテスト(SINGLE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	get_string_stubmode = 1;
 	get_int_stubmode = 1;
@@ -2360,6 +2462,9 @@ void	replication_finalize_test(){
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
+
+	get_string_stubmode = 0;
+	get_int_stubmode = 0;
 }
 
 
@@ -2369,21 +2474,20 @@ void	replication_handle_receive_test(){
 
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_string_table[1] = "40000";					//	"service_name"
 	get_string_table[2] = "eth1";					//	"nic"
 	get_string_table[3] = "virtualservice";			//	"cmponent_id_00"
 	get_string_table[4] = "chash";					//	"cmponent_id_01"
 	get_string_table[5] = "sslid";					//	"cmponent_id_02"
-	get_int_table[0] = 1000;						//	"interval"
+	get_int_table[0] = 10000;						//	"interval"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(global_io);
+	l7vs::replication	repli1(global_receive_io);
 
-	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 1;							//	"cmponent_size_02"
@@ -2392,17 +2496,15 @@ void	replication_handle_receive_test(){
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
-	// unit_test[152]  handle_receiveのテスト(正常系)
+	// unit_test[161]  handle_receiveのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 //	repli1.dump_memory();
 //	BOOST_CHECK( 1 );
 
-	boost::thread	thread_item( boost::bind ( &sender_thread3 ) );
+	boost::thread	thread_item( boost::bind ( &sender2_thread ) );
 //receiver_end = false;
 //boost::thread	thread_item3( boost::bind ( &receiver_thread ) );
-
-	sleep(2);
 
 	thread_item.join();
 //thread_item3.join();
@@ -2411,12 +2513,12 @@ void	replication_handle_receive_test(){
 	BOOST_CHECK( 1 );
 
 /*
-	// unit_test[153]  handle_receiveのテスト(replication対replication)
+	// unit_test[162]  handle_receiveのテスト(replication対replication)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
-	boost::thread	thread_item2( boost::bind ( &sender_thread2 ) );
+	boost::thread	thread_item2( boost::bind ( &sender_thread ) );
 
-	sleep(2);
+	sleep(1);
 
 	thread_item2.join();
 std::cout << "sender2 end\n";
@@ -2424,7 +2526,6 @@ std::cout << "sender2 end\n";
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
-	get_string_table[0] = "192.168.0.20";			//	"ip_addr"
 	get_int_table[1] = 64;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 200;							//	"cmponent_size_02"
@@ -2432,18 +2533,21 @@ std::cout << "sender2 end\n";
 	repli1.finalize();
 }
 
+void	replication_finish(){
+	io_end = true;
+	global_thread_item.join();
+}
+
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	l7vs::Logger	logger;
 	l7vs::Parameter	parameter;
 
 	logger.loadConf();
-	boost::thread	thread_item( boost::bind ( &io_thread ) );
-
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "replication_test" );
 
 	// add test case to test suite
-/*
+///*
 	ts->add( BOOST_TEST_CASE( &replication_initialize_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_switch_to_master_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_switch_to_slave_test ) );
@@ -2452,6 +2556,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &replication_start_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_stop_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_force_replicate_test ) );
+
 	ts->add( BOOST_TEST_CASE( &replication_reset_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_get_status_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_lock_test ) );
@@ -2470,14 +2575,15 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &replication_releasecmp_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_releasesrf_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_finalize_test ) );
-*/
+//*/
 
 	ts->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
 
-	framework::master_test_suite().add( ts );
 
-	io_end = true;
-	thread_item.join();
+
+	ts->add( BOOST_TEST_CASE( &replication_finish ) );
+
+	framework::master_test_suite().add( ts );
 
 	return 0;
 }
