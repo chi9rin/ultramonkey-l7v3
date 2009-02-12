@@ -1178,35 +1178,35 @@ l7vs::l7vsadm::l7vsadm()
 	string_logcategory_dic["l7vsd_network"]					= LOG_CAT_L7VSD_NETWORK;
 	string_logcategory_dic["nw"]							= LOG_CAT_L7VSD_NETWORK;
 	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK]			= "l7vsd_network";
-	string_logcategory_dic["l7vsd_network.qos"]				= LOG_CAT_L7VSD_NETWORK_QOS;
-	string_logcategory_dic["nw.qos"]						= LOG_CAT_L7VSD_NETWORK_QOS;
-	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_QOS]		= "l7vsd_network.qos";
-	string_logcategory_dic["l7vsd_network.bandwidth"]		= LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
-	string_logcategory_dic["nw.bw"]							= LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
-	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_BANDWIDTH]	= "l7vsd_network.bandwidth";
-	string_logcategory_dic["l7vsd_network.num_connection"]	= LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
-	string_logcategory_dic["nw.conn"]						= LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
+	string_logcategory_dic["l7vsd_network_qos"]				= LOG_CAT_L7VSD_NETWORK_QOS;
+	string_logcategory_dic["nw_qos"]						= LOG_CAT_L7VSD_NETWORK_QOS;
+	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_QOS]		= "l7vsd_network_qos";
+	string_logcategory_dic["l7vsd_network_bandwidth"]		= LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
+	string_logcategory_dic["nw_bw"]							= LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
+	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_BANDWIDTH]	= "l7vsd_network_bandwidth";
+	string_logcategory_dic["l7vsd_network_num_connection"]	= LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
+	string_logcategory_dic["nw_conn"]						= LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
 	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION]
-															= "l7vsd_network.num_connection";
-	string_logcategory_dic["l7vsd_network.access"]			= LOG_CAT_L7VSD_NETWORK_ACCESS;
-	string_logcategory_dic["nw.acc"]						= LOG_CAT_L7VSD_NETWORK_ACCESS;
-	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_ACCESS]		= "l7vsd_network.access";
+															= "l7vsd_network_num_connection";
+	string_logcategory_dic["l7vsd_network_access"]			= LOG_CAT_L7VSD_NETWORK_ACCESS;
+	string_logcategory_dic["nw_acc"]						= LOG_CAT_L7VSD_NETWORK_ACCESS;
+	logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_ACCESS]		= "l7vsd_network_access";
 	string_logcategory_dic["l7vsd_mainthread"]				= LOG_CAT_L7VSD_MAINTHREAD;
 	string_logcategory_dic["mth"]							= LOG_CAT_L7VSD_MAINTHREAD;
 	logcategory_string_dic[LOG_CAT_L7VSD_MAINTHREAD]		= "l7vsd_mainthread";
 	string_logcategory_dic["l7vsd_virtualservice"]			= LOG_CAT_L7VSD_VIRTUALSERVICE;
 	string_logcategory_dic["vs"]							= LOG_CAT_L7VSD_VIRTUALSERVICE;
 	logcategory_string_dic[LOG_CAT_L7VSD_VIRTUALSERVICE]	= "l7vsd_virtualservice";
-	string_logcategory_dic["l7vsd_virtualservice.thread"]	= LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
-	string_logcategory_dic["vs.th"]							= LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
+	string_logcategory_dic["l7vsd_virtualservice_thread"]	= LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
+	string_logcategory_dic["vs_th"]							= LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
 	logcategory_string_dic[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD]
-															= "l7vsd_virtualservice.thread";
+															= "l7vsd_virtualservice_thread";
 	string_logcategory_dic["l7vsd_session"]					= LOG_CAT_L7VSD_SESSION;
 	string_logcategory_dic["ss"]							= LOG_CAT_L7VSD_SESSION;
 	logcategory_string_dic[LOG_CAT_L7VSD_SESSION]			= "l7vsd_session";
-	string_logcategory_dic["l7vsd_session.thread"]			= LOG_CAT_L7VSD_SESSION_THREAD;
-	string_logcategory_dic["ss.th"]							= LOG_CAT_L7VSD_SESSION_THREAD;
-	logcategory_string_dic[LOG_CAT_L7VSD_SESSION_THREAD]	= "l7vsd_session.thread";
+	string_logcategory_dic["l7vsd_session_thread"]			= LOG_CAT_L7VSD_SESSION_THREAD;
+	string_logcategory_dic["ss_th"]							= LOG_CAT_L7VSD_SESSION_THREAD;
+	logcategory_string_dic[LOG_CAT_L7VSD_SESSION_THREAD]	= "l7vsd_session_thread";
 	string_logcategory_dic["l7vsd_realserver"]				= LOG_CAT_L7VSD_REALSERVER;
 	string_logcategory_dic["rs"]							= LOG_CAT_L7VSD_REALSERVER;
 	logcategory_string_dic[LOG_CAT_L7VSD_REALSERVER]		= "l7vsd_realserver";
@@ -1219,10 +1219,10 @@ l7vs::l7vsadm::l7vsadm()
 	string_logcategory_dic["l7vsd_replication"]				= LOG_CAT_L7VSD_REPLICATION;
 	string_logcategory_dic["rep"]							= LOG_CAT_L7VSD_REPLICATION;
 	logcategory_string_dic[LOG_CAT_L7VSD_REPLICATION]		= "l7vsd_replication";
-	string_logcategory_dic["l7vsd_replication.sendthread"]	= LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
-	string_logcategory_dic["rep.sth"]						= LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
+	string_logcategory_dic["l7vsd_replication_sendthread"]	= LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
+	string_logcategory_dic["rep_sth"]						= LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
 	logcategory_string_dic[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD]
-															= "l7vsd_replication.sendthread";
+															= "l7vsd_replication_sendthread";
 	string_logcategory_dic["l7vsd_parameter"]				= LOG_CAT_L7VSD_PARAMETER;
 	string_logcategory_dic["para"]							= LOG_CAT_L7VSD_PARAMETER;
 	logcategory_string_dic[LOG_CAT_L7VSD_PARAMETER]			= "l7vsd_parameter";
@@ -1238,25 +1238,25 @@ l7vs::l7vsadm::l7vsadm()
 	string_logcategory_dic["l7vsd_system"]					= LOG_CAT_L7VSD_SYSTEM;
 	string_logcategory_dic["sys"]							= LOG_CAT_L7VSD_SYSTEM;
 	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM]			= "l7vsd_system";
-	string_logcategory_dic["l7vsd_system.memory"]			= LOG_CAT_L7VSD_SYSTEM_MEMORY;
-	string_logcategory_dic["sys.mem"]						= LOG_CAT_L7VSD_SYSTEM_MEMORY;
-	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_MEMORY]		= "l7vsd_system.memory";
-	string_logcategory_dic["l7vsd_system.endpoint"]			= LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
-	string_logcategory_dic["sys.ep"]						= LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
-	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENDPOINT]	= "l7vsd_system.endpoint";
-	string_logcategory_dic["l7vsd_system.signal"]			= LOG_CAT_L7VSD_SYSTEM_SIGNAL;
-	string_logcategory_dic["sys.sig"]						= LOG_CAT_L7VSD_SYSTEM_SIGNAL;
-	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_SIGNAL]		= "l7vsd_system.signal";
+	string_logcategory_dic["l7vsd_system_memory"]			= LOG_CAT_L7VSD_SYSTEM_MEMORY;
+	string_logcategory_dic["sys_mem"]						= LOG_CAT_L7VSD_SYSTEM_MEMORY;
+	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_MEMORY]		= "l7vsd_system_memory";
+	string_logcategory_dic["l7vsd_system_endpoint"]			= LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
+	string_logcategory_dic["sys_ep"]						= LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
+	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENDPOINT]	= "l7vsd_system_endpoint";
+	string_logcategory_dic["l7vsd_system_signal"]			= LOG_CAT_L7VSD_SYSTEM_SIGNAL;
+	string_logcategory_dic["sys_sig"]						= LOG_CAT_L7VSD_SYSTEM_SIGNAL;
+	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_SIGNAL]		= "l7vsd_system_signal";
 	string_logcategory_dic["l7vsd_system_environment"]		= LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
-	string_logcategory_dic["sys.env"]						= LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
+	string_logcategory_dic["sys_env"]						= LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
 	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT]
 															= "l7vsd_system_environment";
-	string_logcategory_dic["protocol"]						= LOG_CAT_PROTOCOL;
+	string_logcategory_dic["l7vsd_protocol"]				= LOG_CAT_PROTOCOL;
 	string_logcategory_dic["prot"]							= LOG_CAT_PROTOCOL;
-	logcategory_string_dic[LOG_CAT_PROTOCOL]				= "protocol";
-	string_logcategory_dic["schedule"]						= LOG_CAT_SCHEDULE;
+	logcategory_string_dic[LOG_CAT_PROTOCOL]				= "l7vsd_protocol";
+	string_logcategory_dic["l7vsd_schedule"]				= LOG_CAT_SCHEDULE;
 	string_logcategory_dic["sched"]							= LOG_CAT_SCHEDULE;
-	logcategory_string_dic[LOG_CAT_SCHEDULE]				= "schedule";
+	logcategory_string_dic[LOG_CAT_SCHEDULE]				= "l7vsd_schedule";
 	string_logcategory_dic["all"]							= LOG_CAT_END;
 
 	// string snmp logcategory dictionary create 
@@ -1286,22 +1286,22 @@ l7vs::l7vsadm::l7vsadm()
 	string_snmp_logcategory_dic["snmpagent_system"]				= LOG_CAT_SNMPAGENT_SYSTEM;
 	string_snmp_logcategory_dic["snmp_sys"]						= LOG_CAT_SNMPAGENT_SYSTEM;
 	snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM]		= "snmpagent_system";
-	string_snmp_logcategory_dic["snmpagent_system.memory"]		= LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
-	string_snmp_logcategory_dic["snmp_sys.mem"]					= LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
+	string_snmp_logcategory_dic["snmpagent_system_memory"]		= LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
+	string_snmp_logcategory_dic["snmp_sys_mem"]					= LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
 	snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY]
-																= "snmpagent_system.memory";
-	string_snmp_logcategory_dic["snmpagent_system.endpoint"]	= LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
-	string_snmp_logcategory_dic["snmp_sys.ep"]					= LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
+																= "snmpagent_system_memory";
+	string_snmp_logcategory_dic["snmpagent_system_endpoint"]	= LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
+	string_snmp_logcategory_dic["snmp_sys_ep"]					= LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
 	snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT]
-																= "snmpagent_system.endpoint";
-	string_snmp_logcategory_dic["snmpagent_system.signal"]		= LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
-	string_snmp_logcategory_dic["snmp_sys.sig"]					= LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
+																= "snmpagent_system_endpoint";
+	string_snmp_logcategory_dic["snmpagent_system_signal"]		= LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
+	string_snmp_logcategory_dic["snmp_sys_sig"]					= LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
 	snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL]
-																= "snmpagent_system.signal";
-	string_snmp_logcategory_dic["snmpagent_system.environment"]	= LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
-	string_snmp_logcategory_dic["snmp_sys.env"]					= LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
+																= "snmpagent_system_signal";
+	string_snmp_logcategory_dic["snmpagent_system_environment"]	= LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
+	string_snmp_logcategory_dic["snmp_sys_env"]					= LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
 	snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT]
-																= "snmpagent_system.environment";
+																= "snmpagent_system_environment";
 	string_snmp_logcategory_dic["all"]							= LOG_CAT_END;
 
 	// string log level dictionary create.
