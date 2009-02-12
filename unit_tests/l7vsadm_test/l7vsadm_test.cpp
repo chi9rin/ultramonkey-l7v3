@@ -31,7 +31,7 @@ public:
 	l7vs::l7vsadm_request&		get_request()	{ return request; }
 	l7vs::l7vsd_response&		get_response()	{ return response; }
 
-	l7vs::error_code&	get_error()	{ return err; }
+	l7vs::error_code&	get_error()	{ return l7vsadm_err; }
 
 	bool&	get_numeric()	{ return numeric_flag; }
 

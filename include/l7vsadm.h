@@ -30,6 +30,11 @@
 #endif
 #define L7VS_CONFIG_SOCKNAME		L7VS_CONFIG_SOCK_PATH "/l7vs"
 
+#define L7VSADM_DEFAULT_SCHEDULER "rr"		//!< Default scheduler name
+#define L7VSADM_DEFAULT_WAIT_INTERVAL (1)	//!< Default wait interval
+#define L7VSADM_DEFAULT_WAIT_COUNT (10)		//!< Default wait count
+#define L7VSADM_MAX_WAIT (60)				//!< Max wait value
+
 namespace l7vs{
 
 template < class T >
@@ -46,8 +51,62 @@ typename T::endpoint string_to_endpoint( std::string& str ){
 	return *itr;
 }
 
+template < class T >
+std::string	endpoint_to_string( typename T::endpoint ep, bool numeric_flag ){
+	std::stringstream	buf;
+	if( !numeric_flag ){
+		boost::asio::io_service	io_service;
+		typename T::resolver	resolver(io_service);
+		boost::system::error_code	ec;
+		typename T::resolver::iterator	itr = resolver.resolve( ep, ec );
+		if( !ec ){
+			buf << itr->host_name() << ":" << itr->service_name();
+			return buf.str();
+		}
+	}
+	buf << ep.address().to_string() << ":" << ep.port();
+	return buf.str();
+}
+
 class	l7vsadm{
 protected:
+	class	file_lock{
+	protected:
+		int			fd;
+		int			lock;
+	public:
+		file_lock( const std::string& path, error_code& err )
+			:	fd(-1),
+				lock(-1){
+			fd = open( path.c_str(), O_RDONLY );
+			if( fd == -1 ){
+				std::stringstream buf;
+				buf << boost::format( "L7vsadm execute file open error. file:%s" ) % path;
+				err.setter( true, buf.str() );
+			}
+		}
+
+		~file_lock(){
+			if( lock != -1 ){
+				// fd unlock.
+				flock( fd, LOCK_UN );
+			}
+			if( fd != -1 ){
+				// fd close.
+				close(fd);
+			}
+		}
+
+		bool	try_lock(){
+			lock = flock( fd, LOCK_EX | LOCK_NB );
+			if ( lock == 0 ) {
+				// l7vsadm file lock OK.
+				return true;
+			}
+			return false;
+		}
+	};
+
 	//
 	//	command parse functions.
 	//
@@ -108,6 +167,8 @@ protected:
 	void	disp_list_key();
 	void	disp_list_verbose();
 
+	void	set_parameter();
+
 	// command parse function object.type.
 	typedef	boost::function< bool ( int, char*[] ) >
 			parse_cmd_func_type;
@@ -146,10 +207,24 @@ protected:
 	string_logcategory_map_type	string_logcategory_dic;
 	// snmp log category string to snmp log category enum dictionary.
 	string_logcategory_map_type	string_snmp_logcategory_dic;
+
+	// log category enum -> log category string convert map type.
+	typedef	std::map< LOG_CATEGORY_TAG, std::string >	logcategory_string_map_type;
+	// log category enum to log category string dictionary.
+	logcategory_string_map_type	logcategory_string_dic;
+	// snmp log category enum to snmp log category string dictionary.
+	logcategory_string_map_type	snmp_logcategory_string_dic;
+
 	// log level string -> log level enum convert map type
 	typedef	std::map< std::string, LOG_LEVEL_TAG >		string_loglevel_map_type;
 	// log level string to log level enum dictionary
 	string_loglevel_map_type	string_loglevel_dic;
+
+	// log level enum convert map -> log level string type
+	typedef	std::map< LOG_LEVEL_TAG, std::string >		loglevel_string_map_type;
+	// log level enum to log level string dictionary
+	loglevel_string_map_type	loglevel_string_dic;
+
 	// parameter category string -> parameter category enum convert map type
 	typedef	std::map< std::string, PARAMETER_COMPONENT_TAG >	string_parameter_map_type;
 	string_parameter_map_type	string_parameter_dic;
@@ -166,6 +241,10 @@ protected:
 	// disp result function map dictionary.
 	disp_result_map_type	disp_result_dic;
 
+	// replication mode enum -> replication mode string convert map type
+	typedef	std::map< replication::REPLICATION_MODE_TAG, std::string >	replication_mode_string_map_type;
+	// replication mode enum to replication mode string dictionary
+	replication_mode_string_map_type	replication_mode_string_dic;
 
 	// usage function
 	std::string	usage();
@@ -180,8 +259,17 @@ protected:
 	bool					numeric_flag;	//! numeric flag
 	boost::asio::io_service	io_service;		//! io_service
 
-	error_code	err;
+	error_code	l7vsadm_err;
 	bool	help_mode;
+
+	//! Interval of l7vsadm command conflict check.
+	int command_wait_interval;
+	//! Number of times of l7vsadm command conflict check.
+	int command_wait_count;
+	//! Interval of connected check to l7vsd.
+	int connect_wait_interval;
+	//! Number of times of connected check to l7vsd.
+	int connect_wait_count;
 
 public:
 	// constractor
