@@ -352,6 +352,8 @@ void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_ME
 }
 
 void	l7vs::tcp_session::up_thread_run(void){
+	std::cout << "active session";
+	std::cout << boost::this_thread::get_id() << std::endl;
 	exit_flag = false;
 	while(!exit_flag){
 		

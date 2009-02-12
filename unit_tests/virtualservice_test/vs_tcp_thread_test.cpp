@@ -18,6 +18,19 @@ using namespace boost::unit_test;
 typedef	boost::asio::ip::tcp::endpoint	tcp_ep_type;
 typedef	boost::asio::ip::udp::endpoint	udp_ep_type;
 
+//Acceptテスト用Client
+void	client(){
+	boost::system::error_code	b_err;
+
+	boost::asio::io_service	dispatcher;
+	boost::asio::ip::tcp::socket	sock( dispatcher );
+	sock.connect( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ), b_err );
+	std::cout << "connect" << std::endl;
+
+	usleep( 10000 );
+
+	sock.close( b_err );
+}
 
 class	vs_access{
 protected:
@@ -41,10 +54,14 @@ public:
 	void	finalize(){
 		vs->finalize( vs_err );
 		usleep(10);
-		delete vs;
-		vs = NULL;
-		delete rep;
-		rep = NULL;
+		if( NULL != vs ){
+			delete vs;
+			vs = NULL;
+		}
+		if( NULL != rep ){
+			delete rep;
+			rep = NULL;
+		}
 	}
 
 	void	start(){
@@ -57,6 +74,23 @@ public:
 
 	l7vs::vs_tcp*	get_vs(){
 		return vs;
+	}
+
+	void	client(){
+		boost::system::error_code	b_err;
+	
+		boost::asio::io_service	client_io;
+		boost::asio::ip::tcp::socket	sock( client_io );
+		boost::mutex	mtx;
+		boost::mutex::scoped_lock	lk( mtx );
+		cond.wait( lk );
+
+		sock.connect( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ), b_err );
+		std::cout << "connect" << std::endl;
+	
+		usleep( 10000 );
+	
+		sock.close( b_err );
 	}
 
 	void	rs_list_lock(){
@@ -76,77 +110,77 @@ public:
 
 	}
 
-	void		get_element(){
+	void		get_element( l7vs::virtualservice_element* elem ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_element();
+		*(elem) = vs->get_element();
 
 	}
 
-	void		get_qos_upstream(){
+	void		get_qos_upstream( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_qos_upstream();
+		*val = vs->get_qos_upstream();
 
 	}
-	void		get_qos_downstream(){
+	void		get_qos_downstream( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_qos_downstream();
+		*val = vs->get_qos_downstream();
 
 	}
-	void		get_throughput_upstream(){
+	void		get_throughput_upstream( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_throughput_upstream();
+		*val = vs->get_throughput_upstream();
 
 	}
-	void		get_throughput_downstream(){
+	void		get_throughput_downstream( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_throughput_downstream();
+		*val = vs->get_throughput_downstream();
 
 	}
-	void		get_up_recv_size(){
+	void		get_up_recv_size( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_up_recv_size();
+		*val = vs->get_up_recv_size();
 
 	}
-	void		get_up_send_size(){
+	void		get_up_send_size( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_up_send_size();
+		*val = vs->get_up_send_size();
 
 	}
-	void		get_down_recv_size(){
+	void		get_down_recv_size( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_down_recv_size();
+		*val = vs->get_down_recv_size();
 
 	}
-	void		get_down_send_size(){
+	void		get_down_send_size( unsigned long long* val ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_down_send_size();
+		*val = vs->get_down_send_size();
 
 	}
 
@@ -183,20 +217,20 @@ public:
 
 	}
 
-	void		get_protocol_module(){
+	void		get_protocol_module( l7vs::protocol_module_base* in_pm ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_protocol_module();
+		in_pm = vs->get_protocol_module();
 
 	}
-	void		get_schedule_module(){
+	void		get_schedule_module( l7vs::schedule_module_base* in_sm ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->get_schedule_module();
+		in_sm = vs->get_schedule_module();
 
 	}
 
@@ -285,12 +319,7 @@ public:
 	}
 
 	void		run(){
-		boost::mutex	mtx;
-		boost::mutex::scoped_lock	lk( mtx );
-		cond.wait( lk );
-
 		vs->run();
-
 	}
 	void		stop(){
 		boost::mutex	mtx;
@@ -329,6 +358,9 @@ public:
 
 //test case1  create,initialize,run,stop,finalize,destroy(normal case)
 void	virtualservice_tcp_test1(){
+	//replicationエリアを作成しておく
+	debugg_flug_struct::getInstance().create_rep_area();
+
 	boost::asio::io_service		dispatcher;
 
 	l7vs::l7vsd					vsd;
@@ -338,6 +370,7 @@ void	virtualservice_tcp_test1(){
 	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().param_exist_flag() = false;
 
+	l7vs::error_code			vs_err;
 	boost::system::error_code	test_err;
 
 	std::stringstream	tmp_tcp_ep;
@@ -349,7 +382,7 @@ void	virtualservice_tcp_test1(){
 	//set element value
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
 	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
@@ -451,10 +484,12 @@ void	virtualservice_tcp_test1(){
 	}
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0ULL );
 
-	//get_elementに２スレッドから同時アクセス
+	// unit_test[5]  get_elementに２スレッドから同時アクセス
+	l7vs::virtualservice_element	test_elem1;
+	l7vs::virtualservice_element	test_elem2;
 	{
-		boost::thread	get_elem1( &vs_access::get_element, &vst );
-		boost::thread	get_elem2( &vs_access::get_element, &vst );
+		boost::thread	get_elem1( &vs_access::get_element, &vst, &test_elem1 );
+		boost::thread	get_elem2( &vs_access::get_element, &vst, &test_elem2 );
 
 		usleep( 1000 );
 		vst.start();
@@ -462,47 +497,491 @@ void	virtualservice_tcp_test1(){
 		get_elem1.join();
 		get_elem2.join();
 	}
-// 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0ULL );
+	BOOST_CHECK( test_elem1 == test_elem2 );
 
-	//runに２スレッドから同時アクセス
-	//stopに２スレッドから同時アクセス
+	// unit_test[6]  connection_activeに２スレッドから同時アクセス
+	//RSを２つ追加しておく
+	l7vs::virtualservice_element	elem3;
+	//set element value
+	elem3.udpmode					= false;
+	elem3.tcp_accept_endpoint		= 
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem3.realserver_vector.clear();
+	elem3.protocol_module_name		= "PMtest1";
+	elem3.schedule_module_name		= "SMtest1";
+	elem3.protocol_args.clear();
+	elem3.sorry_maxconnection		= 1234LL;
+	elem3.sorry_endpoint			= tcp_ep_type();
+	elem3.sorry_flag				= false;
+	elem3.qos_upstream				= 65535ULL;
+	elem3.qos_downstream			= 32767ULL;
+	for( size_t i = 0; i < 2; ++i ){
+		l7vs::realserver_element	rs_elem;
+		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
+		elem3.realserver_vector.push_back( rs_elem );
+	}
+	vst.get_vs()->add_realserver( elem3, vs_err );
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+	tcp_ep_type		ep1 = elem3.realserver_vector[0].tcp_endpoint;
+	tcp_ep_type		ep2 = elem3.realserver_vector[1].tcp_endpoint;
+	{
+		boost::thread	con_act1( &vs_access::connection_active, &vst, ep1 );
+		boost::thread	con_act2( &vs_access::connection_active, &vst, ep2 );
 
-	//connection_activeに２スレッドから同時アクセス
-	//connection_inactiveに２スレッドから同時アクセス
-	//release_sessionに２スレッドから同時アクセス
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		con_act1.join();
+		con_act2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[0].get_active() == 1 );
+	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[1].get_active() == 1 );
 
-	//get_qos_upstreamに２スレッドから同時アクセス
-	//get_qos_downstreamに２スレッドから同時アクセス
-	//get_throughput_upstreamに２スレッドから同時アクセス
-	//get_throughput_downstreamに２スレッドから同時アクセス
-	//get_up_recv_sizeに２スレッドから同時アクセス
-	//get_up_send_sizeに２スレッドから同時アクセス
-	//get_down_recv_sizeに２スレッドから同時アクセス
-	//get_down_send_sizeに２スレッドから同時アクセス
+	// unit_test[7]  connection_inactiveに２スレッドから同時アクセス
+	{
+		boost::thread	con_inact1( &vs_access::connection_inactive, &vst, ep2 );
+		boost::thread	con_inact2( &vs_access::connection_inactive, &vst, ep1 );
 
-	//update_up_recv_sizeに２スレッドから同時アクセス
-	//update_up_send_sizeに２スレッドから同時アクセス
-	//update_down_recv_sizeに２スレッドから同時アクセス
-	//update_down_send_sizeに２スレッドから同時アクセス
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		con_inact1.join();
+		con_inact2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[0].get_active() == 0 );
+	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[1].get_active() == 0 );
+	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[0].get_inact() == 1 );
+	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[1].get_inact() == 1 );
 
-	//get_protocol_moduleに２スレッドから同時アクセス
-	//get_schedule_moduleに２スレッドから同時アクセス
+
+	vst.get_vs()->initialize( vs_err );
+	boost::thread	vs_run( &vs_access::run, &vst );
+	usleep( 1000 );
+	BOOST_MESSAGE( vst.get_vs()->get_pool_sessions().size() );
+	BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-1 );
+
+	// unit_test[8]  release_sessionに２スレッドから同時アクセス
+	// unit_test[9]  stopに２スレッドから同時アクセス
+	//あらかじめclientからconnectして、ActiveSessionを２つ以上にしておく
+	{
+		usleep( 1000 );
+		boost::thread	cl1( &client );
+		boost::thread	cl2( &client );
+		usleep( 1000000 );
+
+		BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-3 );
+		BOOST_CHECK( vst.get_vs()->get_active_sessions().size() == 3 );
+
+		cl1.join();
+		cl2.join();
+
+		//stopのスレッドを作成
+		boost::thread	stop1( &vs_access::stop, &vst );
+		boost::thread	stop2( &vs_access::stop, &vst );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 100000 );
+		//stopの流れでrelease_sessionも呼ばれる
+		stop1.join();
+		stop2.join();
+	}
+	std::cout << vst.get_vs()->get_pool_sessions().size() << std::endl;
+	BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-1 );
+	std::cout << vst.get_vs()->get_active_sessions().size() << std::endl;
+	BOOST_CHECK( vst.get_vs()->get_active_sessions().size() == 1 );
+	vs_run.join();
+
+	// unit_test[10]  get_qos_upstreamに２スレッドから同時アクセス
+	unsigned long long	qos1 = 0;
+	unsigned long long	qos2 = 0;
+	{
+		boost::thread	qosup1( &vs_access::get_qos_upstream, &vst, &qos1 );
+		boost::thread	qosup2( &vs_access::get_qos_upstream, &vst, &qos2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		qosup1.join();
+		qosup2.join();
+	}
+	BOOST_CHECK( qos1 == elem1.qos_upstream );
+	BOOST_CHECK( qos2 == elem1.qos_upstream );
+
+	// unit_test[11]  get_qos_downstreamに２スレッドから同時アクセス
+	{
+		boost::thread	qosdown1( &vs_access::get_qos_downstream, &vst, &qos1 );
+		boost::thread	qosdown2( &vs_access::get_qos_downstream, &vst, &qos2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		qosdown1.join();
+		qosdown2.join();
+	}
+	BOOST_CHECK( qos1 == elem1.qos_downstream );
+	BOOST_CHECK( qos2 == elem1.qos_downstream );
+
+	// unit_test[12]  get_throughput_upstreamに２スレッドから同時アクセス
+	unsigned long long	throughput1 = 65535ULL;
+	unsigned long long	throughput2 = 65535ULL;
+	{
+		boost::thread	get_throughput1( &vs_access::get_throughput_upstream, &vst, &throughput1 );
+		boost::thread	get_throughput2( &vs_access::get_throughput_upstream, &vst, &throughput2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		get_throughput1.join();
+		get_throughput2.join();
+	}
+	BOOST_CHECK( throughput1 == 0ULL );
+	BOOST_CHECK( throughput1 == 0ULL );
+
+	// unit_test[13]  get_throughput_downstreamに２スレッドから同時アクセス
+	throughput1 = 65535ULL;
+	throughput2 = 65535ULL;
+	{
+		boost::thread	thread1( &vs_access::get_throughput_downstream, &vst, &throughput1 );
+		boost::thread	thread2( &vs_access::get_throughput_downstream, &vst, &throughput2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( throughput1 == 0ULL );
+	BOOST_CHECK( throughput1 == 0ULL );
+
+	// unit_test[14]  get_up_recv_sizeに２スレッドから同時アクセス
+	unsigned long long	recv_size1	= 65535ULL;
+	unsigned long long	recv_size2	= 65535ULL;
+	{
+		boost::thread	thread1( &vs_access::get_up_recv_size, &vst, &recv_size1 );
+		boost::thread	thread2( &vs_access::get_up_recv_size, &vst, &recv_size2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( recv_size1 == 0ULL );
+	BOOST_CHECK( recv_size2 == 0ULL );
+
+	// unit_test[15]  get_up_send_sizeに２スレッドから同時アクセス
+	recv_size1	= 65535ULL;
+	recv_size2	= 65535ULL;
+	{
+		boost::thread	thread1( &vs_access::get_up_send_size, &vst, &recv_size1 );
+		boost::thread	thread2( &vs_access::get_up_send_size, &vst, &recv_size2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( recv_size1 == 0ULL );
+	BOOST_CHECK( recv_size2 == 0ULL );
+
+	// unit_test[16]  get_down_recv_sizeに２スレッドから同時アクセス
+	recv_size1	= 65535ULL;
+	recv_size2	= 65535ULL;
+	{
+		boost::thread	thread1( &vs_access::get_down_recv_size, &vst, &recv_size1 );
+		boost::thread	thread2( &vs_access::get_down_recv_size, &vst, &recv_size2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( recv_size1 == 0ULL );
+	BOOST_CHECK( recv_size2 == 0ULL );
+
+	// unit_test[17]  get_down_send_sizeに２スレッドから同時アクセス
+	recv_size1	= 65535ULL;
+	recv_size2	= 65535ULL;
+	{
+		boost::thread	thread1( &vs_access::get_down_send_size, &vst, &recv_size1 );
+		boost::thread	thread2( &vs_access::get_down_send_size, &vst, &recv_size2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( recv_size1 == 0ULL );
+	BOOST_CHECK( recv_size2 == 0ULL );
+
+	// unit_test[18]  update_up_recv_sizeに２スレッドから同時アクセス
+	{
+		boost::thread	thread1( &vs_access::update_up_recv_size, &vst, 1000ULL );
+		boost::thread	thread2( &vs_access::update_up_recv_size, &vst, 200ULL );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	recv_size1 = vst.get_vs()->get_up_recv_size();
+	BOOST_CHECK( recv_size1 == 1200ULL );
+
+	// unit_test[19]  update_up_send_sizeに２スレッドから同時アクセス
+	{
+		boost::thread	thread1( &vs_access::update_up_send_size, &vst, 100ULL );
+		boost::thread	thread2( &vs_access::update_up_send_size, &vst, 300ULL );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	recv_size1 = vst.get_vs()->get_up_send_size();
+	BOOST_CHECK( recv_size1 == 400ULL );
+
+	// unit_test[20]  update_down_recv_sizeに２スレッドから同時アクセス
+	{
+		boost::thread	thread1( &vs_access::update_down_recv_size, &vst, 10ULL );
+		boost::thread	thread2( &vs_access::update_down_recv_size, &vst, 500ULL );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	recv_size1 = vst.get_vs()->get_down_recv_size();
+	BOOST_CHECK( recv_size1 == 510ULL );
+
+	// unit_test[21]  update_down_send_sizeに２スレッドから同時アクセス
+	{
+		boost::thread	thread1( &vs_access::update_down_send_size, &vst, 8000ULL );
+		boost::thread	thread2( &vs_access::update_down_send_size, &vst, 5000ULL );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	recv_size1 = vst.get_vs()->get_down_send_size();
+	BOOST_CHECK( recv_size1 == 13000ULL );
+
+	// unit_test[22]  get_protocol_moduleに２スレッドから同時アクセス
+	l7vs::protocol_module_base*	pmb1 = NULL;
+	l7vs::protocol_module_base*	pmb2 = NULL;
+	{
+		boost::thread	thread1( &vs_access::get_protocol_module, &vst, pmb1 );
+		boost::thread	thread2( &vs_access::get_protocol_module, &vst, pmb2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( pmb1 == pmb2 );
+
+	// unit_test[23]  get_schedule_moduleに２スレッドから同時アクセス
+	l7vs::schedule_module_base*	smb1 = NULL;
+	l7vs::schedule_module_base*	smb2 = NULL;
+	{
+		boost::thread	thread1( &vs_access::get_schedule_module, &vst, smb1 );
+		boost::thread	thread2( &vs_access::get_schedule_module, &vst, smb2 );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( smb1 == smb2 );
 
 
 	vst.finalize();
+
+	//replicationエリアを開放する
+	debugg_flug_struct::getInstance().destroy_rep_area();
 }
 
 //組み合わせアクセステスト
 void	virtualservice_tcp_test2(){
-	//sessionがActiveになるときに、release_sessionされるケース
-	//sessionがActiveになるときにfinalize
-	//release_sessionされるときにfinalize
+	//replicationエリアを作成しておく
+	debugg_flug_struct::getInstance().create_rep_area();
+
+	boost::asio::io_service		dispatcher;
+
+	l7vs::l7vsd					vsd;
+	l7vs::replication			rep( dispatcher );
+
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
+
+	l7vs::error_code			vs_err;
+	boost::system::error_code	test_err;
+
+	std::stringstream	tmp_tcp_ep;
+	std::stringstream	tmp_udp_ep;
+	std::stringstream	tmp_sorry_ep;
+
+	l7vs::virtualservice_element	elem1;
+
+	//set element value
+	elem1.udpmode					= false;
+	elem1.tcp_accept_endpoint		= 
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem1.realserver_vector.clear();
+	elem1.protocol_module_name		= "PMtest1";
+	elem1.schedule_module_name		= "SMtest1";
+	elem1.protocol_args.clear();
+	elem1.sorry_maxconnection		= 1234LL;
+	elem1.sorry_endpoint			= tcp_ep_type();
+	elem1.sorry_flag				= false;
+	elem1.qos_upstream				= 65535ULL;
+	elem1.qos_downstream			= 32767ULL;
+
+	//vs作成
+	vs_access	vst;
+	vst.initialize( elem1 );
+	vst.get_vs()->initialize( vs_err );
+	//待ち受け開始
+	boost::thread	vs_run( &vs_access::run, &vst );
+	usleep( 1000 );
+
+	// unit_test[24]  sessionがActiveになるときに、release_sessionされるケース
+	// unit_test[25]  sessionがActiveになるときにfinalize
+	// unit_test[26]  release_sessionされるときにfinalize
+	// finalizeを呼べば、stopされてrelease_sessionされる。
+	{
+		boost::thread	thread1( &vs_access::client, &vst );
+		boost::thread	thread2( &vs_access::vs_finalize, &vst );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+
+	vst.get_vs()->stop();
+	usleep( 1000 );
+	vs_run.join();
+
+	vst.finalize();
+
+	//replicationエリアを開放する
+	debugg_flug_struct::getInstance().destroy_rep_area();
 }
 
-void	rslist_access_test(){
+void	virtualservice_tcp_test3(){
+	//replicationエリアを作成しておく
+	debugg_flug_struct::getInstance().create_rep_area();
+
+	boost::asio::io_service		dispatcher;
+
+	l7vs::l7vsd					vsd;
+	l7vs::replication			rep( dispatcher );
+
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
+
+	l7vs::error_code			vs_err;
+	boost::system::error_code	test_err;
+
+	std::stringstream	tmp_tcp_ep;
+	std::stringstream	tmp_udp_ep;
+	std::stringstream	tmp_sorry_ep;
+
+	l7vs::virtualservice_element	elem1;
+
+	//set element value
+	elem1.udpmode					= false;
+	elem1.tcp_accept_endpoint		= 
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem1.realserver_vector.clear();
+	elem1.protocol_module_name		= "PMtest1";
+	elem1.schedule_module_name		= "SMtest1";
+	elem1.protocol_args.clear();
+	elem1.sorry_maxconnection		= 1234LL;
+	elem1.sorry_endpoint			= tcp_ep_type();
+	elem1.sorry_flag				= false;
+	elem1.qos_upstream				= 65535ULL;
+	elem1.qos_downstream			= 32767ULL;
+
+	//vs作成
+	vs_access	vst;
+	vst.initialize( elem1 );
+
 	//rs追加
-	//add_rsとrs_list_lock
-	//add_rsとrs_list_unlock
+	// unit_test[27]  add_rsとrs_list_lock
+	//RS追加用のelement準備
+	l7vs::virtualservice_element	elem2;
+	//set element value
+	elem2.udpmode					= false;
+	elem2.tcp_accept_endpoint		= 
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem2.realserver_vector.clear();
+	elem2.protocol_module_name		= "PMtest1";
+	elem2.schedule_module_name		= "SMtest1";
+	elem2.protocol_args.clear();
+	elem2.sorry_maxconnection		= 1234LL;
+	elem2.sorry_endpoint			= tcp_ep_type();
+	elem2.sorry_flag				= false;
+	elem2.qos_upstream				= 65535ULL;
+	elem2.qos_downstream			= 32767ULL;
+	for( size_t i = 0; i < 2; ++i ){
+		l7vs::realserver_element	rs_elem;
+		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
+		elem2.realserver_vector.push_back( rs_elem );
+	}
+	{
+		boost::thread	thread1( &vs_access::add_realserver, &vst, elem2 );
+		boost::thread	thread2( &vs_access::rs_list_lock, &vst );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
+		//ref_countが1のままだとadd_realserverができないのでunlockする
+		vst.get_vs()->rs_list_unlock();
+		usleep( 100000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
+
+	// unit_test[28]  add_rsとrs_list_unlock(ref_countが1でスタートした場合)
+	{
+		//あらかじめlockしておいてref_countを1にしておく
+		vst.get_vs()->rs_list_lock();
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
+
+		boost::thread	thread1( &vs_access::add_realserver, &vst, elem2 );
+		boost::thread	thread2( &vs_access::rs_list_unlock, &vst );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
+
 	//add_rsとconnection_active
 	//add_rsとconnection_inactive
 	//rs変更
@@ -515,29 +994,23 @@ void	rslist_access_test(){
 	//del_rsとrs_list_unlock
 	//del_rsとconnection_active
 	//del_rsとconnection_inactive
-	//rs_list_lockを複数スレッドから同時に呼ぶ
-	//rs_list_unlockを複数スレッドから同時に呼ぶ
 	//rs_list_lockとrs_list_unlockを複数スレッドから同時に呼ぶ
-	//connection_activeを複数スレッドから同時に呼ぶ
-	//connection_inactiveを複数スレッドから同時に呼ぶ
 	//connection_activeとconnection_inactiveを複数スレッドから同時に呼ぶ
 	//rs_list_lockとconnection_activeを複数スレッドから同時に呼ぶ
 	//rs_list_unlockとrs_list_unlockを複数スレッドから同時に呼ぶ
 	//rs_list_lockとconnection_inactiveを複数スレッドから同時に呼ぶ
 	//rs_list_unlockとconnection_activeを複数スレッドから同時に呼ぶ
+
+	vst.finalize();
+	//replicationエリアを開放する
+	debugg_flug_struct::getInstance().destroy_rep_area();
 }
 
 void	element_access_test(){
-	//get_qos_upを複数スレッドから同時に呼ぶ
-	//get_qos_downを複数スレッドから同時に呼ぶ
 	//get_qos_upとget_qos_downを複数スレッドから同時に呼ぶ
 }
 
 void	datasize_access_test(){
-	//update_up_recvを複数スレッドから同時に呼ぶ
-	//update_up_sendを複数スレッドから同時に呼ぶ
-	//update_down_recvを複数スレッドから同時に呼ぶ
-	//update_down_sendを複数スレッドから同時に呼ぶ
 	//update_throughputとupdate_up_recvを複数スレッドから同時に呼ぶ
 	//update_throughputとupdate_up_sendを複数スレッドから同時に呼ぶ
 	//update_throughputとupdate_down_recvを複数スレッドから同時に呼ぶ
@@ -553,6 +1026,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	// add test case to test suite
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
+	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
+	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
 
 	framework::master_test_suite().add( ts );
 

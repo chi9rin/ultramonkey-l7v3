@@ -44,12 +44,16 @@ public:
 	int						sorry_flag;
 	unsigned long long		qos_upstream;
 	unsigned long long		qos_downstream;
-	
+	unsigned long long		throughput_upstream;
+	unsigned long long		throughput_downstream;
+
 	virtualservice_element() :	udpmode(false),
 				sorry_maxconnection(0LL),
 				sorry_flag(0),
 				qos_upstream(0ULL),
-				qos_downstream(0ULL){}
+				qos_downstream(0ULL),
+				throughput_upstream(0ULL),
+				throughput_downstream(0ULL) {}
 				
 	virtualservice_element( const virtualservice_element& in )
 			:	udpmode( in.udpmode ),
@@ -61,7 +65,9 @@ public:
 				sorry_endpoint( in.sorry_endpoint ),
 				sorry_flag( in.sorry_flag ),
 				qos_upstream( in.qos_upstream ),
-				qos_downstream( in.qos_downstream ){
+				qos_downstream( in.qos_downstream ),
+				throughput_upstream( in.throughput_upstream ),
+				throughput_downstream( in.throughput_downstream ){
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
 			protocol_args.push_back( str );
@@ -82,7 +88,9 @@ public:
 		sorry_flag = in.sorry_flag;
 		qos_upstream = in.qos_upstream;
 		qos_downstream = in.qos_downstream;
-		
+		throughput_upstream = in.throughput_upstream;
+		throughput_downstream = in.throughput_downstream;
+
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
 			protocol_args.push_back( str );
@@ -101,7 +109,9 @@ public:
 				elem1.sorry_maxconnection == elem2.sorry_maxconnection &&
 				elem1.sorry_flag == elem2.sorry_flag &&
 				elem1.qos_upstream == elem2.qos_upstream &&
-				elem1.qos_downstream == elem2.qos_downstream ){
+				elem1.qos_downstream == elem2.qos_downstream &&
+				elem1.throughput_upstream == elem2.throughput_upstream &&
+				elem1.throughput_downstream == elem2.throughput_downstream ){
 				if( elem1.realserver_vector.size() != elem2.realserver_vector.size() ) return false;
 				for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 					if( elem1.realserver_vector[i] != elem2.realserver_vector[i] ) return false;	
@@ -119,7 +129,9 @@ public:
 				elem1.sorry_maxconnection != elem2.sorry_maxconnection ||
 				elem1.sorry_flag != elem2.sorry_flag ||
 				elem1.qos_upstream != elem2.qos_upstream ||
-				elem1.qos_downstream != elem2.qos_downstream ){
+				elem1.qos_downstream != elem2.qos_downstream ||
+				elem1.throughput_upstream != elem2.throughput_upstream ||
+				elem1.throughput_downstream != elem2.throughput_downstream ){
 				if( elem1.realserver_vector.size() == elem2.realserver_vector.size() ){
 					for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 						if( elem1.realserver_vector[i] == elem2.realserver_vector[i] ) return false;
@@ -158,6 +170,8 @@ private:
 		ar & sorry_flag;
 		ar & qos_upstream;
 		ar & qos_downstream;
+		ar & throughput_upstream;
+		ar & throughput_downstream;
 	}
 };
 

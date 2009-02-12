@@ -138,13 +138,12 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		//calcurate throughput
 
 		if( 0 < current_up_recvsize ){
-			if( 0 < time_difference.sec ){
+			if( 0 < time_difference.sec )
 				//秒が0でなければ秒をベースにスループットを計算
 				//bps = current_up_recvsize[bytes] * 8[8bit=1byte] / time_difference.sec
 				throughput_up	= current_up_recvsize / time_difference.sec * 8;
-			}else{
+			else
 				throughput_up	= current_up_recvsize / time_difference.nsec / 1000000000 * 8;
-			}
 		}else throughput_up = 0ULL;
 		current_up_recvsize = 0ULL;
 	}
@@ -156,11 +155,10 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		//bps = current_down_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
 
 		if( 0 < current_down_recvsize ){
-			if( 0 < time_difference.sec ){
+			if( 0 < time_difference.sec )
 				throughput_down = current_down_recvsize / time_difference.sec * 8;
-			}else{
+			else
 				throughput_down = current_down_recvsize / time_difference.nsec / 1000000000 * 8;
-			}
 		}else throughput_down = 0ULL;
 		current_down_recvsize = 0ULL;
 	}
@@ -223,6 +221,9 @@ l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 		element.realserver_vector.push_back( rs_element );
 	}
 	rs_list_unlock();
+	{
+		
+	}
 
 	return element;
 }
@@ -386,8 +387,7 @@ void	l7vs::virtualservice_base::update_down_send_size( unsigned long long	datasi
  * @param   void
  * @return  protocol module pointer(shared_ptr)
  */
-l7vs::protocol_module_base*
-		l7vs::virtualservice_base::get_protocol_module(){ return protomod; }
+l7vs::protocol_module_base*		l7vs::virtualservice_base::get_protocol_module(){ return protomod; }
 
 /*!
  * get schedule module pointer(shared_ptr)
@@ -395,6 +395,5 @@ l7vs::protocol_module_base*
  * @param   void
  * @return  schedule module pointer(shared_ptr)
  */
-l7vs::schedule_module_base*
-		l7vs::virtualservice_base::get_schedule_module(){ return schedmod; }
+l7vs::schedule_module_base*		l7vs::virtualservice_base::get_schedule_module(){ return schedmod; }
 

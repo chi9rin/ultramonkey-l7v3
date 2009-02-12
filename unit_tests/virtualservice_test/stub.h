@@ -61,8 +61,10 @@ public:
 		return reinterpret_cast<void*>( rep_area );
 	}
 	void	destroy_rep_area(){
-		if( NULL != rep_area )
+		if( NULL != rep_area ){
 			delete [] rep_area;
+			rep_area = NULL;
+		}
 	}
 };
 

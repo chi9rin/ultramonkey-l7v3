@@ -231,8 +231,8 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 		t_id	= pool_sessions.begin()->first;
 		stc_ptr	= pool_sessions.begin()->second;
 	
-		pool_sessions.erase( t_id );
-		active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+		pool_sessions.erase( pool_sessions.begin() );
+		active_sessions.insert( session_map_pair_type( t_id, stc_ptr ) );
 	}
 
 	//regist accept event handler
@@ -345,6 +345,12 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	err.setter( false, "" );
 }
 
+/*!
+ * finalize virtualservice(TCP)
+ *
+ * @param   erro_code
+ * @return  void
+ */
 void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 
 	//stop main loop
@@ -355,10 +361,13 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 		protomod->finalize();
 		//unload ProtocolModule
 		l7vs::protocol_module_control::getInstance().unload_module( protomod );
+		protomod = NULL;
 	}
 	//unload ScheduleModule
-	if( protomod )
+	if( schedmod ){
 		l7vs::schedule_module_control::getInstance().unload_module( schedmod );
+		schedmod = NULL;
+	}
 
 	//セッションプール開放
 	boost::mutex::scoped_lock lk( sessions_mutex );
@@ -453,6 +462,11 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 				element.protocol_args.push_back( elem.protocol_args[i] );
 			}
 		}
+	}else{
+		//FATAL case
+		l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
+		return;
 	}
 
 	//update values
@@ -678,6 +692,10 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
  * @return  void
  */
 void	l7vs::virtualservice_tcp::run(){
+	if( pool_sessions.size() == 0 ){
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialized.", __FILE__, __LINE__ );
+		return;
+	}
 	//bind acceptor
 	acceptor_.open( element.tcp_accept_endpoint.protocol() );
 	acceptor_.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
@@ -696,8 +714,8 @@ void	l7vs::virtualservice_tcp::run(){
 		t_id	= pool_sessions.begin()->first;
 		stc_ptr	= pool_sessions.begin()->second;
 	
-		pool_sessions.erase( t_id );
-		active_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+		pool_sessions.erase( pool_sessions.begin() );
+		active_sessions.insert( session_map_pair_type( t_id, stc_ptr ) );
 	}
 
 	//regist accept event handler
@@ -733,17 +751,14 @@ void	l7vs::virtualservice_tcp::run(){
  */
 void	l7vs::virtualservice_tcp::stop(){
 	boost::system::error_code	err;
-	//close acceptor
-	acceptor_.cancel( err );
-	acceptor_.close();
-
 	//stop dispatcher
 	dispatcher.stop();
 
 	//stop all active sessions
+	boost::mutex::scoped_lock lk( sessions_mutex );
 	for( session_map_type::iterator itr = active_sessions.begin();
-		 itr != active_sessions.end();
-		 ++itr ){
+		itr != active_sessions.end();
+		++itr ){
 		//stop session
 		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_END );
 		//stop session_thread_control
@@ -792,9 +807,9 @@ void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::
 }
 
 /*!
- * increment in-active-connection (and decrement active-connection count)
+ * release_session
  *
- * @param   endpoint
+ * @param   thread_id
  * @return  void
  */
 void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_id ){
@@ -802,10 +817,10 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 	session_map_type::iterator	itr = active_sessions.find( thread_id );
 	if( itr != active_sessions.end() ){
 		session_thread_control_ptr	stc_ptr;
+		boost::thread::id	t_id = itr->first;
 		stc_ptr	= itr->second;
-	
-		active_sessions.erase( thread_id );
-		pool_sessions.insert( session_map_pair_type( stc_ptr->get_upthread_id(), stc_ptr ) );
+		pool_sessions.insert( session_map_pair_type( t_id, stc_ptr ) );
+		active_sessions.erase( itr );
 	}
 }
 
