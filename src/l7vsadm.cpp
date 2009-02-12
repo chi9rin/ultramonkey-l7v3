@@ -943,7 +943,7 @@ void	l7vs::l7vsadm::disp_list(){
 				% rse.get_inact();
 		}
 	}
-	std::cout << buf.str() << std::endl;
+	std::cout << buf.str();
 }
 
 //!	disp_list_key function
@@ -977,7 +977,7 @@ void	l7vs::l7vsadm::disp_list_key(){
 				% rse.get_inact();
 		}
 	}
-	std::cout << buf.str() << std::endl;
+	std::cout << buf.str();
 }
 
 //!	disp_list_verbose function
@@ -998,7 +998,7 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 
 	//disp replication
 	buf << "Replication Mode:\n";
-	buf << boost::format( "%s\n" ) % response.replication_mode_status;
+	buf << boost::format( "%s\n" ) % replication_mode_string_dic[response.replication_mode_status];
 	buf << "\n";
 
 	//disp snmp connection status
@@ -1007,7 +1007,7 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 		buf << "connecting\n";
 	else
 		buf << "non-connecting\n";
-	printf("\n");
+	buf << "\n";
 
 	//disp snmp loglevel
 	buf << "SNMPAgent Log Level:\n";
@@ -1067,7 +1067,7 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 				% rse.get_inact();
 		}
 	}
-	std::cout << buf.str() << std::endl;
+	std::cout << buf.str();
 }
 //
 // l7vsadm constractor.
