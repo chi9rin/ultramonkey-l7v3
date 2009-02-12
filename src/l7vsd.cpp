@@ -672,52 +672,20 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		}
 	
 		// protoclol module control initialize
-		try{
-			protocol_module_control::getInstance().initialize( L7VS_MODULE_PATH );
-		}
-		catch( std::exception& e ){
-			std::stringstream	buf;
-			buf << "protocol module control initialize error:" << e.what();
-			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
-			return -1;
-		}
+		protocol_module_control::getInstance().initialize( L7VS_MODULE_PATH );
 	
 		// schedule module control initialize
-		try{
-			schedule_module_control::getInstance().initialize( L7VS_MODULE_PATH );
-		}
-		catch( std::exception& e ){
-			std::stringstream	buf;
-			buf << "schedule module control initialize error:" << e.what();
-			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
-			return -1;
-		}
+		schedule_module_control::getInstance().initialize( L7VS_MODULE_PATH );
 	
 		// receiver initialize
-		try{
-			receiver.reset( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
-		}
-		catch( std::exception& e ){
-			std::stringstream	buf;
-			buf << "command receiver create error:" << e.what();
-			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
-			return -1;
-		}
+		receiver.reset( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
 		if( NULL ==  receiver ){
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "command receiver pointer null.", __FILE__, __LINE__ );
 			return -1;
 		}
 	
 		// replication initialize
-		try{
-			rep.reset( new replication( dispatcher ) );
-		}
-		catch( std::exception& e ){
-			std::stringstream	buf;
-			buf << "replication create error:" << e.what();
-			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
-			return -1;
-		}
+		rep.reset( new replication( dispatcher ) );
 		if( NULL ==  rep ){
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication pointer null.", __FILE__, __LINE__ );
 			return -1;
@@ -728,15 +696,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		}
 	
 		// snmp bridge initialize
-		try{
-			bridge.reset( new snmpbridge( *this, dispatcher ) );
-		}
-		catch( std::exception& e ){
-			std::stringstream	buf;
-			buf << "snmpbridge create error:" << e.what();
-			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
-			return -1;
-		}
+		bridge.reset( new snmpbridge( *this, dispatcher ) );
 		if( NULL ==  bridge ){
 			logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge pointer null.", __FILE__, __LINE__ );
 			return -1;
