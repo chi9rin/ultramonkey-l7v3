@@ -1104,7 +1104,7 @@ void	virtualservice_tcp_test3(){
 		vst.get_vs()->rs_list_lock();
 		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
 
-		boost::thread	thread1( &vs_access::add_realserver, &vst, elem2 );
+		boost::thread	thread1( &vs_access::edit_realserver, &vst, elem2 );
 		boost::thread	thread2( &vs_access::rs_list_unlock, &vst );
 		usleep( 100000 );
 		vst.start();
@@ -1146,7 +1146,7 @@ void	virtualservice_tcp_test3(){
 	}
 	// unit_test[34]  edit_rsとconnection_inactive
 	{
-		boost::thread	thread1( &vs_access::add_realserver, &vst, elem4 );
+		boost::thread	thread1( &vs_access::edit_realserver, &vst, elem4 );
 		boost::thread	thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
 
 		usleep( 100000 );
@@ -1195,7 +1195,7 @@ void	virtualservice_tcp_test3(){
 		vst.get_vs()->rs_list_lock();
 		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
 
-		boost::thread	thread1( &vs_access::del_realserver, &vst, elem3 );
+		boost::thread	thread1( &vs_access::del_realserver, &vst, elem4 );
 		boost::thread	thread2( &vs_access::rs_list_unlock, &vst );
 		usleep( 100000 );
 		vst.start();
@@ -1206,14 +1206,56 @@ void	virtualservice_tcp_test3(){
 	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
+	//再度追加
+	vst.get_vs()->add_realserver( elem4, vs_err );
+
 	//del_rsとconnection_active
+	{
+		boost::thread	thread1( &vs_access::del_realserver, &vst, elem4 );
+		boost::thread	thread2( &vs_access::connection_active, &vst, elem3.realserver_vector[0].tcp_endpoint );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+	for( std::list<l7vs::realserver>::iterator itr = vst.get_vs()->get_rs_list().begin();
+		 itr != vst.get_vs()->get_rs_list().end(); ++itr ){
+		if( itr->tcp_endpoint == elem2.realserver_vector[0].tcp_endpoint ){
+			std::cout << "active_conn check" << std::endl;
+			BOOST_CHECK( itr->get_active() == 1 );
+			BOOST_CHECK( itr->get_inact() == 0 );
+			break;
+		}
+	}
+
+	//再度追加
+	vst.get_vs()->add_realserver( elem4, vs_err );
 	//del_rsとconnection_inactive
-	//rs_list_lockとrs_list_unlockを複数スレッドから同時に呼ぶ
-	//connection_activeとconnection_inactiveを複数スレッドから同時に呼ぶ
-	//rs_list_lockとconnection_activeを複数スレッドから同時に呼ぶ
-	//rs_list_unlockとrs_list_unlockを複数スレッドから同時に呼ぶ
-	//rs_list_lockとconnection_inactiveを複数スレッドから同時に呼ぶ
-	//rs_list_unlockとconnection_activeを複数スレッドから同時に呼ぶ
+	{
+		boost::thread	thread1( &vs_access::del_realserver, &vst, elem4 );
+		boost::thread	thread2( &vs_access::connection_inactive, &vst, elem3.realserver_vector[0].tcp_endpoint );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+	for( std::list<l7vs::realserver>::iterator itr = vst.get_vs()->get_rs_list().begin();
+		 itr != vst.get_vs()->get_rs_list().end(); ++itr ){
+		if( itr->tcp_endpoint == elem2.realserver_vector[0].tcp_endpoint ){
+			std::cout << "inactive_conn check" << std::endl;
+			BOOST_CHECK( itr->get_active() == 0 );
+			BOOST_CHECK( itr->get_inact() == 1 );
+			break;
+		}
+	}
 
 	vst.finalize();
 	//replicationエリアを開放する
