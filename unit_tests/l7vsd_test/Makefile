@@ -6,7 +6,7 @@
 TARGET		= l7vsd_ut
 TARGET2		= l7vsd_thread
 CPP			= g++
-CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./sample.ini"'
+CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./l7vs.cf"'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include
