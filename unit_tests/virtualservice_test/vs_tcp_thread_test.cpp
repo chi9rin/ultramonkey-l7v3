@@ -945,6 +945,7 @@ void	virtualservice_tcp_test3(){
 	for( size_t i = 0; i < 2; ++i ){
 		l7vs::realserver_element	rs_elem;
 		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
+		rs_elem.weight	= 10+i;
 		elem2.realserver_vector.push_back( rs_elem );
 	}
 	{
@@ -964,6 +965,9 @@ void	virtualservice_tcp_test3(){
 	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
+	//一旦削除
+	vst.get_vs()->del_realserver( elem2, vs_err );
+
 	// unit_test[28]  add_rsとrs_list_unlock(ref_countが1でスタートした場合)
 	{
 		//あらかじめlockしておいてref_countを1にしておく
@@ -982,16 +986,226 @@ void	virtualservice_tcp_test3(){
 	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
-	//add_rsとconnection_active
-	//add_rsとconnection_inactive
+	// unit_test[29]  add_rsとconnection_active
+	//RS追加用のelement準備
+	l7vs::virtualservice_element	elem3;
+	//set element value
+	elem3.udpmode					= false;
+	elem3.tcp_accept_endpoint		= 
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem3.realserver_vector.clear();
+	elem3.protocol_module_name		= "PMtest1";
+	elem3.schedule_module_name		= "SMtest1";
+	elem3.protocol_args.clear();
+	elem3.sorry_maxconnection		= 1234LL;
+	elem3.sorry_endpoint			= tcp_ep_type();
+	elem3.sorry_flag				= false;
+	elem3.qos_upstream				= 65535ULL;
+	elem3.qos_downstream			= 32767ULL;
+	for( size_t i = 0; i < 2; ++i ){
+		l7vs::realserver_element	rs_elem;
+		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8090) );
+		rs_elem.weight	= 5+i;
+		elem3.realserver_vector.push_back( rs_elem );
+	}
+	{
+		boost::thread	thread1( &vs_access::add_realserver, &vst, elem3 );
+		boost::thread	thread2( &vs_access::connection_active, &vst, elem2.realserver_vector[0].tcp_endpoint );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
+	for( std::list<l7vs::realserver>::iterator itr = vst.get_vs()->get_rs_list().begin();
+		 itr != vst.get_vs()->get_rs_list().end(); ++itr ){
+		if( itr->tcp_endpoint == elem2.realserver_vector[0].tcp_endpoint ){
+			std::cout << "active_conn check" << std::endl;
+			BOOST_CHECK( itr->get_active() == 1 );
+			BOOST_CHECK( itr->get_inact() == 0 );
+			break;
+		}
+	}
+
+	//一旦削除
+	vst.get_vs()->del_realserver( elem3, vs_err );
+
+	// unit_test[30]  add_rsとconnection_inactive
+	{
+		boost::thread	thread1( &vs_access::add_realserver, &vst, elem3 );
+		boost::thread	thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
+	for( std::list<l7vs::realserver>::iterator itr = vst.get_vs()->get_rs_list().begin();
+		 itr != vst.get_vs()->get_rs_list().end(); ++itr ){
+		if( itr->tcp_endpoint == elem2.realserver_vector[0].tcp_endpoint ){
+			std::cout << "inactive_conn check" << std::endl;
+			BOOST_CHECK( itr->get_active() == 0 );
+			BOOST_CHECK( itr->get_inact() == 1 );
+			break;
+		}
+	}
+
 	//rs変更
-	//edit_rsとrs_list_lock
-	//edit_rsとrs_list_unlock
-	//edit_rsとconnection_active
-	//edit_rsとconnection_inactive
+	// unit_test[31]  edit_rsとrs_list_lock
+	//RS編集用のelement準備
+	l7vs::virtualservice_element	elem4;
+	//set element value
+	elem4.udpmode					= false;
+	elem4.tcp_accept_endpoint		= 
+			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	elem4.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem4.realserver_vector.clear();
+	elem4.protocol_module_name		= "PMtest1";
+	elem4.schedule_module_name		= "SMtest1";
+	elem4.protocol_args.clear();
+	elem4.sorry_maxconnection		= 1234LL;
+	elem4.sorry_endpoint			= tcp_ep_type();
+	elem4.sorry_flag				= false;
+	elem4.qos_upstream				= 65535ULL;
+	elem4.qos_downstream			= 32767ULL;
+	for( size_t i = 0; i < 2; ++i ){
+		l7vs::realserver_element	rs_elem;
+		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
+		rs_elem.weight	= 5+i;
+		elem4.realserver_vector.push_back( rs_elem );
+	}
+	{
+		boost::thread	thread1( &vs_access::edit_realserver, &vst, elem4 );
+		boost::thread	thread2( &vs_access::rs_list_lock, &vst );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
+		//ref_countが1のままだとedit_realserverができないのでunlockする
+		vst.get_vs()->rs_list_unlock();
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
+		usleep( 100000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
+
+	// unit_test[32]  edit_rsとrs_list_unlock
+	{
+		//あらかじめlockしておいてref_countを1にしておく
+		vst.get_vs()->rs_list_lock();
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
+
+		boost::thread	thread1( &vs_access::add_realserver, &vst, elem2 );
+		boost::thread	thread2( &vs_access::rs_list_unlock, &vst );
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
+	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
+
+	// unit_test[33]  edit_rsとconnection_active
+	elem4.realserver_vector.clear();
+	for( size_t i = 0; i < 2; ++i ){
+		l7vs::realserver_element	rs_elem;
+		rs_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (i+8080) );
+		rs_elem.weight	= 100+i;
+		elem4.realserver_vector.push_back( rs_elem );
+	}
+	{
+		boost::thread	thread1( &vs_access::edit_realserver, &vst, elem4 );
+		boost::thread	thread2( &vs_access::connection_active, &vst, elem2.realserver_vector[0].tcp_endpoint );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
+	for( std::list<l7vs::realserver>::iterator itr = vst.get_vs()->get_rs_list().begin();
+		 itr != vst.get_vs()->get_rs_list().end(); ++itr ){
+		if( itr->tcp_endpoint == elem2.realserver_vector[0].tcp_endpoint ){
+			std::cout << "active_conn check" << std::endl;
+			BOOST_CHECK( itr->get_active() == 1 );
+			BOOST_CHECK( itr->get_inact() == 1 );
+			break;
+		}
+	}
+	// unit_test[34]  edit_rsとconnection_inactive
+	{
+		boost::thread	thread1( &vs_access::add_realserver, &vst, elem4 );
+		boost::thread	thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
+	for( std::list<l7vs::realserver>::iterator itr = vst.get_vs()->get_rs_list().begin();
+		 itr != vst.get_vs()->get_rs_list().end(); ++itr ){
+		if( itr->tcp_endpoint == elem2.realserver_vector[0].tcp_endpoint ){
+			std::cout << "inactive_conn check" << std::endl;
+			BOOST_CHECK( itr->get_active() == 0 );
+			BOOST_CHECK( itr->get_inact() == 2 );
+			break;
+		}
+	}
+
 	//rs削除
-	//del_rsとrs_list_lock
-	//del_rsとrs_list_unlock
+	// unit_test[35]  del_rsとrs_list_lock
+	{
+		boost::thread	thread1( &vs_access::del_realserver, &vst, elem4 );
+		boost::thread	thread2( &vs_access::rs_list_lock, &vst );
+
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
+		//ref_countが1のままだとedit_realserverができないのでunlockする
+		vst.get_vs()->rs_list_unlock();
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
+		usleep( 100000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+
+	//再度追加
+	vst.get_vs()->add_realserver( elem4, vs_err );
+
+	// unit_test[36]  del_rsとrs_list_unlock
+	{
+		//あらかじめlockしておいてref_countを1にしておく
+		vst.get_vs()->rs_list_lock();
+		BOOST_CHECK( vst.get_vs()->get_ref_count() == 1 );
+
+		boost::thread	thread1( &vs_access::del_realserver, &vst, elem3 );
+		boost::thread	thread2( &vs_access::rs_list_unlock, &vst );
+		usleep( 100000 );
+		vst.start();
+		usleep( 1000 );
+		thread1.join();
+		thread2.join();
+	}
+	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
+	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
+
 	//del_rsとconnection_active
 	//del_rsとconnection_inactive
 	//rs_list_lockとrs_list_unlockを複数スレッドから同時に呼ぶ

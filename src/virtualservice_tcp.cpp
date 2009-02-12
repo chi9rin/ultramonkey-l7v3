@@ -43,81 +43,85 @@ l7vs::virtualservice_tcp::~virtualservice_tcp(){
  * @param   err
  * @return  void
  */
-void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& in ){
-	bool	newdata	= true;
-	l7vs::replication&	replication = const_cast<l7vs::replication&>( rep );
-
-	std::stringstream	tmp_tcp_ep;
-	tmp_tcp_ep		<< element.tcp_accept_endpoint;
-	std::stringstream	tmp_udp_ep;
-	tmp_udp_ep		<< element.udp_recv_endpoint;
-	std::stringstream	tmp_sorry_ep;
-	tmp_sorry_ep	<< element.sorry_endpoint;
-
-	//get replication area
-	unsigned int	rep_size = 0;
-	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
-	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		return;
-	}
-
-	//check maxdatasize
-	if( ( rep_size * DATA_SIZE ) <
-		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		return;
-	}
-
-	//lock replication area
-	replication.lock( REP_AREA_NAME );
-
-	//read header value and set loop count
-	unsigned int loop_cnt = rep_header_ptr->data_num;
-	//if data_num over MAX_REPLICATION_DATA_NUM, data_num = 0
-	if( static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt )
-		loop_cnt = 0;
-
-	//set start pointer(pointer of replication_data)
-	replication_data*	rep_data_ptr = reinterpret_cast<replication_data*>( ++rep_header_ptr );
-
-	//find vs(loop)
-	for( unsigned int i = 0; i < loop_cnt; ++i ){
-		//check equal udpmode and tcp_accept_endpoint
-		if( (rep_data_ptr->udpmode == element.udpmode )&&
-			( 0 == strncmp( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 ) ) ){
-			newdata = false;
-			break;
+void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err ){
+	if( !err ){
+		bool	newdata	= true;
+		l7vs::replication&	replication = const_cast<l7vs::replication&>( rep );
+	
+		std::stringstream	tmp_tcp_ep;
+		tmp_tcp_ep		<< element.tcp_accept_endpoint;
+		std::stringstream	tmp_udp_ep;
+		tmp_udp_ep		<< element.udp_recv_endpoint;
+		std::stringstream	tmp_sorry_ep;
+		tmp_sorry_ep	<< element.sorry_endpoint;
+	
+		//get replication area
+		unsigned int	rep_size = 0;
+		replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
+		if( (rep_header_ptr == NULL) || (0 == rep_size) ){
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+			return;
 		}
-		//increment data pointer
-		++rep_data_ptr;
-	}
-
-	//if it is new data, increment data num.
-	if( newdata ){
-		rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
-		++(rep_header_ptr->data_num);
-	}
-	//write replication data
-	rep_data_ptr->udpmode		= element.udpmode;
-	memset( rep_data_ptr->tcp_endpoint, 0, 48 );
-	memcpy( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 );
-	memset( rep_data_ptr->udp_endpoint, 0, 48 );
-	memcpy( rep_data_ptr->udp_endpoint, tmp_udp_ep.str().c_str(), 47 );
-	rep_data_ptr->sorry_maxconnection	= element.sorry_maxconnection;
-	memset( rep_data_ptr->sorry_endpoint, 0, 48 );
-	memcpy( rep_data_ptr->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 );
-	rep_data_ptr->sorry_flag	= element.sorry_flag;
-	rep_data_ptr->qos_up		= element.qos_upstream;
-	rep_data_ptr->qos_down		= element.qos_downstream;
-
-	//unlock replication area
-	replication.unlock( REP_AREA_NAME );
-
-	//register handle_replication_interrupt
-	replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
-	replication_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_replication_interrupt, 
-											 this, boost::asio::placeholders::error ) );
+	
+		//check maxdatasize
+		if( ( rep_size * DATA_SIZE ) <
+			((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+			return;
+		}
+	
+		//lock replication area
+		replication.lock( REP_AREA_NAME );
+	
+		//read header value and set loop count
+		unsigned int loop_cnt = rep_header_ptr->data_num;
+		//if data_num over MAX_REPLICATION_DATA_NUM, data_num = 0
+		if( static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt )
+			loop_cnt = 0;
+	
+		//set start pointer(pointer of replication_data)
+		replication_data*	rep_data_ptr = reinterpret_cast<replication_data*>( ++rep_header_ptr );
+	
+		//find vs(loop)
+		for( unsigned int i = 0; i < loop_cnt; ++i ){
+			//check equal udpmode and tcp_accept_endpoint
+			if( (rep_data_ptr->udpmode == element.udpmode )&&
+				( 0 == strncmp( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 ) ) ){
+				newdata = false;
+				break;
+			}
+			//increment data pointer
+			++rep_data_ptr;
+		}
+	
+		//if it is new data, increment data num.
+		if( newdata ){
+			rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
+			++(rep_header_ptr->data_num);
+		}
+		//write replication data
+		rep_data_ptr->udpmode		= element.udpmode;
+		memset( rep_data_ptr->tcp_endpoint, 0, 48 );
+		memcpy( rep_data_ptr->tcp_endpoint, tmp_tcp_ep.str().c_str(), 47 );
+		memset( rep_data_ptr->udp_endpoint, 0, 48 );
+		memcpy( rep_data_ptr->udp_endpoint, tmp_udp_ep.str().c_str(), 47 );
+		rep_data_ptr->sorry_maxconnection	= element.sorry_maxconnection;
+		memset( rep_data_ptr->sorry_endpoint, 0, 48 );
+		memcpy( rep_data_ptr->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 );
+		rep_data_ptr->sorry_flag	= element.sorry_flag;
+		rep_data_ptr->qos_up		= element.qos_upstream;
+		rep_data_ptr->qos_down		= element.qos_downstream;
+	
+		//unlock replication area
+		replication.unlock( REP_AREA_NAME );
+	
+		//register handle_replication_interrupt
+		replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+		replication_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_replication_interrupt, 
+												this, boost::asio::placeholders::error ) );
+	}else
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
 }
 
 /*!
@@ -217,27 +221,31 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
  * @return  void
  */
 void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
-													const boost::system::error_code& in_error ){
-
-	//switch status runing, session_thread_control
-	in_session->startupstream();
-	in_session->startdownstream();
-
-	//switch active a session
-	boost::thread::id			t_id;
-	session_thread_control_ptr	stc_ptr;
-	{
-		boost::mutex::scoped_lock lk( sessions_mutex );
-		t_id	= pool_sessions.begin()->first;
-		stc_ptr	= pool_sessions.begin()->second;
+													const boost::system::error_code& err ){
+	if( !err ){
+		//switch status runing, session_thread_control
+		in_session->startupstream();
+		in_session->startdownstream();
 	
-		pool_sessions.erase( pool_sessions.begin() );
-		active_sessions.insert( session_map_pair_type( t_id, stc_ptr ) );
-	}
-
-	//regist accept event handler
-	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
-							boost::bind( &l7vs::virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
+		//switch active a session
+		boost::thread::id			t_id;
+		session_thread_control_ptr	stc_ptr;
+		{
+			boost::mutex::scoped_lock lk( sessions_mutex );
+			t_id	= pool_sessions.begin()->first;
+			stc_ptr	= pool_sessions.begin()->second;
+		
+			pool_sessions.erase( pool_sessions.begin() );
+			active_sessions.insert( session_map_pair_type( t_id, stc_ptr ) );
+		}
+	
+		//regist accept event handler
+		acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
+								boost::bind( &l7vs::virtualservice_tcp::handle_accept, this, stc_ptr,
+											 boost::asio::placeholders::error ) );
+	}else
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
 }
 
 /*!
@@ -261,6 +269,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	//load protocol module
 	protomod = l7vs::protocol_module_control::getInstance().load_module( element.protocol_module_name );
 	if( NULL == protomod ){
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
 		return;
 	}
@@ -300,6 +310,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	//load schedule module	
 	schedmod = l7vs::schedule_module_control::getInstance().load_module( element.schedule_module_name );
 	if( NULL == schedmod ){
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
 		return;
 	}
@@ -445,8 +457,8 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		schedule_module_control::getInstance().unload_module( schedmod );
 		schedmod = schedule_module_control::getInstance().load_module( elem.schedule_module_name );
 		if( NULL == schedmod ){
-			//FATAL case
-			l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+			//ERROR case
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 			err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
 			return;
 		}
@@ -463,8 +475,8 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			}
 		}
 	}else{
-		//FATAL case
-		l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
 		return;
 	}
@@ -549,7 +561,8 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 	}
 	if( rs_list.size() != rs_mutex_list.size() ){
 		//fatal case
-		err.setter( true, "internal error" );
+		l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "RealServer information data error", __FILE__, __LINE__ );
+		err.setter( true, "RealServer information data error" );
 		return;
 	}
 	err.setter( false, "" );
@@ -608,7 +621,6 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 		for( std::list<realserver>::iterator rs_itr = rs_list.begin();
 			 rs_itr != rs_list.end(); ++rs_itr ){
 			if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
-				rs_itr->tcp_endpoint	= itr->tcp_endpoint;
 				rs_itr->udp_endpoint	= itr->udp_endpoint;
 				rs_itr->weight			= itr->weight;
 			}
@@ -679,7 +691,8 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 	}
 	if( rs_list.size() != rs_mutex_list.size() ){
 		//fatal case
-		err.setter( true, "" );
+		l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "RealServer information data error", __FILE__, __LINE__ );
+		err.setter( true, "RealServer information data error" );
 		return;
 	}
 	err.setter( false, "" );
@@ -708,7 +721,7 @@ void	l7vs::virtualservice_tcp::run(){
 	{
 		boost::mutex::scoped_lock	lk( sessions_mutex );
 		if( pool_sessions.begin() == pool_sessions.end() ){
-			l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialize.", __FILE__, __LINE__ );
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialize.", __FILE__, __LINE__ );
 			return;
 		}
 		t_id	= pool_sessions.begin()->first;

@@ -82,16 +82,20 @@ void	l7vs::virtualservice_base::load_parameter(){
  * @param   error_code
  * @return  void
  */
-void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system::error_code& ){
-	if( NULL != protomod ){
-		protomod->replication_interrupt();
-		//register handle_protomod_replication
-		protomod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
-		protomod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_protomod_replication, 
-												this, boost::asio::placeholders::error ) );
-	}else{
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
-	}
+void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system::error_code& err ){
+	if( !err ){
+		if( NULL != protomod ){
+			protomod->replication_interrupt();
+			//register handle_protomod_replication
+			protomod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+			protomod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_protomod_replication, 
+													this, boost::asio::placeholders::error ) );
+		}else{
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
+		}
+	}else
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
 }
 
 /*!
@@ -100,16 +104,20 @@ void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system
  * @param   error_code
  * @return  void
  */
-void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system::error_code& ){
-	if( NULL != schedmod ){
-		schedmod->replication_interrupt();
-		//register handle_schedmod_replication
-		schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
-		schedmod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_schedmod_replication, 
-												this, boost::asio::placeholders::error ) );
-	}else{
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
-	}
+void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system::error_code& err ){
+	if( !err ){
+		if( NULL != schedmod ){
+			schedmod->replication_interrupt();
+			//register handle_schedmod_replication
+			schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+			schedmod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_schedmod_replication, 
+													this, boost::asio::placeholders::error ) );
+		}else{
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
+		}
+	}else
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
 }
 
 /*!
@@ -118,54 +126,58 @@ void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system
  * @param   error_code
  * @return  void
  */
-void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::error_code& ){
-	//calcurate time difference
-	boost::xtime	current_time;
-	boost::xtime	time_difference;
-	boost::xtime_get( &current_time, boost::TIME_UTC );
-	time_difference.sec = current_time.sec - last_calc_time.sec;
-	time_difference.nsec = current_time.nsec - last_calc_time.nsec;
-	if( 0 > time_difference.nsec ){
-		--time_difference.sec;
-		time_difference.nsec = 1000000000 + time_difference.nsec;
-	}
-	last_calc_time = current_time;
-
-	{
-		//mutex lock
-		boost::mutex::scoped_lock throughput_up_lock( throughput_up_mutex );
-		boost::mutex::scoped_lock recvsize_up_lock( recvsize_up_mutex );
-		//calcurate throughput
-
-		if( 0 < current_up_recvsize ){
-			if( 0 < time_difference.sec )
-				//秒が0でなければ秒をベースにスループットを計算
-				//bps = current_up_recvsize[bytes] * 8[8bit=1byte] / time_difference.sec
-				throughput_up	= current_up_recvsize / time_difference.sec * 8;
-			else
-				throughput_up	= current_up_recvsize / time_difference.nsec / 1000000000 * 8;
-		}else throughput_up = 0ULL;
-		current_up_recvsize = 0ULL;
-	}
-	{
-		//mutex lock
-		boost::mutex::scoped_lock throughput_down_lock( throughput_down_mutex );
-		boost::mutex::scoped_lock recvsize_down_lock( recvsize_down_mutex );
-		//calcurate throughput
-		//bps = current_down_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
-
-		if( 0 < current_down_recvsize ){
-			if( 0 < time_difference.sec )
-				throughput_down = current_down_recvsize / time_difference.sec * 8;
-			else
-				throughput_down = current_down_recvsize / time_difference.nsec / 1000000000 * 8;
-		}else throughput_down = 0ULL;
-		current_down_recvsize = 0ULL;
-	}
-	//register timer event
-	calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
-	calc_bps_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_throughput_update, 
-											 this, boost::asio::placeholders::error ) );
+void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::error_code& err ){
+	if( !err ){
+		//calcurate time difference
+		boost::xtime	current_time;
+		boost::xtime	time_difference;
+		boost::xtime_get( &current_time, boost::TIME_UTC );
+		time_difference.sec = current_time.sec - last_calc_time.sec;
+		time_difference.nsec = current_time.nsec - last_calc_time.nsec;
+		if( 0 > time_difference.nsec ){
+			--time_difference.sec;
+			time_difference.nsec = 1000000000 + time_difference.nsec;
+		}
+		last_calc_time = current_time;
+	
+		{
+			//mutex lock
+			boost::mutex::scoped_lock throughput_up_lock( throughput_up_mutex );
+			boost::mutex::scoped_lock recvsize_up_lock( recvsize_up_mutex );
+			//calcurate throughput
+	
+			if( 0 < current_up_recvsize ){
+				if( 0 < time_difference.sec )
+					//秒が0でなければ秒をベースにスループットを計算
+					//bps = current_up_recvsize[bytes] * 8[8bit=1byte] / time_difference.sec
+					throughput_up	= current_up_recvsize / time_difference.sec * 8;
+				else
+					throughput_up	= current_up_recvsize / time_difference.nsec / 1000000000 * 8;
+			}else throughput_up = 0ULL;
+			current_up_recvsize = 0ULL;
+		}
+		{
+			//mutex lock
+			boost::mutex::scoped_lock throughput_down_lock( throughput_down_mutex );
+			boost::mutex::scoped_lock recvsize_down_lock( recvsize_down_mutex );
+			//calcurate throughput
+			//bps = current_down_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
+	
+			if( 0 < current_down_recvsize ){
+				if( 0 < time_difference.sec )
+					throughput_down = current_down_recvsize / time_difference.sec * 8;
+				else
+					throughput_down = current_down_recvsize / time_difference.nsec / 1000000000 * 8;
+			}else throughput_down = 0ULL;
+			current_down_recvsize = 0ULL;
+		}
+		//register timer event
+		calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
+		calc_bps_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_throughput_update, 
+												this, boost::asio::placeholders::error ) );
+	}else
+		//ERROR case
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
 }
 
 /*!
@@ -221,9 +233,10 @@ l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 		element.realserver_vector.push_back( rs_element );
 	}
 	rs_list_unlock();
-	{
-		
-	}
+	boost::mutex::scoped_lock up_lock( throughput_up_mutex );
+	element.throughput_upstream		= throughput_up;
+	boost::mutex::scoped_lock down_lock( throughput_down_mutex );
+	element.throughput_downstream	= throughput_down;
 
 	return element;
 }
