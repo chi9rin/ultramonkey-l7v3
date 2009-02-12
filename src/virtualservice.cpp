@@ -24,12 +24,17 @@
 l7vs::virtual_service::virtual_service(	const l7vs::l7vsd& invsd,
 										const l7vs::replication& inrep,
 										const l7vs::virtualservice_element& inelement ){
-	if( inelement.udpmode )
-		vs = boost::shared_ptr<l7vs::virtualservice_base>(
-				dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_udp( invsd, inrep, inelement ) ) );
-	else
-		vs = boost::shared_ptr<l7vs::virtualservice_base>(
-				dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_tcp( invsd, inrep, inelement ) ) );
+	try{
+		if( inelement.udpmode )
+			vs = boost::shared_ptr<l7vs::virtualservice_base>(
+					dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_udp( invsd, inrep, inelement ) ) );
+		else
+			vs = boost::shared_ptr<l7vs::virtualservice_base>(
+					dynamic_cast<l7vs::virtualservice_base*>( new l7vs::virtualservice_tcp( invsd, inrep, inelement ) ) );
+	}
+	catch(const std::bad_alloc&){
+		throw std::bad_alloc();
+	}
 }
 
 l7vs::virtual_service::~virtual_service(){
