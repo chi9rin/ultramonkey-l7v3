@@ -647,87 +647,135 @@ boost::mutex&	l7vsd::get_virtualservice_list_mutex(){
 int	l7vsd::run( int argc, char* argv[] ) {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::run", __FILE__, __LINE__ );
 
-	// check options
-	if( !check_options( argc, argv ) ){
-		std::cerr << usage() << std::endl;
-		return -1;
-	}
-
-	// help mode ?
-	if( help ){
-		std::cout << usage() <<std::endl;
-		return 0;
-	}
-
-	// debug mode ?
-	if( !debug ){
-		int ret = daemon( 0, 0 );
-		if( 0 > ret ){
-			std::stringstream buf;
-			buf << "daemon() failed: " << strerror( errno );
+	try{
+		// check options
+		if( !check_options( argc, argv ) ){
+			std::cerr << usage() << std::endl;
+			return -1;
+		}
+	
+		// help mode ?
+		if( help ){
+			std::cout << usage() <<std::endl;
+			return 0;
+		}
+	
+		// debug mode ?
+		if( !debug ){
+			int ret = daemon( 0, 0 );
+			if( 0 > ret ){
+				std::stringstream buf;
+				buf << "daemon() failed: " << strerror( errno );
+				logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+				return -1;
+			}
+		}
+	
+		// protoclol module control initialize
+		try{
+			protocol_module_control::getInstance().initialize( L7VS_MODULE_PATH );
+		}
+		catch( std::exception& e ){
+			std::stringstream	buf;
+			buf << "protocol module control initialize error:" << e.what();
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
 			return -1;
 		}
+	
+		// schedule module control initialize
+		try{
+			schedule_module_control::getInstance().initialize( L7VS_MODULE_PATH );
+		}
+		catch( std::exception& e ){
+			std::stringstream	buf;
+			buf << "schedule module control initialize error:" << e.what();
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+			return -1;
+		}
+	
+		// receiver initialize
+		try{
+			receiver.reset( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
+		}
+		catch( std::exception& e ){
+			std::stringstream	buf;
+			buf << "command receiver create error:" << e.what();
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+			return -1;
+		}
+		if( NULL ==  receiver ){
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "command receiver pointer null.", __FILE__, __LINE__ );
+			return -1;
+		}
+	
+		// replication initialize
+		try{
+			rep.reset( new replication( dispatcher ) );
+		}
+		catch( std::exception& e ){
+			std::stringstream	buf;
+			buf << "replication create error:" << e.what();
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+			return -1;
+		}
+		if( NULL ==  rep ){
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication pointer null.", __FILE__, __LINE__ );
+			return -1;
+		}
+		if( 0 > rep->initialize() ){
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication initialize failed.", __FILE__, __LINE__ );
+			return -1;
+		}
+	
+		// snmp bridge initialize
+		try{
+			bridge.reset( new snmpbridge( *this, dispatcher ) );
+		}
+		catch( std::exception& e ){
+			std::stringstream	buf;
+			buf << "snmpbridge create error:" << e.what();
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+			return -1;
+		}
+		if( NULL ==  bridge ){
+			logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge pointer null.", __FILE__, __LINE__ );
+			return -1;
+		}
+		if( 0 > bridge->initialize() ){
+			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge initialize failed.", __FILE__, __LINE__ );
+			return -1;
+		}
+	
+		// snmp trap function set
+		Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
+	
+		// main loop
+		for(;;){
+			if( exit_requested )	break;
+			dispatcher.poll();
+		}
+	
+		// snmp trap function unset
+		Logger::setSnmpSendtrap( NULL );
+	
+		// snmp bridge finalize
+		bridge->finalize();
+	
+		// replication finalize
+		rep->finalize();
+	
+		// schedule module control finalize
+		schedule_module_control::getInstance().finalize();
+	
+		// protpcol module control finalize
+		protocol_module_control::getInstance().finalize();
 	}
-
-	// protoclol module control initialize
-	protocol_module_control::getInstance().initialize( L7VS_MODULE_PATH );
-
-	// schedule module control initialize
-	schedule_module_control::getInstance().initialize( L7VS_MODULE_PATH );
-
-	// receiver initialize
-	receiver = command_receiver_ptr( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
-	if( NULL ==  receiver ){
-		logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "command receiver create error.", __FILE__, __LINE__ );
+	catch( std::exception& e ){
+		std::stringstream	buf;
+		buf << "l7vsd run error:" << e.what();
+		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
 		return -1;
 	}
-
-	// replication initialize
-	rep = replication_ptr( new replication( dispatcher ) );
-	if( NULL ==  rep ){
-		logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication create error.", __FILE__, __LINE__ );
-		return -1;
-	}
-	if( 0 > rep->initialize() ){
-		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication initialize failed.", __FILE__, __LINE__ );
-		return -1;
-	}
-
-	// snmp bridge initialize
-	bridge = snmpbridge_ptr( new snmpbridge( *this, dispatcher ) );
-	if( NULL ==  bridge ){
-		logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge create error.", __FILE__, __LINE__ );
-		return -1;
-	}
-	if( 0 > bridge->initialize() ){
-		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge initialize failed.", __FILE__, __LINE__ );
-		return -1;
-	}
-
-	// snmp trap function set
-	Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
-
-	// main loop
-	for(;;){
-		if( exit_requested )	break;
-		dispatcher.poll();
-	}
-
-	// snmp trap function unset
-	Logger::setSnmpSendtrap( NULL );
-
-	// snmp bridge finalize
-	bridge->finalize();
-
-	// replication finalize
-	rep->finalize();
-
-	// schedule module control finalize
-	schedule_module_control::getInstance().finalize();
-
-	// protpcol module control finalize
-	protocol_module_control::getInstance().finalize();
 
 	return 0;
 }
