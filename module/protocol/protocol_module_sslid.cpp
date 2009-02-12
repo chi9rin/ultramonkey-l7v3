@@ -48,7 +48,7 @@ bool protocol_module_sslid::is_udp()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in/out_function : bool protocol_module_sslid::is_udp() : return_value = false.",
+        putLogDebug(30001, "in/out_function : bool protocol_module_sslid::is_udp() : return_value = false.",
                     __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -72,10 +72,10 @@ void protocol_module_sslid::initialize(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function : void protocol_module_sslid::initialize("
+        putLogDebug(30002, "in_function : void protocol_module_sslid::initialize("
                     "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end, "
-                    "rs_list_itr_next_func_type inlist_next,boost::function< void(void) > "
-                    "inlist_lock, boost::function< void(void) > inlist_unlock)." , __FILE__, __LINE__);
+                    "rs_list_itr_next_func_type inlist_next, boost::function< void(void) > "
+                    "inlist_lock, boost::function< void(void) > inlist_unlock).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -88,8 +88,8 @@ void protocol_module_sslid::initialize(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function : void protocol_module_sslid::initialize("
-                    "rs_list_itr_func_type inlist_begin,rs_list_itr_func_type inlist_end, "
+        putLogDebug(30003, "out_function : void protocol_module_sslid::initialize("
+                    "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end, "
                     "rs_list_itr_next_func_type inlist_next, boost::function< void(void) > "
                     "inlist_lock, boost::function< void(void) > inlist_unlock).", __FILE__, __LINE__);
     }
@@ -102,7 +102,7 @@ void protocol_module_sslid::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function : void protocol_module_sslid::finalize().", __FILE__, __LINE__);
+        putLogDebug(30004, "in_function : void protocol_module_sslid::finalize().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -116,8 +116,9 @@ void protocol_module_sslid::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "function : rs_list_begin.clear(), rs_list_end.clear(), rs_list_next.clear(), "
-                    "rs_list_lock.clear(), rs_list_unlock.clear() END.", __FILE__, __LINE__);
+        putLogDebug(30005, "function : void protocol_module_sslid::finalize() : "
+					"rs_list_begin.clear(), rs_list_end.clear(), rs_list_next.clear(), "
+                    "rs_list_lock.clear(), rs_list_unlock.clear() end.", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -129,8 +130,9 @@ void protocol_module_sslid::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "function : replication_pay_memory.clear(), replication_area_lock.clear(), "
-                    "replication_area_unlock.clear() END.", __FILE__, __LINE__);
+        putLogDebug(30006, "function : void protocol_module_sslid::finalize() : "
+					"replication_pay_memory.clear(), replication_area_lock.clear(), "
+                    "replication_area_unlock.clear() end.", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -140,7 +142,8 @@ void protocol_module_sslid::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "function : schedule_tcp.clear() END.", __FILE__, __LINE__);
+        putLogDebug(30007, "function : void protocol_module_sslid::finalize() : "
+                           "schedule_tcp.clear() end.", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -156,8 +159,8 @@ void protocol_module_sslid::finalize()
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("delete : address = &(%d).");
-            formatter % reinterpret_cast<int>(replication_data_processor);
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            formatter % static_cast<void*>(replication_data_processor);
+            putLogDebug(30008, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -172,8 +175,8 @@ void protocol_module_sslid::finalize()
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("delete : address = &(%d).");
-            formatter % reinterpret_cast<int>(session_data_processor);
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            formatter % static_cast<void*>(session_data_processor);
+            putLogDebug(30009, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -184,7 +187,7 @@ void protocol_module_sslid::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function : void protocol_module_sslid::finalize().", __FILE__, __LINE__);
+        putLogDebug(30010, "out_function : void protocol_module_sslid::finalize().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -204,7 +207,7 @@ bool protocol_module_sslid::is_use_sorry()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in/out_function : bool protocol_module_sslid::is_use_sorry() : return_value = false.",
+        putLogDebug(30011, "in/out_function : bool protocol_module_sslid::is_use_sorry() : return_value = false.",
                     __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -223,14 +226,14 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
     {
         boost::format formatter("in_function : protocol_module_sslid::check_message_result "
                                 "protocol_module_sslid::check_parameter("
-                                "const std::vector<std::string>& args) :args = %s.");
+                                "const std::vector<std::string>& args) : args = %s.");
         std::string argsdump;
         for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it)
         {
             argsdump += *it;
         }
         formatter % argsdump;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30012, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -293,7 +296,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                             formatter.parse("'-T/--timeout' option value '%s' is not numeric character.");
                             formatter % *itparam;
                             result.message = formatter.str();
-                            putLogError(37000, result.message, __FILE__, __LINE__);
+                            putLogError(37001, result.message, __FILE__, __LINE__);
                             break;
                         }
                     }
@@ -307,7 +310,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                     // already set timeout
                     result.flag = false;
                     result.message = "Cannot set multiple option '-T/--timeout'.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37002, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -338,7 +341,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                                 formatter.parse("'-M/--maxlist' option value '%s' is too large.");
                                 formatter % *itparam;
                                 result.message = formatter.str();
-                                putLogError(37000, result.message, __FILE__, __LINE__);
+                                putLogError(37003, result.message, __FILE__, __LINE__);
                                 break;
                             }
                             else
@@ -355,7 +358,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                             formatter.parse("'-M/--maxlist' option value '%s' is not numeric character.");
                             formatter % *itparam;
                             result.message = formatter.str();
-                            putLogError(37000, result.message, __FILE__, __LINE__);
+                            putLogError(37004, result.message, __FILE__, __LINE__);
                             break;
                         }
                     }
@@ -369,7 +372,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                     // already set maxlist
                     result.flag = false;
                     result.message = "Cannot set multiple option '-M/--maxlist'.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37005, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -386,7 +389,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                     // already set no-reschedule flag
                     result.flag = false;
                     result.message = "You have to choose either of reschedule or no-reschedule.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37006, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -403,7 +406,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                     // already set reshcedule flag
                     result.flag = false;
                     result.message = "You have to choose either of reschedule or no-reschedule.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37007, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -412,7 +415,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                 // check result is false
                 result.flag = false;
                 result.message = "Option error.";
-                putLogError(37000, result.message, __FILE__, __LINE__);
+                putLogError(37008, result.message, __FILE__, __LINE__);
                 break;
             }
             ++itparam;
@@ -423,16 +426,16 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
         result.flag = false;
         std::cerr << "check parameter exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_sslid::check_message_result "
-                                "protocol_module_sslid::check_parameter() exception : error = %s.");
+                                "protocol_module_sslid::check_parameter() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37009, formatter.str(), __FILE__, __LINE__);
     }
     catch (...)
     {
         result.flag = false;
-        std::cerr << "protocol_module_sslid::check_parameter() : Unkown exception." << std::endl;
-        putLogError(37000, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
-                    "check_parameter() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::check_parameter() : Unknown exception." << std::endl;
+        putLogError(37010, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
+                    "check_parameter() : Unknown exception.", __FILE__, __LINE__);
     }
 
     /*-------- DEBUG LOG --------*/
@@ -440,10 +443,10 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
     {
         boost::format formatter("out_function : protocol_module_sslid::check_message_result "
                                 "protocol_module_sslid::check_parameter("
-                                "const std::vector<std::string>& args) :return_value = ("
+                                "const std::vector<std::string>& args) : return_value = ("
                                 "check_message_result.flag = %d, check_message_result.message = %s).");
         formatter % result.flag % result.message;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30013, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -469,7 +472,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             argsdump += *it;
         }
         formatter % argsdump;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30014, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -515,7 +518,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                                 formatter.parse("'-T/--timeout' option value '%s' is too large.");
                                 formatter % *itparam;
                                 result.message = formatter.str();
-                                putLogError(37000, result.message, __FILE__, __LINE__);
+                                putLogError(37011, result.message, __FILE__, __LINE__);
                                 break;
                             }
                             else
@@ -533,7 +536,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                             formatter.parse("'-T/--timeout' option value '%s' is not numeric character.");
                             formatter % *itparam;
                             result.message = formatter.str();
-                            putLogError(37000, result.message, __FILE__, __LINE__);
+                            putLogError(37012, result.message, __FILE__, __LINE__);
                             break;
                         }
                     }
@@ -548,7 +551,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                     // already set timeout
                     result.flag = false;
                     result.message = "Cannot set multiple option '-T/--timeout'.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37013, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -579,7 +582,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                                 formatter.parse("'-M/--maxlist' option value '%s' is too large.");
                                 formatter % *itparam;
                                 result.message = formatter.str();
-                                putLogError(37000, result.message, __FILE__, __LINE__);
+                                putLogError(37014, result.message, __FILE__, __LINE__);
                                 break;
                             }
                             else
@@ -597,7 +600,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                             formatter.parse("'-M/--maxlist' option value '%s' is not numeric character.");
                             formatter % *itparam;
                             result.message = formatter.str();
-                            putLogError(37000, result.message, __FILE__, __LINE__);
+                            putLogError(37015, result.message, __FILE__, __LINE__);
                             break;
                         }
                     }
@@ -612,7 +615,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                     // already set timeout
                     result.flag = false;
                     result.message = "Cannot set multiple option '-M/--maxlist'.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37016, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -630,7 +633,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                     // already set no-reschedule flag
                     result.flag = false;
                     result.message = "You have to choose either of reschedule or no-reschedule.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37017, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -648,7 +651,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                     // already set reshcedule flag
                     result.flag = false;
                     result.message = "You have to choose either of reschedule or no-reschedule.";
-                    putLogError(37000, result.message, __FILE__, __LINE__);
+                    putLogError(37018, result.message, __FILE__, __LINE__);
                     break;
                 }
             }
@@ -657,7 +660,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                 // check result is false
                 result.flag = false;
                 result.message = "Option error.";
-                putLogError(37000, result.message, __FILE__, __LINE__);
+                putLogError(37019, result.message, __FILE__, __LINE__);
                 break;
             }
 
@@ -693,7 +696,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                                     "protocol_module_sslid::set_parameter(const std::vector<std::string>& args) : "
                                     "timeout = %d, maxlist = %d, reschedule = %d.");
             formatter % timeout % maxlist % reschedule;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30015, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -704,12 +707,12 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
-                        "set_parameter() : replication_pay_memory() END.", __FILE__, __LINE__);
+            putLogDebug(30016, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
+                        "set_parameter() : replication_pay_memory() end.", __FILE__, __LINE__);
             boost::format formatter("function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                         "set_parameter() : data_addr = &(%d), data_size = %d.");
-            formatter % reinterpret_cast<int>(data_addr) % data_size;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            formatter % data_addr % data_size;
+            putLogDebug(30017, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -717,17 +720,17 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         {
             // waiting for jp response????????????????????
             // replication area is null
-            putLogError(37000, "Replication area is null.", __FILE__, __LINE__);
+            putLogError(37020, "Replication area is null.", __FILE__, __LINE__);
 
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("out_function : protocol_module_sslid::check_message_result "
                                         "protocol_module_sslid::set_parameter("
-                                        "const std::vector<std::string>& args) :return_value = ("
+                                        "const std::vector<std::string>& args) : return_value = ("
                                         "check_message_result.flag = %d, check_message_result.message = %s).");
                 formatter % result.flag % result.message;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30018, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -752,9 +755,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
-                formatter % reinterpret_cast<int>(replication_data_processor)
+                formatter % static_cast<void*>(replication_data_processor)
                 % sizeof(sslid_session_data_processor);
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30019, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -762,8 +765,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "protocol_module_sslid::check_message_result protocol_module_sslid::"
-                            "set_parameter() : register_replication_area_lock() END.", __FILE__, __LINE__);
+                putLogDebug(30020, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : register_replication_area_lock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -771,8 +774,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "protocol_module_sslid::check_message_result protocol_module_sslid::"
-                            "set_parameter() : register_replication_area_unlock() END.", __FILE__, __LINE__);
+                putLogDebug(30021, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : register_replication_area_unlock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -791,9 +794,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
-                formatter % reinterpret_cast<int>(session_data_processor)
+                formatter % static_cast<void*>(session_data_processor)
                 % sizeof(sslid_session_data_processor);
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30022, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -802,8 +805,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "protocol_module_sslid::check_message_result protocol_module_sslid::"
-                            "set_parameter() : get_replication_area() END.", __FILE__, __LINE__);
+                putLogDebug(30023, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : get_replication_area() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -811,8 +814,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "protocol_module_sslid::check_message_result protocol_module_sslid::"
-                            "set_parameter() : replication_area_lock() END.", __FILE__, __LINE__);
+                putLogDebug(30024, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -820,8 +823,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "protocol_module_sslid::check_message_result protocol_module_sslid::"
-                            "set_parameter() : read_session_data_from_replication_area() END.", __FILE__, __LINE__);
+                putLogDebug(30025, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -829,8 +832,8 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "protocol_module_sslid::check_message_result protocol_module_sslid::"
-                            "set_parameter() : replication_area_unlock() END.", __FILE__, __LINE__);
+                putLogDebug(30026, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -852,7 +855,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         std::cerr << "set parameter exception : Could not allocate memory." << std::endl;
         result.flag = false;
         result.message = "Could not allocate memory.";
-        putLogError(37000, result.message, __FILE__, __LINE__);
+        putLogError(37021, result.message, __FILE__, __LINE__);
     }
     catch (const std::exception& e)
     {
@@ -871,9 +874,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         result.flag = false;
         std::cerr << "set parameter exception : error = " << e.what() << std::endl;
         boost::format formatter("function protocol_module_sslid::check_message_result "
-                                "protocol_module_sslid::set_parameter() exception : error=%s.");
+                                "protocol_module_sslid::set_parameter() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37022, formatter.str(), __FILE__, __LINE__);
     }
     catch (...)
     {
@@ -890,9 +893,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         }
 
         result.flag = false;
-        std::cerr << "protocol_module_sslid::set_parameter() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
-                    "set_parameter() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::set_parameter() : Unknown exception." << std::endl;
+        putLogError(37023, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
+                    "set_parameter() : Unknown exception.", __FILE__, __LINE__);
     }
 
     /*-------- DEBUG LOG --------*/
@@ -903,7 +906,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                                 "const std::vector<std::string>& args) : return_value = ("
                                 "check_message_result.flag = %d, check_message_result.message = %s).");
         formatter % result.flag % result.message;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30027, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -928,19 +931,19 @@ protocol_module_sslid::check_message_result protocol_module_sslid::add_parameter
             argsdump += *it;
         }
         formatter % argsdump;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30028, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
     check_message_result result;
     result.flag = true;
 
-    if (args.size() > 0)
+    if (!args.empty())
     {
         // option exist
         result.flag = false;
         result.message = "Cannot add option.";
-        putLogError(37000, result.message, __FILE__, __LINE__);
+        putLogError(37024, result.message, __FILE__, __LINE__);
     }
 
     /*-------- DEBUG LOG --------*/
@@ -950,7 +953,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::add_parameter
                                 "protocol_module_sslid::add_parameter(const std::vector<std::string>& args) : "
                                 "return_value = (check_message_result.flag = %d, check_message_result.message = %s).");
         formatter % result.flag % result.message;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30029, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -963,7 +966,7 @@ void protocol_module_sslid::handle_rslist_update()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in/out_function : void protocol_module_sslid::handle_rslist_update().",
+        putLogDebug(30030, "in/out_function : void protocol_module_sslid::handle_rslist_update().",
                     __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -976,7 +979,7 @@ void protocol_module_sslid::register_schedule(tcp_schedule_func_type inschedule)
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function : void protocol_module_sslid::register_schedule("
+        putLogDebug(30031, "in_function : void protocol_module_sslid::register_schedule("
                     "tcp_schedule_func_type inschedule).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -986,7 +989,7 @@ void protocol_module_sslid::register_schedule(tcp_schedule_func_type inschedule)
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function : void protocol_module_sslid::register_schedule("
+        putLogDebug(30032, "out_function : void protocol_module_sslid::register_schedule("
                     "tcp_schedule_func_type inschedule).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -999,7 +1002,7 @@ void protocol_module_sslid::register_schedule(udp_schedule_func_type inschedule)
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in/out_function : void protocol_module_sslid::register_schedule("
+        putLogDebug(30033, "in/out_function : void protocol_module_sslid::register_schedule("
                     "udp_schedule_func_type inschedule).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -1025,7 +1028,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
                                 "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : "
                                 "up_thread_id = %d, down_thread_id = %d.");
         formatter % up_thread_id % down_thread_id;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30034, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1042,8 +1045,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("new : address = &(%d), size = %lu.");
-            formatter % reinterpret_cast<int>(threaddata_up) % sizeof(session_thread_data_sslid);
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            formatter % static_cast<void*>(threaddata_up) % sizeof(session_thread_data_sslid);
+            putLogDebug(30035, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -1063,7 +1066,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_session_initialize() : session_thread_data_sslid(upthread) : "
                                     "realserver_connect_failed_count = %d, data_begain_offset = %d, "
-                                    "data_size = %d, current_record_rest_size = %d, hello_message_flag = %d,"
+                                    "data_size = %d, current_record_rest_size = %d, hello_message_flag = %d, "
                                     "end_flag = %d, thread_division = %d, pair_thread_id = %d.");
             formatter % threaddata_up->realserver_connect_failed_count
             % threaddata_up->data_begain_offset
@@ -1073,7 +1076,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
             % threaddata_up->end_flag
             % threaddata_up->thread_division
             % threaddata_up->pair_thread_id;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30036, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -1083,8 +1086,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("new : address = &(%d), size = %lu.");
-            formatter % reinterpret_cast<int>(threaddata_down) % sizeof(session_thread_data_sslid);
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            formatter % static_cast<void*>(threaddata_down) % sizeof(session_thread_data_sslid);
+            putLogDebug(30037, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -1104,7 +1107,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_session_initialize() : session_thread_data_sslid(downthread) : "
                                     "realserver_connect_failed_count = %d, data_begain_offset = %d, "
-                                    "data_size = %d, current_record_rest_size = %d, hello_message_flag = %d,"
+                                    "data_size = %d, current_record_rest_size = %d, hello_message_flag = %d, "
                                     "end_flag = %d, thread_division = %d, pair_thread_id = %d.");
             formatter % threaddata_down->realserver_connect_failed_count
             % threaddata_down->data_begain_offset
@@ -1114,7 +1117,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
             % threaddata_down->end_flag
             % threaddata_down->thread_division
             % threaddata_down->pair_thread_id;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30038, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -1140,7 +1143,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
         }
 
         std::cerr << "handle_session_initialize exception : Could not allocate memory." << std::endl;
-        putLogError(37000, "Could not allocate memory.", __FILE__, __LINE__);
+        putLogError(37025, "Could not allocate memory.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -1160,9 +1163,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
 
         std::cerr << "handle_session_initialize exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_session_initialize() exception : error = %s.");
+                                "handle_session_initialize() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37026, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -1180,9 +1183,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
             threaddata_down = NULL;
         }
 
-        std::cerr << "protocol_module_sslid::handle_session_initialize() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
-                    "handle_session_initialize() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_session_initialize() : Unknown exception." << std::endl;
+        putLogError(37027, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
+                    "handle_session_initialize() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -1196,7 +1199,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
                                 "const boost::asio::ip::tcp::endpoint& client_endpoint_tcp, "
                                 "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : return_value = %d.");
         formatter % status;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30039, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1219,7 +1222,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
                                 "const boost::thread::id down_thread_id) : "
                                 "up_thread_id = %d, down_thread_id = %d.");
         formatter % up_thread_id % down_thread_id;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30040, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1236,8 +1239,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("delete : address = &(%d).");
-                formatter % reinterpret_cast<int>(itthread->second);
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                formatter % static_cast<void*>(itthread->second);
+                putLogDebug(30041, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1253,8 +1256,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("delete : address = &(%d).");
-                formatter % reinterpret_cast<int>(itthread->second);
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                formatter % static_cast<void*>(itthread->second);
+                putLogDebug(30042, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1269,13 +1272,13 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_session_finalize() exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37028, formatter.str(), __FILE__, __LINE__);
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_session_finalize() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
-                    "handle_session_finalize() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_session_finalize() : Unknown exception." << std::endl;
+        putLogError(37029, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
+                    "handle_session_finalize() : Unknown exception.", __FILE__, __LINE__);
     }
 
     /*-------- DEBUG LOG --------*/
@@ -1285,7 +1288,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
                                 "handle_session_finalize(const boost::thread::id up_thread_id, "
                                 "const boost::thread::id down_thread_id) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30043, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1304,7 +1307,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_accept(const boost::thread::id thread_id) : thread_id = %d, return_value = %d.");
         formatter % thread_id % CLIENT_RECV;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30044, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1318,7 +1321,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
 //! @return session use EVENT mode(CLIENT_RECV, REALSERVER_SELECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
     const boost::thread::id thread_id,
-    const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+    const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
     const size_t recvlen)
 {
     /*-------- DEBUG LOG --------*/
@@ -1329,58 +1332,33 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : thread_id = %d, recvbuffer = %s, recvlen = %d.");
         formatter % thread_id % recvbuffer.data() % recvlen;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30045, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
-
-    // parameter check
-    if (recvlen > recvbuffer.size())
-    {
-        // waiting for jp response...??????????????????
-        std::cerr << "handle_client_recv() : Data size bigger than buffer size." << std::endl;
-        putLogError(37000, "Data size bigger than buffer size.", __FILE__, __LINE__);
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_client_recv(const boost::thread::id thread_id, "
-                                    "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
-                                    "const size_t recvlen) : return_value = %d.");
-            formatter % FINALIZE;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
-        }
-        /*------DEBUG LOG END------*/
-
-        return FINALIZE;
-    }
 
     // find session_thread_data_sslid's pointer from map
     session_thread_data_sslid* threaddata = NULL;
     EVENT_TAG status = FINALIZE;
-
     try
     {
+        // parameter check
+        if (recvlen > recvbuffer.size())
+        {
+            // waiting for jp response...??????????????????
+            std::cerr << "handle_client_recv() : Data size bigger than buffer size." << std::endl;
+            putLogError(37030, "Data size bigger than buffer size.", __FILE__, __LINE__);
+            throw -1;
+        }
+
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37031, "Invalid thread id.", __FILE__, __LINE__);
 
-                /*-------- DEBUG LOG --------*/
-                if (LOG_LV_DEBUG == getloglevel())
-                {
-                    boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                            "handle_client_recv(const boost::thread::id thread_id, "
-                                            "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
-                                            "const size_t recvlen) : return_value = %d.");
-                    formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
-
-                return FINALIZE;
+                throw -1;
             }
 
             threaddata = it->second;
@@ -1401,21 +1379,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             {
                 // waiting for jp response...??????????????????
                 std::cerr << "handle_client_recv() : Data size bigger than buffer size." << std::endl;
-                putLogError(37000, "Data size bigger than buffer size.", __FILE__, __LINE__);
-
-                /*-------- DEBUG LOG --------*/
-                if (LOG_LV_DEBUG == getloglevel())
-                {
-                    boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                            "handle_client_recv(const boost::thread::id thread_id, "
-                                            "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
-                                            "const size_t recvlen) : return_value = %d.");
-                    formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+                putLogError(37032, "Data size bigger than buffer size.", __FILE__, __LINE__);
                 threaddata->end_flag = END_FLAG_ON;
-                return FINALIZE;
+                throw -1;
             }
 
             if (threaddata->data_size > 0 && threaddata->data_begain_offset != 0)
@@ -1424,20 +1390,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    boost::format formatter("%02x ");
                     std::string datadump;
-                    for (size_t i = 0; i < threaddata->data_size; ++i)
-                    {
-                        formatter % static_cast<unsigned short>(
-                                threaddata->data_buffer[threaddata->data_begain_offset+i]);
-                        datadump += formatter.str();
-                    }
+                    dump_memory(threaddata->data_buffer.data()+threaddata->data_begain_offset,
+                                threaddata->data_size, datadump);
 
-                    formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_client_recv() : before memmove (data dump) : "
-                                    "data begin(%d), data_size = %d, data = %s.");
+                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                            "handle_client_recv() : before memmove (data dump) : "
+                                            "data begin = %d, data_size = %d, data = %s.");
                     formatter % threaddata->data_begain_offset % threaddata->data_size % datadump;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30046, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1447,19 +1408,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    boost::format formatter("%02x ");
                     std::string datadump;
-                    for (size_t i = 0; i < threaddata->data_size; ++i)
-                    {
-                        formatter % static_cast<unsigned short>(threaddata->data_buffer[i]);
-                        datadump += formatter.str();
-                    }
+                    dump_memory(threaddata->data_buffer.data(),
+                                threaddata->data_size, datadump);
 
-                    formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_client_recv() : after memmove (data dump) : "
-                                    "data begin(0), data_size = %d, data = %s.");
+                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                            "handle_client_recv() : after memmove (data dump) : "
+                                            "data begin = 0, data_size = %d, data = %s.");
                     formatter % threaddata->data_size % datadump;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30047, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -1467,19 +1424,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->data_size+recvlen; ++i)
-                {
-                    formatter % static_cast<unsigned short>(threaddata->data_buffer[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(threaddata->data_buffer.data(),
+                            threaddata->data_size+recvlen, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_recv() :before memcpy (data dump) : "
-                                "data begin(0), data_size = %d, data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "handle_client_recv() : before memcpy (data dump) : "
+                                        "data begin = 0, data_size = %d, data = %s.");
                 formatter % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30048, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1493,19 +1446,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->data_size+recvlen; ++i)
-                {
-                    formatter % static_cast<unsigned short>(threaddata->data_buffer[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(threaddata->data_buffer.data(),
+                            threaddata->data_size+recvlen, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_recv() : after memcpy (data dump) : "
-                                "data begin(0), data_size = %d, data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "handle_client_recv() : after memcpy (data dump) : "
+                                        "data begin = 0, data_size = %d, data = %s.");
                 formatter % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30049, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1515,15 +1464,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                 size_t alllength = 0;
                 bool ishellomessage = false;
                 int ret = check_ssl_record_sendable(true,
-                                                    threaddata->data_buffer.data(),
+                                                    threaddata->data_buffer.data()+threaddata->data_begain_offset,
                                                     threaddata->data_size,
                                                     alllength,
                                                     ishellomessage);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_recv() : check_ssl_record_sendable() END.", __FILE__, __LINE__);
+                    putLogDebug(30050, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                "handle_client_recv() : check_ssl_record_sendable() end.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1535,7 +1484,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                        putLogDebug(30051, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_client_recv() : END_FLAG_ON.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -1561,21 +1510,34 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             }
         }
     }
+    catch (int e)
+    {
+        /*-------- DEBUG LOG --------*/
+        if (LOG_LV_DEBUG == getloglevel())
+        {
+            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_client_recv() : catch exception e = %d.");
+            formatter % e;
+            putLogDebug(30052, formatter.str(), __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+        status = FINALIZE;
+    }
     catch (const std::exception& e)
     {
         std::cerr << "handle_client_recv exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_recv() exception : error = %s.");
+                                "handle_client_recv() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37033, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_client_recv() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_client_recv() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_client_recv() : Unknown exception." << std::endl;
+        putLogError(37034, "function protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_client_recv() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -1588,7 +1550,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d, end_flag = %d.");
         formatter % status % threaddata->end_flag;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30053, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1611,7 +1573,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                 "boost::asio::ip::tcp::endpoint& rs_endpoint) : "
                                 "thread_id = %d, rs_endpoint = [%s]:%d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30054, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1624,10 +1586,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37035, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
@@ -1635,7 +1597,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                             "handle_realserver_select(const boost::thread::id thread_id, "
                                             "boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d.");
                     formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30055, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
                 // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
@@ -1655,8 +1617,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "realserver_selected() END.", __FILE__, __LINE__);
+                    putLogDebug(30056, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                "realserver_selected() end.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1669,8 +1631,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "realserver_selected() END.", __FILE__, __LINE__);
+                    putLogDebug(30057, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                "realserver_selected() end.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1683,8 +1645,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_realserver_select() :END_FLAG_ON.", __FILE__, __LINE__);
+                        putLogDebug(30058, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_realserver_select() : END_FLAG_ON.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -1692,8 +1654,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                 {
                     // get sessionid from the data buffer
                     std::string session_id;
-                    if (get_ssl_session_id(threaddata->data_buffer.data(), threaddata->data_size,
-                                           session_id) == -1)
+                    if (get_ssl_session_id(threaddata->data_buffer.data()+threaddata->data_begain_offset,
+                                           threaddata->data_size, session_id) == -1)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
@@ -1703,7 +1665,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                     "const boost::thread::id thread_id, boost::asio::"
                                                     "ip::tcp::endpoint& rs_endpoint) : return_value = %d.");
                             formatter % FINALIZE;
-                            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(30059, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
 
@@ -1717,12 +1679,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_realserver_select() : get_ssl_session_id() END.", __FILE__, __LINE__);
+                        putLogDebug(30060, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_realserver_select() : get_ssl_session_id() end.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
 
-                    if (session_id.size() == 0)
+                    if (session_id.empty())
                     {
                         // no session id in hellomesseage
                         // schedule the endpoint
@@ -1745,7 +1707,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                             /*-------- DEBUG LOG --------*/
                             if (LOG_LV_DEBUG == getloglevel())
                             {
-                                putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                putLogDebug(30061, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                             "handle_realserver_select() : END_FLAG_ON.", __FILE__, __LINE__);
                             }
                             /*------DEBUG LOG END------*/
@@ -1761,8 +1723,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                        "handle_realserver_select() : get_endpoint_from_session_data() END.",
+                            putLogDebug(30062, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "handle_realserver_select() : get_endpoint_from_session_data() end.",
                                         __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
@@ -1798,7 +1760,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                     /*-------- DEBUG LOG --------*/
                                     if (LOG_LV_DEBUG == getloglevel())
                                     {
-                                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG "
+                                        putLogDebug(30063, "function : protocol_module_base::EVENT_TAG "
                                                     "protocol_module_sslid::handle_realserver_select() : "
                                                     "END_FLAG_ON.", __FILE__, __LINE__);
                                     }
@@ -1814,7 +1776,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                 /*-------- DEBUG LOG --------*/
                                 if (LOG_LV_DEBUG == getloglevel())
                                 {
-                                    putLogDebug(30000, "function : protocol_module_base::EVENT_TAG "
+                                    putLogDebug(30064, "function : protocol_module_base::EVENT_TAG "
                                                 "protocol_module_sslid::handle_realserver_select() : END_FLAG_ON.",
                                                 __FILE__, __LINE__);
                                 }
@@ -1850,7 +1812,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                        putLogDebug(30065, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_realserver_select() : END_FLAG_ON.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -1865,7 +1827,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                    putLogDebug(30066, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_select() : END_FLAG_ON.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
@@ -1880,7 +1842,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                putLogDebug(30067, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                             "handle_realserver_select() : END_FLAG_ON.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -1890,9 +1852,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     {
         std::cerr << "handle_realserver_select exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_select() exception : error = %s.");
+                                "handle_realserver_select() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37036, formatter.str(), __FILE__, __LINE__);
 
         // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
         putLogInfo(035000, "Realserver decision failure.", __FILE__, __LINE__);
@@ -1901,9 +1863,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_realserver_select() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_realserver_select() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_realserver_select() : Unknown exception." << std::endl;
+        putLogError(37037, "function protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_realserver_select() : Unknown exception.", __FILE__, __LINE__);
 
         // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
         putLogInfo(035000, "Realserver decision failure.", __FILE__, __LINE__);
@@ -1916,10 +1878,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     {
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_select(const boost::thread::id thread_id, "
-                                "boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value=%d, "
+                                "boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d, "
                                 "end_flag = %d, rs_endpoint = [%s]:%d.");
         formatter % status % threaddata->end_flag % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30068, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1947,7 +1909,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30069, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
     return STOP;
@@ -1971,7 +1933,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                 "thread_id = %d, sendbuffer = %s, datalen = %d.");
         formatter % thread_id % sendbuffer.data() % datalen;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30070, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -1992,7 +1954,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
             if (it == session_thread_data_map.end())
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37038, "Invalid thread id.", __FILE__, __LINE__);
                 status = FINALIZE;
             }
             else
@@ -2008,14 +1970,14 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_connect() exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37039, formatter.str(), __FILE__, __LINE__);
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_realserver_connect() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_realserver_connect() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_realserver_connect() : Unknown exception." << std::endl;
+        putLogError(37040, "function protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_realserver_connect() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -2028,7 +1990,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                 "return_value = %d.");
         formatter % status;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30071, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2051,7 +2013,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
                                 "const boost::asio::ip::tcp::endpoint& rs_endpoint) : "
                                 "thread_id = %d, rs_endpoint = [%s]:%d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30072, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2064,10 +2026,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37041, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
@@ -2075,7 +2037,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
                                             "handle_realserver_connection_fail(const boost::thread::id thread_id, "
                                             "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d.");
                     formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30073, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
                 return FINALIZE;
@@ -2100,7 +2062,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                putLogDebug(30074, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                             "handle_realserver_connection_fail() : END_FLAG_ON.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -2110,17 +2072,17 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     {
         std::cerr << "handle_realserver_connection_fail exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_connection_fail() exception : error = %s.");
+                                "handle_realserver_connection_fail() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37042, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_realserver_connection_fail() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_realserver_connection_fail() : Unkown exception.",
+        std::cerr << "protocol_module_sslid::handle_realserver_connection_fail() : Unknown exception." << std::endl;
+        putLogError(37043, "function protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_realserver_connection_fail() : Unknown exception.",
                     __FILE__, __LINE__);
 
         status = FINALIZE;
@@ -2134,7 +2096,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
                                 "const boost::asio::ip::tcp::endpoint& rs_endpoint) : "
                                 "return_value = %d, end_flag = %d.");
         formatter % status % threaddata->end_flag;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30075, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2153,7 +2115,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_send(const boost::thread::id thread_id) : thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30076, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2166,18 +2128,18 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37044, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    boost::format formatter("out_function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                    boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                             "handle_realserver_send(const boost::thread::id thread_id) : "
                                             "return_value = %d.");
                     formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30077, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2208,8 +2170,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_send() : check_ssl_record_sendable() END.", __FILE__, __LINE__);
+                    putLogDebug(30078, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                "handle_realserver_send() : check_ssl_record_sendable() end.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2221,7 +2183,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                        putLogDebug(30079, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_realserver_send() : END_FLAG_ON.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -2250,17 +2212,17 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
     {
         std::cerr << "handle_realserver_send exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_send() exception : error = %s.");
+                                "handle_realserver_send() : exception : error = %s.");
         formatter % FINALIZE % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37045, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_realserver_send() : Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_realserver_send() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_realserver_send() : Unknown exception." << std::endl;
+        putLogError(37046, "function protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_realserver_send() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -2268,11 +2230,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("out_function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
+        boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_send(const boost::thread::id thread_id) : "
                                 "return_value = %d, end_flag = %d.");
         formatter % status % threaddata->end_flag;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30080, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2294,7 +2256,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_select
                                 "handle_sorryserver_select(const boost::thread::id thread_id, "
                                 "boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30081, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2319,7 +2281,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30082, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2341,7 +2303,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
                                 "handle_sorryserver_connection_fail(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30083, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2360,7 +2322,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_sorryserver_send(const boost::thread::id thread_id) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30084, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2390,7 +2352,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                 "recvbuffer = %s, recvlen = %d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port() %
         recvbuffer.data() % recvlen;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30085, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2399,7 +2361,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     {
         // waiting for jp response...??????????????????
         std::cerr << "handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
-        putLogError(37000, "Data size bigger than buffer size.", __FILE__, __LINE__);
+        putLogError(37047, "Data size bigger than buffer size.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
@@ -2409,7 +2371,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d.");
             formatter % FINALIZE;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30086, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -2425,10 +2387,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37048, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
@@ -2438,7 +2400,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                             "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                             "const size_t recvlen) : return_value = %d.");
                     formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30087, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2446,6 +2408,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
             }
 
             threaddata = it->second;
+            // realserver endpoint set
+            threaddata->selected_realserver = rs_endpoint;
         }
 
         // get the c-style pointer from data buffer
@@ -2455,7 +2419,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
         {
             // waiting for jp response...??????????????????
             std::cerr << "handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
-            putLogError(37000, "Data size bigger than buffer size.", __FILE__, __LINE__);
+            putLogError(37049, "Data size bigger than buffer size.", __FILE__, __LINE__);
 
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
@@ -2466,7 +2430,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d.");
                 formatter % FINALIZE;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30088, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -2480,20 +2444,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->data_size; ++i)
-                {
-                    formatter % static_cast<unsigned short>(
-                        threaddata->data_buffer[threaddata->data_begain_offset+i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(threaddata->data_buffer.data()+threaddata->data_begain_offset,
+                            threaddata->data_size, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_recv() :before memmove (data dump) : "
-                                "data begin(%d), data_size = %d, data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "handle_realserver_recv() : before memmove (data dump) : "
+                                        "data begin = %d, data_size = %d, data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30089, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -2503,19 +2462,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->data_size; ++i)
-                {
-                    formatter % static_cast<unsigned short>(threaddata->data_buffer[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(threaddata->data_buffer.data(),
+                            threaddata->data_size, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_recv() :after memmove (data dump) : "
-                                "data begin(0), data_size = %d, data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "handle_realserver_recv() : after memmove (data dump) : "
+                                        "data begin = 0, data_size = %d, data = %s.");
                 formatter % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30090, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -2523,19 +2478,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            boost::format formatter("%02x ");
             std::string datadump;
-            for (size_t i = 0; i < threaddata->data_size+recvlen; ++i)
-            {
-                formatter % static_cast<unsigned short>(threaddata->data_buffer[i]);
-                datadump += formatter.str();
-            }
+            dump_memory(threaddata->data_buffer.data(),
+                        threaddata->data_size+recvlen, datadump);
 
-            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                            "handle_realserver_recv() : before memcpy (data dump) : "
-                            "data begin(0), data_size = %d, data = %s.");
+            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_realserver_recv() : before memcpy (data dump) : "
+                                    "data begin = 0, data_size = %d, data = %s.");
             formatter % threaddata->data_size % datadump;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30091, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -2549,19 +2500,15 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            boost::format formatter("%02x ");
             std::string datadump;
-            for (size_t i = 0; i < threaddata->data_size+recvlen; ++i)
-            {
-                formatter % static_cast<unsigned short>(threaddata->data_buffer[i]);
-                datadump += formatter.str();
-            }
+            dump_memory(threaddata->data_buffer.data(),
+                        threaddata->data_size+recvlen, datadump);
 
-            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                            "handle_realserver_recv() :after memcpy (data dump) : "
-                            "data begin(0), data_size = %d, data = %s.");
+            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_realserver_recv() : after memcpy (data dump) : "
+                                    "data begin = 0, data_size = %d, data = %s.");
             formatter % threaddata->data_size % datadump;
-            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30092, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -2571,14 +2518,14 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
             size_t alllength = 0;
             bool ishellomessage = false;
             int ret = check_ssl_record_sendable(false,
-                                                threaddata->data_buffer.data(),
+                                                threaddata->data_buffer.data()+threaddata->data_begain_offset,
                                                 threaddata->data_size,
                                                 alllength,
                                                 ishellomessage);
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                putLogDebug(30093, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                             "handle_realserver_recv() : check_ssl_record_sendable() END.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -2591,7 +2538,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                    putLogDebug(30094, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_recv() : END_FLAG_ON.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
@@ -2619,17 +2566,17 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     {
         std::cerr << "handle_realserver_recv exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_realserver_recv() exception : error = %s.");
+                                "handle_realserver_recv() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37050, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_realserver_recv() :Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_realserver_recv() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_realserver_recv() : Unknown exception." << std::endl;
+        putLogError(37051, "function : protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_realserver_recv() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -2643,7 +2590,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d, end_flag = %d.");
         formatter % status % threaddata->end_flag;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30095, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2671,7 +2618,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30096, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2699,7 +2646,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30097, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2718,7 +2665,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_info
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_response_send_inform(const boost::thread::id thread_id) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30098, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2743,7 +2690,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                 "size_t& datalen) : thread_id = %d, sendbuffer = %s, datalen = %d.");
         formatter % thread_id % sendbuffer.data() % datalen;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30099, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2756,10 +2703,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....??????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37052, "Invalid thread id.", __FILE__, __LINE__);
 
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
@@ -2769,7 +2716,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                                             "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                             "size_t& datalen) : return_value = %d.");
                     formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30100, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2787,8 +2734,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                 // it's server hello message
                 // get sessionid from the data buffer
                 std::string session_id;
-                if (get_ssl_session_id(threaddata->data_buffer.data(), threaddata->data_size,
-                                       session_id) == -1)
+                if (get_ssl_session_id(threaddata->data_buffer.data()+threaddata->data_begain_offset,
+                                       threaddata->data_size, session_id) == -1)
                 {
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
@@ -2799,7 +2746,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                                 "size_t& datalen) : return_value = %d.");
                         formatter % FINALIZE;
-                        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                        putLogDebug(30101, formatter.str(), __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
 
@@ -2810,12 +2757,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_connection_check() : get_ssl_session_id() END.", __FILE__, __LINE__);
+                    putLogDebug(30102, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                "handle_client_connection_check() : get_ssl_session_id() end.", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
-                if (session_id.size() > 0)
+                if (!session_id.empty())
                 {
                     // session id exist
                     time_t now;
@@ -2827,8 +2774,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_client_connection_check() : write_session_data() END.",
+                        putLogDebug(30103, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_client_connection_check() : write_session_data() end.",
                                     __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -2851,8 +2798,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                        "handle_client_connection_check() : put_data_to_sendbuffer() END.",
+            putLogDebug(30104, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                        "handle_client_connection_check() : put_data_to_sendbuffer() end.",
                         __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -2861,17 +2808,17 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
     {
         std::cerr << "handle_client_connection_check exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_connection_check() exception : error = %s.");
+                                "handle_client_connection_check() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37053, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_client_connection_check() :Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_client_connection_check() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_client_connection_check() :Unknown exception." << std::endl;
+        putLogError(37054, "function : protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_client_connection_check() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -2884,7 +2831,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                 "return_value = %d.");
         formatter % status;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30105, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2912,7 +2859,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_select(
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                 "size_t& datalen) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30106, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2932,7 +2879,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_client_send(const boost::thread::id thread_id) : thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30107, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -2945,17 +2892,17 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
         {
             boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-            if (it == session_thread_data_map.end())
+            if (it == session_thread_data_map.end() || it->second == NULL)
             {
                 // waiting for jp response.....?????????????????
-                putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+                putLogError(37055, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                             "handle_client_send(const boost::thread::id thread_id) : return_value = %d.");
                     formatter % FINALIZE;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30108, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2973,7 +2920,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                 boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                         "handle_client_send() : data_size = %d, end_flag = %d.");
                 formatter % threaddata->data_size % threaddata->end_flag;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30109, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -2997,7 +2944,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                 boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                         "handle_client_send() : data_size = %d, current_record_rest_size = %d.");
                 formatter % threaddata->data_size % threaddata->current_record_rest_size;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30110, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -3015,11 +2962,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    boost::format formatter("function :protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                            "handle_client_send() : check_ssl_record_sendable() END. "
+                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                            "handle_client_send() : check_ssl_record_sendable() end. "
                                             "return_value = %d.");
                     formatter % ret;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30111, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -3030,7 +2977,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                        putLogDebug(30112, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_client_send() : END_FLAG_ON.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -3071,17 +3018,17 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
     {
         std::cerr << "handle_client_connection_check exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_send() exception : error = %s.");
+                                "handle_client_send() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37056, formatter.str(), __FILE__, __LINE__);
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_client_send() :Unkown exception." << std::endl;
-        putLogError(37000, "function protocol_module_sslid::check_message_result "
-                    "protocol_module_sslid::handle_client_send() : Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "protocol_module_sslid::handle_client_send() : Unknown exception." << std::endl;
+        putLogError(37057, "function : protocol_module_sslid::check_message_result "
+                    "protocol_module_sslid::handle_client_send() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -3093,7 +3040,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                                 "handle_client_send(const boost::thread::id thread_id) : "
                                 "return_value = %d, end_flag = %d.");
         formatter % status % threaddata->end_flag;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30113, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3113,7 +3060,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
                                 "handle_client_disconnect(const boost::thread::id thread_id) : "
                                 "thread_id = %d, return_value = %d.");
         formatter % thread_id % FINALIZE;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30114, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3132,7 +3079,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_sorry_enable(const boost::thread::id thread_id) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30115, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3151,7 +3098,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_sorry_disable(const boost::thread::id thread_id) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30116, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3173,7 +3120,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_disconn
                                 "handle_realserver_disconnect(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30117, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3195,7 +3142,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_discon
                                 "handle_sorryserver_disconnect(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30118, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3217,7 +3164,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_close(
                                 "handle_realserver_close(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::udp::endpoint& rs_endpoint) : return_value = %d.");
         formatter % STOP;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30119, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3231,7 +3178,7 @@ void protocol_module_sslid::replication_interrupt()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function : void protocol_module_sslid::replication_interrupt().",
+        putLogDebug(30120, "in_function : void protocol_module_sslid::replication_interrupt().",
                     __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -3239,9 +3186,9 @@ void protocol_module_sslid::replication_interrupt()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "function : void protocol_module_sslid::replication_interrupt():"
+        putLogDebug(30121, "function : void protocol_module_sslid::replication_interrupt():"
                     "write_replication_area() END.", __FILE__, __LINE__);
-        putLogDebug(30000, "out_function : void protocol_module_sslid::replication_interrupt().",
+        putLogDebug(30122, "out_function : void protocol_module_sslid::replication_interrupt().",
                     __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -3266,7 +3213,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                 "size_t& datalen) : thread_id = %d, sendbuffer = %s, datalen = %d.");
         formatter % thread_id % sendbuffer.data() % datalen;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30123, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3277,15 +3224,15 @@ int protocol_module_sslid::put_data_to_sendbuffer(
     {
         boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
         session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
-        if (it == session_thread_data_map.end())
+        if (it == session_thread_data_map.end() || it->second == NULL)
         {
             // waiting for jp response.....??????????????????
-            putLogError(37000, "Invalid thread id.", __FILE__, __LINE__);
+            putLogError(37058, "Invalid thread id.", __FILE__, __LINE__);
 
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "out_function : int protocol_module_sslid::put_data_to_sendbuffer("
+                putLogDebug(30124, "out_function : int protocol_module_sslid::put_data_to_sendbuffer("
                             "const boost::thread::id& thread_id,"
                             "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                             "size_t& datalen) : return_value = -1.", __FILE__, __LINE__);
@@ -3307,7 +3254,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+            putLogDebug(30125, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                         "::put_data_to_sendbuffer() : current_record_rest_size >= data_size.",
                         __FILE__, __LINE__);
         }
@@ -3319,22 +3266,18 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->data_size; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(threaddata->data_buffer.data(),
+                            threaddata->data_size, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "::put_data_to_sendbuffer() :data_size <= sendbuffer size. "
-                                "before memcpy (data dump) :data_begin_offset=%d, "
-                                "current_record_rest_size=%d, data_size=%d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "::put_data_to_sendbuffer() : data_size <= sendbuffer size. "
+                                        "before memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30126, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -3354,22 +3297,18 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->data_size; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(threaddata->data_buffer.data(),
+                            threaddata->data_size, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "put_data_to_sendbuffer() : data_size <= sendbuffer size. "
-                                "after memcpy (data dump) : data_begin_offset = %d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "put_data_to_sendbuffer() : data_size <= sendbuffer size. "
+                                        "after memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30127, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -3379,22 +3318,17 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < sendbufsize; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(senddatabegin, sendbufsize, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "::put_data_to_sendbuffer() :data_size > sendbuffer size. "
-                                "before memcpy (data dump) : data_begin_offset=%d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "::put_data_to_sendbuffer() : data_size > sendbuffer size. "
+                                        "before memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30128, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -3414,22 +3348,17 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < sendbufsize; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(senddatabegin, sendbufsize, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "put_data_to_sendbuffer() :data_size > sendbuffer size. "
-                                "after memcpy (data dump) : data_begin_offset = %d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "put_data_to_sendbuffer() : data_size > sendbuffer size. "
+                                        "after memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30129, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -3439,7 +3368,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+            putLogDebug(30130, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                         "::put_data_to_sendbuffer() : current_record_rest_size < data_size.",
                         __FILE__, __LINE__);
         }
@@ -3452,22 +3381,17 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->current_record_rest_size; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(senddatabegin, threaddata->current_record_rest_size, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "::put_data_to_sendbuffer() : current_record_rest_size <= sendbuffer size. "
-                                "before memcpy (data dump) : data_begin_offset = %d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "::put_data_to_sendbuffer() : current_record_rest_size <= sendbuffer size. "
+                                        "before memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30131, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -3487,22 +3411,17 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < threaddata->current_record_rest_size; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(senddatabegin, threaddata->current_record_rest_size, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "::put_data_to_sendbuffer() : current_record_rest_size <= sendbuffer size. "
-                                "after memcpy (data dump) : data_begin_offset = %d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "::put_data_to_sendbuffer() : current_record_rest_size <= sendbuffer size. "
+                                        "after memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30132, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -3512,22 +3431,17 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < sendbufsize; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(senddatabegin, sendbufsize, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "::put_data_to_sendbuffer() : current_record_rest_size > sendbuffer size. "
-                                "before memcpy (data dump) : data_begin_offset = %d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "::put_data_to_sendbuffer() : current_record_rest_size > sendbuffer size. "
+                                        "before memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30133, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -3547,22 +3461,17 @@ int protocol_module_sslid::put_data_to_sendbuffer(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                boost::format formatter("%02x ");
                 std::string datadump;
-                for (size_t i = 0; i < sendbufsize; ++i)
-                {
-                    formatter % static_cast<unsigned short>(senddatabegin[i]);
-                    datadump += formatter.str();
-                }
+                dump_memory(senddatabegin, sendbufsize, datadump);
 
-                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "::put_data_to_sendbuffer() : current_record_rest_size > sendbuffer size. "
-                                "after memcpy (data dump) : data_begin_offset = %d, "
-                                "current_record_rest_size = %d, data_size = %d, dump data begin(0), "
-                                "dump data_size = %d, dump data = %s.");
+                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                        "::put_data_to_sendbuffer() : current_record_rest_size > sendbuffer size. "
+                                        "after memcpy (data dump) : data_begin_offset = %d, "
+                                        "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
+                                        "dump data_size = %d, dump data = %s.");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
-                putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(30134, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -3571,7 +3480,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function : int protocol_module_sslid::put_data_to_sendbuffer("
+        putLogDebug(30135, "out_function : int protocol_module_sslid::put_data_to_sendbuffer("
                     "const boost::thread::id& thread_id,"
                     "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                     "size_t& datalen) : return_value = 0.", __FILE__, __LINE__);
@@ -3593,7 +3502,7 @@ bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endp
         boost::format formatter("in_function : bool protocol_module_sslid::realserver_selected("
                                 "const boost::asio::ip::tcp::endpoint& rs_endpoint) : rs_endpoint = [%s]:%d.");
         formatter % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30136, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -3603,7 +3512,7 @@ bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endp
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "out_function : bool protocol_module_sslid::realserver_selected("
+            putLogDebug(30137, "out_function : bool protocol_module_sslid::realserver_selected("
                         "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = false.",
                         __FILE__, __LINE__);
         }
@@ -3617,7 +3526,7 @@ bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endp
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "out_function : bool protocol_module_sslid::realserver_selected("
+            putLogDebug(30138, "out_function : bool protocol_module_sslid::realserver_selected("
                         "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = true.",
                         __FILE__, __LINE__);
         }

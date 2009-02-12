@@ -18,6 +18,7 @@
 #include "logger_enum.h"
 #include "module_base.h"
 #include "realserver.h"
+#include <boost/format.hpp>
 
 namespace l7vs{
 
@@ -380,6 +381,17 @@ public:
 	virtual	EVENT_TAG	handle_realserver_close(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint& rs_endpoint ) = 0;
+	//! format dump data.
+	//! @param[in]	data want to format
+	//! @param[in]	data size
+	//! @param[out]	format string
+	//! @return
+	static void  dump_memory(
+									const char* data,
+									const size_t data_size,
+									std::string& data_dump)
+	{
+	}
 };
 
 } // namespace l7vsd

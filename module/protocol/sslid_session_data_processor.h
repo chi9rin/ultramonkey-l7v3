@@ -16,7 +16,7 @@ class sslid_session_data_processor
         typedef    boost::function< LOG_LEVEL_TAG(void) >
                                         getloglevel_func_type;
         //! log output function object type
-        typedef    boost::function< void ( const unsigned int, const std::string&, const char*, int ) >
+        typedef    boost::function< void (const unsigned int, const std::string&, const char*, int) >
                                         logger_func_type;
 
     public:
@@ -29,20 +29,20 @@ class sslid_session_data_processor
                             logger_func_type inputLogError,
                             logger_func_type inputLogWarn,
                             logger_func_type inputLogInfo,
-                            logger_func_type inputLogDebug );
+                            logger_func_type inputLogDebug);
 
         virtual ~sslid_session_data_processor();
 
         int get_endpoint_from_session_data(
                             const std::string& session_id,
-                            boost::asio::ip::tcp::endpoint& endpoint );
+                            boost::asio::ip::tcp::endpoint& endpoint);
 
         int write_session_data(
                             const std::string& session_id,
                             const boost::asio::ip::tcp::endpoint& endpoint,
-                            time_t now_time );
+                            time_t now_time);
 
-        int read_session_data_from_replication_area( sslid_replication_data* replication_area );
+        int read_session_data_from_replication_area(sslid_replication_data* replication_area);
 
     protected:
        int clear_expired_session_data();

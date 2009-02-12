@@ -75,26 +75,29 @@ protected:
 public:
 	static const std::string MODULE_NAME;
 
-	static const int THREAD_DIVISION_UP_STREAM = 0; //上りスレッド
-	static const int THREAD_DIVISION_DOWN_STREAM = 1;  //下りスレッド
+	static const int THREAD_DIVISION_UP_STREAM; //上りスレッド
+	static const int THREAD_DIVISION_DOWN_STREAM;  //下りスレッド
 
-	static const int END_FLAG_OFF = 0; //終了フラグOFF
-	static const int END_FLAG_ON = 1; //終了フラグON
+	static const int END_FLAG_OFF; //終了フラグOFF
+	static const int END_FLAG_ON; //終了フラグON
 
-	static const int ACCEPT_END_FLAG_OFF = 0; //ACCEPT完了フラグOFF
-	static const int ACCEPT_END_FLAG_ON = 1; //ACCEPT完了フラグON
+	static const int ACCEPT_END_FLAG_OFF; //ACCEPT完了フラグOFF
+	static const int ACCEPT_END_FLAG_ON; //ACCEPT完了フラグON
 
-	static const int SORRY_FLAG_ON = 1; //SORRY状態
-	static const int SORRY_FLAG_OFF = 0; //SORRY状態以外
+	static const int SORRY_FLAG_ON; //SORRY状態
+	static const int SORRY_FLAG_OFF; //SORRY状態以外
 
-	static const int SORRYSERVER_SWITCH_FLAG_OFF = 0; //sorryserver切替中以外
-	static const int SORRYSERVER_SWITCH_FLAG_ON = 1; //sorryserver切替中
+	static const int SORRYSERVER_SWITCH_FLAG_OFF; //sorryserver切替中以外
+	static const int SORRYSERVER_SWITCH_FLAG_ON; //sorryserver切替中
 
-	static const int REALSERVER_SWITCH_FLAG_OFF = 0; //realserver切替中以外
-	static const int REALSERVER_SWITCH_FLAG_ON = 1; //realserver切替中
+	static const int REALSERVER_SWITCH_FLAG_OFF; //realserver切替中以外
+	static const int REALSERVER_SWITCH_FLAG_ON; //realserver切替中
 
-	static const int EDIT_DIVISION_NO_EDIT = 0; //編集無し
-	static const int EDIT_DIVISION_EDIT = 1; //編集あり
+	static const int EDIT_DIVISION_NO_EDIT; //編集無し
+	static const int EDIT_DIVISION_EDIT; //編集あり
+
+	static const int FORWARDED_FOR_OFF; //forwarded_forフラグOFF
+	static const int FORWARDED_FOR_ON;  //forwarded_forフラグON
 
 public:
 	protocol_module_sessionless();

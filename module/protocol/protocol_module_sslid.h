@@ -72,7 +72,7 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         EVENT_TAG handle_client_recv(
                                 const boost::thread::id thread_id,
-                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                                 const size_t recvlen );
 
         EVENT_TAG handle_realserver_select(
@@ -82,12 +82,12 @@ class protocol_module_sslid : public ssl_protocol_module_base
         EVENT_TAG handle_realserver_select(
                                 const boost::thread::id thread_id,
                                 boost::asio::ip::udp::endpoint& rs_endpoint,
-                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen );
 
         EVENT_TAG handle_realserver_connect(
                                 const boost::thread::id thread_id,
-                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen );
 
         EVENT_TAG handle_realserver_connection_fail(
@@ -102,7 +102,7 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         EVENT_TAG handle_sorryserver_connect(
                                 const boost::thread::id thread_id,
-                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen );
 
         EVENT_TAG handle_sorryserver_connection_fail(
@@ -114,32 +114,32 @@ class protocol_module_sslid : public ssl_protocol_module_base
         EVENT_TAG handle_realserver_recv(
                                 const boost::thread::id thread_id,
                                 const boost::asio::ip::tcp::endpoint& rs_endpoint,
-                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                                 const size_t recvlen );
 
         EVENT_TAG handle_realserver_recv(
                                 const boost::thread::id thread_id,
                                 const boost::asio::ip::udp::endpoint& rs_endpoint,
-                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                                 const size_t recvlen );
 
         EVENT_TAG handle_sorryserver_recv(
                                 const boost::thread::id thread_id,
                                 const boost::asio::ip::tcp::endpoint& sorry_endpoint,
-                                const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
+                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                                 const size_t recvlen );
 
         EVENT_TAG handle_response_send_inform( const boost::thread::id thread_id );
 
         EVENT_TAG handle_client_connection_check(
                                 const boost::thread::id thread_id,
-                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen );
 
         EVENT_TAG handle_client_select(
                                 const boost::thread::id thread_id,
                                 boost::asio::ip::udp::endpoint& cl_endpoint,
-                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen );
 
         EVENT_TAG handle_client_send( const boost::thread::id thread_id );
@@ -169,7 +169,7 @@ class protocol_module_sslid : public ssl_protocol_module_base
     protected:
         int put_data_to_sendbuffer(
                                 const boost::thread::id& thread_id,
-                                boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
+                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen);
     protected:
         int timeout;

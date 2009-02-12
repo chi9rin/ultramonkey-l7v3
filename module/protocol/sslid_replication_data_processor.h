@@ -43,39 +43,39 @@ class sslid_replication_data_processor
         typedef    boost::function< LOG_LEVEL_TAG(void) >
                                         getloglevel_func_type;
         //! log output function object type
-        typedef    boost::function< void ( const unsigned int, const std::string&, const char*, int ) >
+        typedef    boost::function< void (const unsigned int, const std::string&, const char*, int) >
                                         logger_func_type;
 
     public:
-        sslid_replication_data_processor( int maxlist,
-                                                        char* sslid_replication_area_begain,
-                                                        int sslid_replication_area_size,
-                                                        const boost::asio::ip::tcp::endpoint& virtual_service_endpoint,
-                                                        getloglevel_func_type    ingetloglevel,
-                                                        logger_func_type inputLogFatal,
-                                                        logger_func_type inputLogError,
-                                                        logger_func_type inputLogWarn,
-                                                        logger_func_type inputLogInfo,
-                                                        logger_func_type inputLogDebug );
+        sslid_replication_data_processor(int maxlist,
+                                        char* sslid_replication_area_begain,
+                                        int sslid_replication_area_size,
+                                        const boost::asio::ip::tcp::endpoint& virtual_service_endpoint,
+                                        getloglevel_func_type    ingetloglevel,
+                                        logger_func_type inputLogFatal,
+                                        logger_func_type inputLogError,
+                                        logger_func_type inputLogWarn,
+                                        logger_func_type inputLogInfo,
+                                        logger_func_type inputLogDebug);
 
         virtual ~sslid_replication_data_processor();
 
-        void put_into_temp_list( const sslid_replication_temp_data& data );
+        void put_into_temp_list(const sslid_replication_temp_data& data);
 
         void write_replicaion_area();
 
         sslid_replication_data* get_replication_area();
 
-        void register_replication_area_lock( boost::function<void(void)> intable_lock );
+        void register_replication_area_lock(boost::function<void(void)> intable_lock);
 
-        void register_replication_area_unlock( boost::function<void(void)> intable_unlock );
+        void register_replication_area_unlock(boost::function<void(void)> intable_unlock);
 
     protected:
-        void get_from_temp_list( sslid_replication_temp_data& data );
+        void get_from_temp_list(sslid_replication_temp_data& data);
 
     protected:
         int maxlist;
-        int max_temp_list;// : int = 2*maxlist
+        int max_temp_list;                      //!  2*maxlist
         std::deque<sslid_replication_temp_data> temp_list;
         boost::mutex temp_list_mutex;
         boost::condition temp_list_condition;
@@ -83,12 +83,12 @@ class sslid_replication_data_processor
         boost::function<void(void)> replication_area_lock;
         boost::function<void(void)> replication_area_unlock;
         boost::asio::ip::tcp::endpoint virtual_service_endpoint;
-        getloglevel_func_type     getloglevel;        //!< get loglevel function object
-        logger_func_type putLogFatal;                   //!< fatal log output function object
-        logger_func_type putLogError;                   //!< error log output function object
-        logger_func_type putLogWarn;                  //!< warn log output function object
-        logger_func_type putLogInfo;                    //!< info log output function object
-        logger_func_type putLogDebug;               //!< debug log output function object
+        getloglevel_func_type getloglevel;        //! get loglevel function object
+        logger_func_type putLogFatal;             //! fatal log output function object
+        logger_func_type putLogError;             //! error log output function object
+        logger_func_type putLogWarn;              //! warn log output function object
+        logger_func_type putLogInfo;              //! info log output function object
+        logger_func_type putLogDebug;             //! debug log output function object
 };
 
 }

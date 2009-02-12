@@ -1,4 +1,5 @@
 #include "sslid_session_data_processor.h"
+#include "protocol_module_base.h"
 #include "boost/format.hpp"
 
 namespace l7vs
@@ -20,14 +21,14 @@ sslid_session_data_processor::sslid_session_data_processor(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in_function: Constructor sslid_session_data_processor::"
+        boost::format formatter("in_function : Constructor sslid_session_data_processor::"
                                 "sslid_session_data_processor(int maxlist, "
                                 "int timeout, sslid_replication_data_processor* replication_data_processor, "
                                 "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
                                 "logger_func_type inputLogError, logger_func_type inputLogWarn, "
-                                "logger_func_type inputLogInfo, logger_func_type inputLogDebug): "
+                                "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
                                 "maxlist = %d, timeout = %d, replication_data_processor = &(%d).");
-        formatter % maxlist % timeout % reinterpret_cast<int>(replication_data_processor);
+        formatter % maxlist % timeout % static_cast<void*>(replication_data_processor);
         putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -35,7 +36,7 @@ sslid_session_data_processor::sslid_session_data_processor(
     // parameter check
     if (maxlist < 0 || timeout < 0 || replication_data_processor == NULL)
     {
-        putLogDebug(30000, "out_function: Constructor sslid_session_data_processor::"
+        putLogDebug(30001, "out_function : Constructor sslid_session_data_processor::"
                             "sslid_session_data_processor(int maxlist, int timeout, "
                             "sslid_replication_data_processor* replication_data_processor, "
                             "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
@@ -49,7 +50,7 @@ sslid_session_data_processor::sslid_session_data_processor(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: Constructor sslid_session_data_processor::"
+        putLogDebug(30002, "out_function : Constructor sslid_session_data_processor::"
                     "sslid_session_data_processor(int maxlist, int timeout, "
                     "sslid_replication_data_processor* replication_data_processor, "
                     "getloglevel_func_type	ingetloglevel, logger_func_type inputLogFatal, "
@@ -67,7 +68,7 @@ sslid_session_data_processor::~sslid_session_data_processor()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in/out_function: Destructor sslid_session_data_processor::"
+        putLogDebug(30003, "in/out_function : Destructor sslid_session_data_processor::"
                     "~sslid_session_data_processor().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -86,17 +87,15 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in_function: int sslid_session_data_processor::"
+        boost::format formatter("in_function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data(const std::string& session_id, "
-                                "boost::asio::ip::tcp::endpoint& endpoint): "
+                                "boost::asio::ip::tcp::endpoint& endpoint) : "
                                 "session_id = %s, endpoint = [%s]:%d.");
         formatter % session_id % endpoint.address().to_string() % endpoint.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30004, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
-    // lock the session map
-    boost::mutex::scoped_lock sclock(session_map_mutex);
     int ret = 0;
 
     try
@@ -106,27 +105,30 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
         time_t oldtime = 0;
         boost::asio::ip::tcp::endpoint temp_endpoint;
 
-        itendpoint = session_endpoint_map.find(session_id);
-        itlasttime = session_lasttime_map.find(session_id);
-        // can't get the data
-        if (itendpoint == session_endpoint_map.end() ||
-             itlasttime == session_lasttime_map.end())
         {
-            /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
+            // lock the session map
+            boost::mutex::scoped_lock sclock(session_map_mutex);
+            itendpoint = session_endpoint_map.find(session_id);
+            itlasttime = session_lasttime_map.find(session_id);
+            // can't get the data
+            if (itendpoint == session_endpoint_map.end() ||
+                 itlasttime == session_lasttime_map.end())
             {
-                putLogDebug(30000, "out_function: int sslid_session_data_processor::"
-                            "get_endpoint_from_session_data(const std::string& session_id, "
-                            "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.",
-                            __FILE__, __LINE__);
-            }
-            /*------DEBUG LOG END------*/
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    putLogDebug(30005, "out_function : int sslid_session_data_processor::"
+                                "get_endpoint_from_session_data(const std::string& session_id, "
+                                "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.",
+                                __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
 
-            return 1;
+                return 1;
+            }
+            oldtime = itlasttime->second;
+            temp_endpoint = itendpoint->second;
         }
-        oldtime = itlasttime->second;
-        temp_endpoint = itendpoint->second;
-        sclock.unlock();
 
         // expired time check
         time_t now;
@@ -139,25 +141,27 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
         else
         {
             // time out
-            sclock.lock();
-            // delete session from the map
-            std::multimap<time_t, std::string>::iterator itbegin;
-            std::multimap<time_t, std::string>::iterator itend;
-            itbegin = lasttime_session_map.lower_bound(oldtime);
-            itend = lasttime_session_map.upper_bound(oldtime);
-
-            while (itbegin != itend)
             {
-                if (itbegin->first == oldtime && itbegin->second == session_id)
+                // lock the session map
+                boost::mutex::scoped_lock sclocktimeout(session_map_mutex);
+                // delete session from the map
+                std::multimap<time_t, std::string>::iterator itbegin;
+                std::multimap<time_t, std::string>::iterator itend;
+                itbegin = lasttime_session_map.lower_bound(oldtime);
+                itend = lasttime_session_map.upper_bound(oldtime);
+
+                while (itbegin != itend)
                 {
-                    lasttime_session_map.erase(itbegin);
-                    break;
+                    if (itbegin->first == oldtime && itbegin->second == session_id)
+                    {
+                        lasttime_session_map.erase(itbegin);
+                        break;
+                    }
+                    ++itbegin;
                 }
-                ++itbegin;
+                session_endpoint_map.erase(session_id);
+                session_lasttime_map.erase(session_id);
             }
-            session_endpoint_map.erase(session_id);
-            session_lasttime_map.erase(session_id);
-            sclock.unlock();
 
             // update the replication list
             sslid_replication_temp_data temp_data;
@@ -168,8 +172,8 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function: int sslid_session_data_processor::"
-                            "get_endpoint_from_session_data() : put_into_temp_list() --delete item-- END.",
+                putLogDebug(30006, "function : int sslid_session_data_processor::"
+                            "get_endpoint_from_session_data() : put_into_temp_list() --delete item-- end.",
                             __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -178,8 +182,8 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     catch(const std::exception& e)
     {
         std::cerr << "get_endpoint_from_session_data exception: error = " << e.what() << "." << std::endl;
-        boost::format formatter("function: int sslid_session_data_processor::"
-                                "get_endpoint_from_session_data() exception : error = %s.");
+        boost::format formatter("function : int sslid_session_data_processor::"
+                                "get_endpoint_from_session_data() : exception : error = %s.");
         formatter % -1 % e.what();
         putLogError(37000, formatter.str(), __FILE__, __LINE__);
 
@@ -189,11 +193,11 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("out_function: int sslid_session_data_processor::"
+        boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data(const std::string& session_id, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
         formatter % ret;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30007, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -215,13 +219,13 @@ int sslid_session_data_processor::write_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in_function: int sslid_session_data_processor::"
+        boost::format formatter("in_function : int sslid_session_data_processor::"
                                 "write_session_data(const std::string& session_id, "
                                 "const boost::asio::ip::tcp::endpoint& endpoint, "
                                 "time_t now_time) : session_id = %s, "
                                 "endpoint = [%s]:%d, now_time = %lu.");
         formatter % session_id % endpoint.address().to_string() % endpoint.port() % now_time;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30008, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -235,9 +239,9 @@ int sslid_session_data_processor::write_session_data(
              /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "out_function: int sslid_session_data_processor::"
+                putLogDebug(30009, "out_function : int sslid_session_data_processor::"
                             "write_session_data(const std::string& session_id, "
-                            "const boost::asio::ip::tcp::endpoint& endpoint,  time_t now_time) : "
+                            "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                             "return_value = 0.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -266,8 +270,8 @@ int sslid_session_data_processor::write_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function: int sslid_session_data_processor::"
-                            "write_session_data() : put_into_temp_list() --update item-- END.",
+                putLogDebug(30010, "function : int sslid_session_data_processor::"
+                            "write_session_data() : put_into_temp_list() --update item-- end.",
                             __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -283,9 +287,9 @@ int sslid_session_data_processor::write_session_data(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "out_function: int sslid_session_data_processor::"
+                        putLogDebug(30011, "out_function : int sslid_session_data_processor::"
                                     "write_session_data(const std::string& session_id, "
-                                    "const boost::asio::ip::tcp::endpoint& endpoint,  time_t now_time) : "
+                                    "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                                     "return_value = -1.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -296,7 +300,7 @@ int sslid_session_data_processor::write_session_data(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function: int sslid_session_data_processor::"
+                    putLogDebug(30012, "function : int sslid_session_data_processor::"
                                 "write_session_data() : clear_expired_session_data() END.",
                                 __FILE__, __LINE__);
                 }
@@ -319,8 +323,8 @@ int sslid_session_data_processor::write_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function: int sslid_session_data_processor::"
-                            "write_session_data() : put_into_temp_list() --add item-- END.",
+                putLogDebug(30013, "function : int sslid_session_data_processor::"
+                            "write_session_data() : put_into_temp_list() --add item-- end.",
                             __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -330,16 +334,16 @@ int sslid_session_data_processor::write_session_data(
     {
         std::cerr << "write_session_data exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function: int sslid_session_data_processor::"
-                                "write_session_data() exception : error = %s.");
+                                "write_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37001, formatter.str(), __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "out_function: int sslid_session_data_processor::"
-                        "write_session_data(const std::string& session_id,"
-                        "const boost::asio::ip::tcp::endpoint& endpoint,  time_t now_time) : "
+            putLogDebug(30014, "out_function: int sslid_session_data_processor::"
+                        "write_session_data(const std::string& session_id, "
+                        "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                         "return_value = -1.", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -350,9 +354,9 @@ int sslid_session_data_processor::write_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: int sslid_session_data_processor::"
-                    "write_session_data(const std::string& session_id,"
-                    "const boost::asio::ip::tcp::endpoint& endpoint,  time_t now_time) : "
+        putLogDebug(30015, "out_function : int sslid_session_data_processor::"
+                    "write_session_data(const std::string& session_id, "
+                    "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                     "return_value = 0.", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -370,22 +374,22 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in_function: int sslid_session_data_processor::"
+        boost::format formatter("in_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area(sslid_replication_data* replication_area) : "
-                                "replication_area = &(%d). ");
-        formatter % reinterpret_cast<int>(replication_area);
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                                "replication_area = &(%d).");
+        formatter % static_cast<void*>(replication_area);
+        putLogDebug(30016, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
     // null check
     if (replication_area == NULL)
     {
-        putLogError(37000, "Replication area is NULL.", __FILE__, __LINE__);
+        putLogError(37002, "Replication area is NULL.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "out_function: int sslid_session_data_processor::"
+            putLogDebug(30017, "out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area("
                                 "sslid_replication_data* replication_area) : return_value = 1", __FILE__, __LINE__);
         }
@@ -397,6 +401,20 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     try
     {
         // restore replication data to map
+        /*-------- DEBUG LOG --------*/
+        if (LOG_LV_DEBUG == getloglevel())
+        {
+            char* pdata = reinterpret_cast<char*>(replication_area);
+            std::string datadump;
+            protocol_module_base::dump_memory(pdata, maxlist, datadump);
+
+            boost::format formatter("function : int sslid_session_data_processor::"
+                                    "read_session_data_from_replication_area() : "
+                                    "data begin = 0, data_size = %d, data = %s.");
+            formatter % maxlist % datadump;
+            putLogDebug(30018, formatter.str(), __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
         for (int i = 0; i < maxlist; ++i)
         {
             if (replication_area[i].valid == 1)
@@ -416,10 +434,10 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     catch(const std::exception& e)
     {
         std::cerr << "read_session_data_from_replication_area exception : error = " << e.what() << "." << std::endl;
-        boost::format formatter("function: int sslid_session_data_processor::"
-                                            "read_session_data_from_replication_area() exception : error = %s.");
+        boost::format formatter("function : int sslid_session_data_processor::"
+                                            "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37003, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
@@ -427,11 +445,11 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("out_function: int sslid_session_data_processor::"
+        boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area(slid_replication_data* replication_area) : "
                                 "return_value = %d.");
         formatter % ret;
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30019, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -445,7 +463,7 @@ int sslid_session_data_processor::clear_expired_session_data()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function: int sslid_session_data_processor::"
+        putLogDebug(30020, "in_function : int sslid_session_data_processor::"
                     "clear_expired_session_data().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -460,7 +478,7 @@ int sslid_session_data_processor::clear_expired_session_data()
          /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "out_function: int sslid_session_data_processor::"
+            putLogDebug(30021, "out_function : int sslid_session_data_processor::"
                         "clear_expired_session_data() : return_value = 0.",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -494,9 +512,9 @@ int sslid_session_data_processor::clear_expired_session_data()
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30000, "function: int sslid_session_data_processor::"
+                putLogDebug(30022, "function : int sslid_session_data_processor::"
                             "clear_expired_session_data() : put_into_temp_list() "
-                            "--delete expired time item-- END.", __FILE__, __LINE__);
+                            "--delete expired time item-- end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -521,9 +539,9 @@ int sslid_session_data_processor::clear_expired_session_data()
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "function: int sslid_session_data_processor::"
+            putLogDebug(30023, "function : int sslid_session_data_processor::"
                         "clear_expired_session_data() : put_into_temp_list() "
-                        "--delete oldest time item-- END.", __FILE__, __LINE__);
+                        "--delete oldest time item-- end.", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
     }
@@ -531,10 +549,10 @@ int sslid_session_data_processor::clear_expired_session_data()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("out_function: int sslid_session_data_processor::"
+        boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "clear_expired_session_data() : return_value = %d.");
         formatter % ret;
-        putLogDebug(30000, formatter.str(),  __FILE__, __LINE__);
+        putLogDebug(30024, formatter.str(),  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 

@@ -1,4 +1,5 @@
 #include "sslid_replication_data_processor.h"
+#include "protocol_module_base.h"
 #include "boost/format.hpp"
 
 #define SSLID_SERVICE_NUMBER (128)
@@ -22,7 +23,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in_function: Constructor sslid_replication_data_processor::"
+        boost::format formatter("in_function : Constructor sslid_replication_data_processor::"
                                  "sslid_replication_data_processor(int maxlist, "
                                  "char* sslid_replication_area_begain, int sslid_replication_area_size, "
                                  "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
@@ -31,7 +32,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                                  "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
                                  "maxlist = %d, sslid_replication_area_begain = &(%d), "
                                  "sslid_replication_area_size = %d, virtual_service_endpoint = [%s]:%d.");
-        formatter % maxlist % reinterpret_cast<int>(sslid_replication_area_begain)
+        formatter % maxlist % static_cast<void*>(sslid_replication_area_begain)
         % sslid_replication_area_size % virtual_service_endpoint.address().to_string()
         % virtual_service_endpoint.port();
         putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
@@ -48,13 +49,19 @@ sslid_replication_data_processor::sslid_replication_data_processor(
     // parameter check
     if (maxlist < 0 || sslid_replication_area_size < 0)
     {
-        putLogDebug(30000, "out_function: Constructor sslid_replication_data_processor::"
-                     "sslid_replication_data_processor(int maxlist,"
-                     "char* sslid_replication_area_begain, int sslid_replication_area_size,"
-                     "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint,"
-                     "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal,"
-                     "logger_func_type inputLogError, logger_func_type inputLogWarn,"
-                     "logger_func_type inputLogInfo, logger_func_type inputLogDebug)", __FILE__, __LINE__);
+        /*-------- DEBUG LOG --------*/
+        if (LOG_LV_DEBUG == getloglevel())
+        {
+            putLogDebug(30001, "out_function : Constructor sslid_replication_data_processor::"
+                         "sslid_replication_data_processor(int maxlist, "
+                         "char* sslid_replication_area_begain, int sslid_replication_area_size, "
+                         "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
+                         "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
+                         "logger_func_type inputLogError, logger_func_type inputLogWarn, "
+                         "logger_func_type inputLogInfo, logger_func_type inputLogDebug).", __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+
         // waiting for jp response??????????????????
         throw std::logic_error("invalid parameter value.");
     }
@@ -67,7 +74,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "function: sslid_replication_data_processor::"
+            putLogDebug(30002, "function : sslid_replication_data_processor::"
                          "sslid_replication_data_processor() : Replication area is null.",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -86,20 +93,20 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                     sizeof(sslid_replication_data_header) * SSLID_SERVICE_NUMBER + used)
             {
                 // no enough replication area
-                putLogError(37000, "Over replication area.", __FILE__, __LINE__);
+                putLogError(37001, "Over replication area.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function: sslid_replication_data_processor::"
+                    putLogDebug(30003, "function : sslid_replication_data_processor::"
                                  "sslid_replication_data_processor() : Over replication area.",
                                  __FILE__, __LINE__);
-                    putLogDebug(30000, "out_function: Constructor sslid_replication_data_processor::"
+                    putLogDebug(30004, "out_function : Constructor sslid_replication_data_processor::"
                                  "sslid_replication_data_processor(int maxlist, "
                                  "char* sslid_replication_area_begain, int sslid_replication_area_size, "
                                  "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
                                  "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
                                  "logger_func_type inputLogError, logger_func_type inputLogWarn, "
-                                 "logger_func_type inputLogInfo, logger_func_type inputLogDebug)", __FILE__, __LINE__);
+                                 "logger_func_type inputLogInfo, logger_func_type inputLogDebug).", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
                 return;
@@ -140,13 +147,13 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                             static_cast<size_t>(sslid_replication_area_size) * DATA_SIZE)
                     {
                         // replication area is full
-                        putLogError(37000, "Replication area is full.", __FILE__, __LINE__);
+                        putLogError(37002, "Replication area is full.", __FILE__, __LINE__);
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(30000, "function: sslid_replication_data_processor::"
-                                         "sslid_replication_data_processor() : Replication area is full.",
-                                         __FILE__, __LINE__);
+                            putLogDebug(30005, "function : sslid_replication_data_processor::"
+                                        "sslid_replication_data_processor() : Replication area is full.",
+                                        __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -155,9 +162,34 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                         replication_area = reinterpret_cast<sslid_replication_data*>(sslid_replication_area_begain +
                                            sizeof(sslid_replication_data_header) * SSLID_SERVICE_NUMBER +
                                            used);
-                        memcpy(replication_area,
-                                sslid_replication_area_begain + head->offset,
-                                head->size);
+                        /*-------- DEBUG LOG --------*/
+                        if (LOG_LV_DEBUG == getloglevel())
+                        {
+                            std::string datadump;
+                            protocol_module_base::dump_memory(sslid_replication_area_begain+head->offset, head->size, datadump);
+
+                            boost::format formatter("function : sslid_replication_data_processor::"
+                                                    "sslid_replication_data_processor() : before memcpy (data dump) : "
+                                                    "data begin = %d, data_size = %d, data = %s.");
+                            formatter % head->offset % head->size % datadump;
+                            putLogDebug(30006, formatter.str(), __FILE__, __LINE__);
+                        }
+                        /*------DEBUG LOG END------*/
+                        memcpy(replication_area, sslid_replication_area_begain + head->offset, head->size);
+                        /*-------- DEBUG LOG --------*/
+                        if (LOG_LV_DEBUG == getloglevel())
+                        {
+                            char* pdata = reinterpret_cast<char*>(replication_area);
+                            std::string datadump;
+                            protocol_module_base::dump_memory(pdata, head->size, datadump);
+
+                            boost::format formatter("function : sslid_replication_data_processor::"
+                                                    "sslid_replication_data_processor() : after memcpy (data dump) : "
+                                                    "data begin = 0, data_size = %d, data = %s.");
+                            formatter % head->size % datadump;
+                            putLogDebug(30007, formatter.str(), __FILE__, __LINE__);
+                        }
+                        /*------DEBUG LOG END------*/
                         memset(sslid_replication_area_begain + head->offset, 0, head->size);
                         strncpy(pick->virtualserver_ip, virtual_service_endpoint.address().to_string().c_str(),
                                 sizeof(pick->virtualserver_ip)-1);
@@ -170,11 +202,11 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            boost::format formatter("Write replication area: head = (ip = %s, port = %d, "
-                                                                "size = %d, offset = %d).");
+                            boost::format formatter("Write replication area : head = (ip = %s, port = %d, "
+                                                    "size = %d, offset = %d).");
                             formatter % pick->virtualserver_ip % pick->virtualserver_port
                             % pick->size % pick->offset;
-                            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(30008, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -182,12 +214,12 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                 else
                 {
                     // replication area is full
-                    putLogError(37000, "Replication area is full.", __FILE__, __LINE__);
+                    putLogError(37003, "Replication area is full.", __FILE__, __LINE__);
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function: sslid_replication_data_processor::"
-                                     "sslid_replication_data_processor(): Replication area is full.",
+                        putLogDebug(30009, "function : sslid_replication_data_processor::"
+                                     "sslid_replication_data_processor() : Replication area is full.",
                                      __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
@@ -200,11 +232,11 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    boost::format formatter("Write replication area: head = (ip = %s, port = %d, "
+                    boost::format formatter("Write replication area : head = (ip = %s, port = %d, "
                                              "size = %d, offset = %d).");
                     formatter % pick->virtualserver_ip % pick->virtualserver_port
                     % pick->size % pick->offset;
-                    putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(30010, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -220,11 +252,11 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                         static_cast<size_t>(sslid_replication_area_size) * DATA_SIZE)
                 {
                     // replication area is full
-                    putLogError(37000, "Replication area is full.", __FILE__, __LINE__);
+                    putLogError(37004, "Replication area is full.", __FILE__, __LINE__);
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30000, "function: sslid_replication_data_processor::"
+                        putLogDebug(30011, "function : sslid_replication_data_processor::"
                                      "sslid_replication_data_processor() : Replication area is full.",
                                      __FILE__, __LINE__);
                     }
@@ -246,11 +278,11 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        boost::format formatter("Write replication area: head = (ip = %s, port = %d, "
+                        boost::format formatter("Write replication area : head = (ip = %s, port = %d, "
                                                  "size = %d, offset = %d).");
                         formatter % pick->virtualserver_ip % pick->virtualserver_port
                         % pick->size % pick->offset;
-                        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                        putLogDebug(30012, formatter.str(), __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -258,11 +290,11 @@ sslid_replication_data_processor::sslid_replication_data_processor(
             else
             {
                 // replication area is full
-                putLogError(37000, "Replication area is full.", __FILE__, __LINE__);
+                putLogError(37005, "Replication area is full.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30000, "function: sslid_replication_data_processor::"
+                    putLogDebug(30013, "function : sslid_replication_data_processor::"
                                  "sslid_replication_data_processor() : Replication area is full.",
                                  __FILE__, __LINE__);
                 }
@@ -274,13 +306,13 @@ sslid_replication_data_processor::sslid_replication_data_processor(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: Constructor sslid_replication_data_processor::"
-                     "sslid_replication_data_processor(int maxlist,"
-                     "char* sslid_replication_area_begain, int sslid_replication_area_size,"
-                     "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint,"
-                     "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal,"
+        putLogDebug(30014, "out_function: Constructor sslid_replication_data_processor::"
+                     "sslid_replication_data_processor(int maxlist, "
+                     "char* sslid_replication_area_begain, int sslid_replication_area_size, "
+                     "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
+                     "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
                      "logger_func_type inputLogError, logger_func_type inputLogWarn,"
-                     "logger_func_type inputLogInfo, logger_func_type inputLogDebug)"
+                     "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
                      , __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -293,7 +325,7 @@ sslid_replication_data_processor::~sslid_replication_data_processor()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in/out_function: Destructor sslid_replication_data_processor::"
+        putLogDebug(30015, "in/out_function : Destructor sslid_replication_data_processor::"
                      "~sslid_replication_data_processor().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -307,12 +339,12 @@ void sslid_replication_data_processor::put_into_temp_list(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in_function: void sslid_replication_data_processor::put_into_temp_list("
+        boost::format formatter("in_function : void sslid_replication_data_processor::put_into_temp_list("
                                  "const sslid_replication_temp_data& data) : data.op_code = %c, "
                                  "data.session_id = %s, data.last_time = %lu, data.endpoint = [%s]:%d.");
         formatter % data.op_code % data.session_id % data. realserver_addr.address().to_string() %
         data. realserver_addr.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30016, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -329,7 +361,7 @@ void sslid_replication_data_processor::put_into_temp_list(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: void sslid_replication_data_processor::"
+        putLogDebug(30017, "out_function : void sslid_replication_data_processor::"
                      "put_into_temp_list(const sslid_replication_temp_data& data).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -341,7 +373,7 @@ void sslid_replication_data_processor::write_replicaion_area()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function: void sslid_replication_data_processor::"
+        putLogDebug(30018, "in_function : void sslid_replication_data_processor::"
                      "write_replicaion_area().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -352,7 +384,7 @@ void sslid_replication_data_processor::write_replicaion_area()
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30000, "out_function: void sslid_replication_data_processor::"
+            putLogDebug(30019, "out_function : void sslid_replication_data_processor::"
                          "write_replicaion_area().", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -390,10 +422,10 @@ void sslid_replication_data_processor::write_replicaion_area()
                         {
                             char session_id_temp[SSLID_LENGTH+1] = {0};
                             memcpy(session_id_temp, replication_area[i].session_id, SSLID_LENGTH);
-                            boost::format formatter("function: void sslid_replication_data_processor::"
+                            boost::format formatter("function : void sslid_replication_data_processor::"
                                                      "write_replicaion_area() : 'A' : session_id = %s.");
                             formatter % session_id_temp;
-                            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(30020, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
 
@@ -406,11 +438,11 @@ void sslid_replication_data_processor::write_replicaion_area()
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            boost::format formatter("function: void sslid_replication_data_processor::"
-                                                     "write_replicaion_area() : 'A' : realserver_ip=%s,"
+                            boost::format formatter("function : void sslid_replication_data_processor::"
+                                                     "write_replicaion_area() : 'A' : realserver_ip = %s,"
                                                      "realserver_prot = %d.");
                             formatter % replication_area[i].realserver_ip % replication_area[i].realserver_port;
-                            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(30021, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
 
@@ -423,19 +455,17 @@ void sslid_replication_data_processor::write_replicaion_area()
                 // data update
                 for (i = 0; i < maxlist; ++i)
                 {
-                    if (memcmp(replication_area[i].session_id,
-                                 temp_data.session_id.c_str(),
-                                 SSLID_LENGTH) == 0 &&
-                            replication_area[i].valid == 1)
+                    if (replication_area[i].valid == 1 &&
+                        memcmp(replication_area[i].session_id, temp_data.session_id.c_str(), SSLID_LENGTH) == 0)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            boost::format formatter("function: void sslid_replication_data_processor::"
-                                                     "write_replicaion_area() : 'U' : last_time(before) = %lu,"
-                                                     "last_time(after) = %lu.");
+                            boost::format formatter("function : void sslid_replication_data_processor::"
+                                                    "write_replicaion_area() : 'U' : last_time(before) = %lu,"
+                                                    "last_time(after) = %lu.");
                             formatter % replication_area[i].last_time % temp_data.last_time;
-                            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(30022, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
 
@@ -453,19 +483,17 @@ void sslid_replication_data_processor::write_replicaion_area()
                 // data delete
                 for (i = 0; i < maxlist; ++i)
                 {
-                    if (memcmp(replication_area[i].session_id,
-                                 temp_data.session_id.c_str(),
-                                 SSLID_LENGTH) == 0 &&
-                            replication_area[i].valid == 1)
+                    if (replication_area[i].valid == 1 &&
+                        memcmp(replication_area[i].session_id, temp_data.session_id.c_str(), SSLID_LENGTH) == 0)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            boost::format formatter("function: void sslid_replication_data_processor::"
+                            boost::format formatter("function : void sslid_replication_data_processor::"
                                                      "write_replicaion_area() : 'D' : data valid(before) = %d,"
                                                      "data valid(after) = %d.");
                             formatter % replication_area[i].valid % 0;
-                            putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(30023, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
 
@@ -489,15 +517,19 @@ void sslid_replication_data_processor::write_replicaion_area()
             replication_area_unlock();
         }
         std::cerr << "write_replicaion_area exception : error " << e.what() << "." << std::endl;
-        boost::format formatter("function : void sslid_replication_data_processor::write_replicaion_area() "
+        boost::format formatter("function : void sslid_replication_data_processor::write_replicaion_area() : "
                                  "exception : error = %s.");
         formatter % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37006, formatter.str(), __FILE__, __LINE__);
     }
     catch (boost::thread_interrupted&)
     {
+        if (blocked)
+        {
+            replication_area_unlock();
+        }
         std::cerr << "write_replicaion_area boost::thread_interrupted exception." << std::endl;
-        putLogError(37000, "void sslid_replication_data_processor::write_replicaion_area() : "
+        putLogError(37007, "function : void sslid_replication_data_processor::write_replicaion_area() : "
                      "thread_interrupted exception.", __FILE__, __LINE__);
     }
     catch (...)
@@ -506,15 +538,15 @@ void sslid_replication_data_processor::write_replicaion_area()
         {
             replication_area_unlock();
         }
-        std::cerr << "sslid_replication_data_processor::write_replicaion_area() : Unkown exception." << std::endl;
-        putLogError(37000, "function: void sslid_replication_data_processor::write_replicaion_area() : "
-                     "Unkown exception.", __FILE__, __LINE__);
+        std::cerr << "sslid_replication_data_processor::write_replicaion_area() : Unknown exception." << std::endl;
+        putLogError(37008, "function : void sslid_replication_data_processor::write_replicaion_area() : "
+                     "Unknown exception.", __FILE__, __LINE__);
     }
 
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: void sslid_replication_data_processor::"
+        putLogDebug(30024, "out_function : void sslid_replication_data_processor::"
                      "write_replicaion_area().",  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -527,11 +559,11 @@ sslid_replication_data* sslid_replication_data_processor::get_replication_area()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("in/out_function: sslid_replication_data* "
+        boost::format formatter("in/out_function : sslid_replication_data* "
                                  "sslid_replication_data_processor::"
                                  "get_replication_area() : return_value = &(%d).");
-        formatter % reinterpret_cast<int>(replication_area);
-        putLogDebug(30000, formatter.str(),  __FILE__, __LINE__);
+        formatter % static_cast<void*>(replication_area);
+        putLogDebug(30025, formatter.str(),  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -546,7 +578,7 @@ void sslid_replication_data_processor::register_replication_area_lock(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function: void sslid_replication_data_processor::"
+        putLogDebug(30026, "in_function : void sslid_replication_data_processor::"
                      "register_replication_area_lock(boost::function<void(void)> intable_lock).",
                      __FILE__, __LINE__);
     }
@@ -557,7 +589,7 @@ void sslid_replication_data_processor::register_replication_area_lock(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: void sslid_replication_data_processor::"
+        putLogDebug(30027, "out_function : void sslid_replication_data_processor::"
                      "register_replication_area_lock(boost::function<void(void)> intable_lock).",
                      __FILE__, __LINE__);
     }
@@ -572,7 +604,7 @@ void sslid_replication_data_processor::register_replication_area_unlock(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function: void sslid_replication_data_processor::"
+        putLogDebug(30028, "in_function : void sslid_replication_data_processor::"
                      "register_replication_area_unlock(boost::function<void(void)> intable_unlock).",
                      __FILE__, __LINE__);
     }
@@ -583,7 +615,7 @@ void sslid_replication_data_processor::register_replication_area_unlock(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "out_function: void sslid_replication_data_processor::"
+        putLogDebug(30029, "out_function : void sslid_replication_data_processor::"
                      "register_replication_area_unlock(boost::function<void(void)> intable_unlock).",
                      __FILE__, __LINE__);
     }
@@ -598,7 +630,7 @@ void sslid_replication_data_processor::get_from_temp_list(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30000, "in_function: void sslid_replication_data_processor::"
+        putLogDebug(30030, "in_function : void sslid_replication_data_processor::"
                      "get_from_temp_list(sslid_replication_temp_data& data).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -617,13 +649,13 @@ void sslid_replication_data_processor::get_from_temp_list(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        boost::format formatter("out_function: void sslid_replication_data_processor::"
+        boost::format formatter("out_function : void sslid_replication_data_processor::"
                                  "get_from_temp_list(sslid_replication_temp_data& data) : "
                                  "data.op_code = %c, data.session_id = %s, data.last_time = %lu, "
                                  "data.endpoint = [%s]:%d.");
         formatter % data.op_code % data.session_id % data. realserver_addr.address().to_string() %
         data. realserver_addr.port();
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30031, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 }
