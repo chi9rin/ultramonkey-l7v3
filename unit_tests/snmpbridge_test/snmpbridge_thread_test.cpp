@@ -169,7 +169,7 @@ void	snmpbridge_test_thread1(){
 	int ret = 0;
 	ret = test.initialize();
 
-	// unit_test[1] $BJ#?t%9%l%C%I$+$i(Bsend_trap$B$r8F$S=P$7$F$b%(%i!<$,H/@8$7$J$$$3$H$r3NG'(B
+	// unit_test[1] 複数スレッドからsend_trapを呼び出してもエラーが発生しないことを確認
 #if 1
 	boost::thread	thd1( boost::bind( &sendtrap, 1, "message1" ) );
 	boost::thread	thd2( boost::bind( &sendtrap, 2, "message2" ) );
@@ -185,7 +185,7 @@ void	snmpbridge_test_thread1(){
 	thd3.join();
 	thd4.join();
 	thd5.join();
-	// unit_test[2] send_trap$B$H(Breload_config$B$rF1;~$K8F$S=P$7$F$b%(%i!<$,H/@8$7$J$$$3$H$r3NG'(B
+	// unit_test[2] send_trapとreload_configを同時に呼び出してもエラーが発生しないことを確認
 #if 0
 	boost::thread	thd6( boost::bind( &reloadconfig, 6 ) );
 	boost::thread	thd7( boost::bind( &reloadconfig, 7 ) );
@@ -209,7 +209,7 @@ void	snmpbridge_test_thread1(){
 	thd9.join();
 	thd10.join();
 
-	// unit_test[3] send_trap$B$H(Bchange_loglevel$B$rF1;~$K8F$S=P$7$F$b%(%i!<$,H/@8$7$J$$$3$H$r3NG'(B
+	// unit_test[3] send_trapとchange_loglevelを同時に呼び出してもエラーが発生しないことを確認
 #if 0
 	boost::thread	thd11( boost::bind( &changeloglevel, 11, LOG_CAT_SNMPAGENT_START_STOP, LOG_LV_DEBUG ) );
 	boost::thread	thd12( boost::bind( &changeloglevel, 12, LOG_CAT_SNMPAGENT_START_STOP, LOG_LV_DEBUG ) );
@@ -233,7 +233,7 @@ void	snmpbridge_test_thread1(){
 	thd14.join();
 	thd15.join();
 
-	// unit_test[4] send_trap$B$H(Bchange_loglevel_allcategory$B$rF1;~$K8F$S=P$7$F$b%(%i!<$,H/@8$7$J$$$3$H$r3NG'(B
+	// unit_test[4] send_trapとchange_loglevel_allcategoryを同時に呼び出してもエラーが発生しないことを確認
 #if 0
 	boost::thread	thd16( boost::bind( &changeloglevelallcategory, 16, LOG_LV_DEBUG ) );
 	boost::thread	thd17( boost::bind( &changeloglevelallcategory, 17, LOG_LV_DEBUG ) );
@@ -257,7 +257,7 @@ void	snmpbridge_test_thread1(){
 	thd19.join();
 	thd20.join();
 
-	// unit_test[5] send_trap$B$H(Bsend_mibcollection$B$rF1;~$K8F$S=P$7$F$b%(%i!<$,H/@8$7$J$$$3$H$r3NG'(B
+	// unit_test[5] send_trapとsend_mibcollectionを同時に呼び出してもエラーが発生しないことを確認
 	struct l7ag_mibrequest_message payload;
 #if 0
 	boost::thread	thd21( boost::bind( &sendmibcollection, 21, &payload ) );
@@ -289,7 +289,7 @@ void	serverthread(){
 	int ret = 0;
 	ret = test1.initialize();
 #if 1
-	//vs$B$r$R$H$D$@$1DI2C$7$F$*$/(B
+	//vsをひとつだけ追加しておく
 	l7vs::replication rep( io_service1 );
 	l7vs::error_code err;
 	l7vs::virtualservice_element element;
@@ -324,7 +324,7 @@ void	handle_write(boost::asio::ip::tcp::socket& s);
 void	handle_read(boost::asio::ip::tcp::socket& s){
 //	std::cout << "client handle_read size:" << recvbuffer.size() << std::endl;
 //	std::cout << recvbuffer.data() << std::endl;//debug
-	// unit_test[6] $BDL?.$r9T$$!"(Bsnmpbridge$B$,Aw?.$7$?%G!<%?$N%A%'%C%/!JAw?.%G!<%?$O(Bsend_mibcollection$B$N>l9g!K(B
+	// unit_test[6] 通信を行い、snmpbridgeが送信したデータのチェック（送信データはsend_mibcollectionの場合）
 	//check recv data
 	struct l7ag_message_header* header = (struct l7ag_message_header*) recvbuffer.data();
 	BOOST_CHECK_EQUAL( header->magic[0], 0x4d );

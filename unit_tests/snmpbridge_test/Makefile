@@ -42,6 +42,6 @@ $(TARGET2):	$(OBJS2)
 	$(CPP) $(INCLUDES) -o $@ $(OBJS2) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(TARGET2) $(OBJS)
+	rm -f $(TARGET) $(TARGET2) $(OBJS) $(OBJS2)
 
 
