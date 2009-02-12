@@ -825,14 +825,14 @@ protocol_module_cinsert::handle_session_initialize(
 				const boost::asio::ip::udp::endpoint& client_endpoint_udp )
 {
 
-	session_thread_data_cinsert*	up_thread_data		= NULL;
-	session_thread_data_cinsert*	down_thread_data	= NULL;
+//	session_thread_data_cinsert_sp		up_thread_data;
+//	session_thread_data_cinsert_sp		down_thread_data;
 	recive_data						client_recv_data;
 	char*							buffer				= NULL;
 
 	try
 	{
-		up_thread_data = new session_thread_data_cinsert;
+		session_thread_data_cinsert_sp	up_thread_data( new session_thread_data_cinsert );
 
 		up_thread_data->thread_id				= up_thread_id;
 		up_thread_data->thread_division			= THREAD_DIVISION_UP_STREAM;
@@ -850,7 +850,7 @@ protocol_module_cinsert::handle_session_initialize(
 
 		up_thread_data->recive_data_map[ client_endpoint_tcp ] = client_recv_data;
 
-		down_thread_data = new session_thread_data_cinsert;
+		session_thread_data_cinsert_sp	down_thread_data( new session_thread_data_cinsert );
 
 		down_thread_data->thread_id					= down_thread_id;
 		down_thread_data->thread_division			= THREAD_DIVISION_DOWN_STREAM;
@@ -880,8 +880,8 @@ protocol_module_cinsert::handle_session_finalize(
 				const boost::thread::id down_thread_id )
 {
 
-	session_thread_data_cinsert*	up_thread_data		= NULL;
-	session_thread_data_cinsert*	down_thread_data	= NULL;
+	session_thread_data_cinsert_sp		up_thread_data;
+	session_thread_data_cinsert_sp		down_thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	bool							lock_result = false;
@@ -993,7 +993,7 @@ protocol_module_cinsert::handle_session_finalize(
 
 			up_thread_data->session_thread_data_mutex->unlock();
 
-			delete up_thread_data;
+//			delete up_thread_data;
 
 		}
 
@@ -1024,7 +1024,7 @@ protocol_module_cinsert::handle_session_finalize(
 
 			down_thread_data->session_thread_data_mutex->unlock();
 
-			delete down_thread_data;
+//			delete down_thread_data;
 
 		}
 
@@ -1041,7 +1041,7 @@ protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 {
 
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	bool							lock_result = false;
 
@@ -1105,7 +1105,7 @@ protocol_module_cinsert::handle_client_recv(
 
 	using namespace boost::xpressive;
 
-	session_thread_data_cinsert*	thread_data			= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	send_status*					send_status_add		= NULL;
 	char*							buffer_1			= NULL;
 	char*							buffer_2			= NULL;
@@ -1688,8 +1688,8 @@ protocol_module_cinsert::handle_realserver_select(
 {
 
 	using namespace boost::xpressive;
-	session_thread_data_cinsert*	up_thread_data		= NULL;
-	session_thread_data_cinsert*	down_thread_data	= NULL;
+	session_thread_data_cinsert_sp		up_thread_data;
+	session_thread_data_cinsert_sp		down_thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -1952,7 +1952,7 @@ protocol_module_cinsert::handle_realserver_connect(
 				size_t& datalen )
 {
 
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -2314,7 +2314,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	bool							lock_result = false;
 
@@ -2371,7 +2371,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_id )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -2500,8 +2500,8 @@ protocol_module_cinsert::handle_sorryserver_select(
 				const boost::thread::id thread_id,
 				boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
-	session_thread_data_cinsert*	up_thread_data		= NULL;
-	session_thread_data_cinsert*	down_thread_data	= NULL;
+	session_thread_data_cinsert_sp		up_thread_data;
+	session_thread_data_cinsert_sp		down_thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -2645,7 +2645,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 				boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 				size_t& datalen )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -3032,7 +3032,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	bool							lock_result = false;
 
@@ -3089,7 +3089,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread_id )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -3222,7 +3222,7 @@ protocol_module_cinsert::handle_realserver_recv(
 {
 	using namespace boost::xpressive;
 
-	session_thread_data_cinsert*	thread_data			= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	send_status*					send_status_add		= NULL;
 	char*							buffer_1			= NULL;
 	char*							buffer_2			= NULL;
@@ -3801,7 +3801,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 {
 	using namespace boost::xpressive;
 
-	session_thread_data_cinsert*	thread_data			= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	send_status*					send_status_add		= NULL;
 	char*							buffer_1			= NULL;
 	char*							buffer_2			= NULL;
@@ -4375,7 +4375,7 @@ protocol_module_cinsert::handle_client_connection_check(
 				size_t& datalen )
 {
 
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -4750,7 +4750,7 @@ protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 {
 
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -4928,7 +4928,7 @@ protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id )
 {
 
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -5139,7 +5139,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -5352,7 +5352,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 				const boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
 
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
@@ -5492,7 +5492,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
-	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_cinsert_sp		thread_data;
 	session_thread_data_map_itr		thread_data_itr;
 	recive_data_map_itr				recive_data_itr;
 	send_status_list_itr			send_status_itr;
