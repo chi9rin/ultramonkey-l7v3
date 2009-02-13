@@ -1,7 +1,7 @@
 #include <vector>
 #include <list>
-#include <sstream>
 #include <algorithm>
+#include <iostream>
 #include <boost/thread/pthread/mutex.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/format.hpp>
@@ -71,7 +71,7 @@ bool protocol_module_sessionless::is_tcp()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10003, "in/out_function : bool protocol_module_sessionless::is_tcp() : "
+        putLogDebug(10000, "in/out_function : bool protocol_module_sessionless::is_tcp() : "
                     "return_value = true.", __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -86,7 +86,7 @@ bool protocol_module_sessionless::is_udp()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10004, "in/out_function : bool protocol_module_sessionless::is_udp() : "
+        putLogDebug(10001, "in/out_function : bool protocol_module_sessionless::is_udp() : "
                     "return_value = false.", __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -120,7 +120,7 @@ void protocol_module_sessionless::initialize(rs_list_itr_func_type	inlist_begin,
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10005, "in_function : void protocol_module_sessionless::initialize("
+        putLogDebug(10003, "in_function : void protocol_module_sessionless::initialize("
                     "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end, "
                     "rs_list_itr_next_func_type inlist_next, boost::function< void( void ) > "
                     "inlist_lock, boost::function< void( void ) > inlist_unlock).", __FILE__, __LINE__ );
@@ -141,7 +141,7 @@ void protocol_module_sessionless::initialize(rs_list_itr_func_type	inlist_begin,
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10006, "out_function : void protocol_module_sessionless::initialize("
+        putLogDebug(10004, "out_function : void protocol_module_sessionless::initialize("
                     "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end, "
                     "rs_list_itr_next_func_type inlist_next, boost::function< void( void ) > "
                     "inlist_lock, boost::function< void( void ) > inlist_unlock).", __FILE__, __LINE__ );
@@ -155,7 +155,7 @@ void protocol_module_sessionless::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10007, "in_function : void protocol_module_sessionless::finalize().", __FILE__,
+        putLogDebug(10005, "in_function : void protocol_module_sessionless::finalize().", __FILE__,
                     __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -175,7 +175,7 @@ void protocol_module_sessionless::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10007, "function : void protocol_module_sessionless::finalize() : "
+        putLogDebug(10006, "function : void protocol_module_sessionless::finalize() : "
                     "rs_list_begin.clear(), rs_list_end.clear(), rs_list_next.clear(), rs_list_lock.clear(), rs_list_unlock.clear() end.", __FILE__,
                     __LINE__ );
     }
@@ -205,7 +205,7 @@ void protocol_module_sessionless::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10007, "function : void protocol_module_sessionless::finalize() : "
+        putLogDebug(10008, "function : void protocol_module_sessionless::finalize() : "
                     "schedule_tcp.clear(), schedule_udp.clear() end.", __FILE__,
                     __LINE__ );
     }
@@ -219,8 +219,8 @@ void protocol_module_sessionless::finalize()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10007, "function : void protocol_module_sessionless::finalize() : "
-                    "forwarded_for = 0, sorry_uri.assign('\0') end.", __FILE__,
+        putLogDebug(10009, "function : void protocol_module_sessionless::finalize() : "
+                    "forwarded_for = 0, sorry_uri.assign('\\0') end.", __FILE__,
                     __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -248,7 +248,7 @@ bool protocol_module_sessionless::is_use_sorry()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10007, "in/out_function : bool protocol_module_sessionless::is_use_sorry() : "
+        putLogDebug(10010, "in/out_function : bool protocol_module_sessionless::is_use_sorry() : "
                     "return_value = true.", __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -261,7 +261,7 @@ void protocol_module_sessionless::handle_rslist_update()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10005, "in/out_function : void protocol_module_sessionless::handle_rslist_update().", __FILE__,
+        putLogDebug(10011, "in/out_function : void protocol_module_sessionless::handle_rslist_update().", __FILE__,
                     __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -286,7 +286,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
             argsdump += *it;
         }
         formatter % argsdump;
-        putLogDebug(10010, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10012, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -295,7 +295,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
     check_result.flag = true;
     bool forward_checked = false;
     bool sorryuri_checked = false;
-    const std::string regex_match_str = "(/([0-9a-zA-Z$\\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)+";
+    const std::string regex_match_str = "(/([[:digit:][:alpha:]$\\-_.+!*'(),;:@&=]|%[:xdigit:]{2})*)+";
     typedef std::vector<std::string>::const_iterator vec_str_it;
 
     try
@@ -341,7 +341,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                             //set check result message
                             check_result.message = ostr.str();
 
-                            putLogError(17000, check_result.message, __FILE__, __LINE__ );
+                            putLogError(17001, check_result.message, __FILE__, __LINE__ );
                             //loop break;
                             break;
                         }
@@ -368,7 +368,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                                 check_result.flag = false;
                                 //set check result message
                                 check_result.message = ostr.str();
-                                putLogError(17000, check_result.message, __FILE__, __LINE__ );
+                                putLogError(17002, check_result.message, __FILE__, __LINE__ );
                                 //loop break
                                 break;
                             }
@@ -381,7 +381,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                         check_result.flag = false;
                         //set check result message
                         check_result.message = "You have to set option value '-S/--sorry-uri'.";
-                        putLogError(17000, check_result.message, __FILE__,
+                        putLogError(17003, check_result.message, __FILE__,
                                     __LINE__ );
                         //loop break
                         break;
@@ -394,7 +394,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                     check_result.flag = false;
                     //set check result message
                     check_result.message = "Cannot set multiple option '-S/--sorry-uri'.";
-                    putLogError(17000, check_result.message, __FILE__,
+                    putLogError(17004, check_result.message, __FILE__,
                                 __LINE__ );
                     //loop break
                     break;
@@ -407,7 +407,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                 check_result.flag = false;
                 //set check result message
                 check_result.message = "Option error.";
-                putLogError(17000, check_result.message, __FILE__, __LINE__ );
+                putLogError(17005, check_result.message, __FILE__, __LINE__ );
                 //loop break
                 break;
             }
@@ -416,18 +416,18 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
     catch (const std::exception& ex)
     {
         check_result.flag = false;
-        std::cerr << "check parameter exception: error = " << ex.what() << "." << std::endl;
+        std::cerr << "check parameter exception : error = " << ex.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::check_message_result "
                                 "protocol_module_sessionless::check_parameter() exception : "
                                 "error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17006, formatter.str(), __FILE__, __LINE__ );
     }
     catch (...)
     {
         check_result.flag = false;
         std::cerr << "protocol_module_sessionless::check_parameter() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
+        putLogError(17007, "function : protocol_module_base::check_message_result "
                     "protocol_module_sessionless::check_parameter() : "
                     "Unknown exception.", __FILE__, __LINE__ );
     }
@@ -440,7 +440,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                                 "const std::vector<std::string>& args) : return_value = ("
                                 "check_message_result.flag = %d, check_message_result.message = %s).");
         formatter % check_result.flag % check_result.message;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10013, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return check_result;
@@ -465,7 +465,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
             argsdump += *it;
         }
         formatter % argsdump;
-        putLogDebug(10010, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10014, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     //set check result flag to true
@@ -473,7 +473,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
     check_result.flag = true;
     bool forward_checked = false;
     bool sorryuri_checked = false;
-    const std::string regex_match_str = "(/([0-9a-zA-Z$\\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)+";
+    const std::string regex_match_str = "(/([[:digit:][:alpha:]$\\-_.+!*'(),;:@&=]|%[:xdigit:]{2})*)+";
 
     typedef std::vector<std::string>::const_iterator vec_str_it;
 
@@ -507,7 +507,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                             check_result.flag = false;
                             //set check result message
                             check_result.message = "You have to set option value '-S/--sorry-uri'.";
-                            putLogError(17000, check_result.message, __FILE__,
+                            putLogError(17008, check_result.message, __FILE__,
                                         __LINE__ );
                             //loop break
                             break;
@@ -522,7 +522,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                             check_result.flag = false;
                             //set check result message
                             check_result.message = ostr.str();
-                            putLogError(17000, check_result.message, __FILE__,
+                            putLogError(17009, check_result.message, __FILE__,
                                         __LINE__ );
                             //loop break
                             break;
@@ -549,7 +549,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                 check_result.flag = false;
                                 //set check result message
                                 check_result.message = ostr.str();
-                                putLogError(17000, check_result.message, __FILE__,
+                                putLogError(17010, check_result.message, __FILE__,
                                             __LINE__ );
 
                                 break;
@@ -563,7 +563,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                         check_result.flag = false;
                         //set check result message
                         check_result.message = "You have to set option value '-S/--sorry-uri'.";
-                        putLogError(17000, check_result.message, __FILE__,
+                        putLogError(17011, check_result.message, __FILE__,
                                     __LINE__ );
 
                         break;
@@ -576,7 +576,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                     check_result.flag = false;
                     //set check result message
                     check_result.message = "Cannot set multiple option '-S/--sorry-uri'.";
-                    putLogError(17000, check_result.message, __FILE__,
+                    putLogError(17012, check_result.message, __FILE__,
                                 __LINE__ );
 
                     break;
@@ -590,7 +590,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                 //set check result message
                 check_result.message = "Option error.";
 
-                putLogError(17000, check_result.message, __FILE__,
+                putLogError(17013, check_result.message, __FILE__,
                             __LINE__ );
 
                 break;
@@ -612,16 +612,16 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
         check_result.flag = false;
         std::cerr << "set parameter exception : result=false, error = " << ex.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::check_message_result "
-                                "protocol_module_sessionless::set_parameter() exception : "
+                                "protocol_module_sessionless::set_parameter() : exception : "
                                 "error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17014, formatter.str(), __FILE__, __LINE__ );
     }
     catch (...)
     {
         check_result.flag = false;
         std::cerr << "protocol_module_sessionless::set_parameter() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
+        putLogError(17015, "function : protocol_module_base::check_message_result "
                     "protocol_module_sessionless::set_parameter() : "
                     "Unknown exception.", __FILE__, __LINE__ );
     }
@@ -634,7 +634,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                 "const std::vector<std::string>& args) : return_value = ("
                                 "check_message_result.flag = %d, check_message_result.message = %s).");
         formatter % check_result.flag % check_result.message;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10015, formatter.str(), __FILE__, __LINE__ );
     }
     /*-------- DEBUG LOG END--------*/
 
@@ -660,7 +660,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::add_para
             argsdump += *it;
         }
         formatter % argsdump;
-        putLogDebug(10010, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10016, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     check_message_result check_result;
@@ -674,7 +674,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::add_para
         check_result.flag = false;
         //set check result's message
         check_result.message = "Cannot add option.";
-        putLogError(17000, check_result.message, __FILE__, __LINE__ );
+        putLogError(17016, check_result.message, __FILE__, __LINE__ );
     }
 
     /*-------- DEBUG LOG --------*/
@@ -685,7 +685,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::add_para
                                 "const std::vector<std::string>& args) : return_value = ("
                                 "check_message_result.flag = %d, check_message_result.message = %s).");
         formatter % check_result.flag % check_result.message;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10017, formatter.str(), __FILE__, __LINE__ );
     }
     /*-------- DEBUG LOG --------*/
 
@@ -701,7 +701,7 @@ void protocol_module_sessionless::register_schedule(tcp_schedule_func_type insch
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10005, "in_function : void protocol_module_sessionless::register_schedule("
+        putLogDebug(10018, "in_function : void protocol_module_sessionless::register_schedule("
                     "tcp_schedule_func_type inschedule).", __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -709,7 +709,7 @@ void protocol_module_sessionless::register_schedule(tcp_schedule_func_type insch
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10005, "out_function : void protocol_module_sessionless::register_schedule("
+        putLogDebug(10019, "out_function : void protocol_module_sessionless::register_schedule("
                     "tcp_schedule_func_type inschedule).", __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
@@ -722,7 +722,7 @@ void protocol_module_sessionless::register_schedule(udp_schedule_func_type insch
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(10002,
+        putLogDebug(10020,
                     "in/out_function : void protocol_module_sessionless::register_schedule(udp_schedule_func_type inschedule).",
                     __FILE__, __LINE__ );
     }
@@ -747,7 +747,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
                                 "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : "
                                 "up_thread_id = %d, down_thread_id = %d, client_endpoint_tcp = [%s]:%d.");
         formatter % up_thread_id % down_thread_id % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port() ;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10021, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -763,7 +763,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
         {
             boost::format formatter("new : address = &(%d), size = %lu.");
             formatter % static_cast<void*>(p_up) % sizeof(session_thread_data_sessionless);
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10022, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         p_up->thread_id = up_thread_id;
@@ -799,7 +799,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
             formatter % p_up->thread_id % p_up->thread_division % p_up->pair_thread_id % p_up->accept_end_flag
             % p_up->end_flag % p_up->sorry_flag % p_up->sorryserver_switch_flag % p_up->realserver_switch_flag
             % p_up->last_status % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port();
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10023, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -809,7 +809,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
         {
             boost::format formatter("new : address = &(%d), size = %lu.");
             formatter % static_cast<void*>(p_down) % sizeof(session_thread_data_sessionless);
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10024, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         p_down->thread_id = down_thread_id;
@@ -829,12 +829,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_session_initialize() : session_thread_data_sessionless(down_thread_id) : "
                                     "accept_end_flag = %d, end_flag = %d, "
-                                    "pair_thread_id = %d, realserver_switch_flag = %d, sorry_flag = %d, "
+                                    "pair_thread_id = %d, sorryserver_switch_flag = %d, realserver_switch_flag = %d, sorry_flag = %d, "
                                     "thread_division= %d, thread_id = %d, last_status = %d, client_endpoint_tcp = [%s]:%d.");
             formatter % p_down->thread_id % p_down->thread_division % p_down->pair_thread_id % p_down->accept_end_flag
             % p_down->end_flag % p_down->sorry_flag % p_down->sorryserver_switch_flag
             % p_down->realserver_switch_flag % p_down->last_status % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port();
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10025, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -848,7 +848,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
     catch (const std::bad_alloc&)
     {
         std::cerr << "handle_session_initialize exception : Could not allocate memory." << std::endl;
-        putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
+        putLogError(17017, "Could not allocate memory.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::exception& ex)
@@ -857,13 +857,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_session_initialize() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17018, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "rotocol_module_sessionless::handle_session_initialize() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
+        putLogError(17019, "function : protocol_module_base::check_message_result "
                     "protocol_module_sessionless::handle_session_initialize() : "
                     "Unknown exception.", __FILE__, __LINE__ );
 
@@ -878,7 +878,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
                                 "const boost::thread::id down_thread_id, const boost::asio::ip::tcp::endpoint& client_endpoint_tcp, "
                                 "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10026, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -900,7 +900,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                                 "const boost::thread::id down_thread_id): "
                                 "up_thread_id = %d, down_thread_id = %d.");
         formatter % up_thread_id % down_thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10027, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -929,7 +929,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(recv_data.recive_buffer2);
-                        putLogDebug(10005, formatter.str(), __FILE__,
+                        putLogDebug(10028, formatter.str(), __FILE__,
                                     __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -941,7 +941,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(recv_data.recive_buffer1);
-                        putLogDebug(10005, formatter.str(), __FILE__,
+                        putLogDebug(10029, formatter.str(), __FILE__,
                                     __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -955,7 +955,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_up);
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10030, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 delete p_up;
@@ -978,7 +978,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(recv_data.recive_buffer2);
-                        putLogDebug(10005, formatter.str(), __FILE__,
+                        putLogDebug(10031, formatter.str(), __FILE__,
                                     __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -991,7 +991,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(recv_data.recive_buffer2);
-                        putLogDebug(10005, formatter.str(), __FILE__,
+                        putLogDebug(10032, formatter.str(), __FILE__,
                                     __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -1003,7 +1003,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_down);
-                    putLogDebug(10005, formatter.str(), __FILE__,
+                    putLogDebug(10033, formatter.str(), __FILE__,
                                 __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -1020,13 +1020,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_session_finalize() : exception : error = %s.");
         formatter % STOP % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17020, formatter.str(), __FILE__, __LINE__ );
         status = STOP;
     }
     catch (...)
     {
         std::cerr << "Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17021, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_session_finalize() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = STOP;
@@ -1039,7 +1039,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
                                 "handle_session_finalize(const boost::thread::id up_thread_id, "
                                 "const boost::thread::id down_thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10034, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return status;
@@ -1057,7 +1057,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_accept(const boost::thread::id thread_id) : thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10035, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -1072,7 +1072,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
         session_thread_it = session_thread_data_map.find(thread_id);
         if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
         {
-            putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+            putLogError(17022, "Invalid thread id.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -1083,7 +1083,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+            putLogDebug(10036, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                         "handle_accept(const boost::thread::id thread_id) : ACCEPT_END_FLAG_ON.", __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -1109,7 +1109,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_accept() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10037, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -1120,14 +1120,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_accept() : exception : error = %s.");
         formatter % FINALIZE % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17023, formatter.str(), __FILE__, __LINE__ );
 
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
+        putLogError(17024, "function : protocol_module_base::check_message_result "
                     "protocol_module_sessionless::handle_accept() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -1139,7 +1139,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_accept(const boost::thread::id thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10038, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return status;
@@ -1156,12 +1156,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        std::string buffer(recvbuffer.data(), recvbuffer.size() < recvlen ? recvbuffer.size() : recvlen);
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_recv(const boost::thread::id thread_id, "
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : thread_id = %d, recvbuffer = %s, recvlen = %d.");
-        formatter % thread_id % recvbuffer.data() % recvlen;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        formatter % thread_id % buffer.c_str() % recvlen;
+        putLogDebug(10039, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -1175,6 +1176,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
     size_t content_length_header_len = 0;
     size_t content_len_value = 0;
     size_t pos = 0;
+    size_t buffer_size = 0;
     const size_t cr_lf_len = strlen("\r\n\r\n");
     std::string str_value;
     const std::string http_header = "";
@@ -1191,7 +1193,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
     if (recvlen > recvbuffer.size())
     {
         std::cerr << "handle_client_recv() : Data size bigger than buffer size." << std::endl;
-        putLogError(17000, "Data size bigger than buffer size.", __FILE__,
+        putLogError(17025, "Data size bigger than buffer size.", __FILE__,
                     __LINE__ );
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
@@ -1201,7 +1203,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d.");
             formatter % FINALIZE;
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10040, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return FINALIZE;
@@ -1215,7 +1217,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17026, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -1233,7 +1235,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
             if (recive_data_it == session_data->recive_data_map.end())
             {
-                putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+                putLogError(17027, "Invalid endpoint.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -1246,7 +1248,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             it = std::find_if(it, it_end, data_send_ok());
             if (it != it_end)
             {
-                putLogError(17000, "Sending data is not correct.", __FILE__, __LINE__ );
+                putLogError(17028, "Sending data is not correct.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -1255,15 +1257,33 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             it = std::adjacent_find(it, it_end, data_send_repeated());
             if (it != it_end)
             {
-                putLogError(17000, "Sending data is not correct.", __FILE__, __LINE__ );
+                putLogError(17029, "Sending data is not correct.", __FILE__, __LINE__ );
                 throw -1;
             }
 
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step1--send status list loop start.", __FILE__, __LINE__ );
+                std::string datadump;
+                boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                        "send_rest_size = %d, send_possible_size = %d, "
+                                        "send_offset = %d, unsend_size = %d, edit_division = %d.");
+                int i = 0;
+                for (it = recv_data.send_status_list.begin();
+                     it != recv_data.send_status_list.end();
+                     ++it, ++i)
+                {
+                    formatter % i % it->status % it->send_end_size
+                              % it->send_rest_size % it->send_possible_size
+                              % it->send_offset % it->unsend_size % it->edit_division;
+                    datadump += formatter.str();
+                }
+
+                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : send status list dump : send status list size = %d.%s");
+
+                formatter % recv_data.send_status_list.size() % datadump;
+                putLogDebug(10041, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -1299,16 +1319,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step1--send status list loop end.", __FILE__, __LINE__ );
-            }
-            /*------DEBUG LOG END------*/
+                std::string datadump;
+                boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                        "send_rest_size = %d, send_possible_size = %d, "
+                                        "send_offset = %d, unsend_size = %d, edit_division = %d.");
+                int i = 0;
+                for (it = recv_data.send_status_list.begin();
+                     it != recv_data.send_status_list.end();
+                     ++it, ++i)
+                {
+                    formatter % i % it->status % it->send_end_size
+                              % it->send_rest_size % it->send_possible_size
+                              % it->send_offset % it->unsend_size % it->edit_division;
+                    datadump += formatter.str();
+                }
 
-            /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
-            {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step2--data buffer size process start.", __FILE__, __LINE__ );
+                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : send status list dump : send status list size = %d.%s");
+
+                formatter % recv_data.send_status_list.size() % datadump;
+                putLogDebug(10042, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -1320,156 +1350,123 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                 //buffer is need reallcate
                 if (recv_data.recive_buffer_max_size < data_remain_size + recvlen)
                 {
-                    //first recive
-                    if (recv_data.recive_buffer == NULL)
+                    buffer_size = (data_remain_size + recvlen) > MAX_BUFFER_SIZE ? (data_remain_size + recvlen) : MAX_BUFFER_SIZE;
+                    //recive_buffer1's memery allocate and initialization
+                    buffer1 = new char[buffer_size];
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
                     {
-                        //recive_buffer1's memery allocate and initialization
-                        recv_data.recive_buffer1 = new char[MAX_BUFFER_SIZE];
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("new : address = &(%d), size = %lu.");
-                            formatter % static_cast<void*>(recv_data.recive_buffer1) % (MAX_BUFFER_SIZE);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*-------- DEBUG LOG END--------*/
-                        memset(recv_data.recive_buffer1, 0, MAX_BUFFER_SIZE);
-                        //recive_buffer2's memery allocate and initialization
-                        recv_data.recive_buffer2 = new char[MAX_BUFFER_SIZE];
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("new : address = &(%d), size = %lu.");
-                            formatter % static_cast<void*>(recv_data.recive_buffer2) % (MAX_BUFFER_SIZE);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*-------- DEBUG LOG END--------*/
-                        memset(recv_data.recive_buffer2, 0, MAX_BUFFER_SIZE);
-                        //set uisng buffer recive_buffer1 for defalut
-                        recv_data.recive_buffer = recv_data.recive_buffer1;
-                        //set max buffer size MAX_BUFFER_SIZE
-                        recv_data.recive_buffer_max_size = MAX_BUFFER_SIZE;
+                        boost::format formatter("new : address = &(%d), size = %lu.");
+                        formatter % static_cast<void*>(buffer1) % buffer_size;
+                        putLogDebug(10043, formatter.str(), __FILE__, __LINE__ );
                     }
-                    //not first recive
-                    else
+                    /*------DEBUG LOG END------*/
+                    memset(buffer1, 0, buffer_size);
+                    //recive_buffer2's memery allocate and initialization
+                    buffer2 = new char[buffer_size];
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
                     {
-                        //recive_buffer1's memery allocate and initialization
-                        buffer1 = new char[data_remain_size + recvlen];
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("new : address = &(%d), size = %lu.");
-                            formatter % static_cast<void*>(buffer1) % (data_remain_size + recvlen);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        memset(buffer1, 0, data_remain_size + recvlen);
-                        //recive_buffer2's memery allocate and initialization
-                        buffer2 = new char[data_remain_size + recvlen];
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("new : address = &(%d), size = %lu.");
-                            formatter % static_cast<void*>(buffer2) % (data_remain_size + recvlen);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        memset(buffer2, 0, data_remain_size + recvlen);
-
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            std::string datadump;
-                            dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
-                            boost::format formatter(
-                                "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : before memcpy (data dump) : "
-                                "data begin = %d, data_size = %d, data = %s.");
-                            formatter % data_remain_start % (data_remain_size) % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        //copy data from old buffer to new buffer
-                        memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            std::string datadump;
-                            dump_memory(buffer1, data_remain_size, datadump);
-                            boost::format formatter(
-                                "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : after memcpy (data dump) : "
-                                "data begin = 0, data_size = %d, data = %s.");
-                            formatter % (data_remain_size) % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            std::string datadump;
-                            dump_memory(recvbuffer.data(), recvlen, datadump);
-                            boost::format formatter(
-                                "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : before memcpy (data dump) : "
-                                "data begin = %0, data_size = %d, data = %s.");
-                            formatter % recvlen % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            std::string datadump;
-                            dump_memory(buffer1 + data_remain_size, recvlen, datadump);
-                            boost::format formatter(
-                                "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : after memcpy (data dump) :  "
-                                "data begin = %d, data_size = %d, data = %s.");
-                            formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        //free old buffer1 and old buffer2
-                        if (recv_data.recive_buffer1 != NULL)
-                        {
-                            /*-------- DEBUG LOG --------*/
-                            if (LOG_LV_DEBUG == getloglevel())
-                            {
-                                boost::format formatter("delete : address = &(%d).");
-                                formatter % static_cast<void*>(recv_data.recive_buffer1);
-                                putLogDebug(10005, formatter.str(), __FILE__,
-                                            __LINE__ );
-                            }
-                            /*------DEBUG LOG END------*/
-                            delete[] recv_data.recive_buffer1;
-                            recv_data.recive_buffer1 = NULL;
-                        }
-
-                        if (recv_data.recive_buffer2 != NULL)
-                        {
-                            /*-------- DEBUG LOG --------*/
-                            if (LOG_LV_DEBUG == getloglevel())
-                            {
-                                boost::format formatter("delete : address = &(%d).");
-                                formatter % static_cast<void*>(recv_data.recive_buffer2);
-                                putLogDebug(10005, formatter.str(), __FILE__,
-                                            __LINE__ );
-                            }
-                            /*------DEBUG LOG END------*/
-                            delete[] recv_data.recive_buffer2;
-                            recv_data.recive_buffer2 = NULL;
-                        }
-
-                        //set new buffer pointer
-                        recv_data.recive_buffer1 = buffer1;
-                        recv_data.recive_buffer2 = buffer2;
-                        recv_data.recive_buffer = recv_data.recive_buffer1;
-                        //set new buffer's max size
-                        recv_data.recive_buffer_max_size = data_remain_size + recvlen;
+                        boost::format formatter("new : address = &(%d), size = %lu.");
+                        formatter % static_cast<void*>(buffer2) % buffer_size;
+                        putLogDebug(10044, formatter.str(), __FILE__, __LINE__ );
                     }
+                    /*------DEBUG LOG END------*/
+                    memset(buffer2, 0, buffer_size);
+
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        std::string datadump;
+                        dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                        boost::format formatter(
+                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : before memcpy (data dump) : "
+                            "data begin = %d, data_size = %d, data = %s.");
+                        formatter % data_remain_start % data_remain_size % datadump;
+                        putLogDebug(10045, formatter.str(), __FILE__, __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    //copy data from old buffer to new buffer
+                    memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        std::string datadump;
+                        dump_memory(buffer1, data_remain_size, datadump);
+                        boost::format formatter(
+                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : after memcpy (data dump) : "
+                            "data begin = 0, data_size = %d, data = %s.");
+                        formatter % data_remain_size % datadump;
+                        putLogDebug(10046, formatter.str(), __FILE__, __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        std::string datadump;
+                        dump_memory(recvbuffer.data(), recvlen, datadump);
+                        boost::format formatter(
+                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : before memcpy (data dump) : "
+                            "data begin = 0, data_size = %d, data = %s.");
+                        formatter % recvlen % datadump;
+                        putLogDebug(10047, formatter.str(), __FILE__, __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        std::string datadump;
+                        dump_memory(buffer1 + data_remain_size, recvlen, datadump);
+                        boost::format formatter(
+                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : after memcpy (data dump) : "
+                            "data begin = %d, data_size = %d, data = %s.");
+                        formatter % data_remain_size % recvlen % datadump;
+                        putLogDebug(10048, formatter.str(), __FILE__, __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    //free old buffer1 and old buffer2
+                    if (recv_data.recive_buffer1 != NULL)
+                    {
+                        /*-------- DEBUG LOG --------*/
+                        if (LOG_LV_DEBUG == getloglevel())
+                        {
+                            boost::format formatter("delete : address = &(%d).");
+                            formatter % static_cast<void*>(recv_data.recive_buffer1);
+                            putLogDebug(10049, formatter.str(), __FILE__,
+                                        __LINE__ );
+                        }
+                        /*------DEBUG LOG END------*/
+                        delete[] recv_data.recive_buffer1;
+                        recv_data.recive_buffer1 = NULL;
+                    }
+
+                    if (recv_data.recive_buffer2 != NULL)
+                    {
+                        /*-------- DEBUG LOG --------*/
+                        if (LOG_LV_DEBUG == getloglevel())
+                        {
+                            boost::format formatter("delete : address = &(%d).");
+                            formatter % static_cast<void*>(recv_data.recive_buffer2);
+                            putLogDebug(10050, formatter.str(), __FILE__,
+                                        __LINE__ );
+                        }
+                        /*------DEBUG LOG END------*/
+                        delete[] recv_data.recive_buffer2;
+                        recv_data.recive_buffer2 = NULL;
+                    }
+
+                    //set new buffer pointer
+                    recv_data.recive_buffer1 = buffer1;
+                    recv_data.recive_buffer2 = buffer2;
+                    recv_data.recive_buffer = recv_data.recive_buffer1;
+                    //set new buffer's max size
+                    recv_data.recive_buffer_max_size = buffer_size;
                 }
                 //buffer's max size　≧　remain data size　＋　requst size
                 //buffer isn't need reallcate, but switch
@@ -1478,7 +1475,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                     //pointer valid check
                     if (recv_data.recive_buffer1 == NULL || recv_data.recive_buffer2 == NULL)
                     {
-                        putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+                        putLogError(17030, "Invalid pointer.", __FILE__, __LINE__ );
                         throw -1;
                     }
                     //using buffer is buffer1
@@ -1496,7 +1493,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 "handle_client_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % data_remain_start % data_remain_size  % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10051, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer1 to buffer2
@@ -1508,10 +1505,23 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             dump_memory(recv_data.recive_buffer2, recvlen, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : after memcpy (data dump) :  "
+                                "handle_client_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s.");
                             formatter % recvlen % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10052, formatter.str(), __FILE__, __LINE__ );
+                        }
+                        /*------DEBUG LOG END------*/
+                        /*-------- DEBUG LOG --------*/
+                        if (LOG_LV_DEBUG == getloglevel())
+                        {
+                            std::string datadump;
+                            dump_memory(recvbuffer.data(), recvlen, datadump);
+                            boost::format formatter(
+                                "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                "handle_client_recv() : before memcpy (data dump) : "
+                                "data begin = 0, data_size = %d, data = %s.");
+                            formatter % recvlen % datadump;
+                            putLogDebug(10053, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
@@ -1525,7 +1535,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 "handle_client_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10054, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer2 for using buffer
@@ -1543,10 +1553,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : before memcpy (data dump) :  "
+                                "handle_client_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % data_remain_start % data_remain_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10055, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer2 to buffer1
@@ -1558,10 +1568,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             dump_memory(recv_data.recive_buffer1, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : after memcpy (data dump) :  "
+                                "handle_client_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s.");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10056, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         /*-------- DEBUG LOG --------*/
@@ -1571,10 +1581,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             dump_memory(recvbuffer.data(), recvlen, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : before memcpy (data dump) :  "
+                                "handle_client_recv() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s.");
                             formatter % recvlen % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10057, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -1585,10 +1595,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             dump_memory(recv_data.recive_buffer1 + data_remain_size, recvlen, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_client_recv() : after memcpy (data dump) :  "
+                                "handle_client_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10058, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer1 for using buffer
@@ -1608,7 +1618,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                 //offset recalc
                 for (; it_begin != it_end; ++it_begin)
                 {
-                    it->send_offset -= data_remain_start;
+                    it_begin->send_offset -= data_remain_start;
                 }
             }
             //buffer's rest size　≧　request size
@@ -1617,7 +1627,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                 //pointer valid check
                 if (recv_data.recive_buffer == NULL)
                 {
-                    putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+                    putLogError(17031, "Invalid pointer.", __FILE__, __LINE__ );
                     throw -1;
                 }
                 /*-------- DEBUG LOG --------*/
@@ -1629,7 +1639,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                             "handle_client_recv() : before memcpy (data dump) : "
                                             "data begin = 0, data_size = %d, data = %s.");
                     formatter % recvlen % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10059, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy data from paramenter to using buffer
@@ -1646,7 +1656,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                             "data begin = %d, data_size = %d, data = %s.");
                     formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size )
                     % recvlen % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10060, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //buffer's rest size recalc
@@ -1654,26 +1664,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                 //remain data size recalc
                 data_remain_size += recvlen;
             }
-            /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
-            {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step2--data buffer size process end.", __FILE__, __LINE__ );
-            }
-            /*------DEBUG LOG END------*/
 
             it = recv_data.send_status_list.begin();
             it_end = recv_data.send_status_list.end();
 
             //set request rest size
             request_data_remain_size = recvlen;
-            /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
-            {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step3--send status list loop start.", __FILE__, __LINE__ );
-            }
-            /*------DEBUG LOG END------*/
+
             //original status process
             for (; it != it_end; ++it)
             {
@@ -1721,7 +1718,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                 "handle_client_recv() : call check_http_method : "
                                                 "return_value = %d.");
                         formatter % check_result;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10061, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //check http method result is OK
@@ -1736,7 +1733,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                     "handle_client_recv() : call check_http_version : "
                                                     "return_value = %d.");
                             formatter % check_result;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10062, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -1752,8 +1749,8 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_client_recv() : call find_http_header : "
                                                     "return_value = %d.");
-                            formatter % static_cast<int>(bret);;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            formatter % static_cast<int>(bret);
+                            putLogDebug(10063, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //serch http header result is OK
@@ -1768,8 +1765,8 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                         "handle_client_recv() : call find_http_header : "
                                                         "return_value = %d.");
-                                formatter % formatter % static_cast<int>(bret);;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                formatter % static_cast<int>(bret);
+                                putLogDebug(10064, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //serch Content_Length result is OK
@@ -1821,13 +1818,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                             }
                             //set edit_division flag on
                             it->edit_division = EDIT_DIVISION_EDIT;
-                            /*-------- DEBUG LOG --------*/
-                            if (LOG_LV_DEBUG == getloglevel())
-                            {
-                                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_client_recv() : EDIT_DIVISION_EDIT.", __FILE__, __LINE__ );
-                            }
-                            /*------DEBUG LOG END------*/
                         }
                         //serch http header result is NG
                         else
@@ -1887,15 +1877,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step3--send status list loop end.", __FILE__, __LINE__ );
-            }
-            /*------DEBUG LOG END------*/
-            /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
-            {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step4--new send status create procession start.", __FILE__, __LINE__ );
+                std::string datadump;
+                boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                        "send_rest_size = %d, send_possible_size = %d, "
+                                        "send_offset = %d, unsend_size = %d, edit_division = %d.");
+                int i = 0;
+                for (it = recv_data.send_status_list.begin();
+                     it != recv_data.send_status_list.end();
+                     ++it, ++i)
+                {
+                    formatter % i % it->status % it->send_end_size
+                              % it->send_rest_size % it->send_possible_size
+                              % it->send_offset % it->unsend_size % it->edit_division;
+                    datadump += formatter.str();
+                }
+
+                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : send status list dump : send status list size = %d.%s");
+
+                formatter % recv_data.send_status_list.size() % datadump;
+                putLogDebug(10065, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //there are still rest data need to prosess
@@ -1930,7 +1931,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                             "handle_client_recv() : call check_http_method : "
                                             "return_value = %d.");
                     formatter % check_result;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10066, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //check http method resilt is OK
@@ -1946,7 +1947,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                 "handle_client_recv() : call check_http_version : "
                                                 "return_value = %d.");
                         formatter % check_result;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10067, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -1963,7 +1964,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                 "handle_client_recv() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % check_result;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10068, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //searched whole http header
@@ -1979,7 +1980,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                     "handle_client_recv() : call find_http_header : "
                                                     "return_value = %d.");
                             formatter % static_cast<int>(bret);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10069, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -2032,13 +2033,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                         }
                         //set edit_division flag on
                         new_send_it->edit_division = EDIT_DIVISION_EDIT;
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                        "handle_client_recv() : EDIT_DIVISION_EDIT.", __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
                     }
                     //not searched whole http header
                     else
@@ -2086,8 +2080,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_client_recv() : step4--new send status create procession end.", __FILE__, __LINE__ );
+                std::string datadump;
+                boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                        "send_rest_size = %d, send_possible_size = %d, "
+                                        "send_offset = %d, unsend_size = %d, edit_division = %d.");
+                int i = 0;
+                for (it = recv_data.send_status_list.begin();
+                     it != recv_data.send_status_list.end();
+                     ++it, ++i)
+                {
+                    formatter % i % it->status % it->send_end_size
+                              % it->send_rest_size % it->send_possible_size
+                              % it->send_offset % it->unsend_size % it->edit_division;
+                    datadump += formatter.str();
+                }
+
+                formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            "handle_client_recv() : send status list dump : send status list size = %d.%s");
+
+                formatter % recv_data.send_status_list.size() % datadump;
+                putLogDebug(10070, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //search for send_possbile item in status list
@@ -2122,7 +2134,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10071, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -2130,29 +2142,29 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
     catch (const std::string& ex)
     {
         std::cerr << "handle_client_recv exception : " << ex << std::endl;
-        putLogError(17000, ex.c_str(), __FILE__, __LINE__ );
+        putLogError(17032, ex.c_str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::bad_alloc&)
     {
         std::cerr << "handle_client_recv exception : Could not allocate memory." << std::endl;
-        putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
+        putLogError(17033, "Could not allocate memory.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "handle_client_recv exception : error =" << ex.what() << "." << std::endl;
+        std::cerr << "handle_client_recv exception : error = " << ex.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_recv() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17034, formatter.str(), __FILE__, __LINE__ );
 
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_client_recv() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
+        putLogError(17035, "function : protocol_module_base::check_message_result "
                     "protocol_module_sessionless::handle_client_recv() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -2166,7 +2178,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10072, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -2188,7 +2200,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                                 "boost::asio::ip::tcp::endpoint & rs_endpoint) : "
                                 "thread_id = %d, rs_endpoint = [%s]:%d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10073, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -2200,7 +2212,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
     if (schedule_tcp.empty())
     {
         std::cerr << "handle_realserver_select() : Schedule_tcp function is empty." << std::endl;
-        putLogError(17000, "Schedule_tcp function is empty.", __FILE__, __LINE__ );
+        putLogError(17036, "Schedule_tcp function is empty.", __FILE__, __LINE__ );
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
@@ -2209,7 +2221,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                                     "boost::asio::ip::tcp::endpoint & rs_endpoint)"
                                     " : return_value = %d.");
             formatter % FINALIZE;
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10074, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return FINALIZE;
@@ -2223,7 +2235,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17037, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -2239,7 +2251,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                                     "handle_realserver_select() : call schedule_tcp : "
                                     "rs_endpoint = [%s]:%d.");
             formatter % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10075, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2265,7 +2277,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                 {
                     boost::format formatter("new : address = &(%d), size = %lu.");
                     formatter % static_cast<void*>(session_down_thread_data) % sizeof(session_thread_data_sessionless);
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10076, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 session_down_thread_data->thread_id = session_data->pair_thread_id;
@@ -2292,7 +2304,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                     formatter % session_down_thread_data->thread_id % session_down_thread_data->thread_division % session_down_thread_data->pair_thread_id % session_down_thread_data->accept_end_flag
                     % session_down_thread_data->end_flag % session_down_thread_data->sorry_flag % session_down_thread_data->sorryserver_switch_flag % session_down_thread_data->realserver_switch_flag
                     % session_down_thread_data->client_endpoint_tcp.address().to_string() % session_down_thread_data->client_endpoint_tcp.port();
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10077, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -2322,7 +2334,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                     formatter % session_down_thread_data->thread_id % session_down_thread_data->thread_division % session_down_thread_data->pair_thread_id % session_down_thread_data->accept_end_flag
                     % session_down_thread_data->end_flag % session_down_thread_data->sorry_flag % session_down_thread_data->sorryserver_switch_flag % session_down_thread_data->realserver_switch_flag
                     % session_down_thread_data->client_endpoint_tcp.address().to_string() % session_down_thread_data->client_endpoint_tcp.port();
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10078, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2336,7 +2348,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(recv_data.recive_buffer1);
-                        putLogDebug(10005, formatter.str(), __FILE__,
+                        putLogDebug(10079, formatter.str(), __FILE__,
                                     __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -2346,7 +2358,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(recv_data.recive_buffer2);
-                        putLogDebug(10005, formatter.str(), __FILE__,
+                        putLogDebug(10080, formatter.str(), __FILE__,
                                     __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -2375,7 +2387,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10081, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_realserver_select() : END_FLAG_ON.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -2391,7 +2403,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_select() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10082, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -2402,13 +2414,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_select() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17038, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_realserver_select() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG "
+        putLogError(17039, "function : protocol_module_base::EVENT_TAG "
                     "protocol_module_sessionless::handle_realserver_select() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -2422,7 +2434,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                                 "boost::asio::ip::tcp::endpoint & rs_endpoint)"
                                 " : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10083, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -2448,7 +2460,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                                 "size_t& datalen) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(10000, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10084, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return STOP;
@@ -2467,9 +2479,9 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_connect(const boost::thread::id up_thread_id, "
                                 "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
-                                "thread_id = %d, sendbuffer = %s, datalen = %d.");
-        formatter % thread_id % sendbuffer.data() % datalen;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                "thread_id = %d.");
+        formatter % thread_id;
+        putLogDebug(10085, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -2495,7 +2507,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17040, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -2506,7 +2518,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17041, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -2514,7 +2526,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         recive_data& recv_data = recive_data_it->second;
         if (recv_data.recive_buffer == NULL)
         {
-            putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+            putLogError(17042, "Invalid pointer.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -2524,7 +2536,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         it = find_if(it, it_end, data_send_possible());
         if (it == it_end)
         {
-            putLogError(17000, "Sending possible data is not existed.", __FILE__, __LINE__ );
+            putLogError(17043, "Sending possible data is not existed.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -2552,7 +2564,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                             "handle_realserver_connect() : call find_http_header : "
                                             "return_value = %d.");
                     formatter % static_cast<int>(ret);
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10086, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //serch http header result is OK
@@ -2582,12 +2594,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                                 "handle_realserver_connect() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % static_cast<int>(ret);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10087, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     if (!ret)
                     {
-                        putLogError(17000, "find_http_header function failure.", __FILE__, __LINE__ );
+                        putLogError(17044, "find_http_header function failure.", __FILE__, __LINE__ );
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
@@ -2596,7 +2608,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                     "const size_t recvlen) : return_value = %d.");
                             formatter % FINALIZE;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10088, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         return FINALIZE;
@@ -2621,7 +2633,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10089, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_realserver_connect() : Copy data loop start.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -2651,7 +2663,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10090, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from recive_buffer to sendbuffer by sending_possible size
@@ -2671,7 +2683,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10091, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -2696,7 +2708,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10092, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from recive_buffer to sendbuffer by send buffer rest size
@@ -2715,7 +2727,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10093, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += copy_size;
@@ -2749,7 +2761,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (it->send_offset + it->send_end_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10094, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
@@ -2766,7 +2778,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (send_buffer_end_size - send_buffer_remian_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10095, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         it->send_end_size += copy_size;
@@ -2788,7 +2800,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                     "handle_realserver_connect() : before memcpy (data dump) : "
                                     "data begin = 0, data_size = %d, data = %s.");
                                 formatter % edit_min->data_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10096, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy  X-Forwarded-For
@@ -2797,17 +2809,16 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                             /*-------- DEBUG LOG --------*/
                             if (LOG_LV_DEBUG == getloglevel())
                             {
-                                boost::format formatter("%02x ");
                                 std::string datadump;
                                 dump_memory(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
                                             edit_min->data_size, datadump);
-                                formatter.parse(
+                                boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_connect() : after memcpy (data dump) : "
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % edit_min->data_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10097, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += edit_min->replace_size;
@@ -2838,7 +2849,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (it->send_offset + it->send_end_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10098, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data as large as possible
@@ -2857,7 +2868,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (send_buffer_end_size - send_buffer_remian_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10099, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -2871,7 +2882,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10100, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_realserver_connect() : Copy data loop end.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -2896,7 +2907,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                         "data begin = %d, data_size = %d, data = %s.");
                     formatter % it->send_offset
                     % copy_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10101, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy date by send_possible size
@@ -2911,7 +2922,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                         "handle_realserver_connect() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s.");
                     formatter % copy_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10102, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 it->send_end_size = copy_size;
@@ -2933,7 +2944,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                         "data begin = %d, data_size = %d, data = %s.");
                     formatter % it->send_offset
                     % send_buffer_remian_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10103, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy date by buffer rest size
@@ -2948,7 +2959,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                         "handle_realserver_connect() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s.");
                     formatter % send_buffer_remian_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10104, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 it->send_end_size = send_buffer_remian_size;
@@ -2969,7 +2980,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_connect() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10105, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -2980,13 +2991,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_connect() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17045, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_realserver_connect() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17046, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_realserver_connect() : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -2999,7 +3010,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10106, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -3021,7 +3032,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "const boost::asio::ip::tcp::endpoint & rs_endpoint) : "
                                 "thread_id = %d, rs_endpoint = [%s]:%d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10107, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -3036,7 +3047,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         session_thread_it = session_thread_data_map.find(thread_id);
         if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
         {
-            putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+            putLogError(17047, "Invalid thread id.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3047,7 +3058,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+            putLogDebug(10108, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                         "handle_realserver_connection_fail() : END_FLAG_ON.", __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -3062,7 +3073,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_connection_fail() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10109, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -3073,13 +3084,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_connection_fail() : exception : result = %d, error = %s.");
         formatter % FINALIZE % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17048, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17049, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_realserver_connection_fail() : exception : result = %d.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -3091,7 +3102,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "handle_realserver_connection_fail(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint & rs_endpoint) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10110, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return status;
@@ -3109,7 +3120,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                                 "handle_realserver_send(const boost::thread::id thread_id) : "
                                 "thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10111, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -3126,7 +3137,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17050, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -3137,7 +3148,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
         recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17051, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3150,7 +3161,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
         it = std::adjacent_find(it, it_end, data_send_list_incorrect());
         if (it != it_end)
         {
-            putLogError(17000, "Sending possible data is invalid.", __FILE__, __LINE__ );
+            putLogError(17052, "Sending possible data is invalid.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3159,7 +3170,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
         it = std::find_if(it, it_end, data_send_ok());
         if (it == it_end)
         {
-            putLogError(17000, "Sending possible data is not existed.", __FILE__, __LINE__ );
+            putLogError(17053, "Sending possible data is not existed.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3220,7 +3231,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_send() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10112, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -3231,14 +3242,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_send() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17054, formatter.str(), __FILE__, __LINE__ );
 
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_realserver_send() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17055, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_realserver_send() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -3249,7 +3260,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_send(const boost::thread::id thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10113, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -3271,7 +3282,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "boost::asio::ip::tcp::endpoint& sorry_endpoint) : "
                                 "thread_id = %d, sorry_endpoint = [%s]:%d.");
         formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10114, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -3289,7 +3300,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         session_thread_it = session_thread_data_map.find(thread_id);
         if (session_thread_it == session_thread_data_map.end() || session_thread_it->second== NULL)
         {
-            putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+            putLogError(17056, "Invalid thread id.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3315,7 +3326,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(session_down_thread_data) % sizeof(session_thread_data_sessionless);
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10115, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             session_down_thread_data->thread_id = session_data->pair_thread_id;
@@ -3344,7 +3355,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 % session_down_thread_data->end_flag % session_down_thread_data->sorry_flag % session_down_thread_data->sorryserver_switch_flag % session_down_thread_data->realserver_switch_flag
                 % session_down_thread_data->target_endpoint.address().to_string() % session_down_thread_data->target_endpoint.port()
                 % session_down_thread_data->client_endpoint_tcp.address().to_string() % session_down_thread_data->client_endpoint_tcp.port();
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10116, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3377,7 +3388,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 formatter % session_down_thread_data->thread_id % session_down_thread_data->thread_division % session_down_thread_data->pair_thread_id % session_down_thread_data->accept_end_flag
                 % session_down_thread_data->end_flag % session_down_thread_data->sorry_flag % session_down_thread_data->sorryserver_switch_flag % session_down_thread_data->realserver_switch_flag
                 % session_down_thread_data->client_endpoint_tcp.address().to_string() % session_down_thread_data->client_endpoint_tcp.port();
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10117, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3392,7 +3403,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(recv_data.recive_buffer1);
-                    putLogDebug(10005, formatter.str(), __FILE__,
+                    putLogDebug(10118, formatter.str(), __FILE__,
                                 __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -3402,7 +3413,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(recv_data.recive_buffer2);
-                    putLogDebug(10005, formatter.str(), __FILE__,
+                    putLogDebug(10119, formatter.str(), __FILE__,
                                 __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -3431,7 +3442,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_send() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10120, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -3439,7 +3450,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
     catch (const std::bad_alloc& ex)
     {
         std::cerr << "handle_sorryserver_select exception : Could not allocate memory." << std::endl;
-        putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
+        putLogError(17057, "Could not allocate memory.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::exception& ex)
@@ -3448,13 +3459,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_select() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17058, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorryserver_select() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17059, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorryserver_select() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -3467,7 +3478,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             "out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
             "handle_sorryserver_select(const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10121, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return status;
@@ -3487,9 +3498,9 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_connect(const boost::thread::id thread_id, "
                                 "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
-                                "thread_id = %d, sendbuffer = %s, datalen = %d.");
-        formatter % thread_id % sendbuffer.data() % datalen;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                "thread_id = %d.");
+        formatter % thread_id;
+        putLogDebug(10122, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -3516,7 +3527,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17060, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -3528,7 +3539,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         if (recive_data_it
                 == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17061, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3536,7 +3547,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         recive_data& recv_data = recive_data_it->second;
         if (recv_data.recive_buffer == NULL)
         {
-            putLogError(17000, "Invalid recive_buffer.", __FILE__, __LINE__ );
+            putLogError(17062, "Invalid pointer.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3547,7 +3558,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         it = find_if(it, it_end, data_send_possible());
         if (it == it_end)
         {
-            putLogError(17000, "Sending possible is not existed.", __FILE__, __LINE__ );
+            putLogError(17063, "Sending possible is not existed.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -3575,7 +3586,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                             "handle_sorryserver_connect() : call find_uri : "
                                             "return_value = %d.");
                     formatter % static_cast<int>(ret);
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10123, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //serch http header result is OK
@@ -3609,7 +3620,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                                 "handle_sorryserver_connect() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % static_cast<int>(ret);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10124, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -3640,12 +3651,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                                     "handle_sorryserver_connect() : call find_http_header : "
                                                     "return_value = %d.");
                             formatter % static_cast<int>(ret);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10125, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         if (!ret)
                         {
-                            putLogError(17000, "find_http_header function failure.", __FILE__, __LINE__ );
+                            putLogError(17064, "find_http_header function failure.", __FILE__, __LINE__ );
                             /*-------- DEBUG LOG --------*/
                             if (LOG_LV_DEBUG == getloglevel())
                             {
@@ -3654,7 +3665,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                         "const size_t recvlen) : return_value = %d.");
                                 formatter % FINALIZE;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10126, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             return FINALIZE;
@@ -3680,7 +3691,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10127, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_connect() : Copy data loop start.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -3711,7 +3722,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10128, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
@@ -3728,7 +3739,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10129, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += copy_size;
@@ -3751,7 +3762,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10130, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from recive_buffer to sendbuffer by send buffer rest size
@@ -3770,7 +3781,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10131, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += copy_size;
@@ -3805,7 +3816,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (it->send_offset + it->send_end_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10132, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
@@ -3822,7 +3833,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (send_buffer_end_size - send_buffer_remian_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10133, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         it->send_end_size += copy_size;
@@ -3843,7 +3854,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "handle_sorryserver_connect() : before memcpy (data dump) : "
                                     "data begin = 0, data_size = %d, data = %s.");
                                 formatter % edit_min->data_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10134, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy X-Forwarded-For/uri
@@ -3862,7 +3873,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "data begin = %d, data_size = %d, data = %s.");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % edit_min->data_size % datadump;
-                                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(10135, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += edit_min->replace_size;
@@ -3893,7 +3904,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (it->send_offset + it->send_end_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10136, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data as large as possible
@@ -3912,7 +3923,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "data begin = %d, data_size = %d, data = %s.");
                             formatter % (send_buffer_end_size - send_buffer_remian_size)
                             % copy_size % datadump;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(10137, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         it->send_end_size += copy_size;
@@ -3925,7 +3936,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10138, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_connect() : Copy data loop end.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -3950,7 +3961,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         "data begin = %d, data_size = %d, data = %s.");
                     formatter % it->send_offset
                     % copy_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10139, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy date by send_possible size
@@ -3967,7 +3978,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         "handle_sorryserver_connect() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s.");
                     formatter % copy_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10140, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 it->send_end_size = it->send_possible_size;
@@ -3989,7 +4000,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         "data begin = %d, data_size = %d, data = %s.");
                     formatter % it->send_offset
                     % send_buffer_remian_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10141, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy date by buffer rest size
@@ -4006,7 +4017,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         "handle_sorryserver_connect() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s.");
                     formatter % send_buffer_remian_size % datadump;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10142, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 it->send_end_size = send_buffer_remian_size;
@@ -4029,7 +4040,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorryserver_connect() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10143, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -4040,13 +4051,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_connect() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17065, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorryserver_connect() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17066, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorryserver_connect() : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -4059,7 +4070,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10144, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -4081,7 +4092,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "const boost::asio::ip::tcp::endpoint & sorry_endpoint) : "
                                 "thread_id = %d, sorry_endpoint = %s.");
         formatter % thread_id % sorry_endpoint.address().to_string();
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10145, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -4097,14 +4108,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         session_thread_it = session_thread_data_map.find(thread_id);
         if (session_thread_it == session_thread_data_map.end())
         {
-            putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+            putLogError(17067, "Invalid thread id.", __FILE__, __LINE__ );
             return FINALIZE;
         }
 
         session_data = session_thread_it->second;
         if (session_data == NULL)
         {
-            putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+            putLogError(17068, "Invalid pointer.", __FILE__, __LINE__ );
             return FINALIZE;
         }
 
@@ -4117,15 +4128,15 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
     {
         std::cerr << "handle_sorryserver_connection_fail exception : error=" << ex.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_sorryserver_connection_fail() : exception : result = %d, error = %s.");
-        formatter % FINALIZE % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+                                "handle_sorryserver_connection_fail() : exception : error = %s.");
+        formatter % ex.what();
+        putLogError(17069, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17070, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorryserver_connection_fail() : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -4138,7 +4149,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             "out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
             "handle_sorryserver_connection_fail( const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & sorry_endpoint) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10146, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return status;
@@ -4157,7 +4168,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "handle_sorryserver_send(const boost::thread::id thread_id) : "
                                 "thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10147, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -4174,7 +4185,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17071, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -4186,7 +4197,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         if (recive_data_it
                 == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17072, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -4198,7 +4209,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         it = std::adjacent_find(it, it_end, data_send_list_incorrect());
         if (it != it_end)
         {
-            putLogError(17000, "Sending possible data is invalid.", __FILE__, __LINE__ );
+            putLogError(17073, "Sending possible data is invalid.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -4207,7 +4218,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         it = find_if(it, it_end, data_send_ok());
         if (it == it_end)
         {
-            putLogError(17000, "Sending possible data is not existed.", __FILE__, __LINE__ );
+            putLogError(17074, "Sending possible data is not existed.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -4268,7 +4279,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorryserver_send() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10148, formatter.str(), __FILE__, __LINE__ );
         }
         status = FINALIZE;
         /*------DEBUG LOG END------*/
@@ -4279,14 +4290,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_send() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17075, formatter.str(), __FILE__, __LINE__ );
 
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorryserver_send() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17076, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorryserver_send() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -4297,7 +4308,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_send(const boost::thread::id thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10149, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -4324,7 +4335,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                 "const size_t recvlen) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(10000, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10150, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return STOP;
@@ -4350,7 +4361,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                 "const size_t recvlen) : thread_id = %d, rs_endpoint = [%s]:%d, recvbuffer = %s, recvlen = %d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port()
         % recvbuffer.data() % recvlen;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10151, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -4364,6 +4375,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
     size_t content_length_header_len = 0;
     size_t content_len_value = 0;
     size_t pos = 0;
+    size_t buffer_size = 0;
     const size_t cr_lf_len = strlen("\r\n\r\n");
     session_thread_data_sessionless* session_data = NULL;
     char* buffer1 = NULL;
@@ -4380,7 +4392,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
     if (recvlen > recvbuffer.size())
     {
         std::cerr << "handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
-        putLogError(17000, "Data size bigger than buffer size.", __FILE__,
+        putLogError(17077, "Data size bigger than buffer size.", __FILE__,
                     __LINE__ );
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
@@ -4391,7 +4403,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d.");
             formatter % FINALIZE;
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10152, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return FINALIZE;
@@ -4406,7 +4418,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
             if (session_thread_it == session_thread_data_map.end()
                     ||session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17078, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -4416,7 +4428,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17079, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -4429,7 +4441,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         it = std::find_if(it, it_end, data_send_ok());
         if (it != it_end)
         {
-            putLogError(17000, "Sending data is not correct.", __FILE__, __LINE__ );
+            putLogError(17080, "Sending data is not correct.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -4438,15 +4450,33 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         it = std::adjacent_find(it, it_end, data_send_repeated());
         if (it != it_end)
         {
-            putLogError(17000, "Sending data is not correct.", __FILE__, __LINE__ );
+            putLogError(17081, "Sending data is not correct.", __FILE__, __LINE__ );
             throw -1;
         }
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step1--send status list loop start.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10153, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         it = recv_data.send_status_list.begin();
@@ -4480,11 +4510,28 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step1--send status list loop end.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10154, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
-
         //recive buffer process
         //buffer rest size　＜　request size
         if (recv_data.recive_buffer_rest_size < recvlen)
@@ -4493,158 +4540,125 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
             //buffer is need reallcate
             if (recv_data.recive_buffer_max_size < data_remain_size + recvlen)
             {
-                //first recive
-                if (recv_data.recive_buffer == NULL)
+                buffer_size = (data_remain_size + recvlen) > MAX_BUFFER_SIZE ? (data_remain_size + recvlen) : MAX_BUFFER_SIZE;
+                //recive_buffer1's memery allocate and initialization
+                buffer1 = new char[buffer_size];
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
                 {
-                    //recive_buffer1's memery allocate and initialization
-                    recv_data.recive_buffer1 = new char[MAX_BUFFER_SIZE];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(recv_data.recive_buffer1) % (MAX_BUFFER_SIZE);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG END--------*/
-                    memset(recv_data.recive_buffer1, 0, MAX_BUFFER_SIZE);
-                    //recive_buffer2's memery allocate and initialization
-                    recv_data.recive_buffer2 = new char[MAX_BUFFER_SIZE];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(recv_data.recive_buffer2) % (MAX_BUFFER_SIZE);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG END--------*/
-                    memset(recv_data.recive_buffer2, 0, MAX_BUFFER_SIZE);
-                    //set uisng buffer recive_buffer1 for defalut
-                    recv_data.recive_buffer = recv_data.recive_buffer1;
-                    //set max buffer size MAX_BUFFER_SIZE
-                    recv_data.recive_buffer_max_size = MAX_BUFFER_SIZE;
+                    boost::format formatter("new : address = &(%d), size = %lu.");
+                    formatter % static_cast<void*>(buffer1) % (buffer_size);
+                    putLogDebug(10157, formatter.str(), __FILE__, __LINE__ );
                 }
-                //not first recive
-                else
+                /*-------- DEBUG LOG --------*/
+                memset(buffer1, 0, buffer_size);
+                //recive_buffer2's memery allocate and initialization
+                buffer2 = new char[buffer_size];
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
                 {
-                    //recive_buffer1's memery allocate and initialization
-                    buffer1 = new char[data_remain_size + recvlen];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(buffer1) % (data_remain_size + recvlen);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG --------*/
-                    memset(buffer1, 0, data_remain_size + recvlen);
-                    //recive_buffer2's memery allocate and initialization
-                    buffer2 = new char[data_remain_size + recvlen];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(buffer2) % (data_remain_size + recvlen);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG END--------*/
-                    memset(buffer2, 0, data_remain_size + recvlen);
-
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
-
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) : "
-                            "data begin = %d, data_size = %d, data = %s.");
-                        formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //copy data from old buffer to new buffer
-                    memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(buffer1, data_remain_size, datadump);
-
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) : "
-                            "data begin = 0, data_size = %d, data = %s.");
-                        formatter % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(recvbuffer.data(), recvlen, datadump);
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) : "
-                            "data begin = 0, data_size = %d, data = %s.");
-                        formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(buffer1 + data_remain_size, recvlen, datadump);
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
-                            "data begin = %d, data_size = %d, data = %s.");
-                        formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //free old buffer1 and old buffer2
-                    if (recv_data.recive_buffer1 != NULL)
-                    {
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer1);
-                            putLogDebug(10005, formatter.str(), __FILE__,
-                                        __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer1;
-                        recv_data.recive_buffer1 = NULL;
-                    }
-
-                    if (recv_data.recive_buffer2 != NULL)
-                    {
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer2);
-                            putLogDebug(10005, formatter.str(), __FILE__,
-                                        __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer2;
-                        recv_data.recive_buffer2 = NULL;
-                    }
-
-                    //set new buffer pointer
-                    recv_data.recive_buffer1 = buffer1;
-                    recv_data.recive_buffer2 = buffer2;
-                    recv_data.recive_buffer = recv_data.recive_buffer1;
-                    //set new buffer's max size
-                    recv_data.recive_buffer_max_size = data_remain_size + recvlen;
+                    boost::format formatter("new : address = &(%d), size = %lu.");
+                    formatter % static_cast<void*>(buffer2) % (buffer_size);
+                    putLogDebug(10158, formatter.str(), __FILE__, __LINE__ );
                 }
+                /*-------- DEBUG LOG END--------*/
+                memset(buffer2, 0, buffer_size);
+
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : before memcpy (data dump) : "
+                        "data begin = %d, data_size = %d, data = %s.");
+                    formatter % data_remain_start % data_remain_size % datadump;
+                    putLogDebug(10159, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+                //copy data from old buffer to new buffer
+                memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(buffer1, data_remain_size, datadump);
+
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : after memcpy (data dump) : "
+                        "data begin = 0, data_size = %d, data = %s.");
+                    formatter % data_remain_size % datadump;
+                    putLogDebug(10160, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(recvbuffer.data(), recvlen, datadump);
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : before memcpy (data dump) : "
+                        "data begin = 0, data_size = %d, data = %s.");
+                    formatter % recvlen % datadump;
+                    putLogDebug(10161, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+                memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(buffer1 + data_remain_size, recvlen, datadump);
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : after memcpy (data dump) : "
+                        "data begin = %d, data_size = %d, data = %s.");
+                    formatter % data_remain_size % recvlen % datadump;
+                    putLogDebug(10162, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+                //free old buffer1 and old buffer2
+                if (recv_data.recive_buffer1 != NULL)
+                {
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        boost::format formatter("delete : address = &(%d).");
+                        formatter % static_cast<void*>(recv_data.recive_buffer1);
+                        putLogDebug(10163, formatter.str(), __FILE__,
+                                    __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    delete[] recv_data.recive_buffer1;
+                    recv_data.recive_buffer1 = NULL;
+                }
+
+                if (recv_data.recive_buffer2 != NULL)
+                {
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        boost::format formatter("delete : address = &(%d).");
+                        formatter % static_cast<void*>(recv_data.recive_buffer2);
+                        putLogDebug(10164, formatter.str(), __FILE__,
+                                    __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    delete[] recv_data.recive_buffer2;
+                    recv_data.recive_buffer2 = NULL;
+                }
+
+                //set new buffer pointer
+                recv_data.recive_buffer1 = buffer1;
+                recv_data.recive_buffer2 = buffer2;
+                recv_data.recive_buffer = recv_data.recive_buffer1;
+                //set new buffer's max size
+                recv_data.recive_buffer_max_size = buffer_size;
             }
             //buffer's max size　≧　remain data size　＋　requst size
             //buffer isn't need reallcate, but switch
@@ -4653,7 +4667,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                 //pointer valid check
                 if (recv_data.recive_buffer1 == NULL || recv_data.recive_buffer2 == NULL)
                 {
-                    putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+                    putLogError(17082, "Invalid pointer.", __FILE__, __LINE__ );
                     throw -1;
                 }
                 //using buffer is buffer1
@@ -4671,7 +4685,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10165, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from buffer1 to buffer2
@@ -4686,7 +4700,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10166, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     /*-------- DEBUG LOG --------*/
@@ -4699,7 +4713,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10167, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
@@ -4714,7 +4728,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : after memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10168, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //set buffer2 for using buffer
@@ -4736,7 +4750,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_start % (data_remain_size+recvlen) % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10169, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from buffer2 to buffer1
@@ -4752,7 +4766,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10170, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     /*-------- DEBUG LOG --------*/
@@ -4766,7 +4780,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10171, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -4781,7 +4795,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "handle_realserver_recv() : after memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10172, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //set buffer1 for using buffer
@@ -4800,7 +4814,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
             //offset recalc
             for (; it_begin != it_end; ++it_begin)
             {
-                it->send_offset -= data_remain_start;
+                it_begin->send_offset -= data_remain_start;
             }
         }
         //buffer's rest size　≧　request size
@@ -4810,7 +4824,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
             //pointer valid check
             if (recv_data.recive_buffer == NULL)
             {
-                putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+                putLogError(17083, "Invalid pointer.", __FILE__, __LINE__ );
                 throw -1;
             }
             /*-------- DEBUG LOG --------*/
@@ -4822,7 +4836,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                         "handle_realserver_recv() : before memcpy (data dump) : "
                                         "data begin = 0, data_size = %d, data = %s.");
                 formatter % recvlen % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10173, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4840,7 +4854,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                         "data begin = %d, data_size = %d, data = %s.");
                 formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size )
                 % recvlen % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10174, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //buffer's rest size recalc
@@ -4848,21 +4862,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
             //remain data size recalc
             data_remain_size += recvlen;
         }
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step2--data buffer size process end.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
-
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step3--send status list loop start.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
 
         it = recv_data.send_status_list.begin();
         it_end = recv_data.send_status_list.end();
@@ -4898,8 +4897,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                     //request size recalc
                     it->send_rest_size = 0;
                 }
-//				//編集区分に編集なしを設定する
-//				it->edit_division = EDIT_DIVISION_NO_EDIT;
                 //change status from SEND_CONTINUE to SEND_OK
                 it->status = SEND_OK;
             }
@@ -4915,7 +4912,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                             "handle_realserver_recv() : call check_http_method : "
                                             "return_value = %d.");
                     formatter % check_result;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10175, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //check http method result is OK
@@ -4930,7 +4927,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                                 "handle_realserver_recv() : call check_http_version : "
                                                 "return_value = %d.");
                         formatter % check_result;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10176, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -4947,7 +4944,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                                 "handle_realserver_recv() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % static_cast<int>(bret);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10177, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //serch http header result is OK
@@ -4962,8 +4959,8 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_realserver_recv() : call find_http_header : "
                                                     "return_value = %d.");
-                            formatter % formatter % static_cast<int>(bret);
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            formatter % static_cast<int>(bret);
+                            putLogDebug(10178, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //serch Content_Length result is OK
@@ -5063,18 +5060,30 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                 break;
             }
         }
+
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step3--send status list loop end.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step4--new send status create procession start.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10179, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         //there are still rest data need to prosess
@@ -5108,7 +5117,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                         "handle_realserver_recv() : call check_http_method : "
                                         "return_value = %d.");
                 formatter % check_result;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10180, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //check http method resilt is OK
@@ -5124,7 +5133,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                             "handle_realserver_recv() : call check_http_version : "
                                             "return_value = %d.");
                     formatter % check_result;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10181, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -5141,7 +5150,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                             "handle_realserver_recv() : call find_http_header : "
                                             "return_value = %d.");
                     formatter % static_cast<int>(bret);
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10182, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //searched whole http header
@@ -5157,7 +5166,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                                 "handle_realserver_recv() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % static_cast<int>(bret);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10183, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5253,8 +5262,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step4--new send status create procession end.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10184, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5280,7 +5307,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_recv() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10185, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -5288,13 +5315,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
     catch (const std::string& ex)
     {
         std::cerr << "handle_realserver_recv exception : " << ex << std::endl;
-        putLogError(17000, ex.c_str(), __FILE__, __LINE__ );
+        putLogError(17084, ex.c_str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::bad_alloc&)
     {
         std::cerr << "handle_realserver_recv exception : Could not allocate memory." << std::endl;
-        putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
+        putLogError(17085, "Could not allocate memory.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::exception& ex)
@@ -5303,14 +5330,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_recv() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17086, formatter.str(), __FILE__, __LINE__ );
 
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_realserver_recv() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
+        putLogError(17087, "function : protocol_module_base::check_message_result "
                     "protocol_module_sessionless::handle_realserver_recv() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -5325,7 +5352,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10186, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -5354,7 +5381,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "const size_t recvlen) : thread_id = %d, sorry_endpoint = [%s]:%d, recvbuffer = %s, recvlen = %d.");
         formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port()
         % recvbuffer.data() % recvlen;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10187, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -5368,6 +5395,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
     size_t content_length_header_len = 0;
     size_t content_len_value = 0;
     size_t pos = 0;
+    size_t buffer_size = 0;
     const size_t cr_lf_len = strlen("\r\n\r\n");
     std::string str_value;
     const std::string http_header = "";
@@ -5384,7 +5412,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
     if (recvlen > recvbuffer.size())
     {
         std::cerr << "handle_sorryserver_recv() : Data size bigger than buffer size." << std::endl;
-        putLogError(17000, "Data size bigger than buffer size.", __FILE__,
+        putLogError(17088, "Data size bigger than buffer size.", __FILE__,
                     __LINE__ );
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
@@ -5395,7 +5423,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d.");
             formatter % FINALIZE;
-            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10188, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return FINALIZE;
@@ -5409,7 +5437,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17089, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -5419,7 +5447,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17090, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -5431,7 +5459,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         it = std::find_if(it, it_end, data_send_ok());
         if (it != it_end)
         {
-            putLogError(17000, "Sending data is invalid.", __FILE__, __LINE__ );
+            putLogError(17091, "Sending data is invalid.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -5440,15 +5468,33 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         it = std::adjacent_find(it, it_end, data_send_repeated());
         if (it != it_end)
         {
-            putLogError(17000, "Sending data is invalid.", __FILE__, __LINE__ );
+            putLogError(17092, "Sending data is invalid.", __FILE__, __LINE__ );
             throw -1;
         }
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_sorryserver_recv() : step1--send status list loop start.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10189, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5483,16 +5529,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_sorryserver_recv() : step1--send status list loop end.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
 
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step2--data buffer size process start.", __FILE__, __LINE__ );
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10190, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         //recive buffer process
@@ -5503,156 +5559,123 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             //buffer is need reallcate
             if (recv_data.recive_buffer_max_size < data_remain_size + recvlen)
             {
-                //first recive
-                if (recv_data.recive_buffer == NULL)
+                buffer_size = (data_remain_size + recvlen) > MAX_BUFFER_SIZE ? (data_remain_size + recvlen) : MAX_BUFFER_SIZE;
+                //recive_buffer1's memery allocate and initialization
+                buffer1 = new char[buffer_size];
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
                 {
-                    //recive_buffer1's memery allocate and initialization
-                    recv_data.recive_buffer1 = new char[MAX_BUFFER_SIZE];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(recv_data.recive_buffer1) % (MAX_BUFFER_SIZE);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG END--------*/
-                    memset(recv_data.recive_buffer1, 0, MAX_BUFFER_SIZE);
-                    //recive_buffer2's memery allocate and initialization
-                    recv_data.recive_buffer2 = new char[MAX_BUFFER_SIZE];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(recv_data.recive_buffer2) % (MAX_BUFFER_SIZE);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG END--------*/
-                    memset(recv_data.recive_buffer2, 0, MAX_BUFFER_SIZE);
-                    //set uisng buffer recive_buffer1 for defalut
-                    recv_data.recive_buffer = recv_data.recive_buffer1;
-                    //set max buffer size MAX_BUFFER_SIZE
-                    recv_data.recive_buffer_max_size = MAX_BUFFER_SIZE;
+                    boost::format formatter("new : address = &(%d), size = %lu.");
+                    formatter % static_cast<void*>(buffer1) % buffer_size;
+                    putLogDebug(10193, formatter.str(), __FILE__, __LINE__ );
                 }
-                //not first recive
-                else
+                /*-------- DEBUG LOG --------*/
+                memset(buffer1, 0, buffer_size);
+                //recive_buffer2's memery allocate and initialization
+                buffer2 = new char[buffer_size];
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
                 {
-                    //recive_buffer1's memery allocate and initialization
-                    buffer1 = new char[data_remain_size + recvlen];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(buffer1) % (data_remain_size + recvlen);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG --------*/
-                    memset(buffer1, 0, data_remain_size + recvlen);
-                    //recive_buffer2's memery allocate and initialization
-                    buffer2 = new char[data_remain_size + recvlen];
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void*>(buffer2) % (data_remain_size + recvlen);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*-------- DEBUG LOG END--------*/
-                    memset(buffer2, 0, data_remain_size + recvlen);
-
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) : "
-                            "data begin = %d, data_size = %d, data = %s.");
-                        formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //copy data from old buffer to new buffer
-                    memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(buffer1, data_remain_size, datadump);
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
-                            "data begin = 0, data_size = %d, data = %s.");
-                        formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(recvbuffer.data(), recvlen, datadump);
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) :  "
-                            "data begin = 0, data_size = %d, data = %s.");
-                        formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
-                    /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
-                    {
-                        std::string datadump;
-                        dump_memory(buffer1 + data_remain_size, data_remain_size, datadump);
-                        boost::format formatter(
-                            "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
-                            "data begin = %d, data_size = %d, data = %s.");
-                        formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //free old buffer1 and old buffer2
-                    if (recv_data.recive_buffer1 != NULL)
-                    {
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer1);
-                            putLogDebug(10005, formatter.str(), __FILE__,
-                                        __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer1;
-                        recv_data.recive_buffer1 = NULL;
-                    }
-
-                    if (recv_data.recive_buffer2 != NULL)
-                    {
-                        /*-------- DEBUG LOG --------*/
-                        if (LOG_LV_DEBUG == getloglevel())
-                        {
-                            boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer2);
-                            putLogDebug(10005, formatter.str(), __FILE__,
-                                        __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer2;
-                        recv_data.recive_buffer2 = NULL;
-                    }
-
-                    //set new buffer pointer
-                    recv_data.recive_buffer1 = buffer1;
-                    recv_data.recive_buffer2 = buffer2;
-                    recv_data.recive_buffer = recv_data.recive_buffer1;
-                    //set new buffer's max size
-                    recv_data.recive_buffer_max_size = data_remain_size + recvlen;
+                    boost::format formatter("new : address = &(%d), size = %lu.");
+                    formatter % static_cast<void*>(buffer2) % buffer_size;
+                    putLogDebug(10194, formatter.str(), __FILE__, __LINE__ );
                 }
+                /*-------- DEBUG LOG END--------*/
+                memset(buffer2, 0, buffer_size);
+
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : before memcpy (data dump) : "
+                        "data begin = %d, data_size = %d, data = %s.");
+                    formatter % data_remain_start % data_remain_size % datadump;
+                    putLogDebug(10195, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+                //copy data from old buffer to new buffer
+                memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(buffer1, data_remain_size, datadump);
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : after memcpy (data dump) : "
+                        "data begin = 0, data_size = %d, data = %s.");
+                    formatter % recvlen % datadump;
+                    putLogDebug(10196, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(recvbuffer.data(), recvlen, datadump);
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : before memcpy (data dump) : "
+                        "data begin = 0, data_size = %d, data = %s.");
+                    formatter % recvlen % datadump;
+                    putLogDebug(10197, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+                memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == getloglevel())
+                {
+                    std::string datadump;
+                    dump_memory(buffer1 + data_remain_size, data_remain_size, datadump);
+                    boost::format formatter(
+                        "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : after memcpy (data dump) : "
+                        "data begin = %d, data_size = %d, data = %s.");
+                    formatter % data_remain_size % recvlen % datadump;
+                    putLogDebug(10198, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+                //free old buffer1 and old buffer2
+                if (recv_data.recive_buffer1 != NULL)
+                {
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        boost::format formatter("delete : address = &(%d).");
+                        formatter % static_cast<void*>(recv_data.recive_buffer1);
+                        putLogDebug(10199, formatter.str(), __FILE__,
+                                    __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    delete[] recv_data.recive_buffer1;
+                    recv_data.recive_buffer1 = NULL;
+                }
+
+                if (recv_data.recive_buffer2 != NULL)
+                {
+                    /*-------- DEBUG LOG --------*/
+                    if (LOG_LV_DEBUG == getloglevel())
+                    {
+                        boost::format formatter("delete : address = &(%d).");
+                        formatter % static_cast<void*>(recv_data.recive_buffer2);
+                        putLogDebug(10200, formatter.str(), __FILE__,
+                                    __LINE__ );
+                    }
+                    /*------DEBUG LOG END------*/
+                    delete[] recv_data.recive_buffer2;
+                    recv_data.recive_buffer2 = NULL;
+                }
+
+                //set new buffer pointer
+                recv_data.recive_buffer1 = buffer1;
+                recv_data.recive_buffer2 = buffer2;
+                recv_data.recive_buffer = recv_data.recive_buffer1;
+                //set new buffer's max size
+                recv_data.recive_buffer_max_size = buffer_size;
             }
             //buffer's max size　≧　remain data size　＋　requst size
             //buffer isn't need reallcate, but switch
@@ -5661,7 +5684,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 //pointer valid check
                 if (recv_data.recive_buffer1 == NULL || recv_data.recive_buffer2 == NULL)
                 {
-                    putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+                    putLogError(17093, "Invalid pointer.", __FILE__, __LINE__ );
                     throw -1;
                 }
                 //using buffer is buffer1
@@ -5676,10 +5699,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) : "
+                            "handle_sorryserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10201, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from buffer1 to buffer2
@@ -5691,10 +5714,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recv_data.recive_buffer2, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
+                            "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10202, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     /*-------- DEBUG LOG --------*/
@@ -5704,10 +5727,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recvbuffer.data(), recvlen, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) :  "
+                            "handle_sorryserver_recv() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10203, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
@@ -5718,10 +5741,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recv_data.recive_buffer2 + data_remain_size, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
+                            "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10204, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //set buffer2 for using buffer
@@ -5739,10 +5762,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) : "
+                            "handle_sorryserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10205, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from buffer2 to buffer1
@@ -5754,10 +5777,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recv_data.recive_buffer1, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
+                            "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10206, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5768,10 +5791,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recvbuffer.data(), recvlen, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : before memcpy (data dump) :  "
+                            "handle_sorryserver_recv() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s.");
                         formatter % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10207, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -5782,10 +5805,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         dump_memory(recv_data.recive_buffer1 + data_remain_size, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                            "handle_realserver_recv() : after memcpy (data dump) :  "
+                            "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s.");
                         formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10208, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //set buffer1 for using buffer
@@ -5804,7 +5827,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             //offset recalc
             for (; it_begin != it_end; ++it_begin)
             {
-                it->send_offset -= data_remain_start;
+                it_begin->send_offset -= data_remain_start;
             }
         }
         //buffer's rest size　≧　request size
@@ -5814,7 +5837,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             //pointer valid check
             if (recv_data.recive_buffer == NULL)
             {
-                putLogError(17000, "Invalid pointer.", __FILE__, __LINE__ );
+                putLogError(17094, "Invalid pointer.", __FILE__, __LINE__ );
                 throw -1;
             }
             /*-------- DEBUG LOG --------*/
@@ -5824,10 +5847,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 dump_memory(recvbuffer.data(), recvlen, datadump);
                 boost::format formatter(
                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                    "handle_realserver_recv() : before memcpy (data dump) :  "
+                    "handle_sorryserver_recv() : before memcpy (data dump) : "
                     "data begin = 0, data_size = %d, data = %s.");
                 formatter % recvlen % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10209, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5841,10 +5864,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 dump_memory(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size, data_remain_size, datadump);
                 boost::format formatter(
                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                    "handle_realserver_recv() : after memcpy (data dump) :  "
+                    "handle_sorryserver_recv() : after memcpy (data dump) : "
                     "data begin = %d, data_size = %d, data = %s.");
                 formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size) % recvlen % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10210, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //buffer's rest size recalc
@@ -5852,20 +5875,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             //remain data size recalc
             data_remain_size += recvlen;
         }
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step2--data buffer size process end.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step3--send status list loop start.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
+
         it = recv_data.send_status_list.begin();
         it_end = recv_data.send_status_list.end();
         //request rest size initialization
@@ -5904,10 +5914,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_realserver_recv() : call check_status_code : "
+                                            "handle_sorryserver_recv() : call check_status_code : "
                                             "return_value = %d.");
                     formatter % check_result;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10211, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //check http method result is OK
@@ -5919,10 +5929,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                     if (LOG_LV_DEBUG == getloglevel())
                     {
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_realserver_recv() : call check_http_version : "
+                                                "handle_sorryserver_recv() : call check_http_version : "
                                                 "return_value = %d.");
                         formatter % check_result;
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10212, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -5936,10 +5946,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                     if (LOG_LV_DEBUG == getloglevel())
                     {
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_realserver_recv() : call find_http_header : "
+                                                "handle_sorryserver_recv() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % static_cast<int>(bret);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10213, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //serch http header result is OK
@@ -5952,10 +5962,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         if (LOG_LV_DEBUG == getloglevel())
                         {
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_realserver_recv() : call find_http_header : "
+                                                    "handle_sorryserver_recv() : call find_http_header : "
                                                     "return_value = %d.");
-                            formatter % static_cast<int>(bret);;
-                            putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                            formatter % static_cast<int>(bret);
+                            putLogDebug(10214, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //serch Content_Length result is OK
@@ -6057,15 +6067,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step3--send status list loop end.", __FILE__, __LINE__ );
-        }
-        /*------DEBUG LOG END------*/
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
-        {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step4--new send status create procession start.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10215, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6097,10 +6118,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                        "handle_realserver_recv() : call check_status_code : "
+                                        "handle_sorryserver_recv() : call check_status_code : "
                                         "return_value = %d.");
                 formatter % check_result;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10216, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //check http method resilt is OK
@@ -6113,10 +6134,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_realserver_recv() : call check_http_version : "
+                                            "handle_sorryserver_recv() : call check_http_version : "
                                             "return_value = %d.");
                     formatter % check_result;
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10217, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -6130,10 +6151,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_realserver_recv() : call find_http_header : "
+                                            "handle_sorryserver_recv() : call find_http_header : "
                                             "return_value = %d.");
                     formatter % static_cast<int>(bret);
-                    putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(10218, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //searched whole http header
@@ -6146,10 +6167,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                     if (LOG_LV_DEBUG == getloglevel())
                     {
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_realserver_recv() : call find_http_header : "
+                                                "handle_sorryserver_recv() : call find_http_header : "
                                                 "return_value = %d.");
                         formatter % static_cast<int>(bret);
-                        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(10219, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -6242,8 +6263,26 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                        "handle_realserver_recv() : step4--new send status create procession end.", __FILE__, __LINE__ );
+            std::string datadump;
+            boost::format formatter("\nitem[%d]: status = %d, send_end_size = %d, "
+                                    "send_rest_size = %d, send_possible_size = %d, "
+                                    "send_offset = %d, unsend_size = %d, edit_division = %d.");
+            int i = 0;
+            for (it = recv_data.send_status_list.begin();
+                 it != recv_data.send_status_list.end();
+                 ++it, ++i)
+            {
+                formatter % i % it->status % it->send_end_size
+                          % it->send_rest_size % it->send_possible_size
+                          % it->send_offset % it->unsend_size % it->edit_division;
+                datadump += formatter.str();
+            }
+
+            formatter.parse("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
+
+            formatter % recv_data.send_status_list.size() % datadump;
+            putLogDebug(10220, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6267,9 +6306,9 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                    "handle_realserver_recv() : catch exception e = %d.");
+                                    "handle_sorryserver_recv() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10221, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -6277,30 +6316,30 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
     catch (const std::string& ex)
     {
         std::cerr << "handle_sorryserver_recv exception : " << ex << std::endl;
-        putLogError(17000, ex.c_str(), __FILE__, __LINE__ );
+        putLogError(17095, ex.c_str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::bad_alloc&)
     {
         std::cerr << "handle_sorryserver_recv exception : Could not allocate memory." << std::endl;
-        putLogError(17000, "Could not allocate memory.", __FILE__, __LINE__ );
+        putLogError(17096, "Could not allocate memory.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "handle_realserver_recv exception : error =" << ex.what() << "." << std::endl;
+        std::cerr << "handle_sorryserver_recv exception : error =" << ex.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                "handle_realserver_recv() : exception : error = %s.");
+                                "handle_sorryserver_recv() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17097, formatter.str(), __FILE__, __LINE__ );
 
         status = FINALIZE;
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sessionless::handle_realserver_recv() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::check_message_result "
-                    "protocol_module_sessionless::handle_realserver_recv() : "
+        std::cerr << "protocol_module_sessionless::handle_sorryserver_recv() : Unknown exception." << std::endl;
+        putLogError(17098, "function : protocol_module_base::check_message_result "
+                    "protocol_module_sessionless::handle_sorryserver_recv() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -6314,7 +6353,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10222, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -6334,7 +6373,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_response_sen
                                 "handle_response_send_inform(const boost::thread::id thread_id) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(10000, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10223, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return STOP;
@@ -6355,9 +6394,9 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_connection_check(const boost::thread::id thread_id, "
                                 "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
-                                "thread_id = %d, sendbuffer = %s, datalen = %d.");
-        formatter % thread_id % sendbuffer.data() % datalen;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                                "thread_id = %d.");
+        formatter % thread_id;
+        putLogDebug(10224, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -6375,7 +6414,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17099, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -6385,7 +6424,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
         recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17100, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -6396,7 +6435,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                                     data_send_possible());
         if (it == recv_data.send_status_list.end())
         {
-            putLogError(17000, "Sending possible data is not existed.", __FILE__, __LINE__ );
+            putLogError(17101, "Sending possible data is not existed.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -6414,7 +6453,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                     "handle_client_connection_check() : before memcpy (data dump) : "
                     "data begin = %d, data_size = %d, data = %s.");
                 formatter % it->send_offset % (it->send_possible_size) % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10225, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //copy data from recive_buffer to sendbuffer by sending_possible size
@@ -6430,7 +6469,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                     "handle_client_connection_check() : after memcpy (data dump) : "
                     "data begin = 0, data_size = %d, data = %s.");
                 formatter % (it->send_possible_size) % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10226, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //send_end_size recalc
@@ -6454,7 +6493,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                     "handle_client_connection_check() : before memcpy (data dump) : "
                     "data begin = %d, data_size = %d, data = %s.");
                 formatter % it->send_offset % send_buffer_size % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10227, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //copy data from recive_buffer to sendbuffer by buffer size
@@ -6470,7 +6509,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                     "handle_client_connection_check() : after memcpy (data dump) : "
                     "data begin = 0, data_size = %d, data = %s.");
                 formatter % send_buffer_size % datadump;
-                putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(10228, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //send_end_size recalc
@@ -6491,7 +6530,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_connection_check() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10229, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -6502,13 +6541,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_connection_check() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17102, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_client_connection_check() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17103, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_client_connection_check() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -6521,7 +6560,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                                 "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)"
                                 " : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10230, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return status;
@@ -6547,7 +6586,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_selec
                                 "size_t& datalen) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(10000, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10231, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return STOP;
@@ -6566,7 +6605,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
                                 "handle_client_send(const boost::thread::id thread_id) : "
                                 "thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10232, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -6582,7 +6621,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17104, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
             session_data = session_thread_it->second;
@@ -6591,7 +6630,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
         recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17105, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -6604,7 +6643,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
         it = std::adjacent_find(it, it_end, data_send_list_incorrect());
         if (it != it_end)
         {
-            putLogError(17000, "Sending possible data is invalid.", __FILE__, __LINE__ );
+            putLogError(17106, "Sending possible data is invalid.", __FILE__, __LINE__ );
             throw -1;
         }
         //status list check
@@ -6612,7 +6651,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
         it = find_if(it, it_end, data_send_ok());
         if (it == it_end)
         {
-            putLogError(17000, "Sending possible data is not existed.", __FILE__, __LINE__ );
+            putLogError(17107, "Sending possible data is not existed.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -6682,7 +6721,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_send() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10233, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -6693,13 +6732,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_send() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17108, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_client_send() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17109, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_client_send() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -6710,7 +6749,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_send(const boost::thread::id thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10234, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -6729,7 +6768,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_disco
         boost::format formatter("in/out_function : protocol_module_sessionless::"
                                 "handle_client_disconnect(const boost::thread::id thread_id) : return_value = %d.");
         formatter % FINALIZE;
-        putLogDebug(10002, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10235, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return FINALIZE;
@@ -6748,7 +6787,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                                 "handle_sorry_enable(const boost::thread::id thread_id) : "
                                 "thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10236, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -6769,7 +6808,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
             session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17110, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -6781,7 +6820,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
         recive_data_it = session_data->recive_data_map.find(endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17111, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -6818,7 +6857,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                    putLogDebug(10237, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorry_enable() : SORRY_FLAG_ON.", __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -6852,7 +6891,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            putLogDebug(10238, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_enable() : END_FLAG_ON.", __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -6866,7 +6905,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            putLogDebug(10239, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_enable() : SORRYSERVER_SWITCH_FLAG_ON.", __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -6875,7 +6914,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            putLogDebug(10240, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_enable() : SORRY_FLAG_ON.", __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -6912,7 +6951,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        putLogDebug(10241, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_enable() : END_FLAG_ON.", __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -6926,7 +6965,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        putLogDebug(10242, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_enable() : SORRY_FLAG_ON.", __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -6952,7 +6991,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_enable() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10243, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -6963,13 +7002,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorry_enable() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17112, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorry_enable() Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17113, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorry_enable() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -6980,7 +7019,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorry_enable(const boost::thread::id thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10244, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -7000,7 +7039,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                                 "handle_sorry_disable(const boost::thread::id thread_id) : "
                                 "thread_id = %d.");
         formatter % thread_id;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10245, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -7018,7 +7057,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
             session_thread_data_map_it session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17114, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
             //check pointer
@@ -7030,7 +7069,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
         recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17115, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -7069,7 +7108,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                    putLogDebug(10246, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorry_disable() : SORRY_FLAG_OFF.", __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -7090,7 +7129,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            putLogDebug(10247, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_disable() : END_FLAG_ON.", __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -7104,7 +7143,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            putLogDebug(10248, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_disable() : REALSERVER_SWITCH_FLAG_ON.", __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -7113,7 +7152,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == getloglevel())
                         {
-                            putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                            putLogDebug(10249, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_disable() : SORRY_FLAG_OFF.", __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -7150,7 +7189,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        putLogDebug(10250, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_disable() : END_FLAG_ON.", __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -7164,7 +7203,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        putLogDebug(10251, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_disable() : SORRY_FLAG_OFF.", __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -7204,7 +7243,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_disable() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10252, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -7215,13 +7254,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorry_disable() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17116, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorry_disable() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17117, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorry_disable() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -7232,7 +7271,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorry_disable(const boost::thread::id thread_id) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10253, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -7253,7 +7292,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
                                 "handle_realserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & rs_endpoint) : "
                                 "thread_id = %d, rs_endpoint = [%s]:%d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10254, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -7269,7 +7308,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
             session_thread_data_map_it session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17118, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -7279,7 +7318,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
         recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17119, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -7326,7 +7365,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        putLogDebug(10255, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_disconnect() : END_FLAG_ON.", __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -7342,7 +7381,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10256, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_realserver_disconnect() : END_FLAG_ON.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -7366,7 +7405,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_disconnect() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10257, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -7377,13 +7416,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_disconnect() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17120, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_realserver_disconnect() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17121, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_realserver_disconnect() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -7395,7 +7434,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
                                 "handle_realserver_disconnect(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint & rs_endpoint) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10258, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -7420,7 +7459,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             "const boost::asio::ip::tcp::endpoint & sorry_endpoint) : "
             "thread_id = %d, sorry_endpoint = [%s]:%d.");
         formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port() ;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10259, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     EVENT_TAG status;
@@ -7435,7 +7474,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             session_thread_data_map_it session_thread_it = session_thread_data_map.find(thread_id);
             if (session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)
             {
-                putLogError(17000, "Invalid thread id.", __FILE__, __LINE__ );
+                putLogError(17122, "Invalid thread id.", __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -7445,7 +7484,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         recive_data_map_it recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
         if (session_data->recive_data_map.find(session_data->target_endpoint) == session_data->recive_data_map.end())
         {
-            putLogError(17000, "Invalid endpoint.", __FILE__, __LINE__ );
+            putLogError(17123, "Invalid endpoint.", __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -7492,7 +7531,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                        putLogDebug(10260, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorryserver_disconnect() : END_FLAG_ON.", __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -7508,7 +7547,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(10005, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                putLogDebug(10261, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_disconnect() : END_FLAG_ON.", __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
@@ -7532,7 +7571,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorryserver_disconnect() : catch exception e = %d.");
             formatter % e;
-            putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(10262, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         status = FINALIZE;
@@ -7543,13 +7582,13 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_disconnect() : exception : error = %s.");
         formatter % ex.what();
-        putLogError(17000, formatter.str(), __FILE__, __LINE__ );
+        putLogError(17124, formatter.str(), __FILE__, __LINE__ );
         status = FINALIZE;
     }
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorryserver_disconnect() : Unknown exception." << std::endl;
-        putLogError(17000, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+        putLogError(17125, "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorryserver_disconnect() : exception : Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
     }
@@ -7563,7 +7602,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             "handle_sorryserver_disconnect(const boost::thread::id thread_id, "
             "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d.");
         formatter % status;
-        putLogDebug(10005, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10263, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
 
@@ -7585,7 +7624,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 "const boost::asio::ip::udp::endpoint & rs_endpoint) : "
                                 "return_value = %d.");
         formatter % STOP;
-        putLogDebug(10000, formatter.str(), __FILE__, __LINE__ );
+        putLogDebug(10264, formatter.str(), __FILE__, __LINE__ );
     }
     /*------DEBUG LOG END------*/
     return STOP;

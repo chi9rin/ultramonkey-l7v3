@@ -207,38 +207,43 @@ public:
 		int ret = 0;
 		char *record_data;
 
-		// unit_test[1] condition: recv_length = 0, record_data = NULL
-		// unit_test[1] check: get_ssl_session_id() return -1 (error)
+    cout << "[1]------------------------------------------" << endl;
+		// unit_test[1] recv_length が 0で, 且つrecord_data が NULLの場合
+		// unit_test[1] 戻り値が-1(error)で設定する。
 		record_data = NULL;
 		ret = this->get_ssl_session_id(NULL, 0, session_id);
 		BOOST_CHECK_EQUAL(ret, -1);
 
-		// unit_test[2] condition: recv_length = HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has a session id
-		// unit_test[2] check: get_ssl_session_id() return 0 (get a session id successed!)
+    cout << "[2]------------------------------------------" << endl;
+		// unit_test[2] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つrecord_data != NULLの場合
+		// unit_test[2] 戻り値が0で設定する。
 		record_data = new char[HELLO_MSG_HEADER_LENGTH];
 		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x20;
 		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH, session_id);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[3] condition: recv_length = HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has not a session id
-		// unit_test[3] check: get_ssl_session_id() return 1 (get a session id failed!)
+    cout << "[3]------------------------------------------" << endl;
+		// unit_test[3] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つrecord_data != NULLの場合
+		// unit_test[3] 戻り値が1で設定する。
 		record_data = new char[HELLO_MSG_HEADER_LENGTH];
 		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x00;
 		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH, session_id);
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[4] condition: recv_length > HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has a session id
-		// unit_test[4] check: get_ssl_session_id() return 0 (get a session id successed!)
+    cout << "[4]------------------------------------------" << endl;
+		// unit_test[4] recv_length > HELLO_MSG_HEADER_LENGTHで, 且つrecord_data != NULLの場合
+		// unit_test[4] 戻り値が0で設定する。
 		record_data = new char[HELLO_MSG_HEADER_LENGTH+1];
 		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x20;
 		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH+1, session_id);
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[5] condition: recv_length > HELLO_MSG_HEADER_LENGTH, record_data != NULL, record_data has not a session id
-		// unit_test[5] check: get_ssl_session_id() return 1 (get a session id failed!)
+    cout << "[5]------------------------------------------" << endl;
+		// unit_test[5] recv_length > HELLO_MSG_HEADER_LENGTHで, 且つrecord_data != NULLの場合
+		// unit_test[5] 戻り値が1で設定する。
 		record_data = new char[HELLO_MSG_HEADER_LENGTH+1];
 		record_data[SESSION_ID_BEGAIN_OFFSET-1] = 0x00;
 		ret = this->get_ssl_session_id(record_data, HELLO_MSG_HEADER_LENGTH+1, session_id);
@@ -256,8 +261,9 @@ public:
 		bool is_hello_message;
 		int ret;
 
-		// unit_test[6] condition: recv_length = 0, record_data = NULL, is_message_from_client = false
-		// unit_test[6] check: check_ssl_record_sendable() return -1 (error)
+    cout << "[6]------------------------------------------" << endl;
+		// unit_test[6] recv_length が 0で, 且つrecord_data が NULLで, 且つis_message_from_client が falseの場合
+		// unit_test[6] 戻り値が-1(error)で設定する。
 		recv_length = 0u;
 		record_data = NULL;
 		is_message_from_client = false;
@@ -265,8 +271,9 @@ public:
 				record_data, recv_length, all_length, is_hello_message);
 		BOOST_CHECK_EQUAL(ret, -1);
 
-		// unit_test[7] condition: 0 < recv_length < 6, record_data != NULL, is_message_from_client = false
-		// unit_test[7] check: check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[7]------------------------------------------" << endl;
+		// unit_test[7] 0 < recv_length < 6で, 且つrecord_data != NULLで, 且つis_message_from_client が falseの場合
+		// unit_test[7] 戻り値が1(送信不可)で設定する。
 		recv_length = 5u;
 		record_data = new char[recv_length];
 		is_message_from_client = false;
@@ -277,8 +284,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[8] condition: recv_length < 6, record_data != NULL, is_message_from_client = true
-		// unit_test[8] check: check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[8]------------------------------------------" << endl;
+		// unit_test[8] recv_length < 6で, 且つrecord_data != NULLで, 且つis_message_from_client が trueの場合
+		// unit_test[8] 戻り値が1(送信不可)で設定する。
 		recv_length = 5u;
 		record_data = new char[recv_length];
 		is_message_from_client = true;
@@ -289,8 +297,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[9] condition: recv_length = 6, record_data != NULL, is_message_from_client = true, record_data is not a ssl record
-		// unit_test[9] check: check_ssl_record_sendable() return -1 (異常)
+    cout << "[9]------------------------------------------" << endl;
+		// unit_test[9] recv_length が 6で, 且つrecord_data != NULLで, 且つis_message_from_client が trueの場合
+		// unit_test[9] 戻り値が-1(異常)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
@@ -302,8 +311,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[10] condition: recv_length = 6, record_data != NULL, is_message_from_client = false, record_data is not a ssl record
-		// unit_test[10] check: check_ssl_record_sendable() return -1 (異常)
+    cout << "[10]------------------------------------------" << endl;
+		// unit_test[10] recv_length が 6で, 且つrecord_data != NULLで, 且つis_message_from_client が falseの場合
+		// unit_test[10] 戻り値が-1(異常)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
@@ -315,8 +325,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[11] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
-		// unit_test[11] check: check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[11]------------------------------------------" << endl;
+		// unit_test[11] recv_length が 6で, 且つis_message_from_client が trueで, record_dataがsslレコード(最小サイズ)で、且つhello messageでない場合
+		// unit_test[11] 戻り値が0(送信可能)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -335,8 +346,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[11] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
-		// unit_test[11] check: check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[12]------------------------------------------" << endl;
+		// unit_test[12] recv_length が 6で, 且つis_message_from_client が trueで, record_dataがsslレコード(最小サイズ)で、且つhello messageでない場合
+		// unit_test[12] 戻り値が0(送信可能)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x14;
@@ -355,8 +367,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[11] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
-		// unit_test[11] check: check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[13]------------------------------------------" << endl;
+		// unit_test[13] recv_length が 6で, 且つis_message_from_client が trueで, record_dataがsslレコード(最小サイズ)で、且つhello messageでない場合
+		// unit_test[13] 戻り値が0(送信可能)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x15;
@@ -375,8 +388,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[12] condition: recv_length = 6, is_message_from_client = false, record_data is a ssl record(minimal size), but is not a hello message.
-		// unit_test[12] check: check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[14]------------------------------------------" << endl;
+		// unit_test[14] recv_length が 6で, 且つis_message_from_client が falseで, record_dataがsslレコード(最小サイズ)で、且つhello messageでない場合
+		// unit_test[14] 戻り値が0(送信可能)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -395,8 +409,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[13] condition: recv_length = 6, is_message_from_client = true, record_data is a ssl record(minimal size), but is not a hello message.
-		// unit_test[13] check: check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[15]------------------------------------------" << endl;
+		// unit_test[15] recv_length が 6で, 且つis_message_from_client が trueで, record_dataがsslレコード(最小サイズ)で、且つhello messageでない場合
+		// unit_test[15] 戻り値が0(送信可能)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -415,8 +430,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[14] condition: recv_length = 6, is_message_from_client = false, record_data is a ssl record(minimal size), but is not a hello message.
-		// unit_test[14] check: check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[16]------------------------------------------" << endl;
+		// unit_test[16] recv_length が 6で, 且つis_message_from_client が falseで, record_dataがsslレコード(最小サイズ)で、且つhello messageでない場合
+		// unit_test[16] 戻り値が0(送信可能)で設定する
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -435,8 +451,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[15] condition: recv_length = 6, is_message_from_client = true ,record_data is a ssl record(minimal size), and is a hello message.
-		// unit_test[15] check: check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[17]------------------------------------------" << endl;
+		// unit_test[17] recv_length が 6で, 且つis_message_from_client が trueで ,record_dataがsslレコード(最小サイズ)で、且つhello messageの場合
+		// unit_test[17] 戻り値が1(送信不可)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -453,8 +470,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[16] condition: recv_length = 6, is_message_from_client = false ,record_data is a ssl record(minimal size), and is a hello message.
-		// unit_test[16] check: check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[18]------------------------------------------" << endl;
+		// unit_test[18] recv_length が 6で, 且つis_message_from_client が falseで ,record_dataがsslレコード(最小サイズ)で、且つhello messageの場合
+		// unit_test[18] 戻り値が1(送信不可)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -471,8 +489,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[17] condition:recv_length = 6, is_message_from_client = true ,record_data is a ssl record(minimal size), and is a hello message.
-		// unit_test[17] check:check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[19]------------------------------------------" << endl;
+		// unit_test[19] recv_length が 6で, 且つis_message_from_client が trueで ,record_dataがsslレコード(最小サイズ)で、且つhello messageの場合
+		// unit_test[19] 戻り値が1(送信不可)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -489,8 +508,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[18] condition:recv_length = 6, is_message_from_client = false ,record_data is a ssl record(minimal size), and is a hello message.
-		// unit_test[18] check:check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[20]------------------------------------------" << endl;
+		// unit_test[20] recv_length が 6で,　且つis_message_from_client が falseで ,record_dataがsslレコード(最小サイズ)で、且つhello messageの場合
+		// unit_test[20] 戻り値が1(送信不可)で設定する。
 		recv_length = 6u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -507,8 +527,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[19] condition:recv_length > 6, is_message_from_client = true ,record_data is  not ssl record data
-		// unit_test[19] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[21]------------------------------------------" << endl;
+		// unit_test[21] recv_length > 6で, 且つis_message_from_client が trueで,record_dataがsslレコードでない場合
+		// unit_test[21] 戻り値が-1(異常)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
@@ -520,8 +541,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[20] condition:recv_length > 6, is_message_from_client = false ,record_data is  not ssl record data
-		// unit_test[20] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[22]------------------------------------------" << endl;
+		// unit_test[22] recv_length > 6で, 且つis_message_from_client が falseで,record_dataがsslレコードでない場合
+		// unit_test[22] 戻り値が-1(異常)で設定する
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x00;
@@ -533,8 +555,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[21] condition:recv_length > 6, is_message_from_client = true ,record_data is ssl record data, but is not a hello message
-		// unit_test[21] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[23]------------------------------------------" << endl;
+		// unit_test[23] recv_length > 6で, 且つis_message_from_client が trueで ,record_dataがsslレコードで、且つhello messageでない場合
+		// unit_test[23] 戻り値が0(送信可能)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -552,8 +575,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[22] condition:recv_length > 6, is_message_from_client = false ,record_data is ssl record data, but is not a hello message
-		// unit_test[22] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[24]------------------------------------------" << endl;
+		// unit_test[24] recv_length > 6で, 且つis_message_from_client が falseで,record_dataがsslレコードで、且つhello messageでない場合
+		// unit_test[24] 戻り値が0(送信可能)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -571,8 +595,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[23] condition:recv_length > 6, is_message_from_client = true, record_data is ssl record data, but is not a hello message
-		// unit_test[23] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[25]------------------------------------------" << endl;
+		// unit_test[25] recv_length > 6で, 且つis_message_from_client が trueで, record_dataがsslレコードで、且つhello messageでない場合
+		// unit_test[25] 戻り値が0(送信可能)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -590,8 +615,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[24] condition:recv_length > 6, is_message_from_client = false, record_data is ssl record data, but is not a hello message
-		// unit_test[24] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[26]------------------------------------------" << endl;
+		// unit_test[26] recv_length > 6で, 且つis_message_from_client が falseで, record_dataがsslレコードで、且つhello messageでない場合
+		// unit_test[26] 戻り値が0(送信可能)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x17;
@@ -609,8 +635,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[25] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client= true,record_data is ssl record data, is a hello message
-		// unit_test[25] check:check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[27]------------------------------------------" << endl;
+		// unit_test[27] recv_length > 6で, 且つrecv_length < HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_clientが trueで,record_dataがsslレコードで、且つhello messageの場合
+		// unit_test[27] 戻り値が1(送信不可)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -627,8 +654,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[26] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client= false,record_data is ssl record data, is a hello message
-		// unit_test[26] check:check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[28]------------------------------------------" << endl;
+		// unit_test[28] recv_length > 6で, 且つrecv_length < HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_clientが falseで,record_dataがsslレコードで、且つhello messageの場合
+		// unit_test[28] 戻り値が1(送信不可)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -645,8 +673,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[27] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, is a hello message
-		// unit_test[27] check:check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[29]------------------------------------------" << endl;
+		// unit_test[29] recv_length > 6で, 且つrecv_length < HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が falseで,record_dataがsslレコードで、且つhello messageの場合
+		// unit_test[29] 戻り値が1(送信不可)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -663,8 +692,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-		// unit_test[28] condition:recv_length > 6, recv_length < HELLO_MSG_HEADER_LENGTH, is_message_from_client = true, record_data is ssl record data, is a hello message
-		// unit_test[28] check:check_ssl_record_sendable() return 1 (送信不可)
+    cout << "[30]------------------------------------------" << endl;
+		// unit_test[30] recv_length > 6で, 且つrecv_length < HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が trueで, record_dataがsslレコードで、且つhello messageの場合
+		// unit_test[30] 戻り値が1(送信不可)で設定する。
 		recv_length = 10u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -681,9 +711,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 1);
 		delete[] record_data;
 
-/*---------------------------------------------------------------------------------------*/
-		// unit_test[29] condition:recv_length = HELLO_MSG_HEADER_LENGTH,is_message_from_client = true, record_data is ssl record data, but is a error hello message,
-		// unit_test[29] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[31]------------------------------------------" << endl;
+		// unit_test[31] recv_length が HELLO_MSG_HEADER_LENGTHで,且つis_message_from_client が trueで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[31] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -703,8 +733,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[30] condition:recv_length = HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
-		// unit_test[30] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[32]------------------------------------------" << endl;
+		// unit_test[32] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が falseで,record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[32] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -724,8 +755,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[31] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message,
-		// unit_test[31] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[33]------------------------------------------" << endl;
+		// unit_test[33] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つrecord_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[33] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -744,8 +776,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[32] condition:recv_length = HELLO_MSG_HEADER_LENGTH, is_message_from_client = true,record_data is ssl record data, but is a error hello message,
-		// unit_test[32] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[34]------------------------------------------" << endl;
+		// unit_test[34] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が trueで,record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[34] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -765,8 +798,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[33] condition:recv_length = HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
-		// unit_test[33] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[35]------------------------------------------" << endl;
+		// unit_test[35] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が falseで,record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[35] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -786,8 +820,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[34] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[34] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[36]------------------------------------------" << endl;
+		// unit_test[36] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[36] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -807,8 +842,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[35] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[35] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[37]------------------------------------------" << endl;
+		// unit_test[37] recv_length が HELLO_MSG_HEADER_LENGTHで, 且つrecord_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[37] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -828,8 +864,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[36] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[36] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[38]------------------------------------------" << endl;
+		// unit_test[38] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[38] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -849,8 +886,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[37] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[37] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[39]------------------------------------------" << endl;
+		// unit_test[39] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[39] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -870,8 +908,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[38] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[38] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[40]------------------------------------------" << endl;
+		// unit_test[40] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[40] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -891,8 +930,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[39] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[39] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[41]------------------------------------------" << endl;
+		// unit_test[41] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[41] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -912,8 +952,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[40] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[40] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[42]------------------------------------------" << endl;
+		// unit_test[42] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[42] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -933,8 +974,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[41] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[41] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[43]------------------------------------------" << endl;
+		// unit_test[43] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[43] 戻り値が-1(異常)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -954,8 +996,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[42] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[42] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[44]------------------------------------------" << endl;
+		// unit_test[44] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[44] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -977,8 +1020,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[43] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[43] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[45]------------------------------------------" << endl;
+		// unit_test[45] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[45] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -999,8 +1043,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[44] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[44] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[46]------------------------------------------" << endl;
+		// unit_test[46] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[46] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1021,8 +1066,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[45] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[45] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[47]------------------------------------------" << endl;
+		// unit_test[47] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[47] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1043,8 +1089,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[46] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[46] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[48]------------------------------------------" << endl;
+		// unit_test[48] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[48] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1065,8 +1112,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[47] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[47] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[49]------------------------------------------" << endl;
+		// unit_test[49] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[49] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1087,8 +1135,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[48] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[48] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[50]------------------------------------------" << endl;
+		// unit_test[50] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[50] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1109,8 +1158,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[49] condition:recv_length = HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[49] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[51]------------------------------------------" << endl;
+		// unit_test[51] recv_length が HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[51] 戻り値が0(送信可能)で設定する。
 		recv_length = HELLO_MSG_HEADER_LENGTH;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1131,8 +1181,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[50] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = true,record_data is ssl record data, but is a error hello message,
-		// unit_test[50] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[52]------------------------------------------" << endl;
+		// unit_test[52] recv_length > HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が trueで,record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[52] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1152,8 +1203,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[51] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = false,record_data is ssl record data, but is a error hello message,
-		// unit_test[51] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[53]------------------------------------------" << endl;
+		// unit_test[53] recv_length > HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が falseで,record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[53] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1173,8 +1225,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[52] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = true, record_data is ssl record data, but is a error hello message,
-		// unit_test[52] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[54]------------------------------------------" << endl;
+		// unit_test[54] recv_length > HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が trueで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[54] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1194,8 +1247,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[53] condition:recv_length > HELLO_MSG_HEADER_LENGTH, is_message_from_client = false, record_data is ssl record data, but is a error hello message,
-		// unit_test[53] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[55]------------------------------------------" << endl;
+		// unit_test[55] recv_length > HELLO_MSG_HEADER_LENGTHで, 且つis_message_from_client が falseで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[55] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1215,8 +1269,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[54] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[54] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[56]------------------------------------------" << endl;
+		// unit_test[56] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[56] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1236,8 +1291,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[55] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[55] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[57]------------------------------------------" << endl;
+		// unit_test[57] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[57] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1257,8 +1313,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[56] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[56] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[58]------------------------------------------" << endl;
+		// unit_test[58] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[58] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1278,8 +1335,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[57] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[57] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[59]------------------------------------------" << endl;
+		// unit_test[59] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[59] 戻る値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1299,8 +1357,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[58] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[58] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[60]------------------------------------------" << endl;
+		// unit_test[60] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[60] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1320,8 +1379,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[59] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[59] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[61]------------------------------------------" << endl;
+		// unit_test[61] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[61] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1341,8 +1401,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[60] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[60] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[62]------------------------------------------" << endl;
+		// unit_test[62] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[62] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1362,8 +1423,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[61] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, but is a error hello message
-		// unit_test[61] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[63]------------------------------------------" << endl;
+		// unit_test[63] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,誤りのhello messageの場合
+		// unit_test[63] 戻り値が-1(異常)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1383,8 +1445,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[62] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[62] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[64]------------------------------------------" << endl;
+		// unit_test[64] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[64] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1406,8 +1469,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[63] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[63] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[65]------------------------------------------" << endl;
+		// unit_test[65] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[65] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1429,8 +1493,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[64] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[64] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[66]------------------------------------------" << endl;
+		// unit_test[66] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[66] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1452,8 +1517,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[65] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is client hello message
-		// unit_test[65] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[67]------------------------------------------" << endl;
+		// unit_test[67] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つclient hello messageの場合
+		// unit_test[67] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1475,8 +1541,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[66] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[66] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[68]------------------------------------------" << endl;
+		// unit_test[68] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[68] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1498,8 +1565,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[67] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[67] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[69]------------------------------------------" << endl;
+		// unit_test[69] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[69] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1521,8 +1589,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[68] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[68] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[70]------------------------------------------" << endl;
+		// unit_test[70] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[70] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1544,8 +1613,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[69] condition:recv_length > HELLO_MSG_HEADER_LENGTH, record_data is ssl record data, and is server hello message
-		// unit_test[69] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[71]------------------------------------------" << endl;
+		// unit_test[71] recv_length > HELLO_MSG_HEADER_LENGTHで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[71] 戻り値が0(送信可能)で設定する。
 		recv_length = 100u;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1567,8 +1637,9 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[70] condition:recv_length = MAX_SSLID_BUFFER_SIZE, record_data is ssl record data, and is server hello message
-		// unit_test[70] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[72]------------------------------------------" << endl;
+		// unit_test[72] recv_length が MAX_SSLID_BUFFER_SIZEで, record_dataがsslレコードで,且つserver hello messageの場合
+		// unit_test[72] 戻り値が0(送信可能)で設定する。
 		recv_length = MAX_SSLID_BUFFER_SIZE;
 		record_data = new char[recv_length];
 		record_data[0] = 0x16;
@@ -1590,16 +1661,18 @@ public:
 		BOOST_CHECK_EQUAL(ret, 0);
 		delete[] record_data;
 
-		// unit_test[71] condition:record_data = NULL
-		// unit_test[71] check:check_ssl_record_sendable() return -1 (異常)
+    cout << "[73]------------------------------------------" << endl;
+		// unit_test[73] record_data が NULLの場合
+		// unit_test[73] 戻り値が-1(異常)で設定する。
 		record_data = NULL;
 		ret = this->check_ssl_record_sendable(is_message_from_client,
 				record_data, 0u, all_length, is_hello_message);
 		BOOST_CHECK_EQUAL(ret, -1);
 		delete[] record_data;
 
-		// unit_test[72] condition:recv_length=SESSION_ID_BEGAIN_OFFSET, record_data is ssl record data, but no session id
-		// uint_test[72] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[74]------------------------------------------" << endl;
+		// unit_test[74] recv_lengthがSESSION_ID_BEGAIN_OFFSETで, record_dataがsslレコードで,セッションIDがない場合
+		// uint_test[74] 戻り値が0(送信可能)で設定する。
 		recv_length = SESSION_ID_BEGAIN_OFFSET;
 		record_data = new char[SESSION_ID_BEGAIN_OFFSET];
 		record_data[0] = 0x16;
@@ -1618,8 +1691,9 @@ public:
         BOOST_CHECK_EQUAL(all_length, 44u);
         delete[] record_data;
 
-        // unit_test[73] condition:recv_length>SESSION_ID_BEGAIN_OFFSET, record_data is ssl record data, but no session id
-		// uint_test[73] check:check_ssl_record_sendable() return 0 (送信可能)
+    cout << "[75]------------------------------------------" << endl;
+        	// unit_test[75] recv_length>SESSION_ID_BEGAIN_OFFSETで, record_dataがsslレコードで,セッションIDがない場合
+		// uint_test[75] 戻り値が0(送信可能)で設定する。
 		recv_length = SESSION_ID_BEGAIN_OFFSET+1;
 		record_data = new char[SESSION_ID_BEGAIN_OFFSET];
 		record_data[0] = 0x16;

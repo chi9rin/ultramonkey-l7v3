@@ -117,7 +117,7 @@ void protocol_module_sslid::finalize()
     if (LOG_LV_DEBUG == getloglevel())
     {
         putLogDebug(30005, "function : void protocol_module_sslid::finalize() : "
-					"rs_list_begin.clear(), rs_list_end.clear(), rs_list_next.clear(), "
+                    "rs_list_begin.clear(), rs_list_end.clear(), rs_list_next.clear(), "
                     "rs_list_lock.clear(), rs_list_unlock.clear() end.", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -131,7 +131,7 @@ void protocol_module_sslid::finalize()
     if (LOG_LV_DEBUG == getloglevel())
     {
         putLogDebug(30006, "function : void protocol_module_sslid::finalize() : "
-					"replication_pay_memory.clear(), replication_area_lock.clear(), "
+                    "replication_pay_memory.clear(), replication_area_lock.clear(), "
                     "replication_area_unlock.clear() end.", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -718,7 +718,6 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
 
         if (data_addr == NULL || data_size <= 0)
         {
-            // waiting for jp response????????????????????
             // replication area is null
             putLogError(37020, "Replication area is null.", __FILE__, __LINE__);
 
@@ -1344,7 +1343,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
         // parameter check
         if (recvlen > recvbuffer.size())
         {
-            // waiting for jp response...??????????????????
             std::cerr << "handle_client_recv() : Data size bigger than buffer size." << std::endl;
             putLogError(37030, "Data size bigger than buffer size.", __FILE__, __LINE__);
             throw -1;
@@ -1355,7 +1353,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37031, "Invalid thread id.", __FILE__, __LINE__);
 
                 throw -1;
@@ -1377,7 +1374,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             // data length check
             if (threaddata->data_size + recvlen > threaddata->data_buffer.size())
             {
-                // waiting for jp response...??????????????????
                 std::cerr << "handle_client_recv() : Data size bigger than buffer size." << std::endl;
                 putLogError(37032, "Data size bigger than buffer size.", __FILE__, __LINE__);
                 threaddata->end_flag = END_FLAG_ON;
@@ -1588,7 +1584,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37035, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
@@ -1600,8 +1595,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                     putLogDebug(30055, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
-                // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
-                putLogInfo(035000, "Realserver decision failure.", __FILE__, __LINE__);
+                putLogInfo(35000, "Realserver decision failure.", __FILE__, __LINE__);
 
                 return FINALIZE;
             }
@@ -1669,8 +1663,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                         }
                         /*------DEBUG LOG END------*/
 
-                        // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
-                        putLogInfo(035000, "Realserver decision failure", __FILE__, __LINE__);
+                        putLogInfo(35001, "Realserver decision failure", __FILE__, __LINE__);
 
                         threaddata->end_flag = END_FLAG_ON;
                         return FINALIZE;
@@ -1856,8 +1849,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
         formatter % e.what();
         putLogError(37036, formatter.str(), __FILE__, __LINE__);
 
-        // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
-        putLogInfo(035000, "Realserver decision failure.", __FILE__, __LINE__);
+        putLogInfo(35002, "Realserver decision failure.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -1867,8 +1859,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
         putLogError(37037, "function protocol_module_sslid::check_message_result "
                     "protocol_module_sslid::handle_realserver_select() : Unknown exception.", __FILE__, __LINE__);
 
-        // waiting for jp response Could not finalize protomod. (Realserver decision failure)??????
-        putLogInfo(035000, "Realserver decision failure.", __FILE__, __LINE__);
+        putLogInfo(35003, "Realserver decision failure.", __FILE__, __LINE__);
 
         status = FINALIZE;
     }
@@ -1931,8 +1922,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_connect(const boost::thread::id thread_id, "
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
-                                "thread_id = %d, sendbuffer = %s, datalen = %d.");
-        formatter % thread_id % sendbuffer.data() % datalen;
+                                "thread_id = %d.");
+        formatter % thread_id;
         putLogDebug(30070, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -1953,7 +1944,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end())
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37038, "Invalid thread id.", __FILE__, __LINE__);
                 status = FINALIZE;
             }
@@ -2028,7 +2018,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37041, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
@@ -2081,7 +2070,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     catch (...)
     {
         std::cerr << "protocol_module_sslid::handle_realserver_connection_fail() : Unknown exception." << std::endl;
-        putLogError(37043, "function protocol_module_sslid::check_message_result "
+        putLogError(37043, "function : protocol_module_sslid::check_message_result "
                     "protocol_module_sslid::handle_realserver_connection_fail() : Unknown exception.",
                     __FILE__, __LINE__);
 
@@ -2130,7 +2119,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37044, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
@@ -2359,7 +2347,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     // parameter check
     if (recvlen > recvbuffer.size())
     {
-        // waiting for jp response...??????????????????
         std::cerr << "handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
         putLogError(37047, "Data size bigger than buffer size.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
@@ -2389,7 +2376,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37048, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
@@ -2417,7 +2403,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
         // data length check
         if (threaddata->data_size + recvlen > threaddata->data_buffer.size())
         {
-            // waiting for jp response...??????????????????
             std::cerr << "handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
             putLogError(37049, "Data size bigger than buffer size.", __FILE__, __LINE__);
 
@@ -2688,8 +2673,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_client_connection_check(const boost::thread::id thread_id, "
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
-                                "size_t& datalen) : thread_id = %d, sendbuffer = %s, datalen = %d.");
-        formatter % thread_id % sendbuffer.data() % datalen;
+                                "size_t& datalen) : thread_id = %d.");
+        formatter % thread_id;
         putLogDebug(30099, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -2705,7 +2690,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....??????????????????
                 putLogError(37052, "Invalid thread id.", __FILE__, __LINE__);
 
                 /*-------- DEBUG LOG --------*/
@@ -2816,7 +2800,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
     }
     catch (...)
     {
-        std::cerr << "protocol_module_sslid::handle_client_connection_check() :Unknown exception." << std::endl;
+        std::cerr << "protocol_module_sslid::handle_client_connection_check() : Unknown exception." << std::endl;
         putLogError(37054, "function : protocol_module_sslid::check_message_result "
                     "protocol_module_sslid::handle_client_connection_check() : Unknown exception.", __FILE__, __LINE__);
 
@@ -2827,7 +2811,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
     if (LOG_LV_DEBUG == getloglevel())
     {
         boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_connection_check(const boost::thread::id thread_id,"
+                                "handle_client_connection_check(const boost::thread::id thread_id, "
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                 "return_value = %d.");
         formatter % status;
@@ -2894,7 +2878,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (it == session_thread_data_map.end() || it->second == NULL)
             {
-                // waiting for jp response.....?????????????????
                 putLogError(37055, "Invalid thread id.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
@@ -3209,10 +3192,10 @@ int protocol_module_sslid::put_data_to_sendbuffer(
     if (LOG_LV_DEBUG == getloglevel())
     {
         boost::format formatter("in_function : int protocol_module_sslid::put_data_to_sendbuffer("
-                                "const boost::thread::id& thread_id,"
+                                "const boost::thread::id& thread_id, "
                                 "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
-                                "size_t& datalen) : thread_id = %d, sendbuffer = %s, datalen = %d.");
-        formatter % thread_id % sendbuffer.data() % datalen;
+                                "size_t& datalen) : thread_id = %d.");
+        formatter % thread_id;
         putLogDebug(30123, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -3226,14 +3209,13 @@ int protocol_module_sslid::put_data_to_sendbuffer(
         session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
         if (it == session_thread_data_map.end() || it->second == NULL)
         {
-            // waiting for jp response.....??????????????????
             putLogError(37058, "Invalid thread id.", __FILE__, __LINE__);
 
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
                 putLogDebug(30124, "out_function : int protocol_module_sslid::put_data_to_sendbuffer("
-                            "const boost::thread::id& thread_id,"
+                            "const boost::thread::id& thread_id, "
                             "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                             "size_t& datalen) : return_value = -1.", __FILE__, __LINE__);
             }
@@ -3481,7 +3463,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
     if (LOG_LV_DEBUG == getloglevel())
     {
         putLogDebug(30135, "out_function : int protocol_module_sslid::put_data_to_sendbuffer("
-                    "const boost::thread::id& thread_id,"
+                    "const boost::thread::id& thread_id, "
                     "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                     "size_t& datalen) : return_value = 0.", __FILE__, __LINE__);
     }

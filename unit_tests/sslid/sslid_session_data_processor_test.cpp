@@ -6,6 +6,8 @@ using namespace l7vs;
 #define SECTION_NUMBER	200
 #define STRUCT_NUMBER	256
 
+bool clear_function_return_fail = false;
+
 LOG_LEVEL_TAG getloglevel_test(){
 
 	return LOG_LV_NONE;
@@ -89,6 +91,15 @@ public:
 
 	}
 
+	// clear_expired_session_data
+	int clear_expired_session_data(){
+		if(clear_function_return_fail){
+			return 1;
+		} else {
+			return sslid_session_data_processor::clear_expired_session_data();
+		}
+	}
+
 	// write_session_data_test thread
 	void write_session_data_test_thread(
             const std::string& session_id,
@@ -103,7 +114,8 @@ public:
 			int expecting_timeout,
 			sslid_replication_data_processor* expecting_replication_data_processor) {
 
-		// unit_test[1] member variable initialization test
+    cout << "[1]------------------------------------------" << endl;
+		// unit_test[1] メンバー変数が初期化されるチェックする。
 		// maxlist check
 		BOOST_CHECK_EQUAL(this->maxlist, expecting_maxlist);
 		// timeout check
@@ -128,6 +140,62 @@ public:
 		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
 		// lasttime_session_map
 		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
+
+	cout << "[2]------------------------------------------" << endl;
+		// unit_test[2] maxlist < 0の場合, 例外が発生する。
+		bool exception_occur = false;
+		try{
+			l7vs::sslid_session_data_processor(-1, 1, expecting_replication_data_processor,
+					ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
+					inputLogInfo2, inputLogDebug2);
+		} catch(...) {
+			exception_occur = true;
+		}
+		BOOST_CHECK(exception_occur);
+
+	cout << "[3]------------------------------------------" << endl;
+		// unit_test[3] maxlist　が０の場合, 例外が発生しない。
+		try{
+			l7vs::sslid_session_data_processor(0, 1, expecting_replication_data_processor,
+					ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
+					inputLogInfo2, inputLogDebug2);
+		} catch(...) {
+			BOOST_ERROR("exception: sslid_session_data_processor");
+		}
+
+	cout << "[4]------------------------------------------" << endl;
+		// unit_test[4] timeout < 0の場合, 例外が発生する。
+		exception_occur = false;
+		try{
+			l7vs::sslid_session_data_processor(2, -2, expecting_replication_data_processor,
+					ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
+					inputLogInfo2, inputLogDebug2);
+		} catch(...) {
+			exception_occur = true;
+		}
+		BOOST_CHECK(exception_occur);
+
+	cout << "[5]------------------------------------------" << endl;
+		// unit_test[5] timeout が０の場合, 例外が発生しない。
+		try{
+			l7vs::sslid_session_data_processor(2, 0, expecting_replication_data_processor,
+					ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
+					inputLogInfo2, inputLogDebug2);
+		} catch(...) {
+			BOOST_ERROR("exception: sslid_session_data_processor");
+		}
+
+	cout << "[6]------------------------------------------" << endl;
+		// unit_test[6] replication_data_processorがNULLの場合, 例外が発生する。
+		exception_occur = false;
+		try{
+			l7vs::sslid_session_data_processor(2, 2, NULL,
+					ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
+					inputLogInfo2, inputLogDebug2);
+		} catch(...) {
+			exception_occur = true;
+		}
+		BOOST_CHECK(exception_occur);
 	}
 
 	// get_endpoint_from_session_data_test
@@ -142,8 +210,8 @@ public:
 		sslid_replication_data_processor_replacement *this_replication_data_processor =
 			dynamic_cast<sslid_replication_data_processor_replacement *>(this->replication_data_processor);
 
-		// unit_test[2] session_endpoint_map and session_lasttime_map are all empty test
-		// unit_test[2] return value: 1
+    cout << "[7]------------------------------------------" << endl;
+		// unit_test[7] session_endpoint_map と session_lasttime_mapが空の場合、戻り値が失敗（１）で設定する。
 		session_id = "test_id123456789abcdefghijklmnop";
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
@@ -152,8 +220,8 @@ public:
 		// function result check
 		BOOST_CHECK_EQUAL(result, 1);
 
-		// unit_test[3] when session_endpoint_map is empty, but session_lasttime_map is not empty test
-		// unit_test[3] return value: 1
+    cout << "[8]------------------------------------------" << endl;
+		// unit_test[8] session_endpoint_mapが空で,session_lasttime_mapが空でない場合、戻り値が失敗（１）で設定する。
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
 		this->lasttime_session_map.clear();
@@ -162,8 +230,8 @@ public:
 		// function result check
 		BOOST_CHECK_EQUAL(result, 1);
 
-		// unit_test[4] when session_endpoint_map is not empty, but session_lasttime_map is empty test
-		// unit_test[4] return value: 1
+    cout << "[9]------------------------------------------" << endl;
+		// unit_test[9] session_lasttime_mapが空で,session_endpoint_mapが空でない場合、戻り値が失敗（１）で設定する。
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
 		this->lasttime_session_map.clear();
@@ -172,8 +240,8 @@ public:
 		// function result check
 		BOOST_CHECK_EQUAL(result, 1);
 
-		// unit_test[5] while exist one data and does not time out, test
-		// unit_test[5] return value: 0
+    cout << "[10]------------------------------------------" << endl;
+		// unit_test[10] １つのデータがmapに存在して、タイムアウトしない場合、戻り値が正常（０）で設定する。
 		result = 10;
 		session_id = "test_id123456789abcdefghijklmnop";
 		saved_endpoint.address(boost::asio::ip::address::from_string("192.168.120.102"));
@@ -191,8 +259,8 @@ public:
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
 
-		// unit_test[6] while exist one data and time out test
-		// unit_test[6] return value: 0
+    cout << "[11]------------------------------------------" << endl;
+		// unit_test[11] １つのデータがmapに存在して、タイムアウトの場合、戻り値が正常（０）で設定する。
 		result = 10;
 		this->timeout = 0;
 		this->session_endpoint_map.clear();
@@ -217,8 +285,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
 		BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
 
-		// unit_test[7] while map has 3 data and all data does not time out, test
-		// unit_test[7] return value: 0
+    cout << "[12]------------------------------------------" << endl;
+		// unit_test[12] mapに3つデータがあり、且つ３つデータが全部タイムアウトしない場合、戻り値が正常（０）で設定する。
 		result = 10;
 		std::string temp_session_id1 = "temp_session_idyyyyyuuuu33456780";
 		std::string temp_session_id2 = "temp_session_id456789012rtyuerxy";
@@ -243,7 +311,8 @@ public:
 		// got endpoint check
 		BOOST_CHECK_EQUAL(get_endpoint, saved_endpoint);
 
-		// unit_test[8] while map has 3 data, two data does not time out, but the other time out
+    cout << "[13]------------------------------------------" << endl;
+		// unit_test[13] mapに3つデータがあり、且つ２つデータがタイムアウトしなくて,１つのデータだけタイムアウトの場合、戻り値が正常（０）で設定する。
 		time_t temp_last_time = time(0) - 10;
 		time_t out_time = time(0) - 5000;
 		result = 10;
@@ -266,8 +335,8 @@ public:
 		// got endpoint check
 		BOOST_CHECK_EQUAL(get_endpoint, saved_endpoint);
 
-		// unit_test[9] while map has 3 data and all data time out, test
-		// unit_test[9] return value: 0
+    cout << "[14]------------------------------------------" << endl;
+		// unit_test[14] mapに3つデータがあり、且つ３つデータが全部タイムアウトの場合、戻り値が正常（０）で設定する。
 		temp_last_time = last_time - 10;
 		this->timeout = 0;
 		this->session_endpoint_map.clear();
@@ -298,8 +367,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
 		BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
 
-		// unit_test[10] while vaule of timeout is not 0 and the searching data time out, test
-		// unit_test[10] return value: 0
+    cout << "[15]------------------------------------------" << endl;
+		// unit_test[15] メンバー関数timeoutが0でなくて、且つ検索対象データがタイムアウトの場合、戻り値が正常（０）で設定する。
 		temp_last_time = time(0) - 20;
 		this->timeout = 10;
 		this->session_endpoint_map.clear();
@@ -324,7 +393,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
 		BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
 
-		// unit_test[11] ipv6 test(exist one data and does not time out)
+    cout << "[16]------------------------------------------" << endl;
+		// unit_test[16] endpointがipv6で、１つのデータが存在して、且つタイムアウトしない場合、戻り値が正常（０）で設定する。
 		saved_endpoint.address(boost::asio::ip::address::from_string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		result = 10;
 		this->timeout = 10000;
@@ -355,8 +425,19 @@ public:
 		sslid_replication_data_processor_replacement *this_replication_data_processor =
 			dynamic_cast<sslid_replication_data_processor_replacement *> (this->replication_data_processor);
 
-		// unit_test[12] while map is empty, test
+	cout << "[17]------------------------------------------" << endl;
+		// unit_test[17] maxlistが０の場合、戻り値が正常（０）で設定する。
+		this->session_endpoint_map.clear();
+		this->session_lasttime_map.clear();
+		this->lasttime_session_map.clear();
+		this->maxlist = 0;
+		result = this->write_session_data(session_id, new_saved_endpoint, write_time);
+		BOOST_CHECK_EQUAL(result, 0);
+
+    cout << "[18]------------------------------------------" << endl;
+		// unit_test[18] mapが空の場合、例外が発生しない。
 		try{
+			this->maxlist = 3;
 			this->session_endpoint_map.clear();
 			this->session_lasttime_map.clear();
 			this->lasttime_session_map.clear();
@@ -382,7 +463,8 @@ public:
 			BOOST_ERROR("exception: write_session_data");
 		}
 
-		// unit_test[13] session_id exist test
+    cout << "[19]------------------------------------------" << endl;
+		// unit_test[19] mapにセッションIDが存在している場合、戻り値が正常（０）で設定する。
 		old_saved_endpoint.address(boost::asio::ip::address::from_string("0.0.0.0"));
 		new_saved_endpoint.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		session_id = "test_id123456789abcdefghijklmnop";
@@ -411,7 +493,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.realserver_addr, new_saved_endpoint);
 		BOOST_CHECK_EQUAL(temp_list_data.last_time, write_time);
 
-		// unit_test[14] while session_id exists, test(session_endpoint_map size = maxlist - 1)
+    cout << "[20]------------------------------------------" << endl;
+		// unit_test[20] mapにセッションIDが存在して、session_endpoint_mapのサイズがmaxlist - 1の場合、戻り値が正常（０）で設定する。
 		std::string temp_session_id = "test_id2abcdefghijklmnop23456789";
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
@@ -441,7 +524,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.realserver_addr, new_saved_endpoint);
 		BOOST_CHECK_EQUAL(temp_list_data.last_time, write_time);
 
-		// unit_test[15] while session_id exists, test(session_endpoint_map size = maxlist)
+    cout << "[21]------------------------------------------" << endl;
+		// unit_test[21] mapにセッションIDが存在して、session_endpoint_mapのサイズがmaxlistの場合、戻り値が正常（０）で設定する。
 		std::string temp_session_id1 = "test_idthhhffffeeeeddddffffeeeed";
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
@@ -474,7 +558,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.realserver_addr, new_saved_endpoint);
 		BOOST_CHECK_EQUAL(temp_list_data.last_time, write_time);
 
-		// unit_test[16] session_id not exist test(session_endpoint_map size = maxlist - 1)
+    cout << "[22]------------------------------------------" << endl;
+		// unit_test[22] mapにセッションIDが存在しない、session_endpoint_mapのサイズがmaxlist - 1の場合、戻り値が正常（０）で設定する。
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
 		this->lasttime_session_map.clear();
@@ -503,7 +588,8 @@ public:
 		BOOST_CHECK_EQUAL(temp_list_data.realserver_addr, new_saved_endpoint);
 		BOOST_CHECK_EQUAL(temp_list_data.last_time, write_time);
 
-		// unit_test[17] session_id not exist test(session_endpoint_map size = maxlist)
+    cout << "[23]------------------------------------------" << endl;
+		// unit_test[23] mapにセッションIDが存在しない、session_endpoint_mapのサイズがmaxlistの場合、戻り値が正常（０）で設定する。
 		std::string temp_session_id2 = "33rty567234ertgh6890sdfghbnmeeed";
 		time_t earlier_time = last_time - 10;
 		this->timeout = 10000;
@@ -541,7 +627,30 @@ public:
 		BOOST_CHECK_EQUAL(last_temp_list_data.realserver_addr, new_saved_endpoint);
 		BOOST_CHECK_EQUAL(last_temp_list_data.last_time, write_time);
 
-		// unit_test[18] while session_id not exist and session_endpoint_map size = maxlist and one data is time out, test
+	cout << "[24]------------------------------------------" << endl;
+		// unit_test[24]  mapにセッションIDが存在しない、がつ　session_endpoint_mapのサイズがmaxlist、がつ　clear_expired_session_data（）の戻る値が1場合、
+		// unit_test[24]  戻り値が正常（0）で設定する。
+		clear_function_return_fail = true;
+		this->session_endpoint_map.clear();
+		this->session_lasttime_map.clear();
+		this->lasttime_session_map.clear();
+		this_replication_data_processor->get_temp_list().clear();
+		this->session_endpoint_map.insert(std::make_pair(temp_session_id, new_saved_endpoint));
+		this->session_endpoint_map.insert(std::make_pair(temp_session_id1, new_saved_endpoint));
+		this->session_endpoint_map.insert(std::make_pair(temp_session_id2, new_saved_endpoint));
+		this->session_lasttime_map.insert(std::make_pair(temp_session_id, earlier_time));
+		this->session_lasttime_map.insert(std::make_pair(temp_session_id1, last_time));
+		this->session_lasttime_map.insert(std::make_pair(temp_session_id2, last_time));
+		this->lasttime_session_map.insert(std::make_pair(earlier_time, temp_session_id));
+		this->lasttime_session_map.insert(std::make_pair(last_time, temp_session_id1));
+		this->lasttime_session_map.insert(std::make_pair(last_time, temp_session_id2));
+		result = this->write_session_data(session_id, new_saved_endpoint, write_time);
+		clear_function_return_fail = false;
+		BOOST_CHECK_EQUAL(result, 0);
+
+    cout << "[25]------------------------------------------" << endl;
+		// unit_test[25] mapにセッションIDが存在しなくて、且つsession_endpoint_mapのサイズが maxlistで１つのデータがタイムアウトの場合
+		// unit_test[25] 戻り値が正常（０）で設定する。
 		time_t out_of_time = time(0) - 2000;
 		this->timeout = 1000;
 		this->session_endpoint_map.clear();
@@ -578,7 +687,9 @@ public:
 		BOOST_CHECK_EQUAL(last_temp_list_data.realserver_addr, new_saved_endpoint);
 		BOOST_CHECK_EQUAL(last_temp_list_data.last_time, write_time);
 
-		// unit_test[19] while session_id not exist and session_endpoint_map size = maxlist and two data is time out, test
+    cout << "[26]------------------------------------------" << endl;
+		// unit_test[26] mapにセッションIDが存在しなくて、且つsession_endpoint_mapのサイズが maxlistで１つのデータがタイムアウトの場合
+		// unit_test[26] 戻り値が正常（０）で設定する。
 		out_of_time = time(0) - 2000;
 		this->timeout = 1000;
 		this->session_endpoint_map.clear();
@@ -620,7 +731,8 @@ public:
 			}
 		}
 
-		// unit_test[20] multi-threads test
+    cout << "[27]------------------------------------------" << endl;
+		// unit_test[27] マルチスレッドの場合、mapにデータを正常追加する
 		try{
 			this->session_endpoint_map.clear();
 			this->session_lasttime_map.clear();
@@ -641,14 +753,27 @@ public:
 							write_time));
 			thread_group.join_all();
 
+			std::map<std::string, boost::asio::ip::tcp::endpoint>::iterator it1 = this->session_endpoint_map.begin();
+			std::map<std::string, time_t>::iterator it2 =  this->session_lasttime_map.begin();
+			std::multimap<time_t, std::string>::iterator it3 = this->lasttime_session_map.begin();
 			BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 3u);
 			BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 3u);
 			BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 3u);
+			for(; it1 != this->session_endpoint_map.end(); it1++){
+				BOOST_CHECK_EQUAL(it1->second, new_saved_endpoint);
+			}
+			for(; it2 != this->session_lasttime_map.end(); it2++){
+				BOOST_CHECK_EQUAL(it2->second, write_time);
+			}
+			for(; it3 != this->lasttime_session_map.end(); it3++){
+				BOOST_CHECK_EQUAL(it3->first, write_time);
+			}
 		} catch(...){
 			BOOST_ERROR("exception: write_session_data");
 		}
 
-		// unit_test[21] ipv6 test(session_id exist)
+    cout << "[28]------------------------------------------" << endl;
+		// unit_test[28] endpointがipv6で、mapにセッションIDが存在する場合、戻り値が正常（０）で設定する。
 		old_saved_endpoint.address(boost::asio::ip::address::from_string("0:0:0:0:0:0:0:0"));
 		new_saved_endpoint.address(boost::asio::ip::address::from_string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		session_id = "test_id123456789abcdefghijklmnop";
@@ -686,7 +811,8 @@ public:
 		sslid_replication_data_processor_replacement *this_replication_data_processor =
 			dynamic_cast<sslid_replication_data_processor_replacement *> (this->replication_data_processor);
 
-		// unit_test[22] map empty test
+    cout << "[29]------------------------------------------" << endl;
+		// unit_test[29] mapが空の場合、戻り値が失敗（１）で設定する。
 		this->timeout = 0;
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
@@ -697,9 +823,10 @@ public:
 			BOOST_ERROR("exception: clear_expired_session_data");
 		}
 		// function result check
-		BOOST_CHECK_EQUAL(result, 0);
+		BOOST_CHECK_EQUAL(result, 1);
 
-		// unit_test[23] when time out items exist(all items is time out), items remove test
+    cout << "[30]------------------------------------------" << endl;
+		// unit_test[30] mapに全てのアイテムがタイムアウトの場合、全てのアイテムを削除する。
 		test_time = time(0) - 5;
 		this->timeout = 0;
 		this->session_endpoint_map.clear();
@@ -731,7 +858,8 @@ public:
 		BOOST_CHECK_EQUAL(last_temp_list_data.op_code, 'D');
 		BOOST_CHECK_EQUAL(last_temp_list_data.session_id, session_id2);
 
-		// unit_test[24] when time out item exists(one item is time out, but another item is not), item remove test
+    cout << "[31]------------------------------------------" << endl;
+		// unit_test[31] mapに１つのアイテムがタイムアウトで、もう１つのアイテムがタイムアウトしない場合、タイムアウトのアイテムだけ削除する。
 		saved_endpoint2.port(88);
 		this->timeout = 100;
 		test_time = time(0);
@@ -772,7 +900,8 @@ public:
 		BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
 		BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id1);
 
-		// unit_test[25] when all items are not time out, item remove test
+    cout << "[32]------------------------------------------" << endl;
+		// unit_test[32] mapに全てのアイテムがタイムアウトしない場合、一番古いアイテムを削除する。
 		this->timeout = 10000;
 		time_t earlier_time = test_time -5;
 		time_t earliest_time = test_time -10;
@@ -811,7 +940,8 @@ public:
 		BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
 		BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id2);
 
-		// unit_test[26] while all items are not time out and all item's lasttime is equal, first item remove test
+    cout << "[33]------------------------------------------" << endl;
+		// unit_test[33] mapに全てのアイテムがタイムアウトしない場合、lasttimeが全て同じの場合、１つ目のアイテムを削除する。
 		std::string session_id3 = "test_id3wasfgasdasdwasdrggrtrrrr";
 		this->timeout = 10000;
 		this->session_endpoint_map.clear();
@@ -850,7 +980,7 @@ public:
 
 		int result = 10;
 		unsigned short port1 = 888;
-		unsigned short port2 = 999;
+		unsigned short port2 = -999;
 		unsigned short port3 = 333;
 		unsigned short port4 = 444;
 		unsigned short port5 = 555;
@@ -912,7 +1042,8 @@ public:
 		(first_real_data + 4)->realserver_port = port5;
 		(first_real_data + 4)->last_time = last_time5;
 
-		// unit_test[27] NULL pointer test
+    cout << "[34]------------------------------------------" << endl;
+		// unit_test[34] パラメータがNULLの場合、戻り値が異常（-1）で設定する。
 		result = 10;
 		try {
 			result = this->read_session_data_from_replication_area(NULL);
@@ -922,7 +1053,8 @@ public:
 		// function result check
 		BOOST_CHECK_EQUAL(result, -1);
 
-		// unit_test[28] read data test(read the first data)
+    cout << "[35]------------------------------------------" << endl;
+		// unit_test[35] maxlistが１で、５つデータが存在して、パラメータがfirst_real_data の場合、replicationエリアから１つ目のデータを取得する。
 		result = 10;
 		this->maxlist = 1;
 		this->session_endpoint_map.clear();
@@ -954,7 +1086,8 @@ public:
 		// lasttime_session_map's session_id check
 		BOOST_CHECK_EQUAL(it3->second, session_id1);
 
-		// unit_test[29] read data test(read the second data)
+    cout << "[36]------------------------------------------" << endl;
+		// unit_test[36] maxlistが１で、５つデータが存在して、パラメータがfirst_real_data + 1の場合、replicationエリアから２つ目のデータを取得する。
 		result = 10;
 		this->maxlist = 1;
 		this->session_endpoint_map.clear();
@@ -986,7 +1119,8 @@ public:
 		// lasttime_session_map's session_id check
 		BOOST_CHECK_EQUAL(it3->second, session_id2);
 
-		// unit_test[30] read data test(read the thrid data, because the valid is 0, so nothing can be read)
+    cout << "[37]------------------------------------------" << endl;
+		// unit_test[37] maxlistが１で、５つデータが存在して、パラメータがfirst_real_data + ２で 、対応するvalidが0の場合, mapのサイズが０である。
 		result = 10;
 		this->maxlist = 1;
 		this->session_endpoint_map.clear();
@@ -1002,7 +1136,8 @@ public:
 		// lasttime_session_map check(nothing to read)
 		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
 
-		// unit_test[31] while  maxlist is 2, once can read two data, test
+    cout << "[38]------------------------------------------" << endl;
+		// unit_test[38] maxlistが２の場合、mapに２件のデータ読み込む。
 		result = 10;
 		this->maxlist = 2;
 		this->session_endpoint_map.clear();
@@ -1059,7 +1194,8 @@ public:
 			it3++;
 		}
 
-		// unit_test[32] while  maxlist is 2 and the second to read data's valid is 0, test
+    cout << "[39]------------------------------------------" << endl;
+		// unit_test[39] maxlistが２で、２つ目データのvalidが0の場合、１件目のみ読み込む。
 		result = 10;
 		this->maxlist = 2;
 		this->session_endpoint_map.clear();
@@ -1109,7 +1245,8 @@ public:
 			it3++;
 		}
 
-		// unit_test[33] while  maxlist is 2 and the first to read data's valid is 0, test
+    cout << "[40]------------------------------------------" << endl;
+		// unit_test[40] maxlistが２で、１つ目データのvalidが0の場合、２件目のみ読み込む。
 		result = 10;
 		this->maxlist = 2;
 		this->session_endpoint_map.clear();
@@ -1159,8 +1296,8 @@ public:
 			it3++;
 		}
 
-		// unit_test[34] when the realserver_ip is ipv6, test
-		// set the real data area(ipv6)
+    cout << "[41]------------------------------------------" << endl;
+		// unit_test[41] realserverがipv6の場合、取得のipが正しいです。
 		std::string realserver_ipv6_ip1 = "abcd:21d0:8936:4866:eefe:567d:3a4b:1230";
 		memcpy(first_real_data->realserver_ip, realserver_ipv6_ip1.c_str(), realserver_ipv6_ip1.length());
 		result = 10;
@@ -1194,46 +1331,6 @@ void sslid_session_data_processor_test(){
 			inputLogError2, inputLogWarn2, inputLogInfo2, inputLogDebug2);
 
 	test_object.sslid_session_data_processor_test(3, 5, &replication_data_processor);
-
-	// unit_test[35] while maxlist < 0, exception occur, test
-	bool exception_occur = false;
-	try{
-		l7vs::sslid_session_data_processor(-1, 1, &replication_data_processor,
-				ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
-				inputLogInfo2, inputLogDebug2);
-	} catch(...) {
-		exception_occur = true;
-	}
-	BOOST_CHECK(exception_occur);
-
-	// unit_test[36] while maxlist = 0, exception not occur, test
-	try{
-		l7vs::sslid_session_data_processor(0, 1, &replication_data_processor,
-				ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
-				inputLogInfo2, inputLogDebug2);
-	} catch(...) {
-		BOOST_ERROR("exception: sslid_session_data_processor");
-	}
-
-	// unit_test[37] while timeout < 0, exception occur, test
-	exception_occur = false;
-	try{
-		l7vs::sslid_session_data_processor(2, -2, &replication_data_processor,
-				ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
-				inputLogInfo2, inputLogDebug2);
-	} catch(...) {
-		exception_occur = true;
-	}
-	BOOST_CHECK(exception_occur);
-
-	// unit_test[38] while timeout = 0, exception not occur, test
-	try{
-		l7vs::sslid_session_data_processor(2, 0, &replication_data_processor,
-				ingetloglevel2, inputLogFatal2, inputLogError2, inputLogWarn2,
-				inputLogInfo2, inputLogDebug2);
-	} catch(...) {
-		BOOST_ERROR("exception: sslid_session_data_processor");
-	}
 
 	delete []replication_data_area;
 }

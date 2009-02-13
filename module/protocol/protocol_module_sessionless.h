@@ -218,7 +218,8 @@ public:
 	{
 		return (send_status_first.status == protocol_module_sessionless::SEND_OK
 		&& send_status_first.send_rest_size > 0)
-		|| (send_status_first.status == protocol_module_sessionless::SEND_CONTINUE);
+		|| (send_status_first.status == protocol_module_sessionless::SEND_CONTINUE)
+		|| (send_status_first.status == protocol_module_sessionless::SEND_NG);
 	}
 };
 

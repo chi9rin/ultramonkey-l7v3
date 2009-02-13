@@ -2,9 +2,6 @@
 #include "../../module/protocol/http_protocol_module_base.cpp"
 #include "../../module/protocol/protocol_module_sessionless.cpp"
 
-#define FORWARDED_FOR_OFF 0
-#define FORWARDED_FOR_ON 1
-
 #define REQUEST_BUFFER_SIZE 50u  //REQUEST_BUFFER_SIZE
 #define RESPONSE_BUFFER_SIZE 50u  //RESPONSE_BUFFER_SIZE
 #define USE_BUFFER_SIZE 90u //USE_BUFFER_SIZE
@@ -19,9 +16,13 @@ using namespace l7vs;
 char hostname[] = "127.0.0.1";
 
 LOG_LEVEL_TAG	stb_getloglevel(){
-	//return LOG_LV_DEBUG;
+	return LOG_LV_DEBUG;
+	//return LOG_LV_NONE;
+}
+LOG_LEVEL_TAG	stb_getloglevel_is_none(){
 	return LOG_LV_NONE;
 }
+
 void	stb_putLogFatal( const unsigned int message_id, const std::string& message, const char* file, int line){
 //	cout << boost::format( "%s%d%06d %s %s" )
 //				% "PM"
@@ -106,10 +107,17 @@ protocol_module_sessionless::realserverlist_type::iterator rslist_next(
 //RealServerリストロック関数
 void rslist_lock() {
 }
-//ealServerリストアンロック関数
+//RealServerリストアンロック関数
 void rslist_unlock() {
 }
-
+//コンポーネント領域割り当て関数
+void* pay_memory(const std::string& str, unsigned int* pro) {
+	return 0 ;
+}
+//コンポーネント領域ロック関数
+void area_lock() {}
+//コンポーネント領域アンロック関数
+void area_unlock() {}
 //Client振り分け処理関数
 void schedule_tcp_stb( const boost::thread::id id,
 		           protocol_module_base::rs_list_itr_func_type func_type1,
@@ -160,20 +168,6 @@ void schedule_tcp_nodeterminate(//endpoint = 未決定
 class protocol_module_sessionless_test_class : public protocol_module_sessionless
 {
 public:
-	int THREAD_DIVISION_UP_STREAM; //上りスレッド
-	int THREAD_DIVISION_DOWN_STREAM;  //下りスレッド
-	int END_FLAG_OFF; //終了フラグOFF
-	int END_FLAG_ON; //終了フラグON
-	int ACCEPT_END_FLAG_OFF; //ACCEPT完了フラグOFF
-	int ACCEPT_END_FLAG_ON; //ACCEPT完了フラグON
-	int SORRY_FLAG_ON; //SORRY状態
-	int SORRY_FLAG_OFF; //SORRY状態以外
-	int SORRYSERVER_SWITCH_FLAG_OFF; //sorryserver切替中以外
-	int SORRYSERVER_SWITCH_FLAG_ON; //sorryserver切替中
-	int REALSERVER_SWITCH_FLAG_OFF; //realserver切替中以外
-	int REALSERVER_SWITCH_FLAG_ON; //realserver切替中
-	int EDIT_DIVISION_NO_EDIT; //編集無し
-	int EDIT_DIVISION_EDIT; //編集あり
 
 //stub log function install
 void install_stb_log_func(){
@@ -235,20 +229,6 @@ void init_edit_data(edit_data& data)
 }
 
 protocol_module_sessionless_test_class()
-    :THREAD_DIVISION_UP_STREAM(protocol_module_sessionless::THREAD_DIVISION_UP_STREAM) //上りスレッド
-    ,THREAD_DIVISION_DOWN_STREAM(protocol_module_sessionless::THREAD_DIVISION_DOWN_STREAM)  //下りスレッド
-    ,END_FLAG_OFF(protocol_module_sessionless::END_FLAG_OFF) //終了フラグOFF
-    ,END_FLAG_ON(protocol_module_sessionless::END_FLAG_ON) //終了フラグON
-    ,ACCEPT_END_FLAG_OFF(protocol_module_sessionless::ACCEPT_END_FLAG_OFF) //ACCEPT完了フラグOFF
-    ,ACCEPT_END_FLAG_ON(protocol_module_sessionless::ACCEPT_END_FLAG_ON) //ACCEPT完了フラグON
-    ,SORRY_FLAG_ON(protocol_module_sessionless::SORRY_FLAG_ON) //SORRY状態
-    ,SORRY_FLAG_OFF(protocol_module_sessionless::SORRY_FLAG_OFF) //SORRY状態以外
-    ,SORRYSERVER_SWITCH_FLAG_OFF(protocol_module_sessionless::SORRYSERVER_SWITCH_FLAG_OFF) //sorryserver切替中以外
-    ,SORRYSERVER_SWITCH_FLAG_ON(protocol_module_sessionless::SORRYSERVER_SWITCH_FLAG_ON) //sorryserver切替中
-    ,REALSERVER_SWITCH_FLAG_OFF(protocol_module_sessionless::REALSERVER_SWITCH_FLAG_OFF) //realserver切替中以外
-    ,REALSERVER_SWITCH_FLAG_ON(protocol_module_sessionless::REALSERVER_SWITCH_FLAG_ON) //realserver切替中
-    ,EDIT_DIVISION_NO_EDIT(protocol_module_sessionless::EDIT_DIVISION_NO_EDIT)   //編集無し
-    ,EDIT_DIVISION_EDIT(protocol_module_sessionless::EDIT_DIVISION_EDIT)     //編集あり
 {
     install_stb_log_func();
 }
@@ -256,8 +236,15 @@ protocol_module_sessionless_test_class()
 //protocol_module_sessionless 馮家純
 void protocol_module_sessionless_test(){
     cout << "[1]------------------------------------------" << endl;
-    //unit_test[1] モジュール名（"sessionless"）
+    //unit_test[1] モジュール名に（"sessionless"）を設定する,forwarded_forにFORWARDED_FOR_OFFを設定する,sorry_uriに'\0'を設定する
+     //モジュール名に（"sessionless"）を設定する
     BOOST_CHECK_EQUAL(this->name, "sessionless");
+    //forwarded_forにFORWARDED_FOR_OFFを設定する
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_OFF);
+    char chk[MAX_OPTION_SIZE];
+    memset(chk, '\0', MAX_OPTION_SIZE);
+    //sorry_uriに'\0'を設定する
+    BOOST_CHECK_EQUAL(memcmp(this->sorry_uri.data(), chk, MAX_OPTION_SIZE), 0);
 }
 
 //~protocol_module_sessionless 馮家純
@@ -281,7 +268,7 @@ void is_udp_test(){
 //get_name 馮家純
 void get_name_test(){
     cout << "[4]------------------------------------------" << endl;
-    //unit_test[4] モジュール名（"sessionless"）を返却する
+    //unit_test[4] モジュール名に（"sessionless"）を返却する
     BOOST_CHECK_EQUAL(this->get_name(), "sessionless");
 }
 
@@ -324,6 +311,22 @@ void initialize_test() {
 void finalize_test() {
     cout << "[7]------------------------------------------" << endl;
     //unit_test[7] 各操作関数を初期化する
+    //RealServerリストの各操作関数
+    this->rs_list_begin = rslist_begin;
+    this->rs_list_end = rslist_end;
+    this->rs_list_next = rslist_next;
+    this->rs_list_lock = rslist_lock;
+    this->rs_list_unlock = rslist_unlock;
+    //Replicationの各操作関数
+    this->replication_pay_memory = pay_memory;
+    this->replication_area_lock = area_lock;
+    this->replication_area_unlock = area_unlock;
+    //ScheduleModuleの振分関数
+    this->schedule_tcp = schedule_tcp_stb;
+    //各モジュールオプション
+    this->forwarded_for = FORWARDED_FOR_ON;
+    this->sorry_uri.assign('a');
+
     this->finalize();
 
     BOOST_CHECK_EQUAL(this->getloglevel.empty() , true);
@@ -363,70 +366,70 @@ void check_parameter_test() {
 	vector<string> args;
 
     cout << "[9]------------------------------------------" << endl;
-	// unit_test[9] オプション文字列にデータなし場合,チェック結果フラグにTRUEを設定する
+	// unit_test[9] オプション文字列にデータなし場合、チェック結果フラグにTRUEを設定する
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[10]------------------------------------------" << endl;
-	// unit_test[10] オプション文字列 = "-F"の場合,チェック結果フラグにTRUEを設定する
+	// unit_test[10] オプション文字列 = "-F"の場合、チェック結果フラグにTRUEを設定する
 	args.push_back("-F");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[11]------------------------------------------" << endl;
-	// unit_test[11] オプション文字列 = "--forwarded-for"の場合,チェック結果フラグにTRUEを設定する
+	// unit_test[11] オプション文字列 = "--forwarded-for"の場合、チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--forwarded-for");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[12]------------------------------------------" << endl;
-	// unit_test[12] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
-	// unit_test[12] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 > 127
+	// unit_test[12] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
+	// unit_test[12] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF 次要素の文字列長 > 127の場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+	args.push_back("/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
+	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
 
     cout << "[13]------------------------------------------" << endl;
-	// unit_test[13] sorry-uri設定フラグをON チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[13] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 = 127 チェックOKの場合
+	// unit_test[13] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+	// unit_test[13] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックOKの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
+	args.push_back("/bc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
 	args.push_back("--sorry-uri");
-	args.push_back("abc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
+	args.push_back("/bc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 	BOOST_CHECK_EQUAL(result.flag, false);
 
     cout << "[14]------------------------------------------" << endl;
-	// unit_test[14] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[14] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 = 127 チェックNGの場合
+	// unit_test[14] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+	// unit_test[14] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックNGの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("a\r\n/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
+	args.push_back("/a\r\n/123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'a\r\n/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/' is not a valid URI.");
+	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/a\r\n/123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/' is not a valid URI.");
 
     cout << "[15]------------------------------------------" << endl;
-	// unit_test[15] sorry-uri設定フラグをON チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[15] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 < 127 チェックOKの場合
+	// unit_test[15] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+	// unit_test[15] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 < 127 チェックOKの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abc123");
+	args.push_back("/abc123");
 	args.push_back("--sorry-uri");
-	args.push_back("abc123");
+	args.push_back("/abc123");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 	BOOST_CHECK_EQUAL(result.flag, false);
 
     cout << "[16]------------------------------------------" << endl;
-	// unit_test[16] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[16] test data:オプション文字列 = "-S" sorryURI設定フラグ = OFF 次要素の文字列長 < 127 チェックNGの場合
+	// unit_test[16] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+	// unit_test[16] test data:オプション文字列 = "-S"、sorryURI設定フラグ = OFF、次要素の文字列長 < 127 チェックNGの場合
 	args.clear();
 	args.push_back("-S");
 	args.push_back("123\r\n");
@@ -435,8 +438,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '123\r\n' is not a valid URI.");
 
     cout << "[17]------------------------------------------" << endl;
-	// unit_test[17] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set  option value ''-S/--sorry-uri'."を設定する
-	// unit_test[17] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素が存在しない場合
+	// unit_test[17] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set  option value '-S/--sorry-uri'."を設定する
+	// unit_test[17] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素が存在しない場合
 	args.clear();
 	args.push_back("-S");
 	result = this->check_parameter(args);
@@ -444,20 +447,20 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
     cout << "[18]------------------------------------------" << endl;
-	// unit_test[18] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[18] test data:オプション文字列 = "-S" sorry-uri設定フラグ = ON
+	// unit_test[18] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+	// unit_test[18] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = ONの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("123/abc");
+	args.push_back("/123/abc");
 	args.push_back("-S");
-	args.push_back("123/999");
+	args.push_back("/123/999");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, false);
 	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 
     cout << "[19]------------------------------------------" << endl;
-	// unit_test[19] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error."を設定する
-	// unit_test[19] test data:オプション文字列"-F","-S" 以外の場合
+	// unit_test[19] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+	// unit_test[19] test data:オプション文字列"-F"、"-S" 以外の場合
 	args.clear();
 	args.push_back("-D");
 	result = this->check_parameter(args);
@@ -465,25 +468,25 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "Option error.");
 
     cout << "[20]------------------------------------------" << endl;
-	// unit_test[20] オプション文字列"-S","--forwarded-for"の場合,チェック結果フラグにTRUEを設定する
+	// unit_test[20] オプション文字列"-S"、"--forwarded-for"の場合、チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-S");
-	args.push_back("123/abc");
+	args.push_back("/123/abc");
 	args.push_back("--forwarded-for");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[21]------------------------------------------" << endl;
-	// unit_test[21] オプション文字列"-F","--sorry-uri" の場合,チェック結果フラグにTRUEを設定する
+	// unit_test[21] オプション文字列"-F"、"--sorry-uri" の場合、チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-F");
 	args.push_back("--sorry-uri");
-	args.push_back("123/abc");
+	args.push_back("/123/abc");
 	result = this->check_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[22]------------------------------------------" << endl;
-	// unit_test[22] オプション文字列"-F","--forwarded-for" の場合,チェック結果フラグにTRUEを設定する
+	// unit_test[22] オプション文字列"-F"、"--forwarded-for" の場合、チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-F");
 	args.push_back("--forwarded-for");
@@ -491,8 +494,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[23]------------------------------------------" << endl;
-	// unit_test[23] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[23] test data:オプション文字列"-F","-S" の場合
+	// unit_test[23] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+	// unit_test[23] test data:オプション文字列"-F"、"-S" の場合
 	args.clear();
 	args.push_back("-F");
 	args.push_back("-S");
@@ -501,8 +504,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
     cout << "[24]------------------------------------------" << endl;
-	// unit_test[24] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[24] test data:オプション文字列"--sorry-uri","--forwarded-for" の場合
+	// unit_test[24] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+	// unit_test[24] test data:オプション文字列"--sorry-uri"、"--forwarded-for" の場合
 	args.clear();
 	args.push_back("--sorry-uri");
 	args.push_back("--forwarded-for");
@@ -511,8 +514,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
     cout << "[25]------------------------------------------" << endl;
-	// unit_test[25] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error."を設定する
-	// unit_test[25] test data:オプション文字列"--forwarded-for","-R"の場合
+	// unit_test[25] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+	// unit_test[25] test data:オプション文字列"--forwarded-for"、"-R"の場合
 	args.clear();
 	args.push_back("--forwarded-for");
 	args.push_back("-R");
@@ -521,8 +524,8 @@ void check_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "Option error.");
 
     cout << "[26]------------------------------------------" << endl;
-	// unit_test[26] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[26] test data:オプション文字列"S","-R"の場合
+	// unit_test[26] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+	// unit_test[26] test data:オプション文字列"S"、"-R"の場合
 	args.clear();
 	args.push_back("-S");
 	args.push_back("-R");
@@ -537,19 +540,19 @@ void set_parameter_test() {
 	vector<string> args;
 
     cout << "[27]------------------------------------------" << endl;
-	// unit_test[27] オプション文字列にデータなし場合,チェック結果フラグにTRUEを設定する
+	// unit_test[27] オプション文字列にデータなし場合、チェック結果フラグにTRUEを設定する
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[28]------------------------------------------" << endl;
-	// unit_test[28] オプション文字列 = "-F"の場合,送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
+	// unit_test[28] オプション文字列 = "-F"の場合、送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
 	args.push_back("-F");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[29]------------------------------------------" << endl;
-	// unit_test[29] オプション文字列 = "--forwarded-for"の場合,送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
+	// unit_test[29] オプション文字列 = "--forwarded-for"の場合、送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--forwarded-for");
 	result = this->set_parameter(args);
@@ -557,30 +560,30 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.flag, true);
 
     cout << "[30]------------------------------------------" << endl;
-	// unit_test[30] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
-	// unit_test[30] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 > 127
+	// unit_test[30] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
+	// unit_test[30] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 > 127の場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+	args.push_back("/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
+	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
 
     cout << "[31]------------------------------------------" << endl;
-	// unit_test[31] sorryURI設定フラグをON チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[31] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 = 127 チェックOKの場合
+	// unit_test[31] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+	// unit_test[31] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックOKの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+	args.push_back("/bcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
 	args.push_back("--sorry-uri");
-	args.push_back("abcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+	args.push_back("/bcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 	BOOST_CHECK_EQUAL(result.flag, false);
 
     cout << "[32]------------------------------------------" << endl;
-	// unit_test[32] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[32] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 = 127 チェックNGの場合
+	// unit_test[32] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+	// unit_test[32] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックNGの場合
 	args.clear();
 	args.push_back("-S");
 	args.push_back("abcdef12345\r\n/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
@@ -589,19 +592,19 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abcdef12345\r\n/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is not a valid URI.");
 
     cout << "[33]------------------------------------------" << endl;
-	// unit_test[33] sorryURI設定フラグをON チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[33] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素の文字列長 < 127 チェックOKの場合
+	// unit_test[33] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+	// unit_test[33] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 < 127 チェックOKの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abc/123");
+	args.push_back("/abc/123");
 	args.push_back("--sorry-uri");
-	args.push_back("123/555");
+	args.push_back("/123/555");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 	BOOST_CHECK_EQUAL(result.flag, false);
 
     cout << "[34]------------------------------------------" << endl;
-	// unit_test[34] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+	// unit_test[34] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
 	// unit_test[34] test data:次要素の文字列長 < 127 チェックNGの場合
 	args.clear();
 	args.push_back("-S");
@@ -611,8 +614,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abc\r\n' is not a valid URI.");
 
     cout << "[35]------------------------------------------" << endl;
-	// unit_test[35] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set  option value ''-S/--sorry-uri'."を設定する
-	// unit_test[35] test data:オプション文字列 = "-S" sorry-uri設定フラグ = OFF 次要素が存在しない場合
+	// unit_test[35] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set  option value '-S/--sorry-uri'."を設定する
+	// unit_test[35] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素が存在しない場合
 	args.clear();
 	args.push_back("-S");
 	result = this->set_parameter(args);
@@ -620,20 +623,20 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
     cout << "[36]------------------------------------------" << endl;
-	// unit_test[36] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[36] test data:オプション文字列 = "-S" sorry-uri設定フラグ = ON
+	// unit_test[36] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
+	// unit_test[36] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = ONの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abc/123");
+	args.push_back("/abc/123");
 	args.push_back("-S");
-	args.push_back("abc/123");
+	args.push_back("/abc/123");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, false);
 	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 
     cout << "[37]------------------------------------------" << endl;
-	// unit_test[37] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error."を設定する
-	// unit_test[37] test data:オプション文字列"-F","-S" 以外の場合
+	// unit_test[37] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+	// unit_test[37] test data:オプション文字列"-F"、"-S" 以外の場合
 	args.clear();
 	args.push_back("-D");
 	result = this->set_parameter(args);
@@ -642,38 +645,38 @@ void set_parameter_test() {
 
     cout << "[38]------------------------------------------" << endl;
 	// unit_test[38] 送信元設定指示に0を設定する
-	// unit_test[38] test data:チェック結果フラグ = TRUEの場合、送信元設定指示設定フラグ = OFF
+	// unit_test[38] test data:チェック結果フラグ = TRUE、送信元設定指示設定フラグ = OFFの場合
 	args.clear();
 	args.push_back("-S");
-	args.push_back("abc/123");
+	args.push_back("/abc/123");
 	this->set_parameter(args);
 	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_OFF);
 
     cout << "[39]------------------------------------------" << endl;
-	// unit_test[39] チェック結果フラグにTRUEを設定する,送信元設定指示に1を設定する
-	// unit_test[39] test data:オプション文字列"--forwarded-for","-S" の場合
+	// unit_test[39] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
+	// unit_test[39] test data:オプション文字列"--forwarded-for"、"-S" の場合
 	args.clear();
 	args.push_back("--forwarded-for");
 	args.push_back("-S");
-	args.push_back("abc/123");
+	args.push_back("/abc/123");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 
     cout << "[40]------------------------------------------" << endl;
-	// unit_test[40] チェック結果フラグにTRUEを設定する,送信元設定指示に1を設定する
-	// unit_test[40] test data:オプション文字列"--sorry-uri","-F" の場合
+	// unit_test[40] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
+	// unit_test[40] test data:オプション文字列"--sorry-uri"、"-F" の場合
 	args.clear();
 	args.push_back("--sorry-uri");
-	args.push_back("abc/123");
+	args.push_back("/abc/123");
 	args.push_back("-F");
 	result = this->set_parameter(args);
 	BOOST_CHECK_EQUAL(result.flag, true);
 	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 
     cout << "[41]------------------------------------------" << endl;
-	// unit_test[41] チェック結果フラグにTRUEを設定する,送信元設定指示に1を設定する
-	// unit_test[41] test data:オプション文字列"--forwarded-for","-F" の場合
+	// unit_test[41] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
+	// unit_test[41] test data:オプション文字列"--forwarded-for"、"-F" の場合
 	args.clear();
 	args.push_back("--forwarded-for");
 	args.push_back("-F");
@@ -682,8 +685,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 
     cout << "[42]------------------------------------------" << endl;
-	// unit_test[42] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[42] test data:オプション文字列"-F","-S" の場合
+	// unit_test[42] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+	// unit_test[42] test data:オプション文字列"-F"、"-S" の場合
 	args.clear();
 	args.push_back("-F");
 	args.push_back("-S");
@@ -692,8 +695,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
     cout << "[43]------------------------------------------" << endl;
-	// unit_test[43] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[43] test data:オプション文字列"--sorry-uri","--forwarded-for" の場合
+	// unit_test[43] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+	// unit_test[43] test data:オプション文字列"--sorry-uri"、"--forwarded-for" の場合
 	args.clear();
 	args.push_back("--sorry-uri");
 	args.push_back("--forwarded-for");
@@ -702,8 +705,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
     cout << "[44]------------------------------------------" << endl;
-	// unit_test[44] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error."を設定する
-	// unit_test[44] test data:オプション文字列"--forwarded-for","-R"の場合
+	// unit_test[44] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+	// unit_test[44] test data:オプション文字列"--forwarded-for"、"-R"の場合
 	args.clear();
 	args.push_back("--forwarded-for");
 	args.push_back("-R");
@@ -712,8 +715,8 @@ void set_parameter_test() {
 	BOOST_CHECK_EQUAL(result.message, "Option error.");
 
     cout << "[45]------------------------------------------" << endl;
-	// unit_test[45] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[45] test data:オプション文字列"-S","-R"の場合
+	// unit_test[45] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+	// unit_test[45] test data:オプション文字列"-S"、"-R"の場合
 	args.clear();
 	args.push_back("-S");
 	args.push_back("-R");
@@ -750,6 +753,7 @@ void register_schedule_tcp_test() {
     // unit_test[48]  Client振り分け処理関数のテスト
     tcp_schedule_func_type  func = schedule_tcp_stb;
     this->register_schedule(func);
+    BOOST_CHECK_EQUAL(this->schedule_tcp, schedule_tcp_stb);
 
     cout << "[49]------------------------------------------" << endl;
     // unit_test[49]  Client振り分け処理関数空のテスト
@@ -796,7 +800,7 @@ void handle_session_initialize_test() {
     BOOST_CHECK_EQUAL(data->client_endpoint_tcp, ep_tcp);
 
     cout << "[52]------------------------------------------" << endl;
-    //unit_test[52]  下りスレッドマップ空のテスト
+    //unit_test[52]  下りスレッドマップテスト
     iter = this->session_thread_data_map.find(down_thread.get_id());
     bret = (iter != this->session_thread_data_map.end());
     BOOST_REQUIRE_EQUAL(bret, true);
@@ -891,7 +895,7 @@ void handle_accept_test() {
 
 //handle_client_recv 郎希倹
 void handle_client_recv_test(){
-    size_t request_len;
+    size_t request_len = USE_BUFFER_SIZE;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> request;
     send_status send_status_temp;
@@ -933,20 +937,10 @@ void handle_client_recv_test(){
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
-    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-            psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data& recive_data_global = it->second;
 
     cout << "[60]------------------------------------------" << endl;
     // unit_test[60] endpoint対応のrecive_dataなし
     // requestを設定する
-    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_not_used] = recive_data_tmp;
 
@@ -957,8 +951,9 @@ void handle_client_recv_test(){
 
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
-    it = psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data_global = it->second;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
 
     cout << "[61]------------------------------------------" << endl;
     // unit_test[61] recive_data.recive_buffer＝Null
@@ -1016,9 +1011,11 @@ void handle_client_recv_test(){
     memcpy(request.c_array(), "GET / HTTP/1.0\r\nCookie: monkey=123456789012345\r\n\r\n", REQUEST_BUFFER_SIZE);
     request_len = REQUEST_BUFFER_SIZE;
 
+    this->getloglevel = &stb_getloglevel_is_none;
     new_install();
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
     new_uninstall();
+    this->getloglevel = &stb_getloglevel;
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[65]------------------------------------------" << endl;
@@ -1557,24 +1554,25 @@ void handle_client_recv_test(){
     recive_data_global.send_status_list.clear();
 
     memcpy(request.c_array(), "GET / HTTP/1.0\r\nHOST: 192.168.120.1\r\nCookie: "
-            "monkey=1\r\nContent-Length: 43\r\n\r\n0123456789012345678901234567890123456789012", 120);
-    request_len = 120;
+            "monkey=1\r\nContent-Length: 65455\r\n\r\n", 80);
+    memset(request.c_array() + 80, 'x', 65455);
+    request_len = MAX_BUFFER_SIZE;
 
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 120u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
 
     //メモリの内容をチェックする
-    int cmp_ret = memcmp(request.c_array(), recive_data_global.recive_buffer, 120u);
+    int cmp_ret = memcmp(request.c_array(), recive_data_global.recive_buffer, MAX_BUFFER_SIZE);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 120u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, MAX_BUFFER_SIZE);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 0u);
 
@@ -1602,20 +1600,21 @@ void handle_client_recv_test(){
     memcpy(recive_data_global.recive_buffer, "GET / HTTP/1.0\r\nCook", 20);
 
     //リクエストデータ
-    memcpy(request.c_array(), "ie: monkey=1234567890123456789012345678901234567890123456789012345678901", 72);
-    request_len = 72;
+    memcpy(request.c_array(), "ie: monkey=", 11);
+    memset(request.c_array(), 'x', MAX_BUFFER_SIZE - 11);
+    request_len = MAX_BUFFER_SIZE;
 
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
 
     BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 92u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE + 20);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
 
     //メモリの内容をチェックする
     cmp_ret = memcmp(recive_data_global.recive_buffer, "GET / HTTP/1.0\r\nCook", 20);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(recive_data_global.recive_buffer + 20, request.c_array(), 72);
+    cmp_ret = memcmp(recive_data_global.recive_buffer + 20, request.c_array(), MAX_BUFFER_SIZE);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
@@ -1624,7 +1623,7 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 92u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, MAX_BUFFER_SIZE + 20);
 
     cout << "[107]------------------------------------------" << endl;
     // unit_test[107] データバッファ残サイズ　<　リクエストデータサイズ
@@ -2930,7 +2929,7 @@ void handle_realserver_select_tcp_test(){
     cout << "[149]------------------------------------------" << endl;
     //unit_test[149] 異常系 functionがなし場合遷移先ステータスにFINALIZEを設定する
     //register function
-    tcp_schedule_func_type func_err1 = 0;
+    tcp_schedule_func_type func_err1 = NULL;
     this->register_schedule(func_err1);
     boost::asio::ip::tcp::endpoint ep_err1;
 
@@ -2945,7 +2944,7 @@ void handle_realserver_select_tcp_test(){
     //register function
     tcp_schedule_func_type func_cerr2 = &schedule_tcp_determinate;
     this->register_schedule(func_cerr2);
-    this->session_thread_data_map[boost::this_thread::get_id()] = 0;
+    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
     boost::asio::ip::tcp::endpoint ep_err2;
     ret = this->handle_realserver_select(boost::this_thread::get_id(), ep_err2);
 
@@ -3013,7 +3012,7 @@ void handle_realserver_select_tcp_test(){
 void handle_realserver_select_udp_test(){
 
     cout << "[154]------------------------------------------" << endl;
-    //unit_test[154] handle_realserver_select_udp_test return STOP
+    //unit_test[154] handle_realserver_select_udp_test 戻り値が「STOP」に設定する。
     boost::asio::ip::udp::endpoint ep;
     boost::array<char, MAX_BUFFER_SIZE> sbf;
     std::size_t d;
@@ -3025,7 +3024,7 @@ void handle_realserver_select_udp_test(){
 
 //handle_realserver_connect 郎希倹
 void handle_realserver_connect_test(){
-    size_t send_buffer_len;
+    size_t send_buffer_len = USE_BUFFER_SIZE;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> send_buffer;
     send_status send_status_temp;
@@ -3066,29 +3065,20 @@ void handle_realserver_connect_test(){
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
-    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-            psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data& recive_data_global = it->second;
 
     cout << "[157]------------------------------------------" << endl;
     // unit_test[157] endpoint対応のrecive_dataなし
-    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     psession_thread_data->recive_data_map.clear();
     send_buffer_len = 0;
     memset(send_buffer.c_array(), 0, MAX_BUFFER_SIZE);
 
     ret = handle_realserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
-    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
 
-    it = psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data_global = it->second;
+    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
 
     cout << "[158]------------------------------------------" << endl;
     // unit_test[158] recive_data.recive_buffer＝Null
@@ -4095,7 +4085,7 @@ void handle_realserver_connection_fail_test(){
     //unit_test[181] 異常系 session_thread_data_map中にThreadID対応のデータがない
     this->session_thread_data_map.clear();
 
-    this->session_thread_data_map[boost::this_thread::get_id()] = 0;
+    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
     boost::asio::ip::tcp::endpoint ep_err1;
     ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep_err1);
 
@@ -4103,7 +4093,7 @@ void handle_realserver_connection_fail_test(){
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[182]------------------------------------------" << endl;
-    //unit_test[182] 異常系 session_thread_data_map中にThreadIDなし場合のテストない
+    //unit_test[182] 異常系 session_thread_data_map中にThreadIDなし場合のテスト
     this->session_thread_data_map.clear();
 
     ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep_err1);
@@ -4168,7 +4158,7 @@ void handle_realserver_send_test(){
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[188]------------------------------------------" << endl;
-    //unit_test[188] 送信状態->SEND_OK,送信可能データサイズ　>　0/編集データリスト=0/送信可能データあり
+    //unit_test[188] 送信状態->SEND_OK,送信可能データサイズ　>　0/送信可能データあり
     //unit_test[188] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
     real_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
     real_send_status.edit_data_list.clear();//編集データリスト=0
@@ -4196,14 +4186,9 @@ void handle_realserver_send_test(){
     BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
 
     cout << "[189]------------------------------------------" << endl;
-    //unit_test[189] 送信状態->SEND_OK,送信可能データサイズ　>　0/編集データリスト=1/送信可能データあり
-    //unit_test[189] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
-    real_data.insert_posission = 1u;
-    real_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    real_send_status.edit_data_list.push_back(real_data);//編集データリスト=1
-    real_send_status.send_offset = 0u;
-    real_send_status.send_end_size = 1u;
-    real_send_status.status = SEND_OK;//送信状態->SEND_OK
+    //unit_test[189] 送信状態->SEND_NG
+    //unit_test[189] test data:遷移先ステータスを設定する
+    real_send_status.status = SEND_NG;//送信状態->SEND_NG
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
     thread_data.recive_data_map.clear();
@@ -4213,30 +4198,13 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t posission = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.front().insert_posission;
-    offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
 
-    BOOST_CHECK_EQUAL(event_status, REALSERVER_CONNECT); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
-    BOOST_CHECK_EQUAL(posission,0u); //編集データ設定位置から送信済データサイズを減算する
-    BOOST_CHECK_EQUAL(offset,1u); //送信データオフセットに送信済データサイズを加算する
-    BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[190]------------------------------------------" << endl;
-    //unit_test[190] 送信状態->SEND_OK,送信可能データサイズ　>　0/編集データリスト=2/送信可能データあり
-    //unit_test[190] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
-    real_data.insert_posission = 1u;
-    real_data1.insert_posission = 2u;
-    real_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    real_send_status.status = SEND_OK; //送信状態->SEND_OK
-    //編集データリスト=2
-    real_send_status.edit_data_list.clear();
-    real_send_status.edit_data_list.push_back(real_data);
-    real_send_status.edit_data_list.push_back(real_data1);
-    real_send_status.send_offset = 0u;
-    real_send_status.send_end_size = 1u;
+    //unit_test[190] 送信状態->SEND_CONTINUE
+    //unit_test[190] test data:遷移先ステータスを設定する
+    real_send_status.status = SEND_CONTINUE; //送信状態->SEND_CONTINUE
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
 
@@ -4247,18 +4215,8 @@ void handle_realserver_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t posission1 = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.front().insert_posission;
-    size_t posission2 = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.back().insert_posission;
-    offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
 
-    BOOST_CHECK_EQUAL(event_status, REALSERVER_CONNECT); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
-    BOOST_CHECK_EQUAL(posission1,0u); //編集データ設定位置から送信済データサイズを減算する
-    BOOST_CHECK_EQUAL(posission2,1u);
-    BOOST_CHECK_EQUAL(offset,1u); //送信データオフセットに送信済データサイズを加算する
-    BOOST_CHECK_EQUAL(end_size,0u);//送信済データサイズに0を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[191]------------------------------------------" << endl;
     //unit_test[191] 送信状態->SEND_OK,送信可能データサイズ　=　0/送信データ残サイズ　＞　0/送信可能データなし
@@ -4533,15 +4491,15 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
 
     cout << "[203]------------------------------------------" << endl;
-    //unit_test[203] 	session_thread_data_map中に上りスレッド中にThreadID対応のデータがありません
-    this->session_thread_data_map[boost::this_thread::get_id()] = 0;
+    //unit_test[203] 	session_thread_data_map中に上りスレッド中にThreadID対応のデータがない
+    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
     //遷移先ステータスを設定する status = FINALIZE
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[204]------------------------------------------" << endl;
-    //unit_test[204] 	session_thread_data_map中に上りスレッドのデータ無し場合のテストない
+    //unit_test[204] 	session_thread_data_map中に上りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.erase(boost::this_thread::get_id());
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
@@ -4549,7 +4507,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[205]------------------------------------------" << endl;
-    //unit_test[205] 	session_thread_data_map中に上りスレッドと下りスレッドのデータ無し場合のテストない
+    //unit_test[205] 	session_thread_data_map中に上りスレッドと下りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.clear();
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
@@ -4557,7 +4515,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[206]------------------------------------------" << endl;
-    //unit_test[206] 	session_thread_data_map中に下りスレッドのデータ無し場合のテストない
+    //unit_test[206] 	session_thread_data_map中に下りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = &dataup;
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
@@ -4571,7 +4529,7 @@ void handle_sorryserver_select_test(){
 
 //handle_sorryserver_connect 郎希倹
 void handle_sorryserver_connect_test(){
-    size_t send_buffer_len;
+    size_t send_buffer_len = USE_BUFFER_SIZE;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> send_buffer;
     send_status send_status_temp;
@@ -4613,29 +4571,20 @@ void handle_sorryserver_connect_test(){
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
-    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-            psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data& recive_data_global = it->second;
 
     cout << "[209]------------------------------------------" << endl;
     // unit_test[209] endpoint対応のrecive_dataなし
-    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     psession_thread_data->recive_data_map.clear();
     send_buffer_len = 0;
     memset(send_buffer.c_array(), 0, MAX_BUFFER_SIZE);
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
-    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
 
-    it = psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data_global = it->second;
+    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
 
     cout << "[210]------------------------------------------" << endl;
     // unit_test[210] recive_data.recive_buffer＝Null
@@ -4684,15 +4633,15 @@ void handle_sorryserver_connect_test(){
     send_status_temp.send_offset = 0;
     send_status_temp.send_end_size = 0;
     send_status_temp.edit_division = EDIT_DIVISION_NO_EDIT;
-    send_status_temp.send_possible_size = 30;
+    send_status_temp.send_possible_size = 40;
     recive_data_global.send_status_list.push_back(send_status_temp);
 
     init_send_status(send_status_temp);
     send_status_temp.status = SEND_OK;
-    send_status_temp.send_offset = 30;
+    send_status_temp.send_offset = 40;
     send_status_temp.send_end_size = 0;
     send_status_temp.edit_division = EDIT_DIVISION_NO_EDIT;
-    send_status_temp.send_possible_size = 45;
+    send_status_temp.send_possible_size = 35;
     recive_data_global.send_status_list.push_back(send_status_temp);
 
     memcpy(recive_data_global.recive_buffer,
@@ -4701,19 +4650,19 @@ void handle_sorryserver_connect_test(){
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
-    BOOST_CHECK_EQUAL(send_buffer_len, 30u);
+    BOOST_CHECK_EQUAL(send_buffer_len, 40u);
     //送信バッファの内容をチェックする。
-    int cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), 30);
+    int cmp_ret = memcmp(recive_data_global.recive_buffer, send_buffer.c_array(), 40);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, 40u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_end_size, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 45u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 30u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_possible_size, 35u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.rbegin()->send_offset, 40u);
 
     cout << "[213]------------------------------------------" << endl;
     // unit_test[213] 送信状態リストの要素の送信状態が１:送信待　２:送信不可の場合
@@ -4926,10 +4875,10 @@ void handle_sorryserver_connect_test(){
     recive_data_global.send_status_list.push_back(send_status_temp);
 
     init_edit_data(edit_data_temp);
-    edit_data_temp.data = "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n";
-    edit_data_temp.data_size = 40;
+    edit_data_temp.data = "X-Forwarded-For: 10.10.2.2, 10.10.10.1";
+    edit_data_temp.data_size = 38;
     edit_data_temp.insert_posission = MAX_BUFFER_SIZE + 2;
-    edit_data_temp.replace_size = 28;
+    edit_data_temp.replace_size = 26;
     recive_data_global.send_status_list.begin()->edit_data_list.clear();
     recive_data_global.send_status_list.begin()->edit_data_list.push_back(edit_data_temp);
 
@@ -4940,9 +4889,9 @@ void handle_sorryserver_connect_test(){
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), recive_data_global.recive_buffer + MAX_BUFFER_SIZE, 2);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(send_buffer.c_array() + 2, "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 40);
+    cmp_ret = memcmp(send_buffer.c_array() + 2, "X-Forwarded-For: 10.10.2.2, 10.10.10.1", 38);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(send_buffer.c_array() + 42, recive_data_global.recive_buffer + MAX_BUFFER_SIZE + 30, 2);
+    cmp_ret = memcmp(send_buffer.c_array() + 40, recive_data_global.recive_buffer + MAX_BUFFER_SIZE + 30, 2);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.size(), 0u);
@@ -4980,10 +4929,10 @@ void handle_sorryserver_connect_test(){
     recive_data_global.send_status_list.push_back(send_status_temp);
 
     init_edit_data(edit_data_temp);
-    edit_data_temp.data = "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n";
-    edit_data_temp.data_size = 40;
+    edit_data_temp.data = "X-Forwarded-For: 10.10.2.2, 10.10.10.1";
+    edit_data_temp.data_size = 38;
     edit_data_temp.insert_posission = MAX_BUFFER_SIZE + 2;
-    edit_data_temp.replace_size = 28;
+    edit_data_temp.replace_size = 26;
     recive_data_global.send_status_list.begin()->edit_data_list.clear();
     recive_data_global.send_status_list.begin()->edit_data_list.push_back(edit_data_temp);
 
@@ -4994,9 +4943,9 @@ void handle_sorryserver_connect_test(){
     //送信バッファの内容をチェックする。
     cmp_ret = memcmp(send_buffer.c_array(), recive_data_global.recive_buffer + MAX_BUFFER_SIZE, 2);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(send_buffer.c_array() + 2, "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 40);
+    cmp_ret = memcmp(send_buffer.c_array() + 2, "X-Forwarded-For: 10.10.2.2, 10.10.10.1", 38);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(send_buffer.c_array() + 42, recive_data_global.recive_buffer + MAX_BUFFER_SIZE + 30, 2);
+    cmp_ret = memcmp(send_buffer.c_array() + 40, recive_data_global.recive_buffer + MAX_BUFFER_SIZE + 30, 2);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.size(), 0u);
@@ -5044,9 +4993,9 @@ void handle_sorryserver_connect_test(){
     BOOST_CHECK_EQUAL(cmp_ret, 0);
     cmp_ret = memcmp(send_buffer.c_array() + 15, recive_data_global.recive_buffer + 16, MAX_BUFFER_SIZE - 57);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(send_buffer.c_array() + MAX_BUFFER_SIZE - 42, "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 40);
+    cmp_ret = memcmp(send_buffer.c_array() + MAX_BUFFER_SIZE - 42, "X-Forwarded-For: 10.10.2.2, 10.10.10.1", 38);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(send_buffer.c_array() + MAX_BUFFER_SIZE - 2, "\r\n", 2);
+    cmp_ret = memcmp(send_buffer.c_array() + MAX_BUFFER_SIZE - 4, "\r\n\r\n", 4);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.size(), 0u);
@@ -5324,11 +5273,11 @@ void handle_sorryserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data,
-            "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n");
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 40u);
+            "X-Forwarded-For: 10.10.2.2, 10.10.10.1");
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 38u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->insert_posission,
             MAX_BUFFER_SIZE - 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 28u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 26u);
 
     cout << "[226]------------------------------------------" << endl;
     // unit_test[226] 編集データリストが空でない場合
@@ -5376,11 +5325,11 @@ void handle_sorryserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data,
-            "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n");
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 40u);
+            "X-Forwarded-For: 10.10.2.2, 10.10.10.1");
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 38u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->insert_posission,
             MAX_BUFFER_SIZE + 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 28u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 26u);
 
     cout << "[227]------------------------------------------" << endl;
     // unit_test[227] 編集データリストが空でない場合
@@ -5426,11 +5375,11 @@ void handle_sorryserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data,
-            "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n");
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 40u);
+            "X-Forwarded-For: 10.10.2.2, 10.10.10.1");
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->data_size, 38u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->insert_posission,
             MAX_BUFFER_SIZE + 2u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 28u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.begin()->replace_size, 26u);
 
     cout << "[228]------------------------------------------" << endl;
     // unit_test[228] 編集区分 = 編集なし
@@ -5625,7 +5574,7 @@ void handle_sorryserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, 50u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
 
     delete[] recive_data_global.recive_buffer1;
     delete[] recive_data_global.recive_buffer2;
@@ -5705,10 +5654,9 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[240]------------------------------------------" << endl;
-    //unit_test[240] 送信状態->SEND_OK,送信可能データサイズ　>　0/編集データリスト=0/送信可能データあり
+    //unit_test[240] 送信状態->SEND_OK,送信可能データサイズ　>　0/送信可能データあり
     //unit_test[240] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
     sorr_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    sorr_send_status.edit_data_list.clear();//編集データリスト=0
     sorr_send_status.send_offset = 0u;
     sorr_send_status.send_end_size = 1u;
     sorr_send_status.status = SEND_OK; //送信状態->SEND_OK
@@ -5731,16 +5679,9 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
 
     cout << "[241]------------------------------------------" << endl;
-    //unit_test[241] 送信状態->SEND_OK,送信可能データサイズ　>　0/編集データリスト=1/送信可能データあり
-    //unit_test[241] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
-    sorr_data.insert_posission = 1u;
-    sorr_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    sorr_send_status.edit_data_list.clear();
-    sorr_send_status.edit_data_list.push_back(sorr_data);//編集データリスト=1
-
-    sorr_send_status.send_offset = 0u;
-    sorr_send_status.send_end_size = 1u;
-    sorr_send_status.status = SEND_OK; //送信状態->SEND_OK
+    //unit_test[241] 送信状態->SEND_NG
+    //unit_test[241] test data: 遷移先ステータスを設定する
+    sorr_send_status.status = SEND_NG; //送信状態->SEND_NG
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
@@ -5751,31 +5692,13 @@ void handle_sorryserver_send_test() {
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t posission = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.front().insert_posission;
-    offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
 
-    BOOST_CHECK_EQUAL(event_status, SORRYSERVER_CONNECT); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
-    BOOST_CHECK_EQUAL(posission,0u); //編集データ設定位置から送信済データサイズを減算する
-    BOOST_CHECK_EQUAL(offset,1u); //送信データオフセットに送信済データサイズを加算する
-    BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[242]------------------------------------------" << endl;
-    //unit_test[242] 送信状態->SEND_OK,送信可能データサイズ　>　0/編集データリスト=2/送信可能データあり
-    //unit_test[242] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
-    sorr_data.insert_posission = 1u;
-    sorr_data1.insert_posission = 2u;
-    sorr_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    //編集データリスト=2
-    sorr_send_status.edit_data_list.clear();
-    sorr_send_status.edit_data_list.push_back(sorr_data);
-    sorr_send_status.edit_data_list.push_back(sorr_data1);
-
-    sorr_send_status.send_offset = 0u;
-    sorr_send_status.send_end_size = 1u;
-    sorr_send_status.status = SEND_OK; //送信状態->SEND_OK
+    //unit_test[242] 送信状態->SEND_CONTINUE
+    //unit_test[242] test data: 遷移先ステータスを設定する
+    sorr_send_status.status = SEND_CONTINUE; //送信状態->SEND_CONTINUE
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
@@ -5786,18 +5709,8 @@ void handle_sorryserver_send_test() {
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, protocol_module_sessionless::session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t posission1 = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.front().insert_posission;
-    size_t posission2 = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.back().insert_posission;
-    offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
 
-    BOOST_CHECK_EQUAL(event_status, SORRYSERVER_CONNECT); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
-    BOOST_CHECK_EQUAL(posission1,0u); //編集データ設定位置から送信済データサイズを減算する
-    BOOST_CHECK_EQUAL(posission2,1u);
-    BOOST_CHECK_EQUAL(offset,1u); //送信データオフセットに送信済データサイズを加算する
-    BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[243]------------------------------------------" << endl;
     //unit_test[243] 送信状態->SEND_OK,送信可能データサイズ　=　0/送信データ残サイズ　＞　0/送信可能データなし
@@ -5821,13 +5734,14 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
 
     cout << "[244]------------------------------------------" << endl;
-    //unit_test[244] 送信状態->SEND_OK,送信可能データサイズ　=　0/送信データ残サイズ　＞　0/送信可能データなし
+    //unit_test[244] 送信状態->SNED_NG,SEND_OK,/送信データ残サイズ　＞　0
     //unit_test[244] test data: 送信状態に送信待を設定
-    sorr_send_status.send_possible_size = 0u;//送信可能データサイズ=0
+    sorr_send_status.status = SEND_NG;
     sorr_send_status.send_rest_size = 1u;//送信データ残サイズ　> 0
-    sorr_send_status.status = SEND_OK; //送信状態->SEND_OK
+    sorr_send_status1.status = SEND_OK;//送信状態->SEND_OK
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
+    sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
     thread_data.client_endpoint_tcp = endpoint;
     thread_data.recive_data_map.clear();
@@ -5836,10 +5750,8 @@ void handle_sorryserver_send_test() {
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
 
-    BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[245]------------------------------------------" << endl;
     //unit_test[245] 送信状態->SEND_OK,送信可能データサイズ　=　0/送信データ残サイズ　=　0/送信可能データなし
@@ -5863,7 +5775,7 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
 
     cout << "[246]------------------------------------------" << endl;
-    //unit_test[246] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ = 0/編集データリスト=0,送信データ残サイズ　> 0
+    //unit_test[246] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ = 0/送信データ残サイズ　> 0
     //unit_test[246] test data: 遷移先ステータスを設定する
     sorr_send_status.send_possible_size = 0u;//送信可能データサイズ　=　0
     sorr_send_status.status = SEND_OK;
@@ -5884,7 +5796,7 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[247]------------------------------------------" << endl;
-    //unit_test[247] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ = 0/編集データリスト=0,送信データ残サイズ　= 0/送信可能データあり
+    //unit_test[247] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ = 0/送信データ残サイズ　= 0/送信可能データあり
     //unit_test[247] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     sorr_send_status.send_possible_size = 0u;//送信可能データサイズ　=　0
     sorr_send_status.status = SEND_OK;
@@ -5907,7 +5819,7 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ　= 0,送信状態に送信待を設定する
 
     cout << "[248]------------------------------------------" << endl;
-    //unit_test[248] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ = 0/編集データリスト=0,送信データ残サイズ　> 0
+    //unit_test[248] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ = 0/送信データ残サイズ　> 0
     //unit_test[248] test data: 遷移先ステータスを設定する
     sorr_send_status.send_possible_size = 0u;//送信可能データサイズ　=　0
     sorr_send_status.status = SEND_OK;
@@ -5929,7 +5841,7 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[249]------------------------------------------" << endl;
-    //unit_test[249] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ = 0/編集データリスト=0,送信データ残サイズ　= 0/送信可能データあり
+    //unit_test[249] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ = 0/送信データ残サイズ　= 0/送信可能データあり
     //unit_test[249] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     sorr_send_status.send_possible_size = 0u;//送信可能データサイズ　=　0
     sorr_send_status.status = SEND_OK;
@@ -5952,7 +5864,7 @@ void handle_sorryserver_send_test() {
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ　= 0,送信状態に送信待を設定する
 
     cout << "[250]------------------------------------------" << endl;
-    //unit_test[250] 送信状態->SEND_END,SEND_OK/送信可能データサイズ > 0/編集データリスト=0
+    //unit_test[250] 送信状態->SEND_END,SEND_OK/送信可能データサイズ > 0
     //unit_test[250] test data: 遷移先ステータスを設定する
     sorr_send_status.status = SEND_END;
     sorr_send_status1.send_possible_size = 1u;//送信可能データサイズ　>　0
@@ -5976,7 +5888,7 @@ void handle_sorryserver_send_test() {
     //unit_test[251] test data: 遷移先ステータスを設定する
     sorr_send_status.status = SEND_END;
     sorr_send_status1.send_rest_size = 1u;//送信データ残サイズ　> 0
-    sorr_send_status.send_possible_size = 0u;//送信可能データサイズ　=　0
+    sorr_send_status1.send_possible_size = 0u;//送信可能データサイズ　=　0
     sorr_send_status1.status = SEND_OK;//送信状態->SEND_OK
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
@@ -6056,7 +5968,7 @@ void handle_sorryserver_send_test() {
 //handle_realserver_recv(tcp) 郎希倹
 void handle_realserver_recv_tcp_test() {
     boost::asio::ip::tcp::endpoint rs_endpoint;
-    size_t response_len;
+    size_t response_len = USE_BUFFER_SIZE;;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> response;
     send_status send_status_temp;
@@ -6098,20 +6010,10 @@ void handle_realserver_recv_tcp_test() {
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
-    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-            psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data& recive_data_global = it->second;
 
     cout << "[257]------------------------------------------" << endl;
     // unit_test[257] endpoint対応のrecive_dataなし
     // responseを設定する
-    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_not_used] = recive_data_tmp;
 
@@ -6121,9 +6023,11 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     psession_thread_data->recive_data_map.clear();
+
     psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
-    it = psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data_global = it->second;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
 
     cout << "[258]------------------------------------------" << endl;
     // unit_test[258] recive_data.recive_buffer＝Null
@@ -6181,9 +6085,11 @@ void handle_realserver_recv_tcp_test() {
     memcpy(response.c_array(), "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\n01234567890", REQUEST_BUFFER_SIZE);
     response_len = REQUEST_BUFFER_SIZE;
 
+    this->getloglevel = &stb_getloglevel_is_none;
     new_install();
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
     new_uninstall();
+    this->getloglevel = &stb_getloglevel;
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[262]------------------------------------------" << endl;
@@ -6348,7 +6254,7 @@ void handle_realserver_recv_tcp_test() {
         }
 
         ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
-        std::cout << "[" << 345 + i << "]------------------------------------------" << std::endl;
+        std::cout << "[" << 265 + i << "]------------------------------------------" << std::endl;
         BOOST_CHECK_EQUAL(ret, FINALIZE);
     }
 
@@ -6698,8 +6604,8 @@ void handle_realserver_recv_tcp_test() {
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_RECV);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 112u);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, MAX_BUFFER_SIZE - 112);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
 
     //メモリの内容をチェックする
@@ -6735,20 +6641,21 @@ void handle_realserver_recv_tcp_test() {
     memcpy(recive_data_global.recive_buffer, "HTTP/1.1 200 OK\r\nCoo", 20);
 
     //レスポンスデータ
-    memcpy(response.c_array(), "kie: monkey=123456789012345678901234567890123456789012345678901234567890", 72);
-    response_len = 72;
+    memcpy(response.c_array(), "kie: monkey=", 12);
+    memset(response.c_array(), 'x', MAX_BUFFER_SIZE - 12);
+    response_len = MAX_BUFFER_SIZE;
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
 
     BOOST_CHECK_EQUAL(ret, REALSERVER_RECV);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 92u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE + 20);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
 
     //メモリの内容をチェックする
     cmp_ret = memcmp(recive_data_global.recive_buffer, "HTTP/1.1 200 OK\r\nCoo", 20);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(recive_data_global.recive_buffer + 20, response.c_array(), 72);
+    cmp_ret = memcmp(recive_data_global.recive_buffer + 20, response.c_array(), MAX_BUFFER_SIZE);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
@@ -6756,7 +6663,7 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 92u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, MAX_BUFFER_SIZE + 20);
 
     cout << "[303]------------------------------------------" << endl;
     // unit_test[303] データバッファ残サイズ　<　レスポンスデータサイズ
@@ -7586,16 +7493,16 @@ void handle_realserver_recv_tcp_test() {
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
-    memcpy(response.c_array(), "HTTP/2.2 200 OK34567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
+    memcpy(response.c_array(), "HTTP/2.2 200 OK\r\n567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
     response_len = REQUEST_BUFFER_SIZE;
 
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, REALSERVER_RECV);
+    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[328]------------------------------------------" << endl;
     // unit_test[328] レスポンスデータ残サイズ　＞　0
@@ -7894,7 +7801,7 @@ void handle_realserver_recv_udp_test() {
 //handle_sorryserver_recv 郎希倹
 void handle_sorryserver_recv_test() {
     boost::asio::ip::tcp::endpoint sorry_endpoint;
-    size_t response_len;
+    size_t response_len = USE_BUFFER_SIZE;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> response;
     send_status send_status_temp;
@@ -7936,20 +7843,10 @@ void handle_sorryserver_recv_test() {
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
-    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-            psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data& recive_data_global = it->second;
 
     cout << "[343]------------------------------------------" << endl;
     // unit_test[343] endpoint対応のrecive_dataなし
     // responseを設定する
-    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
-    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_not_used] = recive_data_tmp;
 
@@ -7960,8 +7857,9 @@ void handle_sorryserver_recv_test() {
 
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
-    it = psession_thread_data->recive_data_map.find(endpoint_local);
-    recive_data_global = it->second;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
 
     cout << "[344]------------------------------------------" << endl;
     // unit_test[344] recive_data.recive_buffer＝Null
@@ -8019,9 +7917,11 @@ void handle_sorryserver_recv_test() {
     memcpy(response.c_array(), "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\n01234567890", REQUEST_BUFFER_SIZE);
     response_len = REQUEST_BUFFER_SIZE;
 
+    this->getloglevel = &stb_getloglevel_is_none;
     new_install();
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
     new_uninstall();
+    this->getloglevel = &stb_getloglevel;
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[348]------------------------------------------" << endl;
@@ -8186,7 +8086,7 @@ void handle_sorryserver_recv_test() {
         }
 
         ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
-        std::cout << "[" << 345 + i << "]------------------------------------------" << std::endl;
+        std::cout << "[" << 352 + i << "]------------------------------------------" << std::endl;
         BOOST_CHECK_EQUAL(ret, FINALIZE);
     }
 
@@ -8536,8 +8436,8 @@ void handle_sorryserver_recv_test() {
 
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_RECV);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 112u);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, MAX_BUFFER_SIZE - 112);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
 
     //メモリの内容をチェックする
@@ -8573,20 +8473,21 @@ void handle_sorryserver_recv_test() {
     memcpy(recive_data_global.recive_buffer, "HTTP/1.1 200 OK\r\nCoo", 20);
 
     //レスポンスデータ
-    memcpy(response.c_array(), "kie: monkey=123456789012345678901234567890123456789012345678901234567890", 72);
-    response_len = 72;
+    memcpy(response.c_array(), "kie: monkey=", 12);
+    memset(response.c_array(), 'x', MAX_BUFFER_SIZE - 12);
+    response_len = MAX_BUFFER_SIZE;
 
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
 
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_RECV);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer, recive_data_global.recive_buffer1);
-    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, 92u);
+    BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_max_size, MAX_BUFFER_SIZE + 20);
     BOOST_CHECK_EQUAL(recive_data_global.recive_buffer_rest_size, 0u);
 
     //メモリの内容をチェックする
     cmp_ret = memcmp(recive_data_global.recive_buffer, "HTTP/1.1 200 OK\r\nCoo", 20);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
-    cmp_ret = memcmp(recive_data_global.recive_buffer + 20, response.c_array(), 72);
+    cmp_ret = memcmp(recive_data_global.recive_buffer + 20, response.c_array(), MAX_BUFFER_SIZE);
     BOOST_CHECK_EQUAL(cmp_ret, 0);
 
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
@@ -8594,7 +8495,7 @@ void handle_sorryserver_recv_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 92u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, MAX_BUFFER_SIZE + 20);
 
     cout << "[389]------------------------------------------" << endl;
     // unit_test[389] データバッファ残サイズ　<　レスポンスデータサイズ
@@ -9424,16 +9325,16 @@ void handle_sorryserver_recv_test() {
     recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
     recive_data_global.send_status_list.clear();
 
-    memcpy(response.c_array(), "HTTP/2.2 200 OK34567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
+    memcpy(response.c_array(), "HTTP/2.2 200 OK\r\n567890123456789012345678901234567", REQUEST_BUFFER_SIZE);
     response_len = REQUEST_BUFFER_SIZE;
 
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
 
-    BOOST_CHECK_EQUAL(ret, SORRYSERVER_RECV);
+    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
     BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_NG);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
-    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 50u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 50u);
 
     cout << "[414]------------------------------------------" << endl;
     // unit_test[414] レスポンスデータ残サイズ　＞　0
@@ -9722,7 +9623,7 @@ void handle_sorryserver_recv_test() {
 void handle_response_send_inform_test(){
 
     cout << "[426]------------------------------------------" << endl;
-    //unit_test[426] handle_response_send_inform return STOP
+    //unit_test[426] handle_response_send_inform 戻り値が「STOP」に設定する。
     EVENT_TAG ret = this->handle_response_send_inform(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(ret, STOP);
 }
@@ -9733,7 +9634,7 @@ void handle_client_connection_check_test(){
     cout << "[427]------------------------------------------" << endl;
     //unit_test[427] 異常系 session_thread_data_map中にThreadID対応のデータがない
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = 0;
+    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
     boost::array<char, MAX_BUFFER_SIZE> sbf_err1;
     std::size_t d_err1;
     ret = this->handle_client_connection_check(boost::this_thread::get_id(), sbf_err1, d_err1);
@@ -9867,7 +9768,7 @@ void handle_client_connection_check_test(){
 void handle_client_select_test(){
 
     cout << "[432]------------------------------------------" << endl;
-    //unit_test[432] handle_client_select return STOP
+    //unit_test[432] handle_client_select 戻り値が「STOP」に設定する。
     boost::asio::ip::udp::endpoint ep;
     boost::array<char, MAX_BUFFER_SIZE> sbf;
     std::size_t d;
@@ -9914,7 +9815,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[437]------------------------------------------" << endl;
-    //unit_test[437] 送信状態->SEND_OK/送信可能データサイズ　>　0/編集データリスト=0/送信可能データあり
+    //unit_test[437] 送信状態->SEND_OK/送信可能データサイズ　>　0/送信可能データあり
     //unit_test[437] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
     client_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
     client_send_status.edit_data_list.clear();//編集データリスト=0
@@ -9940,15 +9841,9 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
 
     cout << "[438]------------------------------------------" << endl;
-    //unit_test[438] 送信状態->SEND_OK/送信可能データサイズ　>　0/編集データリスト=1/送信可能データあり
-    //unit_test[438] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
-    client_data.insert_posission = 1u;
-    client_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    client_send_status.edit_data_list.push_back(client_data);//編集データリスト=1
-
-    client_send_status.send_offset = 0u;
-    client_send_status.send_end_size = 1u;
-    client_send_status.status = SEND_OK; //送信状態->SEND_OK
+    //unit_test[438] 送信状態->SEND_NG
+    //unit_test[438] test data:遷移先ステータスを設定する
+    client_send_status.status = SEND_NG; //送信状態->SEND_NG
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
@@ -9959,31 +9854,13 @@ void handle_client_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t posission = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.front().insert_posission;
-    offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
 
-    BOOST_CHECK_EQUAL(event_status, CLIENT_CONNECTION_CHECK); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
-    BOOST_CHECK_EQUAL(posission,0u); //編集データ設定位置から送信済データサイズを減算する
-    BOOST_CHECK_EQUAL(offset,1u); //送信データオフセットに送信済データサイズを加算する
-    BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[439]------------------------------------------" << endl;
-    //unit_test[439] 送信状態->SEND_OK/送信可能データサイズ　>　0/編集データリスト=2/送信可能データあり
-    //unit_test[439] test data: 送信状態に送信待を設定,送信データオフセットに送信済データサイズを加算する,送信済データサイズに0を設定する,遷移先ステータスを設定する
-    client_data.insert_posission = 1u;
-    client_data1.insert_posission = 2u;
-    client_send_status.send_possible_size = 1u;//送信可能データサイズ　>　0
-    //編集データリスト=2
-    client_send_status.edit_data_list.clear();
-    client_send_status.edit_data_list.push_back(client_data);
-    client_send_status.edit_data_list.push_back(client_data1);
-
-    client_send_status.send_offset = 0u;
-    client_send_status.send_end_size = 1u;
-    client_send_status.status = SEND_OK; //送信状態->SEND_OK
+    //unit_test[439] 送信状態->SEND_CONTINUE
+    //unit_test[439] test data:遷移先ステータスを設定する
+    client_send_status.status = SEND_CONTINUE; //送信状態->SEND_CONTINUE
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
@@ -9994,18 +9871,8 @@ void handle_client_send_test(){
     this->session_thread_data_map.clear();
     this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t posission1 = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.front().insert_posission;
-    size_t posission2 = thread_data.recive_data_map[endpoint].send_status_list.front().edit_data_list.back().insert_posission;
-    offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
 
-    BOOST_CHECK_EQUAL(event_status, CLIENT_CONNECTION_CHECK); //遷移先ステータスを設定する
-    BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
-    BOOST_CHECK_EQUAL(posission1,0u); //編集データ設定位置から送信済データサイズを減算する
-    BOOST_CHECK_EQUAL(posission2,1u);
-    BOOST_CHECK_EQUAL(offset,1u); //送信データオフセットに送信済データサイズを加算する
-    BOOST_CHECK_EQUAL(end_size,0u); //送信済データサイズに0を設定する
+    BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[440]------------------------------------------" << endl;
     //unit_test[440] 送信状態->SEND_OK/送信可能データサイズ　=　0/送信データ残サイズ　＞　0/送信可能データなし/終了フラグがONの場合
@@ -10144,7 +10011,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
 
     cout << "[446]------------------------------------------" << endl;
-    //unit_test[446] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ　=　0/編集データリスト=0,送信データ残サイズ > 0
+    //unit_test[446] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ　=　0/送信データ残サイズ > 0
     //unit_test[446] test data: 遷移先ステータスを設定する
     client_send_status.send_possible_size = 0u; //送信可能データサイズ　=　0
     client_send_status.status = SEND_OK;//送信状態->SEND_OK
@@ -10165,7 +10032,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[447]------------------------------------------" << endl;
-    //unit_test[447] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ　=　0/編集データリスト=0,送信データ残サイズ = 0/送信可能データあり
+    //unit_test[447] 送信状態->SEND_OK,SEND_OK/送信可能データサイズ　=　0/送信データ残サイズ = 0/送信可能データあり
     //unit_test[447] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     client_send_status.send_possible_size = 0u; //送信可能データサイズ　=　0
     client_send_status.status = SEND_OK;//送信状態->SEND_OK
@@ -10188,7 +10055,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ = 0,送信状態に送信待を設定する
 
     cout << "[448]------------------------------------------" << endl;
-    //unit_test[448] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ　=　0/編集データリスト=0
+    //unit_test[448] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ　=　0
     //unit_test[448] test data: 遷移先ステータスを設定する
     client_send_status.send_possible_size = 0u; //送信可能データサイズ　=　0
     client_send_status.status = SEND_OK;//送信状態->SEND_OK
@@ -10211,7 +10078,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
     cout << "[449]------------------------------------------" << endl;
-    //unit_test[449] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ　=　0/編集データリスト=0,送信データ残サイズ = 0/送信可能データなし/終了フラグがONの場合
+    //unit_test[449] 送信状態->SEND_OK,SEND_NG/送信可能データサイズ　=　0/送信データ残サイズ = 0/送信可能データなし/終了フラグがONの場合
     //unit_test[449] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     client_send_status.send_possible_size = 0u; //送信可能データサイズ　=　0
     client_send_status.status = SEND_OK;//送信状態->SEND_OK
@@ -10235,7 +10102,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ = 0,送信状態に送信待を設定する
 
     cout << "[450]------------------------------------------" << endl;
-    //unit_test[450] 送信状態->SEND_END,SEND_OK/送信可能データサイズ　>　0/編集データリスト=0
+    //unit_test[450] 送信状態->SEND_END,SEND_OK/送信可能データサイズ　>　0
     //unit_test[450] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     client_send_status.status = SEND_END;//送信状態->SEND_END
     client_send_status1.send_possible_size = 1u;
@@ -10258,7 +10125,7 @@ void handle_client_send_test(){
     BOOST_CHECK_EQUAL(send_status, SEND_OK);
 
     cout << "[451]------------------------------------------" << endl;
-    //unit_test[451] 送信状態->SEND_END,SEND_OK/送信可能データサイズ　=　0/編集データリスト=0,送信データ残サイズ > 0/送信可能データなし/終了フラグがONの場合
+    //unit_test[451] 送信状態->SEND_END,SEND_OK/送信可能データサイズ　=　0/送信データ残サイズ > 0/送信可能データなし/終了フラグがONの場合
     //unit_test[451] test data: 送信状態に送信待を設定,遷移先ステータスを設定する
     client_send_status.status = SEND_END;//送信状態->SEND_END
     client_send_status1.send_rest_size = 1u; //送信データ残サイズ > 0
@@ -10633,7 +10500,7 @@ void handle_sorry_enable_test() {
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
     cout << "[471]------------------------------------------" << endl;
-	// unit_test[471] 送信可能データあり status = CLIENT_CONNECTION_CHECK
+	// unit_test[471] status = CLIENT_CONNECTION_CHECK
 	// unit_test[471] test data:送信不可データなし かつ　送信データ残サイズ ＞ ０が存在しない場合,送信可能データあり list 3件
 	init_send_status(sendstatus);
 	init_recive_data(receivedata);
@@ -10699,7 +10566,8 @@ void handle_sorry_enable_test() {
 	this->session_thread_data_map[thread_down.get_id()]->recive_data_map.clear();
 
     cout << "[475]------------------------------------------" << endl;
-    // unit_test[475] 上りスレッドと下りスレッドの場合
+    // unit_test[475] 上りスレッドの戻り値が「ACCEPT」を設定する、下りスレッドの戻り値が「CLIENT_CONNECTION_CHECK」を設定する
+    // unit_test[475] test data:上りスレッドと下りスレッドの場合
     init_send_status(sendstatus);
 	init_recive_data(receivedata);
     session_thread_data_sessionless thread_data_up;
@@ -11072,7 +10940,8 @@ void handle_sorry_disable_test(){
 	this->session_thread_data_map[thread_down.get_id()]->recive_data_map.clear();
 
     cout << "[494]------------------------------------------" << endl;
-    // unit_test[494] 上りスレッドと下りスレッドの場合
+    // unit_test[494] 上りスレッドの戻り値が「ACCEPT」を設定する、下りスレッドの戻り値が「CLIENT_CONNECTION_CHECK」を設定する
+    // unit_test[494] test data:上りスレッドと下りスレッドの場合
     init_send_status(sendstatus);
 	init_recive_data(receivedata);
     session_thread_data_sessionless thread_data_up;
@@ -11119,7 +10988,7 @@ void handle_realserver_disconnect_tcp_test(){
     EVENT_TAG ret;
     cout << "[495]------------------------------------------" << endl;
     //unit_test[495] 異常系 上りスレッドsession_thread_data_map中にThreadID対応のデータがない
-    this->session_thread_data_map[boost::this_thread::get_id()] = 0;
+    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
     boost::asio::ip::tcp::endpoint ep_err;
     ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
@@ -11347,7 +11216,7 @@ void handle_sorryserver_disconnect_test(){
     EVENT_TAG ret;
     cout << "[506]------------------------------------------" << endl;
     //unit_test[506] 異常系 上りスレッドsession_thread_data_map中にThreadID対応のデータなし
-    this->session_thread_data_map[boost::this_thread::get_id()] = 0;
+    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
     boost::asio::ip::tcp::endpoint ep_err;
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
@@ -11363,7 +11232,7 @@ void handle_sorryserver_disconnect_test(){
     cout << "[508]------------------------------------------" << endl;
     //unit_test[508] 異常系 下りスレッドsession_thread_data_map中にThreadID対応のデータなし
     boost::thread t_err(down_thread_func);
-    this->session_thread_data_map[t_err.get_id()] = 0;
+    this->session_thread_data_map[t_err.get_id()] = NULL;
     ret = this->handle_sorryserver_disconnect(t_err.get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
     BOOST_CHECK_EQUAL(ret, FINALIZE);
@@ -11455,7 +11324,7 @@ void handle_sorryserver_disconnect_test(){
     session_thread_data_sessionless data4;
     this->session_thread_data_map[boost::this_thread::get_id()] = &data4;
     //make 上りスレッドの場合 0->上りスレッド
-    data4.thread_division = 0;
+    data4.thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
     data4.end_flag = 0;
     //make realserver切替中でない場合 0->切替中でない
@@ -11573,7 +11442,7 @@ void handle_sorryserver_disconnect_test_thread_func(const boost::thread::id thre
 //handle_realserver_close 馮家純
 void handle_realserver_close_test(){
     cout << "[518]------------------------------------------" << endl;
-    //unit_test[518] handle_realserver_close return STOP
+    //unit_test[518] handle_realserver_close 戻り値が「STOP」に設定する。
     boost::asio::ip::udp::endpoint ep;
     EVENT_TAG ret = this->handle_realserver_close(boost::this_thread::get_id(), ep);
     BOOST_CHECK_EQUAL(ret, STOP);

@@ -36,14 +36,19 @@ sslid_session_data_processor::sslid_session_data_processor(
     // parameter check
     if (maxlist < 0 || timeout < 0 || replication_data_processor == NULL)
     {
-        putLogDebug(30001, "out_function : Constructor sslid_session_data_processor::"
-                            "sslid_session_data_processor(int maxlist, int timeout, "
-                            "sslid_replication_data_processor* replication_data_processor, "
-                            "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
-                            "logger_func_type inputLogError, logger_func_type inputLogWarn, "
-                            "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
+        /*-------- DEBUG LOG --------*/
+        if (LOG_LV_DEBUG == getloglevel())
+        {
+            putLogDebug(30001, "out_function : Constructor sslid_session_data_processor::"
+                                "sslid_session_data_processor(int maxlist, int timeout, "
+                                "sslid_replication_data_processor* replication_data_processor, "
+                                "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
+                                "logger_func_type inputLogError, logger_func_type inputLogWarn, "
+                                "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
                             , __FILE__, __LINE__);
-        // waiting for jp response??????????????????
+        }
+        /*------DEBUG LOG END------*/
+
         throw std::logic_error("invalid parameter value.");
     }
 
@@ -282,7 +287,7 @@ int sslid_session_data_processor::write_session_data(
             if (session_endpoint_map.size() >= static_cast<size_t>(maxlist))
             {
                 // map size arrived to top
-                if (clear_expired_session_data() == -1)
+                if (clear_expired_session_data() == 1)
                 {
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
@@ -290,11 +295,11 @@ int sslid_session_data_processor::write_session_data(
                         putLogDebug(30011, "out_function : int sslid_session_data_processor::"
                                     "write_session_data(const std::string& session_id, "
                                     "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
-                                    "return_value = -1.", __FILE__, __LINE__);
+                                    "return_value = 0.", __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
 
-                    return -1;
+                    return 0;
                 }
 
                 /*-------- DEBUG LOG --------*/
@@ -457,7 +462,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
 }
 
 //! clear expired session data
-//! @return 0 : success
+//! @return 0 : success 1 : map size is 0
 int sslid_session_data_processor::clear_expired_session_data()
 {
     /*-------- DEBUG LOG --------*/
@@ -479,11 +484,11 @@ int sslid_session_data_processor::clear_expired_session_data()
         if (LOG_LV_DEBUG == getloglevel())
         {
             putLogDebug(30021, "out_function : int sslid_session_data_processor::"
-                        "clear_expired_session_data() : return_value = 0.",  __FILE__, __LINE__);
+                        "clear_expired_session_data() : return_value = 1.",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
-        return 0;
+        return 1;
     }
 
     // none record time expired, delete the oldest session

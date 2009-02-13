@@ -244,7 +244,7 @@ class sslid_replication_data_processor_stub : public sslid_replication_data_proc
 
         ~sslid_replication_data_processor_stub(){}
 
-        sslid_replication_data* get_replication_area()
+        sslid_replication_data*& get_replication_area()
 		{
 			return replication_area;
 		}
@@ -290,11 +290,13 @@ protocol_module_sslid_test_class() {
 //protocol_module_sslid
 void protocol_module_sslid_test() {
 
-    //unit_test[1] module name =="sslid"
+    cout << "[1]------------------------------------------" << endl;
+    //unit_test[1] モジュール名が"sslid"に設定する。
     protocol_module_sslid obj;
     BOOST_CHECK_EQUAL(obj.get_name(), "sslid");
 
-    //unit_test[2] new
+    cout << "[2]------------------------------------------" << endl;
+    //unit_test[2] sslidのインスタンスを生成する。
     protocol_module_sslid* p = new protocol_module_sslid();
     BOOST_CHECK_EQUAL(p->get_name(), "sslid");
     delete p;
@@ -304,18 +306,21 @@ void protocol_module_sslid_test() {
 
 //is_tcp
 void is_tcp_test(){
+    cout << "[3]------------------------------------------" << endl;
 	//unit_test[3] is_tcp()メソッドのテスト,正常系で必ずTRUEを返す
     BOOST_CHECK(this->is_tcp());
 }
 
 //is_udp
 void is_udp_test(){
+    cout << "[4]------------------------------------------" << endl;
 	//unit_test[4] is_udp()メソッドのテスト,正常系で必ずFALSEを返す
     BOOST_CHECK(!this->is_udp());
 }
 
 //get_name
 void get_name_test(){
+    cout << "[5]------------------------------------------" << endl;
 	//unit_test[5]　get_name()メソッドのテスト,正常系で必ず"sslid"を返す
 	BOOST_CHECK_EQUAL(this->get_name(), "sslid");
 }
@@ -332,7 +337,8 @@ void initialize_test() {
     boost::function<void(void)> inlist_lock = rslist_lock;
     boost::function<void(void)> inlist_unlock = rslist_unlock;
 
-    // unit_test[6] initialize test
+    cout << "[6]------------------------------------------" << endl;
+    // unit_test[6] initialize 初期値がある場合
     this->initialize(inrslist_begin, inrslist_end, inrslist_next,
             inlist_lock, inlist_unlock);
     BOOST_CHECK_EQUAL(this->rs_list_begin, rslist_begin);
@@ -356,7 +362,8 @@ void initialize_test() {
     this->rs_list_unlock();
     BOOST_CHECK(function_check_flag);
 
-    // unit_test[7] pass null to initialize
+    cout << "[7]------------------------------------------" << endl;
+    // unit_test[7] initialize 初期値が空の場合
     this->initialize(NULL, NULL, NULL, NULL, NULL);
     BOOST_CHECK(!this->rs_list_begin);
     BOOST_CHECK(!this->rs_list_end);
@@ -386,7 +393,8 @@ void finalize_test() {
     logger_func_type inputLogInfo = stb_putLogInfo;
     logger_func_type inputLogDebug = stb_putLogDebug;
 
-    // unit_test[8] normal
+    cout << "[8]------------------------------------------" << endl;
+    // unit_test[8] 初期値がある場合
     this->initialize(inrslist_begin, inrslist_end, inrslist_next,
             inlist_lock, inlist_unlock);
     this->finalize();
@@ -412,7 +420,8 @@ void finalize_test() {
     BOOST_CHECK(this->session_data_processor == NULL);
     BOOST_CHECK(this->replication_data_processor == NULL);
 
-    // unit_test[9] unnormal
+    cout << "[9]------------------------------------------" << endl;
+    // unit_test[9] 初期値が空の場合
     this->getloglevel = stb_getloglevel;
     this->putLogFatal = stb_putLogFatal;
     this->putLogError = stb_putLogError;
@@ -469,6 +478,7 @@ void finalize_test() {
 
 //is_use_sorry
 void is_use_sorry_test(){
+    cout << "[10]------------------------------------------" << endl;
 	//unit_test[10] is_use_sorry()メソッドのテスト,正常系で必ずFALSEを返す
 	BOOST_CHECK(!this->is_use_sorry());
 }
@@ -477,22 +487,27 @@ void is_use_sorry_test(){
 void check_parameter_test(){
 	std::vector<std::string> args;
 
+    cout << "[11]------------------------------------------" << endl;
 	//unit_test[11] オプション文字列が存在しない場合, チェック結果フラグにTRUEを設定する
 	protocol_module_base::check_message_result check_message;
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[12]------------------------------------------" << endl;
 	//unit_test[12] オプション文字列 = "-T", timeout設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
 	args.push_back("-T");
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
-	//unit_test[13] オプション文字列 = "--T", timeout設定フラグ = OFFの場合,チェック結果フラグにFALSEを設定する
+    cout << "[13]------------------------------------------" << endl;
+	//unit_test[13] オプション文字列 = "--T", timeout設定フラグ = OFFの場合,チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
 	args.clear();
 	args.push_back("--T");
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL(check_message.message,"Option error.");
 
+    cout << "[14]------------------------------------------" << endl;
 	//unit_test[14] オプション文字列 = "-T -T", timeout設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-T");
@@ -500,6 +515,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[15]------------------------------------------" << endl;
 	//unit_test[15] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2ewqt' is not numeric character."を設定する
 	//unit_test[15] data test:オプション文字列 = "-T 2ewqt" timeout設定フラグ = OFFの場合
 	args.clear();
@@ -509,6 +525,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2ewqt' is not numeric character.");
 
+    cout << "[16]------------------------------------------" << endl;
 	//unit_test[16] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '$@#' is not numeric character."を設定する
 	//unit_test[16] data test:オプション文字列 = "-T $@#" timeout設定フラグ = OFFの場合
 	args.clear();
@@ -518,6 +535,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '$@#' is not numeric character.");
 
+    cout << "[17]------------------------------------------" << endl;
 	//unit_test[17] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2148583647' is too large."を設定する
 	//unit_test[17] test data:オプション文字列 = "-T 2148583647" timeout設定フラグ = OFF の場合
 	args.clear();
@@ -527,6 +545,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2148583647' is too large.");
 
+    cout << "[18]------------------------------------------" << endl;
 	//unit_test[18] チェック結果フラグにTRUEを設定する
 	//unit_test[18] test data:オプション文字列 = "-T 2000" timeout設定フラグ = OFF の場合
 	args.clear();
@@ -535,6 +554,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[19]------------------------------------------" << endl;
 	//unit_test[19] チェック結果フラグにTRUEを設定する
 	//unit_test[19] test data:オプション文字列 = "-T 2147483647" timeout設定フラグ = OFF の場合
 	args.clear();
@@ -543,6 +563,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[20]------------------------------------------" << endl;
 	//unit_test[20] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[20] test data:オプション文字列 = "-T 2000 -T" timeout設定フラグ = ON の場合
 	args.clear();
@@ -553,6 +574,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
+    cout << "[21]------------------------------------------" << endl;
 	//unit_test[21] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[21] test data:オプション文字列 = "-T 2000 -T 2000" timeout設定フラグ = ON の場合
 	args.clear();
@@ -564,6 +586,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
+    cout << "[22]------------------------------------------" << endl;
 	//unit_test[22] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[22] test data:オプション文字列 = "-T -T 20 -T" timeout設定フラグ = ON の場合
 	args.clear();
@@ -575,12 +598,14 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
+    cout << "[23]------------------------------------------" << endl;
 	//unit_test[23] オプション文字列 = "--timeout" timeout設定フラグ = OFF 次要素が存在しない場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--timeout");
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[24]------------------------------------------" << endl;
 	//unit_test[24] オプション文字列 = "--timeout --timeout" の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--timeout");
@@ -588,6 +613,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[25]------------------------------------------" << endl;
 	//unit_test[25] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2ewqt' is not numeric character."を設定する
 	//unit_test[25] test data:オプション文字列 = "--timeout 2ewqt" timeout設定フラグ = OFF の場合
 	args.clear();
@@ -597,6 +623,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2ewqt' is not numeric character.");
 
+    cout << "[26]------------------------------------------" << endl;
 	//unit_test[26] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2148583647' is too large."を設定する
 	//unit_test[26] test data:オプション文字列 = "--timeout 2148583647" timeout設定フラグ = OFF の場合
 	args.clear();
@@ -606,6 +633,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-T/--timeout' option value '2148583647' is too large.");
 
+    cout << "[27]------------------------------------------" << endl;
 	//unit_test[27] チェック結果フラグにTRUEを設定する
 	//unit_test[27] test data:オプション文字列 = "--timeout 2000" timeout設定フラグ = OFF の場合
 	args.clear();
@@ -614,6 +642,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[28]------------------------------------------" << endl;
 	//unit_test[28] チェック結果フラグにTRUEを設定する
 	//unit_test[28] test data:オプション文字列 = "--timeout 2147483647" timeout設定フラグ = OFFの場合
 	args.clear();
@@ -622,6 +651,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[29]------------------------------------------" << endl;
 	//unit_test[29] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[29] test data:オプション文字列 = "--timeout 2000 --timeout" timeout設定フラグ = ONの場合
 	args.clear();
@@ -632,6 +662,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
+    cout << "[30]------------------------------------------" << endl;
 	//unit_test[30] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[30] test data:オプション文字列 = "--timeout 2000 --timeout 2000" timeout設定フラグ = ONの場合
 	args.clear();
@@ -643,6 +674,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
+    cout << "[31]------------------------------------------" << endl;
 	//unit_test[31] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する
 	//unit_test[31] test data:オプション文字列 = "--timeout --timeout 2000 --timeout" timeout設定フラグ = ONの場合
 	args.clear();
@@ -654,12 +686,14 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-T/--timeout'.",check_message.message);
 
+    cout << "[32]------------------------------------------" << endl;
 	//unit_test[32] オプション文字列 = "-M" maxlist設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-M");
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(true,check_message.flag);
 
+    cout << "[33]------------------------------------------" << endl;
 	//unit_test[33] オプション文字列 = "-M -M" maxlist設定フラグ = OFFの場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-M");
@@ -667,6 +701,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[34]------------------------------------------" << endl;
 	//unit_test[34] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '1st' is not numeric character."を設定する
 	//unit_test[34] test data:オプション文字列 = "-M 1st" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -676,6 +711,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '1st' is not numeric character.");
 
+    cout << "[35]------------------------------------------" << endl;
 	//unit_test[35] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '2148583647' is too large."を設定する
 	//unit_test[35] test data:オプション文字列 = "-M　2148583647" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -685,6 +721,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2148583647' is too large.");
 
+    cout << "[36]------------------------------------------" << endl;
 	//unit_test[36] チェック結果フラグにTRUEを設定する
 	//unit_test[36] test data:オプション文字列 = "-M 100" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -693,6 +730,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[37]------------------------------------------" << endl;
 	//unit_test[37] チェック結果フラグにTRUEを設定する
 	//unit_test[37] test data:オプション文字列 = "-M 2147483647" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -701,6 +739,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[38]------------------------------------------" << endl;
 	//unit_test[38] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[38] test data:オプション文字列 = "-M 100 -M"の場合
 	args.clear();
@@ -711,6 +750,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
+    cout << "[39]------------------------------------------" << endl;
 	//unit_test[39] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[39] test data:オプション文字列 = "-M 100 -M 100"の場合
 	args.clear();
@@ -722,6 +762,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
+    cout << "[40]------------------------------------------" << endl;
 	//unit_test[40] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[40] test data:オプション文字列 = "-M -M 20 -M"の場合
 	args.clear();
@@ -733,6 +774,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
+    cout << "[41]------------------------------------------" << endl;
 	//unit_test[41] チェック結果フラグにTRUEを設定する
 	//unit_test[41] test data:オプション文字列 = "--maxlist" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -740,7 +782,8 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
-	//unit_test[42] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist option' value 1st is not numeric character."を設定する
+    cout << "[42]------------------------------------------" << endl;
+	//unit_test[42] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist option' value '1st' is not numeric character."を設定する
 	//unit_test[42] test data:オプション文字列 = "--maxlist 1st" maxlist設定フラグ = OFFの場合
 	args.clear();
 	args.push_back("--maxlist");
@@ -749,7 +792,8 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '1st' is not numeric character.");
 
-	//unit_test[43] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist option' value 2148583647 is too large."を設定する
+    cout << "[43]------------------------------------------" << endl;
+	//unit_test[43] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist option' value '2148583647' is too large."を設定する
 	//unit_test[43] test data:オプション文字列 = "--maxlist 2148583647" maxlist設定フラグ = OFFの場合
 	args.clear();
 	args.push_back("--maxlist");
@@ -758,6 +802,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL(check_message.message,"'-M/--maxlist' option value '2148583647' is too large.");
 
+    cout << "[44]------------------------------------------" << endl;
 	//unit_test[44] チェック結果フラグにTRUEを設定する
 	//unit_test[44] test data:オプション文字列 = "--maxlist 100" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -766,6 +811,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[45]------------------------------------------" << endl;
 	//unit_test[45] チェック結果フラグにTRUEを設定する
 	//unit_test[45] test data:オプション文字列 = "--maxlist 2147483647" maxlist設定フラグ = OFFの場合
 	args.clear();
@@ -775,6 +821,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
 
+    cout << "[46]------------------------------------------" << endl;
 	//unit_test[46] チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[46] test data:オプション文字列 = "--maxlist 100 --maxlist"の場合
 	args.clear();
@@ -785,6 +832,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
+    cout << "[47]------------------------------------------" << endl;
 	//unit_test[47] チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[47] test data:オプション文字列 = "--maxlist 100 --maxlist"の場合
 	args.clear();
@@ -796,6 +844,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
+    cout << "[48]------------------------------------------" << endl;
 	//unit_test[48] チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する
 	//unit_test[48] test data:オプション文字列 = "--maxlist --maxlist 100 --maxlist"の場合
 	args.clear();
@@ -807,6 +856,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("Cannot set multiple option '-M/--maxlist'.",check_message.message);
 
+    cout << "[49]------------------------------------------" << endl;
 	//unit_test[49] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
 	//unit_test[49] test data:オプション文字列 ="-N -R"の場合
 	args.clear();
@@ -816,6 +866,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
+    cout << "[50]------------------------------------------" << endl;
 	//unit_test[50] オプション文字列 ="-N",reschedule設定フラグ = ON,チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
 	//unit_test[50] test data:オプション文字列 ="-R -N"の場合
 	args.clear();
@@ -825,7 +876,8 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
-	//unit_test[51] オプション文字列 ="-T -M -R -N"の場合,チェック結果フラグにFALSEを設定する
+    cout << "[51]------------------------------------------" << endl;
+	//unit_test[51] オプション文字列 ="-T -M -R -N"の場合,チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
 	args.clear();
 	args.push_back("-T");
 	args.push_back("-M");
@@ -833,8 +885,10 @@ void check_parameter_test(){
 	args.push_back("-N");
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
-	//unit_test[52] オプション文字列 ="-M -T -N -R"の場合,チェック結果フラグにFALSEを設定する
+    cout << "[52]------------------------------------------" << endl;
+	//unit_test[52] オプション文字列 ="-M -T -N -R"の場合,チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
 	args.clear();
 	args.push_back("-M");
 	args.push_back("-T");
@@ -842,7 +896,9 @@ void check_parameter_test(){
 	args.push_back("-R");
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
+    cout << "[53]------------------------------------------" << endl;
 	//unit_test[53] オプション文字列 ="-T 2000 -M 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-T");
@@ -853,6 +909,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[54]------------------------------------------" << endl;
 	//unit_test[54] オプション文字列 ="--timeout 2000 -M 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--timeout");
@@ -863,6 +920,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[55]------------------------------------------" << endl;
 	//unit_test[55] オプション文字列 ="-T 2000 --maxlist 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("-T");
@@ -873,6 +931,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[56]------------------------------------------" << endl;
 	//unit_test[56] オプション文字列 ="--timeout 2000 --maxlist 100 -R"の場合,チェック結果フラグにTRUEを設定する
 	args.clear();
 	args.push_back("--timeout");
@@ -883,6 +942,7 @@ void check_parameter_test(){
 	check_message=this->check_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[57]------------------------------------------" << endl;
 	//unit_test[57] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_rescheduleを設定する
 	//unit_test[57] test data:オプション文字列 ="-T 2000 --maxlist 100 -R -N"の場合
 	args.clear();
@@ -896,6 +956,7 @@ void check_parameter_test(){
 	BOOST_CHECK_EQUAL(check_message.flag,false);
 	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 
+    cout << "[58]------------------------------------------" << endl;
 	//unit_test[58] オプション文字列 = 上記以外の場合,チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error"を設定する
 	args.clear();
 	args.push_back("-A");
@@ -906,6 +967,7 @@ void check_parameter_test(){
 
 //set_parameter
 void set_parameter_test(){
+    cout << "[59]------------------------------------------" << endl;
 	//unit_test[59] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[59] test data:オプション文字列が存在しない,timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	protocol_module_base::check_message_result check_message;
@@ -922,6 +984,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[60]------------------------------------------" << endl;
 	//unit_test[60] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[60] test data:オプション文字列 = "-T",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -937,18 +1000,21 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
-	//unit_test[61] チェック結果フラグにFALSEを設定する,sessionデータをreplication_areaから回復する
+    cout << "[61]------------------------------------------" << endl;
+	//unit_test[61] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[61] test data:オプション文字列 = "--T",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
 	args.push_back("--T");
 	check_message=this->set_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL("Option error.",check_message.message);
 	BOOST_CHECK(this->session_data_processor!=NULL);
 	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[62]------------------------------------------" << endl;
 	//unit_test[62] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[62] test data:オプション文字列 = "-T -T",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -965,6 +1031,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[63]------------------------------------------" << endl;
 	//unit_test[63] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2ewqt' is not numeric character."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[63] test data:オプション文字列 = "-T 2ewqt",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -979,6 +1046,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[64]------------------------------------------" << endl;
 	//unit_test[64] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout option' value '$@#' is not numeric character."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[64] test data:オプション文字列 = "-T $@#",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -993,6 +1061,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[65]------------------------------------------" << endl;
 	//unit_test[65] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2148583647' is too large."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[65] test data:オプション文字列 = "-T 2148583647"の場合
 	args.clear();
@@ -1005,6 +1074,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[66]------------------------------------------" << endl;
 	//unit_test[66] チェック結果フラグにTRUEを設定する,timeoutに2000を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[66] test data:オプション文字列 = "-T 2000",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1021,6 +1091,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[67]------------------------------------------" << endl;
 	//unit_test[67] チェック結果フラグにTRUEを設定する,timeoutに2147483647を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[67] test data:オプション文字列 = "-T 2147483647",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1037,6 +1108,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[68]------------------------------------------" << endl;
 	//unit_test[68] チェック結果フラグにTRUEを設定する,timeoutに2147483647を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[68] test data:オプション文字列 = "-T -T 2147483647",timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1054,6 +1126,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[69]------------------------------------------" << endl;
 	//unit_test[69] チェック結果フラグにFALSEを設定する,timeoutに2147483647を設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[69] test data:オプション文字列 = "-T 2147483647 -T",timeout設定フラグ = ON,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1070,6 +1143,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[70]------------------------------------------" << endl;
 	//unit_test[70] チェック結果フラグにFALSEを設定する,timeoutに2147483647を設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[70] test data:オプション文字列 = "-T 2147483647 -T 2147483647",timeout設定フラグ = ON,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1085,6 +1159,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[71]------------------------------------------" << endl;
 	//unit_test[71] チェック結果フラグにFALSEを設定する,timeoutに2147483647を設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[71] test data:オプション文字列 = "-T -T 2147483647 -T" timeout設定フラグ = ON,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1102,6 +1177,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[72]------------------------------------------" << endl;
 	//unit_test[72] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[72] test data:オプション文字列 = "--timeout" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF の場合
 	args.clear();
@@ -1115,6 +1191,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[73]------------------------------------------" << endl;
 	//unit_test[73] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[73] test data:オプション文字列 = "--timeout --timeout" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1131,6 +1208,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[74]------------------------------------------" << endl;
 	//unit_test[74] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2ewqt' is not numeric character."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[74] test data:オプション文字列 = "--timeout 2ewqt" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1145,6 +1223,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[75]------------------------------------------" << endl;
 	//unit_test[75] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-T/--timeout' option value '2148583647' is too large."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[75] test data:オプション文字列 = "--timeout 2148583647" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1159,6 +1238,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[76]------------------------------------------" << endl;
 	//unit_test[76] チェック結果フラグにTRUEを設定する,timeoutに2000を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[76] test data:オプション文字列 = "--timeout 2000" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1175,6 +1255,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[77]------------------------------------------" << endl;
 	//unit_test[77] チェック結果フラグにTRUEを設定する,timeoutに2147483647を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[77] test data:オプション文字列 = "--timeout" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1191,6 +1272,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[78]------------------------------------------" << endl;
 	//unit_test[78] チェック結果フラグにTRUEを設定する,timeoutに2147483647を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[78] test data:オプション文字列 = "--timeout --timeout 2147483647" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1208,6 +1290,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[79]------------------------------------------" << endl;
 	//unit_test[79] チェック結果フラグにFALSEを設定する,timeoutに2147483647を設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[79] test data:オプション文字列 = "--timeout 2147483647 --timeout" timeout設定フラグ = ON,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1224,6 +1307,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[80]------------------------------------------" << endl;
 	//unit_test[80] チェック結果フラグにFALSEを設定する,timeoutに2147483647を設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[80] test data:オプション文字列 = "--timeout 2147483647 --timeout 2147483647" timeout設定フラグ = ON,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1241,6 +1325,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[81]------------------------------------------" << endl;
 	//unit_test[81] チェック結果フラグにFALSEを設定する,timeoutに2147483647を設定する,チェック結果メッセージに"Cannot set multiple option '-T/timeout'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[81] test data:オプション文字列 = "--timeout 2147483647 --timeout" timeout設定フラグ = ON,maxlist設定フラグ = OFF,reschedule設定フラグ = OFFの場合
 	args.clear();
@@ -1257,6 +1342,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[82]------------------------------------------" << endl;
 	//unit_test[82] チェック結果フラグにTRUEを設定する,timeに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[82] test data:オプション文字列 = "-M" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1272,6 +1358,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[83]------------------------------------------" << endl;
 	//unit_test[83] チェック結果フラグにTRUEを設定する,timeに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[83] test data:オプション文字列 = "-M -M" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1288,6 +1375,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[84]------------------------------------------" << endl;
 	//unit_test[84] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '2ewqt' is not numeric character."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[84] test data:オプション文字列 = "-M 2ewqt" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1302,6 +1390,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[85]------------------------------------------" << endl;
 	//unit_test[85] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '2148583647' is too large."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[85] test data:オプション文字列 = "-M 2148583647" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1316,6 +1405,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[86]------------------------------------------" << endl;
 	//unit_test[86] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに100を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[86] test data:オプション文字列 = "-M 100" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschdule設定フラグ = OFF
 	args.clear();
@@ -1332,6 +1422,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[87]------------------------------------------" << endl;
 	//unit_test[87] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに100を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[87] test data:オプション文字列 = "-M -M 100" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschdule設定フラグ = OFF
 	args.clear();
@@ -1349,6 +1440,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[88]------------------------------------------" << endl;
 	//unit_test[88] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに2147483674を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[88] test data:オプション文字列 = "-M 1024" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1365,6 +1457,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[89]------------------------------------------" << endl;
 	//unit_test[89] チェック結果フラグにFALSEを設定する,maxlistに200を設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[89] test data:オプション文字列 = "-M 200 -M" maxlist設定フラグ = ON,timeout設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1381,6 +1474,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[90]------------------------------------------" << endl;
 	//unit_test[90] チェック結果フラグにFALSEを設定する,maxlistに200を設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[90] test data:オプション文字列 = "-M 200 -M 200" maxlist設定フラグ = ON,timeout設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1398,6 +1492,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[91]------------------------------------------" << endl;
 	//unit_test[91] チェック結果フラグにFALSEを設定する,maxlistに200を設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[91] test data:オプション文字列 = "-M -M 200 -M" maxlist設定フラグ = ON,timeout設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1415,6 +1510,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[92]------------------------------------------" << endl;
 	//unit_test[92] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[92] test data:オプション文字列 = "--maxlist" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1430,6 +1526,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[93]------------------------------------------" << endl;
 	//unit_test[93] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに1024を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[93] test data:オプション文字列 = "--maxlist --maxlist" timeout設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1446,6 +1543,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[94]------------------------------------------" << endl;
 	//unit_test[94] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '2ewqt' is not numeric character."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[94] test data:オプション文字列 = "--maxlist 2ewqt" maxlist設定フラグ = OFF,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1460,6 +1558,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[95]------------------------------------------" << endl;
 	//unit_test[95] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"'-M/--maxlist' option value '2148583647' is too large."を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[95] test data:オプション文字列 = "--maxlist 2148583647" timeout設定フラグ = OFF ,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1474,6 +1573,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[96]------------------------------------------" << endl;
 	//unit_test[96] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに100を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[96] test data:オプション文字列 = "--maxlist 100" timeout設定フラグ = OFF ,maxlist設定フラグ = OFF,reschedule設定フラグ = OFF
 	args.clear();
@@ -1490,6 +1590,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[97]------------------------------------------" << endl;
 	//unit_test[97] チェック結果フラグにTRUEを設定する,timeoutに3600を設定する,maxlistに100を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[97] test data:オプション文字列 = "--maxlist --maxlist 100" timeout設定フラグ = OFF ,reschedule設定フラグ = OFF
 	args.clear();
@@ -1507,6 +1608,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[98]------------------------------------------" << endl;
 	//unit_test[98] チェック結果フラグにTRUEを設定する,maxlistにINT_MAXを設定する,timeoutに3600を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[98] test data:オプション文字列 = "--maxlist 1024" maxlist設定フラグ = OFF,timeout設定フラグ = OFF ,reschedule設定フラグ = OFF
 	args.clear();
@@ -1523,6 +1625,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[99]------------------------------------------" << endl;
 	//unit_test[99] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[99] test data:オプション文字列 = "--maxlist 20 --maxlist"
 	args.clear();
@@ -1538,6 +1641,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[100]------------------------------------------" << endl;
 	//unit_test[100] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[100] test data:オプション文字列 = "--maxlist 20 --maxlist 20"
 	args.clear();
@@ -1554,6 +1658,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[101]------------------------------------------" << endl;
 	//unit_test[101] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot set multiple option '-M/maxlist'"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[101] test data:オプション文字列 = "--maxlist --maxlist 20 --maxlist"
 	args.clear();
@@ -1570,6 +1675,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[102]------------------------------------------" << endl;
 	//unit_test[102] チェック結果フラグにTRUEを設定する,rescheduleに1を設定する,timeoutに3600を設定する,maxlistに1024を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[102] test data:オプション文字列 = "-R" no_reschedule設定フラグ = OFF
 	args.clear();
@@ -1585,6 +1691,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[103]------------------------------------------" << endl;
 	//unit_test[103] チェック結果フラグにFALSEを設定する,rescheduleに0を設定する,チェック結果メッセージに"You have to choose either of reschedule or no_reschedule"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[103] test data:オプション文字列 ="-N -R"
 	args.clear();
@@ -1600,6 +1707,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[104]------------------------------------------" << endl;
 	//unit_test[104] チェック結果フラグにTRUEを設定する,rescheduleに0を設定する,timeoutに3600を設定する,maxlistに1024を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[104] test data:オプション文字列 = "-N" reschedule設定フラグ = OFF
 	args.clear();
@@ -1615,6 +1723,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[105]------------------------------------------" << endl;
 	//unit_test[105] チェック結果フラグにFALSEを設定する,rescheduleに1を設定する,チェック結果メッセージに"You have to choose either of reschedule or no_reschedule"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[105] test data:オプション文字列 = "-R -N"
 	args.clear();
@@ -1630,7 +1739,8 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
-	//unit_test[106] チェック結果フラグにFALSEを設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
+    cout << "[106]------------------------------------------" << endl;
+	//unit_test[106] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_reschedule"を設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[106] test data:オプション文字列 = "-T -M -R -N"
 	args.clear();
 	args.push_back("-T");
@@ -1639,13 +1749,15 @@ void set_parameter_test(){
 	args.push_back("-N");
 	check_message=this->set_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 	BOOST_CHECK(this->session_data_processor!=NULL);
 	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
 
-	//unit_test[107] チェック結果フラグにFALSEを設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
+    cout << "[107]------------------------------------------" << endl;
+	//unit_test[107] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_reschedule"を設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[107] test data:オプション文字列 = "-M -T -N -R"
 	args.clear();
 	args.push_back("-M");
@@ -1654,12 +1766,14 @@ void set_parameter_test(){
 	args.push_back("-R");
 	check_message=this->set_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 	BOOST_CHECK(this->session_data_processor!=NULL);
 	BOOST_CHECK(this->replication_data_processor!=NULL);
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[108]------------------------------------------" << endl;
 	//unit_test[108] チェック結果フラグにTRUEを設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[108] test data:オプション文字列 = "-T 2000 -M 100 -R"
 	args.clear();
@@ -1679,6 +1793,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[109]------------------------------------------" << endl;
 	//unit_test[109] チェック結果フラグにTRUEを設定する,reschedule設定フラグ = OFF,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[109] test data:オプション文字列 = "-T 2000 --maxlist 100 -R"
 	args.clear();
@@ -1698,6 +1813,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[110]------------------------------------------" << endl;
 	//unit_test[110] チェック結果フラグにTRUEを設定する,reschedule設定フラグ = OFF,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[110] test data:オプション文字列 = "--timeout 2000 -M 100 -R"
 	args.clear();
@@ -1717,6 +1833,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[111]------------------------------------------" << endl;
 	//unit_test[111] チェック結果フラグにTRUEを設定する,reschedule設定フラグ = OFF,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに1を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[111] test data:オプション文字列 = "--timeout 2000 --maxlist 100 -R"
 	args.clear();
@@ -1736,7 +1853,8 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
-	//unit_test[112] チェック結果フラグにFALSEを設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
+    cout << "[112]------------------------------------------" << endl;
+	//unit_test[112] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"You have to choose either of reschedule or no_reschedule"を設定する,timeoutに2000を設定する,maxlistに100を設定する,rescheduleに0を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[112] test data:オプション文字列 = "-T 2000 --maxlist 100 -R -N"
 	args.clear();
 	args.push_back("-T");
@@ -1747,6 +1865,7 @@ void set_parameter_test(){
 	args.push_back("-N");
 	check_message=this->set_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,false);
+	BOOST_CHECK_EQUAL("You have to choose either of reschedule or no-reschedule.",check_message.message);
 	BOOST_CHECK_EQUAL(this->timeout,2000);
 	BOOST_CHECK_EQUAL(this->maxlist,100);
 	BOOST_CHECK(this->session_data_processor!=NULL);
@@ -1755,6 +1874,7 @@ void set_parameter_test(){
 	this->maxlist=111;
 	this->reschedule=111;
 
+    cout << "[113]------------------------------------------" << endl;
 	//unit_test[113] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Option error"を設定する,sessionデータをreplication_areaから回復する
 	//unit_test[113] test data:オプション文字列 = 上記以外
 	args.clear();
@@ -1767,39 +1887,19 @@ void set_parameter_test(){
 	this->timeout=111;
 	this->maxlist=111;
 	this->reschedule=111;
-
-
-	//unit_test[109] sessionデータをreplication_areaから回復する
-	//unit_test[109] test data:オプション文字列 = "-T",replication_area_lockにNULLを設定する,replication_area_unlockにNULLを設定する
-//	this->init_replication_functions(replication_pay_memory,NULL,NULL,tcp_ep,udp_ep);
-//	BOOST_CHECK(this->replication_data_processor->replication_area_lock==NULL);
-//	BOOST_CHECK(this->replication_data_processor->replication_area_unlock==NULL);
-//	BOOST_CHECK_EQUAL(this->session_data_processor->session_endpoint_map.empty(),false);
-//	BOOST_CHECK_EQUAL(this->session_data_processor->session_lasttime_map.empty(),false);
-//	BOOST_CHECK_EQUAL(this->session_data_processor->lasttime_session_map.empty(),false);
-
-	//unit_test[110] オプション文字列 = "-T"の場合,sessionデータをreplication_areaから回復する
-	//unit_test[110] test data:オプション文字列 = "-T"
-//	this->init_replication_functions(replication_pay_memory,replication_area_lock,replication_area_unlock,tcp_ep,udp_ep);
-//	void* data_addr=replication_pay_memory(moudle_name,&data_size);
-//	this->replication_data_processor->replication_area_lock();
-//	BOOST_CHECK_EQUAL(check_resule_lock,true);
-//	this->replication_data_processor->replication_area_unlock();
-//	BOOST_CHECK_EQUAL(check_resule_unlock,true);
-//	BOOST_CHECK_EQUAL(this->session_data_processor->session_endpoint_map.empty(),false);
-//	BOOST_CHECK_EQUAL(this->session_data_processor->session_lasttime_map.empty(),false);
-//	BOOST_CHECK_EQUAL(this->session_data_processor->lasttime_session_map.empty(),false);
 }
 
 //add_parameter
 void add_parameter_test(){
 	std::vector<std::string> args;
 
+    cout << "[114]------------------------------------------" << endl;
 	//unit_test[114] オプション文字列が存在ない場合,チェック結果フラグにTRUEを設定する
 	check_message_result check_message;
 	check_message=this->add_parameter(args);
 	BOOST_CHECK_EQUAL(check_message.flag,true);
 
+    cout << "[115]------------------------------------------" << endl;
 	//unit_test[115] チェック結果フラグにFALSEを設定する,チェック結果メッセージに"Cannot add option."を設定する
 	//unit_test[115] test data:オプション文字列が存在する場合
 	args.push_back("-T");
@@ -1819,13 +1919,13 @@ void register_schedule_tcp_test(){
 	protocol_module_base::rs_list_itr_next_func_type rs_3;
 	boost::asio::ip::tcp::endpoint ep;
 	protocol_module_base::tcp_schedule_func_type tcp_schedule;
-	//unit_test[116] schedule_tcpにNULLを設定する
-	//unit_test[116] test data:NULL
+    cout << "[116]------------------------------------------" << endl;
+	//unit_test[116] parameterがNULLの場合,schedule_tcpにNULLを設定する
 	tcp_schedule=NULL;
 	this->register_schedule(tcp_schedule);
 	BOOST_CHECK(this->schedule_tcp==NULL);
-	//unit_test[117] schedule_tcpにt_scheduleを設定する
-	//unit_test[117] test data:NULL
+    cout << "[117]------------------------------------------" << endl;
+	//unit_test[117] parameterがtcp_scheduleの場合,schedule_tcpにt_scheduleを設定する
     	tcp_schedule=&t_schedule;
 	this->register_schedule(tcp_schedule);
 	this->schedule_tcp(boost::this_thread::get_id(),rs_1,rs_2,rs_3,ep);
@@ -1842,7 +1942,8 @@ void handle_session_initialize_test() {
     boost::asio::ip::tcp::endpoint client_endpoint_tcp;
     boost::asio::ip::udp::endpoint client_endpoint_udp;
 
-    // unit_test[118] handle_session_initialize
+    cout << "[118]------------------------------------------" << endl;
+    // unit_test[118] パラメータが正常に入力去れた場合、戻り値にACCEPTを設定する。
     EVENT_TAG status =
             this->handle_session_initialize(boost::this_thread::get_id(),
                     down_thread.get_id(), client_endpoint_tcp,
@@ -1881,7 +1982,8 @@ void handle_session_finalize_test() {
     boost::asio::ip::tcp::endpoint client_endpoint_tcp;
     boost::asio::ip::udp::endpoint client_endpoint_udp;
 
-    // unit_test[119] handle_session_finalize normal
+    cout << "[119]------------------------------------------" << endl;
+    // unit_test[119] パラメータが正常に入力された場合、戻り値にSTOPを設定する。
     this->handle_session_initialize(boost::this_thread::get_id(),
             down_thread.get_id(), client_endpoint_tcp, client_endpoint_udp);
     status = this->handle_session_finalize(boost::this_thread::get_id(),
@@ -1894,7 +1996,8 @@ void handle_session_finalize_test() {
     itr = this->session_thread_data_map.find(down_thread.get_id());
     BOOST_CHECK(itr == this->session_thread_data_map.end());
 
-    // unit_test[120] handle_session_finalize STOP
+    cout << "[120]------------------------------------------" << endl;
+    // unit_test[120] 初期化しなくて、直接該当関数を呼び出す場合、戻り値にSTOPを設定する。
     this->session_thread_data_map[boost::this_thread::get_id()] = new session_thread_data_sslid;
     this->session_thread_data_map[down_thread.get_id()] = new session_thread_data_sslid;
     status = this->handle_session_finalize(boost::this_thread::get_id(),
@@ -1906,9 +2009,9 @@ void handle_session_finalize_test() {
     BOOST_CHECK(itr == this->session_thread_data_map.end());
 }
 
-//120end===========================================
 //handle_accept
 void handle_accept_test(){
+    cout << "[121]------------------------------------------" << endl;
 	//unit_test[121] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
 	boost::asio::ip::tcp::endpoint ep;
 	session_thread_data_sslid thread_up_data_value;
@@ -1935,8 +2038,8 @@ void handle_client_recv_test() {
     int mem_cmp_result;
 	int mem_cmp_length;
 
-    // unit_test[122] end_flag = END_FLAG_ON
-    // unit_test[122] test data:handle_client_recv() return CLIENT_RECV
+    cout << "[122]------------------------------------------" << endl;
+    // unit_test[122] 終了フラグがONの場合、戻り値にCLIENT_RECVを設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_ON;
     this->session_thread_data_map[boost::this_thread::get_id()]
@@ -1947,9 +2050,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[123] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size > 0,
-    // unit_test[123] recvlen > 0,data_begain_offset = 0
-    // unit_test[123] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    cout << "[123]------------------------------------------" << endl;
+    // unit_test[123] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
+    // unit_test[123] 且つ受信データサイズ > 0、且つdata_begain_offset = 0の場合、戻り値をREALSERVER_SELECTに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -1972,9 +2075,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[124] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size > 0, recvlen > 0,
-    // unit_test[124] data_begain_offset > 0
-    // unit_test[124] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    cout << "[124]------------------------------------------" << endl;
+    // unit_test[124] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
+    // unit_test[124] 且つ受信データサイズ > 0、且つdata_begain_offset > 0の場合、戻り値をREALSERVER_SELECTに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -1997,9 +2100,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[125] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
-    // unit_test[125] data_begain_offset = 0,check_ssl_record_sendable() return -1 (異常)
-    // unit_test[125] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    cout << "[125]------------------------------------------" << endl;
+    // unit_test[125] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[125] 且つdata_begain_offset が 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2023,9 +2126,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[126] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
-    // unit_test[126] data_begain_offset > 0,check_ssl_record_sendable() return -1 (異常)
-    // unit_test[126] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    cout << "[126]------------------------------------------" << endl;
+    // unit_test[126] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[126] 且つdata_begain_offset > 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2049,9 +2152,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[127] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
-    // unit_test[127] data_begain_offset = 0,check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[127] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    cout << "[127]------------------------------------------" << endl;
+    // unit_test[127] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[127] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2071,9 +2174,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[128] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,
-    // unit_test[128] data_begain_offset > 0,check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[128] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    cout << "[128]------------------------------------------" << endl;
+    // unit_test[128] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[128] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2093,10 +2196,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[129] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0,
-    // unit_test[129] check_ssl_record_sendable() return 0 (送信可能),is hello message
-    // unit_test[129] test data:hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[129] current_record_rest_size, data_size, data_begain_offset
+    cout << "[129]------------------------------------------" << endl;
+    // unit_test[129] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[129] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2132,10 +2234,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[130] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0,data_begain_offset > 0
-    // unit_test[130] check_ssl_record_sendable() return 0 (送信可能), is hello message
-    // unit_test[130] test data:hello_message_flag = true, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[130] current_record_rest_size, data_size, data_begain_offset
+    cout << "[130]------------------------------------------" << endl;
+    // unit_test[130] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[130] 且つ、data_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値にREALSERVER_SELECTを設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2171,10 +2272,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[130] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset = 0
-    // unit_test[130] check_ssl_record_sendable() return 0 (送信可能), is not hello message
-    // unit_test[130] test data:hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[130] current_record_rest_size, data_size, data_begain_offset
+    cout << "[131]------------------------------------------" << endl;
+    // unit_test[131] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[131] 且つ data_begain_offset = 0で、且つ且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2201,10 +2301,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[131] end_flag = END_FLAG_OFF, data_size = 0, current_record_rest_size = 0, data_begain_offset > 0
-    // unit_test[131] check_ssl_record_sendable() return 0 (送信可能), is not hello message
-    // unit_test[131] test data:hello_message_flag = false, handle_client_recv() return REALSERVER_SELECT,
-    // unit_test[131] current_record_rest_size, data_size, data_begain_offset
+    cout << "[132]------------------------------------------" << endl;
+    // unit_test[132] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[132] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 0u;
@@ -2231,9 +2330,9 @@ void handle_client_recv_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[132] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size != 0,
-    // unit_test[132] data_begain_offset != 0
-    // unit_test[132] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    cout << "[133]------------------------------------------" << endl;
+    // unit_test[133] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset > 0の場合
+    // unit_test[133] 戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2261,8 +2360,9 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[133] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size != 0, data_begain_offset = 0
-    // unit_test[133] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset
+    cout << "[134]------------------------------------------" << endl;
+    // unit_test[134] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset = 0の場合
+    // unit_test[134] 戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2290,9 +2390,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[134] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
-    // unit_test[134] check_ssl_record_sendable() return -1 (異常)
-    // unit_test[134] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    cout << "[135]------------------------------------------" << endl;
+    // unit_test[135] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで,且つdata_begain_offset > 0
+    // unit_test[135] 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
+    // unit_test[135] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2321,9 +2422,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[135] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[135] check_ssl_record_sendable() return -1 (異常)
-    // unit_test[135] test data:handle_client_recv() return FINALIZE, data_size, data_begain_offset
+    cout << "[136]------------------------------------------" << endl;
+    // unit_test[136] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[136] 且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合
+    // unit_test[136] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 10u;
@@ -2352,9 +2454,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[136] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset != 0
-    // unit_test[136] check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[136] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    cout << "[137]------------------------------------------" << endl;
+    // unit_test[137] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[137] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
+    // unit_test[137] 戻り値が CLIENT_RECVで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 1u;
@@ -2382,9 +2485,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[137] end_flag = END_FLAG_OFF, data_size > 0,current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[137] check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[137] test data:handle_client_recv() return CLIENT_RECV, data_size, data_begain_offset
+    cout << "[138]------------------------------------------" << endl;
+    // unit_test[138] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[138] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
+    // unit_test[138] 戻り値が CLIENT_RECVで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 1u;
@@ -2412,10 +2516,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[138] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size = 0,data_begain_offset != 0
-    // unit_test[138] check_ssl_record_sendable() return 0 (送信可能), is hello message
-    // unit_test[138] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
-    // unit_test[138] current_record_rest_size, hello_message_flag
+    cout << "[139]------------------------------------------" << endl;
+    // unit_test[139] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[139] 且つcheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
+    // unit_test[139] 戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2456,10 +2560,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[139] end_flag = END_FLAG_OFF, data_size > 0, current_record_rest_size = 0,data_begain_offset = 0
-    // unit_test[139] check_ssl_record_sendable() return 0 (送信可能), is hello message
-    // unit_test[139] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
-    // unit_test[139] current_record_rest_size, hello_message_flag
+    cout << "[140]------------------------------------------" << endl;
+    // unit_test[140] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[140] 且つheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
+    // unit_test[140] 戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2500,10 +2604,10 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[140] end_flag = END_FLAG_OFF,data_size>0,current_record_rest_size=0,data_begain_offset != 0
-    // unit_test[140] check_ssl_record_sendable() return 0 (送信可能), is not hello message
-    // unit_test[140] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
-    // unit_test[140] current_record_rest_size, hello_message_flag
+    cout << "[141]------------------------------------------" << endl;
+    // unit_test[141] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[141] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
+    // unit_test[141] 戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
@@ -2538,18 +2642,18 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[141] end_flag = END_FLAG_OFF,data_size>0,current_record_rest_size=0,data_begain_offset = 0
-    // unit_test[141] check_ssl_record_sendable() return 0 (送信可能), is not hello message
-    // unit_test[141] test data:handle_client_recv() return REALSERVER_SELECT, data_size, data_begain_offset,
-    // unit_test[141] current_record_rest_size, hello_message_flag
+    cout << "[142]------------------------------------------" << endl;
+    // unit_test[142] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[142] 且つcheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
+    // unit_test[142] 戻り値がREALSERVER_SELECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = 3u;
     up_thread_data->data_begain_offset = 0u;
     up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[12] = 0x17;
-    up_thread_data->data_buffer[13] = 0x03;
-    up_thread_data->data_buffer[14] = 0x01;
+    up_thread_data->data_buffer[0] = 0x17;
+    up_thread_data->data_buffer[1] = 0x03;
+    up_thread_data->data_buffer[2] = 0x01;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     recvlen = 6;
@@ -2576,21 +2680,24 @@ void handle_client_recv_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[142] recvlen > recvbuffer.size()
-    // unit_test[142] test data:handle_client_recv() return FINALIZE
+    cout << "[143]------------------------------------------" << endl;
+    // unit_test[143] 受信データサイズ > 受信バッファサイズの場合
+    // unit_test[143] 戻り値がFINALIZEで設定する。
     recvlen = recvbuffer.size() + 1;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[143] thread id is not in map
-    // unit_test[143] test data:handle_client_recv() return FINALIZE
+    cout << "[144]------------------------------------------" << endl;
+    // unit_test[144] スレッドIDがmapに存在しない場合
+    // unit_test[144] 戻り値がFINALIZEで設定する。
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[144] end_flag = END_FLAG_OFF, data_size+recvlen > MAX_SSLID_BUFFER_SIZE
-    // unit_test[144] test data:handle_client_recv() return FINALIZE, end_flag=END_FLAG_ON
+    cout << "[145]------------------------------------------" << endl;
+    // unit_test[145] 終了フラグがOFFで,且つ data_size+recvlen > MAX_SSLID_BUFFER_SIZEの場合
+    // unit_test[145] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->end_flag = END_FLAG_OFF;
     up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 76u;
@@ -2634,8 +2741,8 @@ void handle_realserver_select_tcp_test() {
     boost::function<void(const unsigned int, const std::string&,
             const char*, int)> inputLogDebug = stb_putLogDebug;
 
-    // unit_test[145] realserver_connect_failed_count = realserver_connect_failed_max_count
-    // unit_test[145] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[146]------------------------------------------" << endl;
+    // unit_test[146] realserver接続回数が最大回数の場合、戻り値がCLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
             = this->realserver_connect_failed_max_count;
@@ -2648,8 +2755,8 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[146] realserver_connect_failed_count > realserver_connect_failed_max_count
-    // unit_test[146] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[147]------------------------------------------" << endl;
+    // unit_test[147] realserver接続回数が最大回数を越える場合、戻り値がCLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
             = this->realserver_connect_failed_max_count + 1;
@@ -2662,9 +2769,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[147] 0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 1(ON)
-    // unit_test[147] get endpoint OK !
-    // unit_test[147] test data:selected_realserver, handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[148]------------------------------------------" << endl;
+    // unit_test[148] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが決定の場合
+    // unit_test[148] 戻り値が REALSERVER_CONNECTで設定する。
     this->schedule_tcp = schedule_tcp_func1;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
@@ -2679,9 +2786,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[148] 0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 1(ON)
-    // unit_test[148] get endpoint failed !
-    // unit_test[148] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[149]------------------------------------------" << endl;
+    // unit_test[149] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが未決定の場合
+    // unit_test[149] 戻り値が CLIENT_DISCONNECTで設定する。
     this->schedule_tcp = schedule_tcp_func2;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
@@ -2696,8 +2803,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[149] 0< realserver_connect_failed_count < realserver_connect_failed_max_count, reschedule = 0 (OFF)
-    // unit_test[149] test data:end_flag = END_FLAG_ON, handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[150]------------------------------------------" << endl;
+    // unit_test[150] realserver接続回数が最大回数に未満で, 且つreschedule が 0 (OFF)の場合
+    // unit_test[150] 戻り値が CLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count
             = this->realserver_connect_failed_max_count - 1;
@@ -2711,8 +2819,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[150] realserver_connect_failed_count = 0, selected_realserver != NULL
-    // unit_test[150] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[151]------------------------------------------" << endl;
+    // unit_test[151] realserverの接続失敗回数が0, 且つselected_realserver が NULLでない場合
+    // unit_test[151] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep1;
@@ -2724,8 +2833,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[151] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = false
-    // unit_test[151] test data:handle_realserver_select() return FINALIZE, end_flag = END_FLAG_ON
+    cout << "[152]------------------------------------------" << endl;
+    // unit_test[152] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがfalseの場合
+    // unit_test[152] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2740,15 +2850,17 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[152] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[152] no ssl session id, get endpoint OK!
-    // unit_test[152] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[153]------------------------------------------" << endl;
+    // unit_test[153] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがtrueで
+    // unit_test[153] 且つendpointが決定の場合
+    // unit_test[153] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x00;
     up_thread_data->data_size = 76u;
+    up_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     this->schedule_tcp = schedule_tcp_func1;
@@ -2759,9 +2871,10 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[153] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[153] no session id, get endpoint failed !
-    // unit_test[153] test data:handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[154]------------------------------------------" << endl;
+    // unit_test[154] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[154] 且つセッションIDがなくで、且つendpointが未決定の場合
+    // unit_test[154] 戻り値がCLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
@@ -2769,6 +2882,7 @@ void handle_realserver_select_tcp_test() {
     up_thread_data->data_buffer[43] = 0x00;
     up_thread_data->data_size = 76u;
     up_thread_data->end_flag = END_FLAG_OFF;
+    up_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     this->schedule_tcp = schedule_tcp_func2;
@@ -2779,15 +2893,17 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[154] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[154] have a ssl session id, get endpoint OK !
-    // unit_test[154] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[155]------------------------------------------" << endl;
+    // unit_test[155] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[155] 且つセッションIDがあるで, 且つendpointが決定の場合
+    // unit_test[155] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
     up_thread_data->data_size = 76u;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -2814,15 +2930,17 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[155] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[155] have a ssl session id, get endpoint failed !reschedule, get endpoint OK !
-    // unit_test[155] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[156]------------------------------------------" << endl;
+    // unit_test[156] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[156] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointが決定の場合
+    // unit_test[156] 戻り値がREALSERVER_CONNECTで設定する。
     this->schedule_tcp = schedule_tcp_func1;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -2840,15 +2958,17 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[156] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[156] have a ssl session id, get endpoint failed !reschedule, get endpoint failed !
-    // unit_test[156] test data:handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[157]------------------------------------------" << endl;
+    // unit_test[157] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[157] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointも未決定の場合
+    // unit_test[157] 戻り値がCLIENT_DISCONNECTで設定する。
     this->schedule_tcp = schedule_tcp_func2;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -2866,14 +2986,16 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[157] realserver_connect_failed_count = 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[157] have a ssl session id, get endpoint failed! no reschedule
-    // unit_test[157] test data:handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[158]------------------------------------------" << endl;
+    // unit_test[158] realserver接続失敗回数が0で, 且つselected_realserverがNULLで, 且つhello_message_flagがtrueで
+    // unit_test[158] 且つセッションIDがあり, endpointが未決定で、且つ no rescheduleの場合
+    // unit_test[158] 戻り値がCLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = 0;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -2890,8 +3012,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[158] realserver_connect_failed_count < 0, selected_realserver != NULL
-    // unit_test[158] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[159]------------------------------------------" << endl;
+    // unit_test[159] realserver接続失敗回数が0で, 且つselected_realserver が NULLないの場合
+    // unit_test[159] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep1;
@@ -2903,8 +3026,9 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[159] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = false
-    // unit_test[159] test data:handle_realserver_select() return FINALIZE, end_flag = END_FLAG_ON
+    cout << "[160]------------------------------------------" << endl;
+    // unit_test[160] realserver接続失敗回数が0で, 且つselected_realserver が　NULLで, 且つhello_message_flag が falseの場合
+    // unit_test[160] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
@@ -2919,15 +3043,17 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[160] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[160] no ssl session id, get endpoint OK!
-    // unit_test[160] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[161]------------------------------------------" << endl;
+    // unit_test[161] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[161] 且つセッションIDがなくで、且つendpointが決定の場合
+    // unit_test[161] 戻り値がREALSERVER_CONNECT設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x00;
     up_thread_data->data_size = 76u;
+    up_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
     this->schedule_tcp = schedule_tcp_func1;
@@ -2938,15 +3064,17 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[161] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[161] no session id, get endpoint failed !
-    // unit_test[161] test data:handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[162]------------------------------------------" << endl;
+    // unit_test[162] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[162] 且つセッションIDがなくで、且つendpointが未決定の場合
+    // unit_test[162] 戻り値がCLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x00;
     up_thread_data->data_size = 76u;
+    up_thread_data->data_begain_offset = 0u;
     up_thread_data->end_flag = END_FLAG_OFF;
     this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
@@ -2958,15 +3086,17 @@ void handle_realserver_select_tcp_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[162] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[162] have a ssl session id, get endpoint OK !
-    // unit_test[162] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[163]------------------------------------------" << endl;
+    // unit_test[163] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[163] 且つセッションIDがあるで, 且つendpointが決定の場合
+    // unit_test[163] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
     up_thread_data->data_size = 76u;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -2990,15 +3120,17 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[163] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[163] have a ssl session id, get endpoint failed !reschedule, get endpoint OK !
-    // unit_test[163] test data:handle_realserver_select() return REALSERVER_CONNECT
+    cout << "[164]------------------------------------------" << endl;
+    // unit_test[164] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[164] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
+    // unit_test[164] 戻り値がREALSERVER_CONNECTで設定する。
     this->schedule_tcp = schedule_tcp_func1;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -3016,15 +3148,17 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[164] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[164] have a ssl session id, get endpoint failed !reschedule, get endpoint failed !
-    // unit_test[164] test data:handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[165]------------------------------------------" << endl;
+    // unit_test[165] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[165] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointも未決定の場合
+    // unit_test[165] 戻り値がCLIENT_DISCONNECTで設定する。
     this->schedule_tcp = schedule_tcp_func2;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -3042,14 +3176,16 @@ void handle_realserver_select_tcp_test() {
     delete this->session_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[165] realserver_connect_failed_count < 0, selected_realserver = NULL, hello_message_flag = true
-    // unit_test[165] have a ssl session id, get endpoint failed! no reschedule
-    // unit_test[165] test data:handle_realserver_select() return CLIENT_DISCONNECT
+    cout << "[166]------------------------------------------" << endl;
+    // unit_test[166] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[166] セッションIDがあり、endpointが未決定でrescheduleしない場合
+    // unit_test[166] 戻り値がCLIENT_DISCONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->realserver_connect_failed_count = -1;
     up_thread_data->selected_realserver = ep2;
     up_thread_data->hello_message_flag = true;
     up_thread_data->data_buffer[43] = 0x20;
+    up_thread_data->data_begain_offset = 0u;
     for (int i = 0; i < 32; i++) {
         up_thread_data->data_buffer[44 + i] = 0x01;
     }
@@ -3069,8 +3205,8 @@ void handle_realserver_select_tcp_test() {
 
 //handle_realserver_select(udp)
 void handle_realserver_select_udp_test(){
-    // unit_test[166] for udp
-    // unit_test[166] test data:handle_realserver_select() return STOP
+    cout << "[167]------------------------------------------" << endl;
+    // unit_test[167] 戻り値が STOPで設定する。
     EVENT_TAG status;
     boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen;
@@ -3091,9 +3227,9 @@ void handle_realserver_connect_test() {
 	int mem_cmp_length;
 	int mem_cmp_result;
 
-    // unit_test[167] current_record_rest_size>data_size, data_size<送信バッファサイズ
-    // unit_test[167] test data:data_begain_offset,current_record_rest_size,data_size, datalen
-    // unit_test[167] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[168]------------------------------------------" << endl;
+    // unit_test[168] current_record_rest_size>data_sizeで、且つdata_size<送信バッファサイズの場合
+    // unit_test[168] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 20u;
@@ -3122,9 +3258,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[168] current_record_rest_size>data_size, data_size=送信バッファサイズ
-    // unit_test[168] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[168] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[169]------------------------------------------" << endl;
+    // unit_test[169] current_record_rest_size>data_sizeで, 且つdata_sizeが送信バッファサイズの場合
+    // unit_test[169] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
@@ -3153,9 +3289,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[169] current_record_rest_size=data_size, data_size<送信バッファサイズ
-    // unit_test[169] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[169] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[170]------------------------------------------" << endl;
+    // unit_test[170] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
+    // unit_test[170] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
@@ -3184,9 +3320,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[170] current_record_rest_size=data_size, data_size=送信バッファサイズ
-    // unit_test[170] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[170] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[171]------------------------------------------" << endl;
+    // unit_test[171] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
+    // unit_test[171] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
@@ -3215,9 +3351,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[171] current_record_rest_size>data_size,data_size＞送信バッファサイズ
-    // unit_test[171] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[171] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[172]------------------------------------------" << endl;
+    // unit_test[172] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[172] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -3246,9 +3382,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[172] current_record_rest_size=data_size,data_size＞送信バッファサイズ
-    // unit_test[172] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[172] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[173]------------------------------------------" << endl;
+    // unit_test[173] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[173] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -3277,9 +3413,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[173] current_record_rest_size＜data_size, current_record_rest_size<送信バッファサイズ
-    // unit_test[173] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[173] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[174]------------------------------------------" << endl;
+    // unit_test[174] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
+    // unit_test[174] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
@@ -3308,9 +3444,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[174] current_record_rest_size<data_size, current_record_rest_size=送信バッファサイズ
-    // unit_test[174] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[174] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[175]------------------------------------------" << endl;
+    // unit_test[175] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
+    // unit_test[175] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
@@ -3339,9 +3475,9 @@ void handle_realserver_connect_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[175] current_record_rest_size＜data_size,current_record_rest_size＞送信バッファサイズ
-    // unit_test[175] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[175] handle_realserver_connect() return REALSERVER_SEND, realserver_connect_failed_count ＝0
+    cout << "[176]------------------------------------------" << endl;
+    // unit_test[176] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
+    // unit_test[176] 戻り値がREALSERVER_SENDで設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -3388,30 +3524,34 @@ void handle_realserver_connection_fail_test(){
 	iter=this->session_thread_data_map.find(boost::this_thread::get_id());
 	session_thread_data_sslid* data=iter->second;
 
-	//unit_test[176] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-	//unit_test[176] test data:no rescheduleモードの場合,the first fail
+    cout << "[177]------------------------------------------" << endl;
+	//unit_test[177] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
+	//unit_test[177] test data:no rescheduleモード、初めて失敗するの場合
 	this->reschedule=0;
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
 
-	//unit_test[177] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
-	//unit_test[177] test data:rescheduleモードの場合,the first fail
+    cout << "[178]------------------------------------------" << endl;
+	//unit_test[178] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
+	//unit_test[178] test data:rescheduleモード、初めて失敗するの場合
 	this->reschedule=1;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,1);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
 
-	//unit_test[178] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-	//unit_test[178] test data:rescheduleモードの場合, the third fail
+    cout << "[179]------------------------------------------" << endl;
+	//unit_test[179] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+	//unit_test[179] test data:rescheduleモード、３目失敗するの場合
 	this->reschedule=1;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
 
-	//unit_test[179] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
-	//unit_test[179] test data:no rescheduleモードの場合,the forth fail
+    cout << "[180]------------------------------------------" << endl;
+	//unit_test[180] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
+	//unit_test[180] test data:no rescheduleモード、４目失敗するの場合
 	this->reschedule=0;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
@@ -3425,8 +3565,9 @@ void handle_realserver_send_test() {
     session_thread_data_sslid* up_thread_data;
     EVENT_TAG status;
 
-    // unit_test[180] data_size = 0,data_begain_offset = 0
-    // unit_test[180] test data:handle_realserver_send() return CLIENT_RECV
+    cout << "[181]------------------------------------------" << endl;
+    // unit_test[181] データサイズが0で、且つdata_begain_offsetが0の場合
+    // unit_test[181] 戻り値がCLIENT_RECVで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 0u;
     up_thread_data->data_begain_offset = 0u;
@@ -3437,8 +3578,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[180] data_size = 0,data_begain_offset >0
-    // unit_test[180] test data:handle_realserver_send() return CLIENT_RECV
+    cout << "[182]------------------------------------------" << endl;
+    // unit_test[182] データサイズが0で,且つdata_begain_offset >0の場合
+    // unit_test[182] 戻り値がCLIENT_RECVで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 0u;
     up_thread_data->data_begain_offset = 10u;
@@ -3449,8 +3591,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[181] data_size > 0, current_record_rest_size > 0,data_begain_offset=0
-    // unit_test[181] test data:handle_realserver_send() return REALSERVER_CONNECT
+    cout << "[183]------------------------------------------" << endl;
+    // unit_test[183] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset=0の場合
+    // unit_test[183] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->current_record_rest_size = 10u;
@@ -3462,8 +3605,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[181] data_size > 0, current_record_rest_size > 0,data_begain_offset>0
-    // unit_test[181] test data:handle_realserver_send() return REALSERVER_CONNECT
+    cout << "[184]------------------------------------------" << endl;
+    // unit_test[184] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset>0の場合
+    // unit_test[184] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->current_record_rest_size = 10u;
@@ -3475,8 +3619,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[182] data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常),data_begain_offset=0
-    // unit_test[182] test data:handle_realserver_send() return FINALIZE, end_flag = END_FLAG_ON
+    cout << "[185]------------------------------------------" << endl;
+    // unit_test[185] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
+    // unit_test[185] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->data_begain_offset = 0u;
@@ -3491,8 +3636,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[182] data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常),data_begain_offset>0
-    // unit_test[182] test data:handle_realserver_send() return FINALIZE, end_flag = END_FLAG_ON
+    cout << "[186]------------------------------------------" << endl;
+    // unit_test[186] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
+    // unit_test[186] 戻り値がFINALIZEで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->data_begain_offset = 0u;
@@ -3507,8 +3653,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[183] data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可),data_begain_offset=0
-    // unit_test[183] test data:handle_realserver_send() return CLIENT_RECV
+    cout << "[187]------------------------------------------" << endl;
+    // unit_test[187] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0の場合
+    // unit_test[187] 戻り値がCLIENT_RECVで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 1u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3520,8 +3667,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[183] data_size > 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可),data_begain_offset>0
-    // unit_test[183] test data:handle_realserver_send() return CLIENT_RECV
+    cout << "[188]------------------------------------------" << endl;
+    // unit_test[188] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0の場合
+    // unit_test[188] 戻り値がCLIENT_RECVで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 1u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3533,10 +3681,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[184] data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能),data_begain_offset =0
-    // unit_test[184] is a hello message
-    // unit_test[184] test data:handle_realserver_send() return REALSERVER_CONNECT,current_record_rest_size,
-    // unit_test[184] hello_message_flag
+    cout << "[189]------------------------------------------" << endl;
+    // unit_test[189] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が０(送信可能)で,且つdata_begain_offset が0の場合
+    // unit_test[189] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 76u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3559,10 +3706,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[184] data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能),data_begain_offset > 0
-    // unit_test[184] is a hello message
-    // unit_test[184] test data:handle_realserver_send() return REALSERVER_CONNECT,current_record_rest_size,
-    // unit_test[184] hello_message_flag
+    cout << "[190]------------------------------------------" << endl;
+    // unit_test[190] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
+    // unit_test[190] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 76u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3585,10 +3731,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[185] data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能),data_begain_offset =0
-    // unit_test[185] is not a hello message
-    // unit_test[185] test data:handle_realserver_send(0 return REALSERVER_CONNECT,current_record_rest_size,
-    // unit_test[185] hello_message_flag
+    cout << "[191]------------------------------------------" << endl;
+    // unit_test[191] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset が0の場合
+    // unit_test[191] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3608,10 +3753,9 @@ void handle_realserver_send_test() {
     delete up_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[185] data_size > 0, current_record_rest_size = 0, check_ssl_record_send() return 0 (送信可能),data_begain_offset > 0
-    // unit_test[185] is not a hello message
-    // unit_test[185] test data:handle_realserver_send(0 return REALSERVER_CONNECT,current_record_rest_size,
-    // unit_test[185] hello_message_flag
+    cout << "[192]------------------------------------------" << endl;
+    // unit_test[192] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
+    // unit_test[192] 戻り値がREALSERVER_CONNECTで設定する。
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->data_size = 10u;
     up_thread_data->current_record_rest_size = 0u;
@@ -3645,8 +3789,9 @@ void handle_realserver_recv_tcp_test() {
 	int mem_cmp_length;
 	char* mem_cmp_buffer;
 
-    // unit_test[186] data_size = 0, current_record_rest_size > 0
-    // unit_test[186] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    cout << "[193]------------------------------------------" << endl;
+    // unit_test[193] データサイズ が 0で, 且つcurrent_record_rest_size > 0の場合
+    // unit_test[193] 戻り値がCLIENT_CONNECTION_CHECK設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 10u;
@@ -3658,12 +3803,13 @@ void handle_realserver_recv_tcp_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[187] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return -1 (異常)
-    // unit_test[187] test data:handle_realserver_recv() return FINALIZE, end_flag = END_FLAG_ON
+    cout << "[194]------------------------------------------" << endl;
+    // unit_test[194] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
+    // unit_test[194] 戻り値がFINALIZEで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->current_record_rest_size = 0u;
-	down_thread_data->data_begain_offset = 0;
+	down_thread_data->data_begain_offset = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x00;
     recvlen = 6;
@@ -3685,11 +3831,12 @@ void handle_realserver_recv_tcp_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[188] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 1 (送信不可)
-    // unit_test[188] test data:handle_realserver_recv() return REALSERVER_RECV
+    cout << "[195]------------------------------------------" << endl;
+    // unit_test[195] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合
+    // unit_test[195] 戻り値がREALSERVER_RECVで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
-	down_thread_data->data_begain_offset = 0;
+	down_thread_data->data_begain_offset = 0u;
     down_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = 3;
@@ -3710,12 +3857,12 @@ void handle_realserver_recv_tcp_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[189] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[189] is a hello message
-    // unit_test[189] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    cout << "[196]------------------------------------------" << endl;
+    // unit_test[196] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
+    // unit_test[196] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
-	down_thread_data->data_begain_offset = 0;
+	down_thread_data->data_begain_offset = 0u;
     down_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x16;
@@ -3749,12 +3896,12 @@ void handle_realserver_recv_tcp_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[190] data_size = 0, current_record_rest_size = 0, check_ssl_record_sendable() return 0 (送信可能)
-    // unit_test[190] is not a hello message
-    // unit_test[190] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    cout << "[197]------------------------------------------" << endl;
+    // unit_test[197] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値0(送信可能)の場合
+    // unit_test[197] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
-	down_thread_data->data_begain_offset = 0;
+	down_thread_data->data_begain_offset = 0u;
     down_thread_data->current_record_rest_size = 0u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvbuffer[0] = 0x17;
@@ -3782,11 +3929,12 @@ void handle_realserver_recv_tcp_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[191] data_size > 0, current_record_rest_size > 0, data_begain_offset>0
-    // unit_test[191] test data:handle_realserver_recv() return CLIENT_CONNECTION_CHECK
+    cout << "[198]------------------------------------------" << endl;
+    // unit_test[198] データサイズ > 0で, 且つcurrent_record_rest_size > 0で, 且つdata_begain_offset>0の場合
+    // unit_test[198] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10u;
-    down_thread_data->data_begain_offset = 5;
+    down_thread_data->data_begain_offset = 5u;
     down_thread_data->current_record_rest_size = 10u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     recvlen = 15;
@@ -3809,8 +3957,9 @@ void handle_realserver_recv_tcp_test() {
 	delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[192] data_size + recvlen > MAX_SSLID_BUFFER_SIZE
-    // unit_test[192] test data:handle_realserver_recv() return FINALIZE
+    cout << "[199]------------------------------------------" << endl;
+    // unit_test[199] データサイズ + 受信データサイズ > MAX_SSLID_BUFFER_SIZEの場合
+    // unit_test[199] 戻り値がFINALIZEで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 76u + 1u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
@@ -3827,8 +3976,8 @@ void handle_realserver_recv_tcp_test() {
 
 //handle_realserver_recv(udp)
 void handle_realserver_recv_udp_test(){
-    // unit_test[193] for udp
-    // unit_test[193] test data:handle_realserver_recv() return STOP
+    cout << "[200]------------------------------------------" << endl;
+    // unit_test[200] 戻り値が STOPで設定する。
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     size_t recvlen;
     boost::asio::ip::udp::endpoint rs_endpoint_udp;
@@ -3859,14 +4008,16 @@ void handle_client_connection_check_test() {
     logger_func_type inputLogDebug = stb_putLogDebug;
 	boost::asio::ip::tcp::endpoint rs_endpoint(boost::asio::ip::address::from_string("192.168.120.249"), 12345);
 
-    // unit_test[194] down_thread_id is not in the map
-    // unit_test[194] test data:handle_client_connection return FINALIZE
+    cout << "[201]------------------------------------------" << endl;
+    // unit_test[201] mapに下りスレッドIDが存在しない場合
+    // unit_test[201] 戻り値がFINALIZEで設定する。
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[195] current_record_rest_size>0,data_begain_offset = 0
-    // unit_test[195] test data:handle_client_connection return CLIENT_SEND
+    cout << "[202]------------------------------------------" << endl;
+    // unit_test[202] current_record_rest_size>0で,且つdata_begain_offset が 0の場合
+    // unit_test[202] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 10u;
     down_thread_data->data_size = 76u;
@@ -3881,8 +4032,9 @@ void handle_client_connection_check_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[195] current_record_rest_size>0,data_begain_offset >0
-    // unit_test[195] test data:handle_client_connection return CLIENT_SEND
+    cout << "[203]------------------------------------------" << endl;
+    // unit_test[203] current_record_rest_size>0で,且つdata_begain_offset >0の場合
+    // unit_test[203] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 10u;
     down_thread_data->data_size = 76u;
@@ -3898,9 +4050,10 @@ void handle_client_connection_check_test() {
     this->session_thread_data_map.clear();
 
 
-    // unit_test[196] current_record_rest_size=0,hello_message_flag=true,data_size >= 76,data_begain_offset=0
-    // unit_test[196] get_ssl_session_id return 0 (have session id)
-    // unit_test[196] test data:handle_client_connection return CLIENT_SEND
+    cout << "[204]------------------------------------------" << endl;
+    // unit_test[204] current_record_rest_sizeが0で、且つhello_message_flagがtrueで、且つdata_size ≧ 76で、且つdata_begain_offsetが0で
+    // unit_test[204] 且つget_ssl_session_id() の戻り値が 0 の場合
+    // unit_test[204] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
@@ -3933,16 +4086,17 @@ void handle_client_connection_check_test() {
     delete replication_data_processor;
     this->session_thread_data_map.clear();
 
-    // unit_test[196] current_record_rest_size=0,hello_message_flag=true,data_size >= 76,data_begain_offset>0
-    // unit_test[196] get_ssl_session_id return 0 (have session id)
-    // unit_test[196] test data:handle_client_connection return CLIENT_SEND
+    cout << "[205]------------------------------------------" << endl;
+    // unit_test[205] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_size ≧ 76で,且つdata_begain_offset>0で
+    // unit_test[205] 且つget_ssl_session_id()の戻り値が0の場合
+    // unit_test[205] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[53] = 0x20;
-    down_thread_data->data_size = 86u;
+    down_thread_data->data_size = 76u;
     down_thread_data->data_begain_offset = 10u;
-    for(size_t i=44; i<down_thread_data->data_size; i++)
+    for(size_t i=54; i<down_thread_data->data_size; i++)
     {
     	down_thread_data->data_buffer[i] = 0x01;
 	}
@@ -3961,7 +4115,7 @@ void handle_client_connection_check_test() {
             sendbuffer, datalen);
 	BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 86u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
@@ -3969,9 +4123,10 @@ void handle_client_connection_check_test() {
     this->session_thread_data_map.clear();
 
 
-    // unit_test[197] current_record_rest_size=0,hello_message_flag=true,data_begain_offset=0
-    // unit_test[197] get_ssl_session_id return 1 (no session id)
-    // unit_test[197] test data:handle_client_connection return CLIENT_SEND
+    cout << "[206]------------------------------------------" << endl;
+    // unit_test[206] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offsetが0で
+    // unit_test[206] 且つget_ssl_session_id()の戻り値が1の場合
+    // unit_test[206] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
@@ -3988,27 +4143,29 @@ void handle_client_connection_check_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[197] current_record_rest_size=0,hello_message_flag=true,data_begain_offset>0
-    // unit_test[197] get_ssl_session_id return 1 (no session id)
-    // unit_test[197] test data:handle_client_connection return CLIENT_SEND
+    cout << "[207]------------------------------------------" << endl;
+    // unit_test[207] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offset>0で
+    // unit_test[207] 且つget_ssl_session_id()の戻り値が1の場合
+    // unit_test[207] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = true;
     down_thread_data->data_buffer[53] = 0x00;
-    down_thread_data->data_size = 86u;
+    down_thread_data->data_size = 76u;
     down_thread_data->data_begain_offset = 10u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 86u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[198] current_record_rest_size=0,hello_message_flag=false,data_begain_offset=0
-    // unit_test[198] test data:handle_client_connection return CLIENT_SEND
+    cout << "[208]------------------------------------------" << endl;
+    // unit_test[208] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
+    // unit_test[208] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = false;
@@ -4024,18 +4181,19 @@ void handle_client_connection_check_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[198] current_record_rest_size=0,hello_message_flag=false,data_begain_offset>0
-    // unit_test[198] test data:handle_client_connection return CLIENT_SEND
+    cout << "[209]------------------------------------------" << endl;
+    // unit_test[209] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offset>0の場合
+    // unit_test[209] 戻り値がCLIENT_SENDで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->current_record_rest_size = 0u;
     down_thread_data->hello_message_flag = false;
-    down_thread_data->data_size = 86u;
+    down_thread_data->data_size = 76u;
     down_thread_data->data_begain_offset = 10u;
     this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 86u);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
     BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
     delete down_thread_data;
@@ -4044,7 +4202,8 @@ void handle_client_connection_check_test() {
 
 //handle_client_select
 void handle_client_select_test(){
-	// unit_test[200] test data:handle_client_select() return STOP
+    cout << "[210]------------------------------------------" << endl;
+	// unit_test[210] 戻り値がSTOPで設定する。
 	boost::asio::ip::udp::endpoint cl_endpoint;
 	boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
 	size_t datalen;
@@ -4059,14 +4218,16 @@ void handle_client_send_test() {
     session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
 
-    // unit_test[201] down_thread_id is not in the map
-    // unit_test[201] test data:handle_client_send() return FINALIZE
+    cout << "[211]------------------------------------------" << endl;
+    // unit_test[211] 下りスレッドIDがmapに存在しない場合
+    // unit_test[211] 戻り値がFINALIZEで設定する。
     this->session_thread_data_map.clear();
     status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    // unit_test[202] data_size=0,end_flag=END_FLAG_ON,data_begain_offset=0
-    // unit_test[202] test data:handle_client_send() return CLIENT_DISCONNECT
+    cout << "[212]------------------------------------------" << endl;
+    // unit_test[212] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offsetが0の場合
+    // unit_test[212] 戻り値がCLIENT_DISCONNECTで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->end_flag = END_FLAG_ON;
@@ -4077,8 +4238,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[202] data_size=0,end_flag=END_FLAG_ON,data_begain_offset>0
-    // unit_test[202] test data:handle_client_send() return CLIENT_DISCONNECT
+    cout << "[213]------------------------------------------" << endl;
+    // unit_test[213] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offset>0の場合
+    // unit_test[213] 戻り値がCLIENT_DISCONNECTで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->end_flag = END_FLAG_ON;
@@ -4089,8 +4251,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[203] data_size=0,end_flag=END_FLAG_OFF,data_begain_offset = 0
-    // unit_test[203] test data:handle_client_send() return REALSERVER_RECV
+    cout << "[214]------------------------------------------" << endl;
+    // unit_test[214] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset が 0の場合
+    // unit_test[214] 戻り値がREALSERVER_RECVで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->end_flag = END_FLAG_OFF;
@@ -4101,8 +4264,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[203] data_size=0,end_flag=END_FLAG_OFF,data_begain_offset > 0
-    // unit_test[203] test data:handle_client_send() return REALSERVER_RECV
+    cout << "[215]------------------------------------------" << endl;
+    // unit_test[215] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset > 0の場合
+    // unit_test[215] 戻り値がREALSERVER_RECVで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 0u;
     down_thread_data->end_flag = END_FLAG_OFF;
@@ -4113,8 +4277,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[204] data_size>0,current_record_rest_size>0,data_begain_offset=0
-    // unit_test[204] test data:handle_client_send() return CLIENT_CONNECTION_CHECK
+    cout << "[216]------------------------------------------" << endl;
+    // unit_test[216] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0の場合
+    // unit_test[216] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10u;
     down_thread_data->current_record_rest_size = 8u;
@@ -4125,8 +4290,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[204] data_size>0,current_record_rest_size>0,data_begain_offset=0,data_begain_offset>0
-    // unit_test[204] test data:handle_client_send() return CLIENT_CONNECTION_CHECK
+    cout << "[217]------------------------------------------" << endl;
+    // unit_test[217] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0で,且つdata_begain_offset>0の場合
+    // unit_test[217] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10u;
     down_thread_data->current_record_rest_size = 8u;
@@ -4137,8 +4303,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[205] data_size>0,current_record_rest_size=0,check_ssl_record_sendable() return -1 (異常),data_begain_offset=0
-    // unit_test[205] test data:end_flag == END_FLAG_ON,handle_client_send() return FINALIZE
+    cout << "[218]------------------------------------------" << endl;
+    // unit_test[218] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
+    // unit_test[218] 戻り値がFINALIZEで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10u;
     down_thread_data->current_record_rest_size = 0u;
@@ -4151,8 +4318,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[205] data_size>0,current_record_rest_size=0,check_ssl_record_sendable() return -1 (異常),data_begain_offset>0
-    // unit_test[205] test data:end_flag == END_FLAG_ON,handle_client_send() return FINALIZE
+    cout << "[219]------------------------------------------" << endl;
+    // unit_test[219] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
+    // unit_test[219] 戻り値がFINALIZEで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10u;
     down_thread_data->current_record_rest_size = 0u;
@@ -4165,9 +4333,10 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[206] data_size>0,current_record_rest_size=0,check_ssl_record_sendable() return 1 (送信不可),data_begain_offset=0
-    // unit_test[206] end_flag=END_FLAG_ON
-    // unit_test[206] test data:handle_client_send() return CLIENT_DISCONNECT
+    cout << "[220]------------------------------------------" << endl;
+    // unit_test[220] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
+    // unit_test[220] 且つ終了フラグがONの場合
+    // unit_test[220] 戻る値がCLIENT_DISCONNECTで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 3u;
     down_thread_data->current_record_rest_size = 0u;
@@ -4179,9 +4348,10 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[206] data_size>0,current_record_rest_size=0,check_ssl_record_sendable() return 1 (送信不可),data_begain_offset>0
-    // unit_test[206] end_flag=END_FLAG_ON
-    // unit_test[206] test data:handle_client_send() return CLIENT_DISCONNECT
+    cout << "[221]------------------------------------------" << endl;
+    // unit_test[221] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
+    // unit_test[221] 且つ終了フラグがONの場合
+    // unit_test[221] 戻り値がCLIENT_DISCONNECTで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 3u;
     down_thread_data->current_record_rest_size = 0u;
@@ -4193,9 +4363,10 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[207] data_size>0,current_record_rest_size=0,check_ssl_record_sendable()return 1 (送信不可),data_begain_offset=0
-    // unit_test[207] end_flag=END_FLAG_OFF
-    // unit_test[207] test data:handle_client_send() return REALSERVER_RECV
+    cout << "[222]------------------------------------------" << endl;
+    // unit_test[222] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
+    // unit_test[222] 且つ終了フラグがOFFの場合
+    // unit_test[222] 戻り値がREALSERVER_RECVで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 3u;
     down_thread_data->current_record_rest_size = 0u;
@@ -4207,9 +4378,10 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[207] data_size>0,current_record_rest_size=0,check_ssl_record_sendable()return 1 (送信不可),data_begain_offset>0
-    // unit_test[207] end_flag=END_FLAG_OFF
-    // unit_test[207] test data:handle_client_send() return REALSERVER_RECV
+    cout << "[223]------------------------------------------" << endl;
+    // unit_test[223] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
+    // unit_test[223] 且つ終了フラグがOFFの場合
+    // unit_test[223] 戻り値がREALSERVER_RECVで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 3u;
     down_thread_data->current_record_rest_size = 0u;
@@ -4221,10 +4393,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[208] data_size>=76,current_record_rest_size=0,check_ssl_record_sendable() return 0 (送信可能),data_begain_offset=0
-    // unit_test[208] is hello message
-    // unit_test[208] test data:current_record_rest_size == all_length,hello_message_flag == TRUE
-    // unit_test[208] handle_client_send() return CLIENT_CONNECTION_CHECK
+    cout << "[224]------------------------------------------" << endl;
+    // unit_test[224] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
+    // unit_test[224] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 76;
     down_thread_data->current_record_rest_size = 0;
@@ -4245,10 +4416,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[208] data_size>=76,current_record_rest_size=0,check_ssl_record_sendable() return 0 (送信可能),data_begain_offset>0
-    // unit_test[208] is hello message
-    // unit_test[208] test data:current_record_rest_size == all_length,hello_message_flag == TRUE
-    // unit_test[208] handle_client_send() return CLIENT_CONNECTION_CHECK
+    cout << "[225]------------------------------------------" << endl;
+    // unit_test[225] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
+    // unit_test[225] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 86;
     down_thread_data->current_record_rest_size = 0;
@@ -4269,10 +4439,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[209] data_size>=6,current_record_rest_size=0,check_ssl_record_sendable() return 0 (送信可能),data_begain_offset=0
-    // unit_test[209] is not hello message
-    // unit_test[209] test data:current_record_rest_size == all_length,hello_message_flag == FALSE
-    // unit_test[209] handle_client_send() return CLIENT_CONNECTION_CHECK
+    cout << "[226]------------------------------------------" << endl;
+    // unit_test[226] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
+    // unit_test[226] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10;
     down_thread_data->current_record_rest_size = 0;
@@ -4290,10 +4459,9 @@ void handle_client_send_test() {
     delete down_thread_data;
     this->session_thread_data_map.clear();
 
-    // unit_test[209] data_size>=6,current_record_rest_size=0,check_ssl_record_sendable() return 0 (送信可能),data_begain_offset>0
-    // unit_test[209] is not hello message
-    // unit_test[209] test data:current_record_rest_size == all_length,hello_message_flag == FALSE
-    // unit_test[209] handle_client_send() return CLIENT_CONNECTION_CHECK
+    cout << "[227]------------------------------------------" << endl;
+    // unit_test[227] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0の場合
+    // unit_test[227] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     down_thread_data = new session_thread_data_sslid;
     down_thread_data->data_size = 10;
     down_thread_data->current_record_rest_size = 0;
@@ -4314,7 +4482,8 @@ void handle_client_send_test() {
 
 //handle_client_disconnect
 void handle_client_disconnect_test(){
-	//unit_test[210] handle_client_disconnect()メソッドのテスト,up and down threads,正常系で必ずFINALIZEを返す
+    cout << "[228]------------------------------------------" << endl;
+	//unit_test[228] handle_client_disconnect()メソッドのテスト,up and down threads,正常系で必ずFINALIZEを返す
 	boost::thread tdown_for_get_id(down_thread_func);
 	boost::thread_group threads;
     	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_disconnect_test_thread_func,
@@ -4325,7 +4494,8 @@ void handle_client_disconnect_test(){
                                    tdown_for_get_id.get_id()));
     	threads.join_all();
 
-	//unit_test[] one thread,return FINALIZE
+    cout << "[229]------------------------------------------" << endl;
+	//unit_test[229] one thread,return FINALIZE
 	BOOST_CHECK_EQUAL(this->handle_client_disconnect(boost::this_thread::get_id()),FINALIZE);
 }
 void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id){
@@ -4335,21 +4505,24 @@ void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id
 
 //handle_realserver_disconnect
 void handle_realserver_disconnect_test(){
-	//unit_test[211] 正常系で必ずSTOPを返す
+    cout << "[230]------------------------------------------" << endl;
+	//unit_test[230] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_realserver_disconnect(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_select
 void handle_sorryserver_select_test(){
-	//unit_test[212] 正常系で必ずSTOPを返す
+    cout << "[231]------------------------------------------" << endl;
+	//unit_test[231] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_select(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_connect
 void handle_sorryserver_connect_test(){
-	//unit_test[213] 正常系で必ずSTOPを返す
+    cout << "[232]------------------------------------------" << endl;
+	//unit_test[232] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
@@ -4358,20 +4531,23 @@ void handle_sorryserver_connect_test(){
 
 //handle_sorryserver_connection_fail
 void handle_sorryserver_connection_fail_test(){
-	//unit_test[214] 正常系で必ずSTOPを返す
+    cout << "[233]------------------------------------------" << endl;
+	//unit_test[233] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_send
 void handle_sorryserver_send_test(){
-	//unit_test[215] 正常系で必ずSTOPを返す
+    cout << "[234]------------------------------------------" << endl;
+	//unit_test[234] 正常系で必ずSTOPを返す
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_send(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorryserver_recv
 void handle_sorryserver_recv_test(){
-	//unit_test[216] 正常系で必ずSTOPを返す
+    cout << "[235]------------------------------------------" << endl;
+	//unit_test[235] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
@@ -4380,29 +4556,33 @@ void handle_sorryserver_recv_test(){
 
 //handle_response_send_inform
 void handle_response_send_inform_test(){
-	//unit_test[217] 正常系で必ずSTOPを返す
+    cout << "[236]------------------------------------------" << endl;
+	//unit_test[236] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_response_send_inform(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorry_enable
 void handle_sorry_enable_test(){
-	//unit_test[218] 全部の場合,遷移先ステータスを設定する,status = STOP
-	//unit_test[218] test data:NULL
+    cout << "[237]------------------------------------------" << endl;
+	//unit_test[237] 全部の場合,遷移先ステータスを設定する,status = STOP
+	//unit_test[237] test data:NULL
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorry_enable(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorry_disable
 void handle_sorry_disable_test(){
-	//unit_test[219] 正常系で必ずSTOPを返す
+    cout << "[238]------------------------------------------" << endl;
+	//unit_test[238] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorry_disable(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorryserver_disconnect
 void handle_sorryserver_disconnect_test(){
-	//unit_test[220] 正常系で必ずSTOPを返す
+    cout << "[239]------------------------------------------" << endl;
+	//unit_test[239] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_disconnect(boost::this_thread::get_id(),ep), STOP);
 }
@@ -4419,8 +4599,8 @@ void replication_interrupt_test(){
 					stb_putLogFatal, stb_putLogError, stb_putLogWarn, stb_putLogInfo,
 					stb_putLogDebug);
 
-	//unit_test[] add the replication_data to replication_area
-	//unit_test[] the replication_data is add
+    cout << "[240]------------------------------------------" << endl;
+	//unit_test[240] op_codeが「A」の場合、replication_dataをreplication_areaに追加する。
 	time_t last_time_A = time(0);
 	boost::asio::ip::tcp::endpoint real_ep_A;
 	struct sslid_replication_temp_data replication_temp_data_add;
@@ -4437,22 +4617,23 @@ void replication_interrupt_test(){
 	{
 		std::cout<<"bad_cast:::"<<std::endl;
 	}
+	pstub->get_replication_area()=new sslid_replication_data;
 	pstub->register_replication_area_lock(replication_area_lock_stb);
 	pstub->register_replication_area_unlock(replication_area_unlock_stb);
 	pstub->get_temp_list().push_back(replication_temp_data_add);
-	pstub->get_replication_area()[0].valid=0;
+	pstub->get_replication_area()->valid=0;
 
 	boost::thread test_thread1(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
 	sleep(5);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,1);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].last_time,last_time_A);
-	BOOST_CHECK_EQUAL(memcmp(pstub->get_replication_area()[0].session_id,"11111111111111111111111111111111",SSLID_LENGTH),0);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_ip,real_ep_A.address().to_string().c_str());
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_port,real_ep_A.port());
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->valid,1);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->last_time,last_time_A);
+	BOOST_CHECK_EQUAL(memcmp(pstub->get_replication_area()->session_id,"11111111111111111111111111111111",SSLID_LENGTH),0);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->realserver_ip,real_ep_A.address().to_string().c_str());
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->realserver_port,real_ep_A.port());
 	test_thread1.interrupt();
 
-	//unit_test[] update the replication_data in the replication_area
-	//unit_test[] the replication_data is update
+    cout << "[241]------------------------------------------" << endl;
+	//unit_test[241] op_codeが「U」、validが１且つセッションIDが一致の場合、replication_area中の該当データを更新する。
 	time_t last_time_U = time(0);
 	boost::asio::ip::tcp::endpoint real_ep_U;
 	struct sslid_replication_temp_data replication_temp_data_update;
@@ -4461,18 +4642,18 @@ void replication_interrupt_test(){
 	replication_temp_data_update.last_time=last_time_U;
 	replication_temp_data_update.realserver_addr=real_ep_U;
 	pstub->get_temp_list().push_back(replication_temp_data_update);
-	pstub->get_replication_area()[0].valid=1;
-	strcpy(pstub->get_replication_area()[0].session_id,"11111111111111111111111111111111");
+	pstub->get_replication_area()->valid=1;
+	strcpy(pstub->get_replication_area()->session_id,"11111111111111111111111111111111");
 	boost::thread test_thread2(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
 	sleep(5);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,1);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].last_time,last_time_U);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_ip,real_ep_U.address().to_string().c_str());
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].realserver_port,real_ep_U.port());
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->valid,1);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->last_time,last_time_U);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->realserver_ip,real_ep_U.address().to_string().c_str());
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->realserver_port,real_ep_U.port());
 	test_thread2.interrupt();
 
-	//unit_test[] delete the replication_data in the replication_area
-	//unit_test[] the replication_data is delete
+    cout << "[242]------------------------------------------" << endl;
+	//unit_test[242] op_codeが「D」、validが１且つセッションIDが存在する場合、replication_areaから該当データを削除する。
 	time_t last_time_D = time(0);
 	boost::asio::ip::tcp::endpoint real_ep_D;
 	struct sslid_replication_temp_data replication_temp_data_delete;
@@ -4481,11 +4662,11 @@ void replication_interrupt_test(){
 	replication_temp_data_delete.last_time=last_time_D;
 	replication_temp_data_delete.realserver_addr=real_ep_D;
 	pstub->get_temp_list().push_back(replication_temp_data_delete);
-	pstub->get_replication_area()[0].valid=1;
-	strcpy(pstub->get_replication_area()[0].session_id,"11111111111111111111111111111111");
+	pstub->get_replication_area()->valid=1;
+	strcpy(pstub->get_replication_area()->session_id,"11111111111111111111111111111111");
 	boost::thread test_thread3(boost::bind(&protocol_module_sslid_test_class::replication_interrupt,this));
 	sleep(5);
-	BOOST_CHECK_EQUAL(pstub->get_replication_area()[0].valid,0);
+	BOOST_CHECK_EQUAL(pstub->get_replication_area()->valid,0);
 	test_thread3.interrupt();
 	sleep(5);
 	delete this->replication_data_processor;
@@ -4501,14 +4682,15 @@ void put_data_to_sendbuffer_test(){
     int mem_cmp_length;
     char* mem_cmp_buffer;
 
-    // unit_test[221] thread id is not in the map
-    // unit_test[221] test data:put_data_to_sendbuffer() return -1
+    cout << "[243]------------------------------------------" << endl;
+    // unit_test[243] スレッドIDがmapに存在していない場合
+    // unit_test[243] 戻り値が -1で設定する。
     ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(), sendbuffer, datalen);
     BOOST_CHECK_EQUAL(ret, -1);
 
-    // unit_test[222] current_record_rest_size>data_size, data_size<送信バッファサイズ
-    // unit_test[222] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[222] put_data_to_sendbuffer() return 0
+    cout << "[244]------------------------------------------" << endl;
+    // unit_test[244] current_record_rest_size>data_sizeで, 且つdata_size<送信バッファサイズの場合
+    // unit_test[244] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 20u;
@@ -4536,9 +4718,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[223] current_record_rest_size>data_size, data_size=送信バッファサイズ
-    // unit_test[223] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[223] put_data_to_sendbuffer() return 0
+    cout << "[245]------------------------------------------" << endl;
+    // unit_test[245] current_record_rest_size>data_sizeで, 且つdata_size=送信バッファサイズの場合
+    // unit_test[245] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
@@ -4566,9 +4748,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[234] current_record_rest_size=data_size, data_size<送信バッファサイズ
-    // unit_test[234] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[234] put_data_to_sendbuffer() return 0
+    cout << "[246]------------------------------------------" << endl;
+    // unit_test[246] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
+    // unit_test[246] 戻り値が0設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
@@ -4596,9 +4778,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[235] current_record_rest_size=data_size, data_size=送信バッファサイズ
-    // unit_test[235] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[235] put_data_to_sendbuffer() return 0
+    cout << "[247]------------------------------------------" << endl;
+    // unit_test[247] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
+    // unit_test[247] 戻り値が0で設定する
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
@@ -4626,9 +4808,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[236] current_record_rest_size>data_size,data_size＞送信バッファサイズ
-    // unit_test[236] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[236] put_data_to_sendbuffer() 0
+    cout << "[248]------------------------------------------" << endl;
+    // unit_test[248] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[248] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -4656,9 +4838,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[237] current_record_rest_size=data_size,data_size＞送信バッファサイズ
-    // unit_test[237] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[237] put_data_to_sendbuffer() return 0
+    cout << "[249]------------------------------------------" << endl;
+    // unit_test[249] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[249] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -4686,9 +4868,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[238] current_record_rest_size＜data_size, current_record_rest_size<送信バッファサイズ
-    // unit_test[238] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[238] put_data_to_sendbuffer() return 0
+    cout << "[250]------------------------------------------" << endl;
+    // unit_test[250] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
+    // unit_test[250] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = 10u;
@@ -4716,9 +4898,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[239] current_record_rest_size<data_size, current_record_rest_size=送信バッファサイズ
-    // unit_test[239] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[239] put_data_to_sendbuffer() return 0
+    cout << "[251]------------------------------------------" << endl;
+    // unit_test[251] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
+    // unit_test[251] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
@@ -4746,9 +4928,9 @@ void put_data_to_sendbuffer_test(){
     delete[] mem_cmp_buffer;
     this->session_thread_data_map.clear();
 
-    // unit_test[240] current_record_rest_size＜data_size,current_record_rest_size＞送信バッファサイズ
-    // unit_test[240] test data:data_begain_offset,current_record_rest_size,data_size,datalen
-    // unit_test[240] put_data_to_sendbuffer() return 0
+    cout << "[252]------------------------------------------" << endl;
+    // unit_test[252] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
+    // unit_test[252] 戻り値が0で設定する。
     datalen = 0;
     up_thread_data = new session_thread_data_sslid;
     up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
@@ -4779,7 +4961,8 @@ void put_data_to_sendbuffer_test(){
 
 //realserver_selected
 void realserver_selected_test(){
-	//unit_test[241] 正常系で必ずFALSEを返す
+    cout << "[253]------------------------------------------" << endl;
+	//unit_test[253] 正常系で必ずFALSEを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->realserver_selected(ep), false);
 }
@@ -5000,3 +5183,4 @@ void protocol_module_sslid_test_main() {
 	ts->add(BOOST_TEST_CASE( &realserver_selected_test ));
 	framework::master_test_suite().add(ts);
 }
+

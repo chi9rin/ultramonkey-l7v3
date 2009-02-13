@@ -199,7 +199,7 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-L7VS_MODDIR = @l7vs_dir@
+L7VS_MODDIR = @l7vs_moddir@
 MAX_BUFFER_SIZE = @l7vs_max_buffer_size@
 AM_CPPFLAGS = \
 		-g -O2 -Wall -Werror -fPIC -pthread \
@@ -511,8 +511,14 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
 
 
 install:
+	cp ./.libs/libprotomod_cinsert.so ./.libs/protomod_cinsert.so && \
+	cp ./.libs/libprotomod_sslid.so ./.libs/protomod_sslid.so && \
+	cp ./.libs/libprotomod_sessionless.so ./.libs/protomod_sessionless.so && \
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -D 755 -D $(L7VS_MODDIR)
+	$(INSTALL) -m 755 -D \
+		./.libs/protomod_cinsert.so \
+		./.libs/protomod_sslid.so  \
+		./.libs/protomod_sessionless.so $(L7VS_MODDIR)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

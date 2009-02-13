@@ -193,7 +193,7 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-L7VS_MODDIR = @l7vs_dir@
+L7VS_MODDIR = @l7vs_moddir@
 MAX_BUFFER_SIZE = @l7vs_max_buffer_size@
 AM_CPPFLAGS = \
 		-g -O2 -Wall -Werror -fPIC -pthread \
@@ -500,8 +500,15 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
 
 
 install:
+	cp ./.libs/libsched_lc.so ./.libs/sched_lc.so && \
+	cp ./.libs/libsched_rr.so ./.libs/sched_rr.so && \
+	cp ./.libs/libsched_wrr.so ./.libs/sched_wrr.so && \
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -D 755 -D $(L7VS_MODDIR)
+	$(INSTALL) -m 755 -D \
+		./.libs/sched_lc.so \
+		./.libs/sched_rr.so \
+		./.libs/sched_wrr.so \
+		$(L7VS_MODDIR)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

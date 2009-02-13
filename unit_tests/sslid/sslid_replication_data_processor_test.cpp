@@ -233,7 +233,7 @@ public:
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
 		test_data1.op_code = 'A';
 		test_data1.realserver_addr = endpoint;
-		test_data1.last_time = time(0);
+		test_data1.last_time = 1000;
 		this->temp_list.push_back(test_data1);
 		this->temp_list.push_back(test_data1);
 		this->temp_list.push_back(test_data1);
@@ -243,26 +243,276 @@ public:
 
 	// get_from_temp_list test thread
 	void get_from_temp_list_thread2() {
+		boost::asio::ip::tcp::endpoint endpoint;
 		l7vs::sslid_replication_temp_data get_data;
 		this->get_from_temp_list(get_data);
+		BOOST_CHECK_EQUAL(get_data.session_id, "test_id123456789abcdefghijklmnop");
+		BOOST_CHECK_EQUAL(get_data.op_code, 'A');
+		BOOST_CHECK_EQUAL(get_data.realserver_addr, endpoint);
+		BOOST_CHECK_EQUAL(get_data.last_time, 1000);
 	}
 
 	// sslid_replication_data_processor
 	void sslid_replication_data_processor_test(int expecting_maxlist,
 			l7vs::sslid_replication_data* expecting_replication_area,
-			boost::asio::ip::tcp::endpoint expecting_virtual_service_endpoint) {
+			boost::asio::ip::tcp::endpoint expecting_virtual_service_endpoint,
+			char* replication_data_area, int data_area_size, char* header_start_address,
+			char* real_data_start_address) {
 
-		// unit_test[1] member variable initialization test
+		int maxlist_test = 5;
+		boost::asio::ip::tcp::endpoint test_virtual_service_endpoint;
+		test_virtual_service_endpoint.port(999);
+		l7vs::sslid_replication_data_header* first_header = reinterpret_cast<sslid_replication_data_header*>(header_start_address);
+
+    cout << "[1]------------------------------------------" << endl;
+		// unit_test[1] メンバー変数が初期化されるチェックする。
 		BOOST_CHECK_EQUAL(this->maxlist, expecting_maxlist);
 		BOOST_CHECK_EQUAL(this->max_temp_list, expecting_maxlist * 2);
 		BOOST_CHECK_EQUAL(this->temp_list.size(), 0u);
 		BOOST_CHECK_EQUAL(this->replication_area, expecting_replication_area);
+		BOOST_CHECK_EQUAL(this->virtual_service_endpoint, expecting_virtual_service_endpoint);
 		BOOST_CHECK_EQUAL(this->getloglevel, replication_getloglevel);
 		BOOST_CHECK_EQUAL(this->putLogFatal, replication_putLogFatal);
 		BOOST_CHECK_EQUAL(this->putLogError, replication_putLogError);
 		BOOST_CHECK_EQUAL(this->putLogWarn, replication_putLogWarn);
 		BOOST_CHECK_EQUAL(this->putLogInfo, replication_putLogInfo);
 		BOOST_CHECK_EQUAL(this->putLogDebug, replication_putLogDebug);
+
+
+	cout << "[2]------------------------------------------" << endl;
+		// unit_test[2] replication_data_area が NULLの場合, 例外が発生しない。
+		try {
+			sslid_replication_data_processor test_object1(maxlist_test,
+					NULL, SECTION_NUMBER, test_virtual_service_endpoint, replication_ingetloglevel,
+					replication_inputLogFatal, replication_inputLogError,
+					replication_inputLogWarn, replication_inputLogInfo,
+					replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[3]------------------------------------------" << endl;
+		// unit_test[3] maxlist < 0の場合, 例外が発生する。
+		bool exception_occured = false;
+		try {
+			sslid_replication_data_processor test_object(-1,
+					replication_data_area, SECTION_NUMBER, test_virtual_service_endpoint, replication_ingetloglevel,
+					replication_inputLogFatal, replication_inputLogError,
+					replication_inputLogWarn, replication_inputLogInfo,
+					replication_inputLogDebug);
+		} catch (...) {
+			exception_occured = true;
+		}
+		BOOST_CHECK(exception_occured);
+
+	cout << "[4]------------------------------------------" << endl;
+		// unit_test[4] maxlist = 0の場合, 例外が発生しない。
+		try {
+			sslid_replication_data_processor test_object(0,
+					replication_data_area, SECTION_NUMBER, test_virtual_service_endpoint, replication_ingetloglevel,
+					replication_inputLogFatal, replication_inputLogError,
+					replication_inputLogWarn, replication_inputLogInfo,
+					replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[5]------------------------------------------" << endl;
+		// unit_test[5] maxlist が 1　の場合, 例外が発生しない。
+		try {
+			sslid_replication_data_processor test_object(1,
+					replication_data_area, SECTION_NUMBER, test_virtual_service_endpoint, replication_ingetloglevel,
+					replication_inputLogFatal, replication_inputLogError,
+					replication_inputLogWarn, replication_inputLogInfo,
+					replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[6]------------------------------------------" << endl;
+		// unit_test[6] sslid_replication_area_size < 0, 例外が発生する。
+		exception_occured = false;
+		try {
+			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			for(int i = 0; i < 128; i++){
+				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				temp->size = static_cast<size_t>(2 * sizeof(l7vs::sslid_replication_data));
+			}
+			l7vs::sslid_replication_data_processor test_object2(2,
+					replication_data_area, -1, test_virtual_service_endpoint,
+					replication_ingetloglevel, replication_inputLogFatal,
+					replication_inputLogError, replication_inputLogWarn,
+					replication_inputLogInfo, replication_inputLogDebug);
+		} catch (...) {
+			exception_occured = true;
+		}
+		BOOST_CHECK(exception_occured);
+
+	cout << "[7]------------------------------------------" << endl;
+		// unit_test[7] sslid_replication_area_sizeが0の場合, 例外が発生しない。
+		try {
+			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			for(int i = 0; i < 128; i++){
+				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				temp->size = static_cast<size_t>(2 * sizeof(l7vs::sslid_replication_data));
+			}
+			l7vs::sslid_replication_data_processor test_object2(2,
+					replication_data_area, 0, test_virtual_service_endpoint,
+					replication_ingetloglevel, replication_inputLogFatal,
+					replication_inputLogError, replication_inputLogWarn,
+					replication_inputLogInfo, replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[8]------------------------------------------" << endl;
+		// unit_test[8] virtual service が存在して、且つvirtual serviceのデータエリアが実際サイズより小さい場合、
+		// unit_test[8] virtual service対応のreplicationデータヘッダーの情報を再設定する。
+		int max_list_size = 3;
+		std::string virtual_service_ip = "192.168.120.102";
+		memset(replication_data_area, 0, data_area_size);
+		test_virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
+		test_virtual_service_endpoint.port(80);
+		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
+		first_header->virtualserver_port = 80;
+		first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
+		first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
+		l7vs::sslid_replication_data_processor test_object3(
+				max_list_size, replication_data_area,
+				SECTION_NUMBER, test_virtual_service_endpoint,
+				replication_ingetloglevel, replication_inputLogFatal,
+				replication_inputLogError, replication_inputLogWarn,
+				replication_inputLogInfo, replication_inputLogDebug);
+		// the virtual service's size is resetted, check it
+		size_t expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+		BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
+
+	cout << "[9]------------------------------------------" << endl;
+		// unit_test[9] virtual service対応のreplicationデータヘッダーの情報を再設定して、ヘッダーエリアがfullの場合,処理を行わない。
+		try {
+			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			for(int i = 0; i < 128; i++){
+				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				temp->size = sizeof(l7vs::sslid_replication_data);
+			}
+			memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
+			first_header->virtualserver_port = 80;
+			first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
+			first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
+			l7vs::sslid_replication_data_processor test_object4(
+					max_list_size, replication_data_area,
+					SECTION_NUMBER, test_virtual_service_endpoint,
+					replication_ingetloglevel, replication_inputLogFatal,
+					replication_inputLogError, replication_inputLogWarn,
+					replication_inputLogInfo, replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[10]------------------------------------------" << endl;
+		// unit_test[10] virtual service対応のreplicationデータヘッダーの情報を再設定する時, ヘッダーエリアがfullでない場合
+		// unit_test[10] replicationデータヘッダーの情報を変更する。
+		memset(replication_data_area, 0, data_area_size);
+		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
+		first_header->virtualserver_port = 80;
+		first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
+		first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
+		l7vs::sslid_replication_data_processor test_object5(
+				max_list_size, replication_data_area,
+				SECTION_NUMBER, test_virtual_service_endpoint,
+				replication_ingetloglevel, replication_inputLogFatal,
+				replication_inputLogError, replication_inputLogWarn,
+				replication_inputLogInfo, replication_inputLogDebug);
+		// the virtual service information's size is resized, get it
+		expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+		// the virtual service information's offset is resized, get it
+		size_t expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
+		// size check
+		BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
+		// offset check
+		BOOST_CHECK_EQUAL((first_header+1)->offset, expecting_offset);
+
+	cout << "[11]------------------------------------------" << endl;
+		// unit_test[11] virtual service対応のreplicationデータヘッダーが存在しなくて、且つヘッダーエリアがfullでなく、且つ
+		// unit_test[11] replicationデータエリアの領域が足りない場合、処理を行わない。
+		try {
+			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			std::string temp_virtual_service_ip = "255.255.255.255";
+			for(int i = 0; i < 128; i++){
+				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				temp->size = static_cast<size_t>((max_list_size + 1) * sizeof(l7vs::sslid_replication_data));
+				memcpy(temp->virtualserver_ip, temp_virtual_service_ip.c_str(), temp_virtual_service_ip.length());
+				if(i == 127) {
+					temp->size = 0;
+				}
+			}
+			l7vs::sslid_replication_data_processor test_object6(
+					max_list_size, replication_data_area,
+					SECTION_NUMBER, test_virtual_service_endpoint,
+					replication_ingetloglevel, replication_inputLogFatal,
+					replication_inputLogError, replication_inputLogWarn,
+					replication_inputLogInfo, replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[12]------------------------------------------" << endl;
+		// unit_test[12] virtual service対応のreplicationデータヘッダーが存在しなくて、且つreplicationデータエリアの領域が足りる場合、
+		// unit_test[12] ヘッダーエリアに、virtual serviceを追加する。
+		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+		l7vs::sslid_replication_data_processor test_object7(
+				max_list_size, replication_data_area,
+				SECTION_NUMBER, test_virtual_service_endpoint,
+				replication_ingetloglevel, replication_inputLogFatal,
+				replication_inputLogError, replication_inputLogWarn,
+				replication_inputLogInfo, replication_inputLogDebug);
+		expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+		expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address);
+		// session information's size check
+		BOOST_CHECK_EQUAL(first_header->size, expecting_size);
+		// session information's offset check
+		BOOST_CHECK_EQUAL(first_header->offset, expecting_offset);
+
+	cout << "[13]------------------------------------------" << endl;
+		// unit_test[13] virtual serviceが存在しなくて、且つヘッダーエリアがfullの場合,処理を行わない。
+		try {
+			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			std::string temp_virtual_service_ip = "255.255.255.255";
+			for(int i = 0; i < 128; i++){
+				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				temp->size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+				memcpy(temp->virtualserver_ip, temp_virtual_service_ip.c_str(), temp_virtual_service_ip.length());
+			}
+			l7vs::sslid_replication_data_processor test_object8(
+					max_list_size, replication_data_area,
+					SECTION_NUMBER, test_virtual_service_endpoint,
+					replication_ingetloglevel, replication_inputLogFatal,
+					replication_inputLogError, replication_inputLogWarn,
+					replication_inputLogInfo, replication_inputLogDebug);
+		} catch (...) {
+			BOOST_ERROR("exception: sslid_replication_data_processor");
+		}
+
+	cout << "[14]------------------------------------------" << endl;
+		// unit_test[14] virtual serviceのipがipv6で、virtual serviceが存在して、且つ
+		// unit_test[14] virtual service対応のデータ領域が足りない場合、virtual service対応のreplicationデータヘッダーの情報を再設定する。
+		virtual_service_ip = "abcd:21d0:8936:4866:eefe:567d:3a4b:1230";
+		memset(replication_data_area, 0, data_area_size);
+		test_virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
+		test_virtual_service_endpoint.port(80);
+		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
+		first_header->virtualserver_port = 80;
+		first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
+		first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
+		l7vs::sslid_replication_data_processor test_object9(
+				max_list_size, replication_data_area,
+				SECTION_NUMBER, test_virtual_service_endpoint,
+				replication_ingetloglevel, replication_inputLogFatal,
+				replication_inputLogError, replication_inputLogWarn,
+				replication_inputLogInfo, replication_inputLogDebug);
+		// the virtual service's size is resetted, check it
+		expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+		BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
 	}
 
 	// put_into_temp_list_test
@@ -277,7 +527,8 @@ public:
 		l7vs::sslid_replication_temp_data test_data2;
 		l7vs::sslid_replication_temp_data test_data3;
 
-		// unit_test[2] put into temp_list test(put into 1 item)
+    cout << "[15]------------------------------------------" << endl;
+		// unit_test[15] １つのアイテムの場合、temp_listにデータを追加する。
 		test_data1.session_id = session_id1;
 		test_data1.last_time = last_time;
 		test_data1.op_code = 'A';
@@ -295,7 +546,8 @@ public:
 		// realserver_addr check
 		BOOST_CHECK_EQUAL(put_into_data.realserver_addr, test_data1.realserver_addr);
 
-		// unit_test[3] put into temp_list test(put into 2 items)
+    cout << "[16]------------------------------------------" << endl;
+		// unit_test[16] ２つのアイテムの場合、temp_listにデータを追加する。
 		test_data1.session_id = session_id1;
 		test_data1.last_time = last_time;
 		test_data1.op_code = 'U';
@@ -323,7 +575,8 @@ public:
 		BOOST_CHECK_EQUAL(first_put_into_data.realserver_addr, test_data1.realserver_addr);
 		BOOST_CHECK_EQUAL(second_put_into_data.realserver_addr, test_data2.realserver_addr);
 
-		// unit_test[4] put into temp_list test(put into 3 items)
+    cout << "[17]------------------------------------------" << endl;
+		// unit_test[17] ３つのアイテムの場合、temp_listにデータを追加する。
 		test_data1.session_id = session_id1;
 		test_data1.last_time = last_time;
 		test_data1.op_code = 'U';
@@ -361,7 +614,8 @@ public:
 		BOOST_CHECK_EQUAL(second_put_into_data.realserver_addr, test_data2.realserver_addr);
 		BOOST_CHECK_EQUAL(third_put_into_data.realserver_addr, test_data3.realserver_addr);
 
-		// unit_test[5] multi-threads test
+    cout << "[18]------------------------------------------" << endl;
+		// unit_test[18] マルチスレッドの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
 			this->temp_list.clear();
@@ -400,7 +654,8 @@ public:
 			}
 		}
 
-		// unit_test[6] while temp_list size = max_temp_list, test it
+    cout << "[19]------------------------------------------" << endl;
+		// unit_test[19] マルチスレッド　がつ　temp_listのサイズが max_temp_listの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
 			this->temp_list.clear();
@@ -424,7 +679,8 @@ public:
 			BOOST_CHECK_EQUAL(temp.op_code, 'A');
 		}
 
-		// unit_test[7] while temp_list size > max_temp_list, test it
+    cout << "[20]------------------------------------------" << endl;
+		// unit_test[20] ルチスレッド　がつ　temp_list size > max_temp_listの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
 			this->temp_list.clear();
@@ -448,7 +704,8 @@ public:
 			BOOST_CHECK_EQUAL(temp.op_code, 'A');
 		}
 
-		// unit_test[8] while temp_list is full and one thread is waiting, test
+    cout << "[21]------------------------------------------" << endl;
+		// unit_test[21] temp_listがfullで、且１つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
 		try{
 			boost::thread_group thread_group;
 
@@ -469,7 +726,8 @@ public:
 			BOOST_ERROR("exception: put_into_temp_list");
 		}
 
-		// unit_test[9] while temp_list is full and two threads are waiting, test
+    cout << "[22]------------------------------------------" << endl;
+		// unit_test[22] temp_listがfullで、且２つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
 		try{
 			boost::thread_group thread_group;
 
@@ -500,7 +758,8 @@ public:
 			BOOST_ERROR("exception: put_into_temp_list");
 		}
 
-		// unit_test[10] while temp_list is full and 3 threads are waiting, test
+    cout << "[23]------------------------------------------" << endl;
+		// unit_test[23] temp_listがfullで、且３つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
 		try{
 			boost::thread_group thread_group;
 
@@ -551,7 +810,8 @@ public:
 		this->replication_area_lock = lock_function;
 		this->replication_area_unlock = unlock_function;
 
-		// unit_test[11] when temp_list is empty, test it
+    cout << "[24]------------------------------------------" << endl;
+		// unit_test[24] temp_listが空の場合、例外が発生しない。
 		try {
 			this->temp_list.clear();
 			boost::thread test_thread1(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
@@ -564,7 +824,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[12] data add test(when data area has one sslip_replication_data)
+    cout << "[25]------------------------------------------" << endl;
+		// unit_test[25] op_codeが「A」で、且つreplication_areaに１つのデータが存在する場合、新データを追加する。
 		temp_session_id = "temp_id1rtrrrrtttttteeeeeeemmmmp";
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_data.last_time = time(0);
@@ -612,7 +873,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[13] data add test(when data area has two sslip_replication_data,and the first sslip_replication_data's valid flag is unused)
+    cout << "[26]------------------------------------------" << endl;
+		// unit_test[26] op_codeが「A」で、且つreplication_areaに２つのデータが存在して、且つ１つ目データのvalidフラグが０の場合、新のデータを追加する。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_session_id = "temp_id2eeeeeetttteeeeeeemmmmuui";
 		temp_data.last_time = time(0);
@@ -663,7 +925,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[14] data add test(when data area has no sslip_replication_data)
+    cout << "[27]------------------------------------------" << endl;
+		// unit_test[27] op_codeが「A」で、且つreplication_areaにデータが存在しない場合、新のデータを追加する。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
@@ -696,8 +959,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[15] data update test
-		// update the added data
+    cout << "[28]------------------------------------------" << endl;
+		// unit_test[28] op_codeが「U」で、且つセッションIDが存在している場合、該当データを更新する。
 		realserver_addr.address(boost::asio::ip::address::from_string("255.255.255.255"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
@@ -728,7 +991,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[16] data delete test
+    cout << "[29]------------------------------------------" << endl;
+		// unit_test[29] op_codeが「D」で、且つセッションIDが存在している場合、該当データを削除する。
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
 		test_data1.op_code = 'D';
@@ -757,7 +1021,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[17] when op_code is out of 'A','U','D', old data is not changed test
+    cout << "[30]------------------------------------------" << endl;
+		// unit_test[30] op_codeが「A」,「U」,「D」以外の場合、データを変更しない。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(port);
@@ -781,7 +1046,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[18] replication_area_lock function is called test
+    cout << "[31]------------------------------------------" << endl;
+		// unit_test[31] データを追加するの場合、replication_area_lock関数を呼び出す。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
@@ -804,7 +1070,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[19] replication_area_unlock function is called test
+    cout << "[32]------------------------------------------" << endl;
+		// unit_test[32] データを追加するの場合、replication_area_unlock関数を呼び出す。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
@@ -827,7 +1094,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[20] ipv6 test(condition: while data area has no sslip_replication_data and one data will add to to the data area)
+    cout << "[33]------------------------------------------" << endl;
+		// unit_test[33] endpointがipv6で、replicationエリアにデータがなくて、該当ipv6のendpointを追加する。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		realserver_addr.port(80);
@@ -859,7 +1127,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[21] ipv6 test(condition: while update data)
+    cout << "[34]------------------------------------------" << endl;
+		// unit_test[34] op_codeが「U」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを更新する。
 		realserver_addr.address(boost::asio::ip::address::from_string("1:21d0:1:4866:1:1:3a4b:1230"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
@@ -881,7 +1150,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[22] ipv6 test(condition: while delete data)
+    cout << "[35]------------------------------------------" << endl;
+		// unit_test[35] op_codeが「D」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを変更しない、validに０を設定する。
 		realserver_addr.address(boost::asio::ip::address::from_string("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
 		test_data1.op_code = 'D';
 		test_data1.last_time = delete_time;
@@ -912,11 +1182,13 @@ public:
 
 		boost::function<void(void)> register_function = &lock_function;
 
-		// unit_test[23] registered function is NULL test
+    cout << "[36]------------------------------------------" << endl;
+		// unit_test[36] register_replication_area_lock（）関数のパラメータがNULLの場合、replication_area_lockがNULLある。
 		this->register_replication_area_lock(NULL);
 		BOOST_CHECK_EQUAL(this->replication_area_lock.empty(), true);
 
-		// unit_test[24] while registered replication_area_lock function is not NULL test
+    cout << "[37]------------------------------------------" << endl;
+		// unit_test[37] register_replication_area_lock（）関数のパラメータがNULLでない場合、replication_area_lockがパラメータと一致する。
 		this->register_replication_area_lock(register_function);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_lock, lock_function);
@@ -927,12 +1199,14 @@ public:
 
 		boost::function<void(void)> register_function = &unlock_function;
 
-		// unit_test[25] registered function is NULL test
+    cout << "[38]------------------------------------------" << endl;
+		// unit_test[38] register_replication_area_unlock（）関数のパラメータがNULLの場合、replication_area_unlockがNULLある。
 		this->register_replication_area_unlock(NULL);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_unlock.empty(), true);
 
-		// unit_test[26] while registered replication_area_unlock function is not NULL, test
+    cout << "[39]------------------------------------------" << endl;
+		// unit_test[39] register_replication_area_unlock（）関数のパラメータがNULLでない場合、replication_area_unlockがパラメータと一致する。
 		this->register_replication_area_unlock(register_function);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_unlock, unlock_function);
@@ -946,7 +1220,8 @@ public:
 		l7vs::sslid_replication_temp_data get_data;
 		boost::asio::ip::tcp::endpoint endpoint;
 
-		// unit_test[27] when temp_list is empty, test
+    cout << "[40]------------------------------------------" << endl;
+		// unit_test[40] temp_listが空の場合、例外が発生しない。
 		try{
 			this->temp_list.clear();
 			boost::thread test_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list, this, get_data));
@@ -957,7 +1232,8 @@ public:
 		this->put_into_temp_list(test_data1);
 		sleep(1);
 
-		// unit_test[28] muliti-threads test
+    cout << "[41]------------------------------------------" << endl;
+		// unit_test[41] マルチスレッドの場合、temp_listにデータを正常取得する。
 		try {
 			this->temp_list.clear();
 			boost::thread_group thread_group1;
@@ -969,7 +1245,8 @@ public:
 			BOOST_ERROR("exception: get_from_temp_list");
 		}
 
-		// unit_test[29] first element of temp_list is removed test
+    cout << "[42]------------------------------------------" << endl;
+		// unit_test[42] temp_listにデータがある場合、１つ目のデータを削除する。
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
 		test_data1.op_code = 'T';
 		test_data1.realserver_addr = endpoint;
@@ -994,7 +1271,8 @@ public:
 		// last_time check
 		BOOST_CHECK_EQUAL(leave_data.last_time, test_data2.last_time);
 
-		// unit_test[30] get data test(list has one item)
+    cout << "[43]------------------------------------------" << endl;
+		// unit_test[43] temp_listに１つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの内容と一致する。
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
 		this->temp_list.push_back(test_data1);
@@ -1009,7 +1287,8 @@ public:
 		// last_time check
 		BOOST_CHECK_EQUAL(get_data.last_time, test_data1.last_time);
 
-		// unit_test[31] get data test(list has two items, get the item which first put into)
+    cout << "[44]------------------------------------------" << endl;
+		// unit_test[44] temp_listに２つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの１つ目の内容と一致する。
 		test_data1.op_code = 'U';
 		test_data2.op_code = 'D';
 		this->temp_list.clear();
@@ -1030,7 +1309,8 @@ public:
 	// get_replication_area_test
 	void get_replication_area_test(sslid_replication_data* expecting_sslid_replication_data) {
 
-		// unit_test[32] get_replication_area function test
+    cout << "[45]------------------------------------------" << endl;
+		// unit_test[45] get_replication_area（）関数の戻り値はコンストラクタが正常に生成する値と一致する。
 		sslid_replication_data* get_data = this->get_replication_area();
 		BOOST_CHECK_EQUAL(get_data, expecting_sslid_replication_data);
 	}
@@ -1045,7 +1325,6 @@ void sslid_replication_data_processor_test(){
 	char *header_start_address = replication_data_area;
 	char *real_data_start_address = header_start_address + 128*sizeof(struct l7vs::sslid_replication_data_header);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
-	l7vs::sslid_replication_data_header* first_header = (sslid_replication_data_header*)header_start_address;
 
 	memset(replication_data_area, 0, data_area_size);
 
@@ -1056,231 +1335,9 @@ void sslid_replication_data_processor_test(){
 			replication_inputLogError, replication_inputLogWarn,
 			replication_inputLogInfo, replication_inputLogDebug);
 	test_object.sslid_replication_data_processor_test(maxlist_test,
-			(l7vs::sslid_replication_data*) real_data_start_address,
-			virtual_service_endpoint);
-
-	// unit_test[33] while replication_data_area is NULL, exception not occur, test it
-	try {
-		sslid_replication_data_processor test_object1(maxlist_test,
-				NULL, SECTION_NUMBER, virtual_service_endpoint, replication_ingetloglevel,
-				replication_inputLogFatal, replication_inputLogError,
-				replication_inputLogWarn, replication_inputLogInfo,
-				replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[34] while maxlist < 0, exception occur, test it
-	bool exception_occured = false;
-	try {
-		sslid_replication_data_processor test_object(-1,
-				replication_data_area, SECTION_NUMBER, virtual_service_endpoint, replication_ingetloglevel,
-				replication_inputLogFatal, replication_inputLogError,
-				replication_inputLogWarn, replication_inputLogInfo,
-				replication_inputLogDebug);
-	} catch (...) {
-		exception_occured = true;
-	}
-	BOOST_CHECK(exception_occured);
-
-	// unit_test[35] while maxlist = 0, exception not occur, test it
-	try {
-		sslid_replication_data_processor test_object(0,
-				replication_data_area, SECTION_NUMBER, virtual_service_endpoint, replication_ingetloglevel,
-				replication_inputLogFatal, replication_inputLogError,
-				replication_inputLogWarn, replication_inputLogInfo,
-				replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[36] while maxlist = 1, exception not occur, test it
-	try {
-		sslid_replication_data_processor test_object(1,
-				replication_data_area, SECTION_NUMBER, virtual_service_endpoint, replication_ingetloglevel,
-				replication_inputLogFatal, replication_inputLogError,
-				replication_inputLogWarn, replication_inputLogInfo,
-				replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[37] while sslid_replication_area_size < 0, exception occur, test it
-	exception_occured = false;
-	try {
-		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
-		for(int i = 0; i < 128; i++){
-			l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
-			temp->size = static_cast<size_t>(2 * sizeof(l7vs::sslid_replication_data));
-		}
-		l7vs::sslid_replication_data_processor test_object2(2,
-				replication_data_area, -1, virtual_service_endpoint,
-				replication_ingetloglevel, replication_inputLogFatal,
-				replication_inputLogError, replication_inputLogWarn,
-				replication_inputLogInfo, replication_inputLogDebug);
-	} catch (...) {
-		exception_occured = true;
-	}
-	BOOST_CHECK(exception_occured);
-
-	// unit_test[38] while sslid_replication_area_size = 0, exception not occur, test it
-	try {
-		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
-		for(int i = 0; i < 128; i++){
-			l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
-			temp->size = static_cast<size_t>(2 * sizeof(l7vs::sslid_replication_data));
-		}
-		l7vs::sslid_replication_data_processor test_object2(2,
-				replication_data_area, 0, virtual_service_endpoint,
-				replication_ingetloglevel, replication_inputLogFatal,
-				replication_inputLogError, replication_inputLogWarn,
-				replication_inputLogInfo, replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[39] when virtual service data has exist and the virtual service's data area is samller than needed,
-	// unit_test[39] need to reset the virtual service session information, test
-	int max_list_size = 3;
-	std::string virtual_service_ip = "192.168.120.102";
-	memset(replication_data_area, 0, data_area_size);
-	virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
-	virtual_service_endpoint.port(80);
-	memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
-	first_header->virtualserver_port = 80;
-	first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
-	first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
-	l7vs::sslid_replication_data_processor test_object3(
-			max_list_size, replication_data_area,
-			SECTION_NUMBER, virtual_service_endpoint,
-			replication_ingetloglevel, replication_inputLogFatal,
-			replication_inputLogError, replication_inputLogWarn,
-			replication_inputLogInfo, replication_inputLogDebug);
-	// the virtual service's size is resetted, check it
-	size_t expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-	BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
-
-	// unit_test[40] when resize the virtual service session information, if header area is full, nothing to do, test it
-	try {
-		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
-		for(int i = 0; i < 128; i++){
-			l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
-			temp->size = sizeof(l7vs::sslid_replication_data);
-		}
-		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
-		first_header->virtualserver_port = 80;
-		first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
-		first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
-		l7vs::sslid_replication_data_processor test_object4(
-				max_list_size, replication_data_area,
-				SECTION_NUMBER, virtual_service_endpoint,
-				replication_ingetloglevel, replication_inputLogFatal,
-				replication_inputLogError, replication_inputLogWarn,
-				replication_inputLogInfo, replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[41] when resize the virtual service session information, if header area is not full,
-	// unit_test[41] virtual service session information is changed, test it
-	memset(replication_data_area, 0, data_area_size);
-	memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
-	first_header->virtualserver_port = 80;
-	first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
-	first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
-	l7vs::sslid_replication_data_processor test_object5(
-			max_list_size, replication_data_area,
-			SECTION_NUMBER, virtual_service_endpoint,
-			replication_ingetloglevel, replication_inputLogFatal,
-			replication_inputLogError, replication_inputLogWarn,
-			replication_inputLogInfo, replication_inputLogDebug);
-	// the virtual service information's size is resized, get it
-	expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-	// the virtual service information's offset is resized, get it
-	size_t expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
-	// size check
-	BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
-	// offset check
-	BOOST_CHECK_EQUAL((first_header+1)->offset, expecting_offset);
-
-	// unit_test[42] when virtual service data is not exist and header area is not full and the
-	// unit_test[42] sslip replication data area there is no enough sapce to add data, nothing to do, test it
-	try {
-		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
-		std::string temp_virtual_service_ip = "255.255.255.255";
-		for(int i = 0; i < 128; i++){
-			l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
-			temp->size = static_cast<size_t>((max_list_size + 1) * sizeof(l7vs::sslid_replication_data));
-			memcpy(temp->virtualserver_ip, temp_virtual_service_ip.c_str(), temp_virtual_service_ip.length());
-			if(i == 127) {
-				temp->size = 0;
-			}
-		}
-		l7vs::sslid_replication_data_processor test_object6(
-				max_list_size, replication_data_area,
-				SECTION_NUMBER, virtual_service_endpoint,
-				replication_ingetloglevel, replication_inputLogFatal,
-				replication_inputLogError, replication_inputLogWarn,
-				replication_inputLogInfo, replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[43] when virtual service data is not exist and the sslip replication area there is
-	// unit_test[43] enough sapce to add data, add the data to the replication area, test it
-	memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
-	l7vs::sslid_replication_data_processor test_object7(
-			max_list_size, replication_data_area,
-			SECTION_NUMBER, virtual_service_endpoint,
-			replication_ingetloglevel, replication_inputLogFatal,
-			replication_inputLogError, replication_inputLogWarn,
-			replication_inputLogInfo, replication_inputLogDebug);
-	expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-	expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address);
-	// session information's size check
-	BOOST_CHECK_EQUAL(first_header->size, expecting_size);
-	// session information's offset check
-	BOOST_CHECK_EQUAL(first_header->offset, expecting_offset);
-
-	// unit_test[44] when virtual service data is not exist and the sslip replication header area
-	// unit_test[44] is full, nothing to do, test it
-	try {
-		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
-		std::string temp_virtual_service_ip = "255.255.255.255";
-		for(int i = 0; i < 128; i++){
-			l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
-			temp->size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-			memcpy(temp->virtualserver_ip, temp_virtual_service_ip.c_str(), temp_virtual_service_ip.length());
-		}
-		l7vs::sslid_replication_data_processor test_object8(
-				max_list_size, replication_data_area,
-				SECTION_NUMBER, virtual_service_endpoint,
-				replication_ingetloglevel, replication_inputLogFatal,
-				replication_inputLogError, replication_inputLogWarn,
-				replication_inputLogInfo, replication_inputLogDebug);
-	} catch (...) {
-		BOOST_ERROR("exception: sslid_replication_data_processor");
-	}
-
-	// unit_test[45] while virtual service ip is ipv6, test(condition: virtual service data has exist and
-	// unit_test[45] the virtual service's data area is samller than needed, need to reset the virtual service session information)
-	virtual_service_ip = "abcd:21d0:8936:4866:eefe:567d:3a4b:1230";
-	memset(replication_data_area, 0, data_area_size);
-	virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
-	virtual_service_endpoint.port(80);
-	memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
-	first_header->virtualserver_port = 80;
-	first_header->size = static_cast<size_t>((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
-	first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
-	l7vs::sslid_replication_data_processor test_object9(
-			max_list_size, replication_data_area,
-			SECTION_NUMBER, virtual_service_endpoint,
-			replication_ingetloglevel, replication_inputLogFatal,
-			replication_inputLogError, replication_inputLogWarn,
-			replication_inputLogInfo, replication_inputLogDebug);
-	// the virtual service's size is resetted, check it
-	expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
-	BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
+			reinterpret_cast<l7vs::sslid_replication_data*>(real_data_start_address),
+			virtual_service_endpoint, replication_data_area, data_area_size,
+			header_start_address, real_data_start_address);
 
 	delete []replication_data_area;
 }

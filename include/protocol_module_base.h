@@ -199,7 +199,7 @@ public:
 									const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer,
 									const size_t recvlen ) = 0;
 
-	//! called from after realserver select.use in upstream thread. 
+	//! called from after realserver select.use in upstream thread.
 	//! @param[in]	upstream thread id
 	//! @param[out]	realserver TCP endpoint
 	//! @return		session use EVENT mode.
@@ -349,7 +349,7 @@ public:
 									const boost::thread::id thread_id ) = 0;
 
 	//! call from sorry mode event. use upstream thread and downstream thread
-	//! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )	
+	//! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )
 	//! @return 	session use EVENT mode
 	virtual	EVENT_TAG	handle_sorry_enable( const boost::thread::id thread_id ) = 0;
 
@@ -369,7 +369,7 @@ public:
 	//! call from sorry server disconnect. use upstraem thread and downstream thread
 	//! @param[in]	upstream and downstream thread id( check! one thread one event )
 	//! @param[in]	disconnect sorryserver endpoint
-	//! @return		session use EVENT mode	
+	//! @return		session use EVENT mode
 	virtual	EVENT_TAG	handle_sorryserver_disconnect(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::tcp::endpoint& sorry_endpoint ) = 0;
@@ -391,6 +391,27 @@ public:
 									const size_t data_size,
 									std::string& data_dump)
 	{
+	    if (data == NULL || data_size == 0)
+	    {
+	        return;
+	    }
+
+		boost::format formatter("%02X");
+		for (size_t i = 0; i < data_size; i++)
+		{
+			if (i % 32 == 0)
+			{
+				data_dump += "\n";
+			}
+			else if (i != 0 && i % 2 == 0)
+			{
+				data_dump += " ";
+			}
+
+			formatter % static_cast<unsigned short>(static_cast<unsigned char>(data[i]));
+			data_dump += formatter.str();
+		}
+		data_dump += "\n";
 	}
 };
 

@@ -62,13 +62,11 @@ sslid_replication_data_processor::sslid_replication_data_processor(
         }
         /*------DEBUG LOG END------*/
 
-        // waiting for jp response??????????????????
-        throw std::logic_error("invalid parameter value.");
+        throw std::logic_error("Invalid parameter value.");
     }
 
     if (sslid_replication_area_begain == NULL)
     {
-        // waiting for jp response????????????????????
         // replication area is null
         putLogError(37000, "Replication area is null.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
