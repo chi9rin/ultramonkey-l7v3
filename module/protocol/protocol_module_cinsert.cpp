@@ -780,7 +780,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 
 		check_result.flag = true;
 
-		if( args.empty() == true )
+		if( args.empty() == false )
 		{
 
 			check_result.flag = false;
