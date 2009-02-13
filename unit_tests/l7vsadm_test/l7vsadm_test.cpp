@@ -3260,7 +3260,7 @@ void	l7vsadm_test::file_lock_class_test(){
 	{
 		l7vs::error_code	err;
 	
-		// unit_test[1] file_lock_class normal case 1 (first lock) return value check
+		// unit_test[1] file_lock_class normal case 1 (first lock) error check
 		l7vs::l7vsadm::file_lock	lock( file_path, err );
 		BOOST_CHECK( !err );	
 	
@@ -3269,7 +3269,7 @@ void	l7vsadm_test::file_lock_class_test(){
 		BOOST_CHECK( ret );
 	
 		l7vs::error_code	err2;
-		// unit_test[1] file_lock_class normal case 2 (second lock) return value check
+		// unit_test[1] file_lock_class normal case 2 (second lock) error check
 		l7vs::l7vsadm::file_lock	lock2( file_path, err2 );
 		BOOST_CHECK( !err );	
 	
@@ -3281,7 +3281,7 @@ void	l7vsadm_test::file_lock_class_test(){
 	{
 		l7vs::error_code	err;
 	
-		// unit_test[1] file_lock_class normal case 3 (relock) return value check
+		// unit_test[1] file_lock_class normal case 3 (relock) error check
 		l7vs::l7vsadm::file_lock	lock( file_path, err );
 		BOOST_CHECK( !err );	
 	
