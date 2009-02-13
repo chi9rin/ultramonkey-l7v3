@@ -352,9 +352,13 @@ void	session_thread_data_disp()
 
 	int	i = 0;
 	int	j = 0;
+	int	k = 0;
+	int	l = 0;
 
 	t_session_thread_data_map_itr		thread_data_itr;
 	t_recive_data_map_itr				recive_data_itr;
+	t_send_status_list_itr				send_status_itr;
+	t_edit_data_list_itr				edit_data_itr;
 
 std::cout	<< "session_thread_data_disp" << std::endl;
 
@@ -417,7 +421,65 @@ std::cout	<< "session_thread_data_disp" << std::endl;
 						<< (void*)recive_data_itr->second.recive_buffer_1 << "]" << std::endl;
 			std::cout	<< "recive_buffer_2         = ["
 						<< (void*)recive_data_itr->second.recive_buffer_2 << "]" << std::endl;
+			std::cout	<< "send_status_list entry = ["
+						<< recive_data_itr->second.send_status_list.size() << "]" << std::endl;
 			std::cout << std::endl;
+
+			send_status_itr = recive_data_itr->second.send_status_list.begin();
+	
+			k = 0;
+	
+			while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+			{
+				k++;
+
+				std::cout	<< "< send_status[" << k << "] >" << std::endl;
+				std::cout	<< "status  = ["
+							<< send_status_itr->status << "]" << std::endl;
+				std::cout	<< "send_end_size = ["
+							<< send_status_itr->send_end_size << "]" << std::endl;
+				std::cout	<< "send_rest_size = ["
+							<< send_status_itr->send_rest_size << "]" << std::endl;
+				std::cout	<< "send_possible_size = ["
+							<< send_status_itr->send_possible_size << "]" << std::endl;
+				std::cout	<< "send_offset = ["
+							<< send_status_itr->send_offset << "]" << std::endl;
+				std::cout	<< "unsend_size = ["
+							<< send_status_itr->unsend_size << "]" << std::endl;
+				std::cout	<< "edit_division = ["
+							<< send_status_itr->edit_division << "]" << std::endl;
+				std::cout	<< "send_endpoint = ["
+							<< send_status_itr->send_endpoint << "]" << std::endl;
+				std::cout	<< "edit_data_list entry = ["
+							<< send_status_itr->edit_data_list.size() << "]" << std::endl;
+				std::cout << std::endl;
+
+				edit_data_itr = send_status_itr->edit_data_list.begin();
+		
+				l = 0;
+		
+				while( edit_data_itr != send_status_itr->edit_data_list.end() )
+				{
+					l++;
+	
+					std::cout	<< "< edit_data[" << l << "] >" << std::endl;
+					std::cout	<< "data  = ["
+								<< edit_data_itr->data << "]" << std::endl;
+					std::cout	<< "data_size  = ["
+								<< edit_data_itr->data_size << "]" << std::endl;
+					std::cout	<< "insert_position  = ["
+								<< edit_data_itr->insert_position << "]" << std::endl;
+					std::cout	<< "replace_size  = ["
+								<< edit_data_itr->replace_size << "]" << std::endl;
+					std::cout << std::endl;
+
+					edit_data_itr++;
+
+				}
+
+				send_status_itr++;
+
+			}
 
 			recive_data_itr++;
 
@@ -430,6 +492,56 @@ std::cout	<< "session_thread_data_disp" << std::endl;
 	std::cout << std::endl;
 
 }
+
+void	session_thread_data_send(	boost::thread::id thread_id,
+									boost::asio::ip::tcp::endpoint endpoint)
+{
+
+	t_session_thread_data_map_itr		thread_data_itr;
+	t_recive_data_map_itr				recive_data_itr;
+	t_send_status_list_itr				send_status_itr;
+
+	thread_data_itr = session_thread_data_map.find( thread_id );
+
+	if( thread_data_itr != session_thread_data_map.end() )
+	{
+
+		recive_data_itr = thread_data_itr->second->recive_data_map.find(endpoint);
+
+		if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+		{
+
+			send_status_itr = recive_data_itr->second.send_status_list.begin();
+	
+			while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+			{
+
+				if( send_status_itr->status == SEND_OK )
+				{
+
+					if( send_status_itr->send_rest_size > 0 )
+					{
+						send_status_itr->status = SEND_CONTINUE;
+						send_status_itr->send_end_size = send_status_itr->send_possible_size;
+						send_status_itr->send_possible_size = 0;
+						send_status_itr->edit_division = EDIT_DIVISION_NO_EDIT;
+					}
+					else
+					{
+						send_status_itr->status = SEND_END;
+					}
+				}
+
+				send_status_itr++;
+
+			}
+
+		}
+
+	}
+
+}
+
 
 void session_thread_data_erase()
 {
@@ -1336,7 +1448,7 @@ void	handle_session_finalize_test_thread( int thread_no, bool* ret )
 // 	std::cout << "client_endpoint_tcp = [" << client_endpoint_tcp << "]" << std::endl;
 // 	std::cout << "client_endpoint_udp = [" << client_endpoint_udp << "]" << std::endl;
 // 	std::cout << std::endl;
-// 
+//
 // 	up_thread_data_itr = session_thread_data_map.find( up_thread.get_id());
 // 
 // 	if( up_thread_data_itr == session_thread_data_map.end()){ return; }
@@ -2294,6 +2406,122 @@ void set_parameter_test()
 	BOOST_CHECK( reschedule == 0 );
 	BOOST_CHECK( strlen(sorry_uri.data()) == 0 );
 
+}
+
+void add_parameter_test()
+{
+
+	check_message_result check_result;
+	std::vector<std::string> args;
+	
+
+//-------------------------------------------------------------
+	args.push_back("-C");
+	args.push_back("ABCDEfghij123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567");
+	args.push_back("-E");
+	args.push_back("2147483647");	//INT_MAX
+	args.push_back("-F");
+	args.push_back("-R");
+	args.push_back("-S");
+	args.push_back("/Aa0$-_.+!*'(),%00%0a%0A%A0%Aa%AA/zZ9$-_.+!*'(),%99%9f%9F%F9%Ff%FF/Aa0$-_.+!*'(),%00%0a%0A%A0%Aa%AA/zZ9$-_.+!*'(),%99%9f%9F%F90");
+
+	check_result = add_parameter(args);
+
+	std::cout	<< std::endl;
+	std::cout	<< "<add_parameter_01>" << std::endl;
+	std::cout	<< "check_result.flag = [" << check_result.flag << "]" << std::endl;
+	std::cout	<< "check_result.message = [" << check_result.message << "]" << std::endl;
+
+	BOOST_CHECK( check_result.flag == false );
+	BOOST_CHECK( check_result.message == "Cannot add option." );
+//-------------------------------------------------------------
+	args.erase( args.begin(), args.end());
+
+	check_result = add_parameter(args);
+
+	std::cout	<< std::endl;
+	std::cout	<< "<add_parameter_02>" << std::endl;
+	std::cout	<< "check_result.flag = [" << check_result.flag << "]" << std::endl;
+	std::cout	<< "check_result.message = [" << check_result.message << "]" << std::endl;
+
+	BOOST_CHECK( check_result.flag == true );
+	BOOST_CHECK( check_result.message == "" );
+}
+
+void	handle_client_recv_test()
+{
+
+	boost::array< char, MAX_BUFFER_SIZE > recvbuffer;
+	size_t recvlen;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+
+	protocol_module_cinsert::EVENT_TAG	status;
+
+	std::string data;
+
+	data	=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data	+=	"CONTENT-LENGTH:100\r\n\r\n";
+	data	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+
+	data	+=	"GET /abc/def/ HTTP/1.0\r\n";
+	data	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data	+=	"X-Forwarded-For: 20.20.20.20\r\n\r\n";
+
+	data	+=	"HEAD /abc/def/ HTTP/1.0\r\n";
+	data	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data	+=	"CONTENT-LENGTH:200\r\n\r\n";
+	data	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+	data	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	session_thread_data_set();
+
+	thread_data_itr = session_thread_data_map.begin();
+
+	while( thread_data_itr != session_thread_data_map.end())
+	{
+		if( thread_data_itr->second->thread_division == THREAD_DIVISION_UP_STREAM )
+		{
+			break;
+		}
+		thread_data_itr++;
+	}
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	session_thread_data_disp();
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+	session_thread_data_disp();
+
+	data	=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data	+=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data	+=	"abcdefghij1234567890";
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	session_thread_data_disp();
 
 }
 
@@ -2711,7 +2939,27 @@ void	set_parameter_test()
 	BOOST_MESSAGE( "----- set_parameter test end -----" );
 
 }
+void	add_parameter_test()
+{
 
+	protocol_module_cinsert_test	protocol_module_cinsert_test_1;
+
+	BOOST_MESSAGE( "----- add_parameter test start -----" );
+	protocol_module_cinsert_test_1.add_parameter_test();
+	BOOST_MESSAGE( "----- add_parameter test end -----" );
+
+}
+
+void	handle_client_recv_test()
+{
+
+	protocol_module_cinsert_test	protocol_module_cinsert_test_1;
+
+	BOOST_MESSAGE( "----- handle_client_recv test start -----" );
+	protocol_module_cinsert_test_1.handle_client_recv_test();
+	BOOST_MESSAGE( "----- handle_client_recv test end -----" );
+
+}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -2722,11 +2970,14 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 // 	ts->add( BOOST_TEST_CASE( &is_tcp_test ) );
 // 	ts->add( BOOST_TEST_CASE( &is_udp_test ) );
 // 	ts->add( BOOST_TEST_CASE( &is_use_sorry_test ) );
+// 	ts->add( BOOST_TEST_CASE( &check_parameter_test ) );
+// 	ts->add( BOOST_TEST_CASE( &set_parameter_test ) );
+// 	ts->add( BOOST_TEST_CASE( &add_parameter_test ) );
 
 //	ts->add( BOOST_TEST_CASE( &handle_session_initialize_test ) );
 //	ts->add( BOOST_TEST_CASE( &handle_session_finalize_test ) );
-	ts->add( BOOST_TEST_CASE( &check_parameter_test ) );
-	ts->add( BOOST_TEST_CASE( &set_parameter_test ) );
+
+	ts->add( BOOST_TEST_CASE( &handle_client_recv_test ) );
 
 	framework::master_test_suite().add( ts );
 
