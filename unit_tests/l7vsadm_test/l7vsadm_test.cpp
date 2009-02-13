@@ -116,7 +116,7 @@ public:
 	bool	execute_wp( int argc, char* argv[] )
 	{ return execute( argc, argv ); }
 
-
+	static void file_lock_class_test();
 
 };
 
@@ -3220,15 +3220,8 @@ void	execute_test(){
 
 		test_request = l7vs::l7vsadm_request();
 		test_response = l7vs::l7vsd_response();
-//		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
-// 		boost::thread	thd1( &server_thread );
-// 		{
-// 			boost::mutex::scoped_lock	lock( accept_mutex );
-// 			accept_condition.wait( lock );
-// 		}
 		bool ret = adm.execute_wp( argc, argv );
-// 		thd1.join();
 
 		// unit_test[1] execute normal case 17 (help operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
@@ -3236,7 +3229,68 @@ void	execute_test(){
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_HELP );
 	}
 
+	// execute error case 1 (invalid operation)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-Z"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+
+		bool ret = adm.execute_wp( argc, argv );
+
+		// unit_test[1] execute 1 (invalid operation) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
 	BOOST_MESSAGE( "----- execute_test end -----" );
+
+}
+
+void	l7vsadm_test::file_lock_class_test(){
+	BOOST_MESSAGE( "----- file_lock_class_test start -----" );
+
+	char file_path[256];
+	memset(file_path, 0, sizeof(file_path));
+	readlink("/proc/self/exe", file_path, sizeof(file_path));
+
+	{
+		l7vs::error_code	err;
+	
+		// unit_test[1] file_lock_class normal case 1 (first lock) return value check
+		l7vs::l7vsadm::file_lock	lock( file_path, err );
+		BOOST_CHECK( !err );	
+	
+		// unit_test[1] file_lock_class normal case 1 (first lock) locable check
+		bool ret = lock.try_lock();
+		BOOST_CHECK( ret );
+	
+		l7vs::error_code	err2;
+		// unit_test[1] file_lock_class normal case 2 (second lock) return value check
+		l7vs::l7vsadm::file_lock	lock2( file_path, err2 );
+		BOOST_CHECK( !err );	
+	
+		// unit_test[1] file_lock_class normal case 2 (second lock) unlocable check
+		ret = lock2.try_lock();
+		BOOST_CHECK( !ret );
+	}
+
+	{
+		l7vs::error_code	err;
+	
+		// unit_test[1] file_lock_class normal case 3 (relock) return value check
+		l7vs::l7vsadm::file_lock	lock( file_path, err );
+		BOOST_CHECK( !err );	
+	
+		// unit_test[1] file_lock_class normal case 3 (relock) locable check
+		bool ret = lock.try_lock();
+		BOOST_CHECK( ret );
+	}
+
+	BOOST_MESSAGE( "----- file_lock_class_test end -----" );
 
 }
 
@@ -3282,6 +3336,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	ts->add( BOOST_TEST_CASE( &execute_test ) );
 
+	ts->add( BOOST_TEST_CASE( &l7vsadm_test::file_lock_class_test ) );
 
 	framework::master_test_suite().add( ts );
 
