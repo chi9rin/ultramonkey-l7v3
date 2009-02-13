@@ -208,7 +208,7 @@ namespace l7vs{
 			//! up and down thread state update
 			//! @param[in]		thread_flag is regist or unregist bitset
 			//! @param[in]		regist is regist or unregist flag
-			void thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist);
+			virtual void thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist);
 
 			//! up thread raise module event of handle_accept
 			//! @param[in]		process_type is prosecess type
@@ -283,7 +283,7 @@ namespace l7vs{
 			//! @param[in]		process_type is prosecess type
 			virtual void up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type);
 			//! up thread close all socket
-			void up_thread_all_socket_close(void);
+			virtual void up_thread_all_socket_close(void);
 
 			//! down thread receive from realserver and raise module event of handle_realserver_recv
 			//! @param[in]		process_type is prosecess type
@@ -331,7 +331,7 @@ namespace l7vs{
 			//! @param[in]		process_type is prosecess type
 			virtual void down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type);
 			//! down thread close all socket
-			void down_thread_all_socket_close(void);
+			virtual void down_thread_all_socket_close(void);
 
 	};// class tcp_session
 }// namespace l7vs

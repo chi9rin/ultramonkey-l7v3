@@ -41,6 +41,8 @@ namespace l7vs{
 			list_element get_socket();
 			//! check empty list
 			bool empty();
+			//! clear list
+			void clear();
 			
 		protected:
 			//! realserver list
