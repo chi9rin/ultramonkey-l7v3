@@ -115,12 +115,6 @@
 	#define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY	"sslproxy_conn_rotation_timing_value"
 #endif
 
-//! for transration between string and LOGGER_CATEGORY_TAG
-//log4cxx::LevelPtr l7vs::LoggerImpl::levelTable[LOGGER_LEVEL_NUM];
-
-//! static Logger instance pointer initialized by 0.
-l7vs::LoggerImpl* l7vs::LoggerImpl::instance = 0;
-
 /*!
  * returns single instance.
  *
@@ -128,10 +122,8 @@ l7vs::LoggerImpl* l7vs::LoggerImpl::instance = 0;
  * @return  instance
  */
 l7vs::LoggerImpl& l7vs::LoggerImpl::getInstance(){
-	if (!instance) {
-		instance = new l7vs::LoggerImpl;
-	}
-	return *instance;
+	static	LoggerImpl	instance;
+	return instance;
 }
 
 l7vs::LoggerImpl::LoggerImpl()

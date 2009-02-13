@@ -491,8 +491,6 @@ protected:
 
 	//! destructor.
 	virtual ~LoggerImpl() {}
-	//! static Logger instance
-	static LoggerImpl* instance;
 	//! initialized flag
 	bool initialized;
 	//! hostname
