@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS	= foreign
-L7VS_MODDIR		= @l7vs_dir@
+L7VS_MODDIR		= @l7vs_moddir@
 MAX_BUFFER_SIZE	= @l7vs_max_buffer_size@
 AM_CPPFLAGS		= \
 		-g -O2 -Wall -Werror -fPIC -pthread \
