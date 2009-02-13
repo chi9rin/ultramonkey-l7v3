@@ -607,12 +607,10 @@ void l7vs::snmpbridge::handle_accept(const boost::system::error_code& error){
 void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, size_t bytes_transferred){
 	Logger logger( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 1, "handle_receive", __FILE__, __LINE__ );
 
-	size_t len = 0;
 	struct l7ag_message_header* message_header = NULL;
 	struct l7ag_payload_header* payload_header = NULL;
 
-	len = recv_buffer.size();
-	if ( len < sizeof( l7ag_message_header ) ){
+	if ( bytes_transferred < sizeof( l7ag_message_header ) ){
 		snmp_socket.async_receive( boost::asio::buffer( recv_buffer, READBUF_SIZE ), 
 								boost::bind(&snmpbridge::handle_receive,
 								this,
