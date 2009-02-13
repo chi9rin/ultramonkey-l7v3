@@ -19,8 +19,9 @@ LIBS		=	-lboost_system-gcc41-mt \
 LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
+			../../../module/protocol/http_protocol_module_base.cpp \
 			../../../module/protocol/protocol_module_cinsert.cpp \
-			protocol_module_cinsert_test.cpp
+			protocol_module_cinsert_test_1.cpp
 
 
 .SUFFIX:	.cpp .o
