@@ -31,5 +31,11 @@ libprotomod_sessionless_la_SOURCES	=	protocol_module_base.h \
 libprotomod_sessionless_la_LIBADD	= -lrt -lboost_thread
 
 install:
+	cp ./.libs/libprotomod_cinsert.so ./.libs/protomod_cinsert.so && \
+	cp ./.libs/libprotomod_sslid.so ./.libs/protomod_sslid.so && \
+	cp ./.libs/libprotomod_sessionless.so ./.libs/protomod_sessionless.so && \
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -D 755 -D $(L7VS_MODDIR)
+	$(INSTALL) -m 755 -D \
+		./.libs/protomod_cinsert.so \
+		./.libs/protomod_sslid.so  \
+		./.libs/protomod_sessionless.so $(L7VS_MODDIR)

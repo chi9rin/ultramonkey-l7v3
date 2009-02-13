@@ -28,5 +28,12 @@ libsched_wrr_la_SOURCES	=	schedule_module_base.h \
 libsched_wrr_la_LIBADD	=	-lrt -lboost_thread
 
 install:
+	cp ./.libs/libsched_lc.so ./.libs/sched_lc.so && \
+	cp ./.libs/libsched_rr.so ./.libs/sched_rr.so && \
+	cp ./.libs/libsched_wrr.so ./.libs/sched_wrr.so && \
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -D 755 -D $(L7VS_MODDIR)
+	$(INSTALL) -m 755 -D \
+		./.libs/sched_lc.so \
+		./.libs/sched_rr.so \
+		./.libs/sched_wrr.so \
+		$(L7VS_MODDIR)
