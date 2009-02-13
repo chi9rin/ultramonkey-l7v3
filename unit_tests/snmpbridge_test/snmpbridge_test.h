@@ -8,7 +8,7 @@ class l7vs::snmpbridge;
 
 
 l7vs::l7vsd::l7vsd(){
-	rep = replication_ptr( new replication( dispatcher ) );
+	rep = replication_ptr( new replication() );
 	bridge = snmpbridge_ptr( new snmpbridge( *this, dispatcher ) );
 	vslist.clear();
 }

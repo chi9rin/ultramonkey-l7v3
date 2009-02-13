@@ -523,7 +523,7 @@ void send_mibcollection_snmpbridge_test(){
 	int ret = 0;
 #if 1
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::error_code err;
 	l7vs::virtualservice_element element;
 	boost::asio::ip::tcp::endpoint vs_endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 10001);

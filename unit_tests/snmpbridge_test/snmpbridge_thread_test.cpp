@@ -290,7 +290,7 @@ void	serverthread(){
 	ret = test1.initialize();
 #if 1
 	//vsをひとつだけ追加しておく
-	l7vs::replication rep( io_service1 );
+	l7vs::replication rep;
 	l7vs::error_code err;
 	l7vs::virtualservice_element element;
 	boost::asio::ip::tcp::endpoint vs_endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 10001);
