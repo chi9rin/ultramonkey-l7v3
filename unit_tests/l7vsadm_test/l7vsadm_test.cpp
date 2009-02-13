@@ -121,9 +121,9 @@ public:
 };
 
 //variables
-boost::mutex		accept_mutex;
-boost::condition	accept_condition;
-//volatile	bool	accept_ready;
+//boost::mutex		accept_mutex;
+//boost::condition	accept_condition;
+volatile	bool	accept_ready;
 
 l7vs::l7vsadm_request		test_request;
 l7vs::l7vsd_response		test_response;
@@ -142,8 +142,8 @@ void	server_thread(){
 	stream_protocol::socket	s( server_io );
 
 	// ready to accept
-	//accept_ready = true;
-	accept_condition.notify_all();
+	accept_ready = true;
+	//accept_condition.notify_all();
 	//std::cout << "accept_ready" << std::endl;
 
 	acc.accept( s );
@@ -2540,12 +2540,22 @@ void	execute_test(){
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
 		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		typedef std::list< l7vs::virtualservice_element >	vse_list_type;
+		for(	vse_list_type::iterator itr = test_response.virtualservice_status_list.begin();
+				itr != test_response.virtualservice_status_list.end();
+				++itr ){
+			itr->protocol_module_name = "protomod";
+			itr->schedule_module_name = "sched";
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+		}
 
 		boost::thread	thd1( &server_thread );
 		{
 			// accept ready wait
-			boost::mutex::scoped_lock	lock( accept_mutex );
-			accept_condition.wait( lock );
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
 		}
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
@@ -2559,7 +2569,600 @@ void	execute_test(){
 	}
 
 
-	// execute normal case 1
+	// execute normal case 2 (list operation)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-l"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		typedef std::list< l7vs::virtualservice_element >	vse_list_type;
+		for(	vse_list_type::iterator itr = test_response.virtualservice_status_list.begin();
+				itr != test_response.virtualservice_status_list.end();
+				++itr ){
+			itr->protocol_module_name = "protomod";
+			itr->schedule_module_name = "sched";
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+		}
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 2 (list operation) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 2 (list operation) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST );
+		// unit_test[1] execute normal case 2 (list operation) response value check
+		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
+	}
+
+	// execute normal case 3 (list operation numeric)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 3;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-l",
+							"-n"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		typedef std::list< l7vs::virtualservice_element >	vse_list_type;
+		for(	vse_list_type::iterator itr = test_response.virtualservice_status_list.begin();
+				itr != test_response.virtualservice_status_list.end();
+				++itr ){
+			itr->protocol_module_name = "protomod";
+			itr->schedule_module_name = "sched";
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+		}
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 3 (list operation numeric) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 3 (list operation numeric) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST );
+		// unit_test[1] execute normal case 3 (list operation numeric) response value check
+		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
+
+	}
+
+	// execute normal case 4 (list operation key)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-K"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		typedef std::list< l7vs::virtualservice_element >	vse_list_type;
+		for(	vse_list_type::iterator itr = test_response.virtualservice_status_list.begin();
+				itr != test_response.virtualservice_status_list.end();
+				++itr ){
+			itr->protocol_module_name = "protomod";
+			itr->schedule_module_name = "sched";
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+		}
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 4 (list operation key) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 4 (list operation key) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST_KEY );
+		// unit_test[1] execute normal case 4 (list operation key) response value check
+		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
+	}
+
+	// execute normal case 5 (list operation verbose)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-V"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		test_response.virtualservice_status_list.push_back( l7vs::virtualservice_element() );
+		typedef std::list< l7vs::virtualservice_element >	vse_list_type;
+		for(	vse_list_type::iterator itr = test_response.virtualservice_status_list.begin();
+				itr != test_response.virtualservice_status_list.end();
+				++itr ){
+			itr->protocol_module_name = "protomod";
+			itr->schedule_module_name = "sched";
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+			itr->realserver_vector.push_back( l7vs::realserver_element() );
+		}
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 5 (list operation verbose) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 5 (list operation verbose) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST_VERBOSE );
+		// unit_test[1] execute normal case 5 (list operation verbose) response value check
+		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
+	}
+
+	// execute normal case 6 (vs operation add-vs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 17;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-A",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-s",
+							"lc",
+							"-u",
+							"50",
+							"-b",
+							"10.144.169.86:8080",
+							"-Q",
+							"100M",
+							"-q",
+							"200M"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 6 (vs operation add-vs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 6 (vs operation add-vs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_ADD_VS );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) protocol module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) protocol module arg check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) schedule module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.schedule_module_name, "lc" );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) sorry_maxconnection check
+		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_maxconnection, 50 );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) sorry_endpoint check
+		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_endpoint, sorry_ep );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) qos_upstream check
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, 104857600ULL );
+		// unit_test[1] execute normal case 6 (vs operation add-vs) qos_downstream check
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, 209715200ULL );
+	}
+
+	// execute normal case 7 (vs operation edit-vs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 19;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-E",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-s",
+							"rr",
+							"-u",
+							"50",
+							"-b",
+							"10.144.169.86:8080",
+							"-f",
+							"1",
+							"-Q",
+							"100M",
+							"-q",
+							"200M"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_EDIT_VS );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) protocol module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) protocol module arg check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) schedule module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.schedule_module_name, "rr" );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) sorry_maxconnection check
+		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_maxconnection, 50 );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) sorry_endpoint check
+		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_endpoint, sorry_ep );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) sorry_flag check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) qos_upstream check
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, 104857600ULL );
+		// unit_test[1] execute normal case 7 (vs operation edit-vs) qos_downstream check
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, 209715200ULL );
+	}
+
+	// execute normal case 8 (vs operation del-vs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 7;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-D",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 8 (vs operation del-vs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 8 (vs operation del-vs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_DEL_VS );
+		// unit_test[1] execute normal case 8 (vs operation del-vs) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] execute normal case 8 (vs operation del-vs) protocol module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] execute normal case 8 (vs operation del-vs) protocol module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+	}
+
+	// execute normal case 9 (vs operation flush-vs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-C"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 9 (vs operation flush-vs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 9 (vs operation flush-vs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_FLUSH_VS );
+	}
+
+	// execute normal case 10 (rs operation add-rs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 11;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-a",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080",
+							"-w",
+							"10"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 10 (rs operation add-rs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 10 (rs operation add-rs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_ADD_RS );
+		// unit_test[1] execute normal case 10 (rs operation add-rs) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] execute normal case 10 (rs operation add-rs) protocol module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] execute normal case 10 (rs operation add-rs) protocol module arg check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] execute normal case 10 (rs operation add-rs) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+		// unit_test[1] execute normal case 10 (rs operation add-rs) weight check
+		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().weight, 10 );
+	}
+
+	// execute normal case 11 (rs operation edit-rs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 11;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-e",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080",
+							"-w",
+							"20"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_EDIT_RS );
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) protocol module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) protocol module arg check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+		// unit_test[1] execute normal case 11 (rs operation edit-rs) weight check
+		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().weight, 20 );
+	}
+
+	// execute normal case 12 (rs operation del-rs)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 9;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-d",
+							"-t",
+							"10.144.169.87:22100",
+							"-m",
+							"cinsert",
+							"mod_arg",
+							"-r",
+							"10.144.169.86:8080"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 12 (rs operation del-rs) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 12 (rs operation del-rs) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_DEL_RS );
+		// unit_test[1] execute normal case 12 (rs operation del-rs) tcp_accept_endpoint check
+		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
+		// unit_test[1] execute normal case 12 (rs operation del-rs) protocol module name check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
+		// unit_test[1] execute normal case 12 (rs operation del-rs) protocol module arg check
+		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
+		// unit_test[1] execute normal case 12 (rs operation del-rs) realserver endpoint check
+		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
+		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+	}
+
+	// execute normal case 13 (replication operation)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 4;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-R",
+							"-s",
+							"start"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 13 (replication operation) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 13 (replication operation) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_REPLICATION );
+		// unit_test[1] execute normal case 13 (replication operation) replication command check
+		BOOST_CHECK_EQUAL( test_request.replication_command, l7vs::l7vsadm_request::REP_START );
+	}
+
+	// execute normal case 14 (log operation)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 6;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-L",
+							"-c",
+							"l7vsd_network",
+							"-l",
+							"debug"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 14 (log operation) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 14 (log operation) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LOG );
+		// unit_test[1] execute normal case 14 (log operation) logcategory check
+		BOOST_CHECK_EQUAL( test_request.log_category, l7vs::LOG_CAT_L7VSD_NETWORK );
+		// unit_test[1] execute normal case 14 (log operation) logcategory check
+		BOOST_CHECK_EQUAL( test_request.log_level, l7vs::LOG_LV_DEBUG );
+	}
+
+	// execute normal case 15 (snmp log operation)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 6;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-S",
+							"-c",
+							"snmpagent_start_stop",
+							"-l",
+							"warn"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+		boost::thread	thd1( &server_thread );
+		{
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
+		}
+		bool ret = adm.execute_wp( argc, argv );
+		thd1.join();
+
+		// unit_test[1] execute normal case 15 (snmp log operation) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 15 (snmp log operation) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_SNMP );
+		// unit_test[1] execute normal case 15 (snmp log operation) logcategory check
+		BOOST_CHECK_EQUAL( test_request.snmp_log_category, l7vs::LOG_CAT_SNMPAGENT_START_STOP );
+		// unit_test[1] execute normal case 15 (snmp log operation) logcategory check
+		BOOST_CHECK_EQUAL( test_request.snmp_log_level, l7vs::LOG_LV_WARN );
+	}
+
+	// execute normal case 16 (parameter operation)
 	{
 		l7vsadm_test	adm;
 		int		argc	= 4;
@@ -2573,32 +3176,49 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
-		//accept_ready = false;
-		//std::cout << "thread_start" << std::endl;
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
-			boost::mutex::scoped_lock	lock( accept_mutex );
-			accept_condition.wait( lock );
+			//boost::mutex::scoped_lock	lock( accept_mutex );
+			//accept_condition.wait( lock );
+			for(;;) { if(accept_ready)	break; }
 		}
-// 		for(;;){
-// 			std::cout << "waiting..." << std::endl;
-// 			if(accept_ready)	break;
-// 			// wait
-// 			boost::xtime xt;
-// 			xtime_get(&xt, boost::TIME_UTC);
-// 			xt.sec += 1;
-// 			boost::thread::sleep(xt);
-// 		}
-		//std::cout << "execute" << std::endl;
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[1] execute normal case 1 return value check
+		// unit_test[1] execute normal case 16 (parameter operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[1] execute normal case 1 request check
+		// unit_test[1] execute normal case 16 (parameter operation) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_PARAMETER );
+		// unit_test[1] execute normal case 16 (parameter operation) reload_component check
+		BOOST_CHECK_EQUAL( test_request.reload_param, l7vs::PARAM_COMP_LOGGER );
 	}
 
+	// execute normal case 17 (help operation)
+	{
+		l7vsadm_test	adm;
+		int		argc	= 2;
+		char*	argv[]	= {	"l7vsadm_test",
+							"-h"
+							};
+
+		test_request = l7vs::l7vsadm_request();
+		test_response = l7vs::l7vsd_response();
+//		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
+
+// 		boost::thread	thd1( &server_thread );
+// 		{
+// 			boost::mutex::scoped_lock	lock( accept_mutex );
+// 			accept_condition.wait( lock );
+// 		}
+		bool ret = adm.execute_wp( argc, argv );
+// 		thd1.join();
+
+		// unit_test[1] execute normal case 17 (help operation) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[1] execute normal case 17 (help operation) request command check
+		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_HELP );
+	}
 
 	BOOST_MESSAGE( "----- execute_test end -----" );
 

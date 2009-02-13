@@ -834,7 +834,7 @@ bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* a
 
 //! help command parsing
 bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
-	help_mode = true;
+	request.command = cmd;
 
 	std::cout << usage() << std::endl;
 
@@ -1074,7 +1074,6 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 // create including all dictionary.
 l7vs::l7vsadm::l7vsadm()
 				:	numeric_flag(false),
-					help_mode(false),
 					command_wait_interval( L7VSADM_DEFAULT_WAIT_INTERVAL ),
 					command_wait_count( L7VSADM_DEFAULT_WAIT_COUNT ),
 					connect_wait_interval( L7VSADM_DEFAULT_WAIT_INTERVAL ),
@@ -1532,7 +1531,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 			return false;
 		}
 	
-		if( !help_mode ){
+		if( l7vsadm_request::CMD_HELP != request.command ){
 			// communicate to l7vsd
 			using boost::asio::local::stream_protocol;
 			boost::array< char, COMMAND_BUFFER_SIZE >	buf;

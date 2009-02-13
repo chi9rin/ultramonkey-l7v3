@@ -260,7 +260,6 @@ protected:
 	boost::asio::io_service	io_service;		//! io_service
 
 	error_code	l7vsadm_err;
-	bool	help_mode;
 
 	//! Interval of l7vsadm command conflict check.
 	int command_wait_interval;
