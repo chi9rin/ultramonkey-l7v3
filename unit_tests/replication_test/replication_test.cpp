@@ -39,7 +39,7 @@ class replication_fake : public replication
 {
 public:
 	//!	constractor
-	replication_fake( boost::asio::io_service& inreceive_io ) : replication( inreceive_io ) {}
+	replication_fake() : replication() {}
 	//! destractor
 	~replication_fake(){}
 
@@ -64,6 +64,14 @@ public:
 	}
 
 	int		set_slave_wrapper(){
+
+		{
+			boost::mutex::scoped_lock	lock( replication_thread_mutex );
+			if	( replication_flag != EXIT ){
+				 replication_flag = WAIT;
+			}
+		}
+
 		return set_slave();
 	}
 
@@ -104,6 +112,18 @@ public:
 	uint64_t*	releasesrf_wrapper(){
 		releasesrf();
 		return replication_state.surface_block_array_ptr;
+	}
+
+	void		disable_send_thread(){
+		{
+			boost::mutex::scoped_lock	lock( replication_thread_mutex );
+
+			replication_flag = EXIT;
+			replication_thread_condition.notify_all();
+		}
+		if ( replication_thread_ptr ){
+			replication_thread_ptr->join();
+		}
 	}
 };
 
@@ -167,21 +187,11 @@ static const char* replication_mode[] = {
 	"REPLICATION_SLAVE_STOP"
 };
 
-bool locked_end = false;
+volatile bool locked_end = false;
 
-bool receiver_end = false;
-bool io_end = false;
+volatile bool receiver_end = false;
 boost::asio::io_service global_receive_io;
 boost::asio::io_service global_send_io;
-
-void io_thread(){
-	while( false == io_end ){
-		global_receive_io.run();
-		global_send_io.run();
-	}
-}
-
-boost::thread	global_thread_item( boost::bind ( &io_thread ) );
 
 void receiver_thread(){
 	boost::asio::ip::udp::endpoint	udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
@@ -268,7 +278,7 @@ void receiver_thread(){
 			goto END;
 		}
 
-//std::cout << "receiver_thread 5-1\n";
+//std::cout << "receiver_thread\n";
 //std::cout << replication_data.id << "\n";
 //std::cout << replication_data.serial << "\n";
 //std::cout << replication_data.block_num << "\n";
@@ -386,10 +396,10 @@ END:
 	receiver_socket.close();
 
 	receiver_end = true;
-};
+}
 
 void	sender_thread(){
-	l7vs::replication	repli2(global_send_io);
+	l7vs::replication	repli2;
 
 	BOOST_CHECK_EQUAL( repli2.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli2.initialize(), 0 );
@@ -425,7 +435,6 @@ void	sender_thread(){
 }
 
 void	sender2_thread(){
-std::cout << "sender2 in\n";
 	boost::asio::ip::udp::endpoint	udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
 //	boost::asio::ip::udp::socket	sender_socket( global_send_io, udp_endpoint );
 	boost::asio::ip::udp::socket	sender_socket( global_send_io );
@@ -472,6 +481,7 @@ std::cout << "send 1st block\n";
 		sender_socket.close();
 		return;
 	}
+	global_send_io.run();
 	usleep( 10000 );
 	
 	replication_data.block_num = 1;
@@ -492,6 +502,7 @@ std::cout << "send 2nd block\n";
 		sender_socket.close();
 		return;
 	}
+	global_send_io.run();
 	usleep( 10000 );
 
 	replication_data.block_num = 2;
@@ -512,6 +523,7 @@ std::cout << "send 3rd block\n";
 		sender_socket.close();
 		return;
 	}
+	global_send_io.run();
 	sleep(1);
 
 	sender_socket.close();
@@ -531,8 +543,6 @@ void lock_thread( l7vs::replication_fake* p_repliX, const char* name ){
 //test case1.
 void	replication_initialize_test(){
 //	int	loop;
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -549,7 +559,7 @@ void	replication_initialize_test(){
 
 	// unit_test[1]  コンストラクタのテスト
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 
@@ -813,8 +823,6 @@ void	replication_initialize_test(){
 
 //test case2.
 void	replication_switch_to_master_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -829,7 +837,7 @@ void	replication_switch_to_master_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -881,8 +889,6 @@ void	replication_switch_to_master_test(){
 
 //test case3.
 void	replication_switch_to_slave_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -897,7 +903,7 @@ void	replication_switch_to_slave_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -953,7 +959,6 @@ void	replication_switch_to_slave_test(){
 
 //test case4.
 void	replication_pay_memory_test(){
-	boost::asio::io_service io;
 	unsigned int	size;
 	void*			ptr;
 
@@ -971,7 +976,7 @@ void	replication_pay_memory_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -1144,8 +1149,6 @@ void	replication_pay_memory_test(){
 
 //test case5.
 void	replication_dump_memory_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1160,7 +1163,7 @@ void	replication_dump_memory_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
@@ -1218,8 +1221,6 @@ void	replication_dump_memory_test(){
 
 //test case6.
 void	replication_start_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1234,7 +1235,7 @@ void	replication_start_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -1288,8 +1289,6 @@ void	replication_start_test(){
 
 //test case7.
 void	replication_stop_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1304,7 +1303,7 @@ void	replication_stop_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -1356,8 +1355,6 @@ void	replication_stop_test(){
 
 //test case8.
 void	replication_force_replicate_test(){
-//	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1372,7 +1369,7 @@ void	replication_force_replicate_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(global_send_io);
+	l7vs::replication_fake	repli1;
 
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
@@ -1449,6 +1446,7 @@ void	replication_force_replicate_test(){
 
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+	repli1.disable_send_thread();
 
 	unsigned int	size;
 	void*			ptr;
@@ -1481,7 +1479,9 @@ void	replication_force_replicate_test(){
 
 	repli1.finalize();
 
-	while( !receiver_end );
+	while( !receiver_end ){
+		global_receive_io.poll();
+	}
 
 	thread_item1.join();
 
@@ -1490,8 +1490,6 @@ void	replication_force_replicate_test(){
 
 //test case9.
 void	replication_reset_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1506,7 +1504,7 @@ void	replication_reset_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -1593,8 +1591,6 @@ void	replication_reset_test(){
 
 //test case10.
 void	replication_get_status_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1609,7 +1605,7 @@ void	replication_get_status_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	// unit_test[106]  get_statusのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -1650,8 +1646,6 @@ void	replication_get_status_test(){
 
 //test case11.
 void	replication_lock_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1666,7 +1660,7 @@ void	replication_lock_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -1732,7 +1726,6 @@ void	replication_lock_test(){
 	repli1.unlock( "virtualservice" );
 
 	thread_item1.join();
-	thread_item1.detach();
 
 	BOOST_CHECK_EQUAL( locked_end, true );
 	BOOST_CHECK_EQUAL( repli1.locked( "virtualservice" ), true );
@@ -1745,7 +1738,6 @@ void	replication_lock_test(){
 	repli1.unlock( "chash" );
 
 	thread_item2.join();
-	thread_item2.detach();
 
 	BOOST_CHECK_EQUAL( locked_end, true );
 	BOOST_CHECK_EQUAL( repli1.locked( "chash" ), true );
@@ -1758,7 +1750,6 @@ void	replication_lock_test(){
 	repli1.unlock( "sslid" );
 
 	thread_item3.join();
-	thread_item3.detach();
 
 	BOOST_CHECK_EQUAL( locked_end, true );
 	BOOST_CHECK_EQUAL( repli1.locked( "sslid" ), true );
@@ -1777,8 +1768,6 @@ void	replication_lock_test(){
 
 //test case12.
 void	replication_unlock_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1793,7 +1782,7 @@ void	replication_unlock_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -1859,8 +1848,6 @@ void	replication_unlock_test(){
 
 //test case13.
 void	replication_refer_lock_mutex_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1875,7 +1862,7 @@ void	replication_refer_lock_mutex_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	l7vs::replication::mutex_ptr mutex1, mutex2, mutex3, mutex4;
 
@@ -1947,8 +1934,6 @@ void	replication_refer_lock_mutex_test(){
 
 //test case14.
 void	replication_handle_send_test(){
-//	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -1963,7 +1948,7 @@ void	replication_handle_send_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(global_send_io);
+	l7vs::replication	repli1;
 
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
@@ -1975,9 +1960,6 @@ void	replication_handle_send_test(){
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
-
-	receiver_end = false;
-	boost::thread	thread_item1( boost::bind ( &receiver_thread ) );
 
 	unsigned int	size;
 	void*			ptr;
@@ -2009,11 +1991,15 @@ void	replication_handle_send_test(){
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.switch_to_master();
 
+	receiver_end = false;
+	boost::thread	thread_item1( boost::bind ( &receiver_thread ) );
+
 	// unit_test[141]  send_thread&handle_sendのテスト(MASTER時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 	repli1.start();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 	while( !receiver_end );
+	repli1.stop();
 
 	thread_item1.join();
 	BOOST_CHECK( 1 );
@@ -2023,8 +2009,6 @@ void	replication_handle_send_test(){
 
 //test case15.
 void	replication_set_master_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2039,11 +2023,12 @@ void	replication_set_master_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+	repli1.disable_send_thread();
 
 	// unit_test[142]  set_masterのテスト(SLAVE時)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -2071,8 +2056,6 @@ void	replication_set_master_test(){
 
 //test case16.
 void	replication_set_slave_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2087,11 +2070,12 @@ void	replication_set_slave_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+	repli1.disable_send_thread();
 	repli1.switch_to_master();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 
@@ -2119,8 +2103,6 @@ void	replication_set_slave_test(){
 
 //test case17.
 void	replication_check_parameter_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2135,7 +2117,7 @@ void	replication_check_parameter_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
@@ -2151,8 +2133,6 @@ void	replication_check_parameter_test(){
 
 //test case18.
 void	replication_getrpl_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2167,7 +2147,7 @@ void	replication_getrpl_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );	// param読み込みのため1回実行
@@ -2179,14 +2159,13 @@ void	replication_getrpl_test(){
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getrpl_wrapper() );	// 異常系はinitializeにて評価済み
+	repli1.releaserpl_wrapper();
 
 	repli1.finalize();
 }
 
 //test case19.
 void	replication_getcmp_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2201,7 +2180,7 @@ void	replication_getcmp_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );	// param読み込みのため1回実行
@@ -2213,14 +2192,13 @@ void	replication_getcmp_test(){
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getcmp_wrapper() );	// 異常系はinitializeにて評価済み
+	repli1.releasecmp_wrapper();
 
 	repli1.finalize();
 }
 
 //test case20.
 void	replication_getsrf_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2235,7 +2213,7 @@ void	replication_getsrf_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );	// param読み込みのため1回実行
@@ -2247,14 +2225,13 @@ void	replication_getsrf_test(){
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	BOOST_CHECK( NULL != repli1.getsrf_wrapper() );	// 異常系はinitializeにて評価済み
+	repli1.releasesrf_wrapper();
 
 	repli1.finalize();
 }
 
 //test case21.
 void	replication_make_serial_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2269,7 +2246,7 @@ void	replication_make_serial_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 	unsigned long long		value1, value2;
 
 	// unit_test[150]  make_serialのテスト(正常系)
@@ -2290,8 +2267,6 @@ void	replication_make_serial_test(){
 
 //test case22.
 void	replication_releaserpl_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2306,7 +2281,7 @@ void	replication_releaserpl_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );	// param読み込みのため1回実行
@@ -2325,8 +2300,6 @@ void	replication_releaserpl_test(){
 
 //test case23.
 void	replication_releasecmp_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2341,7 +2314,7 @@ void	replication_releasecmp_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );	// param読み込みのため1回実行
@@ -2354,13 +2327,12 @@ void	replication_releasecmp_test(){
 
 	BOOST_CHECK( NULL != repli1.getcmp_wrapper() );
 	BOOST_CHECK( NULL == repli1.releasecmp_wrapper() );
+
 	repli1.finalize();
 }
 
 //test case24.
 void	replication_releasesrf_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2375,7 +2347,7 @@ void	replication_releasesrf_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication_fake	repli1(io);
+	l7vs::replication_fake	repli1;
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );	// param読み込みのため1回実行
@@ -2394,8 +2366,6 @@ void	replication_releasesrf_test(){
 
 //test case25.
 void	replication_finalize_test(){
-	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2410,7 +2380,7 @@ void	replication_finalize_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(io);
+	l7vs::replication	repli1;
 
 	// unit_test[155]  finalizeのテスト(未初期化)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -2470,8 +2440,6 @@ void	replication_finalize_test(){
 
 //test case26.
 void	replication_handle_receive_test(){
-//	boost::asio::io_service io;
-
 	get_string_stubmode = 0;
 	get_int_stubmode = 0;
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
@@ -2486,34 +2454,81 @@ void	replication_handle_receive_test(){
 	get_int_table[3] = 200;							//	"cmponent_size_02"
 	get_int_table[4] = 10;							//	"compulsorily_interval"
 
-	l7vs::replication	repli1(global_receive_io);
+	l7vs::replication	repli1;
 
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 1;							//	"cmponent_size_02"
 
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
+
 	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
 	// unit_test[161]  handle_receiveのテスト(正常系)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
-//	repli1.dump_memory();
-//	BOOST_CHECK( 1 );
+	{
+		boost::thread	thread_item( boost::bind ( &sender2_thread ) );
 
-	boost::thread	thread_item( boost::bind ( &sender2_thread ) );
-//receiver_end = false;
-//boost::thread	thread_item3( boost::bind ( &receiver_thread ) );
+		thread_item.join();
+	}
 
-	thread_item.join();
-//thread_item3.join();
+	repli1.dump_memory();
+	BOOST_CHECK( 1 );
+
+	// unit_test[162]  handle_receiveのテスト(MASTER → SLAVE時)
+	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
+
+	unsigned int	size;
+	void*			ptr;
+
+	ptr = repli1.pay_memory( "virtualservice", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
+	memset( ptr, '1', size * DATA_SIZE );
+	repli1.unlock( "virtualservice" );
+
+	ptr = repli1.pay_memory( "chash", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
+	memset( ptr, '2', size * DATA_SIZE );
+	repli1.unlock( "chash" );
+
+	ptr = repli1.pay_memory( "sslid", size );
+	BOOST_CHECK( NULL != ptr );
+	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
+	memset( ptr, '3', size * DATA_SIZE );
+	repli1.unlock( "sslid" );
+
+	repli1.switch_to_master();
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
+
+	{
+		receiver_end = false;
+		boost::thread	thread_item( boost::bind ( &receiver_thread ) );
+
+		while( !receiver_end ){
+			global_receive_io.poll();
+		}
+
+		thread_item.join();
+	}
+
+	repli1.switch_to_slave();
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+
+	{
+		boost::thread	thread_item( boost::bind ( &sender2_thread ) );
+
+		thread_item.join();
+	}
 
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
 
 /*
-	// unit_test[162]  handle_receiveのテスト(replication対replication)
+	// unit_test[163]  handle_receiveのテスト(replication対replication)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
 	boost::thread	thread_item2( boost::bind ( &sender_thread ) );
@@ -2521,7 +2536,6 @@ void	replication_handle_receive_test(){
 	sleep(1);
 
 	thread_item2.join();
-std::cout << "sender2 end\n";
 
 	repli1.dump_memory();
 	BOOST_CHECK( 1 );
@@ -2533,11 +2547,6 @@ std::cout << "sender2 end\n";
 	repli1.finalize();
 }
 
-void	replication_finish(){
-	io_end = true;
-	global_thread_item.join();
-}
-
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	l7vs::Logger	logger;
 	l7vs::Parameter	parameter;
@@ -2547,7 +2556,6 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "replication_test" );
 
 	// add test case to test suite
-///*
 	ts->add( BOOST_TEST_CASE( &replication_initialize_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_switch_to_master_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_switch_to_slave_test ) );
@@ -2555,6 +2563,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &replication_dump_memory_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_start_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_stop_test ) );
+
 	ts->add( BOOST_TEST_CASE( &replication_force_replicate_test ) );
 
 	ts->add( BOOST_TEST_CASE( &replication_reset_test ) );
@@ -2575,13 +2584,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &replication_releasecmp_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_releasesrf_test ) );
 	ts->add( BOOST_TEST_CASE( &replication_finalize_test ) );
-//*/
 
 	ts->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
-
-
-
-	ts->add( BOOST_TEST_CASE( &replication_finish ) );
 
 	framework::master_test_suite().add( ts );
 

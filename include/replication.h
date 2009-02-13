@@ -137,7 +137,7 @@ protected:
 	};
 
 	std::map<std::string, mutex_ptr>	replication_mutex;
-	boost::asio::io_service&			receive_io;
+	boost::asio::io_service				service_io;
 	boost::asio::ip::udp::endpoint 		replication_endpoint;
 	boost::asio::ip::udp::socket		replication_receive_socket;
 	boost::asio::ip::udp::socket		replication_send_socket;
@@ -147,6 +147,7 @@ protected:
 	enum REPLICATION_THREAD_TAG{
 		WAIT = 0,
 		RUNNING,
+		WAIT_REQ,
 		EXIT
 	};
 
@@ -157,11 +158,16 @@ protected:
 
 	struct replication_data_struct		replication_data;
 
+	REPLICATION_THREAD_TAG				service_flag;
+	thread_ptr							service_thread_ptr;
+	boost::mutex						service_thread_mutex;
+	boost::condition					service_thread_condition;
+
 public:
-	replication( boost::asio::io_service& inreceive_io ) :	receive_io( inreceive_io ),
-															replication_receive_socket( inreceive_io ),
-															replication_send_socket( inreceive_io ),
-															replication_flag(WAIT) {
+	replication() :	replication_receive_socket( service_io ),
+					replication_send_socket( service_io ),
+					replication_flag(EXIT),
+					service_flag(EXIT) {
 	} ;
 	~replication(){}
 
@@ -196,6 +202,7 @@ protected:
 	void						releasesrf();
 
 	void						send_thread();
+	void						service_thread();
 };
 
 }	//namespace l7vs

@@ -52,6 +52,10 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
 	scopedLogMessage(msg),
 	scopedLogFile(file),
 	scopedLogLine(line){
+
+//	std::stringstream buf;
+//	buf << msg << "  " << file << "  " << line;
+//	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!
