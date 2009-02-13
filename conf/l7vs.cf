@@ -167,6 +167,10 @@ sslproxy_server			= "info"
 sslproxy_session		= "info"
 sslproxy_connection		= "info"
 
+[virtualservice]
+session_thread_pool_size	= 256
+throughput_calc_interval	= 500
+
 #
 # l7vsadm setting
 #

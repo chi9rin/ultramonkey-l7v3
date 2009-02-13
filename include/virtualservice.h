@@ -30,8 +30,8 @@
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 
-#define	PARAM_POOLSIZE_KEY_NAME	"session_pool_size"
-#define	PARAM_BPS_CALC_INTERVAL	"bps_calc_interval"
+#define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
+#define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
 #define	PARAM_REP_INTERVAL		"interval"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
