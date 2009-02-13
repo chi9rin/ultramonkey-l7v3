@@ -133,6 +133,7 @@ void	server_thread(){
 	using boost::asio::local::stream_protocol;
 
 	boost::array< char,COMMAND_BUFFER_SIZE >	buf;
+	buf.assign( 0x00 );
 
 	// accept
 	//std::cout << "sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
@@ -2550,6 +2551,7 @@ void	execute_test(){
 			itr->realserver_vector.push_back( l7vs::realserver_element() );
 		}
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			// accept ready wait
@@ -2592,6 +2594,7 @@ void	execute_test(){
 			itr->realserver_vector.push_back( l7vs::realserver_element() );
 		}
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2633,6 +2636,7 @@ void	execute_test(){
 			itr->realserver_vector.push_back( l7vs::realserver_element() );
 		}
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2674,6 +2678,7 @@ void	execute_test(){
 			itr->realserver_vector.push_back( l7vs::realserver_element() );
 		}
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2714,6 +2719,7 @@ void	execute_test(){
 			itr->realserver_vector.push_back( l7vs::realserver_element() );
 		}
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2758,6 +2764,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2820,6 +2827,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2872,6 +2880,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2906,6 +2915,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2942,6 +2952,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -2990,6 +3001,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -3036,6 +3048,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -3075,6 +3088,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -3108,6 +3122,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -3143,6 +3158,7 @@ void	execute_test(){
 		test_response = l7vs::l7vsd_response();
 		test_response.status = l7vs::l7vsd_response::RESPONSE_OK;
 
+		accept_ready = false;
 		boost::thread	thd1( &server_thread );
 		{
 			//boost::mutex::scoped_lock	lock( accept_mutex );
@@ -3217,7 +3233,7 @@ void	execute_test(){
 		// unit_test[1] execute normal case 17 (help operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[1] execute normal case 17 (help operation) request command check
-		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_HELP );
+		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_HELP );
 	}
 
 	BOOST_MESSAGE( "----- execute_test end -----" );

@@ -20,6 +20,9 @@ namespace	l7vs{
 command_session::command_session(	boost::asio::io_service& io_service, l7vsd& parent )
 								:	unixsocket( io_service ),
 									vsd( parent ){
+	// buffer initialize
+	request_buffer.assign( 0x00 );
+
 	// command handler map initialize
 	command_handler_map[l7vsadm_request::CMD_LIST]
 											= boost::bind(	&l7vsd::list_virtual_service, &vsd,

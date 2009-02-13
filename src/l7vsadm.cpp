@@ -1534,8 +1534,9 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 		if( l7vsadm_request::CMD_HELP != request.command ){
 			// communicate to l7vsd
 			using boost::asio::local::stream_protocol;
-			boost::array< char, COMMAND_BUFFER_SIZE >	buf;
-	
+			boost::array< char, COMMAND_BUFFER_SIZE >	response_buffer;
+			response_buffer.assign( 0x00 );
+
 			// connect
 			boost::asio::io_service	io;
 			stream_protocol::socket	s( io );
@@ -1577,10 +1578,10 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 			boost::asio::write( s, boost::asio::buffer( send_stream.str() ) );
 
 			// read sockfile
-			s.read_some( boost::asio::buffer( buf ) );
+			s.read_some( boost::asio::buffer( response_buffer ) );
 			
 			std::stringstream	recv_stream;
-			recv_stream << &(buf[0]);
+			recv_stream << &(response_buffer[0]);
 			boost::archive::text_iarchive	ia( recv_stream );
 			ia >> response;
 	

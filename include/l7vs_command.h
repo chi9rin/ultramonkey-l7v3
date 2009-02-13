@@ -72,6 +72,7 @@ public:
 								replication_command( REP_NONE ),
 								log_category( LOG_CAT_NONE ),
 								log_level( LOG_LV_NONE ),
+								reload_param( PARAM_COMP_NOCAT ),
 								snmp_log_category( LOG_CAT_NONE ),
 								snmp_log_level( LOG_LV_NONE ){}
 private:
@@ -85,6 +86,7 @@ private:
 		ar & replication_command;
 		ar & log_category;
 		ar & log_level;
+		ar & reload_param;
 		ar & snmp_log_category;
 		ar & snmp_log_level;
 	}
