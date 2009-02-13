@@ -50,5 +50,11 @@ namespace l7vs{
 		return bres;
 	}
 	
+	//! clear list
+	void tcp_realserver_connect_socket_list::clear(){
+		boost::mutex::scoped_lock scope_lock(list_mutex);
+		connect_list.clear();
+	}
+	
 }// namespace l7vs
  
