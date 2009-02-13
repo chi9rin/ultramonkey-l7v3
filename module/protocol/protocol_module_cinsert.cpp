@@ -255,7 +255,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 									break;
 								}
 
-								cookie_name_set_flag = true;
+								cookie_expire_set_flag = true;
 							}
 						}
 					}
@@ -434,12 +434,12 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	sregex	cookie_name_regex = +( alpha | digit );
 	sregex	cookie_expire_regex = +digit;
 	sregex	sorry_uri_regex
-				=	+(	"/" >>
-						*(	alpha |
+				=	+(	'/' >>
+						+(	alpha |
 							digit |
 							( set = '$', '-', '_', '.', '+' ) |
 							( set = '!', '*', '\'', '\(', ')', ',' ) |
-							"%" >> repeat<2>(xdigit)));
+							'%' >> repeat<2>(xdigit)));
 
 	try
 	{
@@ -501,6 +501,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 								else
 								{
 
+									cookie_name.assign('\0');
 									memcpy( cookie_name.data(), args_itr->c_str(), args_itr->length()); 
 			
 									cookie_name_set_flag = true;
@@ -575,7 +576,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 									break;
 								}
 
-								cookie_name_set_flag = true;
+								cookie_expire_set_flag = true;
 							}
 						}
 					}
@@ -690,6 +691,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 								else
 								{
 
+									sorry_uri.assign('\0');
 									memcpy( sorry_uri.data(), args_itr->c_str(), args_itr->length()); 
 			
 									sorry_uri_set_flag = true;
@@ -825,14 +827,12 @@ protocol_module_cinsert::handle_session_initialize(
 				const boost::asio::ip::udp::endpoint& client_endpoint_udp )
 {
 
-//	session_thread_data_cinsert_sp		up_thread_data;
-//	session_thread_data_cinsert_sp		down_thread_data;
 	recive_data						client_recv_data;
 	char*							buffer				= NULL;
 
 	try
 	{
-		session_thread_data_cinsert_sp	up_thread_data( new session_thread_data_cinsert );
+		t_session_thread_data_cinsert	up_thread_data( new session_thread_data_cinsert );
 
 		up_thread_data->thread_id				= up_thread_id;
 		up_thread_data->thread_division			= THREAD_DIVISION_UP_STREAM;
@@ -850,7 +850,10 @@ protocol_module_cinsert::handle_session_initialize(
 
 		up_thread_data->recive_data_map[ client_endpoint_tcp ] = client_recv_data;
 
-		session_thread_data_cinsert_sp	down_thread_data( new session_thread_data_cinsert );
+		client_recv_data.recive_buffer_1	= NULL;
+		client_recv_data.recive_buffer_2	= NULL; 
+
+		t_session_thread_data_cinsert	down_thread_data( new session_thread_data_cinsert );
 
 		down_thread_data->thread_id					= down_thread_id;
 		down_thread_data->thread_division			= THREAD_DIVISION_DOWN_STREAM;
@@ -880,152 +883,25 @@ protocol_module_cinsert::handle_session_finalize(
 				const boost::thread::id down_thread_id )
 {
 
-	session_thread_data_cinsert_sp		up_thread_data;
-	session_thread_data_cinsert_sp		down_thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_map_itr	thread_data_itr;
 
 	try
 	{
 
-		while( 1 )
+		boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+
+		thread_data_itr = session_thread_data_map.find( up_thread_id );
+
+		if( thread_data_itr != session_thread_data_map.end() )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( up_thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-
-					up_thread_data = thread_data_itr->second;
-	
-					lock_result = up_thread_data->session_thread_data_mutex->try_lock();
-
-					if( lock_result == true )
-					{
-						session_thread_data_map.erase( thread_data_itr );
-						break;
-					}
-				}
-				else
-				{
-					break;
-				}
-			}
+			session_thread_data_map.erase( thread_data_itr );
 		}
 
-		while( 1 )
+		thread_data_itr = session_thread_data_map.find( down_thread_id );
+
+		if( thread_data_itr != session_thread_data_map.end() )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( down_thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-
-					down_thread_data = thread_data_itr->second;
-
-					lock_result = down_thread_data->session_thread_data_mutex->try_lock();
-
-					if( lock_result == true )
-					{
-						session_thread_data_map.erase( thread_data_itr );
-						break;
-					}
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-
-// 		{
-// 			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-// 
-// 			thread_data_itr = session_thread_data_map.find( up_thread_id );
-// 
-// 			if( thread_data_itr != session_thread_data_map.end() )
-// 			{
-// 
-// 				up_thread_data = thread_data_itr->second;
-// 				session_thread_data_map.erase( up_thread_id );
-// 			}
-// 
-// 			thread_data_itr = session_thread_data_map.find( down_thread_id );
-// 
-// 			if( thread_data_itr != session_thread_data_map.end() )
-// 			{
-// 
-// 				down_thread_data = thread_data_itr->second;
-// 				session_thread_data_map.erase( down_thread_id );
-// 			}
-// 		}
-
-		if( up_thread_data != NULL )
-		{
-
-			recive_data_itr = up_thread_data->recive_data_map.begin();
-
-			while( recive_data_itr != up_thread_data->recive_data_map.end() )
-			{
-				if( recive_data_itr->second.recive_buffer_1 != NULL )
-				{
-
-					free( recive_data_itr->second.recive_buffer_1 );
-					recive_data_itr->second.recive_buffer_1 = NULL;
-				}
-				if( recive_data_itr->second.recive_buffer_2 != NULL )
-				{
-
-					free( recive_data_itr->second.recive_buffer_2 );
-					recive_data_itr->second.recive_buffer_2 = NULL;
-				}
-
-				recive_data_itr->second.recive_buffer = NULL;
-
-				recive_data_itr++;
-
-			}
-
-			up_thread_data->session_thread_data_mutex->unlock();
-
-//			delete up_thread_data;
-
-		}
-
-		if( down_thread_data != NULL )
-		{
-			recive_data_itr = down_thread_data->recive_data_map.begin();
-
-			while( recive_data_itr != down_thread_data->recive_data_map.end() )
-			{
-				if( recive_data_itr->second.recive_buffer_1 != NULL )
-				{
-
-					free( recive_data_itr->second.recive_buffer_1 );
-					recive_data_itr->second.recive_buffer_1 = NULL;
-				}
-				if( recive_data_itr->second.recive_buffer_2 != NULL )
-				{
-
-					free( recive_data_itr->second.recive_buffer_2 );
-					recive_data_itr->second.recive_buffer_2 = NULL;
-				}
-
-				recive_data_itr->second.recive_buffer = NULL;
-
-				recive_data_itr++;
-
-			}
-
-			down_thread_data->session_thread_data_mutex->unlock();
-
-//			delete down_thread_data;
-
+			session_thread_data_map.erase( thread_data_itr );
 		}
 
 	} catch (const std::exception& ex)
@@ -1041,38 +917,21 @@ protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 {
 
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+	t_session_thread_data_map_itr	thread_data_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -1082,8 +941,6 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 			thread_data->accept_end_flag = ACCEPT_END_FLAG_ON;
 
 			status = CLIENT_RECV;
-
-			thread_data->session_thread_data_mutex->unlock();
 
 		}
 	} catch (const std::exception& ex)
@@ -1105,62 +962,44 @@ protocol_module_cinsert::handle_client_recv(
 
 	using namespace boost::xpressive;
 
-	session_thread_data_cinsert_sp		thread_data;
+	t_session_thread_data_cinsert	thread_data;
+
+	char*	buffer_1			= NULL;
+	char*	buffer_2			= NULL;
+
+	size_t	unsend_data_offset		= 0;
+	size_t	unsend_data_size		= 0;
+	size_t	rest_request_data_size	= 0;
+	size_t	next_request_offset		= 0;
+
 	send_status*					send_status_add		= NULL;
-	char*							buffer_1			= NULL;
-	char*							buffer_2			= NULL;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	edit_data_list_itr				min_insert_position_itr;
-	edit_data						edit_data_x_forwarded_for;
-	bool	find_result;
+
 	CHECK_RESULT_TAG	check_result;
-	size_t	http_header_offset	= 0;
-	size_t	http_header_len		= 0;
-	size_t	unsend_data_offset;
-	size_t	unsend_data_size;
-	size_t	rest_request_data_size;
-	size_t	next_request_offset;
-	std::string		http_header_name_blank = "";
-	std::string		http_header_name_content_length = "Content-Length";
-	bool							lock_result = false;
-	std::string		content_length;
-	boost::posix_time::ptime		now;
-
+	bool				find_result;
+	size_t				http_header_offset	= 0;
+	size_t				http_header_len		= 0;
+	std::string			http_header_name_blank = "";
+	std::string			http_header_name_content_length = "Content-Length";
+	std::string			content_length;
 	match_results< const char* >	regex_result;
-
 	cregex	content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -1669,8 +1508,6 @@ protocol_module_cinsert::handle_client_recv(
 				}
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -1688,20 +1525,10 @@ protocol_module_cinsert::handle_realserver_select(
 {
 
 	using namespace boost::xpressive;
-	session_thread_data_cinsert_sp		up_thread_data;
-	session_thread_data_cinsert_sp		down_thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	bool							lock_result = false;
+
+	t_session_thread_data_cinsert	thread_data;
+
 	boost::asio::ip::tcp::endpoint	endpoint_init;
-	recive_data						realserver_recv_data;
-	char*							buffer				= NULL;
-
-	realserverlist_type::iterator	rs_list_itr;
-
-	EVENT_TAG	status = STOP;
 
 	bool	find_result;
 	size_t	http_header_offset	= 0;
@@ -1717,41 +1544,31 @@ protocol_module_cinsert::handle_realserver_select(
 					( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
 					":" >> ( s2 = +_d ) >> ";";
 
+	realserverlist_type::iterator	rs_list_itr;
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+
+	EVENT_TAG	status = STOP;
+
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					up_thread_data = thread_data_itr->second;
-	
-					lock_result = up_thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( up_thread_data != NULL )
+		if( thread_data != NULL )
 		{
-			recive_data_itr
-					= up_thread_data->recive_data_map.find( up_thread_data->client_endpoint_tcp );
+			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != up_thread_data->recive_data_map.end() )
+			if( recive_data_itr != thread_data->recive_data_map.end() )
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -1851,66 +1668,13 @@ protocol_module_cinsert::handle_realserver_select(
 
 							send_status_itr->send_endpoint = rs_endpoint;
 
-							while( 1 )
-							{
-								{
-									boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-						
-									thread_data_itr
-											= session_thread_data_map.find( up_thread_data->pair_thread_id );
-		
-									if( thread_data_itr != session_thread_data_map.end() )
-									{
-		
-										down_thread_data = thread_data_itr->second;
-		
-										lock_result = down_thread_data->session_thread_data_mutex->try_lock();
-		
-										if( lock_result == true )
-										{
-											break;
-										}
-		
-									}
-									else
-									{
-										break;
-									}
-								}
-							}
-		
-							if( down_thread_data != NULL )
-							{
-								recive_data_itr
-									= down_thread_data->recive_data_map.find( rs_endpoint );
-		
-								if( recive_data_itr == down_thread_data->recive_data_map.end() )
-								{
-		
-									buffer = new char[realserver_recv_data.recive_buffer_max_size];
-							
-									realserver_recv_data.recive_buffer		= buffer;
-									realserver_recv_data.recive_buffer_1	= buffer;
-							
-									buffer = new char[realserver_recv_data.recive_buffer_max_size];
-							
-									realserver_recv_data.recive_buffer_2	= buffer;
-							
-									down_thread_data->recive_data_map[ rs_endpoint ] = realserver_recv_data;
-
-								}
-		
-								down_thread_data->session_thread_data_mutex->unlock();
-		
-							}
-
 							status = REALSERVER_CONNECT;
 
 						}
 						else
 						{
 
-							up_thread_data->end_flag = END_FLAG_ON;
+							thread_data->end_flag = END_FLAG_ON;
 
 							status = REALSERVER_DISCONNECT;
 
@@ -1920,8 +1684,6 @@ protocol_module_cinsert::handle_realserver_select(
 				}
 
 			}
-
-			up_thread_data->session_thread_data_mutex->unlock();
 
 		}
 	} catch (const std::exception& ex)
@@ -1952,50 +1714,36 @@ protocol_module_cinsert::handle_realserver_connect(
 				size_t& datalen )
 {
 
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	edit_data_list_itr				min_insert_position_itr;
-	edit_data						edit_data_x_forwarded_for;
-	bool	find_result;
-	size_t	http_header_offset	= 0;
-	size_t	http_header_len		= 0;
+	t_session_thread_data_cinsert		thread_data;
+
 	size_t	rest_datalen = sendbuffer.size();
-	std::string		http_header_name_blank = "";
-	std::string		http_header_name_x_forwarded_for = "X-Forwarded-For";
-	bool							lock_result = false;
-	boost::posix_time::ptime		now;
+
+	edit_data	edit_data_x_forwarded_for;
+
+	bool			find_result			= false;
+	size_t			http_header_offset	= 0;
+	size_t			http_header_len		= 0;
+	std::string		http_header_name_blank				= "";
+	std::string		http_header_name_x_forwarded_for	= "X-Forwarded-For";
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+	t_edit_data_list_itr			edit_data_itr;
+	t_edit_data_list_itr			min_insert_position_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -2296,8 +2044,6 @@ protocol_module_cinsert::handle_realserver_connect(
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -2314,38 +2060,21 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+	t_session_thread_data_map_itr	thread_data_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -2355,8 +2084,6 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 			thread_data->end_flag = END_FLAG_ON;
 
 			status = REALSERVER_DISCONNECT;
-
-			thread_data->session_thread_data_mutex->unlock();
 
 		}
 	} catch (const std::exception& ex)
@@ -2371,41 +2098,25 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_id )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+	t_edit_data_list_itr			edit_data_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -2483,8 +2194,6 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -2500,53 +2209,32 @@ protocol_module_cinsert::handle_sorryserver_select(
 				const boost::thread::id thread_id,
 				boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
-	session_thread_data_cinsert_sp		up_thread_data;
-	session_thread_data_cinsert_sp		down_thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	bool							lock_result = false;
-	recive_data						sorryserver_recv_data;
-	char*							buffer				= NULL;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					up_thread_data = thread_data_itr->second;
-	
-					lock_result = up_thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( up_thread_data != NULL )
+		if( thread_data != NULL )
 		{
-			recive_data_itr
-					= up_thread_data->recive_data_map.find( up_thread_data->client_endpoint_tcp );
+			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != up_thread_data->recive_data_map.end() )
+			if( recive_data_itr != thread_data->recive_data_map.end() )
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -2568,66 +2256,11 @@ protocol_module_cinsert::handle_sorryserver_select(
 				if( send_status_itr != recive_data_itr->second.send_status_list.end())
 				{
 
-					while( 1 )
-					{
-						{
-							boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-				
-							thread_data_itr
-									= session_thread_data_map.find( up_thread_data->pair_thread_id );
-
-							if( thread_data_itr != session_thread_data_map.end() )
-							{
-
-								down_thread_data = thread_data_itr->second;
-
-								lock_result = down_thread_data->session_thread_data_mutex->try_lock();
-
-								if( lock_result == true )
-								{
-									break;
-								}
-
-							}
-							else
-							{
-								break;
-							}
-						}
-					}
-
-					if( down_thread_data != NULL )
-					{
-						recive_data_itr
-							= down_thread_data->recive_data_map.find( sorry_endpoint );
-
-						if( recive_data_itr == down_thread_data->recive_data_map.end() )
-						{
-
-							buffer = new char[sorryserver_recv_data.recive_buffer_max_size];
-					
-							sorryserver_recv_data.recive_buffer		= buffer;
-							sorryserver_recv_data.recive_buffer_1	= buffer;
-					
-							buffer = new char[sorryserver_recv_data.recive_buffer_max_size];
-					
-							sorryserver_recv_data.recive_buffer_2	= buffer;
-					
-							down_thread_data->recive_data_map[ sorry_endpoint ] = sorryserver_recv_data;
-
-						}
-
-						down_thread_data->session_thread_data_mutex->unlock();
-
-					}
-
 					send_status_itr->send_endpoint = sorry_endpoint;
 
 					status = SORRYSERVER_CONNECT;
 				}
 			}
-
-			up_thread_data->session_thread_data_mutex->unlock();
 
 		}
 	} catch (const std::exception& ex)
@@ -2645,53 +2278,39 @@ protocol_module_cinsert::handle_sorryserver_connect(
 				boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 				size_t& datalen )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	edit_data_list_itr				min_insert_position_itr;
-	edit_data						edit_data_uri;
-	edit_data						edit_data_x_forwarded_for;
-	bool	find_result;
-	size_t	uri_offset	= 0;
-	size_t	uri_len		= 0;
-	size_t	http_header_offset	= 0;
-	size_t	http_header_len		= 0;
+	t_session_thread_data_cinsert	thread_data;
+
+	edit_data	edit_data_uri;
+	edit_data	edit_data_x_forwarded_for;
+
 	size_t	rest_datalen = sendbuffer.size();
-	std::string		http_header_name_blank = "";
-	std::string		http_header_name_x_forwarded_for = "X-Forwarded-For";
-	bool							lock_result = false;
-	boost::posix_time::ptime		now;
+
+	bool			find_result			= false;
+	size_t			uri_offset			= 0;
+	size_t			uri_len				= 0;
+	size_t			http_header_offset	= 0;
+	size_t			http_header_len		= 0;
+	std::string		http_header_name_blank				= "";
+	std::string		http_header_name_x_forwarded_for	= "X-Forwarded-For";
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+	t_edit_data_list_itr			edit_data_itr;
+	t_edit_data_list_itr			min_insert_position_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -3015,8 +2634,6 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -3032,38 +2649,21 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+	t_session_thread_data_map_itr	thread_data_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -3073,8 +2673,6 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 			thread_data->end_flag = END_FLAG_ON;
 
 			status = SORRYSERVER_DISCONNECT;
-
-			thread_data->session_thread_data_mutex->unlock();
 
 		}
 	} catch (const std::exception& ex)
@@ -3089,41 +2687,25 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread_id )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+	t_edit_data_list_itr			edit_data_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -3201,8 +2783,6 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -3222,62 +2802,48 @@ protocol_module_cinsert::handle_realserver_recv(
 {
 	using namespace boost::xpressive;
 
-	session_thread_data_cinsert_sp		thread_data;
+	t_session_thread_data_cinsert	thread_data;
+
+	recive_data		realserver_recv_data;
+
 	send_status*					send_status_add		= NULL;
-	char*							buffer_1			= NULL;
-	char*							buffer_2			= NULL;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	edit_data_list_itr				min_insert_position_itr;
-	edit_data						edit_data_x_forwarded_for;
-	bool	find_result;
+
+	size_t	unsend_data_offset		= 0;
+	size_t	unsend_data_size		= 0;
+	size_t	rest_response_data_size	= 0;
+	size_t	next_response_offset	= 0;
+
+	char*	buffer				= NULL;
+	char*	buffer_1			= NULL;
+	char*	buffer_2			= NULL;
+
+	bool				find_result	= false;
 	CHECK_RESULT_TAG	check_result;
-	size_t	http_header_offset	= 0;
-	size_t	http_header_len		= 0;
-	size_t	unsend_data_offset;
-	size_t	unsend_data_size;
-	size_t	rest_response_data_size;
-	size_t	next_response_offset;
-	std::string		http_header_name_blank = "";
-	std::string		http_header_name_content_length = "Content-Length";
-	bool							lock_result = false;
+	size_t				http_header_offset	= 0;
+	size_t				http_header_len		= 0;
+
+	std::string		http_header_name_blank			= "";
+	std::string		http_header_name_content_length	= "Content-Length";
 	std::string		content_length;
-	boost::posix_time::ptime		now;
-
 	match_results< const char* >	regex_result;
-
 	cregex	content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -3286,8 +2852,29 @@ protocol_module_cinsert::handle_realserver_recv(
 
 			recive_data_itr = thread_data->recive_data_map.find( rs_endpoint );
 
+			if( recive_data_itr == thread_data->recive_data_map.end() )
+			{
+				buffer = new char[realserver_recv_data.recive_buffer_max_size];
+		
+				realserver_recv_data.recive_buffer		= buffer;
+				realserver_recv_data.recive_buffer_1	= buffer;
+		
+				buffer = new char[realserver_recv_data.recive_buffer_max_size];
+		
+				realserver_recv_data.recive_buffer_2	= buffer;
+		
+				thread_data->recive_data_map[ rs_endpoint ] = realserver_recv_data;
+
+				realserver_recv_data.recive_buffer_1 = NULL;
+				realserver_recv_data.recive_buffer_2 = NULL;
+
+				recive_data_itr = thread_data->recive_data_map.find( rs_endpoint );
+
+			}
+
 			if( recive_data_itr != thread_data->recive_data_map.end() )
 			{
+
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
 
 				while( send_status_itr != recive_data_itr->second.send_status_list.end())
@@ -3769,8 +3356,6 @@ protocol_module_cinsert::handle_realserver_recv(
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -3801,62 +3386,47 @@ protocol_module_cinsert::handle_sorryserver_recv(
 {
 	using namespace boost::xpressive;
 
-	session_thread_data_cinsert_sp		thread_data;
-	send_status*					send_status_add		= NULL;
-	char*							buffer_1			= NULL;
-	char*							buffer_2			= NULL;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	edit_data_list_itr				min_insert_position_itr;
-	edit_data						edit_data_x_forwarded_for;
-	bool	find_result;
+	t_session_thread_data_cinsert	thread_data;
+
+	recive_data		sorryserver_recv_data;
+
+	send_status*	send_status_add		= NULL;
+
+	size_t	unsend_data_offset		= 0;
+	size_t	unsend_data_size		= 0;
+	size_t	rest_response_data_size	= 0;
+	size_t	next_response_offset	= 0;
+
+	char*	buffer				= NULL;
+	char*	buffer_1			= NULL;
+	char*	buffer_2			= NULL;
+
+	bool				find_result			= false;
 	CHECK_RESULT_TAG	check_result;
-	size_t	http_header_offset	= 0;
-	size_t	http_header_len		= 0;
-	size_t	unsend_data_offset;
-	size_t	unsend_data_size;
-	size_t	rest_response_data_size;
-	size_t	next_response_offset;
-	std::string		http_header_name_blank = "";
-	std::string		http_header_name_content_length = "Content-Length";
-	bool							lock_result = false;
-	std::string		content_length;
-	boost::posix_time::ptime		now;
-
+	size_t				http_header_offset	= 0;
+	size_t				http_header_len		= 0;
+	std::string			http_header_name_blank			= "";
+	std::string			http_header_name_content_length	= "Content-Length";
+	std::string			content_length;
 	match_results< const char* >	regex_result;
-
 	cregex	content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -3864,6 +3434,26 @@ protocol_module_cinsert::handle_sorryserver_recv(
 		{
 
 			recive_data_itr = thread_data->recive_data_map.find( sorry_endpoint );
+
+			if( recive_data_itr == thread_data->recive_data_map.end() )
+			{
+				buffer = new char[sorryserver_recv_data.recive_buffer_max_size];
+		
+				sorryserver_recv_data.recive_buffer		= buffer;
+				sorryserver_recv_data.recive_buffer_1	= buffer;
+		
+				buffer = new char[sorryserver_recv_data.recive_buffer_max_size];
+		
+				sorryserver_recv_data.recive_buffer_2	= buffer;
+		
+				thread_data->recive_data_map[ sorry_endpoint ] = sorryserver_recv_data;
+
+				sorryserver_recv_data.recive_buffer_1 = NULL;
+				sorryserver_recv_data.recive_buffer_2 = NULL;
+
+				recive_data_itr = thread_data->recive_data_map.find( sorry_endpoint );
+
+			}
 
 			if( recive_data_itr != thread_data->recive_data_map.end() )
 			{
@@ -4348,8 +3938,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -4375,51 +3963,40 @@ protocol_module_cinsert::handle_client_connection_check(
 				size_t& datalen )
 {
 
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	edit_data_list_itr				min_insert_position_itr;
-	edit_data						edit_data_cookie;
-	int								send_ok_flag = 0;
-	bool	find_result;
-	size_t	http_header_offset	= 0;
-	size_t	http_header_len		= 0;
+	t_session_thread_data_cinsert	thread_data;
+
 	size_t	rest_datalen = sendbuffer.size();
+
+	edit_data	edit_data_cookie;
+
+	int			send_ok_flag = 0;
+
+	bool			find_result			= false;
+	size_t			http_header_offset	= 0;
+	size_t			http_header_len		= 0;
 	std::string		http_header_name_blank = "";
-	bool							lock_result = false;
-	boost::posix_time::ptime		now;
+
+	boost::posix_time::ptime			now;
 	boost::posix_time::time_duration	expire(0,0,cookie_expire,0);
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+	t_edit_data_list_itr			edit_data_itr;
+	t_edit_data_list_itr			min_insert_position_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -4721,8 +4298,6 @@ protocol_module_cinsert::handle_client_connection_check(
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -4750,41 +4325,25 @@ protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 {
 
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	edit_data_list_itr				edit_data_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+	t_edit_data_list_itr			edit_data_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -4904,8 +4463,6 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -4928,40 +4485,24 @@ protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id )
 {
 
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -5122,8 +4663,6 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 				}
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -5139,40 +4678,24 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -5333,8 +4856,6 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 				}
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -5352,40 +4873,24 @@ protocol_module_cinsert::handle_realserver_disconnect(
 				const boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
 
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -5474,8 +4979,6 @@ protocol_module_cinsert::handle_realserver_disconnect(
 
 			}
 
-			thread_data->session_thread_data_mutex->unlock();
-
 		}
 	} catch (const std::exception& ex)
 	{
@@ -5492,40 +4995,24 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
-	session_thread_data_cinsert_sp		thread_data;
-	session_thread_data_map_itr		thread_data_itr;
-	recive_data_map_itr				recive_data_itr;
-	send_status_list_itr			send_status_itr;
-	bool							lock_result = false;
+	t_session_thread_data_cinsert	thread_data;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	EVENT_TAG	status = STOP;
 
 	try
 	{
-		while( 1 )
 		{
-			{
-				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
-	
-				thread_data_itr = session_thread_data_map.find( thread_id );
-	
-				if( thread_data_itr != session_thread_data_map.end() )
-				{
-	
-					thread_data = thread_data_itr->second;
-	
-					lock_result = thread_data->session_thread_data_mutex->try_lock();
+			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 
-					if( lock_result == true )
-					{
-						break;
-					}
-	
-				}
-				else
-				{
-					break;
-				}
+			thread_data_itr = session_thread_data_map.find( thread_id );
+
+			if( thread_data_itr != session_thread_data_map.end() )
+			{
+				thread_data = thread_data_itr->second;
 			}
 		}
 
@@ -5614,8 +5101,6 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 				}
 
 			}
-
-			thread_data->session_thread_data_mutex->unlock();
 
 		}
 	} catch (const std::exception& ex)
