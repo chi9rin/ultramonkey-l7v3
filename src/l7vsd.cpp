@@ -685,7 +685,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		}
 	
 		// replication initialize
-		rep.reset( new replication( dispatcher ) );
+		rep.reset( new replication() );
 		if( NULL ==  rep ){
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication pointer null.", __FILE__, __LINE__ );
 			return -1;
