@@ -1049,10 +1049,10 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 		// QoS value and throughput convert from byte/s to bps.
 		buf << boost::format( "    %lld %lld\n" )
 			% (vse.qos_upstream * 8)
-			% (vse.qos_upstream * 8);
+			% (vse.throughput_upstream * 8);
 		buf << boost::format( "    %lld %lld\n" )
 			% (vse.qos_downstream * 8)
-			% (vse.qos_downstream * 8);
+			% (vse.throughput_downstream * 8);
 		BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
 			std::string	rsepstr;
 			if( vse.udpmode )
