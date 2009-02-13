@@ -2,6 +2,9 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread/condition.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/format.hpp>
 
 #include "protocol_module_cinsert.h"
 
@@ -30,6 +33,364 @@ void	session_thread_data_map_lock()
 	boost::mutex::scoped_lock	lk( session_thread_data_map_mutex );
 	session_thread_data_map_condition.wait( lk );
 }
+void	session_thread_data_set()
+{
+
+	int	i = 0;
+	int	j = 0;
+	size_t	recive_data_num = 0;
+
+	boost::thread	up_thread_1( &thread_method );
+	boost::thread	up_thread_2( &thread_method );
+
+	boost::thread	down_thread_1( &thread_method );
+	boost::thread	down_thread_2( &thread_method );
+
+	boost::asio::ip::address	address;
+
+	boost::asio::ip::tcp::endpoint client_endpoint_tcp_1( address, 11111 );
+	boost::asio::ip::tcp::endpoint client_endpoint_tcp_2( address, 12222 );
+	boost::asio::ip::tcp::endpoint client_endpoint_tcp_3( address, 13333 );
+
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_1( address, 21111 );
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_2( address, 22222 );
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_3( address, 23333 );
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_4( address, 24444 );
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_5( address, 25555 );
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_6( address, 26666 );
+	boost::asio::ip::tcp::endpoint realserver_endpoint_tcp_7( address, 27777 );
+
+	session_thread_data_map_itr		thread_data_itr;
+	recive_data_map_itr				recive_data_itr;
+
+	session_thread_data_cinsert*	up_thread_data_1	= NULL;
+	session_thread_data_cinsert*	up_thread_data_2	= NULL;
+	session_thread_data_cinsert*	down_thread_data_1	= NULL;
+	session_thread_data_cinsert*	down_thread_data_2	= NULL;
+	recive_data						client_recv_data_1;
+	recive_data						client_recv_data_2;
+	recive_data						client_recv_data_3;
+	recive_data						realserver_recv_data_1;
+	recive_data						realserver_recv_data_2;
+	recive_data						realserver_recv_data_3;
+	recive_data						realserver_recv_data_4;
+	recive_data						realserver_recv_data_5;
+	recive_data						realserver_recv_data_6;
+	recive_data						realserver_recv_data_7;
+	char*							buffer				= NULL;
+
+	//----------------------------------------------------------------------
+	up_thread_data_1 = new session_thread_data_cinsert;
+
+	up_thread_data_1->thread_id				= up_thread_1.get_id();
+	up_thread_data_1->thread_division		= THREAD_DIVISION_UP_STREAM;
+	up_thread_data_1->pair_thread_id		= down_thread_1.get_id();
+	up_thread_data_1->client_endpoint_tcp	= client_endpoint_tcp_1;
+
+	buffer = (char*)malloc( client_recv_data_1.recive_buffer_max_size );
+
+	client_recv_data_1.recive_buffer	= buffer;
+	client_recv_data_1.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( client_recv_data_1.recive_buffer_max_size );
+
+	client_recv_data_1.recive_buffer_2	= buffer;
+
+	up_thread_data_1->recive_data_map[ client_endpoint_tcp_1 ] = client_recv_data_1;
+
+	buffer = (char*)malloc( client_recv_data_2.recive_buffer_max_size );
+
+	client_recv_data_2.recive_buffer	= buffer;
+	client_recv_data_2.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( client_recv_data_2.recive_buffer_max_size );
+
+	client_recv_data_2.recive_buffer_2	= buffer;
+
+	up_thread_data_1->recive_data_map[ client_endpoint_tcp_2 ] = client_recv_data_2;
+
+	session_thread_data_map[ up_thread_1.get_id() ]	= up_thread_data_1;
+
+	//----------------------------------------------------------------------
+	up_thread_data_2 = new session_thread_data_cinsert;
+
+	up_thread_data_2->thread_id				= up_thread_2.get_id();
+	up_thread_data_2->thread_division		= THREAD_DIVISION_UP_STREAM;
+	up_thread_data_2->pair_thread_id		= down_thread_2.get_id();
+	up_thread_data_2->client_endpoint_tcp	= client_endpoint_tcp_3;
+
+	buffer = (char*)malloc( client_recv_data_3.recive_buffer_max_size );
+
+	client_recv_data_3.recive_buffer	= buffer;
+	client_recv_data_3.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( client_recv_data_3.recive_buffer_max_size );
+
+	client_recv_data_3.recive_buffer_2	= buffer;
+
+	up_thread_data_2->recive_data_map[ client_endpoint_tcp_3 ] = client_recv_data_3;
+
+	session_thread_data_map[ up_thread_2.get_id() ]	= up_thread_data_2;
+
+	//----------------------------------------------------------------------
+	down_thread_data_1 = new session_thread_data_cinsert;
+
+	down_thread_data_1->thread_id			= down_thread_1.get_id();
+	down_thread_data_1->thread_division		= THREAD_DIVISION_DOWN_STREAM;
+	down_thread_data_1->pair_thread_id		= up_thread_1.get_id();
+	down_thread_data_1->client_endpoint_tcp	= client_endpoint_tcp_1;
+
+	buffer = (char*)malloc( realserver_recv_data_1.recive_buffer_max_size );
+
+	realserver_recv_data_1.recive_buffer	= buffer;
+	realserver_recv_data_1.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_1.recive_buffer_max_size );
+
+	realserver_recv_data_1.recive_buffer_2	= buffer;
+
+	down_thread_data_1->recive_data_map[ realserver_endpoint_tcp_1 ] = realserver_recv_data_1;
+
+	buffer = (char*)malloc( realserver_recv_data_2.recive_buffer_max_size );
+
+	realserver_recv_data_2.recive_buffer	= buffer;
+	realserver_recv_data_2.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_2.recive_buffer_max_size );
+
+	realserver_recv_data_2.recive_buffer_2	= buffer;
+
+	down_thread_data_1->recive_data_map[ realserver_endpoint_tcp_2 ] = realserver_recv_data_2;
+
+	buffer = (char*)malloc( realserver_recv_data_3.recive_buffer_max_size );
+
+	realserver_recv_data_3.recive_buffer	= buffer;
+	realserver_recv_data_3.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_3.recive_buffer_max_size );
+
+	realserver_recv_data_3.recive_buffer_2	= buffer;
+
+	down_thread_data_1->recive_data_map[ realserver_endpoint_tcp_3 ] = realserver_recv_data_3;
+
+	buffer = (char*)malloc( realserver_recv_data_4.recive_buffer_max_size );
+
+	realserver_recv_data_4.recive_buffer	= buffer;
+	realserver_recv_data_4.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_4.recive_buffer_max_size );
+
+	realserver_recv_data_4.recive_buffer_2	= buffer;
+
+	down_thread_data_1->recive_data_map[ realserver_endpoint_tcp_4 ] = realserver_recv_data_4;
+
+	session_thread_data_map[ down_thread_1.get_id() ]	= down_thread_data_1;
+
+	//----------------------------------------------------------------------
+	down_thread_data_2 = new session_thread_data_cinsert;
+
+	down_thread_data_2->thread_id			= down_thread_2.get_id();
+	down_thread_data_2->thread_division		= THREAD_DIVISION_DOWN_STREAM;
+	down_thread_data_2->pair_thread_id		= up_thread_2.get_id();
+	down_thread_data_2->client_endpoint_tcp	= client_endpoint_tcp_3;
+
+	buffer = (char*)malloc( realserver_recv_data_5.recive_buffer_max_size );
+
+	realserver_recv_data_5.recive_buffer	= buffer;
+	realserver_recv_data_5.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_5.recive_buffer_max_size );
+
+	realserver_recv_data_5.recive_buffer_2	= buffer;
+
+	down_thread_data_2->recive_data_map[ realserver_endpoint_tcp_5 ] = realserver_recv_data_5;
+
+	buffer = (char*)malloc( realserver_recv_data_6.recive_buffer_max_size );
+
+	realserver_recv_data_6.recive_buffer	= buffer;
+	realserver_recv_data_6.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_6.recive_buffer_max_size );
+
+	realserver_recv_data_6.recive_buffer_2	= buffer;
+
+	down_thread_data_2->recive_data_map[ realserver_endpoint_tcp_6 ] = realserver_recv_data_6;
+
+	buffer = (char*)malloc( realserver_recv_data_7.recive_buffer_max_size );
+
+	realserver_recv_data_7.recive_buffer		= buffer;
+	realserver_recv_data_7.recive_buffer_1	= buffer;
+
+	buffer = (char*)malloc( realserver_recv_data_7.recive_buffer_max_size );
+
+	realserver_recv_data_7.recive_buffer_2	= buffer;
+
+	down_thread_data_2->recive_data_map[ realserver_endpoint_tcp_7 ] = realserver_recv_data_7;
+
+	session_thread_data_map[ down_thread_2.get_id() ]	= down_thread_data_2;
+
+	//----------------------------------------------------------------------
+
+	thread_data_itr = session_thread_data_map.begin();
+
+	std::cout	<< "session_thread_data_map entry = ["
+				<< session_thread_data_map.size() << "]" << std::endl;
+
+	std::cout << std::endl;
+
+	i = 0;
+
+	while( thread_data_itr != session_thread_data_map.end() )
+	{
+		i++;
+
+		std::cout	<< "<< thread_data[" << i << "] >>" << std::endl;
+		std::cout	<< "key                     = ["
+					<< thread_data_itr->first << "]" << std::endl;
+		std::cout	<< "thread_id               = ["
+					<< thread_data_itr->second->thread_id << "]" << std::endl;
+		std::cout	<< "thread_division         = ["
+					<< thread_data_itr->second->thread_division << "]" << std::endl;
+		std::cout	<< "pair_thread_id          = ["
+					<< thread_data_itr->second->pair_thread_id << "]" << std::endl;
+		std::cout	<< "end_flag                = ["
+					<< thread_data_itr->second->end_flag << "]" << std::endl;
+		std::cout	<< "accept_end_flag         = ["
+					<< thread_data_itr->second->accept_end_flag << "]" << std::endl;
+		std::cout	<< "sorry_flag              = ["
+					<< thread_data_itr->second->sorry_flag << "]" << std::endl;
+		std::cout	<< "sorryserver_switch_flag = ["
+					<< thread_data_itr->second->sorryserver_switch_flag << "]" << std::endl;
+		std::cout	<< "realserver_switch_flag  = ["
+					<< thread_data_itr->second->realserver_switch_flag << "]" << std::endl;
+		std::cout	<< "client_endpoint_tcp     = ["
+					<< thread_data_itr->second->client_endpoint_tcp << "]" << std::endl;
+		std::cout	<< "recive_data_map entry = ["
+					<< thread_data_itr->second->recive_data_map.size() << "]" << std::endl;
+		std::cout << std::endl;
+
+		recive_data_num = 0;
+
+		if( thread_data_itr->first == up_thread_1.get_id() )
+		{
+			recive_data_num = 2;
+		}
+		else if( thread_data_itr->first == up_thread_2.get_id() )
+		{
+			recive_data_num = 1;
+		}
+		else if( thread_data_itr->first == down_thread_1.get_id() )
+		{
+			recive_data_num = 4;
+		}
+		else if( thread_data_itr->first == down_thread_2.get_id() )
+		{
+			recive_data_num = 3;
+		}
+
+		recive_data_itr = thread_data_itr->second->recive_data_map.begin();
+
+		j = 0;
+
+		while( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+		{
+			j++;
+
+			std::cout	<< "< recive_data[" << j << "] >" << std::endl;
+			std::cout	<< "key                     = ["
+						<< recive_data_itr->first << "]" << std::endl;
+			std::cout	<< "recive_buffer_max_size  = ["
+						<< recive_data_itr->second.recive_buffer_max_size << "]" << std::endl;
+			std::cout	<< "recive_buffer_rest_size = ["
+						<< recive_data_itr->second.recive_buffer_rest_size << "]" << std::endl;
+			std::cout	<< "recive_buffer           = ["
+						<< (void*)recive_data_itr->second.recive_buffer << "]" << std::endl;
+			std::cout	<< "recive_buffer_1         = ["
+						<< (void*)recive_data_itr->second.recive_buffer_1 << "]" << std::endl;
+			std::cout	<< "recive_buffer_2         = ["
+						<< (void*)recive_data_itr->second.recive_buffer_2 << "]" << std::endl;
+			std::cout << std::endl;
+
+			recive_data_itr++;
+
+		}
+
+		thread_data_itr++;
+
+	}
+
+	std::cout << std::endl;
+
+}
+
+void	session_thread_data_mutex_test( int thread_no, bool* ret )
+{
+
+	session_thread_data_cinsert*	thread_data		= NULL;
+	session_thread_data_map_itr		thread_data_itr;
+	bool							lock_result = false;
+
+	try
+	{
+		while( 1 )
+		{
+			{
+				boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+std::cout << "[" << thread_no << "] session_thread_data_map lock" << std::endl;
+				thread_data_itr = session_thread_data_map.begin();
+
+				if( thread_no % 2 == 0 )
+				{
+					thread_data_itr++;
+				}
+
+				if( thread_data_itr != session_thread_data_map.end() )
+				{
+
+					thread_data = thread_data_itr->second;
+	
+					lock_result = thread_data->session_thread_data_mutex->try_lock();
+std::cout << "[" << thread_no << "] thread_id = [" << thread_data->thread_id << "]" << std::endl;
+std::cout << "[" << thread_no << "] session_thread_data lock" << std::endl;
+std::cout << "[" << thread_no << "] lock_result = [" << lock_result << "]" << std::endl;
+
+					if( lock_result == true )
+					{
+						break;
+					}
+
+				}
+				else
+				{
+					break;
+				}
+std::cout << "[" << thread_no << "] session_thread_data_map unlock" << std::endl;
+			}
+
+			sleep(1);
+
+		}
+
+		if( thread_data != NULL )
+		{
+std::cout << "[" << thread_no << "] main" << std::endl;
+			thread_data->end_flag += thread_no;
+			sleep(1);
+
+std::cout << "[" << thread_no << "] thread_data->end_flag = [" << thread_data->end_flag << "]" << std::endl;	
+std::cout << "[" << thread_no << "] session_thread_data unlock" << std::endl;
+			thread_data->session_thread_data_mutex->unlock();
+
+		}
+	} catch (const std::exception& ex)
+	{
+	} catch (...)
+	{
+	}
+
+
+}
+
 //-------------------------------------------------------------------
 void	get_name_test()
 {
@@ -836,6 +1197,9 @@ void	handle_session_finalize_test()
 
 	}
 
+//	realserver_recv_data_1.recive_buffer_1[0] = 'a';
+//	realserver_recv_data_1.recive_buffer_1[0] = 'a';
+
 	std::cout << std::endl;
 
  	BOOST_CHECK( status == STOP );
@@ -1372,6 +1736,132 @@ void	handle_session_finalize_test()
 
 	BOOST_MESSAGE( "----- handle_session_finalize test multi thread end -----" );
 }
+
+void	session_thread_data_mutex_test_thread(
+				protocol_module_cinsert_test* protocol_module_cinsert_test_1,
+				int thread_no,
+				bool* ret )
+{
+	for( int i = 0; i < THREAD_LOOP_NUM; i++ )
+	{
+		protocol_module_cinsert_test_1->session_thread_data_mutex_test( thread_no, ret );
+	}
+}
+
+
+void	session_thread_data_mutex_test()
+{
+
+	bool	thread_1;
+	bool	thread_2;
+	bool	thread_3;
+	bool	thread_4;
+	bool	thread_5;
+
+	protocol_module_cinsert_test	protocol_module_cinsert_test_1;
+
+// 	BOOST_MESSAGE( "----- handle_realserver_disconnect test start -----" );
+// 	protocol_module_cinsert_test_1.handle_session_finalize_test();
+// 	BOOST_MESSAGE( "----- handle_realserver_disconnect test end -----" );
+
+	protocol_module_cinsert_test_1.session_thread_data_set();
+
+	BOOST_MESSAGE( "----- handle_realserver_disconnect test multi thread start -----" );
+	boost::thread	t0(	boost::bind(	&session_thread_data_map_lock,
+										&protocol_module_cinsert_test_1));
+
+	sleep(1);
+
+	boost::thread	t1(	boost::bind(	&session_thread_data_mutex_test_thread,
+										&protocol_module_cinsert_test_1, 1, &thread_1));
+	boost::thread	t2(	boost::bind(	&session_thread_data_mutex_test_thread,
+										&protocol_module_cinsert_test_1, 2, &thread_2));
+ 	boost::thread	t3(	boost::bind(	&session_thread_data_mutex_test_thread,
+ 										&protocol_module_cinsert_test_1, 3, &thread_3));
+ 	boost::thread	t4(	boost::bind(	&session_thread_data_mutex_test_thread,
+ 										&protocol_module_cinsert_test_1, 4, &thread_4));
+ 	boost::thread	t5(	boost::bind(	&session_thread_data_mutex_test_thread,
+ 										&protocol_module_cinsert_test_1, 5, &thread_5));
+
+	sleep(1);
+
+	protocol_module_cinsert_test_1.sync_condition.notify_all();
+
+	sleep(1);
+
+	protocol_module_cinsert_test_1.session_thread_data_map_condition.notify_all();
+
+	sleep(1);
+
+	protocol_module_cinsert_test_1.sync_condition.notify_all();
+
+	t1.join();
+	t2.join();
+ 	t3.join();
+ 	t4.join();
+ 	t5.join();
+
+// boost::posix_time::ptime		now;
+// now = boost::posix_time::second_clock::universal_time();
+// std::cout	<< "now = [" << now << "]" << std::endl;
+// std::cout	<< "now.date.year = [" << now.date().year() << "]" << std::endl;
+// std::cout	<< "now.date.month = [" << now.date().month() << "]" << std::endl;
+// std::cout	<< "now.date.day = [" << now.date().day() << "]" << std::endl;
+// std::cout	<< "now.date.day_of_week = [" << now.date().day_of_week() << "]" << std::endl;
+// std::cout	<< "now.date.week_number = [" << now.date().week_number() << "]" << std::endl;
+// std::cout	<< "now.time_of_day = [" << now.time_of_day() << "]" << std::endl;
+
+	boost::posix_time::ptime		now;
+	boost::array< char, MAX_OPTION_SIZE >	cookie_name;
+	memcpy(cookie_name.data(), "cookie_value", 13);
+	int cookie_expire	= 86400;
+	boost::asio::ip::address	address;
+	boost::asio::ip::tcp::endpoint endpoint_tcp( address, 11111 );
+
+	std::string		edit_data_cookie
+						=	str(boost::format(	"Set-Cookie: %1%=%2%:%3%;" )
+											% cookie_name.data()
+											% endpoint_tcp.address()
+											% endpoint_tcp.port());
+
+					now = boost::posix_time::second_clock::universal_time();// + cookie_expire;
+
+					boost::posix_time::time_duration	expire(0,0,cookie_expire,0);
+
+std::cout	<< "now = [" << now << "]" << std::endl;
+std::cout	<< "expire = [" << expire << "]" << std::endl;
+
+					now += expire; 
+
+std::cout	<< "now = [" << now << "]" << std::endl;
+
+					edit_data_cookie
+						+=	str(boost::format(	" expires=%1%, %2%-%3%-%4% %5% GMT; path=/\r\n" )
+											% now.date().day_of_week()
+											% now.date().day()
+											% now.date().month()
+											% now.date().year()
+ 											% now.time_of_day()
+											);
+// 					edit_data_cookie
+// 						+=	str(boost::format(	" expires=%1%, %2%-%3%-%4% %5% GMT; path=/\r\n\0" )
+// 											% now.date().day_of_week()
+// 											% now.date().day()
+// 											% now.date().month()
+// 											% now.date().year()
+// 											% now.time_of_day());
+
+std::cout	<< "cookie = [" << edit_data_cookie << "]" << std::endl;
+
+// 	BOOST_CHECK( thread_1 == true );
+// 	BOOST_CHECK( thread_2 == true );
+// 	BOOST_CHECK( thread_3 == true );
+// 	BOOST_CHECK( thread_4 == true );
+// 	BOOST_CHECK( thread_5 == true );
+
+	BOOST_MESSAGE( "----- handle_realserver_disconnect test multi thread end -----" );
+}
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -1386,8 +1876,11 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 // 
 // 
 // 	ts->add( BOOST_TEST_CASE( &handle_session_initialize_test ) );
-	ts->add( BOOST_TEST_CASE( &handle_session_finalize_test ) );
+// 	ts->add( BOOST_TEST_CASE( &handle_session_finalize_test ) );
 
+
+
+	ts->add( BOOST_TEST_CASE( &session_thread_data_mutex_test ) );
 
 	framework::master_test_suite().add( ts );
 
