@@ -411,6 +411,18 @@ namespace l7vs{
 			client_socket.close(ec);
 			return;
 		}
+		if(!client_socket.set_non_blocking_mode(ec)){
+			// socket set nonblocking mode error
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] set non blocking socket error :";
+			buf << ec.message();
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			exit_flag = true;
+			client_socket.close(ec);
+			return;
+		}
 		boost::asio::ip::udp::endpoint dumy_end;
 		protocol_module_base::EVENT_TAG module_event = protocol_module->handle_session_initialize(up_thread_id,down_thread_id,cl_end,dumy_end);
 		std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -932,8 +944,7 @@ namespace l7vs{
 			bool bres = new_socket->connect(server_endpoint,ec);
 			if(bres){
 				parent_service.connection_active(server_endpoint);
-				new_socket->set_non_blocking_mode(ec);
-				if(ec){
+				if(!new_socket->set_non_blocking_mode(ec)){
 					// socket set nonblocking mode error
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1344,8 +1355,7 @@ namespace l7vs{
 		bool bres = sorryserver_socket.second->connect(sorry_endpoint,ec);
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(bres){
-			sorryserver_socket.second->set_non_blocking_mode(ec);
-			if(ec){
+			if(!sorryserver_socket.second->set_non_blocking_mode(ec)){
 					// socket set nonblocking mode error
 				std::stringstream buf;
 				buf << "Thread ID[";
