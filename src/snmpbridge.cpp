@@ -694,6 +694,12 @@ void l7vs::snmpbridge::handle_send(const boost::system::error_code& error, size_
 int l7vs::snmpbridge::send_message(){
 	Logger logger( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 1, "send_message", __FILE__, __LINE__ );
 
+	if( connection_state == false ){
+		std::string msg( "snmpbridge is disconnect" );
+		Logger::putLogError( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND, 1, msg, __FILE__, __LINE__ );
+		return -1;
+	}
+
 	if (send_buffer == NULL || send_buffer_size == 0){
 		std::string msg( "send data is none" );
 		Logger::putLogError( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND, 1, msg, __FILE__, __LINE__ );

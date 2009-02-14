@@ -199,6 +199,7 @@ void send_trap_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	// send_trap
 	std::string msg = "error message";
@@ -270,6 +271,7 @@ void reload_config_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	// reload_config
 //	int ret = 0;
@@ -353,6 +355,7 @@ void change_loglevel_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	// change_loglevel 
 	int ret = 0;
@@ -432,6 +435,7 @@ void change_loglevel_allcategory_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	int ret = 0;
 	ret = test.change_loglevel_allcategory(LOG_LV_INFO);
@@ -519,6 +523,7 @@ void send_mibcollection_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	int ret = 0;
 #if 1
@@ -968,6 +973,7 @@ void get_loglevel_snmpbridge_test(){
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT ), LOG_LV_INFO );
 
 	// unit_test[144] snmpbridge get_loglevelの各カテゴリのログレベルをチェック
+	test.set_connection_state(true);
 	test.change_loglevel( LOG_CAT_SNMPAGENT_START_STOP, LOG_LV_DEBUG );
 	BOOST_CHECK_EQUAL( test.get_loglevel( LOG_CAT_SNMPAGENT_START_STOP ), LOG_LV_DEBUG );
 	test.change_loglevel( LOG_CAT_SNMPAGENT_MANAGER_RECEIVE, LOG_LV_DEBUG );
@@ -1003,6 +1009,7 @@ void get_loglevel_allcategory_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	// unit_test[145] get_loglevel_allcategory 全カテゴリのログレベルが取得出来ることを確認
 	test.change_loglevel_allcategory( LOG_LV_INFO );
@@ -1050,10 +1057,11 @@ void handle_receive_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	// unit_test[148] handle_receiveの呼び出しのチェック
 	boost::system::error_code error;
-	size_t bytes_transferred;
+	size_t bytes_transferred = 0;
 	test.handle_receive( error, bytes_transferred );
 
 	test.finalize();
@@ -1066,6 +1074,7 @@ void handle_send_snmpbridge_test(){
 	snmpbridge_testclass test(vsd, io_service);
 
 	test.initialize();
+	test.set_connection_state(true);
 
 	// unit_test[149] handle_sendの呼び出しのチェック
 	boost::system::error_code error;
