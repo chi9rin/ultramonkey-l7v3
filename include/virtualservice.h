@@ -63,6 +63,21 @@ public:
 
 	typedef	boost::shared_ptr<boost::mutex>					mutex_ptr;
 
+	typedef	std::list<l7vs::realserver>
+									rslist_type;
+	typedef	boost::function< rslist_type::iterator (void)>
+									rslist_iterator_begin_func_type;
+	typedef	boost::function< rslist_type::iterator (void)>
+									rslist_iterator_end_func_type;
+	typedef	boost::function< rslist_type::iterator (rslist_type::iterator)>
+									rslist_iterator_next_func_type;
+	typedef	boost::function< void (		const boost::thread::id,
+										rslist_iterator_begin_func_type,
+										rslist_iterator_end_func_type,
+										rslist_iterator_next_func_type,
+										boost::asio::ip::tcp::endpoint& ) >
+								tcp_schedule_func_type;
+
 	//!	@struct	replication_header replication header structure
 	struct	replication_header{
 		unsigned int	data_num;
@@ -164,6 +179,15 @@ protected:
 	void*						replication_pay_memory( const std::string& inid, unsigned int* outsize ){
 		l7vs::replication&	tmp_rep = const_cast<l7vs::replication&>( rep );
 		return tmp_rep.pay_memory( inid, *outsize );
+	}
+
+	void						schedule_rs(
+										boost::thread::id thread_id,
+										rslist_iterator_begin_func_type in_begin,
+										rslist_iterator_end_func_type in_end,
+										rslist_iterator_next_func_type in_next,
+										boost::asio::ip::tcp::endpoint& in_ep ){
+		schedmod->handle_schedule( thread_id, in_begin, in_end, in_next, in_ep );
 	}
 
 public:

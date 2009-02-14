@@ -314,6 +314,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					boost::bind( &l7vs::virtualservice_tcp::rs_list_unlock, this ),
 					element.tcp_accept_endpoint,
 					element.udp_recv_endpoint );
+	tcp_schedule_func_type	sched_rs_func	= boost::bind( &l7vs::virtualservice_tcp::schedule_rs, this, _1, _2, _3, _4, _5 );
+	protomod->register_schedule( sched_rs_func );
 
 	l7vs::protocol_module_base::check_message_result pm_result;
 	pm_result	=	protomod->check_parameter( element.protocol_args );
