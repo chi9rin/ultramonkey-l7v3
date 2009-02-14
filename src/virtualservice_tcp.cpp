@@ -791,6 +791,9 @@ void	l7vs::virtualservice_tcp::run(){
  */
 void	l7vs::virtualservice_tcp::stop(){
 	boost::system::error_code	err;
+
+	acceptor_.close();
+
 	//stop dispatcher
 	dispatcher.stop();
 
