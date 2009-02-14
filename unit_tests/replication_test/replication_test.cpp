@@ -2044,10 +2044,10 @@ void	replication_set_master_test(){
 
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
-//	BOOST_CHECK_EQUAL( repli1.initialize(), 0 );
-//	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
+	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-//	BOOST_CHECK_EQUAL( repli1.set_master_wrapper(), -1 );							// 不正なip_addrはruntime errorになるのでオミット
+	BOOST_CHECK_EQUAL( repli1.set_master_wrapper(), 0 );							// set_masterの時点ではendpointを使用していない
 
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 
@@ -2089,12 +2089,14 @@ void	replication_set_slave_test(){
 	// unit_test[145]  set_slaveのテスト(ip_adrが不正)
 	BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
-	get_string_table[0] = "192:168:0:20";			//	"ip_addr"
+	get_string_table[0] = "10.144.169.87";			//	"ip_addr"						作成失敗だと0.0.0.0:0でbind成功してしまうので使えないIPで
 
 	repli1.finalize();
 	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
+	BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
+	BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-//	BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), -1 );								// 不正なip_addrはruntime errorになるのでオミット
+	BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), -1 );
 
 	get_string_table[0] = "10.144.169.86";			//	"ip_addr"
 
