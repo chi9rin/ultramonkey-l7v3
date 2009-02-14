@@ -131,6 +131,9 @@ l7vs::l7vsd::vslist_type::iterator	l7vs::l7vsd::search_vslist( const virtualserv
 	return vslist.begin();
 }
 
+void	l7vs::l7vsd::release_virtual_service( const virtualservice_element& ) const {}
+
+
 int		l7vs::replication::initialize(){
 	return 0;
 }

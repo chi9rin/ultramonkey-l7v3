@@ -420,6 +420,8 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 	active_sessions.clear();
 	pool_sessions.clear();
 
+	vsd.release_virtual_service( element );
+
 	err.setter( false, "" );
 }
 
