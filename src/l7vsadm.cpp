@@ -512,6 +512,10 @@ bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			return false;
 		}
 	}
+	// realserver weight default value = 1
+	if( -1 == request.vs_element.realserver_vector.front().weight ){
+		request.vs_element.realserver_vector.front().weight = 1;
+	}
 
 	return true;
 }
@@ -529,8 +533,8 @@ bool	l7vs::l7vsadm::parse_opt_rs_weight_func( int& pos, int argc, char* argv[] )
 	}
 	try{
 		request.vs_element.realserver_vector.front().weight = boost::lexical_cast<int>( argv[pos] );
-		if( 0 == request.vs_element.realserver_vector.front().weight )
-			request.vs_element.realserver_vector.front().weight = INT_MAX;		// clear value
+		//if( 0 == request.vs_element.realserver_vector.front().weight )
+		//	request.vs_element.realserver_vector.front().weight = INT_MAX;		// clear value
 	}
 	catch( boost::bad_lexical_cast& ex ){
 		// lexical cast error
