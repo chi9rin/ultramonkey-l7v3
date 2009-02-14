@@ -95,7 +95,7 @@ void	list_virtual_service_test(){
 	l7vsd_test			vsd_test;
 
 	boost::asio::io_service	io;
-	l7vs::replication	rep(io);
+	l7vs::replication	rep;
 	l7vs::virtualservice_element	e;
 
 	boost::shared_ptr< l7vs::virtual_service > vs1( new l7vs::virtual_service( vsd_test, rep, e ) );
@@ -151,7 +151,7 @@ void	list_virtual_service_verbose_test(){
 
 	boost::asio::io_service	io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 	//l7vs::replication	rep(io);
 	boost::shared_ptr< l7vs::snmpbridge >
@@ -253,7 +253,7 @@ void	add_virtual_service_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 // 正常系
@@ -367,7 +367,7 @@ void	del_virtual_service_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	l7vs::virtualservice_element	elem;
@@ -486,7 +486,7 @@ void	edit_virtual_service_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	l7vs::virtualservice_element	elem;
@@ -538,7 +538,7 @@ void	add_real_server_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	l7vs::virtualservice_element	elem;
@@ -590,7 +590,7 @@ void	del_real_server_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	l7vs::virtualservice_element	elem;
@@ -642,7 +642,7 @@ void	edit_real_server_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	l7vs::virtualservice_element	elem;
@@ -695,7 +695,7 @@ void	flush_virtual_service_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	l7vs::virtualservice_element	elem;
@@ -792,7 +792,7 @@ void	replication_command_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	// REP_START
@@ -863,7 +863,7 @@ void	set_loglevel_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	std::vector< l7vs::LOG_CATEGORY_TAG > categories;
@@ -1059,7 +1059,7 @@ void	set_snmp_loglevel_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	boost::shared_ptr< l7vs::snmpbridge >
@@ -1211,7 +1211,7 @@ void	reload_parameter_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 	boost::shared_ptr< l7vs::snmpbridge >
 									bridge( new l7vs::snmpbridge( vsd_test, io ) );
@@ -1270,7 +1270,7 @@ void	search_vslist_test(){
 	l7vsd_test			vsd_test;
 
 	boost::asio::io_service	io;
-	l7vs::replication	rep( io );
+	l7vs::replication	rep;
 	l7vs::virtualservice_element	e;
 
 	boost::shared_ptr< l7vs::virtual_service > vs1( new l7vs::virtual_service( vsd_test, rep, e ) );

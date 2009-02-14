@@ -88,7 +88,7 @@ void	thread_test(){
 
 	l7vs::l7vsd	vsd;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication( server_io ) );
+									rep( new l7vs::replication() );
 	vsd.set_replication( rep );
 
 	l7vs::command_receiver	receiver( server_io, SOCKFILE, vsd );

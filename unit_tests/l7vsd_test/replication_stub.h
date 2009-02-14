@@ -16,7 +16,7 @@ public:
 	};
 
 //variable
-	boost::asio::io_service&				receive_io;
+//	boost::asio::io_service&				receive_io;
 	bool	switch_to_master_called;
 	bool	switch_to_slave_called;
 
@@ -32,9 +32,8 @@ public:
 	static	bool	reset_called;
 
 //function
-	replication(	boost::asio::io_service& inreceive_io )
-				:	receive_io( inreceive_io ),
-					switch_to_master_called(false),
+	replication()
+				:	switch_to_master_called(false),
 					switch_to_slave_called(false)
 	{};
 

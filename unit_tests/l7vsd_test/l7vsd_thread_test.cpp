@@ -240,7 +240,7 @@ void	thread_test(){
 
 	boost::asio::io_service			io;
 	boost::shared_ptr< l7vs::replication >
-									rep( new l7vs::replication(io) );
+									rep( new l7vs::replication() );
 	vsd_test.set_replication( rep );
 
 	boost::shared_ptr< l7vs::snmpbridge >
