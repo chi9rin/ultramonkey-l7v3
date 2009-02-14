@@ -232,6 +232,26 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 		session_thread_control_ptr	stc_ptr;
 		{
 			boost::mutex::scoped_lock lk( sessions_mutex );
+			if( pool_sessions.begin() == pool_sessions.end() ){
+				l7vs::tcp_session*	sess;
+				try{
+					sess	= new l7vs::tcp_session( *this, dispatcher );
+				}
+				catch( std::bad_alloc ){ //bad alloc exception catch
+					l7vs::Logger::putLogFatal( 
+						l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "error, create session.", __FILE__, __LINE__ );
+					return;
+				}
+				sess->initialize();
+				boost::shared_ptr<session_thread_control>	stc( new l7vs::session_thread_control( sess ) );
+				std::pair<session_map_type::iterator,bool> retval;
+				retval	= pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
+				if( !retval.second ){
+					l7vs::Logger::putLogFatal( 
+						l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "error, create session.", __FILE__, __LINE__ );
+					return;
+				}
+			}
 			t_id	= pool_sessions.begin()->first;
 			stc_ptr	= pool_sessions.begin()->second;
 		
@@ -341,14 +361,17 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 				sess	= new l7vs::tcp_session( *this, dispatcher );
 			}
 			catch( std::bad_alloc ){ //bad alloc exception catch
-				err.setter( true, "error, create session pool." );
+				l7vs::Logger::putLogFatal( 
+					l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "error, create session.", __FILE__, __LINE__ );
 				return;
 			}
+			sess->initialize();
 			boost::shared_ptr<session_thread_control>	stc( new l7vs::session_thread_control( sess ) );
 			std::pair<session_map_type::iterator,bool> retval;
 			retval	= pool_sessions.insert( session_map_pair_type(stc->get_upthread_id(), stc) );
 			if( !retval.second ){
-				err.setter( true, "error, create session pool." );
+				l7vs::Logger::putLogFatal( 
+					l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "error, create session.", __FILE__, __LINE__ );
 				return;
 			}
 		}
