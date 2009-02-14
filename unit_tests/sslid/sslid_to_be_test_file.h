@@ -7,5 +7,5 @@
 #include "../../module/protocol/sslid_replication_data_processor.cpp"
 #include "../../module/protocol/sslid_session_data_processor.cpp"
 #include "../../module/protocol/protocol_module_sslid.cpp"
-
+#define THREAD_COUNT 10
 #endif /* SSLID_TO_BE_TEST_FILE_H_ */

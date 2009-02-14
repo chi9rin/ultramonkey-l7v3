@@ -804,7 +804,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30023, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                putLogDebug(30023, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                             "set_parameter() : get_replication_area() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -813,7 +813,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30024, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                putLogDebug(30024, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                             "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -822,7 +822,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30025, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                putLogDebug(30025, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                             "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -831,7 +831,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30026, "protocol_module_sslid::check_message_result protocol_module_sslid::"
+                putLogDebug(30026, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                             "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -872,7 +872,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
 
         result.flag = false;
         std::cerr << "set parameter exception : error = " << e.what() << std::endl;
-        boost::format formatter("function protocol_module_sslid::check_message_result "
+        boost::format formatter("function : protocol_module_sslid::check_message_result "
                                 "protocol_module_sslid::set_parameter() : exception : error = %s.");
         formatter % e.what();
         putLogError(37022, formatter.str(), __FILE__, __LINE__);
@@ -893,7 +893,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
 
         result.flag = false;
         std::cerr << "protocol_module_sslid::set_parameter() : Unknown exception." << std::endl;
-        putLogError(37023, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
+        putLogError(37023, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                     "set_parameter() : Unknown exception.", __FILE__, __LINE__);
     }
 
@@ -1032,19 +1032,16 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
     /*------DEBUG LOG END------*/
 
     EVENT_TAG status = ACCEPT;
-    session_thread_data_sslid* threaddata_up = NULL;
-    session_thread_data_sslid* threaddata_down = NULL;
 
     try
     {
+        thread_data_ptr threaddata_up(new session_thread_data_sslid);
         // initialize the up/down thread data
-        threaddata_up = new session_thread_data_sslid;
-
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("new : address = &(%d), size = %lu.");
-            formatter % static_cast<void*>(threaddata_up) % sizeof(session_thread_data_sslid);
+            formatter % static_cast<void*>(threaddata_up.get()) % sizeof(session_thread_data_sslid);
             putLogDebug(30035, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -1079,13 +1076,13 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
         }
         /*------DEBUG LOG END------*/
 
-        threaddata_down = new session_thread_data_sslid;
+        thread_data_ptr threaddata_down(new session_thread_data_sslid);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
             boost::format formatter("new : address = &(%d), size = %lu.");
-            formatter % static_cast<void*>(threaddata_down) % sizeof(session_thread_data_sslid);
+            formatter % static_cast<void*>(threaddata_down.get()) % sizeof(session_thread_data_sslid);
             putLogDebug(30037, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -1129,18 +1126,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
     }
     catch (const std::bad_alloc& ba)
     {
-        if (threaddata_up)
-        {
-            delete threaddata_up;
-            threaddata_up = NULL;
-        }
-
-        if (threaddata_down)
-        {
-            delete threaddata_down;
-            threaddata_down = NULL;
-        }
-
         std::cerr << "handle_session_initialize exception : Could not allocate memory." << std::endl;
         putLogError(37025, "Could not allocate memory.", __FILE__, __LINE__);
 
@@ -1148,18 +1133,6 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
     }
     catch (const std::exception& e)
     {
-        if (threaddata_up)
-        {
-            delete threaddata_up;
-            threaddata_up = NULL;
-        }
-
-        if (threaddata_down)
-        {
-            delete threaddata_down;
-            threaddata_down = NULL;
-        }
-
         std::cerr << "handle_session_initialize exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_session_initialize() : exception : error = %s.");
@@ -1170,20 +1143,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
     }
     catch (...)
     {
-        if (threaddata_up)
-        {
-            delete threaddata_up;
-            threaddata_up = NULL;
-        }
-
-        if (threaddata_down)
-        {
-            delete threaddata_down;
-            threaddata_down = NULL;
-        }
-
         std::cerr << "protocol_module_sslid::handle_session_initialize() : Unknown exception." << std::endl;
-        putLogError(37027, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
+        putLogError(37027, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                     "handle_session_initialize() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
@@ -1238,13 +1199,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("delete : address = &(%d).");
-                formatter % static_cast<void*>(itthread->second);
+                formatter % static_cast<void*>(itthread->second.get());
                 putLogDebug(30041, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
-
-            delete itthread->second;
-            itthread->second = NULL;
             session_thread_data_map.erase(itthread);
         }
 
@@ -1255,13 +1213,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
             if (LOG_LV_DEBUG == getloglevel())
             {
                 boost::format formatter("delete : address = &(%d).");
-                formatter % static_cast<void*>(itthread->second);
+                formatter % static_cast<void*>(itthread->second.get());
                 putLogDebug(30042, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
-
-            delete itthread->second;
-            itthread->second = NULL;
             session_thread_data_map.erase(itthread);
         }
     }
@@ -1276,7 +1231,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_finalize(
     catch (...)
     {
         std::cerr << "protocol_module_sslid::handle_session_finalize() : Unknown exception." << std::endl;
-        putLogError(37029, "function protocol_module_sslid::check_message_result protocol_module_sslid::"
+        putLogError(37029, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
                     "handle_session_finalize() : Unknown exception.", __FILE__, __LINE__);
     }
 
@@ -1326,17 +1281,19 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        size_t buffer_size = recvbuffer.size() < recvlen ? recvbuffer.size() : recvlen;
+        std::string buffer(recvbuffer.data(), buffer_size);
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_client_recv(const boost::thread::id thread_id, "
                                 "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                 "const size_t recvlen) : thread_id = %d, recvbuffer = %s, recvlen = %d.");
-        formatter % thread_id % recvbuffer.data() % recvlen;
+        formatter % thread_id % buffer % recvlen;
         putLogDebug(30045, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
     try
     {
@@ -1392,7 +1349,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
 
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                             "handle_client_recv() : before memmove (data dump) : "
-                                            "data begin = %d, data_size = %d, data = %s.");
+                                            "data begin = %d, data_size = %d, data = %s");
                     formatter % threaddata->data_begain_offset % threaddata->data_size % datadump;
                     putLogDebug(30046, formatter.str(), __FILE__, __LINE__);
                 }
@@ -1410,7 +1367,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
 
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                             "handle_client_recv() : after memmove (data dump) : "
-                                            "data begin = 0, data_size = %d, data = %s.");
+                                            "data begin = 0, data_size = %d, data = %s");
                     formatter % threaddata->data_size % datadump;
                     putLogDebug(30047, formatter.str(), __FILE__, __LINE__);
                 }
@@ -1426,7 +1383,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
 
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                         "handle_client_recv() : before memcpy (data dump) : "
-                                        "data begin = 0, data_size = %d, data = %s.");
+                                        "data begin = 0, data_size = %d, data = %s");
                 formatter % threaddata->data_size % datadump;
                 putLogDebug(30048, formatter.str(), __FILE__, __LINE__);
             }
@@ -1448,7 +1405,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
 
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                         "handle_client_recv() : after memcpy (data dump) : "
-                                        "data begin = 0, data_size = %d, data = %s.");
+                                        "data begin = 0, data_size = %d, data = %s");
                 formatter % threaddata->data_size % datadump;
                 putLogDebug(30049, formatter.str(), __FILE__, __LINE__);
             }
@@ -1532,7 +1489,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
     catch (...)
     {
         std::cerr << "protocol_module_sslid::handle_client_recv() : Unknown exception." << std::endl;
-        putLogError(37034, "function protocol_module_sslid::check_message_result "
+        putLogError(37034, "function : protocol_module_sslid::check_message_result "
                     "protocol_module_sslid::handle_client_recv() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
@@ -1574,7 +1531,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
 
     try
@@ -1663,7 +1620,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                         }
                         /*------DEBUG LOG END------*/
 
-                        putLogInfo(35001, "Realserver decision failure", __FILE__, __LINE__);
+                        putLogInfo(35001, "Realserver decision failure.", __FILE__, __LINE__);
 
                         threaddata->end_flag = END_FLAG_ON;
                         return FINALIZE;
@@ -1856,7 +1813,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     catch (...)
     {
         std::cerr << "protocol_module_sslid::handle_realserver_select() : Unknown exception." << std::endl;
-        putLogError(37037, "function protocol_module_sslid::check_message_result "
+        putLogError(37037, "function : protocol_module_sslid::check_message_result "
                     "protocol_module_sslid::handle_realserver_select() : Unknown exception.", __FILE__, __LINE__);
 
         putLogInfo(35003, "Realserver decision failure.", __FILE__, __LINE__);
@@ -1949,8 +1906,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
             }
             else
             {
-                session_thread_data_sslid* threaddata = it->second;
-                threaddata->realserver_connect_failed_count = 0;
+                it->second->realserver_connect_failed_count = 0;
             }
         }
     }
@@ -2008,7 +1964,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
 
     try
@@ -2109,7 +2065,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
 
     try
@@ -2209,7 +2165,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
     catch (...)
     {
         std::cerr << "protocol_module_sslid::handle_realserver_send() : Unknown exception." << std::endl;
-        putLogError(37046, "function protocol_module_sslid::check_message_result "
+        putLogError(37046, "function : protocol_module_sslid::check_message_result "
                     "protocol_module_sslid::handle_realserver_send() : Unknown exception.", __FILE__, __LINE__);
 
         status = FINALIZE;
@@ -2332,6 +2288,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        size_t buffer_size = recvbuffer.size() < recvlen ? recvbuffer.size() : recvlen;
+        std::string buffer(recvbuffer.data(), buffer_size);
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_realserver_recv(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint& rs_endpoint, "
@@ -2339,7 +2297,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                 "const size_t recvlen) : thread_id = %d, rs_endpoint = [%s]:%d, "
                                 "recvbuffer = %s, recvlen = %d.");
         formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port() %
-        recvbuffer.data() % recvlen;
+        buffer % recvlen;
         putLogDebug(30085, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -2366,7 +2324,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     }
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
 
     try
@@ -2435,7 +2393,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
 
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                         "handle_realserver_recv() : before memmove (data dump) : "
-                                        "data begin = %d, data_size = %d, data = %s.");
+                                        "data begin = %d, data_size = %d, data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->data_size % datadump;
                 putLogDebug(30089, formatter.str(), __FILE__, __LINE__);
             }
@@ -2453,7 +2411,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
 
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                         "handle_realserver_recv() : after memmove (data dump) : "
-                                        "data begin = 0, data_size = %d, data = %s.");
+                                        "data begin = 0, data_size = %d, data = %s");
                 formatter % threaddata->data_size % datadump;
                 putLogDebug(30090, formatter.str(), __FILE__, __LINE__);
             }
@@ -2469,7 +2427,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
 
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_realserver_recv() : before memcpy (data dump) : "
-                                    "data begin = 0, data_size = %d, data = %s.");
+                                    "data begin = 0, data_size = %d, data = %s");
             formatter % threaddata->data_size % datadump;
             putLogDebug(30091, formatter.str(), __FILE__, __LINE__);
         }
@@ -2491,7 +2449,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
 
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                     "handle_realserver_recv() : after memcpy (data dump) : "
-                                    "data begin = 0, data_size = %d, data = %s.");
+                                    "data begin = 0, data_size = %d, data = %s");
             formatter % threaddata->data_size % datadump;
             putLogDebug(30092, formatter.str(), __FILE__, __LINE__);
         }
@@ -2680,7 +2638,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
 
     try
@@ -2868,7 +2826,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
 
     try
@@ -3201,7 +3159,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
     /*------DEBUG LOG END------*/
 
     // find session_thread_data_sslid's pointer from map
-    session_thread_data_sslid* threaddata = NULL;
+    thread_data_ptr threaddata;
     datalen = 0;
 
     {
@@ -3256,7 +3214,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "::put_data_to_sendbuffer() : data_size <= sendbuffer size. "
                                         "before memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30126, formatter.str(), __FILE__, __LINE__);
@@ -3287,7 +3245,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "put_data_to_sendbuffer() : data_size <= sendbuffer size. "
                                         "after memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30127, formatter.str(), __FILE__, __LINE__);
@@ -3307,7 +3265,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "::put_data_to_sendbuffer() : data_size > sendbuffer size. "
                                         "before memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30128, formatter.str(), __FILE__, __LINE__);
@@ -3337,7 +3295,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "put_data_to_sendbuffer() : data_size > sendbuffer size. "
                                         "after memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30129, formatter.str(), __FILE__, __LINE__);
@@ -3370,7 +3328,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "::put_data_to_sendbuffer() : current_record_rest_size <= sendbuffer size. "
                                         "before memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30131, formatter.str(), __FILE__, __LINE__);
@@ -3400,7 +3358,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "::put_data_to_sendbuffer() : current_record_rest_size <= sendbuffer size. "
                                         "after memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30132, formatter.str(), __FILE__, __LINE__);
@@ -3420,7 +3378,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "::put_data_to_sendbuffer() : current_record_rest_size > sendbuffer size. "
                                         "before memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30133, formatter.str(), __FILE__, __LINE__);
@@ -3450,7 +3408,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                                         "::put_data_to_sendbuffer() : current_record_rest_size > sendbuffer size. "
                                         "after memcpy (data dump) : data_begin_offset = %d, "
                                         "current_record_rest_size = %d, data_size = %d, dump data begin = 0, "
-                                        "dump data_size = %d, dump data = %s.");
+                                        "dump data_size = %d, dump data = %s");
                 formatter % threaddata->data_begain_offset % threaddata->current_record_rest_size
                 % threaddata->data_size % datadump;
                 putLogDebug(30134, formatter.str(), __FILE__, __LINE__);

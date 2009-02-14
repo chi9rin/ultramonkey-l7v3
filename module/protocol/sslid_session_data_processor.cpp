@@ -415,7 +415,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
 
             boost::format formatter("function : int sslid_session_data_processor::"
                                     "read_session_data_from_replication_area() : "
-                                    "data begin = 0, data_size = %d, data = %s.");
+                                    "data begin = 0, data_size = %d, data = %s");
             formatter % maxlist % datadump;
             putLogDebug(30018, formatter.str(), __FILE__, __LINE__);
         }

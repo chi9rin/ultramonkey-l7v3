@@ -370,7 +370,6 @@ void initialize_test() {
     BOOST_CHECK(!this->rs_list_next);
     BOOST_CHECK(!this->rs_list_lock);
     BOOST_CHECK(!this->rs_list_unlock);
-
 }
 
 //finalize
@@ -1949,7 +1948,7 @@ void handle_session_initialize_test() {
                     down_thread.get_id(), client_endpoint_tcp,
                     client_endpoint_udp);
     BOOST_CHECK_EQUAL(status, ACCEPT);
-    std::map<const boost::thread::id, session_thread_data_sslid*>::iterator
+    std::map<const boost::thread::id, thread_data_ptr>::iterator
             itr;
     itr = this->session_thread_data_map.find(boost::this_thread::get_id());
     BOOST_CHECK(itr != this->session_thread_data_map.end());
@@ -1975,6 +1974,52 @@ void handle_session_initialize_test() {
     BOOST_CHECK(!itr->second->hello_message_flag);
 }
 
+//handle_session_initialize
+void handle_session_initialize_test_thread() {
+
+    boost::thread down_thread(down_thread_func);
+    boost::asio::ip::tcp::endpoint ep;
+    boost::asio::ip::tcp::endpoint client_endpoint_tcp;
+    boost::asio::ip::udp::endpoint client_endpoint_udp;
+
+    cout << "[118]------------------------------------------\n";
+    // unit_test[118] パラメータが正常に入力去れた場合、戻り値にACCEPTを設定する。
+    EVENT_TAG status =
+            this->handle_session_initialize(boost::this_thread::get_id(),
+                    down_thread.get_id(), client_endpoint_tcp,
+                    client_endpoint_udp);
+    BOOST_CHECK_EQUAL(status, ACCEPT);
+    std::map<const boost::thread::id, thread_data_ptr>::iterator itr;
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        itr = this->session_thread_data_map.find(boost::this_thread::get_id());
+	BOOST_CHECK(itr != this->session_thread_data_map.end());
+    }
+    BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_UP_STREAM);
+    BOOST_CHECK_EQUAL(itr->second->pair_thread_id, down_thread.get_id());
+    BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
+    BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
+    BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
+    BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
+    BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
+    BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
+    BOOST_CHECK(!itr->second->hello_message_flag);
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        itr = this->session_thread_data_map.find(down_thread.get_id());
+	BOOST_CHECK(itr != this->session_thread_data_map.end());
+    }
+    BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_DOWN_STREAM);
+    BOOST_CHECK_EQUAL(itr->second->pair_thread_id, boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
+    BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
+    BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
+    BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
+    BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
+    BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
+    BOOST_CHECK(!itr->second->hello_message_flag);
+}
+
 //handle_session_finalize
 void handle_session_finalize_test() {
     boost::thread down_thread(down_thread_func);
@@ -1989,7 +2034,7 @@ void handle_session_finalize_test() {
     status = this->handle_session_finalize(boost::this_thread::get_id(),
             down_thread.get_id());
     BOOST_CHECK_EQUAL(status, STOP);
-    std::map<const boost::thread::id, session_thread_data_sslid*>::iterator
+    std::map<const boost::thread::id, thread_data_ptr>::iterator
             itr;
     itr = this->session_thread_data_map.find(boost::this_thread::get_id());
     BOOST_CHECK(itr == this->session_thread_data_map.end());
@@ -1998,8 +2043,8 @@ void handle_session_finalize_test() {
 
     cout << "[120]------------------------------------------" << endl;
     // unit_test[120] 初期化しなくて、直接該当関数を呼び出す場合、戻り値にSTOPを設定する。
-    this->session_thread_data_map[boost::this_thread::get_id()] = new session_thread_data_sslid;
-    this->session_thread_data_map[down_thread.get_id()] = new session_thread_data_sslid;
+    this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_ptr(new session_thread_data_sslid);
+    this->session_thread_data_map[down_thread.get_id()] = thread_data_ptr(new session_thread_data_sslid);
     status = this->handle_session_finalize(boost::this_thread::get_id(),
             down_thread.get_id());
     BOOST_CHECK_EQUAL(status, STOP);
@@ -2009,28 +2054,79 @@ void handle_session_finalize_test() {
     BOOST_CHECK(itr == this->session_thread_data_map.end());
 }
 
+//handle_session_finalize
+void handle_session_finalize_test_thread() {
+    boost::thread down_thread(down_thread_func);
+    EVENT_TAG status;
+    boost::asio::ip::tcp::endpoint client_endpoint_tcp;
+    boost::asio::ip::udp::endpoint client_endpoint_udp;
+
+    cout << "[119]------------------------------------------\n";
+    // unit_test[119] パラメータが正常に入力された場合、戻り値にSTOPを設定する。
+    this->handle_session_initialize(boost::this_thread::get_id(),
+            down_thread.get_id(), client_endpoint_tcp, client_endpoint_udp);
+    status = this->handle_session_finalize(boost::this_thread::get_id(),
+            down_thread.get_id());
+    BOOST_CHECK_EQUAL(status, STOP);
+    std::map<const boost::thread::id, thread_data_ptr>::iterator itr;
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        itr = this->session_thread_data_map.find(boost::this_thread::get_id());
+	BOOST_CHECK(itr == this->session_thread_data_map.end());
+    }
+    
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        itr = this->session_thread_data_map.find(down_thread.get_id());
+	BOOST_CHECK(itr == this->session_thread_data_map.end());
+    }
+    
+
+    cout << "[120]------------------------------------------" << endl;
+}
+
 //handle_accept
 void handle_accept_test(){
     cout << "[121]------------------------------------------" << endl;
 	//unit_test[121] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
+
 	boost::asio::ip::tcp::endpoint ep;
-	session_thread_data_sslid thread_up_data_value;
-	thread_up_data_value.thread_division=THREAD_DIVISION_UP_STREAM;
-	thread_up_data_value.realserver_connect_failed_count=0;
-	thread_up_data_value.data_begain_offset=0;
-	thread_up_data_value.data_size=0;
-	thread_up_data_value.current_record_rest_size=0;
-	thread_up_data_value.hello_message_flag=false;
-	session_thread_data_sslid* thread_up_data=&thread_up_data_value;
-	this->session_thread_data_map.insert(std::pair<const boost::thread::id,session_thread_data_sslid*>(boost::this_thread::get_id(),thread_up_data));
+	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
+	thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
+	thread_up_data_value->realserver_connect_failed_count=0;
+	thread_up_data_value->data_begain_offset=0;
+	thread_up_data_value->data_size=0;
+	thread_up_data_value->current_record_rest_size=0;
+	thread_up_data_value->hello_message_flag=false;
+	thread_data_ptr thread_data(thread_up_data_value);
+	this->session_thread_data_map.insert(std::pair<const boost::thread::id,thread_data_ptr>(boost::this_thread::get_id(),thread_data));
 	BOOST_CHECK_EQUAL(this->handle_accept(boost::this_thread::get_id()), protocol_module_base::CLIENT_RECV);
 	this->session_thread_data_map.clear();
+}
+
+void handle_accept_test_thread(){
+    cout << "[122]------------------------------------------\n";
+	//unit_test[121] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
+
+	boost::asio::ip::tcp::endpoint ep;
+	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
+	thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
+	thread_up_data_value->realserver_connect_failed_count=0;
+	thread_up_data_value->data_begain_offset=0;
+	thread_up_data_value->data_size=0;
+	thread_up_data_value->current_record_rest_size=0;
+	thread_up_data_value->hello_message_flag=false;
+	thread_data_ptr thread_data(thread_up_data_value);
+	{
+	    boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map.insert(std::pair<const boost::thread::id,thread_data_ptr>(boost::this_thread::get_id(),thread_data));
+	}
+	BOOST_CHECK_EQUAL(this->handle_accept(boost::this_thread::get_id()), protocol_module_base::CLIENT_RECV);
 }
 
 //handle_client_recv
 void handle_client_recv_test() {
 
-    session_thread_data_sslid* up_thread_data;
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     int recvlen = 0;
     EVENT_TAG status;
@@ -2040,645 +2136,666 @@ void handle_client_recv_test() {
 
     cout << "[122]------------------------------------------" << endl;
     // unit_test[122] 終了フラグがONの場合、戻り値にCLIENT_RECVを設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_ON;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_ON;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[123]------------------------------------------" << endl;
     // unit_test[123] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
     // unit_test[123] 且つ受信データサイズ > 0、且つdata_begain_offset = 0の場合、戻り値をREALSERVER_SELECTに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 10u;
-    recvlen = 3;
-    for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x01;
-	}
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-    mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 10u;
+        recvlen = 3;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[124]------------------------------------------" << endl;
     // unit_test[124] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
     // unit_test[124] 且つ受信データサイズ > 0、且つdata_begain_offset > 0の場合、戻り値をREALSERVER_SELECTに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->current_record_rest_size = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-	recvlen = 3;
-	for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x02;
-	}
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->current_record_rest_size = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 3;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x02;
+        }
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[125]------------------------------------------" << endl;
     // unit_test[125] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[125] 且つdata_begain_offset が 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvbuffer[0] = 0x00;
-    recvlen = 6;
-	for(int i=1; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x03;
-	}
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvbuffer[0] = 0x00;
+        recvlen = 6;
+        for(int i=1; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x03;
+        }
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[126]------------------------------------------" << endl;
     // unit_test[126] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[126] 且つdata_begain_offset > 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvbuffer[0] = 0x00;
-    recvlen = 6;
-	for(int i=1; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x04;
-	}
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-    mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvbuffer[0] = 0x00;
+        recvlen = 6;
+        for(int i=1; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x04;
+        }
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[127]------------------------------------------" << endl;
     // unit_test[127] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[127] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 1;
-	recvbuffer[0] = 0x05;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 1u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 1;
+        recvbuffer[0] = 0x05;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 1u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[128]------------------------------------------" << endl;
     // unit_test[128] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[128] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 1;
-	recvbuffer[0] = 0x06;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 1u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 1;
+        recvbuffer[0] = 0x06;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 1u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[129]------------------------------------------" << endl;
     // unit_test[129] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[129] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 76;
-    recvbuffer[0] = 0x16;
-    recvbuffer[1] = 0x03;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-    recvbuffer[5] = 0x01;
-	recvbuffer[6] = 0x07;
-	recvbuffer[7] = 0x07;
-	recvbuffer[8] = 0x07;
-    recvbuffer[9] = 0x03;
-    recvbuffer[10] = 0x01;
-	for(int i=11;i<recvlen;i++)
-	{
-		recvbuffer[i] = 0x07;
-	}
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 76;
+        recvbuffer[0] = 0x16;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x01;
+        recvbuffer[6] = 0x07;
+        recvbuffer[7] = 0x07;
+        recvbuffer[8] = 0x07;
+        recvbuffer[9] = 0x03;
+        recvbuffer[10] = 0x01;
+        for(int i=11;i<recvlen;i++)
+        {
+            recvbuffer[i] = 0x07;
+        }
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[130]------------------------------------------" << endl;
     // unit_test[130] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[130] 且つ、data_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値にREALSERVER_SELECTを設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 76;
-    recvbuffer[0] = 0x16;
-    recvbuffer[1] = 0x03;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-    recvbuffer[5] = 0x01;
-	recvbuffer[6] = 0x08;
-	recvbuffer[7] = 0x08;
-	recvbuffer[8] = 0x08;
-    recvbuffer[9] = 0x03;
-    recvbuffer[10] = 0x01;
-	for(int i=11; i< recvlen; i++)
-	{
-		recvbuffer[i] = 0x08;
-	}
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 76;
+        recvbuffer[0] = 0x16;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x01;
+        recvbuffer[6] = 0x08;
+        recvbuffer[7] = 0x08;
+        recvbuffer[8] = 0x08;
+        recvbuffer[9] = 0x03;
+        recvbuffer[10] = 0x01;
+        for(int i=11; i< recvlen; i++)
+        {
+            recvbuffer[i] = 0x08;
+        }
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[131]------------------------------------------" << endl;
     // unit_test[131] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[131] 且つ data_begain_offset = 0で、且つ且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 6;
-    recvbuffer[0] = 0x17;
-    recvbuffer[1] = 0x03;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-	recvbuffer[5] = 0x09;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 6;
+        recvbuffer[0] = 0x17;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x09;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[132]------------------------------------------" << endl;
     // unit_test[132] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
     // unit_test[132] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 6;
-    recvbuffer[0] = 0x17;
-    recvbuffer[1] = 0x03;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-	recvbuffer[5] = 0x10;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 6;
+        recvbuffer[0] = 0x17;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x10;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), recvbuffer.c_array(), recvlen);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[133]------------------------------------------" << endl;
     // unit_test[133] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset > 0の場合
     // unit_test[133] 戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 36u;
-    up_thread_data->current_record_rest_size = 15u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 5;
-	for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x11;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 36u;
+        up_thread_data->current_record_rest_size = 15u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 5;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x11;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[134]------------------------------------------" << endl;
     // unit_test[134] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset = 0の場合
     // unit_test[134] 戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 15u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 5;
-	for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x12;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 15u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 5;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x12;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[135]------------------------------------------" << endl;
     // unit_test[135] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで,且つdata_begain_offset > 0
     // unit_test[135] 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
     // unit_test[135] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_begain_offset = 12u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 5;
-    recvbuffer[0] = 0x00;
-	for(int i=1; i< recvlen; i++)
-	{
-		recvbuffer[i] = 0x13;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_begain_offset = 12u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 5;
+        recvbuffer[0] = 0x00;
+        for(int i=1; i< recvlen; i++)
+        {
+            recvbuffer[i] = 0x13;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[136]------------------------------------------" << endl;
     // unit_test[136] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
     // unit_test[136] 且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合
     // unit_test[136] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 5;
-    recvbuffer[0] = 0x00;
-	for(int i=1; i< recvlen; i++)
-	{
-		recvbuffer[i] = 0x13;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 5;
+        recvbuffer[0] = 0x00;
+        for(int i=1; i< recvlen; i++)
+        {
+            recvbuffer[i] = 0x13;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[137]------------------------------------------" << endl;
     // unit_test[137] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
     // unit_test[137] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
     // unit_test[137] 戻り値が CLIENT_RECVで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 1u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_begain_offset = 13u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 2;
-	for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x14;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 1u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_begain_offset = 13u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 2;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x14;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[138]------------------------------------------" << endl;
     // unit_test[138] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
     // unit_test[138] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
     // unit_test[138] 戻り値が CLIENT_RECVで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 1u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 2;
-	for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x15;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 1u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 2;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x15;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 3u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[139]------------------------------------------" << endl;
     // unit_test[139] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
     // unit_test[139] 且つcheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
     // unit_test[139] 戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 3u;
-    up_thread_data->data_begain_offset = 12u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[12] = 0x16;
-    up_thread_data->data_buffer[13] = 0x03;
-    up_thread_data->data_buffer[14] = 0x01;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 76;
-    recvbuffer[0] = 0x00;
-    recvbuffer[1] = 0x9e;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-    recvbuffer[5] = 0x00;
-    recvbuffer[6] = 0x03;
-    recvbuffer[7] = 0x01;
-	for(int i=8; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x16;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 79u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 3u;
+        up_thread_data->data_begain_offset = 12u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[12] = 0x16;
+        up_thread_data->data_buffer[13] = 0x03;
+        up_thread_data->data_buffer[14] = 0x01;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 76;
+        recvbuffer[0] = 0x00;
+        recvbuffer[1] = 0x9e;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x00;
+        recvbuffer[6] = 0x03;
+        recvbuffer[7] = 0x01;
+        for(int i=8; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x16;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 79u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[140]------------------------------------------" << endl;
     // unit_test[140] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
     // unit_test[140] 且つheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
     // unit_test[140] 戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 3u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[12] = 0x16;
-    up_thread_data->data_buffer[13] = 0x03;
-    up_thread_data->data_buffer[14] = 0x01;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 76;
-    recvbuffer[0] = 0x00;
-    recvbuffer[1] = 0x9e;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-    recvbuffer[5] = 0x00;
-    recvbuffer[6] = 0x03;
-    recvbuffer[7] = 0x01;
-	for(int i=8; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x17;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 79u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 3u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[12] = 0x16;
+        up_thread_data->data_buffer[13] = 0x03;
+        up_thread_data->data_buffer[14] = 0x01;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 76;
+        recvbuffer[0] = 0x00;
+        recvbuffer[1] = 0x9e;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x00;
+        recvbuffer[6] = 0x03;
+        recvbuffer[7] = 0x01;
+        for(int i=8; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x17;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 79u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[141]------------------------------------------" << endl;
     // unit_test[141] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
     // unit_test[141] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
     // unit_test[141] 戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 3u;
-    up_thread_data->data_begain_offset = 12u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[12] = 0x17;
-    up_thread_data->data_buffer[13] = 0x03;
-    up_thread_data->data_buffer[14] = 0x01;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 6;
-    recvbuffer[0] = 0x00;
-    recvbuffer[1] = 0x9e;
-	for(int i=2; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x18;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 3u;
+        up_thread_data->data_begain_offset = 12u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[12] = 0x17;
+        up_thread_data->data_buffer[13] = 0x03;
+        up_thread_data->data_buffer[14] = 0x01;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 6;
+        recvbuffer[0] = 0x00;
+        recvbuffer[1] = 0x9e;
+        for(int i=2; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x18;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[142]------------------------------------------" << endl;
     // unit_test[142] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
     // unit_test[142] 且つcheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
     // unit_test[142] 戻り値がREALSERVER_SELECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = 3u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[0] = 0x17;
-    up_thread_data->data_buffer[1] = 0x03;
-    up_thread_data->data_buffer[2] = 0x01;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 6;
-    recvbuffer[0] = 0x00;
-    recvbuffer[1] = 0x9e;
-	for(int i=2; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x19;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
-	memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = up_thread_data->data_size + recvlen;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-	mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 3u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[0] = 0x17;
+        up_thread_data->data_buffer[1] = 0x03;
+        up_thread_data->data_buffer[2] = 0x01;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 6;
+        recvbuffer[0] = 0x00;
+        recvbuffer[1] = 0x9e;
+        for(int i=2; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x19;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[143]------------------------------------------" << endl;
     // unit_test[143] 受信データサイズ > 受信バッファサイズの場合
@@ -2698,25 +2815,77 @@ void handle_client_recv_test() {
     cout << "[145]------------------------------------------" << endl;
     // unit_test[145] 終了フラグがOFFで,且つ data_size+recvlen > MAX_SSLID_BUFFER_SIZEの場合
     // unit_test[145] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 76u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    recvlen = 10;
-    status = this->handle_client_recv(boost::this_thread::get_id(),
-            recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 76u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        recvlen = 10;
+        status = this->handle_client_recv(boost::this_thread::get_id(),
+                recvbuffer, recvlen);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
+
+}
+
+//handle_client_recv
+void handle_client_recv_test_thread() {
+
+    boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
+    int recvlen = 0;
+    EVENT_TAG status;
+	char* mem_cmp_buffer;
+    int mem_cmp_result;
+	int mem_cmp_length;
+
+    cout << "[141]------------------------------------------\n";
+    // unit_test[141] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[141] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
+    // unit_test[141] 戻り値がREALSERVER_SELECTで設定する。
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_size = 3u;
+        up_thread_data->data_begain_offset = 12u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[12] = 0x17;
+        up_thread_data->data_buffer[13] = 0x03;
+        up_thread_data->data_buffer[14] = 0x01;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
+        }
+        recvlen = 6;
+        recvbuffer[0] = 0x00;
+        recvbuffer[1] = 0x9e;
+        for(int i=2; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x18;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array() + up_thread_data->data_begain_offset, up_thread_data->data_size);
+        memcpy(mem_cmp_buffer + up_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = up_thread_data->data_size + recvlen;
+        status = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
+        mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        delete[] mem_cmp_buffer;
+    }
 }
 
 //handle_realserver_select(tcp)
 void handle_realserver_select_tcp_test() {
-    session_thread_data_sslid* up_thread_data;
+
     EVENT_TAG status;
     boost::asio::ip::tcp::endpoint rs_endpoint;
     boost::asio::ip::tcp::endpoint comp_endpoint;
@@ -2724,8 +2893,8 @@ void handle_realserver_select_tcp_test() {
             ep1(boost::asio::ip::address::from_string("192.168.120.249"),
                     12345);
     boost::asio::ip::tcp::endpoint ep2;
-    int maxlist = 0;
-    char* sslid_replication_area_begain;
+    int maxlist = 1;
+    char* sslid_replication_area_begain = new char[10];
     int sslid_replication_area_size = 0;
     boost::asio::ip::tcp::endpoint virtual_service_endpoint;
     std::string session_id;
@@ -2743,464 +2912,567 @@ void handle_realserver_select_tcp_test() {
 
     cout << "[146]------------------------------------------" << endl;
     // unit_test[146] realserver接続回数が最大回数の場合、戻り値がCLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count
+                = this->realserver_connect_failed_max_count;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+         this->session_thread_data_map.clear();
+    }
 
     cout << "[147]------------------------------------------" << endl;
     // unit_test[147] realserver接続回数が最大回数を越える場合、戻り値がCLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count + 1;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count
+                = this->realserver_connect_failed_max_count + 1;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[148]------------------------------------------" << endl;
     // unit_test[148] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが決定の場合
     // unit_test[148] 戻り値が REALSERVER_CONNECTで設定する。
-    this->schedule_tcp = schedule_tcp_func1;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count - 1;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 1;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        this->schedule_tcp = schedule_tcp_func1;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count
+                = this->realserver_connect_failed_max_count - 1;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 1;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[149]------------------------------------------" << endl;
     // unit_test[149] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが未決定の場合
     // unit_test[149] 戻り値が CLIENT_DISCONNECTで設定する。
-    this->schedule_tcp = schedule_tcp_func2;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count - 1;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 1;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        this->schedule_tcp = schedule_tcp_func2;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count
+                = this->realserver_connect_failed_max_count - 1;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 1;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[150]------------------------------------------" << endl;
     // unit_test[150] realserver接続回数が最大回数に未満で, 且つreschedule が 0 (OFF)の場合
     // unit_test[150] 戻り値が CLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count - 1;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 0;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count
+                = this->realserver_connect_failed_max_count - 1;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 0;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[151]------------------------------------------" << endl;
     // unit_test[151] realserverの接続失敗回数が0, 且つselected_realserver が NULLでない場合
     // unit_test[151] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep1;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep1;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[152]------------------------------------------" << endl;
     // unit_test[152] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがfalseの場合
     // unit_test[152] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = false;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = false;
+        up_thread_data->end_flag = END_FLAG_OFF;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[153]------------------------------------------" << endl;
     // unit_test[153] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがtrueで
     // unit_test[153] 且つendpointが決定の場合
     // unit_test[153] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x00;
-    up_thread_data->data_size = 76u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->schedule_tcp = schedule_tcp_func1;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x00;
+        up_thread_data->data_size = 76u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->schedule_tcp = schedule_tcp_func1;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[154]------------------------------------------" << endl;
     // unit_test[154] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
     // unit_test[154] 且つセッションIDがなくで、且つendpointが未決定の場合
     // unit_test[154] 戻り値がCLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x00;
-    up_thread_data->data_size = 76u;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->schedule_tcp = schedule_tcp_func2;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x00;
+        up_thread_data->data_size = 76u;
+        up_thread_data->end_flag = END_FLAG_OFF;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->schedule_tcp = schedule_tcp_func2;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[155]------------------------------------------" << endl;
     // unit_test[155] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
     // unit_test[155] 且つセッションIDがあるで, 且つendpointが決定の場合
     // unit_test[155] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_size = 76u;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_size = 76u;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        char* temp_data_buffer = up_thread_data->data_buffer.c_array();
+        session_id.assign(temp_data_buffer + 44, temp_data_buffer + 76);
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_endpoint_map()[session_id]
+                = ep1;
+        time_t last_time = time(0);
+        (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_lasttime_map()[session_id]
+                = last_time;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        delete this->session_data_processor;
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    char* temp_data_buffer = up_thread_data->data_buffer.c_array();
-    session_id.assign(temp_data_buffer + 44, temp_data_buffer + 76);
-    this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
-    		sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-    		inputLogWarn, inputLogInfo, inputLogDebug);
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_endpoint_map()[session_id]
-            = ep1;
-    time_t last_time = time(0);
-    (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_lasttime_map()[session_id]
-            = last_time;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    delete this->session_data_processor;
-    this->session_thread_data_map.clear();
 
     cout << "[156]------------------------------------------" << endl;
     // unit_test[156] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
     // unit_test[156] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointが決定の場合
     // unit_test[156] 戻り値がREALSERVER_CONNECTで設定する。
-    this->schedule_tcp = schedule_tcp_func1;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        this->schedule_tcp = schedule_tcp_func1;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 1;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        delete this->session_data_processor;
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 1;
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    delete this->session_data_processor;
-    this->session_thread_data_map.clear();
 
     cout << "[157]------------------------------------------" << endl;
     // unit_test[157] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
     // unit_test[157] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointも未決定の場合
     // unit_test[157] 戻り値がCLIENT_DISCONNECTで設定する。
-    this->schedule_tcp = schedule_tcp_func2;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        this->schedule_tcp = schedule_tcp_func2;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 1;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        delete this->session_data_processor;
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 1;
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    delete this->session_data_processor;
-    this->session_thread_data_map.clear();
 
     cout << "[158]------------------------------------------" << endl;
     // unit_test[158] realserver接続失敗回数が0で, 且つselected_realserverがNULLで, 且つhello_message_flagがtrueで
     // unit_test[158] 且つセッションIDがあり, endpointが未決定で、且つ no rescheduleの場合
     // unit_test[158] 戻り値がCLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = 0;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = 0;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 0;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 0;
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
 
     cout << "[159]------------------------------------------" << endl;
     // unit_test[159] realserver接続失敗回数が0で, 且つselected_realserver が NULLないの場合
     // unit_test[159] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep1;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep1;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[160]------------------------------------------" << endl;
     // unit_test[160] realserver接続失敗回数が0で, 且つselected_realserver が　NULLで, 且つhello_message_flag が falseの場合
     // unit_test[160] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = false;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = false;
+        up_thread_data->end_flag = END_FLAG_OFF;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[161]------------------------------------------" << endl;
     // unit_test[161] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
     // unit_test[161] 且つセッションIDがなくで、且つendpointが決定の場合
     // unit_test[161] 戻り値がREALSERVER_CONNECT設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x00;
-    up_thread_data->data_size = 76u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->schedule_tcp = schedule_tcp_func1;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x00;
+        up_thread_data->data_size = 76u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->schedule_tcp = schedule_tcp_func1;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[162]------------------------------------------" << endl;
     // unit_test[162] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
     // unit_test[162] 且つセッションIDがなくで、且つendpointが未決定の場合
     // unit_test[162] 戻り値がCLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x00;
-    up_thread_data->data_size = 76u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->end_flag = END_FLAG_OFF;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->schedule_tcp = schedule_tcp_func2;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x00;
+        up_thread_data->data_size = 76u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->end_flag = END_FLAG_OFF;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->schedule_tcp = schedule_tcp_func2;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[163]------------------------------------------" << endl;
     // unit_test[163] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
     // unit_test[163] 且つセッションIDがあるで, 且つendpointが決定の場合
     // unit_test[163] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_size = 76u;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_size = 76u;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        char* temp_data_buffer2 = up_thread_data->data_buffer.c_array();
+        session_id.assign(temp_data_buffer2 + 44, temp_data_buffer2 + 76);
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_endpoint_map()[session_id]
+                = ep1;
+        time_t last_time2 = time(0);
+        (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_lasttime_map()[session_id]
+                = last_time2;
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        delete this->session_data_processor;
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    char* temp_data_buffer2 = up_thread_data->data_buffer.c_array();
-    session_id.assign(temp_data_buffer2 + 44, temp_data_buffer2 + 76);
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_endpoint_map()[session_id]
-            = ep1;
-    time_t last_time2 = time(0);
-    (dynamic_cast<sslid_session_data_processor_stub*> (session_data_processor))->get_session_lasttime_map()[session_id]
-            = last_time2;
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    delete this->session_data_processor;
-    this->session_thread_data_map.clear();
 
     cout << "[164]------------------------------------------" << endl;
     // unit_test[164] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
     // unit_test[164] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
     // unit_test[164] 戻り値がREALSERVER_CONNECTで設定する。
-    this->schedule_tcp = schedule_tcp_func1;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        this->schedule_tcp = schedule_tcp_func1;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 1;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        delete this->session_data_processor;
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 1;
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    delete this->session_data_processor;
-    this->session_thread_data_map.clear();
 
     cout << "[165]------------------------------------------" << endl;
     // unit_test[165] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
     // unit_test[165] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointも未決定の場合
     // unit_test[165] 戻り値がCLIENT_DISCONNECTで設定する。
-    this->schedule_tcp = schedule_tcp_func2;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        this->schedule_tcp = schedule_tcp_func2;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 1;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        delete this->session_data_processor;
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 1;
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    delete this->session_data_processor;
-    this->session_thread_data_map.clear();
 
     cout << "[166]------------------------------------------" << endl;
     // unit_test[166] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
     // unit_test[166] セッションIDがあり、endpointが未決定でrescheduleしない場合
     // unit_test[166] 戻り値がCLIENT_DISCONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->realserver_connect_failed_count = -1;
-    up_thread_data->selected_realserver = ep2;
-    up_thread_data->hello_message_flag = true;
-    up_thread_data->data_buffer[43] = 0x20;
-    up_thread_data->data_begain_offset = 0u;
-    for (int i = 0; i < 32; i++) {
-        up_thread_data->data_buffer[44 + i] = 0x01;
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        this->reschedule = 0;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                1024, 3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
     }
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    this->reschedule = 0;
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            1024, 3600, this->replication_data_processor, ingetloglevel,
-            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-            inputLogDebug);
-    status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+
+}
+
+//handle_realserver_select(tcp)
+void handle_realserver_select_tcp_test_thread() {
+
+    EVENT_TAG status;
+    boost::asio::ip::tcp::endpoint rs_endpoint;
+    boost::asio::ip::tcp::endpoint comp_endpoint;
+    boost::asio::ip::tcp::endpoint
+            ep1(boost::asio::ip::address::from_string("192.168.120.249"),
+                    12345);
+    int maxlist = 1;
+    char* sslid_replication_area_begain = new char[10];
+    int sslid_replication_area_size = 0;
+    boost::asio::ip::tcp::endpoint ep2;
+    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+    std::string session_id;
+    boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogFatal = stb_putLogFatal;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogError = stb_putLogError;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogWarn = stb_putLogWarn;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogInfo = stb_putLogInfo;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogDebug = stb_putLogDebug;
+
+    cout << "[164]------------------------------------------\n";
+    // unit_test[164] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[164] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
+    // unit_test[164] 戻り値がREALSERVER_CONNECTで設定する。
+    {
+        this->schedule_tcp = schedule_tcp_func1;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->realserver_connect_failed_count = -1;
+        up_thread_data->selected_realserver = ep2;
+        up_thread_data->hello_message_flag = true;
+        up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_begain_offset = 0u;
+        for (int i = 0; i < 32; i++) {
+            up_thread_data->data_buffer[44 + i] = 0x01;
+        }
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
+            this->reschedule = 1;
+            this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                    sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                    inputLogWarn, inputLogInfo, inputLogDebug);
+            this->session_data_processor = new sslid_session_data_processor_stub(
+                    1024, 3600, this->replication_data_processor, ingetloglevel,
+                    inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                    inputLogDebug);
+        }
+        status = this->handle_realserver_select(boost::this_thread::get_id(),
+                rs_endpoint);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+    }
 }
 
 //handle_realserver_select(udp)
@@ -3221,7 +3493,6 @@ void handle_realserver_connect_test() {
 
     boost::array<char, MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen = 0;
-    session_thread_data_sslid* up_thread_data;
     EVENT_TAG status;
 	char* mem_cmp_buffer;
 	int mem_cmp_length;
@@ -3230,299 +3501,351 @@ void handle_realserver_connect_test() {
     cout << "[168]------------------------------------------" << endl;
     // unit_test[168] current_record_rest_size>data_sizeで、且つdata_size<送信バッファサイズの場合
     // unit_test[168] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = 20u;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x01;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, 10u);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = 20u;
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x01;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, 10u);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[169]------------------------------------------" << endl;
     // unit_test[169] current_record_rest_size>data_sizeで, 且つdata_sizeが送信バッファサイズの場合
     // unit_test[169] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x02;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 1u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x02;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 1u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[170]------------------------------------------" << endl;
     // unit_test[170] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
     // unit_test[170] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = 10u;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x03;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, 10u);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = 10u;
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x03;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, 10u);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[171]------------------------------------------" << endl;
     // unit_test[171] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
     // unit_test[171] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x04;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x04;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[172]------------------------------------------" << endl;
     // unit_test[172] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
     // unit_test[172] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 5u;
-    up_thread_data->data_begain_offset = 10u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x05;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = MAX_BUFFER_SIZE;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 5u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 5u;
+        up_thread_data->data_begain_offset = 10u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x05;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 5u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[173]------------------------------------------" << endl;
     // unit_test[173] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
     // unit_test[173] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_begain_offset = 10u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x06;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = MAX_BUFFER_SIZE;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_begain_offset = 10u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x06;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[174]------------------------------------------" << endl;
     // unit_test[174] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
     // unit_test[174] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = 10u;
-    up_thread_data->data_size = 20u;
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x07;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->current_record_rest_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 15u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, 10u);
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = 10u;
+        up_thread_data->data_size = 20u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x07;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->current_record_rest_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 15u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, 10u);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[175]------------------------------------------" << endl;
     // unit_test[175] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
     // unit_test[175] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x08;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->current_record_rest_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x08;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->current_record_rest_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[176]------------------------------------------" << endl;
     // unit_test[176] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
     // unit_test[176] 戻り値がREALSERVER_SENDで設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_size =static_cast<size_t>(MAX_BUFFER_SIZE) + 20u;
-    up_thread_data->data_begain_offset = 5u;
-	for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
-	{
-		up_thread_data->data_buffer[i] = 0x09;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = MAX_BUFFER_SIZE;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_connect(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 20u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size =static_cast<size_t>(MAX_BUFFER_SIZE) + 20u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x09;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 20u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
+}
+
+//handle_realserver_connect
+void handle_realserver_connect_test_thread() {
+
+    boost::array<char, MAX_BUFFER_SIZE> sendbuffer;
+    size_t datalen = 0;
+    EVENT_TAG status;
+	char* mem_cmp_buffer;
+	int mem_cmp_length;
+	int mem_cmp_result;
+
+    cout << "[175]------------------------------------------\n";
+    // unit_test[175] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
+    // unit_test[175] 戻り値がREALSERVER_SENDで設定する。
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset;i<up_thread_data->data_begain_offset+up_thread_data->data_size;i++)
+        {
+            up_thread_data->data_buffer[i] = 0x08;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->current_record_rest_size;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
+        }
+        status = this->handle_realserver_connect(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+    }
 }
 
 //handle_realserver_connection_fail
 void handle_realserver_connection_fail_test(){
 	boost::asio::ip::tcp::endpoint ep;
-	session_thread_data_sslid thread_up_data_value;
-	thread_up_data_value.thread_division=THREAD_DIVISION_UP_STREAM;
-	thread_up_data_value.realserver_connect_failed_count=0;
-	thread_up_data_value.data_begain_offset=0;
-	thread_up_data_value.data_size=0;
-	thread_up_data_value.current_record_rest_size=0;
-	thread_up_data_value.hello_message_flag=false;
-	session_thread_data_sslid* thread_up_data=&thread_up_data_value;
-	this->session_thread_data_map.insert(std::pair<const boost::thread::id,session_thread_data_sslid*>(boost::this_thread::get_id(),thread_up_data));
-	std::map<const boost::thread::id,session_thread_data_sslid*>::iterator iter;
+	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
+	thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
+	thread_up_data_value->realserver_connect_failed_count=0;
+	thread_up_data_value->data_begain_offset=0;
+	thread_up_data_value->data_size=0;
+	thread_up_data_value->current_record_rest_size=0;
+	thread_up_data_value->hello_message_flag=false;
+	thread_data_ptr thread_data(thread_up_data_value);
+	this->session_thread_data_map[boost::this_thread::get_id()]=thread_data;
+	std::map<const boost::thread::id,thread_data_ptr>::iterator iter;
 	iter=this->session_thread_data_map.find(boost::this_thread::get_id());
-	session_thread_data_sslid* data=iter->second;
+	thread_data_ptr data=iter->second;
 
     cout << "[177]------------------------------------------" << endl;
 	//unit_test[177] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
@@ -3560,227 +3883,329 @@ void handle_realserver_connection_fail_test(){
 	this->session_thread_data_map.clear();
 }
 
+void handle_realserver_connection_fail_test_thread_reschedule(){
+	boost::asio::ip::tcp::endpoint ep;
+	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
+	thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
+	thread_up_data_value->realserver_connect_failed_count=0;
+	thread_up_data_value->data_begain_offset=0;
+	thread_up_data_value->data_size=0;
+	thread_up_data_value->current_record_rest_size=0;
+	thread_up_data_value->hello_message_flag=false;
+	thread_data_ptr thread_data(thread_up_data_value);
+	thread_data_ptr data;
+	{
+		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+		this->session_thread_data_map[boost::this_thread::get_id()]=thread_data;
+		std::map<const boost::thread::id,thread_data_ptr>::iterator iter;
+		iter=this->session_thread_data_map.find(boost::this_thread::get_id());
+		data=iter->second;
+		this->reschedule=1;
+	}
+
+    cout << "[179]------------------------------------------\n";
+	//unit_test[179] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+	//unit_test[179] test data:rescheduleモード、３目失敗するの場合
+	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
+	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
+}
+
+void handle_realserver_connection_fail_test_thread_noreschedule(){
+	boost::asio::ip::tcp::endpoint ep;
+	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
+	thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
+	thread_up_data_value->realserver_connect_failed_count=0;
+	thread_up_data_value->data_begain_offset=0;
+	thread_up_data_value->data_size=0;
+	thread_up_data_value->current_record_rest_size=0;
+	thread_up_data_value->hello_message_flag=false;
+	thread_data_ptr thread_data(thread_up_data_value);
+	thread_data_ptr data;
+	{
+		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+		this->session_thread_data_map[boost::this_thread::get_id()]=thread_data;
+		std::map<const boost::thread::id,thread_data_ptr>::iterator iter;
+		iter=this->session_thread_data_map.find(boost::this_thread::get_id());
+		data=iter->second;
+		this->reschedule=0;
+	}
+
+    cout << "[177]------------------------------------------\n";
+	//unit_test[177] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
+	//unit_test[177] test data:no rescheduleモード、初めて失敗するの場合
+	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
+	BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
+}
+
 //handle_realserver_send
 void handle_realserver_send_test() {
-    session_thread_data_sslid* up_thread_data;
+
     EVENT_TAG status;
 
     cout << "[181]------------------------------------------" << endl;
     // unit_test[181] データサイズが0で、且つdata_begain_offsetが0の場合
     // unit_test[181] 戻り値がCLIENT_RECVで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[182]------------------------------------------" << endl;
     // unit_test[182] データサイズが0で,且つdata_begain_offset >0の場合
     // unit_test[182] 戻り値がCLIENT_RECVで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[183]------------------------------------------" << endl;
     // unit_test[183] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset=0の場合
     // unit_test[183] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 10u;
-    up_thread_data->current_record_rest_size = 10u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 10u;
+        up_thread_data->current_record_rest_size = 10u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[184]------------------------------------------" << endl;
     // unit_test[184] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset>0の場合
     // unit_test[184] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 10u;
-    up_thread_data->current_record_rest_size = 10u;
-    up_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 10u;
+        up_thread_data->current_record_rest_size = 10u;
+        up_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[185]------------------------------------------" << endl;
     // unit_test[185] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
     // unit_test[185] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[0] = 0x00;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[0] = 0x00;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[186]------------------------------------------" << endl;
     // unit_test[186] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
     // unit_test[186] 戻り値がFINALIZEで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[0] = 0x00;
-    up_thread_data->data_begain_offset =10u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[0] = 0x00;
+        up_thread_data->data_begain_offset =10u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[187]------------------------------------------" << endl;
     // unit_test[187] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0の場合
     // unit_test[187] 戻り値がCLIENT_RECVで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 1u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 1u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[188]------------------------------------------" << endl;
     // unit_test[188] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0の場合
     // unit_test[188] 戻り値がCLIENT_RECVで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 1u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_RECV);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 1u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[189]------------------------------------------" << endl;
     // unit_test[189] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が０(送信可能)で,且つdata_begain_offset が0の場合
     // unit_test[189] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 76u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[0] = 0x16;
-    up_thread_data->data_buffer[1] = 0x03;
-    up_thread_data->data_buffer[2] = 0x01;
-    up_thread_data->data_buffer[3] = 0x00;
-    up_thread_data->data_buffer[4] = 0x9e;
-    up_thread_data->data_buffer[5] = 0x01;
-    up_thread_data->data_buffer[9] = 0x03;
-    up_thread_data->data_buffer[10] = 0x01;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->hello_message_flag = false;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 76u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[0] = 0x16;
+        up_thread_data->data_buffer[1] = 0x03;
+        up_thread_data->data_buffer[2] = 0x01;
+        up_thread_data->data_buffer[3] = 0x00;
+        up_thread_data->data_buffer[4] = 0x9e;
+        up_thread_data->data_buffer[5] = 0x01;
+        up_thread_data->data_buffer[9] = 0x03;
+        up_thread_data->data_buffer[10] = 0x01;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->hello_message_flag = false;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[190]------------------------------------------" << endl;
     // unit_test[190] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
     // unit_test[190] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 76u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[10] = 0x16;
-    up_thread_data->data_buffer[11] = 0x03;
-    up_thread_data->data_buffer[12] = 0x01;
-    up_thread_data->data_buffer[13] = 0x00;
-    up_thread_data->data_buffer[14] = 0x9e;
-    up_thread_data->data_buffer[15] = 0x01;
-    up_thread_data->data_buffer[19] = 0x03;
-    up_thread_data->data_buffer[20] = 0x01;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->hello_message_flag = false;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 76u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[10] = 0x16;
+        up_thread_data->data_buffer[11] = 0x03;
+        up_thread_data->data_buffer[12] = 0x01;
+        up_thread_data->data_buffer[13] = 0x00;
+        up_thread_data->data_buffer[14] = 0x9e;
+        up_thread_data->data_buffer[15] = 0x01;
+        up_thread_data->data_buffer[19] = 0x03;
+        up_thread_data->data_buffer[20] = 0x01;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->hello_message_flag = false;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[191]------------------------------------------" << endl;
     // unit_test[191] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset が0の場合
     // unit_test[191] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[0] = 0x17;
-    up_thread_data->data_buffer[1] = 0x03;
-    up_thread_data->data_buffer[2] = 0x01;
-    up_thread_data->data_buffer[3] = 0x00;
-    up_thread_data->data_buffer[4] = 0x9e;
-    up_thread_data->data_begain_offset = 0u;
-    up_thread_data->hello_message_flag = true;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[0] = 0x17;
+        up_thread_data->data_buffer[1] = 0x03;
+        up_thread_data->data_buffer[2] = 0x01;
+        up_thread_data->data_buffer[3] = 0x00;
+        up_thread_data->data_buffer[4] = 0x9e;
+        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->hello_message_flag = true;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[192]------------------------------------------" << endl;
     // unit_test[192] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
     // unit_test[192] 戻り値がREALSERVER_CONNECTで設定する。
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->data_size = 10u;
-    up_thread_data->current_record_rest_size = 0u;
-    up_thread_data->data_buffer[10] = 0x17;
-    up_thread_data->data_buffer[11] = 0x03;
-    up_thread_data->data_buffer[12] = 0x01;
-    up_thread_data->data_buffer[13] = 0x00;
-    up_thread_data->data_buffer[14] = 0x9e;
-    up_thread_data->data_begain_offset = 10u;
-    up_thread_data->hello_message_flag = true;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    status = this->handle_realserver_send(boost::this_thread::get_id());
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-    delete up_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 10u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[10] = 0x17;
+        up_thread_data->data_buffer[11] = 0x03;
+        up_thread_data->data_buffer[12] = 0x01;
+        up_thread_data->data_buffer[13] = 0x00;
+        up_thread_data->data_buffer[14] = 0x9e;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->hello_message_flag = true;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        this->session_thread_data_map.clear();
+    }
 
+}
+
+//handle_realserver_send
+void handle_realserver_send_test_thread() {
+
+    EVENT_TAG status;
+
+    cout << "[190]------------------------------------------\n";
+    // unit_test[190] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
+    // unit_test[190] 戻り値がREALSERVER_CONNECTで設定する。
+    {
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->data_size = 76u;
+        up_thread_data->current_record_rest_size = 0u;
+        up_thread_data->data_buffer[10] = 0x16;
+        up_thread_data->data_buffer[11] = 0x03;
+        up_thread_data->data_buffer[12] = 0x01;
+        up_thread_data->data_buffer[13] = 0x00;
+        up_thread_data->data_buffer[14] = 0x9e;
+        up_thread_data->data_buffer[15] = 0x01;
+        up_thread_data->data_buffer[19] = 0x03;
+        up_thread_data->data_buffer[20] = 0x01;
+        up_thread_data->data_begain_offset = 10u;
+        up_thread_data->hello_message_flag = false;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
+        }
+        status = this->handle_realserver_send(boost::this_thread::get_id());
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+    }
 }
 
 //handle_realserver_recv(tcp)
 void handle_realserver_recv_tcp_test() {
 
-    session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
     boost::asio::ip::tcp::endpoint rs_endpoint;
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
@@ -3792,186 +4217,244 @@ void handle_realserver_recv_tcp_test() {
     cout << "[193]------------------------------------------" << endl;
     // unit_test[193] データサイズ が 0で, 且つcurrent_record_rest_size > 0の場合
     // unit_test[193] 戻り値がCLIENT_CONNECTION_CHECK設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-    down_thread_data->current_record_rest_size = 10u;
-    recvlen = 0;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->current_record_rest_size = 10u;
+        recvlen = 0;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[194]------------------------------------------" << endl;
     // unit_test[194] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
     // unit_test[194] 戻り値がFINALIZEで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-    down_thread_data->current_record_rest_size = 0u;
-	down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    recvbuffer[0] = 0x00;
-    recvlen = 6;
-	for(int i=1; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x01;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
-	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = down_thread_data->data_size + recvlen;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete down_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        recvbuffer[0] = 0x00;
+        recvlen = 6;
+        for(int i=1; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x01;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+        memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = down_thread_data->data_size + recvlen;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[195]------------------------------------------" << endl;
     // unit_test[195] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合
     // unit_test[195] 戻り値がREALSERVER_RECVで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-	down_thread_data->data_begain_offset = 0u;
-    down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    recvlen = 3;
-	for(int i=0; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x02;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
-	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = down_thread_data->data_size + recvlen;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-    delete down_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->data_begain_offset = 0u;
+        down_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        recvlen = 3;
+        for(int i=0; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x02;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+        memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = down_thread_data->data_size + recvlen;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[196]------------------------------------------" << endl;
     // unit_test[196] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
     // unit_test[196] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-	down_thread_data->data_begain_offset = 0u;
-    down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    recvbuffer[0] = 0x16;
-    recvbuffer[1] = 0x03;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-    recvbuffer[5] = 0x02;
-	recvbuffer[6] = 0x03;
-	recvbuffer[7] = 0x03;
-	recvbuffer[8] = 0x03;
-    recvbuffer[9] = 0x03;
-    recvbuffer[10] = 0x01;
-    recvlen = 76;
-	for(int i=11; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x03;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
-	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = down_thread_data->data_size + recvlen;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->data_begain_offset = 0u;
+        down_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        recvbuffer[0] = 0x16;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x02;
+        recvbuffer[6] = 0x03;
+        recvbuffer[7] = 0x03;
+        recvbuffer[8] = 0x03;
+        recvbuffer[9] = 0x03;
+        recvbuffer[10] = 0x01;
+        recvlen = 76;
+        for(int i=11; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x03;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+        memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = down_thread_data->data_size + recvlen;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[197]------------------------------------------" << endl;
     // unit_test[197] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値0(送信可能)の場合
     // unit_test[197] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-	down_thread_data->data_begain_offset = 0u;
-    down_thread_data->current_record_rest_size = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    recvbuffer[0] = 0x17;
-    recvbuffer[1] = 0x03;
-    recvbuffer[2] = 0x01;
-    recvbuffer[3] = 0x00;
-    recvbuffer[4] = 0x9e;
-    recvlen = 10;
-	for(int i=5; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x04;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
-	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = down_thread_data->data_size + recvlen;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->data_begain_offset = 0u;
+        down_thread_data->current_record_rest_size = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        recvbuffer[0] = 0x17;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvlen = 10;
+        for(int i=5; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x04;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+        memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = down_thread_data->data_size + recvlen;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[198]------------------------------------------" << endl;
     // unit_test[198] データサイズ > 0で, 且つcurrent_record_rest_size > 0で, 且つdata_begain_offset>0の場合
     // unit_test[198] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10u;
-    down_thread_data->data_begain_offset = 5u;
-    down_thread_data->current_record_rest_size = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    recvlen = 15;
-	for(int i=5; i<recvlen; i++)
-	{
-		recvbuffer[i] = 0x05;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
-	memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
-	mem_cmp_length = down_thread_data->data_size + recvlen;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
-    BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 25u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-	delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10u;
+        down_thread_data->data_begain_offset = 5u;
+        down_thread_data->current_record_rest_size = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        recvlen = 15;
+        for(int i=5; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x05;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+        memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = down_thread_data->data_size + recvlen;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 25u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[199]------------------------------------------" << endl;
     // unit_test[199] データサイズ + 受信データサイズ > MAX_SSLID_BUFFER_SIZEの場合
     // unit_test[199] 戻り値がFINALIZEで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 76u + 1u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    recvlen = MAX_BUFFER_SIZE;
-    status = this->handle_realserver_recv(boost::this_thread::get_id(),
-            rs_endpoint, recvbuffer, recvlen);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 76u + 1u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        recvlen = MAX_BUFFER_SIZE;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
+}
 
+//handle_realserver_recv(tcp)
+void handle_realserver_recv_tcp_test_thread() {
 
+    EVENT_TAG status;
+    boost::asio::ip::tcp::endpoint rs_endpoint;
+    boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
+    int recvlen;
+	int mem_cmp_result;
+	int mem_cmp_length;
+	char* mem_cmp_buffer;
+
+    cout << "[196]------------------------------------------\n";
+    // unit_test[196] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
+    // unit_test[196] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->data_begain_offset = 0u;
+        down_thread_data->current_record_rest_size = 0u;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        }
+        recvbuffer[0] = 0x16;
+        recvbuffer[1] = 0x03;
+        recvbuffer[2] = 0x01;
+        recvbuffer[3] = 0x00;
+        recvbuffer[4] = 0x9e;
+        recvbuffer[5] = 0x02;
+        recvbuffer[6] = 0x03;
+        recvbuffer[7] = 0x03;
+        recvbuffer[8] = 0x03;
+        recvbuffer[9] = 0x03;
+        recvbuffer[10] = 0x01;
+        recvlen = 76;
+        for(int i=11; i<recvlen; i++)
+        {
+            recvbuffer[i] = 0x03;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, down_thread_data->data_buffer.c_array()+down_thread_data->data_begain_offset, down_thread_data->data_size);
+        memcpy(mem_cmp_buffer+down_thread_data->data_size, recvbuffer.c_array(), recvlen);
+        mem_cmp_length = down_thread_data->data_size + recvlen;
+        status = this->handle_realserver_recv(boost::this_thread::get_id(),
+                rs_endpoint, recvbuffer, recvlen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    }
 }
 
 //handle_realserver_recv(udp)
@@ -3991,7 +4474,6 @@ void handle_client_connection_check_test() {
 
     boost::array<char, MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen = 0;
-    session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
     int maxlist = 0;
     int timeout = 0;
@@ -4018,186 +4500,233 @@ void handle_client_connection_check_test() {
     cout << "[202]------------------------------------------" << endl;
     // unit_test[202] current_record_rest_size>0で,且つdata_begain_offset が 0の場合
     // unit_test[202] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 10u;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 10u;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[203]------------------------------------------" << endl;
     // unit_test[203] current_record_rest_size>0で,且つdata_begain_offset >0の場合
     // unit_test[203] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 10u;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 20u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 10u;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 20u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        this->session_thread_data_map.clear();
+    }
 
 
     cout << "[204]------------------------------------------" << endl;
     // unit_test[204] current_record_rest_sizeが0で、且つhello_message_flagがtrueで、且つdata_size ≧ 76で、且つdata_begain_offsetが0で
     // unit_test[204] 且つget_ssl_session_id() の戻り値が 0 の場合
     // unit_test[204] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->hello_message_flag = true;
-    down_thread_data->data_buffer[43] = 0x20;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 0u;
-    for(size_t i=44; i<down_thread_data->data_size; i++)
     {
-    	down_thread_data->data_buffer[i] = 0x01;
-	}
-	session_id.assign(down_thread_data->data_buffer.c_array()+44,down_thread_data->data_buffer.c_array()+76);
-    down_thread_data->selected_realserver = rs_endpoint;
-    maxlist = 3;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
-    		sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-    		inputLogWarn, inputLogInfo, inputLogDebug);
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            maxlist, timeout, this->replication_data_processor, stb_getloglevel,
-            stb_putLogFatal, stb_putLogError, stb_putLogWarn,
-            stb_putLogInfo, stb_putLogDebug);
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    delete replication_data_processor;
-    this->session_thread_data_map.clear();
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = true;
+        down_thread_data->data_buffer[43] = 0x20;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 0u;
+        for(size_t i=44; i<down_thread_data->data_size; i++)
+        {
+            down_thread_data->data_buffer[i] = 0x01;
+        }
+        session_id.assign(down_thread_data->data_buffer.c_array()+44,down_thread_data->data_buffer.c_array()+76);
+        down_thread_data->selected_realserver = rs_endpoint;
+        maxlist = 3;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                maxlist, timeout, this->replication_data_processor, stb_getloglevel,
+                stb_putLogFatal, stb_putLogError, stb_putLogWarn,
+                stb_putLogInfo, stb_putLogDebug);
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        delete replication_data_processor;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[205]------------------------------------------" << endl;
     // unit_test[205] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_size ≧ 76で,且つdata_begain_offset>0で
     // unit_test[205] 且つget_ssl_session_id()の戻り値が0の場合
     // unit_test[205] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->hello_message_flag = true;
-    down_thread_data->data_buffer[53] = 0x20;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 10u;
-    for(size_t i=54; i<down_thread_data->data_size; i++)
     {
-    	down_thread_data->data_buffer[i] = 0x01;
-	}
-	session_id.assign(down_thread_data->data_buffer.c_array()+54,down_thread_data->data_buffer.c_array()+86);
-    down_thread_data->selected_realserver = rs_endpoint;
-    maxlist = 3;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
-    		sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-    		inputLogWarn, inputLogInfo, inputLogDebug);
-    this->session_data_processor = new sslid_session_data_processor_stub(
-            maxlist, timeout, this->replication_data_processor, stb_getloglevel,
-            stb_putLogFatal, stb_putLogError, stb_putLogWarn,
-            stb_putLogInfo, stb_putLogDebug);
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    delete replication_data_processor;
-    this->session_thread_data_map.clear();
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = true;
+        down_thread_data->data_buffer[53] = 0x20;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 10u;
+        for(size_t i=54; i<down_thread_data->data_size; i++)
+        {
+            down_thread_data->data_buffer[i] = 0x01;
+        }
+        session_id.assign(down_thread_data->data_buffer.c_array()+54,down_thread_data->data_buffer.c_array()+86);
+        down_thread_data->selected_realserver = rs_endpoint;
+        maxlist = 3;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+                sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                inputLogWarn, inputLogInfo, inputLogDebug);
+        this->session_data_processor = new sslid_session_data_processor_stub(
+                maxlist, timeout, this->replication_data_processor, stb_getloglevel,
+                stb_putLogFatal, stb_putLogError, stb_putLogWarn,
+                stb_putLogInfo, stb_putLogDebug);
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        delete replication_data_processor;
+        this->session_thread_data_map.clear();
+    }
 
 
     cout << "[206]------------------------------------------" << endl;
     // unit_test[206] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offsetが0で
     // unit_test[206] 且つget_ssl_session_id()の戻り値が1の場合
     // unit_test[206] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->hello_message_flag = true;
-    down_thread_data->data_buffer[43] = 0x00;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = true;
+        down_thread_data->data_buffer[43] = 0x00;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[207]------------------------------------------" << endl;
     // unit_test[207] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offset>0で
     // unit_test[207] 且つget_ssl_session_id()の戻り値が1の場合
     // unit_test[207] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->hello_message_flag = true;
-    down_thread_data->data_buffer[53] = 0x00;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = true;
+        down_thread_data->data_buffer[53] = 0x00;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[208]------------------------------------------" << endl;
     // unit_test[208] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
     // unit_test[208] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->hello_message_flag = false;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = false;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[209]------------------------------------------" << endl;
     // unit_test[209] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offset>0の場合
     // unit_test[209] 戻り値がCLIENT_SENDで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->hello_message_flag = false;
-    down_thread_data->data_size = 76u;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_connection_check(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-    BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = false;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        this->session_thread_data_map.clear();
+    }
+
+}
+
+//handle_client_connection_check
+void handle_client_connection_check_test_thread() {
+
+    boost::array<char, MAX_BUFFER_SIZE> sendbuffer;
+    size_t datalen = 0;
+    EVENT_TAG status;
+    std::string session_id;
+    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+    getloglevel_func_type ingetloglevel = stb_getloglevel;
+    logger_func_type inputLogFatal = stb_putLogFatal;
+    logger_func_type inputLogError = stb_putLogError;
+    logger_func_type inputLogWarn = stb_putLogWarn;
+    logger_func_type inputLogInfo = stb_putLogInfo;
+    logger_func_type inputLogDebug = stb_putLogDebug;
+	boost::asio::ip::tcp::endpoint rs_endpoint(boost::asio::ip::address::from_string("192.168.120.249"), 12345);
+
+    cout << "[208]------------------------------------------\n";
+    // unit_test[208] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
+    // unit_test[208] 戻り値がCLIENT_SENDで設定する。
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->hello_message_flag = false;
+        down_thread_data->data_size = 76u;
+        down_thread_data->data_begain_offset = 0u;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        }
+        status = this->handle_client_connection_check(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+    }
 }
 
 //handle_client_select
@@ -4215,7 +4744,6 @@ void handle_client_select_test(){
 //handle_client_send
 void handle_client_send_test() {
 
-    session_thread_data_sslid* down_thread_data;
     EVENT_TAG status;
 
     cout << "[211]------------------------------------------" << endl;
@@ -4228,256 +4756,304 @@ void handle_client_send_test() {
     cout << "[212]------------------------------------------" << endl;
     // unit_test[212] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offsetが0の場合
     // unit_test[212] 戻り値がCLIENT_DISCONNECTで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-    down_thread_data->end_flag = END_FLAG_ON;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->end_flag = END_FLAG_ON;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[213]------------------------------------------" << endl;
     // unit_test[213] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offset>0の場合
     // unit_test[213] 戻り値がCLIENT_DISCONNECTで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-    down_thread_data->end_flag = END_FLAG_ON;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->end_flag = END_FLAG_ON;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[214]------------------------------------------" << endl;
     // unit_test[214] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset が 0の場合
     // unit_test[214] 戻り値がREALSERVER_RECVで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-    down_thread_data->end_flag = END_FLAG_OFF;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->end_flag = END_FLAG_OFF;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[215]------------------------------------------" << endl;
     // unit_test[215] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset > 0の場合
     // unit_test[215] 戻り値がREALSERVER_RECVで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 0u;
-    down_thread_data->end_flag = END_FLAG_OFF;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 0u;
+        down_thread_data->end_flag = END_FLAG_OFF;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[216]------------------------------------------" << endl;
     // unit_test[216] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0の場合
     // unit_test[216] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10u;
-    down_thread_data->current_record_rest_size = 8u;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10u;
+        down_thread_data->current_record_rest_size = 8u;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[217]------------------------------------------" << endl;
     // unit_test[217] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0で,且つdata_begain_offset>0の場合
     // unit_test[217] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10u;
-    down_thread_data->current_record_rest_size = 8u;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10u;
+        down_thread_data->current_record_rest_size = 8u;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[218]------------------------------------------" << endl;
     // unit_test[218] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
     // unit_test[218] 戻り値がFINALIZEで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10u;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->data_buffer[10] = 0x00;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->data_buffer[0] = 0x00;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[219]------------------------------------------" << endl;
     // unit_test[219] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
     // unit_test[219] 戻り値がFINALIZEで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10u;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->data_buffer[10] = 0x00;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-    BOOST_CHECK_EQUAL(status, FINALIZE);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->data_buffer[10] = 0x00;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+        BOOST_CHECK_EQUAL(status, FINALIZE);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[220]------------------------------------------" << endl;
     // unit_test[220] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
     // unit_test[220] 且つ終了フラグがONの場合
     // unit_test[220] 戻る値がCLIENT_DISCONNECTで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 3u;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->end_flag = END_FLAG_ON;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 3u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->end_flag = END_FLAG_ON;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[221]------------------------------------------" << endl;
     // unit_test[221] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
     // unit_test[221] 且つ終了フラグがONの場合
     // unit_test[221] 戻り値がCLIENT_DISCONNECTで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 3u;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->end_flag = END_FLAG_ON;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 3u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->end_flag = END_FLAG_ON;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[222]------------------------------------------" << endl;
     // unit_test[222] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
     // unit_test[222] 且つ終了フラグがOFFの場合
     // unit_test[222] 戻り値がREALSERVER_RECVで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 3u;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->end_flag = END_FLAG_OFF;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 3u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->end_flag = END_FLAG_OFF;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[223]------------------------------------------" << endl;
     // unit_test[223] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
     // unit_test[223] 且つ終了フラグがOFFの場合
     // unit_test[223] 戻り値がREALSERVER_RECVで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 3u;
-    down_thread_data->current_record_rest_size = 0u;
-    down_thread_data->end_flag = END_FLAG_OFF;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 3u;
+        down_thread_data->current_record_rest_size = 0u;
+        down_thread_data->end_flag = END_FLAG_OFF;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[224]------------------------------------------" << endl;
     // unit_test[224] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
     // unit_test[224] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 76;
-    down_thread_data->current_record_rest_size = 0;
-    down_thread_data->data_buffer[0] = 0x16;
-    down_thread_data->data_buffer[1] = 0x03;
-    down_thread_data->data_buffer[2] = 0x01;
-    down_thread_data->data_buffer[3] = 0x00;
-    down_thread_data->data_buffer[4] = 0x9e;
-    down_thread_data->data_buffer[5] = 0x02;
-    down_thread_data->data_buffer[9] = 0x03;
-    down_thread_data->data_buffer[10] = 0x01;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 76;
+        down_thread_data->current_record_rest_size = 0;
+        down_thread_data->data_buffer[0] = 0x16;
+        down_thread_data->data_buffer[1] = 0x03;
+        down_thread_data->data_buffer[2] = 0x01;
+        down_thread_data->data_buffer[3] = 0x00;
+        down_thread_data->data_buffer[4] = 0x9e;
+        down_thread_data->data_buffer[5] = 0x02;
+        down_thread_data->data_buffer[9] = 0x03;
+        down_thread_data->data_buffer[10] = 0x01;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[225]------------------------------------------" << endl;
     // unit_test[225] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
     // unit_test[225] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 86;
-    down_thread_data->current_record_rest_size = 0;
-    down_thread_data->data_buffer[10] = 0x16;
-    down_thread_data->data_buffer[11] = 0x03;
-    down_thread_data->data_buffer[12] = 0x01;
-    down_thread_data->data_buffer[13] = 0x00;
-    down_thread_data->data_buffer[14] = 0x9e;
-    down_thread_data->data_buffer[15] = 0x02;
-    down_thread_data->data_buffer[19] = 0x03;
-    down_thread_data->data_buffer[20] = 0x01;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 86;
+        down_thread_data->current_record_rest_size = 0;
+        down_thread_data->data_buffer[10] = 0x16;
+        down_thread_data->data_buffer[11] = 0x03;
+        down_thread_data->data_buffer[12] = 0x01;
+        down_thread_data->data_buffer[13] = 0x00;
+        down_thread_data->data_buffer[14] = 0x9e;
+        down_thread_data->data_buffer[15] = 0x02;
+        down_thread_data->data_buffer[19] = 0x03;
+        down_thread_data->data_buffer[20] = 0x01;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[226]------------------------------------------" << endl;
     // unit_test[226] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
     // unit_test[226] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10;
-    down_thread_data->current_record_rest_size = 0;
-    down_thread_data->data_buffer[0] = 0x17;
-    down_thread_data->data_buffer[1] = 0x03;
-    down_thread_data->data_buffer[2] = 0x01;
-    down_thread_data->data_buffer[3] = 0x00;
-    down_thread_data->data_buffer[4] = 0x9e;
-    down_thread_data->data_begain_offset = 0u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10;
+        down_thread_data->current_record_rest_size = 0;
+        down_thread_data->data_buffer[0] = 0x17;
+        down_thread_data->data_buffer[1] = 0x03;
+        down_thread_data->data_buffer[2] = 0x01;
+        down_thread_data->data_buffer[3] = 0x00;
+        down_thread_data->data_buffer[4] = 0x9e;
+        down_thread_data->data_begain_offset = 0u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[227]------------------------------------------" << endl;
     // unit_test[227] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0の場合
     // unit_test[227] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
-    down_thread_data = new session_thread_data_sslid;
-    down_thread_data->data_size = 10;
-    down_thread_data->current_record_rest_size = 0;
-    down_thread_data->data_buffer[10] = 0x17;
-    down_thread_data->data_buffer[11] = 0x03;
-    down_thread_data->data_buffer[12] = 0x01;
-    down_thread_data->data_buffer[13] = 0x00;
-    down_thread_data->data_buffer[14] = 0x9e;
-    down_thread_data->data_begain_offset = 10u;
-    this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
-    status = this->handle_client_send(boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-    delete down_thread_data;
-    this->session_thread_data_map.clear();
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 10;
+        down_thread_data->current_record_rest_size = 0;
+        down_thread_data->data_buffer[10] = 0x17;
+        down_thread_data->data_buffer[11] = 0x03;
+        down_thread_data->data_buffer[12] = 0x01;
+        down_thread_data->data_buffer[13] = 0x00;
+        down_thread_data->data_buffer[14] = 0x9e;
+        down_thread_data->data_begain_offset = 10u;
+        this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        this->session_thread_data_map.clear();
+    }
+}
+
+//handle_client_send
+void handle_client_send_test_thread() {
+
+    EVENT_TAG status;
+
+    cout << "[225]------------------------------------------\n";
+    // unit_test[225] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
+    // unit_test[225] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    {
+        thread_data_ptr down_thread_data(new session_thread_data_sslid);
+        down_thread_data->data_size = 86;
+        down_thread_data->current_record_rest_size = 0;
+        down_thread_data->data_buffer[10] = 0x16;
+        down_thread_data->data_buffer[11] = 0x03;
+        down_thread_data->data_buffer[12] = 0x01;
+        down_thread_data->data_buffer[13] = 0x00;
+        down_thread_data->data_buffer[14] = 0x9e;
+        down_thread_data->data_buffer[15] = 0x02;
+        down_thread_data->data_buffer[19] = 0x03;
+        down_thread_data->data_buffer[20] = 0x01;
+        down_thread_data->data_begain_offset = 10u;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
+        }
+        status = this->handle_client_send(boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    }
 }
 
 //handle_client_disconnect
@@ -4676,7 +5252,6 @@ void replication_interrupt_test(){
 void put_data_to_sendbuffer_test(){
     boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen = 0u;
-    session_thread_data_sslid* up_thread_data;
     int ret = 0;
     int mem_cmp_result;
     int mem_cmp_length;
@@ -4691,272 +5266,323 @@ void put_data_to_sendbuffer_test(){
     cout << "[244]------------------------------------------" << endl;
     // unit_test[244] current_record_rest_size>data_sizeで, 且つdata_size<送信バッファサイズの場合
     // unit_test[244] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = 20u;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x01;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, 10u);
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = 20u;
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x01;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, 10u);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[245]------------------------------------------" << endl;
     // unit_test[245] current_record_rest_size>data_sizeで, 且つdata_size=送信バッファサイズの場合
     // unit_test[245] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x02;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 1u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 1u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x02;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 1u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[246]------------------------------------------" << endl;
     // unit_test[246] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
     // unit_test[246] 戻り値が0設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = 10u;
-    up_thread_data->data_size = 10u;
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x03;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, 10u);
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = 10u;
+        up_thread_data->data_size = 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x03;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, 10u);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[247]------------------------------------------" << endl;
     // unit_test[247] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
     // unit_test[247] 戻り値が0で設定する
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x04;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->data_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x04;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->data_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[248]------------------------------------------" << endl;
     // unit_test[248] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
     // unit_test[248] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 5u;
-    up_thread_data->data_begain_offset = 10u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x05;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = MAX_BUFFER_SIZE;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 5u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 5u;
+        up_thread_data->data_begain_offset = 10u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x05;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 5u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[249]------------------------------------------" << endl;
     // unit_test[249] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
     // unit_test[249] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_begain_offset = 10u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x06;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = MAX_BUFFER_SIZE;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_begain_offset = 10u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x06;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[250]------------------------------------------" << endl;
     // unit_test[250] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
     // unit_test[250] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = 10u;
-    up_thread_data->data_size = 20u;
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x07;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->current_record_rest_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 15u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, 10u);
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = 10u;
+        up_thread_data->data_size = 20u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x07;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->current_record_rest_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 15u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, 10u);
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[251]------------------------------------------" << endl;
     // unit_test[251] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
     // unit_test[251] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x08;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = up_thread_data->current_record_rest_size;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE);
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x08;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = up_thread_data->current_record_rest_size;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
 
     cout << "[252]------------------------------------------" << endl;
     // unit_test[252] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
     // unit_test[252] 戻り値が0で設定する。
-    datalen = 0;
-    up_thread_data = new session_thread_data_sslid;
-    up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
-    up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 20u;
-    up_thread_data->data_begain_offset = 5u;
-    for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
     {
-    	up_thread_data->data_buffer[i] = 0x08;
-	}
-	mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
-	memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
-	mem_cmp_length = MAX_BUFFER_SIZE;
-    this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-    ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
-            sendbuffer, datalen);
-	mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-	BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 20u);
-    BOOST_CHECK_EQUAL(ret, 0);
-    BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
-    delete up_thread_data;
-    delete[] mem_cmp_buffer;
-    this->session_thread_data_map.clear();
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 20u;
+        up_thread_data->data_begain_offset = 5u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x08;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        this->session_thread_data_map[boost::this_thread::get_id()]
+                = up_thread_data;
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 20u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        delete[] mem_cmp_buffer;
+        this->session_thread_data_map.clear();
+    }
+
+}
+
+//put_data_to_sendbuffer
+void put_data_to_sendbuffer_test_thread(){
+    boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
+    size_t datalen = 0u;
+    int ret = 0;
+    int mem_cmp_result;
+    int mem_cmp_length;
+    char* mem_cmp_buffer;
+
+    cout << "[249]------------------------------------------\n";
+    // unit_test[249] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[249] 戻り値が0で設定する。
+    {
+        datalen = 0;
+        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+        up_thread_data->current_record_rest_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_size = static_cast<size_t>(MAX_BUFFER_SIZE) + 10u;
+        up_thread_data->data_begain_offset = 10u;
+        for(size_t i=up_thread_data->data_begain_offset; i<up_thread_data->data_begain_offset+up_thread_data->data_size; i++)
+        {
+            up_thread_data->data_buffer[i] = 0x06;
+        }
+        mem_cmp_buffer = new char[MAX_SSLID_BUFFER_SIZE];
+        memcpy(mem_cmp_buffer, up_thread_data->data_buffer.c_array()+up_thread_data->data_begain_offset, up_thread_data->data_size);
+        mem_cmp_length = MAX_BUFFER_SIZE;
+        {
+            boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+            this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
+        }
+        ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
+                sendbuffer, datalen);
+        mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
+        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+        BOOST_CHECK_EQUAL(ret, 0);
+        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+    }
 }
 
 //realserver_selected
@@ -5016,32 +5642,71 @@ void add_parameter_test(){
     obj.add_parameter_test();
 }
 //handle_rslist_update_test
-
 void register_schedule_tcp_test(){
     protocol_module_sslid_test_class obj;
     obj.register_schedule_tcp_test();
 }
 //register_schedule_udp_test
-
 void handle_session_initialize_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_session_initialize_test();
+}
+void handle_session_initialize_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_session_initialize_test_thread,&obj));
+    }
+    threads.join_all();
 }
 void handle_session_finalize_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_session_finalize_test();
 }
+void handle_session_finalize_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_session_finalize_test_thread,&obj));
+    }
+    threads.join_all();
+}
 void handle_accept_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_accept_test();
+}
+void handle_accept_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for(int i=0; i<THREAD_COUNT; i++)
+    {
+        threads.create_thread(bind(&protocol_module_sslid_test_class::handle_accept_test_thread,&obj));
+    }
+    threads.join_all();
 }
 void handle_client_recv_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_client_recv_test();
 }
+void handle_client_recv_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_recv_test_thread,&obj));
+    }
+    threads.join_all();
+}
 void handle_realserver_select_tcp_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_select_tcp_test();
+}
+void handle_realserver_select_tcp_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_select_tcp_test_thread,&obj));
+    }
+    threads.join_all();
 }
 void handle_realserver_select_udp_test(){
     protocol_module_sslid_test_class obj;
@@ -5051,17 +5716,61 @@ void handle_realserver_connect_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_connect_test();
 }
+void handle_realserver_connect_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_connect_test_thread,&obj));
+    }
+    threads.join_all();
+}
 void handle_realserver_connection_fail_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_connection_fail_test();
+}
+void handle_realserver_connection_fail_test_thread_reschedule()
+{
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for(int i=0; i<THREAD_COUNT; i++)
+    {
+        threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_connection_fail_test_thread_reschedule,&obj));
+    }
+    threads.join_all();
+}
+void handle_realserver_connection_fail_test_thread_noreschedule()
+{
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for(int i=0; i<THREAD_COUNT; i++)
+    {
+        threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_connection_fail_test_thread_noreschedule,&obj));
+    }
+    threads.join_all();
 }
 void handle_realserver_send_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_send_test();
 }
+void handle_realserver_send_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_send_test_thread,&obj));
+    }
+    threads.join_all();
+}
 void handle_realserver_recv_tcp_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_recv_tcp_test();
+}
+void handle_realserver_recv_tcp_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_recv_tcp_test_thread,&obj));
+    }
+    threads.join_all();
 }
 void handle_realserver_recv_udp_test(){
     protocol_module_sslid_test_class obj;
@@ -5071,6 +5780,14 @@ void handle_client_connection_check_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_client_connection_check_test();
 }
+void handle_client_connection_check_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_connection_check_test_thread,&obj));
+    }
+    threads.join_all();
+}
 void handle_client_select_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_client_select_test();
@@ -5078,6 +5795,14 @@ void handle_client_select_test(){
 void handle_client_send_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_client_send_test();
+}
+void handle_client_send_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_select_tcp_test_thread,&obj));
+    }
+    threads.join_all();
 }
 void handle_client_disconnect_test(){
     protocol_module_sslid_test_class obj;
@@ -5131,6 +5856,14 @@ void put_data_to_sendbuffer_test(){
     protocol_module_sslid_test_class obj;
     obj.put_data_to_sendbuffer_test();
 }
+void put_data_to_sendbuffer_test_thread(){
+    protocol_module_sslid_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::put_data_to_sendbuffer_test_thread,&obj));
+    }
+    threads.join_all();
+}
 void realserver_selected_test(){
     protocol_module_sslid_test_class obj;
     obj.realserver_selected_test();
@@ -5154,19 +5887,31 @@ void protocol_module_sslid_test_main() {
 	ts->add(BOOST_TEST_CASE( &register_schedule_tcp_test ));
 //	ts->add(BOOST_TEST_CASE( &register_schedule_udp_test ));
 	ts->add(BOOST_TEST_CASE( &handle_session_initialize_test ));
+	ts->add(BOOST_TEST_CASE( &handle_session_initialize_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_session_finalize_test ));
+	ts->add(BOOST_TEST_CASE( &handle_session_finalize_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_accept_test ));
+	ts->add(BOOST_TEST_CASE( &handle_accept_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_client_recv_test ));
+	ts->add(BOOST_TEST_CASE( &handle_client_recv_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_select_tcp_test ));
+	ts->add(BOOST_TEST_CASE( &handle_realserver_select_tcp_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_select_udp_test ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_connect_test ));
+	ts->add(BOOST_TEST_CASE( &handle_realserver_connect_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test ));
+	ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test_thread_reschedule ));
+	ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test_thread_noreschedule ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_send_test ));
+	ts->add(BOOST_TEST_CASE( &handle_realserver_send_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_recv_tcp_test ));
+	ts->add(BOOST_TEST_CASE( &handle_realserver_recv_tcp_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_recv_udp_test ));
 	ts->add(BOOST_TEST_CASE( &handle_client_connection_check_test ));
+	ts->add(BOOST_TEST_CASE( &handle_client_connection_check_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_client_select_test ));
 	ts->add(BOOST_TEST_CASE( &handle_client_send_test ));
+	ts->add(BOOST_TEST_CASE( &handle_client_send_test_thread ));
 	ts->add(BOOST_TEST_CASE( &handle_client_disconnect_test ));
 	ts->add(BOOST_TEST_CASE( &handle_realserver_disconnect_test ));
 	ts->add(BOOST_TEST_CASE( &handle_sorryserver_select_test ));
@@ -5180,6 +5925,7 @@ void protocol_module_sslid_test_main() {
 	ts->add(BOOST_TEST_CASE( &handle_sorryserver_disconnect_test ));
 	ts->add(BOOST_TEST_CASE( &replication_interrupt_test ));
 	ts->add(BOOST_TEST_CASE( &put_data_to_sendbuffer_test ));
+	ts->add(BOOST_TEST_CASE( &put_data_to_sendbuffer_test_thread ));
 	ts->add(BOOST_TEST_CASE( &realserver_selected_test ));
 	framework::master_test_suite().add(ts);
 }

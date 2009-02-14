@@ -5,6 +5,7 @@
 #include "sslid_replication_data_processor.h"
 #include "sslid_session_data_processor.h"
 #include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
 #include <map>
 
 #define MAX_SSLID_BUFFER_SIZE (MAX_BUFFER_SIZE + 76)
@@ -175,7 +176,8 @@ class protocol_module_sslid : public ssl_protocol_module_base
         int timeout;
         int maxlist;
         int reschedule;
-        typedef std::map<boost::thread::id, session_thread_data_sslid*> session_thread_data_map_type;
+        typedef boost::shared_ptr<session_thread_data_sslid> thread_data_ptr;
+        typedef std::map<boost::thread::id, thread_data_ptr> session_thread_data_map_type;
         session_thread_data_map_type session_thread_data_map;
         boost::mutex session_thread_data_map_mutex;
         int realserver_connect_failed_max_count;

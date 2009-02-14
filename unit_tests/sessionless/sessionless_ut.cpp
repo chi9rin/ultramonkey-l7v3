@@ -5,19 +5,18 @@
 #define REQUEST_BUFFER_SIZE 50u  //REQUEST_BUFFER_SIZE
 #define RESPONSE_BUFFER_SIZE 50u  //RESPONSE_BUFFER_SIZE
 #define USE_BUFFER_SIZE 90u //USE_BUFFER_SIZE
+#define THREAD_COUNT 10
 
 using namespace std;
 using namespace boost;
 using namespace boost::unit_test;
 using namespace l7vs;
 
-
 //log stub function
 char hostname[] = "127.0.0.1";
 
 LOG_LEVEL_TAG	stb_getloglevel(){
 	return LOG_LV_DEBUG;
-	//return LOG_LV_NONE;
 }
 LOG_LEVEL_TAG	stb_getloglevel_is_none(){
 	return LOG_LV_NONE;
@@ -185,7 +184,7 @@ void install_stb_log_func(){
 }
 
 //initinalize session_thread_data_sessionless
-void init_session_thread_data_sessionless(session_thread_data_sessionless* data,
+void init_session_thread_data_sessionless(thread_data_ptr data,
                                             boost::thread::id thread_id){
     data->thread_id = boost::this_thread::get_id();
     data->thread_division = THREAD_DIVISION_UP_STREAM;
@@ -200,10 +199,7 @@ void init_session_thread_data_sessionless(session_thread_data_sessionless* data,
 }
 
 //initinalize recive_data
-void init_recive_data(recive_data& data){
-    data.recive_buffer = NULL;
-    data.recive_buffer1 = NULL;
-    data.recive_buffer2 = NULL;
+ void init_recive_data(recive_data& data){
     data.recive_buffer_max_size = 0;
     data.recive_buffer_rest_size = 0;
     data.send_status_list.clear();
@@ -304,7 +300,6 @@ void initialize_test() {
     BOOST_CHECK_EQUAL(this->rs_list_next.empty(), true);
     BOOST_CHECK_EQUAL(this->rs_list_lock.empty(), true);
     BOOST_CHECK_EQUAL(this->rs_list_unlock.empty(), true);
-
 }
 
 //finalize 董作方
@@ -784,7 +779,7 @@ void handle_session_initialize_test() {
         = this->session_thread_data_map.find(boost::this_thread::get_id());
     bool bret = (iter != this->session_thread_data_map.end());
     BOOST_REQUIRE_EQUAL(bret, true);
-    session_thread_data_sessionless* data = iter->second;
+    thread_data_ptr data = iter->second;
     bret = (data != NULL);
     BOOST_REQUIRE_EQUAL(bret, true);
 
@@ -812,6 +807,42 @@ void handle_session_initialize_test() {
     BOOST_CHECK_EQUAL(data->thread_division, THREAD_DIVISION_DOWN_STREAM);
     BOOST_CHECK_EQUAL(data->pair_thread_id, boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(data->recive_data_map.empty(), true);
+    BOOST_CHECK_EQUAL(data->end_flag, END_FLAG_OFF);
+    BOOST_CHECK_EQUAL(data->accept_end_flag, ACCEPT_END_FLAG_OFF);
+    BOOST_CHECK_EQUAL(data->sorry_flag, SORRY_FLAG_OFF);
+    BOOST_CHECK_EQUAL(data->sorryserver_switch_flag, SORRYSERVER_SWITCH_FLAG_OFF);
+    BOOST_CHECK_EQUAL(data->realserver_switch_flag, REALSERVER_SWITCH_FLAG_OFF);
+    BOOST_CHECK_EQUAL(data->client_endpoint_tcp, ep_tcp);
+}
+
+//handle_session_initialize 董作方
+void handle_session_initialize_test_thread() {
+    boost::thread down_thread(down_thread_func);
+    boost::asio::ip::tcp::endpoint ep_tcp = string_to_endpoint<boost::asio::ip::tcp> ("100.100.100.100:8888");
+    boost::asio::ip::udp::endpoint ep_udp = string_to_endpoint<boost::asio::ip::udp> ("100.100.100.100:8080");
+
+    cout << "[51]------------------------------------------\n";
+    //unit_test[51] 多スレッドテスト
+    EVENT_TAG ret =	this->handle_session_initialize(boost::this_thread::get_id(), down_thread.get_id(),ep_tcp,ep_udp);
+
+    BOOST_CHECK_EQUAL(ret, ACCEPT);
+
+    session_thread_data_map_it iter;
+    bool bret ;
+    {
+       boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+       iter = this->session_thread_data_map.find(boost::this_thread::get_id());
+       bret = (iter != this->session_thread_data_map.end());
+    }
+    BOOST_REQUIRE_EQUAL(bret, true);
+    thread_data_ptr data = iter->second;
+    bret = (data != NULL);
+    BOOST_REQUIRE_EQUAL(bret, true);
+
+    BOOST_CHECK_EQUAL(data->thread_id, boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(data->thread_division, THREAD_DIVISION_UP_STREAM);
+    BOOST_CHECK_EQUAL(data->pair_thread_id, down_thread.get_id());
+    BOOST_CHECK_EQUAL(data->recive_data_map.empty(), false);
     BOOST_CHECK_EQUAL(data->end_flag, END_FLAG_OFF);
     BOOST_CHECK_EQUAL(data->accept_end_flag, ACCEPT_END_FLAG_OFF);
     BOOST_CHECK_EQUAL(data->sorry_flag, SORRY_FLAG_OFF);
@@ -848,6 +879,38 @@ void handle_session_finalize_test() {
     BOOST_CHECK_EQUAL( ret, STOP);
 }
 
+//handle_session_finalize 董作方
+void handle_session_finalize_test_thread() {
+    cout << "[53]------------------------------------------\n";
+    //unit_test[53] 多スレッドテスト/セッションスレッドに対応する終了処理
+    //unit_test[53] test data:セッションスレッド初期化
+    boost::thread down_thread(down_thread_func);
+    boost::asio::ip::tcp::endpoint ep_tcp = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
+    boost::asio::ip::udp::endpoint ep_udp = string_to_endpoint<boost::asio::ip::udp> ("10.10.100.100:8088");
+
+    this->handle_session_initialize(boost::this_thread::get_id(),down_thread.get_id(),ep_tcp,ep_udp);
+    protocol_module_base::EVENT_TAG ret =
+    this->handle_session_finalize(boost::this_thread::get_id(), down_thread.get_id());
+
+    //session_thread_data_map中にthis_thread無し
+    session_thread_data_map_it thread_map_iterator;
+    bool bret;
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        thread_map_iterator = this->session_thread_data_map.find(boost::this_thread::get_id());
+    	bret = (thread_map_iterator == this->session_thread_data_map.end());
+    }
+    BOOST_CHECK_EQUAL(bret,true);
+
+    //session_thread_data_map中にdown_thread無し
+    thread_map_iterator = this->session_thread_data_map.find(down_thread.get_id());
+    bret = (thread_map_iterator == this->session_thread_data_map.end());
+    BOOST_CHECK_EQUAL(bret,true);
+
+    //遷移先ステータスを設定する status = ACCEPT
+    BOOST_CHECK_EQUAL( ret, STOP);
+}
+
 //handle_accept 董作方
 void handle_accept_test() {
     cout << "[54]------------------------------------------" << endl;
@@ -857,40 +920,55 @@ void handle_accept_test() {
 
     cout << "[55]------------------------------------------" << endl;
     //unit_test[55] session_thread_data_map中にsession_thread_data無し
-    session_thread_data_sessionless*  data1 = NULL;
-    this->session_thread_data_map.insert(
-                std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(), data1));
+    thread_data_ptr  data1 ;
+    this->session_thread_data_map[boost::this_thread::get_id()] = data1;
     ret = this->handle_accept(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[56]------------------------------------------" << endl;
     //unit_test[56] sorry状態の場合
     //unit_test[56] test data:accept_end_flag= on,sorry_flag= on
-    session_thread_data_sessionless  data;
-    data.accept_end_flag = ACCEPT_END_FLAG_OFF;
-    data.sorry_flag = SORRY_FLAG_ON;
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
+    data_pro->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    data_pro->sorry_flag = SORRY_FLAG_ON;
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(
-            std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(), &data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
 
     ret = this->handle_accept(boost::this_thread::get_id());
 
-    BOOST_CHECK_EQUAL(data.accept_end_flag, ACCEPT_END_FLAG_ON);//accept完了フラグをON
+    BOOST_CHECK_EQUAL(data_pro->accept_end_flag, ACCEPT_END_FLAG_ON);//accept完了フラグをON
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);//遷移先ステータス=SORRYSERVER_SELECT
 
     cout << "[57]------------------------------------------" << endl;
     //unit_test[57] sorry状態以外の場合
     //unit_test[57] test data:accept_end_flag= on,sorry_flag= off
-    data.accept_end_flag = ACCEPT_END_FLAG_OFF;
-    data.sorry_flag = SORRY_FLAG_OFF;
+    data_pro->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    data_pro->sorry_flag = SORRY_FLAG_OFF;
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(
-                std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(), &data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
 
     ret = this->handle_accept(boost::this_thread::get_id());
 
-    BOOST_CHECK_EQUAL(data.accept_end_flag, ACCEPT_END_FLAG_ON);//accept完了フラグをON
+    BOOST_CHECK_EQUAL(data_pro->accept_end_flag, ACCEPT_END_FLAG_ON);//accept完了フラグをON
     BOOST_CHECK_EQUAL(ret, REALSERVER_SELECT);//遷移先ステータス=REALSERVER_SELECT
+}
+
+//handle_accept 董作方
+void handle_accept_test_thread() {
+    cout << "[56]------------------------------------------\n";
+    //unit_test[56] 多スレッドテスト/sorry状態の場合
+    //unit_test[56] test data:accept_end_flag= on,sorry_flag= on
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
+    data_pro->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    data_pro->sorry_flag = SORRY_FLAG_ON;
+    {
+        boost::mutex::scoped_lock  sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
+    }
+    EVENT_TAG ret = this->handle_accept(boost::this_thread::get_id());
+
+    BOOST_CHECK_EQUAL(data_pro->accept_end_flag, ACCEPT_END_FLAG_ON);//accept完了フラグをON
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);//遷移先ステータス=SORRYSERVER_SELECT
 }
 
 //handle_client_recv 郎希倹
@@ -900,21 +978,21 @@ void handle_client_recv_test(){
     boost::array<char, MAX_BUFFER_SIZE> request;
     send_status send_status_temp;
     boost::thread down_thread(&down_thread_func);
-    session_thread_data_sessionless* psession_thread_data = new session_thread_data_sessionless;
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
     init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
     recive_data recive_data_tmp;
 
     init_send_status(send_status_temp);
     // recive_dataを作成する
     init_recive_data(recive_data_tmp);
-    recive_data_tmp.recive_buffer_max_size = USE_BUFFER_SIZE;
-    recive_data_tmp.recive_buffer_rest_size = USE_BUFFER_SIZE;
 
     //recive_data_mapを作成する
     psession_thread_data->end_flag = END_FLAG_OFF;
     psession_thread_data->last_status = CLIENT_RECV;
     boost::asio::ip::tcp::endpoint endpoint_local;
+    endpoint_local = string_to_endpoint<boost::asio::ip::tcp> ("111.111.111.111:1111");
     boost::asio::ip::tcp::endpoint endpoint_not_used;
+    psession_thread_data->client_endpoint_tcp = endpoint_local;
     endpoint_not_used = string_to_endpoint<boost::asio::ip::tcp> ("100.100.100.100:8888");
 
     //session_thread_dataを作成する
@@ -931,7 +1009,8 @@ void handle_client_recv_test(){
     cout << "[59]------------------------------------------" << endl;
     // unit_test[59] boost::this_thread::get_id()対応のデータsession_thread_dataがNULL
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    thread_data_ptr p;
+    this->session_thread_data_map[boost::this_thread::get_id()] = p;
     ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
@@ -959,6 +1038,8 @@ void handle_client_recv_test(){
     // unit_test[61] recive_data.recive_buffer＝Null
     recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
     recive_data_global.recive_buffer_rest_size = USE_BUFFER_SIZE;
+    delete[] recive_data_global.recive_buffer1;
+    delete[] recive_data_global.recive_buffer2;
     recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
     recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
     recive_data_global.recive_buffer = NULL;
@@ -2910,16 +2991,72 @@ void handle_client_recv_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 50u);
+}
 
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = NULL;
-    recive_data_global.recive_buffer2 = NULL;
+//handle_client_recv_test_thread
+void handle_client_recv_test_thread(){
+    size_t request_len = USE_BUFFER_SIZE;
+    EVENT_TAG ret;
+    boost::array<char, MAX_BUFFER_SIZE> request;
+    send_status send_status_temp;
+    recive_data recive_data_tmp;
+    boost::thread down_thread(&down_thread_func);
+    boost::asio::ip::tcp::endpoint endpoint_local = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
+    init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
+    psession_thread_data->client_endpoint_tcp = endpoint_local;
 
-    if (psession_thread_data)
     {
-        delete psession_thread_data;
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
+        this->forwarded_for = 1;
     }
+
+    init_recive_data(recive_data_tmp);
+
+    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
+
+    cout << "[142]------------------------------------------\n";
+    // unit_test[142] リクエストデータ残サイズ　＞　0
+    // unit_test[142]  ●出力の送信状態リスト：　１：送信待　２：送信不可
+    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 78;
+    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
+    recive_data_global.send_status_list.clear();
+
+    init_send_status(send_status_temp);
+    send_status_temp.status = SEND_NG;
+    send_status_temp.send_offset = 0;
+    send_status_temp.send_end_size = 0;
+    send_status_temp.unsend_size = 12;
+    recive_data_global.send_status_list.push_back(send_status_temp);
+
+    //未送信データ
+    memcpy(recive_data_global.recive_buffer, "GET / HTTP/1", 12);
+
+    memcpy(request.c_array(), ".0\r\nCookie: m=1\r\n\r\nGET / HTTP/1.0\r\nCookie: m=1\r\n\r", 49);
+    request_len = 49;
+
+    ret = handle_client_recv(boost::this_thread::get_id(), request, request_len);
+
+    BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 31u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
+
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->status, SEND_NG);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->edit_division, EDIT_DIVISION_NO_EDIT);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->unsend_size, 30u);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->send_offset, 31u);
 }
 
 //handle_realserver_select(tcp) 馮家純
@@ -2944,7 +3081,7 @@ void handle_realserver_select_tcp_test(){
     //register function
     tcp_schedule_func_type func_cerr2 = &schedule_tcp_determinate;
     this->register_schedule(func_cerr2);
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    this->session_thread_data_map[boost::this_thread::get_id()].reset();
     boost::asio::ip::tcp::endpoint ep_err2;
     ret = this->handle_realserver_select(boost::this_thread::get_id(), ep_err2);
 
@@ -2962,14 +3099,15 @@ void handle_realserver_select_tcp_test(){
     cout << "[152]------------------------------------------" << endl;
     //unit_test[152] endpoint = 決定
     boost::thread down_thread1(down_thread_func);
-    session_thread_data_sessionless dataup1, datadown1;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &dataup1;
-    this->session_thread_data_map[down_thread1.get_id()] = &datadown1;
-    dataup1.thread_division = THREAD_DIVISION_UP_STREAM;
-    dataup1.pair_thread_id = down_thread1.get_id();
-    datadown1.thread_division = THREAD_DIVISION_DOWN_STREAM;
-    datadown1.pair_thread_id = boost::this_thread::get_id();
-    datadown1.recive_data_map.clear();
+    thread_data_ptr dataup1(new session_thread_data_sessionless);
+    thread_data_ptr datadown1(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = dataup1;
+    this->session_thread_data_map[down_thread1.get_id()] = datadown1;
+    dataup1->thread_division = THREAD_DIVISION_UP_STREAM;
+    dataup1->pair_thread_id = down_thread1.get_id();
+    datadown1->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    datadown1->pair_thread_id = boost::this_thread::get_id();
+    datadown1->recive_data_map.clear();
     //register function
     tcp_schedule_func_type func1 = &schedule_tcp_determinate;
 
@@ -2980,8 +3118,6 @@ void handle_realserver_select_tcp_test(){
 
     //endpoint = 決定
     BOOST_CHECK_EQUAL(ep1, string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888"));
-    //realserver受信バッファを確保する
-    BOOST_CHECK(datadown1.recive_data_map.find(ep1) != datadown1.recive_data_map.end());
     //遷移先ステータスを設定する status = CLIENT_RECV
     BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 
@@ -2989,9 +3125,9 @@ void handle_realserver_select_tcp_test(){
     //unit_test[153] endpoint = 未決定
     this->session_thread_data_map.clear();
 
-    session_thread_data_sessionless dataup2;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &dataup2;
-    dataup2.end_flag = END_FLAG_OFF;
+    thread_data_ptr dataup2(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = dataup2;
+    dataup2->end_flag = END_FLAG_OFF;
     //register function
     tcp_schedule_func_type func2 = &schedule_tcp_nodeterminate;
 
@@ -3003,9 +3139,43 @@ void handle_realserver_select_tcp_test(){
     //endpoint = 未決定
     BOOST_CHECK_EQUAL(ep_chk2, ep2);
     //終了フラグをONにする
-    BOOST_CHECK_EQUAL(dataup2.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(dataup2->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_DISCONNECT
     BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+}
+
+//handle_realserver_select(tcp)_thread 馮家純
+void handle_realserver_select_tcp_test_thread(){
+	EVENT_TAG ret;
+	cout << "[152]------------------------------------------\n";
+	//unit_test[152] endpoint = 決定
+	boost::thread down_thread(down_thread_func);
+    thread_data_ptr dataup(new session_thread_data_sessionless);
+    thread_data_ptr datadown(new session_thread_data_sessionless);
+	dataup->thread_division = THREAD_DIVISION_UP_STREAM;
+	dataup->pair_thread_id = down_thread.get_id();
+	datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
+	datadown->pair_thread_id = boost::this_thread::get_id();
+	datadown->recive_data_map.clear();
+
+	{
+		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+		this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
+		this->session_thread_data_map[down_thread.get_id()] = datadown;
+	}
+
+	//register function
+	tcp_schedule_func_type func = &schedule_tcp_determinate;
+
+	this->register_schedule(func);
+
+	boost::asio::ip::tcp::endpoint ep;
+	ret = this->handle_realserver_select(boost::this_thread::get_id(), ep);
+
+	//endpoint = 決定
+	BOOST_CHECK_EQUAL(ep, string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888"));
+	//遷移先ステータスを設定する status = CLIENT_RECV
+	BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 }
 
 //handle_realserver_select(udp) 馮家純
@@ -3030,7 +3200,7 @@ void handle_realserver_connect_test(){
     send_status send_status_temp;
     edit_data edit_data_temp;
     boost::thread down_thread(&down_thread_func);
-    session_thread_data_sessionless* psession_thread_data = new session_thread_data_sessionless;
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
     init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
     recive_data recive_data_tmp;
     init_send_status(send_status_temp);
@@ -3042,12 +3212,12 @@ void handle_realserver_connect_test(){
     //recive_data_mapを作成する
     psession_thread_data->end_flag = END_FLAG_OFF;
     psession_thread_data->last_status = CLIENT_RECV;
-    boost::asio::ip::tcp::endpoint endpoint_local;
+    boost::asio::ip::tcp::endpoint endpoint_local = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");;
 
     //session_thread_dataを作成する
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
-    psession_thread_data->client_endpoint_tcp = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    psession_thread_data->client_endpoint_tcp = endpoint_local;
     this->forwarded_for = 1;
 
     cout << "[155]------------------------------------------" << endl;
@@ -3059,7 +3229,8 @@ void handle_realserver_connect_test(){
     cout << "[156]------------------------------------------" << endl;
     // unit_test[156] boost::this_thread::get_id()対応のデータsession_thread_dataがNULL
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    thread_data_ptr p;
+    this->session_thread_data_map[boost::this_thread::get_id()] = p;
     ret = handle_realserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
@@ -4065,27 +4236,95 @@ void handle_realserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_EDIT);
+}
 
+//handle_realserver_connect_test_thread
+void handle_realserver_connect_test_thread(){
+    EVENT_TAG ret;
+    boost::array<char, MAX_BUFFER_SIZE> send_buffer;
+    send_status send_status_temp;
+    recive_data recive_data_tmp;
+    boost::thread down_thread(&down_thread_func);
+    boost::asio::ip::tcp::endpoint endpoint_local = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
+    init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
+    psession_thread_data->client_endpoint_tcp = endpoint_local;
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
+        this->forwarded_for = 1;
+    }
+
+    init_recive_data(recive_data_tmp);
+
+    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
+
+    const char* forwarded_exist = "POST / HTTP/1.0\r\nX-Forwarded-For: 10.10.2.2\r\nContent-Length: 65465\r\n\r\n";
+    const int exist_len = 70;
+    const int exist_leave_len = 65465;
+    const int forwarded_offset = 17;
+
+    cout << "[168]------------------------------------------\n";
+    // unit_test[168] 編集データリストが空の場合
+    // unit_test[168] ●送信バッファ残サイズ　＞　0　かつ　送信可能データサイズ　＞　0
+    // unit_test[168] ●送信バッファ残サイズ　＜　送信可能データサイズ
+    recive_data_global.recive_buffer_max_size = MAX_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 0;
     delete[] recive_data_global.recive_buffer1;
     delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = NULL;
-    recive_data_global.recive_buffer2 = NULL;
+    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
+    size_t send_buffer_len = 0;
+    memset(send_buffer.c_array(), 0, MAX_BUFFER_SIZE);
+    recive_data_global.send_status_list.clear();
 
-    if (psession_thread_data)
-    {
-        delete psession_thread_data;
-    }
+    init_send_status(send_status_temp);
+    send_status_temp.status = SEND_OK;
+    send_status_temp.send_offset = 0;
+    send_status_temp.send_end_size = 0;
+    send_status_temp.edit_division = EDIT_DIVISION_EDIT;
+    send_status_temp.send_possible_size = MAX_BUFFER_SIZE;
+    recive_data_global.send_status_list.push_back(send_status_temp);
+
+    memcpy(recive_data_global.recive_buffer, forwarded_exist, exist_len);
+    memset(recive_data_global.recive_buffer + exist_len, 'x', exist_leave_len);
+
+    ret = handle_realserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
+
+    BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);
+    BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
+    //送信バッファの内容をチェックする。
+    int cmp_ret = memcmp(send_buffer.c_array(), recive_data_global.recive_buffer, forwarded_offset);
+    BOOST_CHECK_EQUAL(cmp_ret, 0);
+    cmp_ret = memcmp(send_buffer.c_array() + forwarded_offset, "X-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 40);
+    BOOST_CHECK_EQUAL(cmp_ret, 0);
+    cmp_ret = memcmp(send_buffer.c_array() + forwarded_offset + 40, recive_data_global.recive_buffer + forwarded_offset
+            + 28, MAX_BUFFER_SIZE - forwarded_offset - 40);
+    BOOST_CHECK_EQUAL(cmp_ret, 0);
+
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.size(), 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, MAX_BUFFER_SIZE - 12u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 12u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
 }
 
 //handle_realserver_connection_fail 馮家純
-void handle_realserver_connection_fail_test(){
+void handle_realserver_connection_fail_test() {
     EVENT_TAG ret;
 
     cout << "[181]------------------------------------------" << endl;
     //unit_test[181] 異常系 session_thread_data_map中にThreadID対応のデータがない
     this->session_thread_data_map.clear();
 
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    this->session_thread_data_map[boost::this_thread::get_id()].reset();
     boost::asio::ip::tcp::endpoint ep_err1;
     ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep_err1);
 
@@ -4105,14 +4344,36 @@ void handle_realserver_connection_fail_test(){
     //unit_test[183] 終了フラグ,遷移先ステータス
     boost::asio::ip::tcp::endpoint ep;
 
-    session_thread_data_sessionless data;
-    data.thread_id = boost::this_thread::get_id();
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data;
+    thread_data_ptr data(new session_thread_data_sessionless);
+    data->thread_id = boost::this_thread::get_id();
+    this->session_thread_data_map[boost::this_thread::get_id()] = data;
 
     ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data->end_flag, END_FLAG_ON);
+    //遷移先ステータス status = CLIENT_DISCONNECT
+    BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+}
+
+//handle_realserver_connection_fail_thread 馮家純
+void handle_realserver_connection_fail_test_thread() {
+    cout << "[183]------------------------------------------\n";
+    //unit_test[183] 終了フラグ,遷移先ステータス
+    EVENT_TAG ret;
+    boost::asio::ip::tcp::endpoint ep;
+
+    thread_data_ptr data(new session_thread_data_sessionless);
+    data->thread_id = boost::this_thread::get_id();
+    {
+		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data;
+	}
+
+    ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+
+    //終了フラグをON
+    BOOST_CHECK_EQUAL(data->end_flag, END_FLAG_ON);
     //遷移先ステータス status = CLIENT_DISCONNECT
     BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
 }
@@ -4121,9 +4382,8 @@ void handle_realserver_connection_fail_test(){
 void handle_realserver_send_test(){
     boost::asio::ip::tcp::endpoint endpoint = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
     send_status real_send_status ,real_send_status1 ;
-    edit_data real_data,real_data1;
     recive_data real_recive_data;
-    session_thread_data_sessionless thread_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
 
     cout << "[184]------------------------------------------" << endl;
     //unit_test[184] session_thread_data_map中にthread_id無し
@@ -4133,26 +4393,26 @@ void handle_realserver_send_test(){
 
     cout << "[185]------------------------------------------" << endl;
     //unit_test[185] session_thread_data_map中にsession_thread_data_sessionless無し
-    session_thread_data_sessionless* thread_data1 = NULL;
+    thread_data_ptr thread_data1 ;
 
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),thread_data1));
+    this->session_thread_data_map[boost::this_thread::get_id()] = thread_data1;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[186]------------------------------------------" << endl;
     //unit_test[186] recive_data_map中にendpoint無し
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[187]-------------------------------------------" << endl;
     //unit_test[187] send_status_list中にsend_status無し
     real_recive_data.send_status_list.clear();
-    thread_data.recive_data_map[endpoint] = real_recive_data;
+    data_pro->recive_data_map[endpoint] = real_recive_data;
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
 
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
@@ -4167,19 +4427,19 @@ void handle_realserver_send_test(){
     real_send_status.status = SEND_OK;//送信状態->SEND_OK
     real_recive_data.send_status_list.push_back(real_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, REALSERVER_CONNECT);//遷移先ステータスを設定する
 
-    SEND_STATUS_TAG send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    size_t end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
+    SEND_STATUS_TAG send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
+    size_t offset = data_pro->recive_data_map[endpoint].send_status_list.front().send_offset;
+    size_t end_size = data_pro->recive_data_map[endpoint].send_status_list.front().send_end_size;
 
     BOOST_CHECK_EQUAL(send_status,SEND_OK); //送信状態に送信待を設定する
     BOOST_CHECK_EQUAL(offset,1u);//送信データオフセットに送信済データサイズを加算する
@@ -4191,12 +4451,12 @@ void handle_realserver_send_test(){
     real_send_status.status = SEND_NG;//送信状態->SEND_NG
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
-    thread_data.recive_data_map.clear();
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->recive_data_map.clear();
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -4208,12 +4468,12 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -4227,14 +4487,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
@@ -4248,14 +4508,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
@@ -4271,12 +4531,12 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -4292,14 +4552,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, REALSERVER_CONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信データ残サイズ　= 0,送信状態に送信済を設定する
@@ -4315,12 +4575,12 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -4336,14 +4596,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信データ残サイズ　= 0,送信状態に送信済を設定する
@@ -4358,14 +4618,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-     thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+     data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, REALSERVER_CONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信データ残サイズ　> 0,送信状態に送信継続を設定する
@@ -4381,14 +4641,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信データ残サイズ　> 0,送信状態に送信済を設定する
@@ -4400,12 +4660,12 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.clear();
     real_recive_data.send_status_list.push_back(real_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -4420,14 +4680,14 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信済を設定する
@@ -4443,17 +4703,48 @@ void handle_realserver_send_test(){
     real_recive_data.send_status_list.push_back(real_send_status);
     real_recive_data.send_status_list.push_back(real_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_realserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(send_status,SEND_CONTINUE); //送信状態に送信待を設定する
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
+}
+
+//handle_realserver_send 董作方
+void handle_realserver_send_test_thread(){
+    boost::asio::ip::tcp::endpoint endpoint = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
+    send_status real_send_status;
+    recive_data real_recive_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
+
+    cout << "[191]------------------------------------------\n";
+    //unit_test[191] 多スレッドテスト/送信状態->SEND_OK,送信可能データサイズ　=　0/送信データ残サイズ　＞　0/送信可能データなし
+    //unit_test[191] test data: 送信状態に送信待を設定
+    real_send_status.send_possible_size = 0u;//送信可能データサイズ=0
+    real_send_status.send_rest_size = 1u;//送信データ残サイズ　> 0
+    real_send_status.status = SEND_OK;
+    real_recive_data.send_status_list.clear();
+    real_recive_data.send_status_list.push_back(real_send_status);
+
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,real_recive_data));
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
+    }
+    EVENT_TAG event_status = this->handle_realserver_send(boost::this_thread::get_id());
+    SEND_STATUS_TAG send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
+
+    BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
+    BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
 }
 
 //handle_sorryserver_select 馮家純
@@ -4464,35 +4755,34 @@ void handle_sorryserver_select_test(){
     boost::asio::ip::tcp::endpoint ep;
 
     //up,down thread map
-    session_thread_data_sessionless dataup, datadown;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &dataup;
-    this->session_thread_data_map[downt.get_id()] = &datadown;
-    dataup.thread_id = boost::this_thread::get_id();
-    dataup.thread_division = THREAD_DIVISION_UP_STREAM;
-    dataup.pair_thread_id = downt.get_id();
-    datadown.thread_id = downt.get_id();
-    datadown.thread_division = THREAD_DIVISION_DOWN_STREAM;
-    datadown.pair_thread_id = boost::this_thread::get_id();
-    datadown.recive_data_map.clear();
+    thread_data_ptr dataup(new session_thread_data_sessionless);
+    thread_data_ptr datadown(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
+    this->session_thread_data_map[downt.get_id()] = datadown;
+    dataup->thread_id = boost::this_thread::get_id();
+    dataup->thread_division = THREAD_DIVISION_UP_STREAM;
+    dataup->pair_thread_id = downt.get_id();
+    datadown->thread_id = downt.get_id();
+    datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    datadown->pair_thread_id = boost::this_thread::get_id();
+    datadown->recive_data_map.clear();
 
     //send_status送信可能データ
     send_status st;
     st.status = SEND_OK;
     st.send_possible_size = 2u;
-    dataup.recive_data_map[ep].send_status_list.push_back(st);
+    dataup->recive_data_map[ep].send_status_list.push_back(st);
 
     EVENT_TAG ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
-    //下りスレッドにsorryserver受信バッファを確保する
-    BOOST_CHECK_EQUAL(datadown.recive_data_map.empty(), false);
     //送信先endpointにendpointを設定する
-    BOOST_CHECK_EQUAL(dataup.target_endpoint, ep);
+    BOOST_CHECK_EQUAL(dataup->target_endpoint, ep);
     //遷移先ステータス status = SORRYSERVER_CONNECT
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
 
     cout << "[203]------------------------------------------" << endl;
     //unit_test[203] 	session_thread_data_map中に上りスレッド中にThreadID対応のデータがない
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    this->session_thread_data_map[boost::this_thread::get_id()].reset();
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
     //遷移先ステータスを設定する status = FINALIZE
@@ -4517,12 +4807,48 @@ void handle_sorryserver_select_test(){
     cout << "[206]------------------------------------------" << endl;
     //unit_test[206] 	session_thread_data_map中に下りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = &dataup;
+    this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
-    //下りスレッドにsorryserver受信バッファを確保する
-    BOOST_CHECK_EQUAL(this->session_thread_data_map[dataup.pair_thread_id]->recive_data_map.empty(), false);
     //送信先endpointにendpointを設定する
-    BOOST_CHECK_EQUAL(dataup.target_endpoint, ep);
+    BOOST_CHECK_EQUAL(dataup->target_endpoint, ep);
+    //遷移先ステータス status = SORRYSERVER_CONNECT
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
+}
+
+
+void handle_sorryserver_select_test_thread(){
+    cout << "[202]------------------------------------------\n";
+    //unit_test[202] 該当スレッドの送信可能データを取得する,下りスレッドにsorryserver受信バッファを確保する,送信先endpoint,遷移先ステータス
+    boost::thread downt(down_thread_func);
+    boost::asio::ip::tcp::endpoint ep;
+
+    //up,down thread map
+    thread_data_ptr dataup(new session_thread_data_sessionless);
+    thread_data_ptr datadown(new session_thread_data_sessionless);
+    dataup->thread_id = boost::this_thread::get_id();
+    dataup->thread_division = THREAD_DIVISION_UP_STREAM;
+    dataup->pair_thread_id = downt.get_id();
+    datadown->thread_id = downt.get_id();
+    datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    datadown->pair_thread_id = boost::this_thread::get_id();
+    datadown->recive_data_map.clear();
+
+    {
+		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
+        this->session_thread_data_map[downt.get_id()] = datadown;
+	}
+
+    //send_status送信可能データ
+    send_status st;
+    st.status = SEND_OK;
+    st.send_possible_size = 2u;
+    dataup->recive_data_map[ep].send_status_list.push_back(st);
+
+    EVENT_TAG ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
+
+    //送信先endpointにendpointを設定する
+    BOOST_CHECK_EQUAL(dataup->target_endpoint, ep);
     //遷移先ステータス status = SORRYSERVER_CONNECT
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
 }
@@ -4535,7 +4861,7 @@ void handle_sorryserver_connect_test(){
     send_status send_status_temp;
     edit_data edit_data_temp;
     boost::thread up_thread(&up_thread_func);
-    session_thread_data_sessionless* psession_thread_data = new session_thread_data_sessionless;
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
     init_session_thread_data_sessionless(psession_thread_data, up_thread.get_id());
     recive_data recive_data_tmp;
     init_send_status(send_status_temp);
@@ -4547,12 +4873,12 @@ void handle_sorryserver_connect_test(){
     //recive_data_mapを作成する
     psession_thread_data->end_flag = END_FLAG_OFF;
     psession_thread_data->last_status = CLIENT_RECV;
-    boost::asio::ip::tcp::endpoint endpoint_local;
+    boost::asio::ip::tcp::endpoint endpoint_local = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
 
     //session_thread_dataを作成する
     psession_thread_data->recive_data_map.clear();
     psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
-    psession_thread_data->client_endpoint_tcp = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    psession_thread_data->client_endpoint_tcp = endpoint_local;
     this->forwarded_for = 1;
     memcpy(sorry_uri.c_array(), "/sorry.htm", 10);
 
@@ -4565,7 +4891,8 @@ void handle_sorryserver_connect_test(){
     cout << "[208]------------------------------------------" << endl;
     // unit_test[208] boost::this_thread::get_id()対応のデータsession_thread_dataがNULL
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    thread_data_ptr p;
+    this->session_thread_data_map[boost::this_thread::get_id()] = p;
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
@@ -4756,7 +5083,6 @@ void handle_sorryserver_connect_test(){
     const int exist_leave_len = 65455;
     const int not_exist_leave_len = 65483;
     const int not_exist_len = 52;
-    //const int forwarded_offset = 27;
 
     cout << "[215]------------------------------------------" << endl;
     // unit_test[215] 編集区分 = 編集あり、編集データリストが空の場合
@@ -5575,22 +5901,91 @@ void handle_sorryserver_connect_test(){
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
+}
 
+//handle_sorryserver_connect_test_thread
+void handle_sorryserver_connect_test_thread(){
+    EVENT_TAG ret;
+    boost::array<char, MAX_BUFFER_SIZE> send_buffer;
+    send_status send_status_temp;
+    recive_data recive_data_tmp;
+    boost::thread down_thread(&down_thread_func);
+    boost::asio::ip::tcp::endpoint endpoint_local = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
+    init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
+    psession_thread_data->client_endpoint_tcp = endpoint_local;
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
+        this->forwarded_for = 1;
+        memcpy(sorry_uri.c_array(), "/sorry.htm", 10);
+    }
+
+    init_recive_data(recive_data_tmp);
+
+    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(endpoint_local);
+    recive_data& recive_data_global = it->second;
+
+    const char* forwarded_exist = "POST /index.aspx HTTP/1.0\r\nX-Forwarded-For: 10.10.2.2\r\nContent-Length: 65455\r\n\r\n";
+    const int exist_len = 80;
+    const int exist_leave_len = 65455;
+
+    cout << "[220]------------------------------------------\n";
+    // unit_test[220] 編集データリストが空の場合
+    // unit_test[220] ●送信バッファ残サイズ　＞　0　かつ　送信可能データサイズ　＞　0
+    // unit_test[220] ●送信バッファ残サイズ　＜　送信可能データサイズ
+    recive_data_global.recive_buffer_max_size = MAX_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 0;
     delete[] recive_data_global.recive_buffer1;
     delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = NULL;
-    recive_data_global.recive_buffer2 = NULL;
+    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
+    size_t send_buffer_len = 0;
+    memset(send_buffer.c_array(), 0, MAX_BUFFER_SIZE);
+    recive_data_global.send_status_list.clear();
 
-    if (psession_thread_data)
-    {
-        delete psession_thread_data;
-    }
+    init_send_status(send_status_temp);
+    send_status_temp.status = SEND_OK;
+    send_status_temp.send_offset = 0;
+    send_status_temp.send_end_size = 0;
+    send_status_temp.edit_division = EDIT_DIVISION_EDIT;
+    send_status_temp.send_possible_size = MAX_BUFFER_SIZE;
+    recive_data_global.send_status_list.push_back(send_status_temp);
+
+    memcpy(recive_data_global.recive_buffer, forwarded_exist, exist_len);
+    memset(recive_data_global.recive_buffer + exist_len, 'x', exist_leave_len);
+
+    ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
+
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);
+    BOOST_CHECK_EQUAL(send_buffer_len, MAX_BUFFER_SIZE);
+    //送信バッファの内容をチェックする。
+    int cmp_ret = memcmp(send_buffer.c_array(), "POST /sorry.htm HTTP/1.0\r\nX-Forwarded-For: 10.10.2.2, 10.10.10.1\r\n", 66);
+    BOOST_CHECK_EQUAL(cmp_ret, 0);
+    cmp_ret = memcmp(send_buffer.c_array(), recive_data_global.recive_buffer, 5);
+    BOOST_CHECK_EQUAL(cmp_ret, 0);
+    cmp_ret = memcmp(send_buffer.c_array() + 66,
+                     recive_data_global.recive_buffer + 55 ,
+                     MAX_BUFFER_SIZE - 66);
+    BOOST_CHECK_EQUAL(cmp_ret, 0);
+
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 1u);
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.begin()->edit_data_list.size(), 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_end_size, MAX_BUFFER_SIZE - 11u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 11u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->edit_division, EDIT_DIVISION_NO_EDIT);
 }
 
 //handle_sorryserver_connection_fail 董作方
 void handle_sorryserver_connection_fail_test() {
     boost::asio::ip::tcp::endpoint ep_tcp = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
-    session_thread_data_sessionless  thread_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
 
     cout << "[233]------------------------------------------" << endl;
     //unit_test[233] session_thread_data_map中にthread_id無し
@@ -5599,20 +5994,40 @@ void handle_sorryserver_connection_fail_test() {
 
     cout << "[234]------------------------------------------" << endl;
     //unit_test[234] session_thread_data_map中にsession_thread_data無し
-    session_thread_data_sessionless*  thread_data1 = NULL;
-    this->session_thread_data_map.insert(std::pair<boost::thread::id,session_thread_data_sessionless*>(boost::this_thread::get_id(),thread_data1));
+    thread_data_ptr thread_data1 ;
+    this->session_thread_data_map[boost::this_thread::get_id()] = thread_data1;
     ret = this->handle_sorryserver_connection_fail(boost::this_thread::get_id(), ep_tcp);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[235]------------------------------------------" << endl;
     //unit_test[235] handle_sorryserver_connection_failメソッドのテスト
     //unit_test[235] test data:end_flag = on
-    thread_data.end_flag = END_FLAG_OFF;// 終了フラグを設定する
+    data_pro->end_flag = END_FLAG_OFF;// 終了フラグを設定する
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id,session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     ret = this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep_tcp);
 
-    BOOST_CHECK_EQUAL(thread_data.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data_pro->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT );
+}
+
+//handle_sorryserver_connection_fail 董作方
+void handle_sorryserver_connection_fail_test_thread() {
+    boost::asio::ip::tcp::endpoint ep_tcp = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
+
+    cout << "[235]------------------------------------------\n";
+    //unit_test[235] 多スレッドテスト/handle_sorryserver_connection_failメソッドの多スレッドテスト
+    //unit_test[235] test data:end_flag = on
+    data_pro->end_flag = END_FLAG_OFF;// 終了フラグを設定する
+    
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
+    }
+    EVENT_TAG ret = this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep_tcp);
+
+    BOOST_CHECK_EQUAL(data_pro->end_flag, END_FLAG_ON);
     BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT );
 }
 
@@ -5620,9 +6035,8 @@ void handle_sorryserver_connection_fail_test() {
 void handle_sorryserver_send_test() {
     boost::asio::ip::tcp::endpoint endpoint = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");;
     send_status sorr_send_status,sorr_send_status1;
-    edit_data sorr_data,sorr_data1;
     recive_data sorr_recive_data;
-    session_thread_data_sessionless thread_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
 
     cout << "[236]------------------------------------------" << endl;
     //unit_test[236] session_thread_data_map中にthread_id無し
@@ -5631,24 +6045,24 @@ void handle_sorryserver_send_test() {
 
     cout << "[237]------------------------------------------" << endl;
     //unit_test[237] session_thread_data_map中にsession_thread_data_sessionless無し
-    session_thread_data_sessionless* thread_data1 = NULL;
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),thread_data1));
+    thread_data_ptr data_pro1;
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro1;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[238]------------------------------------------" << endl;
     //unit_test[238] recive_data_map中にendpoint無し
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[239]------------------------------------------" << endl;
     //unit_test[239] send_status_list中にsend_status無し
     sorr_recive_data.send_status_list.clear();
-    thread_data.recive_data_map[endpoint] = sorr_recive_data;
+    data_pro->recive_data_map[endpoint] = sorr_recive_data;
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
 
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
@@ -5662,16 +6076,16 @@ void handle_sorryserver_send_test() {
     sorr_send_status.status = SEND_OK; //送信状態->SEND_OK
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    SEND_STATUS_TAG send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    size_t end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
+    SEND_STATUS_TAG send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
+    size_t offset = data_pro->recive_data_map[endpoint].send_status_list.front().send_offset;
+    size_t end_size = data_pro->recive_data_map[endpoint].send_status_list.front().send_end_size;
 
     BOOST_CHECK_EQUAL(event_status, SORRYSERVER_CONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
@@ -5685,12 +6099,12 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -5702,12 +6116,12 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, protocol_module_sessionless::session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -5721,14 +6135,14 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
@@ -5743,12 +6157,12 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -5762,14 +6176,14 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, protocol_module_sessionless::session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
@@ -5785,12 +6199,12 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -5806,14 +6220,14 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, SORRYSERVER_CONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ　= 0,送信状態に送信待を設定する
@@ -5829,14 +6243,14 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
@@ -5851,14 +6265,14 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ　= 0,送信状態に送信待を設定する
@@ -5873,12 +6287,12 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, SORRYSERVER_CONNECT); //遷移先ステータスを設定する
@@ -5894,12 +6308,12 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
@@ -5911,11 +6325,11 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.clear();
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
 
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -5930,14 +6344,14 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status,  CLIENT_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信済を設定する
@@ -5954,26 +6368,55 @@ void handle_sorryserver_send_test() {
     sorr_recive_data.send_status_list.push_back(sorr_send_status);
     sorr_recive_data.send_status_list.push_back(sorr_send_status1);
 
-    thread_data.client_endpoint_tcp = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status,FINALIZE); //送信状態に送信待を設定する
 }
 
+//handle_sorryserver_send 郎希倹
+void handle_sorryserver_send_test_thread() {
+    boost::asio::ip::tcp::endpoint endpoint = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");;
+    send_status sorr_send_status;
+    recive_data sorr_recive_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless);
+
+    cout << "[243]------------------------------------------\n";
+    //unit_test[243] 多スレッドテスト/送信状態->SEND_OK,送信可能データサイズ　=　0/送信データ残サイズ　＞　0/送信可能データなし
+    //unit_test[243] test data: 送信状態に送信待を設定
+    sorr_send_status.send_possible_size = 0u;//送信可能データサイズ=0
+    sorr_send_status.send_rest_size = 1u;//送信データ残サイズ　> 0
+    sorr_send_status.status = SEND_OK;//送信状態->SEND_OK
+    sorr_recive_data.send_status_list.clear();
+    sorr_recive_data.send_status_list.push_back(sorr_send_status);
+
+    data_pro->client_endpoint_tcp = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,sorr_recive_data));
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
+    }
+    EVENT_TAG event_status = this->handle_sorryserver_send(boost::this_thread::get_id());
+    SEND_STATUS_TAG send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
+
+    BOOST_CHECK_EQUAL(event_status, CLIENT_RECV); //遷移先ステータスを設定する
+    BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
+}
+
 //handle_realserver_recv(tcp) 郎希倹
 void handle_realserver_recv_tcp_test() {
-    boost::asio::ip::tcp::endpoint rs_endpoint;
     size_t response_len = USE_BUFFER_SIZE;;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> response;
     send_status send_status_temp;
     boost::thread up_thread(&up_thread_func);
-    session_thread_data_sessionless* psession_thread_data = new session_thread_data_sessionless;
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
     init_session_thread_data_sessionless(psession_thread_data, up_thread.get_id());
     recive_data recive_data_tmp;
 
@@ -5986,13 +6429,12 @@ void handle_realserver_recv_tcp_test() {
     //recive_data_mapを作成する
     psession_thread_data->end_flag = END_FLAG_OFF;
     psession_thread_data->last_status = REALSERVER_RECV;
-    boost::asio::ip::tcp::endpoint endpoint_local;
-    boost::asio::ip::tcp::endpoint endpoint_not_used;
-    endpoint_not_used = string_to_endpoint<boost::asio::ip::tcp> ("100.100.100.100:8888");
+    boost::asio::ip::tcp::endpoint rs_endpoint = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    psession_thread_data->target_endpoint = rs_endpoint;
 
     //session_thread_dataを作成する
     psession_thread_data->recive_data_map.clear();
-    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    psession_thread_data->recive_data_map[rs_endpoint] = recive_data_tmp;
     this->forwarded_for = 1;
 
     cout << "[255]------------------------------------------" << endl;
@@ -6004,29 +6446,18 @@ void handle_realserver_recv_tcp_test() {
     cout << "[256]------------------------------------------" << endl;
     // unit_test[256] boost::this_thread::get_id()対応のデータsession_thread_dataがNULL
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    thread_data_ptr p;
+    this->session_thread_data_map[boost::this_thread::get_id()] = p;
     ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
 
-    cout << "[257]------------------------------------------" << endl;
-    // unit_test[257] endpoint対応のrecive_dataなし
-    // responseを設定する
     psession_thread_data->recive_data_map.clear();
-    psession_thread_data->recive_data_map[endpoint_not_used] = recive_data_tmp;
-
-    memcpy(response.c_array(), "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\n01234567890", REQUEST_BUFFER_SIZE);
-    response_len = REQUEST_BUFFER_SIZE;
-    ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
-    BOOST_CHECK_EQUAL(ret, FINALIZE);
-
-    psession_thread_data->recive_data_map.clear();
-
-    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    psession_thread_data->recive_data_map[rs_endpoint] = recive_data_tmp;
     std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-                psession_thread_data->recive_data_map.find(endpoint_local);
+                psession_thread_data->recive_data_map.find(rs_endpoint);
     recive_data& recive_data_global = it->second;
 
     cout << "[258]------------------------------------------" << endl;
@@ -7775,16 +8206,69 @@ void handle_realserver_recv_tcp_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 50u);
+}
 
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = NULL;
-    recive_data_global.recive_buffer2 = NULL;
+//handle_realserver_recv_tcp_test_thread
+void handle_realserver_recv_tcp_test_thread(){
+    EVENT_TAG ret;
+    boost::array<char, MAX_BUFFER_SIZE> response;
+    send_status send_status_temp;
+    recive_data recive_data_tmp;
+    boost::thread down_thread(&down_thread_func);
+    boost::asio::ip::tcp::endpoint rs_endpoint = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
+    init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
+    psession_thread_data->target_endpoint = rs_endpoint;
 
-    if (psession_thread_data)
     {
-        delete psession_thread_data;
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
+        this->forwarded_for = 1;
     }
+
+    init_recive_data(recive_data_tmp);
+
+    psession_thread_data->recive_data_map[rs_endpoint] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(rs_endpoint);
+    recive_data& recive_data_global = it->second;
+
+    cout << "[334]------------------------------------------\n";
+    // unit_test[334] レスポンスデータ残サイズ　＞　0
+    // unit_test[334]  ●出力の送信状態リスト：　１：送信待　２：送信不可
+    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 76;
+    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
+    recive_data_global.send_status_list.clear();
+
+    init_send_status(send_status_temp);
+    send_status_temp.status = SEND_NG;
+    send_status_temp.send_offset = 0;
+    send_status_temp.send_end_size = 0;
+    send_status_temp.unsend_size = 14;
+    recive_data_global.send_status_list.push_back(send_status_temp);
+
+    //未送信データ
+    memcpy(recive_data_global.recive_buffer, "HTTP/1.0 200 O", 14);
+
+    memcpy(response.c_array(), "K\r\nCookie: m=1\r\n\r\nHTTP/1.0 200 OK\r\nCookie: m=1\r\n\r", 49);
+    size_t response_len = 49;
+
+    ret = handle_realserver_recv(boost::this_thread::get_id(), rs_endpoint, response, response_len);
+
+    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 32u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
+
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->status, SEND_NG);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->unsend_size, 31u);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->send_offset, 32u);
 }
 
 //handle_realserver_recv(udp) 郎希倹
@@ -7800,13 +8284,12 @@ void handle_realserver_recv_udp_test() {
 
 //handle_sorryserver_recv 郎希倹
 void handle_sorryserver_recv_test() {
-    boost::asio::ip::tcp::endpoint sorry_endpoint;
     size_t response_len = USE_BUFFER_SIZE;
     EVENT_TAG ret;
     boost::array<char, MAX_BUFFER_SIZE> response;
     send_status send_status_temp;
     boost::thread up_thread(&up_thread_func);
-    session_thread_data_sessionless* psession_thread_data = new session_thread_data_sessionless;
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
     init_session_thread_data_sessionless(psession_thread_data, up_thread.get_id());
     recive_data recive_data_tmp;
 
@@ -7819,13 +8302,12 @@ void handle_sorryserver_recv_test() {
     //recive_data_mapを作成する
     psession_thread_data->end_flag = END_FLAG_OFF;
     psession_thread_data->last_status = SORRYSERVER_RECV;
-    boost::asio::ip::tcp::endpoint endpoint_local;
-    boost::asio::ip::tcp::endpoint endpoint_not_used;
-    endpoint_not_used = string_to_endpoint<boost::asio::ip::tcp> ("100.100.100.100:8888");
+    boost::asio::ip::tcp::endpoint sorry_endpoint = string_to_endpoint<boost::asio::ip::tcp>("111.111.111.111:8080");
+    psession_thread_data->target_endpoint = sorry_endpoint;
 
     //session_thread_dataを作成する
     psession_thread_data->recive_data_map.clear();
-    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    psession_thread_data->recive_data_map[sorry_endpoint] = recive_data_tmp;
     this->forwarded_for = 1;
 
     cout << "[341]------------------------------------------" << endl;
@@ -7837,28 +8319,18 @@ void handle_sorryserver_recv_test() {
     cout << "[342]------------------------------------------" << endl;
     // unit_test[342] boost::this_thread::get_id()対応のデータsession_thread_dataがNULL
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    thread_data_ptr p;
+    this->session_thread_data_map[boost::this_thread::get_id()] = p;
     ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
 
-    cout << "[343]------------------------------------------" << endl;
-    // unit_test[343] endpoint対応のrecive_dataなし
-    // responseを設定する
     psession_thread_data->recive_data_map.clear();
-    psession_thread_data->recive_data_map[endpoint_not_used] = recive_data_tmp;
-
-    memcpy(response.c_array(), "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\n01234567890", REQUEST_BUFFER_SIZE);
-    response_len = REQUEST_BUFFER_SIZE;
-    ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
-    BOOST_CHECK_EQUAL(ret, FINALIZE);
-
-    psession_thread_data->recive_data_map.clear();
-    psession_thread_data->recive_data_map[endpoint_local] = recive_data_tmp;
+    psession_thread_data->recive_data_map[sorry_endpoint] = recive_data_tmp;
     std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
-                psession_thread_data->recive_data_map.find(endpoint_local);
+                psession_thread_data->recive_data_map.find(sorry_endpoint);
     recive_data& recive_data_global = it->second;
 
     cout << "[344]------------------------------------------" << endl;
@@ -9607,16 +10079,70 @@ void handle_sorryserver_recv_test() {
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
     BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->unsend_size, 50u);
+}
 
-    delete[] recive_data_global.recive_buffer1;
-    delete[] recive_data_global.recive_buffer2;
-    recive_data_global.recive_buffer1 = NULL;
-    recive_data_global.recive_buffer2 = NULL;
+//handle_sorryserver_recv_test_thread
+void handle_sorryserver_recv_test_thread(){
+    EVENT_TAG ret;
+    boost::array<char, MAX_BUFFER_SIZE> response;
+    send_status send_status_temp;
+    recive_data recive_data_tmp;
+    boost::thread down_thread(&down_thread_func);
+    boost::asio::ip::tcp::endpoint sorry_endpoint = string_to_endpoint<boost::asio::ip::tcp>("10.10.10.1:8080");
+    thread_data_ptr psession_thread_data(new session_thread_data_sessionless);
+    init_session_thread_data_sessionless(psession_thread_data, down_thread.get_id());
+    psession_thread_data->target_endpoint = sorry_endpoint;
 
-    if (psession_thread_data)
     {
-        delete psession_thread_data;
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
+    	this->forwarded_for = 1;
     }
+
+    init_recive_data(recive_data_tmp);
+
+    psession_thread_data->recive_data_map[sorry_endpoint] = recive_data_tmp;
+    std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator it =
+                psession_thread_data->recive_data_map.find(sorry_endpoint);
+    recive_data& recive_data_global = it->second;
+
+    cout << "[334]------------------------------------------\n";
+    // unit_test[334] レスポンスデータ残サイズ　＞　0
+    // unit_test[334]  ●出力の送信状態リスト：　１：送信待　２：送信不可
+    recive_data_global.recive_buffer_max_size = USE_BUFFER_SIZE;
+    recive_data_global.recive_buffer_rest_size = 76;
+    recive_data_global.recive_buffer1 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer2 = new char[recive_data_global.recive_buffer_max_size];
+    recive_data_global.recive_buffer = recive_data_global.recive_buffer1;
+    recive_data_global.send_status_list.clear();
+
+    init_send_status(send_status_temp);
+    send_status_temp.status = SEND_NG;
+    send_status_temp.send_offset = 0;
+    send_status_temp.send_end_size = 0;
+    send_status_temp.unsend_size = 14;
+    recive_data_global.send_status_list.push_back(send_status_temp);
+
+    //未送信データ
+    memcpy(recive_data_global.recive_buffer, "HTTP/1.0 200 O", 14);
+
+    memcpy(response.c_array(), "K\r\nCookie: m=1\r\n\r\nHTTP/1.0 200 OK\r\nCookie: m=1\r\n\r", 49);
+    size_t response_len = 49;
+
+    ret = handle_sorryserver_recv(boost::this_thread::get_id(), sorry_endpoint, response, response_len);
+
+    BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
+    BOOST_REQUIRE_EQUAL(recive_data_global.send_status_list.size(), 2u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->status, SEND_OK);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_possible_size, 32u);
+    BOOST_CHECK_EQUAL(recive_data_global.send_status_list.begin()->send_offset, 0u);
+
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->status, SEND_NG);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->send_rest_size, 0u);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->unsend_size, 31u);
+    BOOST_CHECK_EQUAL((recive_data_global.send_status_list.rbegin())->send_offset, 32u);
+
 }
 
 //handle_response_send_inform 馮家純
@@ -9634,7 +10160,7 @@ void handle_client_connection_check_test(){
     cout << "[427]------------------------------------------" << endl;
     //unit_test[427] 異常系 session_thread_data_map中にThreadID対応のデータがない
     this->session_thread_data_map.clear();
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    this->session_thread_data_map[boost::this_thread::get_id()].reset();
     boost::array<char, MAX_BUFFER_SIZE> sbf_err1;
     std::size_t d_err1;
     ret = this->handle_client_connection_check(boost::this_thread::get_id(), sbf_err1, d_err1);
@@ -9658,8 +10184,8 @@ void handle_client_connection_check_test(){
     boost::asio::ip::tcp::endpoint ep1;
 
     //session_thread_data_sessionless
-    session_thread_data_sessionless data1;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data1;
+    thread_data_ptr data1(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data1;
     //send_status
     send_status sd1;
     sd1.status = SEND_OK;
@@ -9671,7 +10197,7 @@ void handle_client_connection_check_test(){
     //send_status->recive_data
     rd1.send_status_list.push_back(sd1);
     //recive_data->session_thread_data_sessionless
-    data1.recive_data_map[ep1] = rd1;
+    data1->recive_data_map[ep1] = rd1;
 
     ret = this->handle_client_connection_check(boost::this_thread::get_id(), sbf1, d1);
 
@@ -9679,9 +10205,9 @@ void handle_client_connection_check_test(){
     //送信可能データを先頭から送信可能データサイズ分、送信バッファにコピーする
     BOOST_CHECK_EQUAL(memcmp(sbf1.data(), chk1.c_str(), 2u), 0);
     //送信済データサイズに送信可能データサイズを設定する
-    BOOST_CHECK_EQUAL(data1.recive_data_map[ep1].send_status_list.rbegin()->send_end_size, 2u);
+    BOOST_CHECK_EQUAL(data1->recive_data_map[ep1].send_status_list.rbegin()->send_end_size, 2u);
     //送信可能データサイズに0を設定する
-    BOOST_CHECK_EQUAL(data1.recive_data_map[ep1].send_status_list.rbegin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(data1->recive_data_map[ep1].send_status_list.rbegin()->send_possible_size, 0u);
     //遷移先ステータスを設定する status = CLIENT_SEND
     BOOST_CHECK_EQUAL(ret, CLIENT_SEND);
 
@@ -9694,8 +10220,8 @@ void handle_client_connection_check_test(){
     boost::asio::ip::tcp::endpoint ep2;
 
     //session_thread_data_sessionless
-    session_thread_data_sessionless data2;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data2;
+    thread_data_ptr data2(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data2;
     //send_status
     send_status sd2;
     sd2.status = SEND_OK;
@@ -9707,7 +10233,7 @@ void handle_client_connection_check_test(){
     //send_status->recive_data
     rd2.send_status_list.push_back(sd2);
     //recive_data->session_thread_data_sessionless
-    data2.recive_data_map[ep2] = rd2;
+    data2->recive_data_map[ep2] = rd2;
 
     ret = this->handle_client_connection_check(boost::this_thread::get_id(), sbf2, d2);
 
@@ -9717,9 +10243,9 @@ void handle_client_connection_check_test(){
 
     std::size_t sbfsize = sbf2.max_size();
     //送信済データサイズに送信バッファサイズを設定する
-    BOOST_CHECK_EQUAL(data2.recive_data_map[ep2].send_status_list.rbegin()->send_end_size, sbfsize);
+    BOOST_CHECK_EQUAL(data2->recive_data_map[ep2].send_status_list.rbegin()->send_end_size, sbfsize);
     //送信可能データサイズから送信バッファサイズを減算する
-    BOOST_CHECK_EQUAL(data2.recive_data_map[ep2].send_status_list.rbegin()->send_possible_size, 1u);
+    BOOST_CHECK_EQUAL(data2->recive_data_map[ep2].send_status_list.rbegin()->send_possible_size, 1u);
     //遷移先ステータスを設定する status = CLIENT_SEND
     BOOST_CHECK_EQUAL(ret, CLIENT_SEND);
 
@@ -9732,8 +10258,8 @@ void handle_client_connection_check_test(){
     boost::asio::ip::tcp::endpoint ep3;
 
     //session_thread_data_sessionless
-    session_thread_data_sessionless data3;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data3;
+    thread_data_ptr data3(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data3;
     //send_status
     send_status sd3;
     sd3.status = SEND_OK;
@@ -9747,7 +10273,7 @@ void handle_client_connection_check_test(){
     //send_status->recive_data
     rd3.send_status_list.push_back(sd3);
     //recive_data->session_thread_data_sessionless
-    data3.recive_data_map[ep3] = rd3;
+    data3->recive_data_map[ep3] = rd3;
 
     ret = this->handle_client_connection_check(boost::this_thread::get_id(), sbf3, d3);
 
@@ -9757,9 +10283,52 @@ void handle_client_connection_check_test(){
     //送信可能データを先頭から送信可能データサイズ分、送信バッファにコピーする
     BOOST_CHECK_EQUAL(memcmp(sbf3.data(), chk3, sbf_size - 2), 0);
     //送信済データサイズに送信可能データサイズを設定する
-    BOOST_CHECK_EQUAL(data3.recive_data_map[ep3].send_status_list.rbegin()->send_end_size, sbf_size);
+    BOOST_CHECK_EQUAL(data3->recive_data_map[ep3].send_status_list.rbegin()->send_end_size, sbf_size);
     //送信可能データサイズに0を設定する
-    BOOST_CHECK_EQUAL(data3.recive_data_map[ep3].send_status_list.rbegin()->send_possible_size, 0u);
+    BOOST_CHECK_EQUAL(data3->recive_data_map[ep3].send_status_list.rbegin()->send_possible_size, 0u);
+    //遷移先ステータスを設定する status = CLIENT_SEND
+    BOOST_CHECK_EQUAL(ret, CLIENT_SEND);
+
+}
+
+void handle_client_connection_check_test_thread(){
+    EVENT_TAG ret;
+    cout << "[429]------------------------------------------\n";
+    //unit_test[429] 送信バッファサイズ　>　送信可能データサイズ
+    boost::array<char, MAX_BUFFER_SIZE> sbf1;
+    std::size_t d1;
+    boost::asio::ip::tcp::endpoint ep1;
+
+    //session_thread_data_sessionless
+    thread_data_ptr data1(new session_thread_data_sessionless);
+
+    //send_status
+    send_status sd1;
+    sd1.status = SEND_OK;
+    sd1.send_possible_size = 2u;
+    sd1.send_offset = 1u;
+    //recive_data
+    recive_data rd1;
+    rd1.recive_buffer = "abcd";
+    //send_status->recive_data
+    rd1.send_status_list.push_back(sd1);
+    //recive_data->session_thread_data_sessionless
+    data1->recive_data_map[ep1] = rd1;
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data1;
+    }
+
+    ret = this->handle_client_connection_check(boost::this_thread::get_id(), sbf1, d1);
+
+    std::string chk1 = "bc";
+    //送信可能データを先頭から送信可能データサイズ分、送信バッファにコピーする
+    BOOST_CHECK_EQUAL(memcmp(sbf1.data(), chk1.c_str(), 2u), 0);
+    //送信済データサイズに送信可能データサイズを設定する
+    BOOST_CHECK_EQUAL(data1->recive_data_map[ep1].send_status_list.rbegin()->send_end_size, 2u);
+    //送信可能データサイズに0を設定する
+    BOOST_CHECK_EQUAL(data1->recive_data_map[ep1].send_status_list.rbegin()->send_possible_size, 0u);
     //遷移先ステータスを設定する status = CLIENT_SEND
     BOOST_CHECK_EQUAL(ret, CLIENT_SEND);
 }
@@ -9781,9 +10350,8 @@ void handle_client_select_test(){
 void handle_client_send_test(){
     boost::asio::ip::tcp::endpoint endpoint = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
     send_status client_send_status, client_send_status1;
-    edit_data client_data, client_data1;
     recive_data client_recive_data;
-    session_thread_data_sessionless thread_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless) ;
 
     cout << "[433]------------------------------------------" << endl;
     //unit_test[433] session_thread_data_map中にthread_id無し
@@ -9792,24 +10360,24 @@ void handle_client_send_test(){
 
     cout << "[434]------------------------------------------" << endl;
     //unit_test[434] session_thread_data_map中にsession_thread_data_sessionless無し
-    session_thread_data_sessionless* thread_data1 = NULL;
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),thread_data1));
+    thread_data_ptr thread_data1 ;
+    this->session_thread_data_map[boost::this_thread::get_id()] = thread_data1;
     event_status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[435]------------------------------------------" << endl;
     //unit_test[435] recive_data_map中にendpoint無し
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
 
     cout << "[436]------------------------------------------" << endl;
     //unit_test[436] send_status_list中にsend_status無し
     client_recive_data.send_status_list.clear();
-    thread_data.recive_data_map[endpoint] = client_recive_data;
+    data_pro->recive_data_map[endpoint] = client_recive_data;
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
 
     event_status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(event_status, FINALIZE);
@@ -9824,16 +10392,16 @@ void handle_client_send_test(){
     client_send_status.send_end_size = 1u;
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    SEND_STATUS_TAG send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
-    size_t offset = thread_data.recive_data_map[endpoint].send_status_list.front().send_offset;
-    size_t end_size = thread_data.recive_data_map[endpoint].send_status_list.front().send_end_size;
+    SEND_STATUS_TAG send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
+    size_t offset = data_pro->recive_data_map[endpoint].send_status_list.front().send_offset;
+    size_t end_size = data_pro->recive_data_map[endpoint].send_status_list.front().send_end_size;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_CONNECTION_CHECK); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_OK); //送信状態に送信待を設定する
@@ -9847,12 +10415,12 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -9864,12 +10432,12 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -9883,15 +10451,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON;//終了フラグがON
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON;//終了フラグがON
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, protocol_module_sessionless::session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
@@ -9905,16 +10473,16 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_OFF;//終了フラグがOFF
-    thread_data.sorry_flag = SORRY_FLAG_ON;//sorry状態の場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_OFF;//終了フラグがOFF
+    data_pro->sorry_flag = SORRY_FLAG_ON;//sorry状態の場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, SORRYSERVER_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
@@ -9928,16 +10496,16 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_OFF;//終了フラグがOFF
-    thread_data.sorry_flag = SORRY_FLAG_OFF;//sorry状態以外の場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_OFF;//終了フラグがOFF
+    data_pro->sorry_flag = SORRY_FLAG_OFF;//sorry状態以外の場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, REALSERVER_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信状態に送信待を設定する
@@ -9951,15 +10519,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON;//終了フラグがON
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON;//終了フラグがON
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
@@ -9973,16 +10541,16 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_OFF;//終了フラグがOFF
-    thread_data.sorry_flag = SORRY_FLAG_ON;//sorry状態の場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_OFF;//終了フラグがOFF
+    data_pro->sorry_flag = SORRY_FLAG_ON;//sorry状態の場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, SORRYSERVER_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
@@ -9996,16 +10564,16 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_OFF;//終了フラグがOFF
-    thread_data.sorry_flag = SORRY_FLAG_OFF;//sorry状態以外の場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_OFF;//終了フラグがOFF
+    data_pro->sorry_flag = SORRY_FLAG_OFF;//sorry状態以外の場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, protocol_module_sessionless::session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, REALSERVER_RECV); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
@@ -10021,12 +10589,12 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -10042,14 +10610,14 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_CONNECTION_CHECK); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ = 0,送信状態に送信待を設定する
@@ -10065,15 +10633,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON; //終了フラグがONの場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON; //終了フラグがONの場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 
@@ -10088,15 +10656,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON; //終了フラグがONの場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON; //終了フラグがONの場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.front().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信可能データサイズ　=　0,送信データ残サイズ = 0,送信状態に送信待を設定する
@@ -10111,15 +10679,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON; //終了フラグがONの場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON; //終了フラグがONの場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status,  CLIENT_CONNECTION_CHECK); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_OK);
@@ -10135,15 +10703,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON; //終了フラグがONの場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON; //終了フラグがONの場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_CONTINUE); //送信可能データサイズ　=　0,送信データ残サイズ > 0,送信状態に送信待を設定する
@@ -10155,13 +10723,13 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.clear();
     client_recive_data.send_status_list.push_back(client_send_status);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON; //終了フラグがONの場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON; //終了フラグがONの場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
@@ -10177,15 +10745,15 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
-    thread_data.end_flag = END_FLAG_ON; //終了フラグがONの場合
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_ON; //終了フラグがONの場合
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
-    send_status = thread_data.recive_data_map[endpoint].send_status_list.back().status;
+    send_status = data_pro->recive_data_map[endpoint].send_status_list.back().status;
 
     BOOST_CHECK_EQUAL(event_status, CLIENT_DISCONNECT); //遷移先ステータスを設定する
     BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
@@ -10199,16 +10767,50 @@ void handle_client_send_test(){
     client_recive_data.send_status_list.push_back(client_send_status);
     client_recive_data.send_status_list.push_back(client_send_status1);
 
-    thread_data.target_endpoint = endpoint;
-    thread_data.recive_data_map.clear();
-    thread_data.recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, recive_data>(endpoint,client_recive_data));
 
     this->session_thread_data_map.clear();
-    this->session_thread_data_map.insert(std::pair<boost::thread::id, session_thread_data_sessionless*>(boost::this_thread::get_id(),&thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
     event_status = this->handle_client_send(boost::this_thread::get_id());
 
     BOOST_CHECK_EQUAL(event_status, FINALIZE); //遷移先ステータスを設定する
 }
+
+//handle_client_send 郎希倹
+void handle_client_send_test_thread(){
+    boost::asio::ip::tcp::endpoint endpoint = string_to_endpoint<boost::asio::ip::tcp> ("10.10.100.100:8800");
+    send_status client_send_status;
+    recive_data client_recive_data;
+    thread_data_ptr data_pro(new session_thread_data_sessionless) ;
+
+     cout << "[445]------------------------------------------\n";
+    //unit_test[445] 多スレッドテスト/送信状態->SEND_OK/送信可能データサイズ　=　0/送信データ残サイズ　=　0/送信可能データなし/終了フラグがOFFの場合/sorry状態以外の場合
+    //unit_test[445] test data: 送信状態に送信待を設定
+    client_send_status.send_possible_size = 0u;//送信可能データサイズ=0
+    client_send_status.send_rest_size = 0u;//送信データ残サイズ　= 0
+    client_send_status.status = SEND_OK;//送信状態->SEND_OK
+    client_recive_data.send_status_list.clear();
+    client_recive_data.send_status_list.push_back(client_send_status);
+
+    data_pro->target_endpoint = endpoint;
+    data_pro->recive_data_map.clear();
+    data_pro->recive_data_map.insert(std::pair<boost::asio::ip::tcp::endpoint, protocol_module_sessionless::recive_data>(endpoint,client_recive_data));
+    data_pro->end_flag = END_FLAG_OFF;//終了フラグがOFF
+    data_pro->sorry_flag = SORRY_FLAG_OFF;//sorry状態以外の場合
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data_pro;
+    }
+    EVENT_TAG event_status = this->handle_client_send(boost::this_thread::get_id());
+    SEND_STATUS_TAG send_status = data_pro->recive_data_map[endpoint].send_status_list.front().status;
+
+    BOOST_CHECK_EQUAL(event_status, REALSERVER_RECV); //遷移先ステータスを設定する
+    BOOST_CHECK_EQUAL(send_status, SEND_END); //送信状態に送信待を設定する
+}
+
 //handle_client_disconnect 馮家純
 void handle_client_disconnect_test(){
 
@@ -10240,7 +10842,7 @@ void handle_sorry_enable_test() {
     EVENT_TAG status;
 	send_status sendstatus;
 	recive_data receivedata;
-	session_thread_data_sessionless *thread_data = new session_thread_data_sessionless;
+	thread_data_ptr thread_data(new session_thread_data_sessionless);
 	boost::thread thread_up(&up_thread_func);
 	boost::thread thread_down(&down_thread_func);
 
@@ -10248,7 +10850,7 @@ void handle_sorry_enable_test() {
 	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
 	thread_data->thread_id = boost::this_thread::get_id();
 	this->session_thread_data_map.insert(pair<boost::thread::id,
-				session_thread_data_sessionless*> (boost::this_thread::get_id(),
+				thread_data_ptr> (boost::this_thread::get_id(),
 				thread_data));
 
     cout << "[457]------------------------------------------" << endl;
@@ -10375,7 +10977,7 @@ void handle_sorry_enable_test() {
 	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
 	thread_data->thread_id = boost::this_thread::get_id();
 	this->session_thread_data_map.insert(pair<boost::thread::id,
-				session_thread_data_sessionless*> (boost::this_thread::get_id(),
+				thread_data_ptr> (boost::this_thread::get_id(),
 				thread_data));
 	this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint
 						= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.243:8800");
@@ -10539,7 +11141,8 @@ void handle_sorry_enable_test() {
 	// unit_test[473] session_thread_data NULLの場合,status = FINALIZE
 	init_send_status(sendstatus);
 	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+	thread_data_ptr thread_data_null;
+	this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_null;
 	status = this->handle_sorry_enable(boost::this_thread::get_id());
 	BOOST_CHECK_EQUAL(status, FINALIZE);
 
@@ -10549,7 +11152,7 @@ void handle_sorry_enable_test() {
 	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
 	thread_data->thread_id = thread_down.get_id();
 	this->session_thread_data_map.insert(pair<boost::thread::id,
-				session_thread_data_sessionless*> (thread_down.get_id(),
+				thread_data_ptr> (thread_down.get_id(),
 				thread_data));
 	this->session_thread_data_map[thread_down.get_id()]->target_endpoint
 						= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.243:8800");
@@ -10570,25 +11173,25 @@ void handle_sorry_enable_test() {
     // unit_test[475] test data:上りスレッドと下りスレッドの場合
     init_send_status(sendstatus);
 	init_recive_data(receivedata);
-    session_thread_data_sessionless thread_data_up;
+    thread_data_ptr thread_data_up(new session_thread_data_sessionless);
     // 上りスレッド,accept完了フラグOFFの場合
-    thread_data_up.thread_division = THREAD_DIVISION_UP_STREAM;
-    thread_data_up.accept_end_flag = ACCEPT_END_FLAG_OFF;
-    thread_data_up.thread_id = thread_up.get_id();
-	thread_data_up.pair_thread_id = thread_down.get_id();
-    thread_data_up.recive_data_map[thread_data_up.client_endpoint_tcp];
+    thread_data_up->thread_division = THREAD_DIVISION_UP_STREAM;
+    thread_data_up->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    thread_data_up->thread_id = thread_up.get_id();
+	thread_data_up->pair_thread_id = thread_down.get_id();
+    thread_data_up->recive_data_map[thread_data_up->client_endpoint_tcp];
     // 下りスレッド,sorry状態の場合,送信可能データありの場合
-    session_thread_data_sessionless thread_data_down;
-    thread_data_down.thread_division = THREAD_DIVISION_DOWN_STREAM;
-    thread_data_down.thread_id = thread_down.get_id();
-    thread_data_down.pair_thread_id = thread_up.get_id();
-    thread_data_down.sorry_flag = SORRY_FLAG_ON;
+    thread_data_ptr thread_data_down(new session_thread_data_sessionless);
+    thread_data_down->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    thread_data_down->thread_id = thread_down.get_id();
+    thread_data_down->pair_thread_id = thread_up.get_id();
+    thread_data_down->sorry_flag = SORRY_FLAG_ON;
     sendstatus.status = SEND_OK;
     sendstatus.send_possible_size = 10;
-    thread_data_down.recive_data_map         [thread_data_down.target_endpoint].send_status_list.push_back(sendstatus);
+    thread_data_down->recive_data_map[thread_data_down->target_endpoint].send_status_list.push_back(sendstatus);
 
-    this->session_thread_data_map[thread_up.get_id()] = &thread_data_up;
-    this->session_thread_data_map[thread_down.get_id()] = &thread_data_down;
+    this->session_thread_data_map[thread_up.get_id()] = thread_data_up;
+    this->session_thread_data_map[thread_down.get_id()] = thread_data_down;
     boost::thread_group threads;
     threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_enable_test_thread_func,
                                    this,
@@ -10600,13 +11203,43 @@ void handle_sorry_enable_test() {
                                    CLIENT_CONNECTION_CHECK));
     threads.join_all();
     // sorry状態をON
-    BOOST_CHECK_EQUAL(thread_data_up.sorry_flag, SORRY_FLAG_ON);
+    BOOST_CHECK_EQUAL(thread_data_up->sorry_flag, SORRY_FLAG_ON);
 }
-
 void handle_sorry_enable_test_thread_func(const boost::thread::id thread_id,
                             EVENT_TAG check_value){
     EVENT_TAG ret = this->handle_sorry_enable(thread_id);
     BOOST_CHECK_EQUAL(ret, check_value);
+}
+
+void handle_sorry_enable_test_thread(){
+
+    EVENT_TAG status;
+	send_status sendstatus;
+	recive_data receivedata;
+	thread_data_ptr thread_data(new session_thread_data_sessionless);
+
+	// 上りスレッドの場合
+	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
+	thread_data->thread_id = boost::this_thread::get_id();
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
+    }
+
+    cout << "[458]------------------------------------------\n";
+	// unit_test[458] accept完了フラグON,sorry状態,送信可能データあり list 1件の場合,status = SORRYSERVER_SELECT
+	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
+	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+	sendstatus.status = SEND_OK;
+	sendstatus.send_possible_size = 10;
+	receivedata.send_status_list.push_back(sendstatus);
+	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+				pair<boost::asio::ip::tcp::endpoint, recive_data> (
+						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+						receivedata));
+	status = this->handle_sorry_enable(boost::this_thread::get_id());
+	BOOST_CHECK_EQUAL(status, SORRYSERVER_SELECT);
+
 }
 
 //handle_sorry_disable 馬翠翠
@@ -10614,7 +11247,7 @@ void handle_sorry_disable_test(){
     EVENT_TAG status;
 	send_status sendstatus;
 	recive_data receivedata;
-	session_thread_data_sessionless *thread_data = new session_thread_data_sessionless;
+	thread_data_ptr thread_data(new session_thread_data_sessionless);
 	boost::thread thread_up(&up_thread_func);
 	boost::thread thread_down(&down_thread_func);
 
@@ -10622,7 +11255,7 @@ void handle_sorry_disable_test(){
 	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
 	thread_data->thread_id = boost::this_thread::get_id();
 	this->session_thread_data_map.insert(pair<boost::thread::id,
-				session_thread_data_sessionless*> (boost::this_thread::get_id(),
+				thread_data_ptr> (boost::this_thread::get_id(),
 				thread_data));
 	this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp
 					= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
@@ -10748,7 +11381,7 @@ void handle_sorry_disable_test(){
 	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
 	thread_data->thread_id = boost::this_thread::get_id();
 	this->session_thread_data_map.insert(pair<boost::thread::id,
-				session_thread_data_sessionless*> (boost::this_thread::get_id(),
+				thread_data_ptr> (boost::this_thread::get_id(),
 				thread_data));
 	this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint
 					= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
@@ -10913,7 +11546,8 @@ void handle_sorry_disable_test(){
 	// unit_test[492] session_thread_data NULLの場合,status = FINALIZE
 	init_send_status(sendstatus);
 	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+	thread_data_ptr thread_data_null;
+	this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_null;
 	status = this->handle_sorry_disable(boost::this_thread::get_id());
 	BOOST_CHECK_EQUAL(status, FINALIZE);
 
@@ -10923,7 +11557,7 @@ void handle_sorry_disable_test(){
 	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
 	thread_data->thread_id = thread_down.get_id();
 	this->session_thread_data_map.insert(pair<boost::thread::id,
-				session_thread_data_sessionless*> (thread_down.get_id(),
+				thread_data_ptr> (thread_down.get_id(),
 				thread_data));
 	this->session_thread_data_map[thread_down.get_id()]->target_endpoint
 						= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
@@ -10944,25 +11578,25 @@ void handle_sorry_disable_test(){
     // unit_test[494] test data:上りスレッドと下りスレッドの場合
     init_send_status(sendstatus);
 	init_recive_data(receivedata);
-    session_thread_data_sessionless thread_data_up;
+    thread_data_ptr thread_data_up(new session_thread_data_sessionless);
     // 上りスレッド,accept完了フラグOFFの場合
-    thread_data_up.thread_division = THREAD_DIVISION_UP_STREAM;
-    thread_data_up.accept_end_flag = ACCEPT_END_FLAG_OFF;
-    thread_data_up.thread_id = thread_up.get_id();
-	thread_data_up.pair_thread_id = thread_down.get_id();
-    thread_data_up.recive_data_map[thread_data_up.client_endpoint_tcp];
+    thread_data_up->thread_division = THREAD_DIVISION_UP_STREAM;
+    thread_data_up->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    thread_data_up->thread_id = thread_up.get_id();
+	thread_data_up->pair_thread_id = thread_down.get_id();
+    thread_data_up->recive_data_map[thread_data_up->client_endpoint_tcp];
     // 下りスレッド,sorry状態以外の場合,送信可能データありの場合
-    session_thread_data_sessionless thread_data_down;
-    thread_data_down.thread_division = THREAD_DIVISION_DOWN_STREAM;
-    thread_data_down.thread_id = thread_down.get_id();
-    thread_data_down.pair_thread_id = thread_up.get_id();
-    thread_data_down.sorry_flag = SORRY_FLAG_OFF;
+    thread_data_ptr thread_data_down(new session_thread_data_sessionless);
+    thread_data_down->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    thread_data_down->thread_id = thread_down.get_id();
+    thread_data_down->pair_thread_id = thread_up.get_id();
+    thread_data_down->sorry_flag = SORRY_FLAG_OFF;
     sendstatus.status = SEND_OK;
     sendstatus.send_possible_size = 10;
-    thread_data_down.recive_data_map         [thread_data_down.target_endpoint].send_status_list.push_back(sendstatus);
+    thread_data_down->recive_data_map[thread_data_down->target_endpoint].send_status_list.push_back(sendstatus);
 
-    this->session_thread_data_map[thread_up.get_id()] = &thread_data_up;
-    this->session_thread_data_map[thread_down.get_id()] = &thread_data_down;
+    this->session_thread_data_map[thread_up.get_id()] = thread_data_up;
+    this->session_thread_data_map[thread_down.get_id()] = thread_data_down;
     boost::thread_group threads;
     threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_disable_test_thread_func,
                                    this,
@@ -10974,8 +11608,9 @@ void handle_sorry_disable_test(){
                                    CLIENT_CONNECTION_CHECK));
     threads.join_all();
     // sorry状態をOFF
-    BOOST_CHECK_EQUAL(thread_data_up.sorry_flag, SORRY_FLAG_OFF);
+    BOOST_CHECK_EQUAL(thread_data_up->sorry_flag, SORRY_FLAG_OFF);
 }
+
 
 void handle_sorry_disable_test_thread_func(const boost::thread::id thread_id,
                             EVENT_TAG check_value){
@@ -10983,12 +11618,43 @@ void handle_sorry_disable_test_thread_func(const boost::thread::id thread_id,
     BOOST_CHECK_EQUAL(ret, check_value);
 }
 
+void handle_sorry_disable_test_thread(){
+
+    EVENT_TAG status;
+	send_status sendstatus;
+	recive_data receivedata;
+	thread_data_ptr thread_data(new session_thread_data_sessionless);
+
+	// 上りスレッドの場合
+	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
+	thread_data->thread_id = boost::this_thread::get_id();
+	{
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
+    }
+
+    cout << "[477]------------------------------------------\n";
+	// unit_test[477] 終了フラグをON,status = SORRYSERVER_DISCONNECT
+	// unit_test[477] test data:accept完了フラグONの場合,sorry状態の場合,送信継続データあり list 1件
+	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
+	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+	sendstatus.status = SEND_CONTINUE;
+	receivedata.send_status_list.push_back(sendstatus);
+	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+				pair<boost::asio::ip::tcp::endpoint, recive_data> (
+						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+						receivedata));
+	status = this->handle_sorry_disable(boost::this_thread::get_id());
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+	BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
+}
+
 //handle_realserver_disconnect(tcp) 馮家純
 void handle_realserver_disconnect_tcp_test(){
     EVENT_TAG ret;
     cout << "[495]------------------------------------------" << endl;
     //unit_test[495] 異常系 上りスレッドsession_thread_data_map中にThreadID対応のデータがない
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    this->session_thread_data_map[boost::this_thread::get_id()].reset();
     boost::asio::ip::tcp::endpoint ep_err;
     ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
@@ -11004,7 +11670,7 @@ void handle_realserver_disconnect_tcp_test(){
     cout << "[497]------------------------------------------" << endl;
     //unit_test[497] 異常系 下りスレッドsession_thread_data_map中にThreadID対応のデータがない
     boost::thread t_err(down_thread_func);
-    this->session_thread_data_map[t_err.get_id()] = 0;
+    this->session_thread_data_map[t_err.get_id()].reset();
     ret = this->handle_realserver_disconnect(t_err.get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
     BOOST_CHECK_EQUAL(ret, FINALIZE);
@@ -11020,14 +11686,14 @@ void handle_realserver_disconnect_tcp_test(){
     //unit_test[499] 上りスレッドの場合->終了フラグがONの場合
     boost::asio::ip::tcp::endpoint ep1, ep_d1;
 
-    session_thread_data_sessionless data1;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data1;
+    thread_data_ptr data1(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data1;
     //make 上りスレッドの場合 0->上りスレッド
-    data1.thread_division = THREAD_DIVISION_UP_STREAM;
+    data1->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがONの場合 1->on
-    data1.end_flag = END_FLAG_ON;
+    data1->end_flag = END_FLAG_ON;
 
-    data1.recive_data_map[ep_d1];
+    data1->recive_data_map[ep_d1];
 
     ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep1);
     //遷移先ステータスを設定する status = CLIENT_RECV
@@ -11039,19 +11705,19 @@ void handle_realserver_disconnect_tcp_test(){
 
     boost::asio::ip::tcp::endpoint ep2;
 
-    session_thread_data_sessionless data2;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data2;
+    thread_data_ptr data2(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data2;
     //make 上りスレッドの場合 0->上りスレッド
-    data2.thread_division = THREAD_DIVISION_UP_STREAM;
+    data2->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
-    data2.end_flag = END_FLAG_OFF;
+    data2->end_flag = END_FLAG_OFF;
     //make sorryserver切替中の場合 1->切替中
-    data2.sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
+    data2->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
     //make 送信可能データあり
     send_status st2;
     st2.status = SEND_OK;
     st2.send_possible_size = 100u;
-    data2.recive_data_map[ep2].send_status_list.push_back(st2);
+    data2->recive_data_map[ep2].send_status_list.push_back(st2);
 
 
     ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep2);
@@ -11064,19 +11730,19 @@ void handle_realserver_disconnect_tcp_test(){
 
     boost::asio::ip::tcp::endpoint ep3;
 
-    session_thread_data_sessionless data3;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data3;
+    thread_data_ptr data3(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data3;
     //make 上りスレッドの場合 0->上りスレッド
-    data3.thread_division = THREAD_DIVISION_UP_STREAM;
+    data3->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
-    data3.end_flag = END_FLAG_OFF;
+    data3->end_flag = END_FLAG_OFF;
     //make sorryserver切替中の場合 1->切替中
-    data3.sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
+    data3->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
     //make 送信可能データなし
     send_status st3;
     //send_possible=0
     st3.send_possible_size = 0u;
-    data3.recive_data_map[ep3].send_status_list.push_back(st3);
+    data3->recive_data_map[ep3].send_status_list.push_back(st3);
 
     ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep3);
     //遷移先ステータスを設定する status = CLIENT_RECV
@@ -11088,20 +11754,20 @@ void handle_realserver_disconnect_tcp_test(){
 
     boost::asio::ip::tcp::endpoint ep4, ep_d4;
 
-    session_thread_data_sessionless data4;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data4;
+    thread_data_ptr data4(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data4;
     //make 上りスレッドの場合 0->上りスレッド
-    data4.thread_division = THREAD_DIVISION_UP_STREAM;
+    data4->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
-    data4.end_flag = END_FLAG_OFF;
+    data4->end_flag = END_FLAG_OFF;
     //make sorryserver切替中でない場合 0->切替中でない
-    data4.sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_OFF;
+    data4->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_OFF;
 
-    data4.recive_data_map[ep_d4];
+    data4->recive_data_map[ep_d4];
 
     ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep4);
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data4.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data4->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_RECV
     BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 
@@ -11112,20 +11778,20 @@ void handle_realserver_disconnect_tcp_test(){
     boost::thread t5(down_thread_func);
     boost::asio::ip::tcp::endpoint ep5;
 
-    session_thread_data_sessionless data5;
-    this->session_thread_data_map[t5.get_id()] = &data5;
+    thread_data_ptr data5(new session_thread_data_sessionless);
+    this->session_thread_data_map[t5.get_id()] = data5;
     //make 下りスレッドの場合 1->下りスレッド
-    data5.thread_division = THREAD_DIVISION_DOWN_STREAM;
+    data5->thread_division = THREAD_DIVISION_DOWN_STREAM;
     //make 送信可能データあり
     send_status st5;
     st5.status = SEND_OK;
     //send_possible>0
     st5.send_possible_size = 100u;
-    data5.recive_data_map[ep5].send_status_list.push_back(st5);
+    data5->recive_data_map[ep5].send_status_list.push_back(st5);
 
     ret = this->handle_realserver_disconnect(t5.get_id(), ep5);
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data5.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data5->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_CONNECTION_CHECK
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
 
@@ -11136,19 +11802,19 @@ void handle_realserver_disconnect_tcp_test(){
     boost::thread t6(down_thread_func);
     boost::asio::ip::tcp::endpoint ep6;
 
-    session_thread_data_sessionless data6;
-    this->session_thread_data_map[t6.get_id()] = &data6;
+    thread_data_ptr data6(new session_thread_data_sessionless);
+    this->session_thread_data_map[t6.get_id()] = data6;
     //make 下りスレッドの場合 1->下りスレッド
-    data6.thread_division = THREAD_DIVISION_DOWN_STREAM;
+    data6->thread_division = THREAD_DIVISION_DOWN_STREAM;
     //make 送信可能データなし
     send_status st6;
     //send_possible>0
     st6.send_possible_size = 0u;
-    data6.recive_data_map[ep6].send_status_list.push_back(st6);
+    data6->recive_data_map[ep6].send_status_list.push_back(st6);
 
     ret = this->handle_realserver_disconnect(t6.get_id(), ep6);
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data6.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data6->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_DISCONNECT
     BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
 
@@ -11162,26 +11828,26 @@ void handle_realserver_disconnect_tcp_test(){
     boost::asio::ip::tcp::endpoint epdown;
 
     //上りスレッドの場合->終了フラグがONの場合
-    session_thread_data_sessionless dataup;
-    dataup.thread_id = boost::this_thread::get_id();
-    dataup.thread_division = THREAD_DIVISION_UP_STREAM;
-    dataup.pair_thread_id = tdown_for_get_id.get_id();
-    dataup.end_flag = END_FLAG_ON;
-    dataup.recive_data_map[epup];
+    thread_data_ptr dataup(new session_thread_data_sessionless);
+    dataup->thread_id = boost::this_thread::get_id();
+    dataup->thread_division = THREAD_DIVISION_UP_STREAM;
+    dataup->pair_thread_id = tdown_for_get_id.get_id();
+    dataup->end_flag = END_FLAG_ON;
+    dataup->recive_data_map[epup];
 
     // 下りスレッドの場合->送信可能データあり
-    session_thread_data_sessionless datadown;
-    datadown.thread_id = tdown_for_get_id.get_id();
-    datadown.thread_division = THREAD_DIVISION_DOWN_STREAM;
-    datadown.pair_thread_id = boost::this_thread::get_id();
+    thread_data_ptr datadown(new session_thread_data_sessionless);
+    datadown->thread_id = tdown_for_get_id.get_id();
+    datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    datadown->pair_thread_id = boost::this_thread::get_id();
     //make 送信可能データあり
     send_status st;
     st.status = SEND_OK;
     st.send_possible_size = 100u;
-    datadown.recive_data_map[epdown].send_status_list.push_back(st);
+    datadown->recive_data_map[epdown].send_status_list.push_back(st);
 
-    this->session_thread_data_map[boost::this_thread::get_id()] = &dataup;
-    this->session_thread_data_map[tdown_for_get_id.get_id()] = &datadown;
+    this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
+    this->session_thread_data_map[tdown_for_get_id.get_id()] = datadown;
 
     boost::thread_group threads;
     threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_disconnect_test_thread_func,
@@ -11197,7 +11863,8 @@ void handle_realserver_disconnect_tcp_test(){
     threads.join_all();
 
     //終了フラグをON
-    BOOST_CHECK_EQUAL(datadown.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(datadown->end_flag, END_FLAG_ON);
+
 }
 
 void handle_realserver_disconnect_test_thread_func(const boost::thread::id thread_id,
@@ -11207,6 +11874,36 @@ void handle_realserver_disconnect_test_thread_func(const boost::thread::id threa
     BOOST_CHECK_EQUAL(ret, check_value);
 }
 
+void handle_realserver_disconnect_tcp_test_thread(){
+    EVENT_TAG ret;
+    cout << "[501]------------------------------------------\n";
+    //unit_test[501] 上りスレッドの場合->終了フラグがOFFの場合->sorryserver切替中の場合->送信可能データなし
+
+    boost::asio::ip::tcp::endpoint ep3;
+
+    thread_data_ptr data3(new session_thread_data_sessionless);
+
+    //make 上りスレッドの場合 0->上りスレッド
+    data3->thread_division = THREAD_DIVISION_UP_STREAM;
+    //make 終了フラグがOFFの場合 0->off
+    data3->end_flag = END_FLAG_OFF;
+    //make sorryserver切替中の場合 1->切替中
+    data3->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
+    //make 送信可能データなし
+    send_status st3;
+    //send_possible=0
+    st3.send_possible_size = 0u;
+    data3->recive_data_map[ep3].send_status_list.push_back(st3);
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data3;
+    }
+
+    ret = this->handle_realserver_disconnect(boost::this_thread::get_id(), ep3);
+    //遷移先ステータスを設定する status = CLIENT_RECV
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+}
 //handle_realserver_disconnect(udp) 馮家純
 void handle_realserver_disconnect_udp_test(){
 }
@@ -11216,7 +11913,7 @@ void handle_sorryserver_disconnect_test(){
     EVENT_TAG ret;
     cout << "[506]------------------------------------------" << endl;
     //unit_test[506] 異常系 上りスレッドsession_thread_data_map中にThreadID対応のデータなし
-    this->session_thread_data_map[boost::this_thread::get_id()] = NULL;
+    this->session_thread_data_map[boost::this_thread::get_id()].reset();
     boost::asio::ip::tcp::endpoint ep_err;
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
@@ -11232,7 +11929,7 @@ void handle_sorryserver_disconnect_test(){
     cout << "[508]------------------------------------------" << endl;
     //unit_test[508] 異常系 下りスレッドsession_thread_data_map中にThreadID対応のデータなし
     boost::thread t_err(down_thread_func);
-    this->session_thread_data_map[t_err.get_id()] = NULL;
+    this->session_thread_data_map[t_err.get_id()].reset();
     ret = this->handle_sorryserver_disconnect(t_err.get_id(), ep_err);
     //遷移先ステータスを設定する status = FINALIZE
     BOOST_CHECK_EQUAL(ret, FINALIZE);
@@ -11248,12 +11945,12 @@ void handle_sorryserver_disconnect_test(){
     //unit_test[510] 異常系 recive_data_mapにendpointなしの場合のテスト
     boost::asio::ip::tcp::endpoint ep1, ep_d1;
 
-    session_thread_data_sessionless data1;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data1;
+    thread_data_ptr data1(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data1;
     //make 上りスレッドの場合 0->上りスレッド
-    data1.thread_division = THREAD_DIVISION_UP_STREAM;
+    data1->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがONの場合 1->on
-    data1.end_flag = END_FLAG_ON;
+    data1->end_flag = END_FLAG_ON;
 
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep1);
     //遷移先ステータスを設定する status = FINALIZE
@@ -11261,7 +11958,7 @@ void handle_sorryserver_disconnect_test(){
 
     cout << "[511]------------------------------------------" << endl;
     //unit_test[511] 上りスレッドの場合->終了フラグがONの場合
-    data1.recive_data_map[ep_d1];
+    data1->recive_data_map[ep_d1];
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep1);
     //遷移先ステータスを設定する status = CLIENT_RECV
     BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
@@ -11272,20 +11969,20 @@ void handle_sorryserver_disconnect_test(){
 
     boost::asio::ip::tcp::endpoint ep2;
 
-    session_thread_data_sessionless data2;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data2;
+    thread_data_ptr data2(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data2;
     //make 上りスレッドの場合 0->上りスレッド
-    data2.thread_division = THREAD_DIVISION_UP_STREAM;
+    data2->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
-    data2.end_flag = END_FLAG_OFF;
+    data2->end_flag = END_FLAG_OFF;
     //make realserver切替中の場合 1->切替中
-    data2.realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
+    data2->realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
     //make 送信可能データあり
     send_status st2;
     st2.status = SEND_OK;
     //send_possible>0
     st2.send_possible_size = 100u;
-    data2.recive_data_map[ep2].send_status_list.push_back(st2);
+    data2->recive_data_map[ep2].send_status_list.push_back(st2);
 
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep2);
     //遷移先ステータスを設定する status = REALSERVER_SELECT
@@ -11297,19 +11994,19 @@ void handle_sorryserver_disconnect_test(){
 
     boost::asio::ip::tcp::endpoint ep3;
 
-    session_thread_data_sessionless data3;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data3;
+    thread_data_ptr data3(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data3;
     //make 上りスレッドの場合 0->上りスレッド
-    data3.thread_division = THREAD_DIVISION_UP_STREAM;
+    data3->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
-    data3.end_flag = END_FLAG_OFF;
+    data3->end_flag = END_FLAG_OFF;
     //make realserver切替中の場合 1->切替中
-    data3.realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
+    data3->realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
     //make 送信可能データなし
     send_status st3;
     //send_possible=0
     st3.send_possible_size = 0u;
-    data3.recive_data_map[ep3].send_status_list.push_back(st3);
+    data3->recive_data_map[ep3].send_status_list.push_back(st3);
 
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep3);
     //遷移先ステータスを設定する status = CLIENT_RECV
@@ -11321,20 +12018,20 @@ void handle_sorryserver_disconnect_test(){
 
     boost::asio::ip::tcp::endpoint ep4, ep_d4;
 
-    session_thread_data_sessionless data4;
-    this->session_thread_data_map[boost::this_thread::get_id()] = &data4;
+    thread_data_ptr data4(new session_thread_data_sessionless);
+    this->session_thread_data_map[boost::this_thread::get_id()] = data4;
     //make 上りスレッドの場合 0->上りスレッド
-    data4.thread_division = THREAD_DIVISION_UP_STREAM;
+    data4->thread_division = THREAD_DIVISION_UP_STREAM;
     //make 終了フラグがOFFの場合 0->off
-    data4.end_flag = 0;
+    data4->end_flag = 0;
     //make realserver切替中でない場合 0->切替中でない
-    data4.realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
+    data4->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
 
-    data4.recive_data_map[ep_d4];
+    data4->recive_data_map[ep_d4];
 
     ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep4);
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data4.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data4->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_RECV
     BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 
@@ -11345,20 +12042,20 @@ void handle_sorryserver_disconnect_test(){
     boost::thread t5(down_thread_func);
     boost::asio::ip::tcp::endpoint ep5;
 
-    session_thread_data_sessionless data5;
-    this->session_thread_data_map[t5.get_id()] = &data5;
+    thread_data_ptr data5(new session_thread_data_sessionless);
+    this->session_thread_data_map[t5.get_id()] = data5;
     //make 下りスレッドの場合 1->下りスレッド
-    data5.thread_division = THREAD_DIVISION_DOWN_STREAM;
+    data5->thread_division = THREAD_DIVISION_DOWN_STREAM;
     //make 送信可能データあり
     send_status st5;
     st5.status = SEND_OK;
     //send_possible>0
     st5.send_possible_size = 100u;
-    data5.recive_data_map[ep5].send_status_list.push_back(st5);
+    data5->recive_data_map[ep5].send_status_list.push_back(st5);
 
     ret = this->handle_sorryserver_disconnect(t5.get_id(), ep5);
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data5.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data5->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_CONNECTION_CHECK
     BOOST_CHECK_EQUAL(ret, CLIENT_CONNECTION_CHECK);
 
@@ -11369,19 +12066,19 @@ void handle_sorryserver_disconnect_test(){
     boost::thread t6(down_thread_func);
     boost::asio::ip::tcp::endpoint ep6;
 
-    session_thread_data_sessionless data6;
-    this->session_thread_data_map[t6.get_id()] = &data6;
+    thread_data_ptr data6(new session_thread_data_sessionless);
+    this->session_thread_data_map[t6.get_id()] = data6;
     //make 下りスレッドの場合 1->下りスレッド
-    data6.thread_division = THREAD_DIVISION_DOWN_STREAM;
+    data6->thread_division = THREAD_DIVISION_DOWN_STREAM;
     //make 送信可能データなし
     send_status st6;
     //send_possible=0
     st6.send_possible_size = 0u;
-    data6.recive_data_map[ep6].send_status_list.push_back(st6);
+    data6->recive_data_map[ep6].send_status_list.push_back(st6);
 
     ret = this->handle_sorryserver_disconnect(t6.get_id(), ep6);
     //終了フラグをON
-    BOOST_CHECK_EQUAL(data6.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(data6->end_flag, END_FLAG_ON);
     //遷移先ステータスを設定する status = CLIENT_DISCONNECT
     BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
 
@@ -11395,26 +12092,26 @@ void handle_sorryserver_disconnect_test(){
     boost::asio::ip::tcp::endpoint epdown;
 
     //上りスレッドの場合->終了フラグがONの場合
-    session_thread_data_sessionless dataup;
-    dataup.thread_id = boost::this_thread::get_id();
-    dataup.thread_division = THREAD_DIVISION_UP_STREAM;
-    dataup.pair_thread_id = tdown_for_get_id.get_id();
-    dataup.end_flag = END_FLAG_ON;
-    dataup.recive_data_map[epup];
+    thread_data_ptr dataup(new session_thread_data_sessionless);
+    dataup->thread_id = boost::this_thread::get_id();
+    dataup->thread_division = THREAD_DIVISION_UP_STREAM;
+    dataup->pair_thread_id = tdown_for_get_id.get_id();
+    dataup->end_flag = END_FLAG_ON;
+    dataup->recive_data_map[epup];
 
     // 下りスレッドの場合->送信可能データあり
-    session_thread_data_sessionless datadown;
-    datadown.thread_id = tdown_for_get_id.get_id();
-    datadown.thread_division = THREAD_DIVISION_DOWN_STREAM;
-    datadown.pair_thread_id = boost::this_thread::get_id();
+    thread_data_ptr datadown(new session_thread_data_sessionless);
+    datadown->thread_id = tdown_for_get_id.get_id();
+    datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    datadown->pair_thread_id = boost::this_thread::get_id();
     //make 送信可能データあり
     send_status st;
     st.status = SEND_OK;
     st.send_possible_size = 100u;
-    datadown.recive_data_map[epdown].send_status_list.push_back(st);
+    datadown->recive_data_map[epdown].send_status_list.push_back(st);
 
-    this->session_thread_data_map[boost::this_thread::get_id()] = &dataup;
-    this->session_thread_data_map[tdown_for_get_id.get_id()] = &datadown;
+    this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
+    this->session_thread_data_map[tdown_for_get_id.get_id()] = datadown;
 
     boost::thread_group threads;
     threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_disconnect_test_thread_func,
@@ -11430,13 +12127,44 @@ void handle_sorryserver_disconnect_test(){
     threads.join_all();
 
     //終了フラグをON
-    BOOST_CHECK_EQUAL(datadown.end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(datadown->end_flag, END_FLAG_ON);
+
 }
 
 void handle_sorryserver_disconnect_test_thread_func(const boost::thread::id thread_id,
 	                            const boost::asio::ip::tcp::endpoint & rs_endpoint, EVENT_TAG check_value){
     EVENT_TAG ret = this->handle_sorryserver_disconnect(thread_id, rs_endpoint);
     BOOST_CHECK_EQUAL(ret, check_value);
+}
+
+void handle_sorryserver_disconnect_test_thread(){
+    cout << "[513]------------------------------------------\n";
+    //unit_test[513] 上りスレッドの場合->終了フラグがOFFの場合->realserver切替中の場合->送信可能データなし
+    EVENT_TAG ret;
+    boost::asio::ip::tcp::endpoint ep3;
+
+    thread_data_ptr data3(new session_thread_data_sessionless);
+
+    //make 上りスレッドの場合 0->上りスレッド
+    data3->thread_division = THREAD_DIVISION_UP_STREAM;
+    //make 終了フラグがOFFの場合 0->off
+    data3->end_flag = END_FLAG_OFF;
+    //make realserver切替中の場合 1->切替中
+    data3->realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
+    //make 送信可能データなし
+    send_status st3;
+    //send_possible=0
+    st3.send_possible_size = 0u;
+    data3->recive_data_map[ep3].send_status_list.push_back(st3);
+
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = data3;
+    }
+
+    ret = this->handle_sorryserver_disconnect(boost::this_thread::get_id(), ep3);
+    //遷移先ステータスを設定する status = CLIENT_RECV
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 }
 
 //handle_realserver_close 馮家純
@@ -11543,10 +12271,30 @@ void handle_session_initialize_test() {
     obj.handle_session_initialize_test();
 }
 
+//handle_session_initialize 董作方
+void handle_session_initialize_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for(int i=0; i<THREAD_COUNT; i++) {
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_session_initialize_test_thread,&obj));
+    }
+    threads.join_all();
+}
+
 //handle_session_finalize 董作方
 void handle_session_finalize_test() {
     protocol_module_sessionless_test_class obj;
     obj.handle_session_finalize_test();
+}
+
+//handle_session_finalize 董作方
+void handle_session_finalize_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for(int i=0; i<THREAD_COUNT; i++) {
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_session_finalize_test_thread,&obj));
+    }
+    threads.join_all();
 }
 
 //handle_accept 董作方
@@ -11555,16 +12303,46 @@ void handle_accept_test() {
     obj.handle_accept_test();
 }
 
+//handle_accept 董作方
+void handle_accept_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_accept_test_thread,&obj));
+    }
+    threads.join_all();
+}
+
 //handle_client_recv 郎希倹
 void handle_client_recv_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_client_recv_test();
 }
 
+//handle_client_recv_thread 郎希倹
+void handle_client_recv_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_recv_test_thread, &obj));
+    }
+    threads.join_all();
+}
+
 //handle_realserver_select(tcp) 馮家純
 void handle_realserver_select_tcp_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_realserver_select_tcp_test();
+}
+
+//handle_realserver_select(tcp)_thread 馮家純
+void handle_realserver_select_tcp_test_thread(){
+	protocol_module_sessionless_test_class obj;
+	boost::thread_group threads;
+	for(int i = 0; i < THREAD_COUNT; ++i){
+		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_select_tcp_test_thread, &obj));
+	}
+	threads.join_all();
 }
 
 //handle_realserver_select(udp) 馮家純
@@ -11579,10 +12357,29 @@ void handle_realserver_connect_test(){
     obj.handle_realserver_connect_test();
 }
 
+//handle_realserver_connect_thread 郎希倹
+void handle_realserver_connect_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_connect_test_thread, &obj));
+    }
+    threads.join_all();
+}
+
 //handle_realserver_connection_fail 馮家純
 void handle_realserver_connection_fail_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_realserver_connection_fail_test();
+}
+
+void handle_realserver_connection_fail_test_thread(){
+    protocol_module_sessionless_test_class obj;
+	boost::thread_group threads;
+	for(int i = 0; i < THREAD_COUNT; ++i){
+		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_connection_fail_test_thread, &obj));
+	}
+	threads.join_all();
 }
 
 //handle_realserver_send 董作方
@@ -11591,10 +12388,29 @@ void handle_realserver_send_test(){
     obj.handle_realserver_send_test();
 }
 
+//handle_realserver_send 董作方
+void handle_realserver_send_test_thread(){
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_send_test_thread,&obj));
+    }
+    threads.join_all();
+}
+
 //handle_sorryserver_select 馮家純
 void handle_sorryserver_select_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_sorryserver_select_test();
+}
+
+void handle_sorryserver_select_test_thread(){
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+	for(int i = 0; i < THREAD_COUNT; ++i){
+		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_select_test_thread, &obj));
+	}
+	threads.join_all();
 }
 
 //handle_sorryserver_connect 郎希倹
@@ -11603,10 +12419,30 @@ void handle_sorryserver_connect_test(){
     obj.handle_sorryserver_connect_test();
 }
 
+//handle_sorryserver_connect_thread 郎希倹
+void handle_sorryserver_connect_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_connect_test_thread, &obj));
+    }
+    threads.join_all();
+}
+
 //handle_sorryserver_connection_fail 董作方
 void handle_sorryserver_connection_fail_test() {
     protocol_module_sessionless_test_class obj;
     obj.handle_sorryserver_connection_fail_test();
+}
+
+//handle_sorryserver_connection_fail 董作方
+void handle_sorryserver_connection_fail_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_connection_fail_test_thread,&obj));
+    }
+    threads.join_all();
 }
 
 //handle_sorryserver_send 郎希倹
@@ -11615,10 +12451,30 @@ void handle_sorryserver_send_test() {
     obj.handle_sorryserver_send_test();
 }
 
+//handle_sorryserver_send 郎希倹
+void handle_sorryserver_send_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_send_test_thread,&obj));
+    }
+    threads.join_all();
+}
+
 //handle_realserver_recv(tcp) 郎希倹
 void handle_realserver_recv_tcp_test() {
     protocol_module_sessionless_test_class obj;
     obj.handle_realserver_recv_tcp_test();
+}
+
+//handle_realserver_recv_tcp_test_thread 郎希倹
+void handle_realserver_recv_tcp_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_recv_tcp_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_realserver_recv(udp) 郎希倹
@@ -11633,6 +12489,16 @@ void handle_sorryserver_recv_test() {
     obj.handle_sorryserver_recv_test();
 }
 
+//handle_sorryserver_recv_test_thread 郎希倹
+void handle_sorryserver_recv_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_recv_test_thread, &obj));
+    }
+    threads.join_all();
+}
+
 //handle_response_send_inform 馮家純
 void handle_response_send_inform_test(){
     protocol_module_sessionless_test_class obj;
@@ -11643,6 +12509,15 @@ void handle_response_send_inform_test(){
 void handle_client_connection_check_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_client_connection_check_test();
+}
+
+void handle_client_connection_check_test_thread(){
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+	for(int i = 0; i < THREAD_COUNT; ++i){
+		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_connection_check_test_thread, &obj));
+	}
+	threads.join_all();
 }
 
 //handle_client_select 馮家純
@@ -11657,6 +12532,17 @@ void handle_client_send_test(){
     obj.handle_client_send_test();
 }
 
+//handle_client_send 郎希倹
+void handle_client_send_test_thread(){
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i=0; i<THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_send_test_thread,&obj));
+    }
+    threads.join_all();
+}
+
+
 //handle_client_disconnect 馮家純
 void handle_client_disconnect_test(){
     protocol_module_sessionless_test_class obj;
@@ -11669,16 +12555,46 @@ void handle_sorry_enable_test() {
     obj.handle_sorry_enable_test();
 }
 
+//handle_sorry_enable_test_thread 馬翠翠
+void handle_sorry_enable_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_enable_test_thread, &obj));
+    }
+    threads.join_all();
+}
+
 //handle_sorry_disable 馬翠翠
 void handle_sorry_disable_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_sorry_disable_test();
 }
 
+//handle_sorry_disable_test_thread 馬翠翠
+void handle_sorry_disable_test_thread() {
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+    for (int i = 0; i < THREAD_COUNT; i++) {
+    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_disable_test_thread, &obj));
+    }
+    threads.join_all();
+}
+
 //handle_realserver_disconnect(tcp) 馮家純
 void handle_realserver_disconnect_tcp_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_realserver_disconnect_tcp_test();
+}
+
+
+void handle_realserver_disconnect_tcp_test_thread(){
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+	for(int i = 0; i < THREAD_COUNT; ++i){
+		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_disconnect_tcp_test_thread, &obj));
+	}
+	threads.join_all();
 }
 
 //handle_realserver_disconnect(udp) 馮家純
@@ -11691,6 +12607,15 @@ void handle_realserver_disconnect_udp_test(){
 void handle_sorryserver_disconnect_test(){
     protocol_module_sessionless_test_class obj;
     obj.handle_sorryserver_disconnect_test();
+}
+
+void handle_sorryserver_disconnect_test_thread(){
+    protocol_module_sessionless_test_class obj;
+    boost::thread_group threads;
+	for(int i = 0; i < THREAD_COUNT; ++i){
+		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_disconnect_test_thread, &obj));
+	}
+	threads.join_all();
 }
 
 //handle_realserver_close 馮家純
@@ -11719,31 +12644,51 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add(BOOST_TEST_CASE(&register_schedule_tcp_test));
 	ts->add(BOOST_TEST_CASE(&register_schedule_udp_test));
 	ts->add(BOOST_TEST_CASE(&handle_session_initialize_test));
+	ts->add(BOOST_TEST_CASE(&handle_session_initialize_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_session_finalize_test));
+	ts->add(BOOST_TEST_CASE(&handle_session_finalize_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_accept_test));
+	ts->add(BOOST_TEST_CASE(&handle_accept_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_client_recv_test));
+	ts->add(BOOST_TEST_CASE(&handle_client_recv_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test));
+	ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_select_udp_test));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test));
+	ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_connection_fail_test));
+	ts->add(BOOST_TEST_CASE(&handle_realserver_connection_fail_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_send_test));
+	ts->add(BOOST_TEST_CASE(&handle_realserver_send_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_sorryserver_select_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorryserver_select_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connect_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connect_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connection_fail_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connection_fail_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_sorryserver_send_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorryserver_send_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_recv_tcp_test));
+	ts->add(BOOST_TEST_CASE(&handle_realserver_recv_tcp_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_recv_udp_test));
 	ts->add(BOOST_TEST_CASE(&handle_sorryserver_recv_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorryserver_recv_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_response_send_inform_test));
 	ts->add(BOOST_TEST_CASE(&handle_client_connection_check_test));
+	ts->add(BOOST_TEST_CASE(&handle_client_connection_check_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_client_select_test));
 	ts->add(BOOST_TEST_CASE(&handle_client_send_test));
+	ts->add(BOOST_TEST_CASE(&handle_client_send_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_client_disconnect_test));
 	ts->add(BOOST_TEST_CASE(&handle_sorry_enable_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorry_enable_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_sorry_disable_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorry_disable_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_tcp_test));
+	ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_tcp_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_udp_test));
 	ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test));
+	ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test_thread));
 	ts->add(BOOST_TEST_CASE(&handle_realserver_close_test));
 
 	framework::master_test_suite().add(ts);

@@ -168,7 +168,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
 
                             boost::format formatter("function : sslid_replication_data_processor::"
                                                     "sslid_replication_data_processor() : before memcpy (data dump) : "
-                                                    "data begin = %d, data_size = %d, data = %s.");
+                                                    "data begin = %d, data_size = %d, data = %s");
                             formatter % head->offset % head->size % datadump;
                             putLogDebug(30006, formatter.str(), __FILE__, __LINE__);
                         }
@@ -183,7 +183,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
 
                             boost::format formatter("function : sslid_replication_data_processor::"
                                                     "sslid_replication_data_processor() : after memcpy (data dump) : "
-                                                    "data begin = 0, data_size = %d, data = %s.");
+                                                    "data begin = 0, data_size = %d, data = %s");
                             formatter % head->size % datadump;
                             putLogDebug(30007, formatter.str(), __FILE__, __LINE__);
                         }
@@ -304,7 +304,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30014, "out_function: Constructor sslid_replication_data_processor::"
+        putLogDebug(30014, "out_function : Constructor sslid_replication_data_processor::"
                      "sslid_replication_data_processor(int maxlist, "
                      "char* sslid_replication_area_begain, int sslid_replication_area_size, "
                      "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "

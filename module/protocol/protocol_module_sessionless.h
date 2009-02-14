@@ -45,6 +45,14 @@ public:
         size_t recive_buffer_max_size;
         size_t recive_buffer_rest_size;
         std::list<send_status>  send_status_list;
+        recive_data()
+        {
+            recive_buffer1 = NULL;
+            recive_buffer2 = NULL;
+            recive_buffer = NULL;
+            recive_buffer_max_size = 0;
+            recive_buffer_rest_size = 0;
+        }
 	};
 
 
@@ -64,40 +72,41 @@ public:
     };
 
    typedef std::list<send_status>::iterator send_status_it;
-   typedef std::map<boost::thread::id, session_thread_data_sessionless*>::iterator session_thread_data_map_it;
+   typedef boost::shared_ptr<session_thread_data_sessionless> thread_data_ptr;
+   typedef std::map<boost::thread::id, thread_data_ptr>::iterator session_thread_data_map_it;
    typedef std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator recive_data_map_it;
 protected:
 	int forwarded_for;
 	boost:: array<char,MAX_OPTION_SIZE> sorry_uri ;
-	std::map<boost::thread::id, session_thread_data_sessionless*> session_thread_data_map;
+	std::map<boost::thread::id, thread_data_ptr> session_thread_data_map;
 	boost::mutex session_thread_data_map_mutex;
 
 public:
 	static const std::string MODULE_NAME;
 
-	static const int THREAD_DIVISION_UP_STREAM; //上りスレッド
-	static const int THREAD_DIVISION_DOWN_STREAM;  //下りスレッド
+	static const int THREAD_DIVISION_UP_STREAM;
+	static const int THREAD_DIVISION_DOWN_STREAM;
 
-	static const int END_FLAG_OFF; //終了フラグOFF
-	static const int END_FLAG_ON; //終了フラグON
+	static const int END_FLAG_OFF;
+	static const int END_FLAG_ON;
 
-	static const int ACCEPT_END_FLAG_OFF; //ACCEPT完了フラグOFF
-	static const int ACCEPT_END_FLAG_ON; //ACCEPT完了フラグON
+	static const int ACCEPT_END_FLAG_OFF;
+	static const int ACCEPT_END_FLAG_ON;
 
-	static const int SORRY_FLAG_ON; //SORRY状態
-	static const int SORRY_FLAG_OFF; //SORRY状態以外
+	static const int SORRY_FLAG_ON;
+	static const int SORRY_FLAG_OFF;
 
-	static const int SORRYSERVER_SWITCH_FLAG_OFF; //sorryserver切替中以外
-	static const int SORRYSERVER_SWITCH_FLAG_ON; //sorryserver切替中
+	static const int SORRYSERVER_SWITCH_FLAG_OFF;
+	static const int SORRYSERVER_SWITCH_FLAG_ON;
 
-	static const int REALSERVER_SWITCH_FLAG_OFF; //realserver切替中以外
-	static const int REALSERVER_SWITCH_FLAG_ON; //realserver切替中
+	static const int REALSERVER_SWITCH_FLAG_OFF;
+	static const int REALSERVER_SWITCH_FLAG_ON;
 
-	static const int EDIT_DIVISION_NO_EDIT; //編集無し
-	static const int EDIT_DIVISION_EDIT; //編集あり
+	static const int EDIT_DIVISION_NO_EDIT;
+	static const int EDIT_DIVISION_EDIT;
 
-	static const int FORWARDED_FOR_OFF; //forwarded_forフラグOFF
-	static const int FORWARDED_FOR_ON;  //forwarded_forフラグON
+	static const int FORWARDED_FOR_OFF;
+	static const int FORWARDED_FOR_ON;
 
 public:
 	protocol_module_sessionless();
