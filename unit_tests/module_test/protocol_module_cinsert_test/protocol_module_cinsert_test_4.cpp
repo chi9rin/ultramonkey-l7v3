@@ -2534,12 +2534,12 @@ void	handle_client_send_test()
 
 	session_thread_data_set();
 
-	// unit_test[x4_1]  handle_client_send$B$N%F%9%H!JB8:_$7$J$$(BID STOP$B!K(B
+	// unit_test[x4_1]  handle_client_sendのテスト（存在しないID STOP）
 	boost::thread::id	thread_id;
 	status = handle_client_send( thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_2]  handle_client_send$B$N%F%9%H!J(Bsend_status$BL5$7(B REALSERVER_RECV$B!K(B
+	// unit_test[x4_2]  handle_client_sendのテスト（send_status無し REALSERVER_RECV）
 	thread_data_itr = session_thread_data_map.begin();
 
 	while( thread_data_itr != session_thread_data_map.end())
@@ -2554,19 +2554,19 @@ void	handle_client_send_test()
 	status = handle_client_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, REALSERVER_RECV );
 
-	// unit_test[x4_3]  handle_client_send$B$N%F%9%H!J(Bsend_status$BL5$7(B CLIENT_RECV$B!K(B
+	// unit_test[x4_3]  handle_client_sendのテスト（send_status無し CLIENT_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	status = handle_client_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, SORRYSERVER_RECV );
 
-	// unit_test[x4_4]  handle_client_send$B$N%F%9%H!J(Bsend_status$BL5$7(B CLIENT_DISCONNECT$B!K(B
+	// unit_test[x4_4]  handle_client_sendのテスト（send_status無し CLIENT_DISCONNECT）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	status = handle_client_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_DISCONNECT );
 
-	// unit_test[x4_5]  handle_client_send$B$N%F%9%H!J(Bsend_possible_size$BM-$j(B CLIENT_CONNECTION_CHECK$B!K(B
+	// unit_test[x4_5]  handle_client_sendのテスト（send_possible_size有り CLIENT_CONNECTION_CHECK）
 	t_recive_data_map_itr				recive_data_itr;
 	send_status							send_status_add;
 
@@ -2601,7 +2601,7 @@ void	handle_client_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_CONNECTION_CHECK );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
-	// unit_test[x4_6]  handle_client_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B REALSERVER_RECV$B!K(B
+	// unit_test[x4_6]  handle_client_sendのテスト（send_possible_size無し REALSERVER_RECV）
 
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
@@ -2611,7 +2611,7 @@ void	handle_client_send_test()
 	BOOST_CHECK_EQUAL( status, REALSERVER_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_7]  handle_client_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B REALSERVER_RECV$B!K(B
+	// unit_test[x4_7]  handle_client_sendのテスト（send_rest_size有り REALSERVER_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2620,7 +2620,7 @@ void	handle_client_send_test()
 	BOOST_CHECK_EQUAL( status, REALSERVER_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_CONTINUE );
 
-	// unit_test[x4_8]  handle_client_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B SORRYSERVER_RECV$B!K(B
+	// unit_test[x4_8]  handle_client_sendのテスト（send_possible_size無し SORRYSERVER_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	send_status_itr->status = SEND_OK;
@@ -2631,7 +2631,7 @@ void	handle_client_send_test()
 	BOOST_CHECK_EQUAL( status, SORRYSERVER_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_9]  handle_client_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B SORRYSERVER_RECV$B!K(B
+	// unit_test[x4_9]  handle_client_sendのテスト（send_rest_size有り SORRYSERVER_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2640,7 +2640,7 @@ void	handle_client_send_test()
 	BOOST_CHECK_EQUAL( status, SORRYSERVER_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_CONTINUE );
 
-	// unit_test[x4_10]  handle_client_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B CLIENT_DISCONNECT$B!K(B
+	// unit_test[x4_10]  handle_client_sendのテスト（send_possible_size無し CLIENT_DISCONNECT）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	send_status_itr->status = SEND_OK;
@@ -2651,7 +2651,7 @@ void	handle_client_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_DISCONNECT );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_11]  handle_client_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B CLIENT_DISCONNECT$B!K(B
+	// unit_test[x4_11]  handle_client_sendのテスト（send_rest_size有り CLIENT_DISCONNECT）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2663,7 +2663,7 @@ void	handle_client_send_test()
 
 
 
-	// unit_test[x4_12]  handle_client_send$B$N%F%9%H!J(Breceive_data$BL5$7(B REALSERVER_RECV$B!K(B
+	// unit_test[x4_12]  handle_client_sendのテスト（receive_data無し REALSERVER_RECV）
 	thread_data_itr->second->end_flag = END_FLAG_OFF;
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_OFF;
 	thread_data_itr->second->recive_data_map.clear();
@@ -2672,13 +2672,13 @@ void	handle_client_send_test()
 	status = handle_client_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, REALSERVER_RECV );
 
-	// unit_test[x4_13]  handle_client_send$B$N%F%9%H!J(Breceive_data$BL5$7(B SORRYSERVER_RECV$B!K(B
+	// unit_test[x4_13]  handle_client_sendのテスト（receive_data無し SORRYSERVER_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	status = handle_client_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, SORRYSERVER_RECV );
 
-	// unit_test[x4_14]  handle_client_send$B$N%F%9%H!J(Breceive_data$BL5$7(B CLIENT_DISCONNECT$B!K(B
+	// unit_test[x4_14]  handle_client_sendのテスト（receive_data無し CLIENT_DISCONNECT）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	status = handle_client_send( thread_data_itr->second->thread_id );
@@ -2696,12 +2696,12 @@ void	handle_realserver_send_test()
 
 	session_thread_data_set();
 
-	// unit_test[x4_15]  handle_realserver_send$B$N%F%9%H!JB8:_$7$J$$(BID STOP$B!K(B
+	// unit_test[x4_15]  handle_realserver_sendのテスト（存在しないID STOP）
 	boost::thread::id	thread_id;
 	status = handle_realserver_send( thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_16]  handle_realserver_send$B$N%F%9%H!J(Bsend_status$BL5$7(B CLIENT_RECV$B!K(B
+	// unit_test[x4_16]  handle_realserver_sendのテスト（send_status無し CLIENT_RECV）
 	thread_data_itr = session_thread_data_map.begin();
 
 	while( thread_data_itr != session_thread_data_map.end())
@@ -2716,19 +2716,19 @@ void	handle_realserver_send_test()
 	status = handle_realserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 
-	// unit_test[x4_17]  handle_realserver_send$B$N%F%9%H!J(Bsend_status$BL5$7(B sorry_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_17]  handle_realserver_sendのテスト（send_status無し sorry_flag有り CLIENT_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	status = handle_realserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 
-	// unit_test[x4_18]  handle_realserver_send$B$N%F%9%H!J(Bsend_status$BL5$7(B end_flag$BM-$j(B CLIENT_RECEV$B!K(B
+	// unit_test[x4_18]  handle_realserver_sendのテスト（send_status無し end_flag有り CLIENT_RECEV）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	status = handle_realserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 
-	// unit_test[x4_19]  handle_realserver_send$B$N%F%9%H!J(Bsend_possible_size$BM-$j(B REALSERVER_SELECT$B!K(B
+	// unit_test[x4_19]  handle_realserver_sendのテスト（send_possible_size有り REALSERVER_SELECT）
 	t_recive_data_map_itr				recive_data_itr;
 	send_status							send_status_add;
 
@@ -2763,7 +2763,7 @@ void	handle_realserver_send_test()
 	BOOST_CHECK_EQUAL( status, REALSERVER_SELECT );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
-	// unit_test[x4_20]  handle_realserver_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B CLIENT_RECV$B!K(B
+	// unit_test[x4_20]  handle_realserver_sendのテスト（send_possible_size無し CLIENT_RECV）
 
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
@@ -2773,7 +2773,7 @@ void	handle_realserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_21]  handle_realserver_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_21]  handle_realserver_sendのテスト（send_rest_size有り CLIENT_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2782,7 +2782,7 @@ void	handle_realserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_CONTINUE );
 
-	// unit_test[x4_22]  handle_realserver_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B sorry_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_22]  handle_realserver_sendのテスト（send_possible_size無し sorry_flag有り CLIENT_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	send_status_itr->status = SEND_OK;
@@ -2793,7 +2793,7 @@ void	handle_realserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_23]  handle_realserver_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B sorry_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_23]  handle_realserver_sendのテスト（send_rest_size有り sorry_flag有り CLIENT_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2802,7 +2802,7 @@ void	handle_realserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_CONTINUE );
 
-	// unit_test[x4_24]  handle_realserver_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B end_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_24]  handle_realserver_sendのテスト（send_possible_size無し end_flag有り CLIENT_RECV）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	send_status_itr->status = SEND_OK;
@@ -2813,7 +2813,7 @@ void	handle_realserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_25]  handle_realserver_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B end_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_25]  handle_realserver_sendのテスト（send_rest_size有り end_flag有り CLIENT_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2825,7 +2825,7 @@ void	handle_realserver_send_test()
 
 
 
-	// unit_test[x4_26]  handle_realserver_send$B$N%F%9%H!J(Breceive_data$BL5$7(B $B$"$jF@$J$$$1$I$d$i$l$?$i(BSTOP$B!K(B
+	// unit_test[x4_26]  handle_realserver_sendのテスト（receive_data無し あり得ないけどやられたらSTOP）
 	thread_data_itr->second->end_flag = END_FLAG_OFF;
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_OFF;
 	thread_data_itr->second->recive_data_map.clear();
@@ -2834,13 +2834,13 @@ void	handle_realserver_send_test()
 	status = handle_realserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_27]  handle_realserver_send$B$N%F%9%H!J(Breceive_data$BL5$7(B $B$"$jF@$J$$$1$I$d$i$l$?$i(BSTOP$B!K(B
+	// unit_test[x4_27]  handle_realserver_sendのテスト（receive_data無し あり得ないけどやられたらSTOP）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	status = handle_realserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_28]  handle_realserver_send$B$N%F%9%H!J(Breceive_data$BL5$7(B $B$"$jF@$J$$$1$I$d$i$l$?$i(BSTOP$B!K(B
+	// unit_test[x4_28]  handle_realserver_sendのテスト（receive_data無し あり得ないけどやられたらSTOP）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	status = handle_realserver_send( thread_data_itr->second->thread_id );
@@ -2858,12 +2858,12 @@ void	handle_sorryserver_send_test()
 
 	session_thread_data_set();
 
-	// unit_test[x4_29]  handle_sorryserver_send$B$N%F%9%H!JB8:_$7$J$$(BID STOP$B!K(B
+	// unit_test[x4_29]  handle_sorryserver_sendのテスト（存在しないID STOP）
 	boost::thread::id	thread_id;
 	status = handle_sorryserver_send( thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_30]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_status$BL5$7(B CLIENT_RECV$B!K(B
+	// unit_test[x4_30]  handle_sorryserver_sendのテスト（send_status無し CLIENT_RECV）
 	thread_data_itr = session_thread_data_map.begin();
 
 	while( thread_data_itr != session_thread_data_map.end())
@@ -2878,19 +2878,19 @@ void	handle_sorryserver_send_test()
 	status = handle_sorryserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 
-	// unit_test[x4_31]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_status$BL5$7(B sorry_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_31]  handle_sorryserver_sendのテスト（send_status無し sorry_flag有り CLIENT_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	status = handle_sorryserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 
-	// unit_test[x4_32]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_status$BL5$7(B end_flag$BM-$j(B CLIENT_RECEV$B!K(B
+	// unit_test[x4_32]  handle_sorryserver_sendのテスト（send_status無し end_flag有り CLIENT_RECEV）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	status = handle_sorryserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 
-	// unit_test[x4_33]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_possible_size$BM-$j(B SORRYSERVER_SELECT$B!K(B
+	// unit_test[x4_33]  handle_sorryserver_sendのテスト（send_possible_size有り SORRYSERVER_SELECT）
 	t_recive_data_map_itr				recive_data_itr;
 	send_status							send_status_add;
 
@@ -2925,7 +2925,7 @@ void	handle_sorryserver_send_test()
 	BOOST_CHECK_EQUAL( status, SORRYSERVER_SELECT );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
-	// unit_test[x4_34]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B CLIENT_RECV$B!K(B
+	// unit_test[x4_34]  handle_sorryserver_sendのテスト（send_possible_size無し CLIENT_RECV）
 
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
@@ -2935,7 +2935,7 @@ void	handle_sorryserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_35]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_35]  handle_sorryserver_sendのテスト（send_rest_size有り CLIENT_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2944,7 +2944,7 @@ void	handle_sorryserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_CONTINUE );
 
-	// unit_test[x4_36]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B sorry_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_36]  handle_sorryserver_sendのテスト（send_possible_size無し sorry_flag有り CLIENT_RECV）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	send_status_itr->status = SEND_OK;
@@ -2955,7 +2955,7 @@ void	handle_sorryserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_37]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B sorry_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_37]  handle_sorryserver_sendのテスト（send_rest_size有り sorry_flag有り CLIENT_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2964,7 +2964,7 @@ void	handle_sorryserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_CONTINUE );
 
-	// unit_test[x4_38]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_possible_size$BL5$7(B end_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_38]  handle_sorryserver_sendのテスト（send_possible_size無し end_flag有り CLIENT_RECV）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	send_status_itr->status = SEND_OK;
@@ -2975,7 +2975,7 @@ void	handle_sorryserver_send_test()
 	BOOST_CHECK_EQUAL( status, CLIENT_RECV );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_39]  handle_sorryserver_send$B$N%F%9%H!J(Bsend_rest_size$BM-$j(B end_flag$BM-$j(B CLIENT_RECV$B!K(B
+	// unit_test[x4_39]  handle_sorryserver_sendのテスト（send_rest_size有り end_flag有り CLIENT_RECV）
 	send_status_itr->status = SEND_OK;
 	send_status_itr->send_possible_size = 0;
 	send_status_itr->send_rest_size = 1;
@@ -2987,7 +2987,7 @@ void	handle_sorryserver_send_test()
 
 
 
-	// unit_test[x4_40]  handle_sorryserver_send$B$N%F%9%H!J(Breceive_data$BL5$7(B $B$"$jF@$J$$$1$I$d$i$l$?$i(BSTOP$B!K(B
+	// unit_test[x4_40]  handle_sorryserver_sendのテスト（receive_data無し あり得ないけどやられたらSTOP）
 	thread_data_itr->second->end_flag = END_FLAG_OFF;
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_OFF;
 	thread_data_itr->second->recive_data_map.clear();
@@ -2996,13 +2996,13 @@ void	handle_sorryserver_send_test()
 	status = handle_sorryserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_41]  handle_sorryserver_send$B$N%F%9%H!J(Breceive_data$BL5$7(B $B$"$jF@$J$$$1$I$d$i$l$?$i(BSTOP$B!K(B
+	// unit_test[x4_41]  handle_sorryserver_sendのテスト（receive_data無し あり得ないけどやられたらSTOP）
 	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
 
 	status = handle_sorryserver_send( thread_data_itr->second->thread_id );
 	BOOST_CHECK_EQUAL( status, STOP );
 
-	// unit_test[x4_42]  handle_sorryserver_send$B$N%F%9%H!J(Breceive_data$BL5$7(B $B$"$jF@$J$$$1$I$d$i$l$?$i(BSTOP$B!K(B
+	// unit_test[x4_42]  handle_sorryserver_sendのテスト（receive_data無し あり得ないけどやられたらSTOP）
 	thread_data_itr->second->end_flag = END_FLAG_ON;
 
 	status = handle_sorryserver_send( thread_data_itr->second->thread_id );
