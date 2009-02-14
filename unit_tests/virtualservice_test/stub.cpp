@@ -252,6 +252,9 @@ l7vs::l7vsd::vslist_type::iterator	l7vs::l7vsd::search_vslist( const virtualserv
 	return vslist.begin();
 }
 
+void	l7vs::l7vsd::release_virtual_service( const virtualservice_element& ) const {}
+
+
 l7vs::data_buff_base::data_buff_base(){}
 l7vs::data_buff_base::~data_buff_base(){}
 void	l7vs::data_buff_base::initialize(){}
