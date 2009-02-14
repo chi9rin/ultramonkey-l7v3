@@ -1261,6 +1261,10 @@ l7vs::l7vsadm::l7vsadm()
 	string_logcategory_dic["sys_env"]						= LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
 	logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT]
 															= "l7vsd_system_environment";
+	string_logcategory_dic["l7vsd_snmpbridge"]				= LOG_CAT_L7VSD_SNMPBRIDGE;
+	string_logcategory_dic["bridge"]						= LOG_CAT_L7VSD_SNMPBRIDGE;
+	logcategory_string_dic[LOG_CAT_L7VSD_SNMPBRIDGE]
+															= "l7vsd_snmpbridge";
 	string_logcategory_dic["l7vsd_protocol"]				= LOG_CAT_PROTOCOL;
 	string_logcategory_dic["prot"]							= LOG_CAT_PROTOCOL;
 	logcategory_string_dic[LOG_CAT_PROTOCOL]				= "l7vsd_protocol";

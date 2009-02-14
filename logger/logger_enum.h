@@ -79,6 +79,7 @@ enum LOG_CATEGORY_TAG{
 	LOG_CAT_L7VSD_SYSTEM_ENDPOINT,			//!< logcategory is systemcall socket 
 	LOG_CAT_L7VSD_SYSTEM_SIGNAL,			//!< logcategory is systemcall signal
 	LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT,		//!< logcategory is systemcall env
+	LOG_CAT_L7VSD_SNMPBRIDGE,				//!< logcategory is snmp_bridge
 
 	LOG_CAT_PROTOCOL,						//!< logcategory is protocol.
 	LOG_CAT_SCHEDULE,						//!< logcategory is schedule

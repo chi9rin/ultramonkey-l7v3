@@ -257,6 +257,11 @@ l7vs::LoggerImpl::LoggerImpl()
 	name_category_map["l7vsd_system_environment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
 	category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_environment";
 
+	//l7vsd snmpbridge category initialize
+	category_level_map[LOG_CAT_L7VSD_SNMPBRIDGE] = LOG_LV_DEBUG;
+	name_category_map["l7vsd_snmpbridge"] = LOG_CAT_L7VSD_SNMPBRIDGE;
+	category_name_map[LOG_CAT_L7VSD_SNMPBRIDGE] = "l7vsd_snmpbridge";
+
 	//l7vsd protocol module category initialize
 	category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_DEBUG;
 	name_category_map["l7vsd_protocol"] = LOG_CAT_PROTOCOL;
