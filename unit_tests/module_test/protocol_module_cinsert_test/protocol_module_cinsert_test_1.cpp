@@ -493,6 +493,150 @@ std::cout	<< "session_thread_data_disp" << std::endl;
 
 }
 
+void	session_thread_data_disp_thread( boost::thread::id thread_id )
+{
+
+	int	i = 0;
+	int	j = 0;
+	int	k = 0;
+	int	l = 0;
+
+	t_session_thread_data_map_itr		thread_data_itr;
+	t_recive_data_map_itr				recive_data_itr;
+	t_send_status_list_itr				send_status_itr;
+	t_edit_data_list_itr				edit_data_itr;
+
+std::cout	<< "session_thread_data_disp" << std::endl;
+
+	thread_data_itr = session_thread_data_map.find(thread_id);
+
+	std::cout	<< "session_thread_data_map entry = ["
+				<< session_thread_data_map.size() << "]" << std::endl;
+
+	std::cout << std::endl;
+
+	i = 0;
+
+	if( thread_data_itr != session_thread_data_map.end() )
+	{
+		i++;
+
+		std::cout	<< "<< thread_data[" << i << "] >>" << std::endl;
+		std::cout	<< "key                     = ["
+					<< thread_data_itr->first << "]" << std::endl;
+		std::cout	<< "thread_id               = ["
+					<< thread_data_itr->second->thread_id << "]" << std::endl;
+		std::cout	<< "thread_division         = ["
+					<< thread_data_itr->second->thread_division << "]" << std::endl;
+		std::cout	<< "pair_thread_id          = ["
+					<< thread_data_itr->second->pair_thread_id << "]" << std::endl;
+		std::cout	<< "end_flag                = ["
+					<< thread_data_itr->second->end_flag << "]" << std::endl;
+		std::cout	<< "accept_end_flag         = ["
+					<< thread_data_itr->second->accept_end_flag << "]" << std::endl;
+		std::cout	<< "sorry_flag              = ["
+					<< thread_data_itr->second->sorry_flag << "]" << std::endl;
+		std::cout	<< "sorryserver_switch_flag = ["
+					<< thread_data_itr->second->sorryserver_switch_flag << "]" << std::endl;
+		std::cout	<< "realserver_switch_flag  = ["
+					<< thread_data_itr->second->realserver_switch_flag << "]" << std::endl;
+		std::cout	<< "client_endpoint_tcp     = ["
+					<< thread_data_itr->second->client_endpoint_tcp << "]" << std::endl;
+		std::cout	<< "recive_data_map entry = ["
+					<< thread_data_itr->second->recive_data_map.size() << "]" << std::endl;
+		std::cout << std::endl;
+
+		recive_data_itr = thread_data_itr->second->recive_data_map.begin();
+
+		j = 0;
+
+		while( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+		{
+			j++;
+
+			std::cout	<< "< recive_data[" << j << "] >" << std::endl;
+			std::cout	<< "key                     = ["
+						<< recive_data_itr->first << "]" << std::endl;
+			std::cout	<< "recive_buffer_max_size  = ["
+						<< recive_data_itr->second.recive_buffer_max_size << "]" << std::endl;
+			std::cout	<< "recive_buffer_rest_size = ["
+						<< recive_data_itr->second.recive_buffer_rest_size << "]" << std::endl;
+			std::cout	<< "recive_buffer           = ["
+						<< (void*)recive_data_itr->second.recive_buffer << "]" << std::endl;
+			std::cout	<< "recive_buffer_1         = ["
+						<< (void*)recive_data_itr->second.recive_buffer_1 << "]" << std::endl;
+			std::cout	<< "recive_buffer_2         = ["
+						<< (void*)recive_data_itr->second.recive_buffer_2 << "]" << std::endl;
+			std::cout	<< "send_status_list entry = ["
+						<< recive_data_itr->second.send_status_list.size() << "]" << std::endl;
+			std::cout << std::endl;
+
+			send_status_itr = recive_data_itr->second.send_status_list.begin();
+	
+			k = 0;
+	
+			while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+			{
+				k++;
+
+				std::cout	<< "< send_status[" << k << "] >" << std::endl;
+				std::cout	<< "status  = ["
+							<< send_status_itr->status << "]" << std::endl;
+				std::cout	<< "send_end_size = ["
+							<< send_status_itr->send_end_size << "]" << std::endl;
+				std::cout	<< "send_rest_size = ["
+							<< send_status_itr->send_rest_size << "]" << std::endl;
+				std::cout	<< "send_possible_size = ["
+							<< send_status_itr->send_possible_size << "]" << std::endl;
+				std::cout	<< "send_offset = ["
+							<< send_status_itr->send_offset << "]" << std::endl;
+				std::cout	<< "unsend_size = ["
+							<< send_status_itr->unsend_size << "]" << std::endl;
+				std::cout	<< "edit_division = ["
+							<< send_status_itr->edit_division << "]" << std::endl;
+				std::cout	<< "send_endpoint = ["
+							<< send_status_itr->send_endpoint << "]" << std::endl;
+				std::cout	<< "edit_data_list entry = ["
+							<< send_status_itr->edit_data_list.size() << "]" << std::endl;
+				std::cout << std::endl;
+
+				edit_data_itr = send_status_itr->edit_data_list.begin();
+		
+				l = 0;
+		
+				while( edit_data_itr != send_status_itr->edit_data_list.end() )
+				{
+					l++;
+	
+					std::cout	<< "< edit_data[" << l << "] >" << std::endl;
+					std::cout	<< "data  = ["
+								<< edit_data_itr->data << "]" << std::endl;
+					std::cout	<< "data_size  = ["
+								<< edit_data_itr->data_size << "]" << std::endl;
+					std::cout	<< "insert_position  = ["
+								<< edit_data_itr->insert_position << "]" << std::endl;
+					std::cout	<< "replace_size  = ["
+								<< edit_data_itr->replace_size << "]" << std::endl;
+					std::cout << std::endl;
+
+					edit_data_itr++;
+
+				}
+
+				send_status_itr++;
+
+			}
+
+			recive_data_itr++;
+
+		}
+
+	}
+
+	std::cout << std::endl;
+
+}
+
 void	session_thread_data_send(	boost::thread::id thread_id,
 									boost::asio::ip::tcp::endpoint endpoint)
 {
@@ -529,6 +673,8 @@ void	session_thread_data_send(	boost::thread::id thread_id,
 					else
 					{
 						send_status_itr->status = SEND_END;
+						send_status_itr->send_end_size = send_status_itr->send_possible_size;
+						send_status_itr->send_possible_size = 0;
 					}
 				}
 
@@ -2451,38 +2597,157 @@ void add_parameter_test()
 void	handle_client_recv_test()
 {
 
+	int	i	= 0;
+
 	boost::array< char, MAX_BUFFER_SIZE > recvbuffer;
 	size_t recvlen;
 
+	size_t send_offset;
+
+	size_t buffer_size;
+
+	char*	buffer_1_resize_before;
+	char*	buffer_2_resize_before;
+
 	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
 
 	protocol_module_cinsert::EVENT_TAG	status;
 
-	std::string data;
+	std::string	data;
+	std::string	data_1_1;
+	std::string	data_2_1;
+	std::string	data_3_1;
+	std::string	data_3_2;
+	std::string	data_4_1;
+	std::string	data_4_2;
+	std::string	data_5_1;
+	std::string	data_5_2;
+	std::string	data_5_3;
+	std::string	data_6_1;
+	std::string	data_7_1;
+	std::string	data_8_1;
+	std::string	data_8_2;
+	std::string	data_9_1;
+	std::string	data_9_2;
+	std::string	data_9_3;
 
-	data	=	"PUT /abc/def/ HTTP/1.0\r\n";
-	data	+=	"Cookie: 10.10.10.10:11111;\r\n";
-	data	+=	"X-Forwarded-For: 20.20.20.20\r\n";
-	data	+=	"CONTENT-LENGTH:100\r\n\r\n";
-	data	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
-	data	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+	size_t		data_1_1_len = 0;
+	size_t		data_2_1_len = 0;
+	size_t		data_3_1_len = 0;
+	size_t		data_3_2_len = 0;
+	size_t		data_4_1_len = 0;
+	size_t		data_4_2_len = 0;
+	size_t		data_5_1_len = 0;
+	size_t		data_5_2_len = 0;
+	size_t		data_5_3_len = 0;
+	size_t		data_6_1_len = 0;
+	size_t		data_7_1_len = 0;
+	size_t		data_8_1_len = 0;
+	size_t		data_8_2_len = 0;
+	size_t		data_9_1_len = 0;
+	size_t		data_9_2_len = 0;
+	size_t		data_9_3_len = 0;
 
-	data	+=	"GET /abc/def/ HTTP/1.0\r\n";
-	data	+=	"Cookie: 20.20.20.20:22222;\r\n";
-	data	+=	"X-Forwarded-For: 20.20.20.20\r\n\r\n";
 
-	data	+=	"HEAD /abc/def/ HTTP/1.0\r\n";
-	data	+=	"Cookie: 20.20.20.20:22222;\r\n";
-	data	+=	"X-Forwarded-For: 20.20.20.20\r\n";
-	data	+=	"CONTENT-LENGTH:200\r\n\r\n";
-	data	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
-	data	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
-	data	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_1_1	=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data_1_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_1_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_1_1	+=	"CONTENT-LENGTH:100\r\n\r\n";
+	data_1_1	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_1_1	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
 
-	recvbuffer.assign('\0');
-	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	data_1_1_len = data_1_1.length();
 
-	recvlen = strlen(recvbuffer.data());
+	data_2_1	=	"GET /abc/def/ HTTP/1.0\r\n";
+	data_2_1	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data_2_1	+=	"X-Forwarded-For: 20.20.20.20\r\n\r\n";
+
+	data_2_1_len = data_2_1.length();
+
+	data_3_1	+=	"HEAD /abc/def/ HTTP/1.0\r\n";
+	data_3_1	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data_3_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_3_1	+=	"CONTENT-LENGTH:200\r\n\r\n";
+	data_3_1	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_3_1	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+
+	data_3_1_len = data_3_1.length();
+
+	data_3_2	=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_3_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_3_2_len = data_3_2.length();
+
+	data_4_1	=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data_4_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_4_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_4_1	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_4_1	+=	"abcdefghij1234567890";
+
+	data_4_1_len = data_4_1.length();
+
+	data_4_2	=	"abcdefghij1234567890abcdefghij";
+
+	data_4_2_len = data_4_2.length();
+
+	data_5_1	=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data_5_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_5_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_5_1	+=	"CONTENT-LENGTH:150\r";
+
+	data_5_1_len = data_5_1.length();
+
+	data_5_2	=	"\n\r\n";
+	data_5_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_5_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_5_2_len = data_5_2.length();
+
+	data_5_3	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_5_3_len = data_5_3.length();
+
+	data_6_1	=	"BUT /abc/def/ HTTP/1.0\r\n";
+	data_6_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_6_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_6_1_len = data_6_1.length();
+
+	data_7_1	=	"PUT /abc/def/ HTTP/9.0\r\n";
+	data_7_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_7_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_7_1_len = data_7_1.length();
+
+	data_8_1	=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data_8_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_8_1	+=	"X-Forwarded-For: 20.20.20";
+
+	data_8_1_len = data_8_1.length();
+
+	data_8_2	+=	".20\r\n";
+	data_8_2	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_8_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_8_2_len = data_8_2.length();
+
+	data_9_1	=	"PUT /abc/def/ HTTP/1.0\r\n";
+	data_9_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+
+	data_9_1_len = data_9_1.length();
+
+	data_9_2	=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_9_2_len = data_9_2.length();
+
+	data_9_3	=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_9_3	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_9_3_len = data_9_3.length();
+
+
 
 	session_thread_data_set();
 
@@ -2497,22 +2762,13 @@ void	handle_client_recv_test()
 		thread_data_itr++;
 	}
 
-	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+	recive_data_itr = thread_data_itr->second->recive_data_map.find(thread_data_itr->second->client_endpoint_tcp);
 
-	session_thread_data_disp();
-
-	session_thread_data_send(	thread_data_itr->second->thread_id,
-								thread_data_itr->second->client_endpoint_tcp );
-
-	session_thread_data_disp();
-
-	data	=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
-
-	data	+=	"PUT /abc/def/ HTTP/1.0\r\n";
-	data	+=	"Cookie: 10.10.10.10:11111;\r\n";
-	data	+=	"X-Forwarded-For: 20.20.20.20\r\n";
-	data	+=	"CONTENT-LENGTH:50\r\n\r\n";
-	data	+=	"abcdefghij1234567890";
+	send_offset = 0;
+//--------------------------------------------------------------------------------------
+	data	=	data_1_1;
+	data	+=	data_2_1;
+	data	+=	data_3_1;
 
 	recvbuffer.assign('\0');
 	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
@@ -2521,8 +2777,2409 @@ void	handle_client_recv_test()
 
 	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
 
-	session_thread_data_disp();
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
 
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 3 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += 0;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_1_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_1_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_2_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+			if( i == 2 )
+			{
+				send_offset += data_2_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_3_2_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_3_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_3_2;
+	data	+=	data_4_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_3_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_3_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_3_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_4_2_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_4_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_4_2;
+	data	+=	data_5_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_4_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_4_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_4_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_NG );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== 0 );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== data_5_1_len );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_5_2;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_5_3_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_5_1_len + data_5_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_5_3;
+	data	+=	data_6_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_5_1_len + data_5_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_5_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_5_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_6_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_7_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == SORRYSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_6_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_7_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_8_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_RECV );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_7_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_NG );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== 0 );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== data_8_1_len );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_8_2;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == SORRYSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_8_1_len + data_8_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//--------------------------------------------------------------------------------------
+
+	thread_data_itr->second->sorry_flag = SORRY_FLAG_OFF;
+
+	buffer_size = send_offset + data_8_1_len + data_8_2_len;
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+
+		data	=	data_9_1;
+		data	+=	data_9_2;
+		data	+=	data_9_3;
+	
+		recvbuffer.assign('\0');
+		memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	
+		recvlen = strlen(recvbuffer.data());
+	
+		buffer_size += recvlen;
+	
+		status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+	
+		session_thread_data_send(	thread_data_itr->second->thread_id,
+									thread_data_itr->second->client_endpoint_tcp );
+
+	}
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == MAX_BUFFER_SIZE );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == MAX_BUFFER_SIZE - recvlen  );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset = data_9_1_len + data_9_2_len + data_9_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_9_1_len + data_9_2_len + data_9_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+
+	buffer_size = send_offset + data_9_1_len + data_9_2_len + data_9_3_len;
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+
+		data	=	data_9_1;
+		data	+=	data_9_2;
+		data	+=	data_9_3;
+	
+		recvbuffer.assign('\0');
+		memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	
+		recvlen = strlen(recvbuffer.data());
+	
+		buffer_size += recvlen;
+	
+		status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+	
+		session_thread_data_send(	thread_data_itr->second->thread_id,
+									thread_data_itr->second->client_endpoint_tcp );
+
+	}
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == MAX_BUFFER_SIZE );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == MAX_BUFFER_SIZE - recvlen  );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset = data_9_1_len + data_9_2_len + data_9_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_9_1_len + data_9_2_len + data_9_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+
+	buffer_1_resize_before = recive_data_itr->second.recive_buffer_1;
+	buffer_2_resize_before = recive_data_itr->second.recive_buffer_2;
+
+	data	=	data_9_1;
+
+	buffer_size = 0;
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+		data		+= data_9_2;
+		buffer_size	+= data_9_2_len;
+	}
+
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	buffer_size = recvlen;
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+// 	session_thread_data_send(	thread_data_itr->second->thread_id,
+// 								thread_data_itr->second->client_endpoint_tcp );
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_1 != buffer_1_resize_before );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_2 != buffer_2_resize_before );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == buffer_size );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == 0 );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== recvlen );
+				BOOST_CHECK( send_status_itr->send_offset			== 0 );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								thread_data_itr->second->client_endpoint_tcp );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_client_recv( thread_data_itr->second->thread_id, recvbuffer, recvlen );
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == buffer_size );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == buffer_size - recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_SELECT );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== recvlen );
+				BOOST_CHECK( send_status_itr->send_offset			== 0 );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+}
+
+void	handle_realserver_recv_test()
+{
+
+	int	i	= 0;
+
+	boost::array< char, MAX_BUFFER_SIZE > recvbuffer;
+	size_t recvlen;
+
+	size_t send_offset;
+
+	size_t buffer_size;
+
+	char*	buffer_1_resize_before;
+	char*	buffer_2_resize_before;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+
+	protocol_module_cinsert::EVENT_TAG	status;
+
+	std::string	data;
+	std::string	data_1_1;
+	std::string	data_2_1;
+	std::string	data_3_1;
+	std::string	data_3_2;
+	std::string	data_4_1;
+	std::string	data_4_2;
+	std::string	data_5_1;
+	std::string	data_5_2;
+	std::string	data_5_3;
+	std::string	data_6_1;
+	std::string	data_7_1;
+	std::string	data_8_1;
+	std::string	data_8_2;
+	std::string	data_9_1;
+	std::string	data_9_2;
+	std::string	data_9_3;
+
+	size_t		data_1_1_len = 0;
+	size_t		data_2_1_len = 0;
+	size_t		data_3_1_len = 0;
+	size_t		data_3_2_len = 0;
+	size_t		data_4_1_len = 0;
+	size_t		data_4_2_len = 0;
+	size_t		data_5_1_len = 0;
+	size_t		data_5_2_len = 0;
+	size_t		data_5_3_len = 0;
+	size_t		data_6_1_len = 0;
+	size_t		data_7_1_len = 0;
+	size_t		data_8_1_len = 0;
+	size_t		data_8_2_len = 0;
+	size_t		data_9_1_len = 0;
+	size_t		data_9_2_len = 0;
+	size_t		data_9_3_len = 0;
+
+
+	data_1_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_1_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_1_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_1_1	+=	"CONTENT-LENGTH:100\r\n\r\n";
+	data_1_1	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_1_1	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+
+	data_1_1_len = data_1_1.length();
+
+	data_2_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_2_1	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data_2_1	+=	"X-Forwarded-For: 20.20.20.20\r\n\r\n";
+
+	data_2_1_len = data_2_1.length();
+
+	data_3_1	+=	"HTTP/1.0 100 abcd\r\n";
+	data_3_1	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data_3_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_3_1	+=	"CONTENT-LENGTH:200\r\n\r\n";
+	data_3_1	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_3_1	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+
+	data_3_1_len = data_3_1.length();
+
+	data_3_2	=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_3_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_3_2_len = data_3_2.length();
+
+	data_4_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_4_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_4_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_4_1	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_4_1	+=	"abcdefghij1234567890";
+
+	data_4_1_len = data_4_1.length();
+
+	data_4_2	=	"abcdefghij1234567890abcdefghij";
+
+	data_4_2_len = data_4_2.length();
+
+	data_5_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_5_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_5_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_5_1	+=	"CONTENT-LENGTH:150\r";
+
+	data_5_1_len = data_5_1.length();
+
+	data_5_2	=	"\n\r\n";
+	data_5_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_5_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_5_2_len = data_5_2.length();
+
+	data_5_3	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_5_3_len = data_5_3.length();
+
+	data_6_1	=	"HTTP/9.0 100 abcd\r\n";
+	data_6_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_6_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_6_1_len = data_6_1.length();
+
+	data_7_1	=	"HTTP/1.0 400 abcd\r\n";
+	data_7_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_7_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_7_1_len = data_7_1.length();
+
+	data_8_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_8_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_8_1	+=	"X-Forwarded-For: 20.20.20";
+
+	data_8_1_len = data_8_1.length();
+
+	data_8_2	+=	".20\r\n";
+	data_8_2	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_8_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_8_2_len = data_8_2.length();
+
+	data_9_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_9_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+
+	data_9_1_len = data_9_1.length();
+
+	data_9_2	=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_9_2_len = data_9_2.length();
+
+	data_9_3	=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_9_3	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_9_3_len = data_9_3.length();
+
+	buffer_size = 0;
+
+	buffer_1_resize_before = NULL;
+	buffer_2_resize_before = NULL;
+
+	session_thread_data_set();
+
+	thread_data_itr = session_thread_data_map.begin();
+
+	while( thread_data_itr != session_thread_data_map.end())
+	{
+		if( thread_data_itr->second->thread_division == THREAD_DIVISION_DOWN_STREAM )
+		{
+			break;
+		}
+		thread_data_itr++;
+	}
+
+	recive_data_itr = thread_data_itr->second->recive_data_map.begin();
+
+	send_offset = 0;
+//--------------------------------------------------------------------------------------
+	data	=	data_1_1;
+	data	+=	data_2_1;
+	data	+=	data_3_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 3 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += 0;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_1_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_1_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_2_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+			if( i == 2 )
+			{
+				send_offset += data_2_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_3_2_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_3_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+	data	=	data_3_2;
+	data	+=	data_4_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_3_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_3_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_3_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_4_2_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_4_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_4_2;
+	data	+=	data_5_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_4_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_4_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_4_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_NG );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== 0 );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== data_5_1_len );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_5_2;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_5_3_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_5_1_len + data_5_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_5_3;
+	data	+=	data_6_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_5_1_len + data_5_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_5_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_5_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_6_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_7_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_6_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_7_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_8_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == REALSERVER_RECV );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_7_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_NG );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== 0 );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== data_8_1_len );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_8_2;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_8_1_len + data_8_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+
+	thread_data_itr->second->sorry_flag = SORRY_FLAG_OFF;
+
+	buffer_size = send_offset + data_8_1_len + data_8_2_len;
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+
+		data	=	data_9_1;
+		data	+=	data_9_2;
+		data	+=	data_9_3;
+	
+		recvbuffer.assign('\0');
+		memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	
+		recvlen = strlen(recvbuffer.data());
+	
+		buffer_size += recvlen;
+	
+		status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+	
+		session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	}
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == MAX_BUFFER_SIZE );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == MAX_BUFFER_SIZE - recvlen  );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset = data_9_1_len + data_9_2_len + data_9_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_9_1_len + data_9_2_len + data_9_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+
+	buffer_size = send_offset + data_9_1_len + data_9_2_len + data_9_3_len;
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+
+		data	=	data_9_1;
+		data	+=	data_9_2;
+		data	+=	data_9_3;
+	
+		recvbuffer.assign('\0');
+		memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	
+		recvlen = strlen(recvbuffer.data());
+	
+		buffer_size += recvlen;
+	
+		status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+	
+		session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	}
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == MAX_BUFFER_SIZE );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == MAX_BUFFER_SIZE - recvlen  );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset = data_9_1_len + data_9_2_len + data_9_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_9_1_len + data_9_2_len + data_9_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+
+	buffer_1_resize_before = recive_data_itr->second.recive_buffer_1;
+	buffer_2_resize_before = recive_data_itr->second.recive_buffer_2;
+
+	data	=	data_9_1;
+
+	buffer_size = 0;
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+		data		+= data_9_2;
+		buffer_size	+= data_9_2_len;
+	}
+
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	buffer_size = recvlen;
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+// 	session_thread_data_send(	thread_data_itr->second->thread_id,
+// 								thread_data_itr->second->client_endpoint_tcp );
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_1 != buffer_1_resize_before );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_2 != buffer_2_resize_before );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == buffer_size );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == 0 );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== recvlen );
+				BOOST_CHECK( send_status_itr->send_offset			== 0 );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_realserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == buffer_size );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == buffer_size - recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== recvlen );
+				BOOST_CHECK( send_status_itr->send_offset			== 0 );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 1 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+}
+
+void	handle_sorryserver_recv_test()
+{
+
+	int	i	= 0;
+
+	boost::array< char, MAX_BUFFER_SIZE > recvbuffer;
+	size_t recvlen;
+
+	size_t send_offset;
+
+	size_t buffer_size;
+
+	char*	buffer_1_resize_before;
+	char*	buffer_2_resize_before;
+
+	t_session_thread_data_map_itr	thread_data_itr;
+	t_recive_data_map_itr			recive_data_itr;
+	t_send_status_list_itr			send_status_itr;
+
+	protocol_module_cinsert::EVENT_TAG	status;
+
+	std::string	data;
+	std::string	data_1_1;
+	std::string	data_2_1;
+	std::string	data_3_1;
+	std::string	data_3_2;
+	std::string	data_4_1;
+	std::string	data_4_2;
+	std::string	data_5_1;
+	std::string	data_5_2;
+	std::string	data_5_3;
+	std::string	data_6_1;
+	std::string	data_7_1;
+	std::string	data_8_1;
+	std::string	data_8_2;
+	std::string	data_9_1;
+	std::string	data_9_2;
+	std::string	data_9_3;
+
+	size_t		data_1_1_len = 0;
+	size_t		data_2_1_len = 0;
+	size_t		data_3_1_len = 0;
+	size_t		data_3_2_len = 0;
+	size_t		data_4_1_len = 0;
+	size_t		data_4_2_len = 0;
+	size_t		data_5_1_len = 0;
+	size_t		data_5_2_len = 0;
+	size_t		data_5_3_len = 0;
+	size_t		data_6_1_len = 0;
+	size_t		data_7_1_len = 0;
+	size_t		data_8_1_len = 0;
+	size_t		data_8_2_len = 0;
+	size_t		data_9_1_len = 0;
+	size_t		data_9_2_len = 0;
+	size_t		data_9_3_len = 0;
+
+
+	data_1_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_1_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_1_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_1_1	+=	"CONTENT-LENGTH:100\r\n\r\n";
+	data_1_1	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_1_1	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+
+	data_1_1_len = data_1_1.length();
+
+	data_2_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_2_1	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data_2_1	+=	"X-Forwarded-For: 20.20.20.20\r\n\r\n";
+
+	data_2_1_len = data_2_1.length();
+
+	data_3_1	+=	"HTTP/1.0 100 abcd\r\n";
+	data_3_1	+=	"Cookie: 20.20.20.20:22222;\r\n";
+	data_3_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_3_1	+=	"CONTENT-LENGTH:200\r\n\r\n";
+	data_3_1	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_3_1	+=	"1234567890abcdefghij1234567890abcdefghij1234567890";
+
+	data_3_1_len = data_3_1.length();
+
+	data_3_2	=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_3_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_3_2_len = data_3_2.length();
+
+	data_4_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_4_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_4_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_4_1	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_4_1	+=	"abcdefghij1234567890";
+
+	data_4_1_len = data_4_1.length();
+
+	data_4_2	=	"abcdefghij1234567890abcdefghij";
+
+	data_4_2_len = data_4_2.length();
+
+	data_5_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_5_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_5_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+	data_5_1	+=	"CONTENT-LENGTH:150\r";
+
+	data_5_1_len = data_5_1.length();
+
+	data_5_2	=	"\n\r\n";
+	data_5_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+	data_5_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_5_2_len = data_5_2.length();
+
+	data_5_3	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_5_3_len = data_5_3.length();
+
+	data_6_1	=	"HTTP/9.0 100 abcd\r\n";
+	data_6_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_6_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_6_1_len = data_6_1.length();
+
+	data_7_1	=	"HTTP/1.0 400 abcd\r\n";
+	data_7_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_7_1	+=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_7_1_len = data_7_1.length();
+
+	data_8_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_8_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+	data_8_1	+=	"X-Forwarded-For: 20.20.20";
+
+	data_8_1_len = data_8_1.length();
+
+	data_8_2	+=	".20\r\n";
+	data_8_2	+=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_8_2	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_8_2_len = data_8_2.length();
+
+	data_9_1	=	"HTTP/1.0 100 abcd\r\n";
+	data_9_1	+=	"Cookie: 10.10.10.10:11111;\r\n";
+
+	data_9_1_len = data_9_1.length();
+
+	data_9_2	=	"X-Forwarded-For: 20.20.20.20\r\n";
+
+	data_9_2_len = data_9_2.length();
+
+	data_9_3	=	"CONTENT-LENGTH:50\r\n\r\n";
+	data_9_3	+=	"abcdefghij1234567890abcdefghij1234567890abcdefghij";
+
+	data_9_3_len = data_9_3.length();
+
+	buffer_size = 0;
+
+	buffer_1_resize_before = NULL;
+	buffer_2_resize_before = NULL;
+
+	session_thread_data_set();
+
+	thread_data_itr = session_thread_data_map.begin();
+
+	while( thread_data_itr != session_thread_data_map.end())
+	{
+		if( thread_data_itr->second->thread_division == THREAD_DIVISION_DOWN_STREAM )
+		{
+			break;
+		}
+		thread_data_itr++;
+	}
+
+	recive_data_itr = thread_data_itr->second->recive_data_map.begin();
+
+	send_offset = 0;
+//--------------------------------------------------------------------------------------
+	data	=	data_1_1;
+	data	+=	data_2_1;
+	data	+=	data_3_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 3 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += 0;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_1_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_1_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_2_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 2 )
+			{
+				send_offset += data_2_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_3_2_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_3_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+	data	=	data_3_2;
+	data	+=	data_4_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_3_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_3_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_3_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_4_2_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_4_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_4_2;
+	data	+=	data_5_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_4_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_4_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_4_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_NG );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== 0 );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== data_5_1_len );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_5_2;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== data_5_3_len );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_5_1_len + data_5_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_5_3;
+	data	+=	data_6_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 2 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_5_1_len + data_5_2_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_5_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+			if( i == 1 )
+			{
+				send_offset += data_5_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_6_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_7_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	thread_data_itr->second->sorry_flag = SORRY_FLAG_ON;
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_6_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_7_1_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_8_1;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == SORRYSERVER_RECV );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset += data_7_1_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_NG );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== 0 );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== data_8_1_len );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+	data	=	data_8_2;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_8_1_len + data_8_2_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+// 	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//--------------------------------------------------------------------------------------
+
+	thread_data_itr->second->sorry_flag = SORRY_FLAG_OFF;
+
+	buffer_size = send_offset + data_8_1_len + data_8_2_len;
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+
+		data	=	data_9_1;
+		data	+=	data_9_2;
+		data	+=	data_9_3;
+	
+		recvbuffer.assign('\0');
+		memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	
+		recvlen = strlen(recvbuffer.data());
+	
+		buffer_size += recvlen;
+	
+		status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+	
+		session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	}
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == MAX_BUFFER_SIZE );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == MAX_BUFFER_SIZE - recvlen  );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset = data_9_1_len + data_9_2_len + data_9_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_9_1_len + data_9_2_len + data_9_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+
+	buffer_size = send_offset + data_9_1_len + data_9_2_len + data_9_3_len;
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+
+		data	=	data_9_1;
+		data	+=	data_9_2;
+		data	+=	data_9_3;
+	
+		recvbuffer.assign('\0');
+		memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+	
+		recvlen = strlen(recvbuffer.data());
+	
+		buffer_size += recvlen;
+	
+		status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+	
+		session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	}
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == MAX_BUFFER_SIZE );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == MAX_BUFFER_SIZE - recvlen  );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				send_offset = data_9_1_len + data_9_2_len + data_9_3_len;
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== data_9_1_len + data_9_2_len + data_9_3_len );
+				BOOST_CHECK( send_status_itr->send_offset			== send_offset );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+//--------------------------------------------------------------------------------------
+
+	buffer_1_resize_before = recive_data_itr->second.recive_buffer_1;
+	buffer_2_resize_before = recive_data_itr->second.recive_buffer_2;
+
+	data	=	data_9_1;
+
+	buffer_size = 0;
+
+	while( buffer_size <= MAX_BUFFER_SIZE )
+	{
+		data		+= data_9_2;
+		buffer_size	+= data_9_2_len;
+	}
+
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	buffer_size = recvlen;
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+// 		session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+// 	session_thread_data_send(	thread_data_itr->second->thread_id,
+// 								thread_data_itr->second->client_endpoint_tcp );
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_1 != buffer_1_resize_before );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_2 != buffer_2_resize_before );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == buffer_size );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == 0 );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== recvlen );
+				BOOST_CHECK( send_status_itr->send_offset			== 0 );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
+//	session_thread_data_disp_thread( thread_data_itr->second->thread_id );
+
+	session_thread_data_send(	thread_data_itr->second->thread_id,
+								recive_data_itr->first );
+
+	data	=	data_9_1;
+	data	+=	data_9_2;
+	data	+=	data_9_3;
+
+	recvbuffer.assign('\0');
+	memcpy( recvbuffer.data(), data.c_str(), strlen(data.c_str()));
+
+	recvlen = strlen(recvbuffer.data());
+
+	status = handle_sorryserver_recv( thread_data_itr->second->thread_id, recive_data_itr->first, recvbuffer, recvlen );
+
+	BOOST_CHECK( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_2 );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_max_size == buffer_size );
+	BOOST_CHECK( recive_data_itr->second.recive_buffer_rest_size == buffer_size - recvlen );
+
+	if( recive_data_itr != thread_data_itr->second->recive_data_map.end() )
+	{
+
+		BOOST_CHECK( status == CLIENT_CONNECTION_CHECK );
+		BOOST_CHECK( recive_data_itr->second.send_status_list.size() == 1 );
+
+		send_status_itr = recive_data_itr->second.send_status_list.begin();
+
+		i = 0;
+
+		while( send_status_itr != recive_data_itr->second.send_status_list.end() )
+		{
+			if( i == 0 )
+			{
+				BOOST_CHECK( send_status_itr->status				== SEND_OK );
+				BOOST_CHECK( send_status_itr->send_end_size			== 0 );
+				BOOST_CHECK( send_status_itr->send_rest_size		== 0 );
+				BOOST_CHECK( send_status_itr->send_possible_size	== recvlen );
+				BOOST_CHECK( send_status_itr->send_offset			== 0 );
+				BOOST_CHECK( send_status_itr->unsend_size			== 0 );
+				BOOST_CHECK( send_status_itr->edit_division			== 0 );
+			}
+
+			i++;
+			send_status_itr++;
+		}
+
+	}
 }
 
 };
@@ -2960,6 +5617,26 @@ void	handle_client_recv_test()
 	BOOST_MESSAGE( "----- handle_client_recv test end -----" );
 
 }
+void	handle_realserver_recv_test()
+{
+
+	protocol_module_cinsert_test	protocol_module_cinsert_test_1;
+
+	BOOST_MESSAGE( "----- handle_realserver_recv test start -----" );
+	protocol_module_cinsert_test_1.handle_realserver_recv_test();
+	BOOST_MESSAGE( "----- handle_realserver_recv test end -----" );
+
+}
+void	handle_sorryserver_recv_test()
+{
+
+	protocol_module_cinsert_test	protocol_module_cinsert_test_1;
+
+	BOOST_MESSAGE( "----- handle_sorryserver_recv test start -----" );
+	protocol_module_cinsert_test_1.handle_sorryserver_recv_test();
+	BOOST_MESSAGE( "----- handle_sorryserver_recv test end -----" );
+
+}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -2977,7 +5654,9 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 //	ts->add( BOOST_TEST_CASE( &handle_session_initialize_test ) );
 //	ts->add( BOOST_TEST_CASE( &handle_session_finalize_test ) );
 
-	ts->add( BOOST_TEST_CASE( &handle_client_recv_test ) );
+//	ts->add( BOOST_TEST_CASE( &handle_client_recv_test ) );
+//	ts->add( BOOST_TEST_CASE( &handle_realserver_recv_test ) );
+	ts->add( BOOST_TEST_CASE( &handle_sorryserver_recv_test ) );
 
 	framework::master_test_suite().add( ts );
 
