@@ -3546,7 +3546,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 						free( recive_data_itr->second.recive_buffer_1 );
 						free( recive_data_itr->second.recive_buffer_2 );
 
-						recive_data_itr->second.recive_buffer		= buffer_1;
+						recive_data_itr->second.recive_buffer	= buffer_1;
 						recive_data_itr->second.recive_buffer_1	= buffer_1;
 						recive_data_itr->second.recive_buffer_2	= buffer_2;
 
@@ -3593,6 +3593,8 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 					recive_data_itr->second.recive_buffer_rest_size
 						= recive_data_itr->second.recive_buffer_max_size - unsend_data_size - recvlen;
+
+					next_response_offset = 0;
 
 					unsend_data_size += recvlen;
 
