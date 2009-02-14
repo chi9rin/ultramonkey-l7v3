@@ -2874,6 +2874,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 			if( recive_data_itr == thread_data->recive_data_map.end() )
 			{
+
 				buffer = new char[realserver_recv_data.recive_buffer_max_size];
 		
 				realserver_recv_data.recive_buffer		= buffer;
@@ -2902,6 +2903,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 					if( send_status_itr->status == SEND_END )
 					{
+
 						next_response_offset = send_status_itr->send_offset + send_status_itr->send_end_size;
 						send_status_itr = recive_data_itr->second.send_status_list.erase( send_status_itr );
 					}
@@ -2914,17 +2916,16 @@ protocol_module_cinsert::handle_realserver_recv(
 					}
 					else
 					{
+
 						unsend_data_offset = send_status_itr->send_offset;
 						unsend_data_size = send_status_itr->unsend_size;
 						break;
 					}
-
-					send_status_itr++;
-
 				}
 
 				if( recive_data_itr->second.recive_buffer_rest_size < recvlen )
 				{
+
 					if( recive_data_itr->second.recive_buffer_max_size < unsend_data_size + recvlen )
 					{
 
@@ -2957,6 +2958,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 						if( recive_data_itr->second.recive_buffer == recive_data_itr->second.recive_buffer_1 )
 						{
+
 							memset( recive_data_itr->second.recive_buffer_2,
 									'\0',
 									recive_data_itr->second.recive_buffer_max_size );
@@ -2973,6 +2975,7 @@ protocol_module_cinsert::handle_realserver_recv(
 						}
 						else
 						{
+
 							memset( recive_data_itr->second.recive_buffer_1,
 									'\0',
 									recive_data_itr->second.recive_buffer_max_size );
@@ -3067,13 +3070,14 @@ protocol_module_cinsert::handle_realserver_recv(
 					else if( send_status_itr->status == SEND_NG )
 					{
 
-						check_result = check_http_method(
+						check_result = check_status_code(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											unsend_data_size );
 
 						if( check_result == CHECK_OK )
 						{
+
 							check_result = check_http_version(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
@@ -3171,6 +3175,7 @@ protocol_module_cinsert::handle_realserver_recv(
 								send_status_itr->unsend_size + rest_response_data_size )
 						{
 
+
 							send_status_itr->send_possible_size
 								= send_status_itr->unsend_size + rest_response_data_size;
 
@@ -3210,6 +3215,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 					if( rest_response_data_size <= 0 )
 					{
+
 						break;
 					}
 
@@ -3228,13 +3234,14 @@ protocol_module_cinsert::handle_realserver_recv(
 					send_status_add.edit_division		= 0;
 					send_status_add.send_offset			= next_response_offset;
 
-					check_result = check_http_method(
+					check_result = check_status_code(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
 										rest_response_data_size );
 
 					if( check_result == CHECK_OK )
 					{
+
 						check_result = check_http_version(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_add.send_offset,
@@ -3303,6 +3310,8 @@ protocol_module_cinsert::handle_realserver_recv(
 
 							rest_response_data_size = 0;
 
+							recive_data_itr->second.send_status_list.push_back( send_status_add );
+
 							break;
 
 						}
@@ -3322,6 +3331,8 @@ protocol_module_cinsert::handle_realserver_recv(
 						send_status_add.unsend_size = rest_response_data_size;
 
 						rest_response_data_size = 0;
+
+						recive_data_itr->second.send_status_list.push_back( send_status_add );
 
 						break;
 
@@ -3361,6 +3372,8 @@ protocol_module_cinsert::handle_realserver_recv(
 					next_response_offset	= send_status_add.send_offset
 											+ send_status_add.send_possible_size;
 
+					recive_data_itr->second.send_status_list.push_back( send_status_add );
+
 				}
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -3372,6 +3385,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 					if( send_status_itr->status == SEND_OK )
 					{
+
 						status = CLIENT_CONNECTION_CHECK;
 						break;
 					}
@@ -3507,8 +3521,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 						unsend_data_size = send_status_itr->unsend_size;
 						break;
 					}
-
-					send_status_itr++;
 
 				}
 
@@ -3654,7 +3666,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					else if( send_status_itr->status == SEND_NG )
 					{
 
-						check_result = check_http_method(
+						check_result = check_status_code(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											unsend_data_size );
@@ -3815,7 +3827,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					send_status_add.edit_division		= 0;
 					send_status_add.send_offset			= next_response_offset;
 
-					check_result = check_http_method(
+					check_result = check_status_code(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
 										rest_response_data_size );
@@ -3890,6 +3902,8 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 							rest_response_data_size = 0;
 
+							recive_data_itr->second.send_status_list.push_back( send_status_add );
+
 							break;
 
 						}
@@ -3909,6 +3923,8 @@ protocol_module_cinsert::handle_sorryserver_recv(
 						send_status_add.unsend_size = rest_response_data_size;
 
 						rest_response_data_size = 0;
+
+						recive_data_itr->second.send_status_list.push_back( send_status_add );
 
 						break;
 
@@ -3947,6 +3963,8 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 					next_response_offset	= send_status_add.send_offset
 											+ send_status_add.send_possible_size;
+
+					recive_data_itr->second.send_status_list.push_back( send_status_add );
 
 				}
 
