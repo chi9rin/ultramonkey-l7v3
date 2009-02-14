@@ -467,7 +467,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 
 	//additional PM options(for protomod_url)
 	l7vs::protocol_module_base::check_message_result result;
-	if( !protomod ){
+	if( NULL != protomod ){
 		result = protomod->add_parameter( elem.protocol_args );
 		if( result.flag ){
 			for( size_t i = 0; i < elem.protocol_args.size(); ++i ){
@@ -477,7 +477,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 	}else{
 		//ERROR case
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
-		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
+		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
 		return;
 	}
 

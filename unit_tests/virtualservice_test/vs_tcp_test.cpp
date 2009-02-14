@@ -39,7 +39,7 @@ void	virtualservice_tcp_test1(){
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	element;
 	//set element value
 	element.udpmode					= false;
@@ -134,7 +134,7 @@ void	virtualservice_tcp_test2(){
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	element;
 	//set element value
 
@@ -368,6 +368,8 @@ void	virtualservice_tcp_test3(){
 	l7vs::error_code			vs_err;
 	boost::system::error_code	test_err;
 	debugg_flug_struct::getInstance().param_exist_flag() = false;
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
 
 	std::stringstream	tmp_tcp_ep;
 	std::stringstream	tmp_udp_ep;
@@ -375,7 +377,7 @@ void	virtualservice_tcp_test3(){
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	element;
 	//set element value
 
@@ -775,7 +777,7 @@ void	virtualservice_tcp_test4(){
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	elem1;
 
 	//set element value
@@ -1174,7 +1176,7 @@ void	virtualservice_tcp_test5(){
 
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	elem1;
 
 	//set element value

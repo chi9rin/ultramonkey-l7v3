@@ -31,7 +31,7 @@ void operator delete ( void * p){
 void virtual_service_test(void){
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 
 	// common
 	int basecount = virtual_service_test_struct::getInstance().basefunctioncallcount;

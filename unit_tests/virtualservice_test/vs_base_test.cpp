@@ -19,7 +19,7 @@ using namespace boost::unit_test;
 void	virtualservice_base_test1(){
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	element;
 	
 	// unit_test[1]  object create
@@ -39,7 +39,7 @@ void	virtualservice_base_test1(){
 void	virtualservice_base_test2(){
 	l7vs::l7vsd					vsd;
 	boost::asio::io_service		dispatcher;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 	l7vs::virtualservice_element	element;
 	//
 	element.qos_upstream	= 1234ULL;

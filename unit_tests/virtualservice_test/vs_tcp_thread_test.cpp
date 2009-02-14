@@ -47,7 +47,7 @@ public:
 	~vs_access(){}
 
 	void	initialize( l7vs::virtualservice_element& in_elem ){
-		rep	= new l7vs::replication( dispatcher );
+		rep	= new l7vs::replication();
 		vs	= new l7vs::vs_tcp( vsd, *rep, in_elem );
 	}
 
@@ -364,7 +364,7 @@ void	virtualservice_tcp_test1(){
 	boost::asio::io_service		dispatcher;
 
 	l7vs::l7vsd					vsd;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep;
 
 	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
@@ -820,7 +820,7 @@ void	virtualservice_tcp_test2(){
 	boost::asio::io_service		dispatcher;
 
 	l7vs::l7vsd					vsd;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep();
 
 	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
@@ -890,7 +890,7 @@ void	virtualservice_tcp_test3(){
 	boost::asio::io_service		dispatcher;
 
 	l7vs::l7vsd					vsd;
-	l7vs::replication			rep( dispatcher );
+	l7vs::replication			rep();
 
 	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
