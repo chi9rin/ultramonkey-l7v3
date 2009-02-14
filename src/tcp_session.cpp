@@ -405,7 +405,8 @@ namespace l7vs{
 			std::stringstream buf;
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
-			buf << "] client endpoint get false";
+			buf << "] client endpoint get false : ";
+			buf << ec.message();
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			exit_flag = true;
 			client_socket.close(ec);
