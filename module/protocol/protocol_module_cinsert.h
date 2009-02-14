@@ -185,16 +185,13 @@ public:
 										send_status_list( in.send_status_list )	{}
 		~recive_data()
 		{
-std::cout	<< "<★★★★★★★★delete recive_data>" << std::endl;
 			if( recive_buffer_1 != NULL )
 			{
-std::cout	<< "★★★★★delete recive_buffer_1 = [" << (void*)recive_buffer_1 << "]" << std::endl;
 				delete[] recive_buffer_1;
 			}
 
 			if( recive_buffer_2 != NULL )
 			{
-std::cout	<< "★★★★★delete recive_buffer_2 = [" << (void*)recive_buffer_2 << "]" << std::endl;
 				delete[] recive_buffer_2;
 			}
 		}
