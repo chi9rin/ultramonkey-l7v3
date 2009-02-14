@@ -15,7 +15,16 @@
 
 #define L7VS_MODULE_INITFN "create_module"
 #define L7VS_MODULE_FINIFN "destroy_module"
+
 namespace l7vs{
+
+#if defined(LOGGER_PROCESS_VSD)
+const LOG_CATEGORY_TAG loggerCategory = LOG_CAT_L7VSD_MODULE;
+const LOG_CATEGORY_TAG loggerCategorySysMem = LOG_CAT_L7VSD_SYSTEM_MEMORY;
+#else
+const LOG_CATEGORY_TAG loggerCategory = LOG_CAT_L7VSADM_MODULE;
+const LOG_CATEGORY_TAG loggerCategorySysMem = LOG_CAT_L7VSADM_COMMON;
+#endif
 
 /*!
  * returns singleton instance.
@@ -25,7 +34,7 @@ namespace l7vs{
  */
 schedule_module_control&
 schedule_module_control::getInstance(){
-	Logger logger( LOG_CAT_L7VSD_MODULE, 1, "schedule_module_control::getInstance", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 1, "schedule_module_control::getInstance", __FILE__, __LINE__ );
 	static	schedule_module_control	instance;
 	return	instance;
 }
@@ -38,7 +47,7 @@ schedule_module_control::getInstance(){
  */
 void
 schedule_module_control::initialize( const std::string& infile_path ){
-	Logger logger( LOG_CAT_L7VSD_MODULE, 1, "schedule_module_control::initialize", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 1, "schedule_module_control::initialize", __FILE__, __LINE__ );
 	if( &infile_path != NULL ){
 		module_control_base::modulefile_path	= infile_path;
 	}
@@ -52,7 +61,7 @@ schedule_module_control::initialize( const std::string& infile_path ){
  */
 void
 schedule_module_control::finalize(){
-	Logger logger( LOG_CAT_L7VSD_MODULE, 1, "schedule_module_control::finalize", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 1, "schedule_module_control::finalize", __FILE__, __LINE__ );
 }
 
 /*!
@@ -64,7 +73,7 @@ schedule_module_control::finalize(){
  */
 schedule_module_base*
 schedule_module_control::load_module( const	std::string& modulename ){
-	Logger logger( LOG_CAT_L7VSD_MODULE, 1, "schedule_module_control::load_module", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 1, "schedule_module_control::load_module", __FILE__, __LINE__ );
 	schedule_module_base* return_value = NULL;
 	boost::mutex::scoped_lock lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( modulename );
@@ -73,7 +82,7 @@ schedule_module_control::load_module( const	std::string& modulename ){
 		void* h = dlopen( load_module_name.c_str(), RTLD_LAZY );
 		if( h == NULL ){
 			std::string msg = "Could not open " + load_module_name + " module: " + dlerror();
-			Logger::putLogError(LOG_CAT_L7VSD_MODULE, 1, msg, __FILE__, __LINE__);
+			Logger::putLogError(loggerCategory, 1, msg, __FILE__, __LINE__);
 			return NULL;
 		}
 
@@ -82,7 +91,7 @@ schedule_module_control::load_module( const	std::string& modulename ){
 		if( create_func == NULL ){
 			std::stringstream buf;
 			buf << "Could not find symbol " << L7VS_MODULE_INITFN << ": " << dlerror();
-			Logger::putLogError(LOG_CAT_L7VSD_MODULE, 2, buf.str(), __FILE__, __LINE__);
+			Logger::putLogError(loggerCategory, 2, buf.str(), __FILE__, __LINE__);
 			dlclose(h);
 			return NULL;
 		}
@@ -91,7 +100,7 @@ schedule_module_control::load_module( const	std::string& modulename ){
 		if( destroy_func == NULL ){
 			std::stringstream buf;
 			buf << "Could not find symbol " << L7VS_MODULE_FINIFN << ": " << dlerror();
-			Logger::putLogError(LOG_CAT_L7VSD_MODULE, 3, buf.str(), __FILE__, __LINE__);
+			Logger::putLogError(loggerCategory, 3, buf.str(), __FILE__, __LINE__);
 			dlclose(h);
 			return NULL;
 		}
@@ -109,7 +118,7 @@ schedule_module_control::load_module( const	std::string& modulename ){
 		}
 		else{
 			std::string msg = "Module initialization failed.";
-			Logger::putLogError(LOG_CAT_L7VSD_MODULE, 4, msg, __FILE__, __LINE__);
+			Logger::putLogError(loggerCategory, 4, msg, __FILE__, __LINE__);
 		}
 	}
 	return return_value;
@@ -124,10 +133,10 @@ schedule_module_control::load_module( const	std::string& modulename ){
  */
 void
 schedule_module_control::unload_module( schedule_module_base* module_ptr ){
-	Logger logger( LOG_CAT_L7VSD_MODULE, 1, "schedule_module_control::unload_module", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 1, "schedule_module_control::unload_module", __FILE__, __LINE__ );
 	if( module_ptr == NULL ){
 		std::string msg = "Arg(module_ptr) is NULL pointer.";
-		Logger::putLogError(LOG_CAT_L7VSD_MODULE, 5, msg, __FILE__, __LINE__);
+		Logger::putLogError(loggerCategory, 5, msg, __FILE__, __LINE__);
 		return;
 	}
 
@@ -135,7 +144,7 @@ schedule_module_control::unload_module( schedule_module_base* module_ptr ){
 	name_module_info_map::iterator it = loadmodule_map.find( module_ptr->get_name() );
 	if( it == loadmodule_map.end() ){
 		std::string msg = "module name is not found.";
-		Logger::putLogError(LOG_CAT_L7VSD_MODULE, 6, msg, __FILE__, __LINE__);
+		Logger::putLogError(loggerCategory, 6, msg, __FILE__, __LINE__);
 		return;
 	}
 	it->second.destroy_func(module_ptr);
