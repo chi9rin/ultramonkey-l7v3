@@ -613,7 +613,18 @@ l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element&
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
-		if( (*itr)->get_element() == in_vselement )	return itr;
+		if( in_vselement.udpmode ){
+			if(	( (*itr)->get_element().udpmode ) &&
+				( (*itr)->get_element().udp_recv_endpoint  == in_vselement.udp_recv_endpoint ) ){
+				return itr;
+			}
+		}
+		else{
+			if(	( !((*itr)->get_element().udpmode) ) &&
+				( (*itr)->get_element().tcp_accept_endpoint == in_vselement.tcp_accept_endpoint ) ){
+				return itr;
+			}
+		}
 	}
 	return vslist.end();
 }
