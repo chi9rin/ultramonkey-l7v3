@@ -11,53 +11,58 @@ using namespace l7vs;
 char hostname[] = "127.0.0.1";
 
 LOG_LEVEL_TAG	stb_getloglevel(){
-	//return LOG_LV_DEBUG;
+    //return LOG_LV_NONE;
+	return LOG_LV_DEBUG;
+}
+
+LOG_LEVEL_TAG	stb_getloglevel_is_none(){
 	return LOG_LV_NONE;
 }
+
 void	stb_putLogFatal( const unsigned int message_id, const std::string& message, const char* file, int line){
-	cout << boost::format( "%s%d%06d %s %s" )
-				% "PM"
-				% LOG_LV_FATAL
-				% message_id
-				% message.c_str()
-				% hostname;
-    cout << endl;
+//	cout << boost::format( "%s%d%06d %s %s" )
+//				% "PM"
+//				% LOG_LV_FATAL
+//				% message_id
+//				% message.c_str()
+//				% hostname;
+//    cout << endl;
 }
 void	stb_putLogError( const unsigned int message_id, const std::string& message, const char* file, int line){
-	cout << boost::format( "%s%d%06d %s %s" )
-				% "PM"
-				% LOG_LV_ERROR
-				% message_id
-				% message.c_str()
-				% hostname;
-    cout << endl;
+//	cout << boost::format( "%s%d%06d %s %s" )
+//				% "PM"
+//				% LOG_LV_ERROR
+//				% message_id
+//				% message.c_str()
+//				% hostname;
+//    cout << endl;
 }
 void	stb_putLogWarn( const unsigned int message_id, const std::string& message, const char* file, int line){
-	cout << boost::format( "%s%d%06d %s %s" )
-				% "PM"
-				% LOG_LV_WARN
-				% message_id
-				% message.c_str()
-				% hostname;
-    cout << endl;
+//	cout << boost::format( "%s%d%06d %s %s" )
+//				% "PM"
+//				% LOG_LV_WARN
+//				% message_id
+//				% message.c_str()
+//				% hostname;
+//    cout << endl;
 }
 void	stb_putLogInfo( const unsigned int message_id, const std::string& message, const char* file, int line){
-	cout << boost::format( "%s%d%06d %s %s" )
-				% "PM"
-				% LOG_LV_INFO
-				% message_id
-				% message.c_str()
-				% hostname;
-    cout << endl;
+//	cout << boost::format( "%s%d%06d %s %s" )
+//				% "PM"
+//				% LOG_LV_INFO
+//				% message_id
+//				% message.c_str()
+//				% hostname;
+//    cout << endl;
 }
 void	stb_putLogDebug( const unsigned int message_id, const std::string& message, const char* file, int line){
-	cout << boost::format( "%s%d%06d %s %s" )
-				% "PM"
-				% LOG_LV_DEBUG
-				% message_id
-				% message.c_str()
-				% hostname;
-    cout << endl;
+//	cout << boost::format( "%s%d%06d %s %s" )
+//				% "PM"
+//				% LOG_LV_DEBUG
+//				% message_id
+//				% message.c_str()
+//				% hostname;
+//    cout << endl;
 }
 
 //new operator function
@@ -253,13 +258,37 @@ class sslid_replication_data_processor_stub : public sslid_replication_data_proc
 		{
 			return temp_list;
 		}
-
 };
 
 //test class
 class protocol_module_sslid_test_class: public protocol_module_sslid {
 public:
+boost::mutex check_mutex;
 
+void set_replication_data_processor(sslid_replication_data_processor* p)
+{
+    this->replication_data_processor = p;
+}
+
+void set_session_data_processor(sslid_session_data_processor* p)
+{
+    this->session_data_processor = p;
+}
+
+void set_reschedule(int i)
+{
+    this->reschedule = i;
+}
+
+sslid_replication_data_processor*& get_replication_data_processor()
+{
+    return this->replication_data_processor;
+}
+
+void set_schedule_tcp(tcp_schedule_func_type p)
+{
+    this->schedule_tcp = p;
+}
 void install_stb_log_func() {
     typedef boost::function<void(const unsigned int, const std::string&,
             const char*, int)> log_func_type;
@@ -1972,6 +2001,7 @@ void handle_session_initialize_test() {
     BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
     BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
     BOOST_CHECK(!itr->second->hello_message_flag);
+
 }
 
 //handle_session_initialize
@@ -1982,8 +2012,8 @@ void handle_session_initialize_test_thread() {
     boost::asio::ip::tcp::endpoint client_endpoint_tcp;
     boost::asio::ip::udp::endpoint client_endpoint_udp;
 
-    cout << "[118]------------------------------------------\n";
-    // unit_test[118] パラメータが正常に入力去れた場合、戻り値にACCEPTを設定する。
+    cout << "[119]------------------------------------------\n";
+    // unit_test[119] パラメータが正常に入力去れた場合、戻り値にACCEPTを設定する。
     EVENT_TAG status =
             this->handle_session_initialize(boost::this_thread::get_id(),
                     down_thread.get_id(), client_endpoint_tcp,
@@ -1993,31 +2023,37 @@ void handle_session_initialize_test_thread() {
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         itr = this->session_thread_data_map.find(boost::this_thread::get_id());
-	BOOST_CHECK(itr != this->session_thread_data_map.end());
+        BOOST_CHECK(itr != this->session_thread_data_map.end());
     }
-    BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_UP_STREAM);
-    BOOST_CHECK_EQUAL(itr->second->pair_thread_id, down_thread.get_id());
-    BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
-    BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
-    BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
-    BOOST_CHECK(!itr->second->hello_message_flag);
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_UP_STREAM);
+        BOOST_CHECK_EQUAL(itr->second->pair_thread_id, down_thread.get_id());
+        BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
+        BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
+        BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
+        BOOST_CHECK(!itr->second->hello_message_flag);
+    }
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         itr = this->session_thread_data_map.find(down_thread.get_id());
-	BOOST_CHECK(itr != this->session_thread_data_map.end());
+        BOOST_CHECK(itr != this->session_thread_data_map.end());
     }
-    BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_DOWN_STREAM);
-    BOOST_CHECK_EQUAL(itr->second->pair_thread_id, boost::this_thread::get_id());
-    BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
-    BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
-    BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
-    BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
-    BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
-    BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
-    BOOST_CHECK(!itr->second->hello_message_flag);
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_DOWN_STREAM);
+        BOOST_CHECK_EQUAL(itr->second->pair_thread_id, boost::this_thread::get_id());
+        BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
+        BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
+        BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
+        BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
+        BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
+        BOOST_CHECK_EQUAL(itr->second->selected_realserver, ep);
+        BOOST_CHECK(!itr->second->hello_message_flag);
+    }
 }
 
 //handle_session_finalize
@@ -2027,8 +2063,8 @@ void handle_session_finalize_test() {
     boost::asio::ip::tcp::endpoint client_endpoint_tcp;
     boost::asio::ip::udp::endpoint client_endpoint_udp;
 
-    cout << "[119]------------------------------------------" << endl;
-    // unit_test[119] パラメータが正常に入力された場合、戻り値にSTOPを設定する。
+    cout << "[120]------------------------------------------" << endl;
+    // unit_test[120] パラメータが正常に入力された場合、戻り値にSTOPを設定する。
     this->handle_session_initialize(boost::this_thread::get_id(),
             down_thread.get_id(), client_endpoint_tcp, client_endpoint_udp);
     status = this->handle_session_finalize(boost::this_thread::get_id(),
@@ -2041,8 +2077,8 @@ void handle_session_finalize_test() {
     itr = this->session_thread_data_map.find(down_thread.get_id());
     BOOST_CHECK(itr == this->session_thread_data_map.end());
 
-    cout << "[120]------------------------------------------" << endl;
-    // unit_test[120] 初期化しなくて、直接該当関数を呼び出す場合、戻り値にSTOPを設定する。
+    cout << "[121]------------------------------------------" << endl;
+    // unit_test[121] 初期化しなくて、直接該当関数を呼び出す場合、戻り値にSTOPを設定する。
     this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_ptr(new session_thread_data_sslid);
     this->session_thread_data_map[down_thread.get_id()] = thread_data_ptr(new session_thread_data_sslid);
     status = this->handle_session_finalize(boost::this_thread::get_id(),
@@ -2061,8 +2097,8 @@ void handle_session_finalize_test_thread() {
     boost::asio::ip::tcp::endpoint client_endpoint_tcp;
     boost::asio::ip::udp::endpoint client_endpoint_udp;
 
-    cout << "[119]------------------------------------------\n";
-    // unit_test[119] パラメータが正常に入力された場合、戻り値にSTOPを設定する。
+    cout << "[122]------------------------------------------\n";
+    // unit_test[122] パラメータが正常に入力された場合、戻り値にSTOPを設定する。
     this->handle_session_initialize(boost::this_thread::get_id(),
             down_thread.get_id(), client_endpoint_tcp, client_endpoint_udp);
     status = this->handle_session_finalize(boost::this_thread::get_id(),
@@ -2072,23 +2108,19 @@ void handle_session_finalize_test_thread() {
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         itr = this->session_thread_data_map.find(boost::this_thread::get_id());
-	BOOST_CHECK(itr == this->session_thread_data_map.end());
+        BOOST_CHECK(itr == this->session_thread_data_map.end());
     }
-    
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         itr = this->session_thread_data_map.find(down_thread.get_id());
-	BOOST_CHECK(itr == this->session_thread_data_map.end());
+        BOOST_CHECK(itr == this->session_thread_data_map.end());
     }
-    
-
-    cout << "[120]------------------------------------------" << endl;
 }
 
 //handle_accept
 void handle_accept_test(){
-    cout << "[121]------------------------------------------" << endl;
-	//unit_test[121] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
+    cout << "[123]------------------------------------------" << endl;
+	//unit_test[123] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
 
 	boost::asio::ip::tcp::endpoint ep;
 	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
@@ -2105,8 +2137,8 @@ void handle_accept_test(){
 }
 
 void handle_accept_test_thread(){
-    cout << "[122]------------------------------------------\n";
-	//unit_test[121] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
+    cout << "[124]------------------------------------------\n";
+	//unit_test[124] handle_accpet()メソッドのテスト,正常系で必ずCLIENT_RECVを返す
 
 	boost::asio::ip::tcp::endpoint ep;
 	session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
@@ -2121,7 +2153,10 @@ void handle_accept_test_thread(){
 	    boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         this->session_thread_data_map.insert(std::pair<const boost::thread::id,thread_data_ptr>(boost::this_thread::get_id(),thread_data));
 	}
-	BOOST_CHECK_EQUAL(this->handle_accept(boost::this_thread::get_id()), protocol_module_base::CLIENT_RECV);
+	{
+	    boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(this->handle_accept(boost::this_thread::get_id()), protocol_module_base::CLIENT_RECV);
+	}
 }
 
 //handle_client_recv
@@ -2134,8 +2169,8 @@ void handle_client_recv_test() {
     int mem_cmp_result;
 	int mem_cmp_length;
 
-    cout << "[122]------------------------------------------" << endl;
-    // unit_test[122] 終了フラグがONの場合、戻り値にCLIENT_RECVを設定する。
+    cout << "[125]------------------------------------------" << endl;
+    // unit_test[125] 終了フラグがONの場合、戻り値にCLIENT_RECVを設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_ON;
@@ -2147,9 +2182,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[123]------------------------------------------" << endl;
-    // unit_test[123] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
-    // unit_test[123] 且つ受信データサイズ > 0、且つdata_begain_offset = 0の場合、戻り値をREALSERVER_SELECTに設定する。
+    cout << "[126]------------------------------------------" << endl;
+    // unit_test[126] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
+    // unit_test[126] 且つ受信データサイズ > 0、且つdata_begain_offset = 0の場合、戻り値をREALSERVER_SELECTに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2173,9 +2208,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[124]------------------------------------------" << endl;
-    // unit_test[124] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
-    // unit_test[124] 且つ受信データサイズ > 0、且つdata_begain_offset > 0の場合、戻り値をREALSERVER_SELECTに設定する。
+    cout << "[127]------------------------------------------" << endl;
+    // unit_test[127] 終了フラグがOFFで、且つ データサイズが0で、且つ 新SSLレコードでなくて、
+    // unit_test[127] 且つ受信データサイズ > 0、且つdata_begain_offset > 0の場合、戻り値をREALSERVER_SELECTに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2199,9 +2234,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[125]------------------------------------------" << endl;
-    // unit_test[125] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[125] 且つdata_begain_offset が 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
+    cout << "[128]------------------------------------------" << endl;
+    // unit_test[128] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[128] 且つdata_begain_offset が 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2226,9 +2261,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[126]------------------------------------------" << endl;
-    // unit_test[126] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[126] 且つdata_begain_offset > 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
+    cout << "[129]------------------------------------------" << endl;
+    // unit_test[129] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[129] 且つdata_begain_offset > 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2253,9 +2288,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[127]------------------------------------------" << endl;
-    // unit_test[127] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[127] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
+    cout << "[130]------------------------------------------" << endl;
+    // unit_test[130] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[130] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2276,9 +2311,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[128]------------------------------------------" << endl;
-    // unit_test[128] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[128] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
+    cout << "[131]------------------------------------------" << endl;
+    // unit_test[131] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[131] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合、戻り値をCLIENT_RECVに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2299,9 +2334,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[129]------------------------------------------" << endl;
-    // unit_test[129] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[129] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
+    cout << "[132]------------------------------------------" << endl;
+    // unit_test[132] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[132] 且つdata_begain_offset = 0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2338,9 +2373,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[130]------------------------------------------" << endl;
-    // unit_test[130] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[130] 且つ、data_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値にREALSERVER_SELECTを設定する。
+    cout << "[133]------------------------------------------" << endl;
+    // unit_test[133] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[133] 且つ、data_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値にREALSERVER_SELECTを設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2377,9 +2412,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[131]------------------------------------------" << endl;
-    // unit_test[131] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[131] 且つ data_begain_offset = 0で、且つ且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
+    cout << "[134]------------------------------------------" << endl;
+    // unit_test[134] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[134] 且つ data_begain_offset = 0で、且つ且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値をREALSERVER_SELECTに設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2407,9 +2442,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[132]------------------------------------------" << endl;
-    // unit_test[132] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-    // unit_test[132] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値がREALSERVER_SELECTで設定する。
+    cout << "[135]------------------------------------------" << endl;
+    // unit_test[135] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
+    // unit_test[135] 且つdata_begain_offset > 0で、且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合、戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2437,9 +2472,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[133]------------------------------------------" << endl;
-    // unit_test[133] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset > 0の場合
-    // unit_test[133] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[136]------------------------------------------" << endl;
+    // unit_test[136] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset > 0の場合
+    // unit_test[136] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2468,9 +2503,9 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[134]------------------------------------------" << endl;
-    // unit_test[134] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset = 0の場合
-    // unit_test[134] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[137]------------------------------------------" << endl;
+    // unit_test[137] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードでなくて、且つdata_begain_offset = 0の場合
+    // unit_test[137] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2499,10 +2534,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[135]------------------------------------------" << endl;
-    // unit_test[135] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで,且つdata_begain_offset > 0
-    // unit_test[135] 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
-    // unit_test[135] 戻り値がFINALIZEで設定する。
+    cout << "[138]------------------------------------------" << endl;
+    // unit_test[138] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで,且つdata_begain_offset > 0
+    // unit_test[138] 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
+    // unit_test[138] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2532,10 +2567,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[136]------------------------------------------" << endl;
-    // unit_test[136] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
-    // unit_test[136] 且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合
-    // unit_test[136] 戻り値がFINALIZEで設定する。
+    cout << "[139]------------------------------------------" << endl;
+    // unit_test[139] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[139] 且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合
+    // unit_test[139] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2565,10 +2600,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[137]------------------------------------------" << endl;
-    // unit_test[137] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
-    // unit_test[137] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
-    // unit_test[137] 戻り値が CLIENT_RECVで設定する。
+    cout << "[140]------------------------------------------" << endl;
+    // unit_test[140] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[140] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
+    // unit_test[140] 戻り値が CLIENT_RECVで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2597,10 +2632,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[138]------------------------------------------" << endl;
-    // unit_test[138] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
-    // unit_test[138] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
-    // unit_test[138] 戻り値が CLIENT_RECVで設定する。
+    cout << "[141]------------------------------------------" << endl;
+    // unit_test[141] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[141] 且つcheck_ssl_record_sendable()の戻り値が1 (送信不可)の場合
+    // unit_test[141] 戻り値が CLIENT_RECVで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2629,10 +2664,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[139]------------------------------------------" << endl;
-    // unit_test[139] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
-    // unit_test[139] 且つcheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
-    // unit_test[139] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[142]------------------------------------------" << endl;
+    // unit_test[142] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[142] 且つcheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
+    // unit_test[142] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2674,10 +2709,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[140]------------------------------------------" << endl;
-    // unit_test[140] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
-    // unit_test[140] 且つheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
-    // unit_test[140] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[143]------------------------------------------" << endl;
+    // unit_test[143] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[143] 且つheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
+    // unit_test[143] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2719,10 +2754,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[141]------------------------------------------" << endl;
-    // unit_test[141] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
-    // unit_test[141] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
-    // unit_test[141] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[144]------------------------------------------" << endl;
+    // unit_test[144] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[144] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
+    // unit_test[144] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2758,10 +2793,10 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[142]------------------------------------------" << endl;
-    // unit_test[142] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
-    // unit_test[142] 且つcheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
-    // unit_test[142] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[145]------------------------------------------" << endl;
+    // unit_test[145] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[145] 且つcheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
+    // unit_test[145] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2797,24 +2832,24 @@ void handle_client_recv_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[143]------------------------------------------" << endl;
-    // unit_test[143] 受信データサイズ > 受信バッファサイズの場合
-    // unit_test[143] 戻り値がFINALIZEで設定する。
+    cout << "[146]------------------------------------------" << endl;
+    // unit_test[146] 受信データサイズ > 受信バッファサイズの場合
+    // unit_test[146] 戻り値がFINALIZEで設定する。
     recvlen = recvbuffer.size() + 1;
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    cout << "[144]------------------------------------------" << endl;
-    // unit_test[144] スレッドIDがmapに存在しない場合
-    // unit_test[144] 戻り値がFINALIZEで設定する。
+    cout << "[147]------------------------------------------" << endl;
+    // unit_test[147] スレッドIDがmapに存在しない場合
+    // unit_test[147] 戻り値がFINALIZEで設定する。
     status = this->handle_client_recv(boost::this_thread::get_id(),
             recvbuffer, recvlen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    cout << "[145]------------------------------------------" << endl;
-    // unit_test[145] 終了フラグがOFFで,且つ data_size+recvlen > MAX_SSLID_BUFFER_SIZEの場合
-    // unit_test[145] 戻り値がFINALIZEで設定する。
+    cout << "[148]------------------------------------------" << endl;
+    // unit_test[148] 終了フラグがOFFで,且つ data_size+recvlen > MAX_SSLID_BUFFER_SIZEの場合
+    // unit_test[148] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2843,10 +2878,10 @@ void handle_client_recv_test_thread() {
     int mem_cmp_result;
 	int mem_cmp_length;
 
-    cout << "[141]------------------------------------------\n";
-    // unit_test[141] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
-    // unit_test[141] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
-    // unit_test[141] 戻り値がREALSERVER_SELECTで設定する。
+    cout << "[149]------------------------------------------\n";
+    // unit_test[149] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset > 0
+    // unit_test[149] 且つheck_ssl_record_sendable()の戻り値が０(送信可能)の場合
+    // unit_test[149] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2873,12 +2908,15 @@ void handle_client_recv_test_thread() {
         mem_cmp_length = up_thread_data->data_size + recvlen;
         status = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
         mem_cmp_result = memcmp(this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
-        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 9u);
+            BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+            BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+        }
         delete[] mem_cmp_buffer;
     }
 }
@@ -2910,8 +2948,8 @@ void handle_realserver_select_tcp_test() {
     boost::function<void(const unsigned int, const std::string&,
             const char*, int)> inputLogDebug = stb_putLogDebug;
 
-    cout << "[146]------------------------------------------" << endl;
-    // unit_test[146] realserver接続回数が最大回数の場合、戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[150]------------------------------------------" << endl;
+    // unit_test[150] realserver接続回数が最大回数の場合、戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count
@@ -2925,8 +2963,8 @@ void handle_realserver_select_tcp_test() {
          this->session_thread_data_map.clear();
     }
 
-    cout << "[147]------------------------------------------" << endl;
-    // unit_test[147] realserver接続回数が最大回数を越える場合、戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[151]------------------------------------------" << endl;
+    // unit_test[151] realserver接続回数が最大回数を越える場合、戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count
@@ -2940,9 +2978,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[148]------------------------------------------" << endl;
-    // unit_test[148] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが決定の場合
-    // unit_test[148] 戻り値が REALSERVER_CONNECTで設定する。
+    cout << "[152]------------------------------------------" << endl;
+    // unit_test[152] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが決定の場合
+    // unit_test[152] 戻り値が REALSERVER_CONNECTで設定する。
     {
         this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -2958,9 +2996,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[149]------------------------------------------" << endl;
-    // unit_test[149] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが未決定の場合
-    // unit_test[149] 戻り値が CLIENT_DISCONNECTで設定する。
+    cout << "[153]------------------------------------------" << endl;
+    // unit_test[153] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが未決定の場合
+    // unit_test[153] 戻り値が CLIENT_DISCONNECTで設定する。
     {
         this->schedule_tcp = schedule_tcp_func2;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -2976,9 +3014,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[150]------------------------------------------" << endl;
-    // unit_test[150] realserver接続回数が最大回数に未満で, 且つreschedule が 0 (OFF)の場合
-    // unit_test[150] 戻り値が CLIENT_DISCONNECTで設定する。
+    cout << "[154]------------------------------------------" << endl;
+    // unit_test[154] realserver接続回数が最大回数に未満で, 且つreschedule が 0 (OFF)の場合
+    // unit_test[154] 戻り値が CLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count
@@ -2993,9 +3031,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[151]------------------------------------------" << endl;
-    // unit_test[151] realserverの接続失敗回数が0, 且つselected_realserver が NULLでない場合
-    // unit_test[151] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[155]------------------------------------------" << endl;
+    // unit_test[155] realserverの接続失敗回数が0, 且つselected_realserver が NULLでない場合
+    // unit_test[155] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = 0;
@@ -3008,9 +3046,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[152]------------------------------------------" << endl;
-    // unit_test[152] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがfalseの場合
-    // unit_test[152] 戻り値がFINALIZEで設定する。
+    cout << "[156]------------------------------------------" << endl;
+    // unit_test[156] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがfalseの場合
+    // unit_test[156] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = 0;
@@ -3026,10 +3064,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[153]------------------------------------------" << endl;
-    // unit_test[153] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがtrueで
-    // unit_test[153] 且つendpointが決定の場合
-    // unit_test[153] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[157]------------------------------------------" << endl;
+    // unit_test[157] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがtrueで
+    // unit_test[157] 且つendpointが決定の場合
+    // unit_test[157] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = 0;
@@ -3048,10 +3086,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[154]------------------------------------------" << endl;
-    // unit_test[154] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
-    // unit_test[154] 且つセッションIDがなくで、且つendpointが未決定の場合
-    // unit_test[154] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[158]------------------------------------------" << endl;
+    // unit_test[158] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[158] 且つセッションIDがなくで、且つendpointが未決定の場合
+    // unit_test[158] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = 0;
@@ -3071,10 +3109,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[155]------------------------------------------" << endl;
-    // unit_test[155] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
-    // unit_test[155] 且つセッションIDがあるで, 且つendpointが決定の場合
-    // unit_test[155] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[159]------------------------------------------" << endl;
+    // unit_test[159] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[159] 且つセッションIDがあるで, 且つendpointが決定の場合
+    // unit_test[159] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = 0;
@@ -3109,10 +3147,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[156]------------------------------------------" << endl;
-    // unit_test[156] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
-    // unit_test[156] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointが決定の場合
-    // unit_test[156] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[160]------------------------------------------" << endl;
+    // unit_test[160] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[160] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointが決定の場合
+    // unit_test[160] 戻り値がREALSERVER_CONNECTで設定する。
     {
         this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3141,10 +3179,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[157]------------------------------------------" << endl;
-    // unit_test[157] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
-    // unit_test[157] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointも未決定の場合
-    // unit_test[157] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[161]------------------------------------------" << endl;
+    // unit_test[161] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+    // unit_test[161] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointも未決定の場合
+    // unit_test[161] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         this->schedule_tcp = schedule_tcp_func2;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3173,10 +3211,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[158]------------------------------------------" << endl;
-    // unit_test[158] realserver接続失敗回数が0で, 且つselected_realserverがNULLで, 且つhello_message_flagがtrueで
-    // unit_test[158] 且つセッションIDがあり, endpointが未決定で、且つ no rescheduleの場合
-    // unit_test[158] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[162]------------------------------------------" << endl;
+    // unit_test[162] realserver接続失敗回数が0で, 且つselected_realserverがNULLで, 且つhello_message_flagがtrueで
+    // unit_test[162] 且つセッションIDがあり, endpointが未決定で、且つ no rescheduleの場合
+    // unit_test[162] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = 0;
@@ -3203,9 +3241,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[159]------------------------------------------" << endl;
-    // unit_test[159] realserver接続失敗回数が0で, 且つselected_realserver が NULLないの場合
-    // unit_test[159] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[163]------------------------------------------" << endl;
+    // unit_test[163] realserver接続失敗回数が0で, 且つselected_realserver が NULLないの場合
+    // unit_test[163] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
@@ -3218,9 +3256,9 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[160]------------------------------------------" << endl;
-    // unit_test[160] realserver接続失敗回数が0で, 且つselected_realserver が　NULLで, 且つhello_message_flag が falseの場合
-    // unit_test[160] 戻り値がFINALIZEで設定する。
+    cout << "[164]------------------------------------------" << endl;
+    // unit_test[164] realserver接続失敗回数が0で, 且つselected_realserver が　NULLで, 且つhello_message_flag が falseの場合
+    // unit_test[164] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
@@ -3236,10 +3274,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[161]------------------------------------------" << endl;
-    // unit_test[161] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[161] 且つセッションIDがなくで、且つendpointが決定の場合
-    // unit_test[161] 戻り値がREALSERVER_CONNECT設定する。
+    cout << "[165]------------------------------------------" << endl;
+    // unit_test[165] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[165] 且つセッションIDがなくで、且つendpointが決定の場合
+    // unit_test[165] 戻り値がREALSERVER_CONNECT設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
@@ -3258,10 +3296,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[162]------------------------------------------" << endl;
-    // unit_test[162] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[162] 且つセッションIDがなくで、且つendpointが未決定の場合
-    // unit_test[162] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[166]------------------------------------------" << endl;
+    // unit_test[166] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[166] 且つセッションIDがなくで、且つendpointが未決定の場合
+    // unit_test[166] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
@@ -3281,10 +3319,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[163]------------------------------------------" << endl;
-    // unit_test[163] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[163] 且つセッションIDがあるで, 且つendpointが決定の場合
-    // unit_test[163] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[167]------------------------------------------" << endl;
+    // unit_test[167] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[167] 且つセッションIDがあるで, 且つendpointが決定の場合
+    // unit_test[167] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
@@ -3319,10 +3357,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[164]------------------------------------------" << endl;
-    // unit_test[164] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[164] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
-    // unit_test[164] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[168]------------------------------------------" << endl;
+    // unit_test[168] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[168] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
+    // unit_test[168] 戻り値がREALSERVER_CONNECTで設定する。
     {
         this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3351,10 +3389,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[165]------------------------------------------" << endl;
-    // unit_test[165] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[165] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointも未決定の場合
-    // unit_test[165] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[169]------------------------------------------" << endl;
+    // unit_test[169] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[169] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointも未決定の場合
+    // unit_test[169] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         this->schedule_tcp = schedule_tcp_func2;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3383,10 +3421,10 @@ void handle_realserver_select_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[166]------------------------------------------" << endl;
-    // unit_test[166] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[166] セッションIDがあり、endpointが未決定でrescheduleしない場合
-    // unit_test[166] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[170]------------------------------------------" << endl;
+    // unit_test[170] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[170] セッションIDがあり、endpointが未決定でrescheduleしない場合
+    // unit_test[170] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
@@ -3424,35 +3462,36 @@ void handle_realserver_select_tcp_test_thread() {
     boost::asio::ip::tcp::endpoint
             ep1(boost::asio::ip::address::from_string("192.168.120.249"),
                     12345);
-    int maxlist = 1;
-    char* sslid_replication_area_begain = new char[10];
-    int sslid_replication_area_size = 0;
+//    int maxlist = 1;
+//    char* sslid_replication_area_begain = new char[10];
+//    int sslid_replication_area_size = 0;
     boost::asio::ip::tcp::endpoint ep2;
-    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
-    std::string session_id;
-    boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
-    boost::function<void(const unsigned int, const std::string&,
-            const char*, int)> inputLogFatal = stb_putLogFatal;
-    boost::function<void(const unsigned int, const std::string&,
-            const char*, int)> inputLogError = stb_putLogError;
-    boost::function<void(const unsigned int, const std::string&,
-            const char*, int)> inputLogWarn = stb_putLogWarn;
-    boost::function<void(const unsigned int, const std::string&,
-            const char*, int)> inputLogInfo = stb_putLogInfo;
-    boost::function<void(const unsigned int, const std::string&,
-            const char*, int)> inputLogDebug = stb_putLogDebug;
+//    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+//    std::string session_id;
+//    boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
+//    boost::function<void(const unsigned int, const std::string&,
+//            const char*, int)> inputLogFatal = stb_putLogFatal;
+//    boost::function<void(const unsigned int, const std::string&,
+//            const char*, int)> inputLogError = stb_putLogError;
+//    boost::function<void(const unsigned int, const std::string&,
+//            const char*, int)> inputLogWarn = stb_putLogWarn;
+//    boost::function<void(const unsigned int, const std::string&,
+//            const char*, int)> inputLogInfo = stb_putLogInfo;
+//    boost::function<void(const unsigned int, const std::string&,
+//            const char*, int)> inputLogDebug = stb_putLogDebug;
 
-    cout << "[164]------------------------------------------\n";
-    // unit_test[164] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
-    // unit_test[164] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
-    // unit_test[164] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[171]------------------------------------------\n";
+    // unit_test[171] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+    // unit_test[171] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
+    // unit_test[171] 戻り値がREALSERVER_CONNECTで設定する。
     {
-        this->schedule_tcp = schedule_tcp_func1;
+        //this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
+        up_thread_data->data_size = 76u;
         up_thread_data->data_begain_offset = 0u;
         for (int i = 0; i < 32; i++) {
             up_thread_data->data_buffer[44 + i] = 0x01;
@@ -3460,25 +3499,28 @@ void handle_realserver_select_tcp_test_thread() {
         {
             boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
             this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
-            this->reschedule = 1;
-            this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
-                    sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->session_data_processor = new sslid_session_data_processor_stub(
-                    1024, 3600, this->replication_data_processor, ingetloglevel,
-                    inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                    inputLogDebug);
+//            this->reschedule = 1;
+//            this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+//                    sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->session_data_processor = new sslid_session_data_processor_stub(
+//                    1024, 3600, this->replication_data_processor, ingetloglevel,
+//                    inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                    inputLogDebug);
         }
         status = this->handle_realserver_select(boost::this_thread::get_id(),
                 rs_endpoint);
-        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        }
     }
 }
 
 //handle_realserver_select(udp)
 void handle_realserver_select_udp_test(){
-    cout << "[167]------------------------------------------" << endl;
-    // unit_test[167] 戻り値が STOPで設定する。
+    cout << "[172]------------------------------------------" << endl;
+    // unit_test[172] 戻り値が STOPで設定する。
     EVENT_TAG status;
     boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
     size_t datalen;
@@ -3498,9 +3540,9 @@ void handle_realserver_connect_test() {
 	int mem_cmp_length;
 	int mem_cmp_result;
 
-    cout << "[168]------------------------------------------" << endl;
-    // unit_test[168] current_record_rest_size>data_sizeで、且つdata_size<送信バッファサイズの場合
-    // unit_test[168] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[173]------------------------------------------" << endl;
+    // unit_test[173] current_record_rest_size>data_sizeで、且つdata_size<送信バッファサイズの場合
+    // unit_test[173] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3530,9 +3572,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[169]------------------------------------------" << endl;
-    // unit_test[169] current_record_rest_size>data_sizeで, 且つdata_sizeが送信バッファサイズの場合
-    // unit_test[169] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[174]------------------------------------------" << endl;
+    // unit_test[174] current_record_rest_size>data_sizeで, 且つdata_sizeが送信バッファサイズの場合
+    // unit_test[174] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3562,9 +3604,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[170]------------------------------------------" << endl;
-    // unit_test[170] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
-    // unit_test[170] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[175]------------------------------------------" << endl;
+    // unit_test[175] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
+    // unit_test[175] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3594,9 +3636,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[171]------------------------------------------" << endl;
-    // unit_test[171] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
-    // unit_test[171] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[176]------------------------------------------" << endl;
+    // unit_test[176] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
+    // unit_test[176] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3626,9 +3668,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[172]------------------------------------------" << endl;
-    // unit_test[172] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
-    // unit_test[172] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[177]------------------------------------------" << endl;
+    // unit_test[177] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[177] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3658,9 +3700,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[173]------------------------------------------" << endl;
-    // unit_test[173] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
-    // unit_test[173] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[178]------------------------------------------" << endl;
+    // unit_test[178] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[178] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3690,9 +3732,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[174]------------------------------------------" << endl;
-    // unit_test[174] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
-    // unit_test[174] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[179]------------------------------------------" << endl;
+    // unit_test[179] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
+    // unit_test[179] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3722,9 +3764,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[175]------------------------------------------" << endl;
-    // unit_test[175] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
-    // unit_test[175] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[180]------------------------------------------" << endl;
+    // unit_test[180] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
+    // unit_test[180] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3754,9 +3796,9 @@ void handle_realserver_connect_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[176]------------------------------------------" << endl;
-    // unit_test[176] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
-    // unit_test[176] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[181]------------------------------------------" << endl;
+    // unit_test[181] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
+    // unit_test[181] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3798,9 +3840,9 @@ void handle_realserver_connect_test_thread() {
 	int mem_cmp_length;
 	int mem_cmp_result;
 
-    cout << "[175]------------------------------------------\n";
-    // unit_test[175] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
-    // unit_test[175] 戻り値がREALSERVER_SENDで設定する。
+    cout << "[182]------------------------------------------\n";
+    // unit_test[182] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
+    // unit_test[182] 戻り値がREALSERVER_SENDで設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -3821,13 +3863,16 @@ void handle_realserver_connect_test_thread() {
         status = this->handle_realserver_connect(boost::this_thread::get_id(),
                 sendbuffer, datalen);
         mem_cmp_result = memcmp(sendbuffer.c_array(), mem_cmp_buffer, mem_cmp_length);
-        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-        BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
-        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 5u+static_cast<size_t>(MAX_BUFFER_SIZE));
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+            BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
+            BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        }
     }
 }
 
@@ -3847,34 +3892,34 @@ void handle_realserver_connection_fail_test(){
 	iter=this->session_thread_data_map.find(boost::this_thread::get_id());
 	thread_data_ptr data=iter->second;
 
-    cout << "[177]------------------------------------------" << endl;
-	//unit_test[177] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-	//unit_test[177] test data:no rescheduleモード、初めて失敗するの場合
+    cout << "[183]------------------------------------------" << endl;
+	//unit_test[183] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
+	//unit_test[183] test data:no rescheduleモード、初めて失敗するの場合
 	this->reschedule=0;
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
 
-    cout << "[178]------------------------------------------" << endl;
-	//unit_test[178] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
-	//unit_test[178] test data:rescheduleモード、初めて失敗するの場合
+    cout << "[184]------------------------------------------" << endl;
+	//unit_test[184] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
+	//unit_test[184] test data:rescheduleモード、初めて失敗するの場合
 	this->reschedule=1;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,1);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
 
-    cout << "[179]------------------------------------------" << endl;
-	//unit_test[179] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-	//unit_test[179] test data:rescheduleモード、３目失敗するの場合
+    cout << "[185]------------------------------------------" << endl;
+	//unit_test[185] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+	//unit_test[185] test data:rescheduleモード、３目失敗するの場合
 	this->reschedule=1;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
 	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
 
-    cout << "[180]------------------------------------------" << endl;
-	//unit_test[180] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
-	//unit_test[180] test data:no rescheduleモード、４目失敗するの場合
+    cout << "[186]------------------------------------------" << endl;
+	//unit_test[186] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
+	//unit_test[186] test data:no rescheduleモード、４目失敗するの場合
 	this->reschedule=0;
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
@@ -3903,14 +3948,17 @@ void handle_realserver_connection_fail_test_thread_reschedule(){
 		this->reschedule=1;
 	}
 
-    cout << "[179]------------------------------------------\n";
-	//unit_test[179] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-	//unit_test[179] test data:rescheduleモード、３目失敗するの場合
+    cout << "[187]------------------------------------------\n";
+	//unit_test[187] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+	//unit_test[187] test data:rescheduleモード、３目失敗するの場合
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-	BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
-	BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
+	{
+	    boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
+        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
+	}
 }
 
 void handle_realserver_connection_fail_test_thread_noreschedule(){
@@ -3933,12 +3981,15 @@ void handle_realserver_connection_fail_test_thread_noreschedule(){
 		this->reschedule=0;
 	}
 
-    cout << "[177]------------------------------------------\n";
-	//unit_test[177] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-	//unit_test[177] test data:no rescheduleモード、初めて失敗するの場合
+    cout << "[188]------------------------------------------\n";
+	//unit_test[188] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
+	//unit_test[188] test data:no rescheduleモード、初めて失敗するの場合
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-	BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
-	BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
+	{
+	    boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
+        BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
+	}
 }
 
 //handle_realserver_send
@@ -3946,9 +3997,9 @@ void handle_realserver_send_test() {
 
     EVENT_TAG status;
 
-    cout << "[181]------------------------------------------" << endl;
-    // unit_test[181] データサイズが0で、且つdata_begain_offsetが0の場合
-    // unit_test[181] 戻り値がCLIENT_RECVで設定する。
+    cout << "[189]------------------------------------------" << endl;
+    // unit_test[189] データサイズが0で、且つdata_begain_offsetが0の場合
+    // unit_test[189] 戻り値がCLIENT_RECVで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 0u;
@@ -3960,9 +4011,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[182]------------------------------------------" << endl;
-    // unit_test[182] データサイズが0で,且つdata_begain_offset >0の場合
-    // unit_test[182] 戻り値がCLIENT_RECVで設定する。
+    cout << "[190]------------------------------------------" << endl;
+    // unit_test[190] データサイズが0で,且つdata_begain_offset >0の場合
+    // unit_test[190] 戻り値がCLIENT_RECVで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 0u;
@@ -3974,9 +4025,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[183]------------------------------------------" << endl;
-    // unit_test[183] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset=0の場合
-    // unit_test[183] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[191]------------------------------------------" << endl;
+    // unit_test[191] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset=0の場合
+    // unit_test[191] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -3989,9 +4040,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[184]------------------------------------------" << endl;
-    // unit_test[184] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset>0の場合
-    // unit_test[184] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[192]------------------------------------------" << endl;
+    // unit_test[192] データサイズ > 0で, 且つcurrent_record_rest_size > 0で,且つdata_begain_offset>0の場合
+    // unit_test[192] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4004,9 +4055,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[185]------------------------------------------" << endl;
-    // unit_test[185] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
-    // unit_test[185] 戻り値がFINALIZEで設定する。
+    cout << "[193]------------------------------------------" << endl;
+    // unit_test[193] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
+    // unit_test[193] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4022,9 +4073,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[186]------------------------------------------" << endl;
-    // unit_test[186] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
-    // unit_test[186] 戻り値がFINALIZEで設定する。
+    cout << "[194]------------------------------------------" << endl;
+    // unit_test[194] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
+    // unit_test[194] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4040,9 +4091,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[187]------------------------------------------" << endl;
-    // unit_test[187] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0の場合
-    // unit_test[187] 戻り値がCLIENT_RECVで設定する。
+    cout << "[195]------------------------------------------" << endl;
+    // unit_test[195] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0の場合
+    // unit_test[195] 戻り値がCLIENT_RECVで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 1u;
@@ -4055,9 +4106,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[188]------------------------------------------" << endl;
-    // unit_test[188] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0の場合
-    // unit_test[188] 戻り値がCLIENT_RECVで設定する。
+    cout << "[196]------------------------------------------" << endl;
+    // unit_test[196] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0の場合
+    // unit_test[196] 戻り値がCLIENT_RECVで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 1u;
@@ -4070,9 +4121,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[189]------------------------------------------" << endl;
-    // unit_test[189] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が０(送信可能)で,且つdata_begain_offset が0の場合
-    // unit_test[189] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[197]------------------------------------------" << endl;
+    // unit_test[197] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が０(送信可能)で,且つdata_begain_offset が0の場合
+    // unit_test[197] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 76u;
@@ -4096,9 +4147,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[190]------------------------------------------" << endl;
-    // unit_test[190] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
-    // unit_test[190] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[198]------------------------------------------" << endl;
+    // unit_test[198] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
+    // unit_test[198] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 76u;
@@ -4122,9 +4173,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[191]------------------------------------------" << endl;
-    // unit_test[191] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset が0の場合
-    // unit_test[191] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[199]------------------------------------------" << endl;
+    // unit_test[199] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset が0の場合
+    // unit_test[199] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4145,9 +4196,9 @@ void handle_realserver_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[192]------------------------------------------" << endl;
-    // unit_test[192] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
-    // unit_test[192] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[200]------------------------------------------" << endl;
+    // unit_test[200] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
+    // unit_test[200] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4175,9 +4226,9 @@ void handle_realserver_send_test_thread() {
 
     EVENT_TAG status;
 
-    cout << "[190]------------------------------------------\n";
-    // unit_test[190] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
-    // unit_test[190] 戻り値がREALSERVER_CONNECTで設定する。
+    cout << "[201]------------------------------------------\n";
+    // unit_test[201] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_send()の戻り値が0(送信可能)で,且つdata_begain_offset > 0の場合
+    // unit_test[201] 戻り値がREALSERVER_CONNECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 76u;
@@ -4197,9 +4248,12 @@ void handle_realserver_send_test_thread() {
             this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
         }
         status = this->handle_realserver_send(boost::this_thread::get_id());
-        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+            BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+        }
     }
 }
 
@@ -4214,9 +4268,9 @@ void handle_realserver_recv_tcp_test() {
 	int mem_cmp_length;
 	char* mem_cmp_buffer;
 
-    cout << "[193]------------------------------------------" << endl;
-    // unit_test[193] データサイズ が 0で, 且つcurrent_record_rest_size > 0の場合
-    // unit_test[193] 戻り値がCLIENT_CONNECTION_CHECK設定する。
+    cout << "[202]------------------------------------------" << endl;
+    // unit_test[202] データサイズ が 0で, 且つcurrent_record_rest_size > 0の場合
+    // unit_test[202] 戻り値がCLIENT_CONNECTION_CHECK設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4229,9 +4283,9 @@ void handle_realserver_recv_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[194]------------------------------------------" << endl;
-    // unit_test[194] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
-    // unit_test[194] 戻り値がFINALIZEで設定する。
+    cout << "[203]------------------------------------------" << endl;
+    // unit_test[203] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
+    // unit_test[203] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4258,9 +4312,9 @@ void handle_realserver_recv_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[195]------------------------------------------" << endl;
-    // unit_test[195] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合
-    // unit_test[195] 戻り値がREALSERVER_RECVで設定する。
+    cout << "[204]------------------------------------------" << endl;
+    // unit_test[204] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が1(送信不可)の場合
+    // unit_test[204] 戻り値がREALSERVER_RECVで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4285,9 +4339,9 @@ void handle_realserver_recv_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[196]------------------------------------------" << endl;
-    // unit_test[196] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
-    // unit_test[196] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[205]------------------------------------------" << endl;
+    // unit_test[205] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
+    // unit_test[205] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4325,9 +4379,9 @@ void handle_realserver_recv_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[197]------------------------------------------" << endl;
-    // unit_test[197] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値0(送信可能)の場合
-    // unit_test[197] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[206]------------------------------------------" << endl;
+    // unit_test[206] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値0(送信可能)の場合
+    // unit_test[206] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4359,9 +4413,9 @@ void handle_realserver_recv_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[198]------------------------------------------" << endl;
-    // unit_test[198] データサイズ > 0で, 且つcurrent_record_rest_size > 0で, 且つdata_begain_offset>0の場合
-    // unit_test[198] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[207]------------------------------------------" << endl;
+    // unit_test[207] データサイズ > 0で, 且つcurrent_record_rest_size > 0で, 且つdata_begain_offset>0の場合
+    // unit_test[207] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -4388,9 +4442,9 @@ void handle_realserver_recv_tcp_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[199]------------------------------------------" << endl;
-    // unit_test[199] データサイズ + 受信データサイズ > MAX_SSLID_BUFFER_SIZEの場合
-    // unit_test[199] 戻り値がFINALIZEで設定する。
+    cout << "[208]------------------------------------------" << endl;
+    // unit_test[208] データサイズ + 受信データサイズ > MAX_SSLID_BUFFER_SIZEの場合
+    // unit_test[208] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 76u + 1u;
@@ -4415,9 +4469,9 @@ void handle_realserver_recv_tcp_test_thread() {
 	int mem_cmp_length;
 	char* mem_cmp_buffer;
 
-    cout << "[196]------------------------------------------\n";
-    // unit_test[196] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
-    // unit_test[196] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[209]------------------------------------------\n";
+    // unit_test[209] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が0(送信可能)の場合
+    // unit_test[209] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4450,17 +4504,20 @@ void handle_realserver_recv_tcp_test_thread() {
         status = this->handle_realserver_recv(boost::this_thread::get_id(),
                 rs_endpoint, recvbuffer, recvlen);
         mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
-        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+            BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+            BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        }
     }
 }
 
 //handle_realserver_recv(udp)
 void handle_realserver_recv_udp_test(){
-    cout << "[200]------------------------------------------" << endl;
-    // unit_test[200] 戻り値が STOPで設定する。
+    cout << "[210]------------------------------------------" << endl;
+    // unit_test[210] 戻り値が STOPで設定する。
     boost::array<char, MAX_BUFFER_SIZE> recvbuffer;
     size_t recvlen;
     boost::asio::ip::udp::endpoint rs_endpoint_udp;
@@ -4490,16 +4547,16 @@ void handle_client_connection_check_test() {
     logger_func_type inputLogDebug = stb_putLogDebug;
 	boost::asio::ip::tcp::endpoint rs_endpoint(boost::asio::ip::address::from_string("192.168.120.249"), 12345);
 
-    cout << "[201]------------------------------------------" << endl;
-    // unit_test[201] mapに下りスレッドIDが存在しない場合
-    // unit_test[201] 戻り値がFINALIZEで設定する。
+    cout << "[211]------------------------------------------" << endl;
+    // unit_test[211] mapに下りスレッドIDが存在しない場合
+    // unit_test[211] 戻り値がFINALIZEで設定する。
     status = this->handle_client_connection_check(boost::this_thread::get_id(),
             sendbuffer, datalen);
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    cout << "[202]------------------------------------------" << endl;
-    // unit_test[202] current_record_rest_size>0で,且つdata_begain_offset が 0の場合
-    // unit_test[202] 戻り値がCLIENT_SENDで設定する。
+    cout << "[212]------------------------------------------" << endl;
+    // unit_test[212] current_record_rest_size>0で,且つdata_begain_offset が 0の場合
+    // unit_test[212] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 10u;
@@ -4515,9 +4572,9 @@ void handle_client_connection_check_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[203]------------------------------------------" << endl;
-    // unit_test[203] current_record_rest_size>0で,且つdata_begain_offset >0の場合
-    // unit_test[203] 戻り値がCLIENT_SENDで設定する。
+    cout << "[213]------------------------------------------" << endl;
+    // unit_test[213] current_record_rest_size>0で,且つdata_begain_offset >0の場合
+    // unit_test[213] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 10u;
@@ -4534,10 +4591,10 @@ void handle_client_connection_check_test() {
     }
 
 
-    cout << "[204]------------------------------------------" << endl;
-    // unit_test[204] current_record_rest_sizeが0で、且つhello_message_flagがtrueで、且つdata_size ≧ 76で、且つdata_begain_offsetが0で
-    // unit_test[204] 且つget_ssl_session_id() の戻り値が 0 の場合
-    // unit_test[204] 戻り値がCLIENT_SENDで設定する。
+    cout << "[214]------------------------------------------" << endl;
+    // unit_test[214] current_record_rest_sizeが0で、且つhello_message_flagがtrueで、且つdata_size ≧ 76で、且つdata_begain_offsetが0で
+    // unit_test[214] 且つget_ssl_session_id() の戻り値が 0 の場合
+    // unit_test[214] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4571,10 +4628,10 @@ void handle_client_connection_check_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[205]------------------------------------------" << endl;
-    // unit_test[205] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_size ≧ 76で,且つdata_begain_offset>0で
-    // unit_test[205] 且つget_ssl_session_id()の戻り値が0の場合
-    // unit_test[205] 戻り値がCLIENT_SENDで設定する。
+    cout << "[215]------------------------------------------" << endl;
+    // unit_test[215] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_size ≧ 76で,且つdata_begain_offset>0で
+    // unit_test[215] 且つget_ssl_session_id()の戻り値が0の場合
+    // unit_test[215] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4609,10 +4666,10 @@ void handle_client_connection_check_test() {
     }
 
 
-    cout << "[206]------------------------------------------" << endl;
-    // unit_test[206] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offsetが0で
-    // unit_test[206] 且つget_ssl_session_id()の戻り値が1の場合
-    // unit_test[206] 戻り値がCLIENT_SENDで設定する。
+    cout << "[216]------------------------------------------" << endl;
+    // unit_test[216] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offsetが0で
+    // unit_test[216] 且つget_ssl_session_id()の戻り値が1の場合
+    // unit_test[216] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4630,10 +4687,10 @@ void handle_client_connection_check_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[207]------------------------------------------" << endl;
-    // unit_test[207] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offset>0で
-    // unit_test[207] 且つget_ssl_session_id()の戻り値が1の場合
-    // unit_test[207] 戻り値がCLIENT_SENDで設定する。
+    cout << "[217]------------------------------------------" << endl;
+    // unit_test[217] current_record_rest_sizeが0で,且つhello_message_flagがtrueで,且つdata_begain_offset>0で
+    // unit_test[217] 且つget_ssl_session_id()の戻り値が1の場合
+    // unit_test[217] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4651,9 +4708,9 @@ void handle_client_connection_check_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[208]------------------------------------------" << endl;
-    // unit_test[208] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
-    // unit_test[208] 戻り値がCLIENT_SENDで設定する。
+    cout << "[218]------------------------------------------" << endl;
+    // unit_test[218] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
+    // unit_test[218] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4670,9 +4727,9 @@ void handle_client_connection_check_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[209]------------------------------------------" << endl;
-    // unit_test[209] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offset>0の場合
-    // unit_test[209] 戻り値がCLIENT_SENDで設定する。
+    cout << "[219]------------------------------------------" << endl;
+    // unit_test[219] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offset>0の場合
+    // unit_test[219] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4707,9 +4764,9 @@ void handle_client_connection_check_test_thread() {
     logger_func_type inputLogDebug = stb_putLogDebug;
 	boost::asio::ip::tcp::endpoint rs_endpoint(boost::asio::ip::address::from_string("192.168.120.249"), 12345);
 
-    cout << "[208]------------------------------------------\n";
-    // unit_test[208] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
-    // unit_test[208] 戻り値がCLIENT_SENDで設定する。
+    cout << "[220]------------------------------------------\n";
+    // unit_test[220] current_record_rest_sizeが0で,且つhello_message_flagがfalseで,且つdata_begain_offsetが0の場合
+    // unit_test[220] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 0u;
@@ -4722,17 +4779,20 @@ void handle_client_connection_check_test_thread() {
         }
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
                 sendbuffer, datalen);
-        BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
+        }
     }
 }
 
 //handle_client_select
 void handle_client_select_test(){
-    cout << "[210]------------------------------------------" << endl;
-	// unit_test[210] 戻り値がSTOPで設定する。
+    cout << "[221]------------------------------------------" << endl;
+	// unit_test[221] 戻り値がSTOPで設定する。
 	boost::asio::ip::udp::endpoint cl_endpoint;
 	boost::array<char,MAX_BUFFER_SIZE> sendbuffer;
 	size_t datalen;
@@ -4746,16 +4806,16 @@ void handle_client_send_test() {
 
     EVENT_TAG status;
 
-    cout << "[211]------------------------------------------" << endl;
-    // unit_test[211] 下りスレッドIDがmapに存在しない場合
-    // unit_test[211] 戻り値がFINALIZEで設定する。
+    cout << "[222]------------------------------------------" << endl;
+    // unit_test[222] 下りスレッドIDがmapに存在しない場合
+    // unit_test[222] 戻り値がFINALIZEで設定する。
     this->session_thread_data_map.clear();
     status = this->handle_client_send(boost::this_thread::get_id());
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
-    cout << "[212]------------------------------------------" << endl;
-    // unit_test[212] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offsetが0の場合
-    // unit_test[212] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[223]------------------------------------------" << endl;
+    // unit_test[223] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offsetが0の場合
+    // unit_test[223] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4767,9 +4827,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[213]------------------------------------------" << endl;
-    // unit_test[213] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offset>0の場合
-    // unit_test[213] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[224]------------------------------------------" << endl;
+    // unit_test[224] データサイズが0で,且つ終了フラグがONで,且つdata_begain_offset>0の場合
+    // unit_test[224] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4781,9 +4841,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[214]------------------------------------------" << endl;
-    // unit_test[214] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset が 0の場合
-    // unit_test[214] 戻り値がREALSERVER_RECVで設定する。
+    cout << "[225]------------------------------------------" << endl;
+    // unit_test[225] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset が 0の場合
+    // unit_test[225] 戻り値がREALSERVER_RECVで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4795,9 +4855,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[215]------------------------------------------" << endl;
-    // unit_test[215] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset > 0の場合
-    // unit_test[215] 戻り値がREALSERVER_RECVで設定する。
+    cout << "[226]------------------------------------------" << endl;
+    // unit_test[226] データサイズが0で,且つ終了フラグがOFFで,且つdata_begain_offset > 0の場合
+    // unit_test[226] 戻り値がREALSERVER_RECVで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4809,9 +4869,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[216]------------------------------------------" << endl;
-    // unit_test[216] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0の場合
-    // unit_test[216] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[227]------------------------------------------" << endl;
+    // unit_test[227] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0の場合
+    // unit_test[227] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -4823,9 +4883,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[217]------------------------------------------" << endl;
-    // unit_test[217] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0で,且つdata_begain_offset>0の場合
-    // unit_test[217] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[228]------------------------------------------" << endl;
+    // unit_test[228] データサイズ>0で,且つcurrent_record_rest_size>0で,且つdata_begain_offsetが0で,且つdata_begain_offset>0の場合
+    // unit_test[228] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -4837,9 +4897,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[218]------------------------------------------" << endl;
-    // unit_test[218] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
-    // unit_test[218] 戻り値がFINALIZEで設定する。
+    cout << "[229]------------------------------------------" << endl;
+    // unit_test[229] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
+    // unit_test[229] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -4853,9 +4913,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[219]------------------------------------------" << endl;
-    // unit_test[219] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
-    // unit_test[219] 戻り値がFINALIZEで設定する。
+    cout << "[230]------------------------------------------" << endl;
+    // unit_test[230] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
+    // unit_test[230] 戻り値がFINALIZEで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -4869,10 +4929,10 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[220]------------------------------------------" << endl;
-    // unit_test[220] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
-    // unit_test[220] 且つ終了フラグがONの場合
-    // unit_test[220] 戻る値がCLIENT_DISCONNECTで設定する。
+    cout << "[231]------------------------------------------" << endl;
+    // unit_test[231] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
+    // unit_test[231] 且つ終了フラグがONの場合
+    // unit_test[231] 戻る値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 3u;
@@ -4885,10 +4945,10 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[221]------------------------------------------" << endl;
-    // unit_test[221] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
-    // unit_test[221] 且つ終了フラグがONの場合
-    // unit_test[221] 戻り値がCLIENT_DISCONNECTで設定する。
+    cout << "[232]------------------------------------------" << endl;
+    // unit_test[232] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
+    // unit_test[232] 且つ終了フラグがONの場合
+    // unit_test[232] 戻り値がCLIENT_DISCONNECTで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 3u;
@@ -4901,10 +4961,10 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[222]------------------------------------------" << endl;
-    // unit_test[222] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
-    // unit_test[222] 且つ終了フラグがOFFの場合
-    // unit_test[222] 戻り値がREALSERVER_RECVで設定する。
+    cout << "[233]------------------------------------------" << endl;
+    // unit_test[233] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offsetが0で
+    // unit_test[233] 且つ終了フラグがOFFの場合
+    // unit_test[233] 戻り値がREALSERVER_RECVで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 3u;
@@ -4917,10 +4977,10 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[223]------------------------------------------" << endl;
-    // unit_test[223] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
-    // unit_test[223] 且つ終了フラグがOFFの場合
-    // unit_test[223] 戻り値がREALSERVER_RECVで設定する。
+    cout << "[234]------------------------------------------" << endl;
+    // unit_test[234] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が1(送信不可)で,且つdata_begain_offset>0で
+    // unit_test[234] 且つ終了フラグがOFFの場合
+    // unit_test[234] 戻り値がREALSERVER_RECVで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 3u;
@@ -4933,9 +4993,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[224]------------------------------------------" << endl;
-    // unit_test[224] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
-    // unit_test[224] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[235]------------------------------------------" << endl;
+    // unit_test[235] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
+    // unit_test[235] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 76;
@@ -4957,9 +5017,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[225]------------------------------------------" << endl;
-    // unit_test[225] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
-    // unit_test[225] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[236]------------------------------------------" << endl;
+    // unit_test[236] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
+    // unit_test[236] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 86;
@@ -4981,9 +5041,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[226]------------------------------------------" << endl;
-    // unit_test[226] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
-    // unit_test[226] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[237]------------------------------------------" << endl;
+    // unit_test[237] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offsetが0の場合
+    // unit_test[237] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10;
@@ -5002,9 +5062,9 @@ void handle_client_send_test() {
         this->session_thread_data_map.clear();
     }
 
-    cout << "[227]------------------------------------------" << endl;
-    // unit_test[227] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0の場合
-    // unit_test[227] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[238]------------------------------------------" << endl;
+    // unit_test[238] データサイズ>=6で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0の場合
+    // unit_test[238] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10;
@@ -5029,9 +5089,9 @@ void handle_client_send_test_thread() {
 
     EVENT_TAG status;
 
-    cout << "[225]------------------------------------------\n";
-    // unit_test[225] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
-    // unit_test[225] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
+    cout << "[239]------------------------------------------\n";
+    // unit_test[239] データサイズ>=76で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が0(送信可能)で,且つdata_begain_offset>0が０の場合
+    // unit_test[239] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 86;
@@ -5050,16 +5110,19 @@ void handle_client_send_test_thread() {
             this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
         }
         status = this->handle_client_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
-        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
-        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 163u);
+            BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+            BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+        }
     }
 }
 
 //handle_client_disconnect
 void handle_client_disconnect_test(){
-    cout << "[228]------------------------------------------" << endl;
-	//unit_test[228] handle_client_disconnect()メソッドのテスト,up and down threads,正常系で必ずFINALIZEを返す
+    cout << "[240]------------------------------------------" << endl;
+	//unit_test[240] handle_client_disconnect()メソッドのテスト,up and down threads,正常系で必ずFINALIZEを返す
 	boost::thread tdown_for_get_id(down_thread_func);
 	boost::thread_group threads;
     	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_disconnect_test_thread_func,
@@ -5070,35 +5133,38 @@ void handle_client_disconnect_test(){
                                    tdown_for_get_id.get_id()));
     	threads.join_all();
 
-    cout << "[229]------------------------------------------" << endl;
-	//unit_test[229] one thread,return FINALIZE
+    cout << "[241]------------------------------------------" << endl;
+	//unit_test[241] one thread,return FINALIZE
 	BOOST_CHECK_EQUAL(this->handle_client_disconnect(boost::this_thread::get_id()),FINALIZE);
 }
 void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id){
     EVENT_TAG ret = this->handle_client_disconnect(thread_id);
-    BOOST_CHECK_EQUAL(ret, FINALIZE);
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(ret, FINALIZE);
+    }
 }
 
 //handle_realserver_disconnect
 void handle_realserver_disconnect_test(){
-    cout << "[230]------------------------------------------" << endl;
-	//unit_test[230] 正常系で必ずSTOPを返す
+    cout << "[242]------------------------------------------" << endl;
+	//unit_test[242] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_realserver_disconnect(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_select
 void handle_sorryserver_select_test(){
-    cout << "[231]------------------------------------------" << endl;
-	//unit_test[231] 正常系で必ずSTOPを返す
+    cout << "[243]------------------------------------------" << endl;
+	//unit_test[243] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_select(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_connect
 void handle_sorryserver_connect_test(){
-    cout << "[232]------------------------------------------" << endl;
-	//unit_test[232] 正常系で必ずSTOPを返す
+    cout << "[244]------------------------------------------" << endl;
+	//unit_test[244] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
@@ -5107,23 +5173,23 @@ void handle_sorryserver_connect_test(){
 
 //handle_sorryserver_connection_fail
 void handle_sorryserver_connection_fail_test(){
-    cout << "[233]------------------------------------------" << endl;
-	//unit_test[233] 正常系で必ずSTOPを返す
+    cout << "[245]------------------------------------------" << endl;
+	//unit_test[245] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_connection_fail(boost::this_thread::get_id(),ep), STOP);
 }
 
 //handle_sorryserver_send
 void handle_sorryserver_send_test(){
-    cout << "[234]------------------------------------------" << endl;
-	//unit_test[234] 正常系で必ずSTOPを返す
+    cout << "[246]------------------------------------------" << endl;
+	//unit_test[246] 正常系で必ずSTOPを返す
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_send(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorryserver_recv
 void handle_sorryserver_recv_test(){
-    cout << "[235]------------------------------------------" << endl;
-	//unit_test[235] 正常系で必ずSTOPを返す
+    cout << "[247]------------------------------------------" << endl;
+	//unit_test[247] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	boost::array<char,MAX_BUFFER_SIZE> buffer;
 	size_t datalen;
@@ -5132,33 +5198,33 @@ void handle_sorryserver_recv_test(){
 
 //handle_response_send_inform
 void handle_response_send_inform_test(){
-    cout << "[236]------------------------------------------" << endl;
-	//unit_test[236] 正常系で必ずSTOPを返す
+    cout << "[248]------------------------------------------" << endl;
+	//unit_test[248] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_response_send_inform(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorry_enable
 void handle_sorry_enable_test(){
-    cout << "[237]------------------------------------------" << endl;
-	//unit_test[237] 全部の場合,遷移先ステータスを設定する,status = STOP
-	//unit_test[237] test data:NULL
+    cout << "[249]------------------------------------------" << endl;
+	//unit_test[249] 全部の場合,遷移先ステータスを設定する,status = STOP
+	//unit_test[249] test data:NULL
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorry_enable(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorry_disable
 void handle_sorry_disable_test(){
-    cout << "[238]------------------------------------------" << endl;
-	//unit_test[238] 正常系で必ずSTOPを返す
+    cout << "[250]------------------------------------------" << endl;
+	//unit_test[250] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorry_disable(boost::this_thread::get_id()), STOP);
 }
 
 //handle_sorryserver_disconnect
 void handle_sorryserver_disconnect_test(){
-    cout << "[239]------------------------------------------" << endl;
-	//unit_test[239] 正常系で必ずSTOPを返す
+    cout << "[251]------------------------------------------" << endl;
+	//unit_test[251] 正常系で必ずSTOPを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->handle_sorryserver_disconnect(boost::this_thread::get_id(),ep), STOP);
 }
@@ -5175,8 +5241,8 @@ void replication_interrupt_test(){
 					stb_putLogFatal, stb_putLogError, stb_putLogWarn, stb_putLogInfo,
 					stb_putLogDebug);
 
-    cout << "[240]------------------------------------------" << endl;
-	//unit_test[240] op_codeが「A」の場合、replication_dataをreplication_areaに追加する。
+    cout << "[252]------------------------------------------" << endl;
+	//unit_test[252] op_codeが「A」の場合、replication_dataをreplication_areaに追加する。
 	time_t last_time_A = time(0);
 	boost::asio::ip::tcp::endpoint real_ep_A;
 	struct sslid_replication_temp_data replication_temp_data_add;
@@ -5208,8 +5274,8 @@ void replication_interrupt_test(){
 	BOOST_CHECK_EQUAL(pstub->get_replication_area()->realserver_port,real_ep_A.port());
 	test_thread1.interrupt();
 
-    cout << "[241]------------------------------------------" << endl;
-	//unit_test[241] op_codeが「U」、validが１且つセッションIDが一致の場合、replication_area中の該当データを更新する。
+    cout << "[253]------------------------------------------" << endl;
+	//unit_test[253] op_codeが「U」、validが１且つセッションIDが一致の場合、replication_area中の該当データを更新する。
 	time_t last_time_U = time(0);
 	boost::asio::ip::tcp::endpoint real_ep_U;
 	struct sslid_replication_temp_data replication_temp_data_update;
@@ -5228,8 +5294,8 @@ void replication_interrupt_test(){
 	BOOST_CHECK_EQUAL(pstub->get_replication_area()->realserver_port,real_ep_U.port());
 	test_thread2.interrupt();
 
-    cout << "[242]------------------------------------------" << endl;
-	//unit_test[242] op_codeが「D」、validが１且つセッションIDが存在する場合、replication_areaから該当データを削除する。
+    cout << "[254]------------------------------------------" << endl;
+	//unit_test[254] op_codeが「D」、validが１且つセッションIDが存在する場合、replication_areaから該当データを削除する。
 	time_t last_time_D = time(0);
 	boost::asio::ip::tcp::endpoint real_ep_D;
 	struct sslid_replication_temp_data replication_temp_data_delete;
@@ -5257,15 +5323,15 @@ void put_data_to_sendbuffer_test(){
     int mem_cmp_length;
     char* mem_cmp_buffer;
 
-    cout << "[243]------------------------------------------" << endl;
-    // unit_test[243] スレッドIDがmapに存在していない場合
-    // unit_test[243] 戻り値が -1で設定する。
+    cout << "[255]------------------------------------------" << endl;
+    // unit_test[255] スレッドIDがmapに存在していない場合
+    // unit_test[255] 戻り値が -1で設定する。
     ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(), sendbuffer, datalen);
     BOOST_CHECK_EQUAL(ret, -1);
 
-    cout << "[244]------------------------------------------" << endl;
-    // unit_test[244] current_record_rest_size>data_sizeで, 且つdata_size<送信バッファサイズの場合
-    // unit_test[244] 戻り値が0で設定する。
+    cout << "[256]------------------------------------------" << endl;
+    // unit_test[256] current_record_rest_size>data_sizeで, 且つdata_size<送信バッファサイズの場合
+    // unit_test[256] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5294,9 +5360,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[245]------------------------------------------" << endl;
-    // unit_test[245] current_record_rest_size>data_sizeで, 且つdata_size=送信バッファサイズの場合
-    // unit_test[245] 戻り値が0で設定する。
+    cout << "[257]------------------------------------------" << endl;
+    // unit_test[257] current_record_rest_size>data_sizeで, 且つdata_size=送信バッファサイズの場合
+    // unit_test[257] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5325,9 +5391,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[246]------------------------------------------" << endl;
-    // unit_test[246] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
-    // unit_test[246] 戻り値が0設定する。
+    cout << "[258]------------------------------------------" << endl;
+    // unit_test[258] current_record_rest_sizeがdata_sizeで, 且つdata_size<送信バッファサイズの場合
+    // unit_test[258] 戻り値が0設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5356,9 +5422,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[247]------------------------------------------" << endl;
-    // unit_test[247] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
-    // unit_test[247] 戻り値が0で設定する
+    cout << "[259]------------------------------------------" << endl;
+    // unit_test[259] current_record_rest_sizeがdata_sizeで, 且つdata_sizeが送信バッファサイズの場合
+    // unit_test[259] 戻り値が0で設定する
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5387,9 +5453,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[248]------------------------------------------" << endl;
-    // unit_test[248] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
-    // unit_test[248] 戻り値が0で設定する。
+    cout << "[260]------------------------------------------" << endl;
+    // unit_test[260] current_record_rest_size>data_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[260] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5418,9 +5484,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[249]------------------------------------------" << endl;
-    // unit_test[249] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
-    // unit_test[249] 戻り値が0で設定する。
+    cout << "[261]------------------------------------------" << endl;
+    // unit_test[261] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[261] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5449,9 +5515,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[250]------------------------------------------" << endl;
-    // unit_test[250] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
-    // unit_test[250] 戻り値が0で設定する。
+    cout << "[262]------------------------------------------" << endl;
+    // unit_test[262] current_record_rest_size＜data_sizeで, 且つcurrent_record_rest_size<送信バッファサイズの場合
+    // unit_test[262] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5480,9 +5546,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[251]------------------------------------------" << endl;
-    // unit_test[251] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
-    // unit_test[251] 戻り値が0で設定する。
+    cout << "[263]------------------------------------------" << endl;
+    // unit_test[263] current_record_rest_size<data_sizeで, 且つcurrent_record_rest_sizeが送信バッファサイズの場合
+    // unit_test[263] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5511,9 +5577,9 @@ void put_data_to_sendbuffer_test(){
         this->session_thread_data_map.clear();
     }
 
-    cout << "[252]------------------------------------------" << endl;
-    // unit_test[252] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
-    // unit_test[252] 戻り値が0で設定する。
+    cout << "[264]------------------------------------------" << endl;
+    // unit_test[264] current_record_rest_size＜data_sizeで,且つcurrent_record_rest_size＞送信バッファサイズの場合
+    // unit_test[264] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5553,9 +5619,9 @@ void put_data_to_sendbuffer_test_thread(){
     int mem_cmp_length;
     char* mem_cmp_buffer;
 
-    cout << "[249]------------------------------------------\n";
-    // unit_test[249] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
-    // unit_test[249] 戻り値が0で設定する。
+    cout << "[265]------------------------------------------\n";
+    // unit_test[265] current_record_rest_sizeがdata_sizeで,且つdata_size＞送信バッファサイズの場合
+    // unit_test[265] 戻り値が0で設定する。
     {
         datalen = 0;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
@@ -5576,19 +5642,22 @@ void put_data_to_sendbuffer_test_thread(){
         ret = this->put_data_to_sendbuffer(boost::this_thread::get_id(),
                 sendbuffer, datalen);
         mem_cmp_result = memcmp(mem_cmp_buffer, sendbuffer.c_array(), mem_cmp_length);
-        BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
-        BOOST_CHECK_EQUAL(ret, 0);
-        BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        {
+            boost::mutex::scoped_lock sclock(check_mutex);
+            BOOST_CHECK_EQUAL(mem_cmp_result, 0);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u+static_cast<size_t>(MAX_BUFFER_SIZE));
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
+            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
+            BOOST_CHECK_EQUAL(ret, 0);
+            BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
+        }
     }
 }
 
 //realserver_selected
 void realserver_selected_test(){
-    cout << "[253]------------------------------------------" << endl;
-	//unit_test[253] 正常系で必ずFALSEを返す
+    cout << "[266]------------------------------------------" << endl;
+	//unit_test[266] 正常系で必ずFALSEを返す
 	boost::asio::ip::tcp::endpoint ep;
 	BOOST_CHECK_EQUAL(this->realserver_selected(ep), false);
 }
@@ -5702,6 +5771,37 @@ void handle_realserver_select_tcp_test(){
 }
 void handle_realserver_select_tcp_test_thread(){
     protocol_module_sslid_test_class obj;
+    int maxlist = 1;
+    char* sslid_replication_area_begain = new char[10];
+    int sslid_replication_area_size = 0;
+    boost::asio::ip::tcp::endpoint ep2;
+    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+    std::string session_id;
+    boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogFatal = stb_putLogFatal;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogError = stb_putLogError;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogWarn = stb_putLogWarn;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogInfo = stb_putLogInfo;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogDebug = stb_putLogDebug;
+    obj.set_reschedule(1);
+    obj.set_schedule_tcp(schedule_tcp_func1);
+    obj.init_logger_functions(ingetloglevel, inputLogFatal, inputLogError,
+            inputLogWarn, inputLogInfo, inputLogDebug);
+    std::vector<std::string> args;
+    obj.install_stb_replication_func();
+    //obj.set_parameter(args);
+    obj.set_replication_data_processor(new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
+            sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+            inputLogWarn, inputLogInfo, inputLogDebug));
+    obj.set_session_data_processor(new sslid_session_data_processor(
+            1024, 3600, obj.get_replication_data_processor(), ingetloglevel,
+            inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+            inputLogDebug));
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
     	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_select_tcp_test_thread,&obj));
@@ -5728,8 +5828,7 @@ void handle_realserver_connection_fail_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_connection_fail_test();
 }
-void handle_realserver_connection_fail_test_thread_reschedule()
-{
+void handle_realserver_connection_fail_test_thread_reschedule(){
     protocol_module_sslid_test_class obj;
     boost::thread_group threads;
     for(int i=0; i<THREAD_COUNT; i++)
@@ -5738,8 +5837,7 @@ void handle_realserver_connection_fail_test_thread_reschedule()
     }
     threads.join_all();
 }
-void handle_realserver_connection_fail_test_thread_noreschedule()
-{
+void handle_realserver_connection_fail_test_thread_noreschedule(){
     protocol_module_sslid_test_class obj;
     boost::thread_group threads;
     for(int i=0; i<THREAD_COUNT; i++)
@@ -5800,7 +5898,7 @@ void handle_client_send_test_thread(){
     protocol_module_sslid_test_class obj;
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_select_tcp_test_thread,&obj));
+    	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_send_test_thread,&obj));
     }
     threads.join_all();
 }

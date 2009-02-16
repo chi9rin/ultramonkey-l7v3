@@ -186,7 +186,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     }
     catch(const std::exception& e)
     {
-        std::cerr << "get_endpoint_from_session_data exception: error = " << e.what() << "." << std::endl;
+        std::cerr << "sslid_session_data_processor::get_endpoint_from_session_data() : exception: error = " << e.what() << "." << std::endl;
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data() : exception : error = %s.");
         formatter % -1 % e.what();
@@ -286,7 +286,7 @@ int sslid_session_data_processor::write_session_data(
             // endpoint not exist
             if (session_endpoint_map.size() >= static_cast<size_t>(maxlist))
             {
-                // map size arrived to top
+                // the map is full
                 if (clear_expired_session_data() == 1)
                 {
                     /*-------- DEBUG LOG --------*/
@@ -396,7 +396,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
         {
             putLogDebug(30017, "out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area("
-                                "sslid_replication_data* replication_area) : return_value = 1", __FILE__, __LINE__);
+                                "sslid_replication_data* replication_area) : return_value = -1", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         return -1;
@@ -438,7 +438,8 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     }
     catch(const std::exception& e)
     {
-        std::cerr << "read_session_data_from_replication_area exception : error = " << e.what() << "." << std::endl;
+        std::cerr << "sslid_session_data_processor::read_session_data_from_replication_area() : "
+											"exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : int sslid_session_data_processor::"
                                             "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();

@@ -309,7 +309,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                      "char* sslid_replication_area_begain, int sslid_replication_area_size, "
                      "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
                      "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
-                     "logger_func_type inputLogError, logger_func_type inputLogWarn,"
+                     "logger_func_type inputLogError, logger_func_type inputLogWarn, "
                      "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
                      , __FILE__, __LINE__);
     }
@@ -340,8 +340,8 @@ void sslid_replication_data_processor::put_into_temp_list(
         boost::format formatter("in_function : void sslid_replication_data_processor::put_into_temp_list("
                                  "const sslid_replication_temp_data& data) : data.op_code = %c, "
                                  "data.session_id = %s, data.last_time = %lu, data.endpoint = [%s]:%d.");
-        formatter % data.op_code % data.session_id % data. realserver_addr.address().to_string() %
-        data. realserver_addr.port();
+        formatter % data.op_code % data.session_id % data.last_time % data.realserver_addr.address().to_string() 
+	% data.realserver_addr.port();
         putLogDebug(30016, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -437,7 +437,7 @@ void sslid_replication_data_processor::write_replicaion_area()
                         if (LOG_LV_DEBUG == getloglevel())
                         {
                             boost::format formatter("function : void sslid_replication_data_processor::"
-                                                     "write_replicaion_area() : 'A' : realserver_ip = %s,"
+                                                     "write_replicaion_area() : 'A' : realserver_ip = %s, "
                                                      "realserver_prot = %d.");
                             formatter % replication_area[i].realserver_ip % replication_area[i].realserver_port;
                             putLogDebug(30021, formatter.str(), __FILE__, __LINE__);
@@ -460,7 +460,7 @@ void sslid_replication_data_processor::write_replicaion_area()
                         if (LOG_LV_DEBUG == getloglevel())
                         {
                             boost::format formatter("function : void sslid_replication_data_processor::"
-                                                    "write_replicaion_area() : 'U' : last_time(before) = %lu,"
+                                                    "write_replicaion_area() : 'U' : last_time(before) = %lu, "
                                                     "last_time(after) = %lu.");
                             formatter % replication_area[i].last_time % temp_data.last_time;
                             putLogDebug(30022, formatter.str(), __FILE__, __LINE__);
@@ -488,7 +488,7 @@ void sslid_replication_data_processor::write_replicaion_area()
                         if (LOG_LV_DEBUG == getloglevel())
                         {
                             boost::format formatter("function : void sslid_replication_data_processor::"
-                                                     "write_replicaion_area() : 'D' : data valid(before) = %d,"
+                                                     "write_replicaion_area() : 'D' : data valid(before) = %d, "
                                                      "data valid(after) = %d.");
                             formatter % replication_area[i].valid % 0;
                             putLogDebug(30023, formatter.str(), __FILE__, __LINE__);
@@ -514,7 +514,7 @@ void sslid_replication_data_processor::write_replicaion_area()
         {
             replication_area_unlock();
         }
-        std::cerr << "write_replicaion_area exception : error " << e.what() << "." << std::endl;
+        std::cerr << "sslid_replication_data_processor::write_replicaion_area() : exception : error " << e.what() << "." << std::endl;
         boost::format formatter("function : void sslid_replication_data_processor::write_replicaion_area() : "
                                  "exception : error = %s.");
         formatter % e.what();
@@ -526,9 +526,9 @@ void sslid_replication_data_processor::write_replicaion_area()
         {
             replication_area_unlock();
         }
-        std::cerr << "write_replicaion_area boost::thread_interrupted exception." << std::endl;
+        std::cerr << "sslid_replication_data_processor::write_replicaion_area() : exception." << std::endl;
         putLogError(37007, "function : void sslid_replication_data_processor::write_replicaion_area() : "
-                     "thread_interrupted exception.", __FILE__, __LINE__);
+                     "Thread_interrupted exception.", __FILE__, __LINE__);
     }
     catch (...)
     {
@@ -651,7 +651,7 @@ void sslid_replication_data_processor::get_from_temp_list(
                                  "get_from_temp_list(sslid_replication_temp_data& data) : "
                                  "data.op_code = %c, data.session_id = %s, data.last_time = %lu, "
                                  "data.endpoint = [%s]:%d.");
-        formatter % data.op_code % data.session_id % data. realserver_addr.address().to_string() %
+        formatter % data.op_code % data.session_id % data.last_time % data. realserver_addr.address().to_string() %
         data. realserver_addr.port();
         putLogDebug(30031, formatter.str(), __FILE__, __LINE__);
     }

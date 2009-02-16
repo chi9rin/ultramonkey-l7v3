@@ -78,6 +78,7 @@ public:
 // test class
 class sslid_session_data_processor_test_class : public sslid_session_data_processor{
 public:
+	boost::mutex check_mutex;
 	// sslid_session_data_processor_test_class
 	sslid_session_data_processor_test_class(int maxlist, int timeout,
 			sslid_replication_data_processor* replication_data_processor,
@@ -117,8 +118,11 @@ public:
 		boost::asio::ip::tcp::endpoint get_endpoint;
 
 		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
-		BOOST_CHECK_EQUAL(result, 0);
-		BOOST_CHECK_EQUAL(get_endpoint, expecting_endpoint);
+		{
+			boost::mutex::scoped_lock sclock(check_mutex);
+			BOOST_CHECK_EQUAL(result, 0);
+			BOOST_CHECK_EQUAL(get_endpoint, expecting_endpoint);
+		}
 	}
 
 	// sslid_session_data_processor_test

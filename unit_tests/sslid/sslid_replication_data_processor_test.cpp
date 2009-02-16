@@ -7,10 +7,13 @@ using namespace l7vs;
 #define STRUCT_NUMBER	256
 
 bool is_lock_function_called = false;
-bool is_unlock_function_called = true;
+bool is_unlock_function_called = false;
+bool is_put_into_temp_list_test_thread4_waiting = false;
+bool is_put_into_temp_list_test_thread6_waiting = false;
 bool is_put_into_temp_list_test_thread8_waiting = false;
 bool is_put_into_temp_list_test_thread9_waiting = false;
 bool is_put_into_temp_list_test_thread10_waiting = false;
+bool is_get_from_temp_list_called = false;
 
 // function for testing register_replication_area_lock
 void lock_function(){
@@ -50,6 +53,7 @@ l7vs::sslid_replication_data_processor::logger_func_type replication_inputLogDeb
 // test class
 class sslid_replication_data_processor_test_class : public l7vs::sslid_replication_data_processor {
 public:
+	boost::mutex check_mutex;
 	// sslid_replication_data_processor_test_class
 	sslid_replication_data_processor_test_class(int maxlist,
             char* sslid_replication_area_begain,
@@ -71,6 +75,12 @@ public:
                 inputLogWarn,
                 inputLogInfo,
                 inputLogDebug ) {
+	}
+
+	// get_from_temp_list function
+	void get_from_temp_list(sslid_replication_temp_data& data){
+		sslid_replication_data_processor::get_from_temp_list(data);
+		is_get_from_temp_list_called = true;
 	}
 
 	// put_into_temp_list test thread
@@ -129,6 +139,7 @@ public:
 		this->put_into_temp_list(test_data1);
 		this->put_into_temp_list(test_data1);
 		this->put_into_temp_list(test_data1);
+		is_put_into_temp_list_test_thread4_waiting = true;
 	}
 
 	// put_into_temp_list test thread
@@ -155,6 +166,7 @@ public:
 		this->put_into_temp_list(test_data1);
 		this->put_into_temp_list(test_data1);
 		this->put_into_temp_list(test_data1);
+		is_put_into_temp_list_test_thread6_waiting = true;
 		this->put_into_temp_list(test_data1);
 		this->put_into_temp_list(test_data1);
 	}
@@ -246,10 +258,13 @@ public:
 		boost::asio::ip::tcp::endpoint endpoint;
 		l7vs::sslid_replication_temp_data get_data;
 		this->get_from_temp_list(get_data);
-		BOOST_CHECK_EQUAL(get_data.session_id, "test_id123456789abcdefghijklmnop");
-		BOOST_CHECK_EQUAL(get_data.op_code, 'A');
-		BOOST_CHECK_EQUAL(get_data.realserver_addr, endpoint);
-		BOOST_CHECK_EQUAL(get_data.last_time, 1000);
+		{
+			boost::mutex::scoped_lock sclock(check_mutex);
+			BOOST_CHECK_EQUAL(get_data.session_id, "test_id123456789abcdefghijklmnop");
+			BOOST_CHECK_EQUAL(get_data.op_code, 'A');
+			BOOST_CHECK_EQUAL(get_data.realserver_addr, endpoint);
+			BOOST_CHECK_EQUAL(get_data.last_time, 1000);
+		}
 	}
 
 	// sslid_replication_data_processor
@@ -658,11 +673,13 @@ public:
 		// unit_test[19] マルチスレッド　がつ　temp_listのサイズが max_temp_listの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
+			is_put_into_temp_list_test_thread4_waiting = false;
 			this->temp_list.clear();
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread4,
 						this, session_id1, endpoint, last_time));
-			sleep(1);
+			while(!is_put_into_temp_list_test_thread4_waiting){
+			}
 			thread_group.create_thread(boost::bind(&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread5, this));
 			thread_group.join_all();
 		} catch(...){
@@ -683,11 +700,13 @@ public:
 		// unit_test[20] ルチスレッド　がつ　temp_list size > max_temp_listの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
+			is_put_into_temp_list_test_thread6_waiting = false;
 			this->temp_list.clear();
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread6,
 						this, session_id1, endpoint, last_time));
-			sleep(1);
+			while(!is_put_into_temp_list_test_thread6_waiting){
+			}
 			thread_group.create_thread(boost::bind(&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread7, this));
 			thread_group.join_all();
 		} catch(...){
@@ -716,7 +735,8 @@ public:
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread8,
 						this, session_id1, endpoint, last_time));
 
-			sleep(1);
+			while(!is_put_into_temp_list_test_thread8_waiting){
+			}
 			// put_into_temp_list_test_thread8 is waiting check
 			BOOST_CHECK_EQUAL(is_put_into_temp_list_test_thread8_waiting, true);
 
@@ -739,13 +759,14 @@ public:
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread8,
 						this, session_id1, endpoint, last_time));
 
-			sleep(1);
-
+			while(!is_put_into_temp_list_test_thread8_waiting){
+			}
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread9,
 						this, session_id1, endpoint, last_time));
 
-			sleep(1);
+			while(!is_put_into_temp_list_test_thread9_waiting){
+			}
 
 			// put_into_temp_list_test_thread8 is waiting check
 			BOOST_CHECK_EQUAL(is_put_into_temp_list_test_thread8_waiting, true);
@@ -771,14 +792,18 @@ public:
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread8,
 						this, session_id1, endpoint, last_time));
-			sleep(1);
+			while(!is_put_into_temp_list_test_thread8_waiting){
+			}
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread9,
 						this, session_id1, endpoint, last_time));
 			thread_group.create_thread(boost::bind(
 						&sslid_replication_data_processor_test_class::put_into_temp_list_test_thread10,
 						this, session_id1, endpoint, last_time));
-			sleep(1);
+			while(!is_put_into_temp_list_test_thread9_waiting){
+			}
+			while(!is_put_into_temp_list_test_thread10_waiting){
+			}
 
 			// put_into_temp_list_test_thread8 is waiting check
 			BOOST_CHECK_EQUAL(is_put_into_temp_list_test_thread8_waiting, true);
@@ -826,6 +851,8 @@ public:
 
     cout << "[25]------------------------------------------" << endl;
 		// unit_test[25] op_codeが「A」で、且つreplication_areaに１つのデータが存在する場合、新データを追加する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		temp_session_id = "temp_id1rtrrrrtttttteeeeeeemmmmp";
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_data.last_time = time(0);
@@ -846,7 +873,8 @@ public:
 		memset(&old_data, 0, sizeof(sslid_replication_data));
 		memcpy(&old_data, this->replication_area, sizeof(sslid_replication_data));
 		boost::thread test_thread2(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread2.interrupt();
 		// data add position: after the old existing data, check it
 		// get the added data information
@@ -875,6 +903,8 @@ public:
 
     cout << "[26]------------------------------------------" << endl;
 		// unit_test[26] op_codeが「A」で、且つreplication_areaに２つのデータが存在して、且つ１つ目データのvalidフラグが０の場合、新のデータを追加する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_session_id = "temp_id2eeeeeetttteeeeeeemmmmuui";
 		temp_data.last_time = time(0);
@@ -899,7 +929,8 @@ public:
 		memset(&old_data, 0, sizeof(sslid_replication_data));
 		memcpy(&old_data, this->replication_area + 1, sizeof(sslid_replication_data));
 		boost::thread test_thread3(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread3.interrupt();
 		// data add position: the first existing data position, check it
 		// get the added data information
@@ -927,6 +958,8 @@ public:
 
     cout << "[27]------------------------------------------" << endl;
 		// unit_test[27] op_codeが「A」で、且つreplication_areaにデータが存在しない場合、新のデータを追加する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
@@ -937,7 +970,8 @@ public:
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		boost::thread test_thread4(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread4.interrupt();
 		// get added data information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
@@ -961,6 +995,8 @@ public:
 
     cout << "[28]------------------------------------------" << endl;
 		// unit_test[28] op_codeが「U」で、且つセッションIDが存在している場合、該当データを更新する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("255.255.255.255"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
@@ -969,7 +1005,8 @@ public:
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		boost::thread test_thread5(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread5.interrupt();
 		// get saved information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
@@ -993,6 +1030,8 @@ public:
 
     cout << "[29]------------------------------------------" << endl;
 		// unit_test[29] op_codeが「D」で、且つセッションIDが存在している場合、該当データを削除する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
 		test_data1.op_code = 'D';
@@ -1001,7 +1040,8 @@ public:
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		boost::thread test_thread6(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread6.interrupt();
 		// get saved information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
@@ -1023,6 +1063,8 @@ public:
 
     cout << "[30]------------------------------------------" << endl;
 		// unit_test[30] op_codeが「A」,「U」,「D」以外の場合、データを変更しない。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(port);
@@ -1036,7 +1078,8 @@ public:
 		l7vs::sslid_replication_data old_session_data[3];
 		memcpy(&old_session_data, this->replication_area, 3*sizeof(sslid_replication_data));
 		boost::thread test_thread7(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread7.interrupt();
 		// test_data1 is not saved, so old data is not changed, check it
 		// old data not changed check
@@ -1048,18 +1091,20 @@ public:
 
     cout << "[31]------------------------------------------" << endl;
 		// unit_test[31] データを追加するの場合、replication_area_lock関数を呼び出す。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		is_lock_function_called = false;
 		this->replication_area_lock = lock_function;
 		this->replication_area_unlock = unlock_function;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		try{
 			boost::thread test_thread8(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			sleep(1);
+			while(!is_lock_function_called || !is_unlock_function_called){
+			}
 			test_thread8.interrupt();
 		} catch(...) {
 			BOOST_ERROR("exception: write_replicaion_area_test");
@@ -1072,18 +1117,20 @@ public:
 
     cout << "[32]------------------------------------------" << endl;
 		// unit_test[32] データを追加するの場合、replication_area_unlock関数を呼び出す。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		is_unlock_function_called = false;
 		this->replication_area_lock = lock_function;
 		this->replication_area_unlock = unlock_function;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		try{
 			boost::thread test_thread9(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			sleep(1);
+			while(!is_lock_function_called || !is_unlock_function_called){
+			}
 			test_thread9.interrupt();
 		} catch(...) {
 			BOOST_ERROR("exception: write_replicaion_area_test");
@@ -1096,6 +1143,8 @@ public:
 
     cout << "[33]------------------------------------------" << endl;
 		// unit_test[33] endpointがipv6で、replicationエリアにデータがなくて、該当ipv6のendpointを追加する。
+		is_lock_function_called = false;
+    	is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		realserver_addr.port(80);
@@ -1106,7 +1155,8 @@ public:
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		boost::thread test_thread10(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread10.interrupt();
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
 		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
@@ -1129,6 +1179,8 @@ public:
 
     cout << "[34]------------------------------------------" << endl;
 		// unit_test[34] op_codeが「U」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを更新する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("1:21d0:1:4866:1:1:3a4b:1230"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
@@ -1137,7 +1189,8 @@ public:
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		boost::thread test_thread11(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread11.interrupt();
 		// get saved information
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
@@ -1152,6 +1205,8 @@ public:
 
     cout << "[35]------------------------------------------" << endl;
 		// unit_test[35] op_codeが「D」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを変更しない、validに０を設定する。
+		is_lock_function_called = false;
+		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
 		test_data1.op_code = 'D';
 		test_data1.last_time = delete_time;
@@ -1159,7 +1214,8 @@ public:
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
 		boost::thread test_thread12(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		sleep(1);
+		while(!is_lock_function_called || !is_unlock_function_called){
+		}
 		test_thread12.interrupt();
 		// get saved information
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
@@ -1229,8 +1285,11 @@ public:
 		} catch(...) {
 			BOOST_ERROR("exception: get_from_temp_list");
 		}
+		// clean the created thread's temp_list_condition
+		is_get_from_temp_list_called = false;
 		this->put_into_temp_list(test_data1);
-		sleep(1);
+		while(!is_get_from_temp_list_called){
+		}
 
     cout << "[41]------------------------------------------" << endl;
 		// unit_test[41] マルチスレッドの場合、temp_listにデータを正常取得する。
