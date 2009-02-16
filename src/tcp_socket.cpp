@@ -54,6 +54,12 @@ namespace l7vs{
 			
 		return open_flag;
 	}
+	
+	//! accept socket
+	void tcp_socket::accept(){
+		boost::mutex::scoped_lock scope_lock(socket_mutex);
+		open_flag = true;
+	}
 
 	//! close socket
 	//! @param[out]		ec is reference error code object
