@@ -5200,12 +5200,13 @@ protocol_module_cinsert::handle_realserver_close(
 	return	STOP;
 }
 //---------------------------------------------------------------------------------
-protocol_module_cinsert::EVENT_TAG
-protocol_module_cinsert::handle_realserver_close(
-				const boost::thread::id thread_id,
-				const boost::asio::ip::udp::endpoint & rs_endpoint )
-{
-	// NOP
-	return	STOP;
+extern "C" l7vs::protocol_module_base*
+create_module(){
+	return dynamic_cast<l7vs::protocol_module_base*>(new l7vs::protocol_module_cinsert());
+}
+
+extern "C" void
+destroy_module( l7vs::protocol_module_base* in ){
+	delete in;
 }
 }
