@@ -1518,7 +1518,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &handle_sorryserver_send_test ) );
 
 	ts->add( BOOST_TEST_CASE( &handle_realserver_select_test ) );
-//	ts->add( BOOST_TEST_CASE( &handle_sorryserver_select_test ) );
+	ts->add( BOOST_TEST_CASE( &handle_sorryserver_select_test ) );
 
 	framework::master_test_suite().add( ts );
 
