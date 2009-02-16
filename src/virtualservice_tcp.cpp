@@ -223,6 +223,11 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
 													const boost::system::error_code& err ){
 	if( !err ){
+		//if active session count equal 
+		if( ( active_sessions.size() >= static_cast<size_t>( element.sorry_maxconnection ) ) || 
+			( 0 != element.sorry_flag ) ){
+			in_session->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
+		}
 		//switch status runing, session_thread_control
 		in_session->startupstream();
 		in_session->startdownstream();
@@ -479,6 +484,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		err.setter( true, "Virtual Service does not exist." );
 		return;
 	}
+
 	//if change ScueduleModule Name, unload old ScheduleModule and load new ScheduleModule
 	if( element.schedule_module_name != elem.schedule_module_name ){
 		schedule_module_control::getInstance().unload_module( schedmod );
@@ -519,9 +525,21 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		if( elem.sorry_endpoint == boost::asio::ip::tcp::endpoint() ){
 			element.sorry_maxconnection	= 0LL;
 			element.sorry_flag			= false;
+			boost::mutex::scoped_lock lk( sessions_mutex );
+			for( session_map_type::iterator itr = active_sessions.begin();
+				itr != active_sessions.end();
+				++itr ){
+				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
+			}
 		}else{
 			element.sorry_maxconnection	= elem.sorry_maxconnection;
 			element.sorry_flag			= elem.sorry_flag;
+			boost::mutex::scoped_lock lk( sessions_mutex );
+			for( session_map_type::iterator itr = active_sessions.begin();
+				itr != active_sessions.end();
+				++itr ){
+				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
+			}
 		}
 	}
 
@@ -574,6 +592,16 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 			}
 		}
 	}
+
+	//pause active sessions
+	boost::mutex::scoped_lock session_lk( sessions_mutex );
+
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
+	}
+
 	//add realserver
 	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
 		 itr != in_element.realserver_vector.end();
@@ -590,8 +618,22 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 		//fatal case
 		l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "RealServer information data error", __FILE__, __LINE__ );
 		err.setter( true, "RealServer information data error" );
+		//run active sessions
+		for( session_map_type::iterator itr = active_sessions.begin();
+			itr != active_sessions.end();
+			++itr ){
+			itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+		}
 		return;
 	}
+
+	//run active sessions
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+	}
+
 	err.setter( false, "" );
 }
 
@@ -641,6 +683,16 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 			return;
 		}
 	}
+
+	//pause active sessions
+	boost::mutex::scoped_lock session_lk( sessions_mutex );
+
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
+	}
+
 	//edit realserver
 	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
 		 itr != in_element.realserver_vector.end();
@@ -653,6 +705,14 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 			}
 		}
 	}
+
+	//run active sessions
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+	}
+
 	err.setter( false, "" );
 }
 
@@ -703,6 +763,15 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 		}
 	}
 
+	//pause active sessions
+	boost::mutex::scoped_lock session_lk( sessions_mutex );
+
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
+	}
+
 	//del realserver
 	for( std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
 		 itr != in_element.realserver_vector.end();
@@ -720,8 +789,22 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 		//fatal case
 		l7vs::Logger::putLogFatal( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "RealServer information data error", __FILE__, __LINE__ );
 		err.setter( true, "RealServer information data error" );
+		//run active sessions
+		for( session_map_type::iterator itr = active_sessions.begin();
+			itr != active_sessions.end();
+			++itr ){
+			itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+		}
 		return;
 	}
+
+	//run active sessions
+	for( session_map_type::iterator itr = active_sessions.begin();
+		 itr != active_sessions.end();
+		 ++itr ){
+		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+	}
+
 	err.setter( false, "" );
 }
 
