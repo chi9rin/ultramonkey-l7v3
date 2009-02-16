@@ -34,6 +34,8 @@ namespace l7vs{
 			//! @param[in]		connect_endpoint is connection endpoint
 			//! @param[out]		ec is reference error code object
 			bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec);
+			//! accept
+			void accept();
 			//! close socket
 			//! @param[out]		ec is reference error code object
 			//! @return 		true is socket close
