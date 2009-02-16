@@ -225,11 +225,10 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 	if( !err ){
 		//if active session count equal
 		//element.sorry_maxconnectionが1以上の場合
-		if( 0 < element.sorry_maxconnection ){
-			if( ( active_sessions.size() >= static_cast<size_t>( element.sorry_maxconnection ) ) || 
-				( 0 != element.sorry_flag ) ){
+		if( ( ( 0 < element.sorry_maxconnection ) && 
+			( active_sessions.size() >= static_cast<size_t>( element.sorry_maxconnection ) ) ) ||
+			( 0 != element.sorry_flag ) ){
 				in_session->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
-			}
 		}
 		//switch status runing, session_thread_control
 		in_session->startupstream();
