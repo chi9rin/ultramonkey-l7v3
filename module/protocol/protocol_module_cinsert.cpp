@@ -5199,6 +5199,8 @@ protocol_module_cinsert::handle_realserver_close(
 	// NOP
 	return	STOP;
 }
+
+}
 //---------------------------------------------------------------------------------
 extern "C" l7vs::protocol_module_base*
 create_module(){
@@ -5208,5 +5210,4 @@ create_module(){
 extern "C" void
 destroy_module( l7vs::protocol_module_base* in ){
 	delete in;
-}
 }
