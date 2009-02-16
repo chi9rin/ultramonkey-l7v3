@@ -151,7 +151,7 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-L7VS_CONF_DIR = @l7vs_conf_dir@
+L7VS_CONF_DIR = @l7vs_config@
 all: all-am
 
 .SUFFIXES:
