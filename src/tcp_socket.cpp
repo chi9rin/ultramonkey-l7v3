@@ -99,7 +99,8 @@ namespace l7vs{
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::write_some", __FILE__, __LINE__ );
 
 		std::size_t res_size = 0;
-		res_size = my_socket.write_some(buffers,ec);
+		if (open_flag)
+			res_size = my_socket.write_some(buffers,ec);
 		
 		return res_size;
 	}
@@ -113,7 +114,8 @@ namespace l7vs{
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::read_some", __FILE__, __LINE__ );
 			
 		std::size_t res_size = 0;
-		res_size = my_socket.read_some(buffers,ec);
+		if (open_flag)
+			res_size = my_socket.read_some(buffers,ec);
 		
 		return res_size;
 	}
