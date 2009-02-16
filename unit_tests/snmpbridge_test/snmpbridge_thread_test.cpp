@@ -168,6 +168,7 @@ void	sendmibcollection( int id, struct l7ag_mibrequest_message* payload ){
 void	snmpbridge_test_thread1(){
 	int ret = 0;
 	ret = test.initialize();
+	test.set_connection_state(true);
 
 	// unit_test[1] 複数スレッドからsend_trapを呼び出してもエラーが発生しないことを確認
 #if 1
