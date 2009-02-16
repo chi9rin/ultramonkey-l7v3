@@ -400,6 +400,14 @@ namespace l7vs{
 		}
 		boost::system::error_code ec;
 		client_socket.accept();
+		boost::xtime wait_time;
+		for(int i = 0;i < 100;i++){
+			if(client_socket.get_socket().is_open()) break;
+			boost::xtime_get(&wait_time, boost::TIME_UTC);
+			wait_time.nsec += 1000000;
+			boost::thread::sleep(wait_time);
+		}
+		
 		endpoint cl_end = client_socket.get_socket().remote_endpoint(ec);
 		if(ec){
 			//client endpoint get Error!
