@@ -52,6 +52,10 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
 	scopedLogMessage(msg),
 	scopedLogFile(file),
 	scopedLogLine(line){
+
+//	std::stringstream buf;
+//	buf << msg << "  " << file << "  " << line;
+//	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!
@@ -95,6 +99,10 @@ bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level){
  * @retrun  void
  */
 void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
+
+	std::stringstream buf;
+	buf << message << "  " << file << "  " << line;
+	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!
@@ -108,6 +116,9 @@ void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_
  * @retrun  void
  */
 void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
+	std::stringstream buf;
+	buf << message << "  " << file << "  " << line;
+	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!
@@ -121,6 +132,9 @@ void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_
  * @retrun  void
  */
 void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
+	std::stringstream buf;
+	buf << message << "  " << file << "  " << line;
+	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!
@@ -134,6 +148,9 @@ void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_i
  * @retrun  void
  */
 void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
+	std::stringstream buf;
+	buf << message << "  " << file << "  " << line;
+	BOOST_MESSAGE ( buf.str() ) ;
 }
 
 /*!
