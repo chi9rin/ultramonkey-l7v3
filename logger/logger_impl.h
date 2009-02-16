@@ -205,7 +205,7 @@ public:
 																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
 			// send_trap
-			if( snmpSendtrap ){
+			if( snmpSendtrap && ( LOG_CAT_L7VSD_SNMPBRIDGE != cat ) ){
 				snmpSendtrap( buf.str() );
 			}
 		}
@@ -263,7 +263,7 @@ public:
 																		buf.str(),
 																		log4cxx::spi::LocationInfo(file, "", line));
 			// send_trap
-			if( snmpSendtrap ){
+			if( snmpSendtrap && ( LOG_CAT_L7VSD_SNMPBRIDGE != cat ) ){
 				snmpSendtrap( buf.str() );
 			}
 		}
