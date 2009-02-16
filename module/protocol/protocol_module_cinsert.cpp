@@ -1772,19 +1772,20 @@ protocol_module_cinsert::handle_realserver_connect(
 
 		if( thread_data != NULL )
 		{
+std::cout	<< "check_point 1" << std::endl;
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
 			if( recive_data_itr != thread_data->recive_data_map.end() )
 			{
-
+std::cout	<< "check_point 2" << std::endl;
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
 
 				while( send_status_itr != recive_data_itr->second.send_status_list.end())
 				{
-
+std::cout	<< "check_point 3" << std::endl;
 					if( send_status_itr->status == SEND_OK )
 					{
-
+std::cout	<< "check_point 4" << std::endl;
 						break;
 
 					}
@@ -1794,17 +1795,19 @@ protocol_module_cinsert::handle_realserver_connect(
 				}
 
 			}
-
+std::cout	<< "check_point 5" << std::endl;
 			if( send_status_itr != recive_data_itr->second.send_status_list.end() )
 			{
+std::cout	<< "check_point 6" << std::endl;
 				if( send_status_itr->edit_division == EDIT_DIVISION_EDIT )
 				{
-	
+std::cout	<< "check_point 7" << std::endl;
 					if( send_status_itr->edit_data_list.empty() == true )
 					{
-
+std::cout	<< "check_point 8" << std::endl;
 						if( forwarded_for == 1 )
 						{
+std::cout	<< "check_point 9" << std::endl;
 							find_result
 								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
 														+ send_status_itr->send_offset,
@@ -1816,7 +1819,7 @@ protocol_module_cinsert::handle_realserver_connect(
 	
 							if( find_result == true )
 							{
-	
+std::cout	<< "check_point 10" << std::endl;
 								edit_data_x_forwarded_for.data.assign(
 																recive_data_itr->second.recive_buffer
 																	+ send_status_itr->send_offset
@@ -1834,7 +1837,7 @@ protocol_module_cinsert::handle_realserver_connect(
 							}
 							else
 							{
-	
+std::cout	<< "check_point 11" << std::endl;
 								find_result
 									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
 															+ send_status_itr->send_offset,
@@ -1845,7 +1848,7 @@ protocol_module_cinsert::handle_realserver_connect(
 	
 								if( find_result == true )
 								{
-		
+std::cout	<< "check_point 12" << std::endl;
 									edit_data_x_forwarded_for.data
 										+=	str(boost::format(	"%1%: %2%\r\n" )
 															% http_header_name_x_forwarded_for
@@ -1855,27 +1858,32 @@ protocol_module_cinsert::handle_realserver_connect(
 									edit_data_x_forwarded_for.insert_position	= http_header_offset;
 									edit_data_x_forwarded_for.replace_size		= 0;
 								}
-	
+
 							}
-	
+std::cout	<< "check_point 13" << std::endl;
+std::cout	<< edit_data_x_forwarded_for.data << std::endl;
+std::cout	<< edit_data_x_forwarded_for.data_size << std::endl;
+std::cout	<< edit_data_x_forwarded_for.insert_position << std::endl;
+std::cout	<< edit_data_x_forwarded_for.replace_size << std::endl;
+
 							send_status_itr->edit_data_list.push_back( edit_data_x_forwarded_for );
 						}
 					}
-	
+std::cout	<< "check_point 14" << std::endl;
 					while( 1 )
 					{
-	
+std::cout	<< "check_point 15" << std::endl;
 						if( send_status_itr->edit_data_list.empty() == true )
 						{
-	
+std::cout	<< "check_point 16" << std::endl;
 							send_status_itr->edit_division = EDIT_DIVISION_NO_EDIT;
 	
 							if( rest_datalen > 0 && send_status_itr->send_possible_size > 0 )
 							{
-	
+std::cout	<< "check_point 17" << std::endl;	
 								if( rest_datalen >= send_status_itr->send_possible_size )
 								{
-	
+std::cout	<< "check_point 18" << std::endl;
 									memcpy(	sendbuffer.data()
 												+	datalen,
 											recive_data_itr->second.recive_buffer
@@ -1883,18 +1891,18 @@ protocol_module_cinsert::handle_realserver_connect(
 												+	send_status_itr->send_end_size,
 											send_status_itr->send_possible_size );
 	
-									datalen += send_status_itr->send_possible_size; 
+									datalen += send_status_itr->send_possible_size;
 	
 									send_status_itr->send_end_size += send_status_itr->send_possible_size;
-	
-									send_status_itr->send_possible_size = 0;
-	
+
 									rest_datalen -= send_status_itr->send_possible_size;
 	
+									send_status_itr->send_possible_size = 0;
+
 								}
 								else
 								{
-	
+std::cout	<< "check_point 19" << std::endl;
 									memcpy(	sendbuffer.data()
 												+	datalen,
 											recive_data_itr->second.recive_buffer
@@ -1911,26 +1919,26 @@ protocol_module_cinsert::handle_realserver_connect(
 									rest_datalen = 0;
 	
 								}
-	
+
 								break;
-	
+
 							}
 	
 						}
 						else
 						{
-	
+std::cout	<< "check_point 20" << std::endl;
 							edit_data_itr = send_status_itr->edit_data_list.begin();
 	
 							min_insert_position_itr = edit_data_itr;
 	
 							while( edit_data_itr != send_status_itr->edit_data_list.end() )
 							{
-	
+std::cout	<< "check_point 21" << std::endl;
 								if( min_insert_position_itr->insert_position
 										> edit_data_itr->insert_position )
 								{
-	
+std::cout	<< "check_point 22" << std::endl;
 									min_insert_position_itr = edit_data_itr;
 	
 								}
@@ -1938,11 +1946,11 @@ protocol_module_cinsert::handle_realserver_connect(
 								edit_data_itr++;
 	
 							}
-	
+std::cout	<< "check_point 23" << std::endl;
 							if( rest_datalen >= ( min_insert_position_itr->insert_position
 													- send_status_itr->send_end_size ))
 							{
-	
+std::cout	<< "check_point 24" << std::endl;
 								memcpy(	sendbuffer.data()
 											+	datalen,
 										recive_data_itr->second.recive_buffer
@@ -1952,47 +1960,47 @@ protocol_module_cinsert::handle_realserver_connect(
 											-	send_status_itr->send_end_size );
 	
 								datalen
-									+=	min_insert_position_itr->insert_position
-									-	send_status_itr->send_end_size;
-	
-								send_status_itr->send_end_size
-									+=	min_insert_position_itr->insert_position
-									-	send_status_itr->send_end_size;
+									+=	( min_insert_position_itr->insert_position
+											- send_status_itr->send_end_size );
 	
 								send_status_itr->send_possible_size
 									-=	( min_insert_position_itr->insert_position
-											+	send_status_itr->send_end_size );
+											- send_status_itr->send_end_size );
 	
 								rest_datalen
 									-=	( min_insert_position_itr->insert_position
-											+	send_status_itr->send_end_size );
-	
-	
+											- send_status_itr->send_end_size );
+
+								send_status_itr->send_end_size
+									+=	( min_insert_position_itr->insert_position
+											- send_status_itr->send_end_size );
+
+std::cout	<< "check_point 25" << std::endl;
 								if( rest_datalen >= min_insert_position_itr->data_size )
 								{
-	
+std::cout	<< "check_point 26" << std::endl;
 									memcpy(	sendbuffer.data()
 												+	datalen,
 											min_insert_position_itr->data.data(),
 											min_insert_position_itr->data_size );
 	
 									datalen += min_insert_position_itr->data_size;
-	
+
 									send_status_itr->send_end_size
 										+=	min_insert_position_itr->replace_size;
-		
+
 									send_status_itr->send_possible_size
 										-=	min_insert_position_itr->replace_size;
-		
+
 									rest_datalen
 										-=	min_insert_position_itr->data_size;
-	
+
 									send_status_itr->edit_data_list.erase( min_insert_position_itr );
 	
 								}
 								else
 								{
-	
+std::cout	<< "check_point 27" << std::endl;
 									break;
 	
 								}
@@ -2000,7 +2008,7 @@ protocol_module_cinsert::handle_realserver_connect(
 							}
 							else
 							{
-	
+std::cout	<< "check_point 28" << std::endl;
 								memcpy(	sendbuffer.data()
 											+	datalen,
 										recive_data_itr->second.recive_buffer
@@ -2027,10 +2035,10 @@ protocol_module_cinsert::handle_realserver_connect(
 				}
 				else
 				{
-	
+std::cout	<< "check_point 29" << std::endl;
 					if( sendbuffer.size() >= send_status_itr->send_possible_size )
 					{
-	
+std::cout	<< "check_point 30" << std::endl;
 						memcpy(	sendbuffer.data(),
 								recive_data_itr->second.recive_buffer
 									+	send_status_itr->send_offset,
@@ -2045,7 +2053,7 @@ protocol_module_cinsert::handle_realserver_connect(
 					}
 					else
 					{
-	
+std::cout	<< "check_point 31" << std::endl;
 						memcpy(	sendbuffer.data(),
 								recive_data_itr->second.recive_buffer
 									+	send_status_itr->send_offset,
@@ -2060,7 +2068,7 @@ protocol_module_cinsert::handle_realserver_connect(
 					}
 	
 				}
-	
+std::cout	<< "check_point 32" << std::endl;
 				status = REALSERVER_SEND;
 
 			}
@@ -2068,8 +2076,10 @@ protocol_module_cinsert::handle_realserver_connect(
 		}
 	} catch (const std::exception& ex)
 	{
+std::cout	<< "check_point 33" << std::endl;
 	} catch (...)
 	{
+std::cout	<< "check_point 34" << std::endl;
 	}
 	return	status;
 
@@ -4057,6 +4067,12 @@ protocol_module_cinsert::handle_client_connection_check(
 		{
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->last_endpoint_tcp );
 
+			if( recive_data_itr == thread_data->recive_data_map.end())
+			{
+				recive_data_itr = thread_data->recive_data_map.begin();
+				thread_data->last_endpoint_tcp = recive_data_itr->first;
+			}
+
 			while( recive_data_itr != thread_data->recive_data_map.end() )
 			{
 
@@ -4097,6 +4113,9 @@ protocol_module_cinsert::handle_client_connection_check(
 
 			if( send_ok_flag == 1 )
 			{
+
+				thread_data->last_endpoint_tcp = recive_data_itr->first;
+
 				if( send_status_itr->edit_division == EDIT_DIVISION_EDIT )
 				{
 	
@@ -4170,11 +4189,11 @@ protocol_module_cinsert::handle_client_connection_check(
 									datalen += send_status_itr->send_possible_size; 
 	
 									send_status_itr->send_end_size += send_status_itr->send_possible_size;
-	
-									send_status_itr->send_possible_size = 0;
-	
+
 									rest_datalen -= send_status_itr->send_possible_size;
 	
+									send_status_itr->send_possible_size = 0;
+
 								}
 								else
 								{
@@ -4236,22 +4255,21 @@ protocol_module_cinsert::handle_client_connection_check(
 											-	send_status_itr->send_end_size );
 	
 								datalen
-									+=	min_insert_position_itr->insert_position
-									-	send_status_itr->send_end_size;
-	
-								send_status_itr->send_end_size
-									+=	min_insert_position_itr->insert_position
-									-	send_status_itr->send_end_size;
-	
+									+=	( min_insert_position_itr->insert_position
+											- send_status_itr->send_end_size );
+
 								send_status_itr->send_possible_size
 									-=	( min_insert_position_itr->insert_position
-											+	send_status_itr->send_end_size );
+											- send_status_itr->send_end_size );
 	
 								rest_datalen
 									-=	( min_insert_position_itr->insert_position
-											+	send_status_itr->send_end_size );
-	
-	
+											- send_status_itr->send_end_size );
+
+								send_status_itr->send_end_size
+									+=	( min_insert_position_itr->insert_position
+											- send_status_itr->send_end_size );
+
 								if( rest_datalen >= min_insert_position_itr->data_size )
 								{
 	
