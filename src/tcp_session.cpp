@@ -398,19 +398,21 @@ namespace l7vs{
 			exit_flag = true;
 			return;
 		}
-		boost::system::error_code ec;
-		client_socket.accept();
-		endpoint cl_end;
-		boost::xtime wait_time;
-		for(int i = 0;i < 5000;i++){
-			cl_end = client_socket.get_socket().remote_endpoint(ec);
-			if(!ec) break;
-			
-			boost::xtime_get(&wait_time, boost::TIME_UTC);
-			wait_time.nsec += 1000000;
-			boost::thread::sleep(wait_time);
+		
+		if(!client_socket.get_socket().is_open()){
+			//client socket not open Error!
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] client socket not open!";
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			exit_flag = true;
+			return;
 		}
 		
+		boost::system::error_code ec;
+		client_socket.accept();
+		endpoint cl_end = client_socket.get_socket().remote_endpoint(ec);
 		if(ec){
 			//client endpoint get Error!
 			std::stringstream buf;
@@ -485,10 +487,6 @@ namespace l7vs{
 			// wait down thread alive
 		}
 		protocol_module->handle_session_finalize(up_thread_id,down_thread_id);
-		// reset nonblocking mode
-		boost::asio::socket_base::non_blocking_io cmd(false);
-		client_socket.get_socket().io_control(cmd,ec);
-		sorryserver_socket.second->get_socket().io_control(cmd,ec);
 		
 		thread_state_update(UP_THREAD_ALIVE,false);
 		parent_service.release_session(up_thread_id);
