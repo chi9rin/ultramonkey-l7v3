@@ -485,6 +485,11 @@ namespace l7vs{
 			// wait down thread alive
 		}
 		protocol_module->handle_session_finalize(up_thread_id,down_thread_id);
+		// reset nonblocking mode
+		boost::asio::socket_base::non_blocking_io cmd(false);
+		client_socket.get_socket().io_control(cmd,ec);
+		sorryserver_socket.second->get_socket().io_control(cmd,ec);
+		
 		thread_state_update(UP_THREAD_ALIVE,false);
 		parent_service.release_session(up_thread_id);
 	}
