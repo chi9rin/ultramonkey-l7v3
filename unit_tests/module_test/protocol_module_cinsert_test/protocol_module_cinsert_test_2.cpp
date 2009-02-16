@@ -1965,6 +1965,829 @@ void	handle_sorry_disable_test(){
 }
 
 
+
+
+
+//--handle_realserver_connection_fail_test_class --
+class	handle_realserver_connection_fail_test_class : public protocol_module_cinsert
+{
+	public:
+		handle_realserver_connection_fail_test_class() : protocol_module_cinsert() {};
+		~handle_realserver_connection_fail_test_class(){};
+		
+		
+		boost::condition	sync_condition;
+		
+		boost::thread::id thread_id_01;
+		boost::asio::ip::tcp::endpoint rs_end_01;
+		boost::mutex		sync_mutex_01;
+		protocol_module_cinsert::EVENT_TAG	status_01;
+		boost::xtime	start_time_01;
+		boost::xtime	end_time_01;
+		
+		boost::thread::id thread_id_02;
+		boost::asio::ip::tcp::endpoint rs_end_02;
+		boost::mutex		sync_mutex_02;
+		protocol_module_cinsert::EVENT_TAG	status_02;
+		boost::xtime	start_time_02;
+		boost::xtime	end_time_02;
+		
+		boost::thread::id thread_id_03;
+		boost::asio::ip::tcp::endpoint rs_end_03;
+		boost::mutex		sync_mutex_03;
+		protocol_module_cinsert::EVENT_TAG	status_03;
+		boost::xtime	start_time_03;
+		boost::xtime	end_time_03;
+		
+		boost::thread::id thread_id_04;
+		boost::asio::ip::tcp::endpoint rs_end_04;
+		boost::mutex		sync_mutex_04;
+		protocol_module_cinsert::EVENT_TAG	status_04;
+		boost::xtime	start_time_04;
+		boost::xtime	end_time_04;
+		
+		boost::thread::id thread_id_05;
+		boost::asio::ip::tcp::endpoint rs_end_05;
+		boost::mutex		sync_mutex_05;
+		protocol_module_cinsert::EVENT_TAG	status_05;
+		boost::xtime	start_time_05;
+		boost::xtime	end_time_05;
+		
+		boost::thread::id thread_id_06;
+		boost::asio::ip::tcp::endpoint rs_end_06;
+		boost::mutex		sync_mutex_06;
+		protocol_module_cinsert::EVENT_TAG	status_06;
+		boost::xtime	start_time_06;
+		boost::xtime	end_time_06;
+		
+		boost::thread::id thread_id_07;
+		boost::asio::ip::tcp::endpoint rs_end_07;
+		boost::mutex		sync_mutex_07;
+		protocol_module_cinsert::EVENT_TAG	status_07;
+		boost::xtime	start_time_07;
+		boost::xtime	end_time_07;
+		
+		boost::thread::id thread_id_08;
+		boost::asio::ip::tcp::endpoint rs_end_08;
+		boost::mutex		sync_mutex_08;
+		protocol_module_cinsert::EVENT_TAG	status_08;
+		boost::xtime	start_time_08;
+		boost::xtime	end_time_08;
+		
+		boost::thread::id thread_id_09;
+		boost::asio::ip::tcp::endpoint rs_end_09;
+		boost::mutex		sync_mutex_09;
+		protocol_module_cinsert::EVENT_TAG	status_09;
+		boost::xtime	start_time_09;
+		boost::xtime	end_time_09;
+		
+		boost::thread::id thread_id_10;
+		boost::asio::ip::tcp::endpoint rs_end_10;
+		boost::mutex		sync_mutex_10;
+		protocol_module_cinsert::EVENT_TAG	status_10;
+		boost::xtime	start_time_10;
+		boost::xtime	end_time_10;
+		
+		void test_thread_01_run(){
+			thread_id_01 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_01 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_01, boost::TIME_UTC);
+			status_01 = handle_realserver_connection_fail(thread_id_01,rs_end_01);
+			boost::xtime_get(&end_time_01, boost::TIME_UTC);
+		};
+		
+		void test_thread_02_run(){
+			thread_id_02 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_02 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_02, boost::TIME_UTC);
+			status_02 = handle_realserver_connection_fail(thread_id_02,rs_end_02);
+			boost::xtime_get(&end_time_02, boost::TIME_UTC);
+		};
+		
+		void test_thread_03_run(){
+			thread_id_03 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_03 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_03, boost::TIME_UTC);
+			status_03 = handle_realserver_connection_fail(thread_id_03,rs_end_03);
+			boost::xtime_get(&end_time_03, boost::TIME_UTC);
+		};
+		
+		void test_thread_04_run(){
+			thread_id_04 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_04 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_04, boost::TIME_UTC);
+			status_04 = handle_realserver_connection_fail(thread_id_04,rs_end_04);
+			boost::xtime_get(&end_time_04, boost::TIME_UTC);
+		};
+		
+		void test_thread_05_run(){
+			thread_id_05 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_05 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_05, boost::TIME_UTC);
+			status_05 = handle_realserver_connection_fail(thread_id_05,rs_end_05);
+			boost::xtime_get(&end_time_05, boost::TIME_UTC);
+		};
+		
+		void test_thread_06_run(){
+			thread_id_06 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_06 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_06, boost::TIME_UTC);
+			status_06 = handle_realserver_connection_fail(thread_id_06,rs_end_06);
+			boost::xtime_get(&end_time_06, boost::TIME_UTC);
+		};
+		
+		void test_thread_07_run(){
+			thread_id_07 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_07 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_07, boost::TIME_UTC);
+			status_07 = handle_realserver_connection_fail(thread_id_07,rs_end_07);
+			boost::xtime_get(&end_time_07, boost::TIME_UTC);
+		};
+		
+		void test_thread_08_run(){
+			thread_id_07 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_08);
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_08, boost::TIME_UTC);
+			status_08 = handle_realserver_connection_fail(thread_id_08,rs_end_08);
+			boost::xtime_get(&end_time_08, boost::TIME_UTC);
+		};
+		
+		void test_thread_09_run(){
+			thread_id_09 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_09);
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_09, boost::TIME_UTC);
+			status_09 = handle_realserver_connection_fail(thread_id_09,rs_end_09);
+			boost::xtime_get(&end_time_09, boost::TIME_UTC);
+		};
+		
+		void test_thread_10_run(){
+			thread_id_10 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_10);
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_10, boost::TIME_UTC);
+			status_10 = handle_realserver_connection_fail(thread_id_10,rs_end_10);
+			boost::xtime_get(&end_time_10, boost::TIME_UTC);
+		};
+		
+		
+		t_session_thread_data_map& get_session_thread_data_map(){
+			return session_thread_data_map;
+		};
+		
+};
+
+void handle_realserver_connection_fail_test(){
+	BOOST_MESSAGE( "----- handle_realserver_connection_fail test end -----" );
+	
+	handle_realserver_connection_fail_test_class	test_obj;
+	protocol_module_cinsert::t_session_thread_data_map& session_thread_data_map = test_obj.get_session_thread_data_map();
+	
+	// session_thread_data_map empty
+	session_thread_data_map.clear();
+	
+	// unit_test [1] handle_realserver_connection_fail session_thread_data_map empty return STOP
+	std::cout << "[1] handle_realserver_connection_fail session_thread_data_map empty return STOP" << std::endl;
+	protocol_module_cinsert::EVENT_TAG status = test_obj.handle_realserver_connection_fail(boost::this_thread::get_id(),boost::asio::ip::tcp::endpoint());
+	// check1 return STOP 
+	BOOST_CHECK_EQUAL(status,protocol_module_cinsert::STOP);
+	
+	boost::thread test_thread_01(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_01_run,&test_obj));
+	boost::thread test_thread_02(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_02_run,&test_obj));
+	boost::thread test_thread_03(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_03_run,&test_obj));
+	boost::thread test_thread_04(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_04_run,&test_obj));
+	boost::thread test_thread_05(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_05_run,&test_obj));
+	boost::thread test_thread_06(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_06_run,&test_obj));
+	boost::thread test_thread_07(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_07_run,&test_obj));
+	boost::thread test_thread_08(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_08_run,&test_obj));
+	boost::thread test_thread_09(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_09_run,&test_obj));
+	boost::thread test_thread_10(boost::bind(&handle_realserver_connection_fail_test_class::test_thread_10_run,&test_obj));
+
+	// sync_condition wait
+	sleep(2);
+	
+	// set session_thread_data_map
+	
+	// thread 1
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_1_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_1_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_1_data.first = test_obj.thread_id_01;
+	session_thread_data_map.insert(thread_1_data);
+	
+	// thread 2
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_2_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_2_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_2_data.first = test_obj.thread_id_02;
+	thread_2_data.second = thread_2_read_data;
+	thread_2_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_2_data);
+	
+	// thread 3
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_3_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_3_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_3_data.first = test_obj.thread_id_03;
+	session_thread_data_map.insert(thread_3_data);
+	
+	// thread 4
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_4_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_4_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_4_data.first = test_obj.thread_id_04;
+	thread_4_data.second = thread_4_read_data;
+	thread_4_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_4_data);
+	
+	// thread 5
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_5_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_5_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_5_data.first = test_obj.thread_id_05;
+	session_thread_data_map.insert(thread_5_data);
+	
+	// thread 6
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_6_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_6_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_6_data.first = test_obj.thread_id_06;
+	thread_6_data.second = thread_6_read_data;
+	thread_6_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_6_data);
+	
+	// thread 7
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_7_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_7_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_7_data.first = test_obj.thread_id_07;
+	session_thread_data_map.insert(thread_7_data);
+	
+	// thread 8
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_8_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_8_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_8_data.first = test_obj.thread_id_08;
+	thread_8_data.second = thread_8_read_data;
+	thread_8_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_8_data);
+	
+	// thread 9
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_9_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_9_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_9_data.first = test_obj.thread_id_09;
+	session_thread_data_map.insert(thread_9_data);
+	
+	// thread 10
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_10_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_10_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_10_data.first = test_obj.thread_id_10;
+	thread_10_data.second = thread_10_read_data;
+	thread_10_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_10_data);
+	
+	
+	test_obj.sync_condition.notify_all();
+	
+//	std::cout << "sync_condition.notify_all" << std::endl;
+	
+	test_thread_01.join();
+//	std::cout << "test_thread_01 stop" << std::endl;
+	test_thread_02.join();
+//	std::cout << "test_thread_02 stop" << std::endl;
+	test_thread_03.join();
+//	std::cout << "test_thread_03 stop" << std::endl;
+	test_thread_04.join();
+//	std::cout << "test_thread_04 stop" << std::endl;
+	test_thread_05.join();
+//	std::cout << "test_thread_05 stop" << std::endl;
+	test_thread_06.join();
+//	std::cout << "test_thread_06 stop" << std::endl;
+	test_thread_07.join();
+//	std::cout << "test_thread_07 stop" << std::endl;
+	test_thread_08.join();
+//	std::cout << "test_thread_08 stop" << std::endl;
+	test_thread_09.join();
+//	std::cout << "test_thread_09 stop" << std::endl;
+	test_thread_10.join();
+//	std::cout << "test_thread_10 stop" << std::endl;
+ 	
+	std::cout << "test_thread_01 start time [" << test_obj.start_time_01.nsec << "]" << std::endl;
+	std::cout << "test_thread_02 start time [" << test_obj.start_time_02.nsec << "]" << std::endl;
+	std::cout << "test_thread_03 start time [" << test_obj.start_time_03.nsec << "]" << std::endl;
+	std::cout << "test_thread_04 start time [" << test_obj.start_time_04.nsec << "]" << std::endl;
+	std::cout << "test_thread_05 start time [" << test_obj.start_time_05.nsec << "]" << std::endl;
+	std::cout << "test_thread_06 start time [" << test_obj.start_time_06.nsec << "]" << std::endl;
+	std::cout << "test_thread_07 start time [" << test_obj.start_time_07.nsec << "]" << std::endl;
+	std::cout << "test_thread_08 start time [" << test_obj.start_time_08.nsec << "]" << std::endl;
+	std::cout << "test_thread_09 start time [" << test_obj.start_time_09.nsec << "]" << std::endl;
+	std::cout << "test_thread_10 start time [" << test_obj.start_time_10.nsec << "]" << std::endl;
+	
+	std::cout << "test_thread_01 end time [" << test_obj.end_time_01.nsec << "]" << std::endl;
+	std::cout << "test_thread_02 end time [" << test_obj.end_time_02.nsec << "]" << std::endl;
+	std::cout << "test_thread_03 end time [" << test_obj.end_time_03.nsec << "]" << std::endl;
+	std::cout << "test_thread_04 end time [" << test_obj.end_time_04.nsec << "]" << std::endl;
+	std::cout << "test_thread_05 end time [" << test_obj.end_time_05.nsec << "]" << std::endl;
+	std::cout << "test_thread_06 end time [" << test_obj.end_time_06.nsec << "]" << std::endl;
+	std::cout << "test_thread_07 end time [" << test_obj.end_time_07.nsec << "]" << std::endl;
+	std::cout << "test_thread_08 end time [" << test_obj.end_time_08.nsec << "]" << std::endl;
+	std::cout << "test_thread_09 end time [" << test_obj.end_time_09.nsec << "]" << std::endl;
+	std::cout << "test_thread_10 end time [" << test_obj.end_time_10.nsec << "]" << std::endl;
+	
+	// unit_test [2] handle_realserver_connection_fail thread_data is NULL return STOP
+	std::cout << "[2] handle_realserver_connection_fail thread_data is NULL return STOP" << std::endl;
+	
+	// thread 1
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_01,protocol_module_cinsert::STOP);
+	
+	// thread 3
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_03,protocol_module_cinsert::STOP);
+	
+	// thread 5
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_05,protocol_module_cinsert::STOP);
+	
+	// thread 7
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_07,protocol_module_cinsert::STOP);
+	
+	// thread 9
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_09,protocol_module_cinsert::STOP);
+
+	// unit_test [3] handle_realserver_connection_fail thread_data is not NULL return REALSERVER_DISCONNECT
+	std::cout << "[3] handle_realserver_connection_fail thread_data is not NULL return REALSERVER_DISCONNECT" << std::endl;
+	// thread 2
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_2_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_02,protocol_module_cinsert::REALSERVER_DISCONNECT);
+		
+	// thread 4
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_4_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_04,protocol_module_cinsert::REALSERVER_DISCONNECT);
+
+	// thread 6
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_6_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_06,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	
+	// thread 8
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_8_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_08,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	
+	// thread 10
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_10_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_10,protocol_module_cinsert::REALSERVER_DISCONNECT);
+
+	BOOST_MESSAGE( "----- handle_realserver_connection_fail test end -----" );
+}
+
+//--handle_sorryserver_connection_fail_test_class --
+class	handle_sorryserver_connection_fail_test_class : public protocol_module_cinsert
+{
+	public:
+		handle_sorryserver_connection_fail_test_class() : protocol_module_cinsert() {};
+		~handle_sorryserver_connection_fail_test_class(){};
+		
+		
+		boost::condition	sync_condition;
+		
+		boost::thread::id thread_id_01;
+		boost::asio::ip::tcp::endpoint rs_end_01;
+		boost::mutex		sync_mutex_01;
+		protocol_module_cinsert::EVENT_TAG	status_01;
+		boost::xtime	start_time_01;
+		boost::xtime	end_time_01;
+		
+		boost::thread::id thread_id_02;
+		boost::asio::ip::tcp::endpoint rs_end_02;
+		boost::mutex		sync_mutex_02;
+		protocol_module_cinsert::EVENT_TAG	status_02;
+		boost::xtime	start_time_02;
+		boost::xtime	end_time_02;
+		
+		boost::thread::id thread_id_03;
+		boost::asio::ip::tcp::endpoint rs_end_03;
+		boost::mutex		sync_mutex_03;
+		protocol_module_cinsert::EVENT_TAG	status_03;
+		boost::xtime	start_time_03;
+		boost::xtime	end_time_03;
+		
+		boost::thread::id thread_id_04;
+		boost::asio::ip::tcp::endpoint rs_end_04;
+		boost::mutex		sync_mutex_04;
+		protocol_module_cinsert::EVENT_TAG	status_04;
+		boost::xtime	start_time_04;
+		boost::xtime	end_time_04;
+		
+		boost::thread::id thread_id_05;
+		boost::asio::ip::tcp::endpoint rs_end_05;
+		boost::mutex		sync_mutex_05;
+		protocol_module_cinsert::EVENT_TAG	status_05;
+		boost::xtime	start_time_05;
+		boost::xtime	end_time_05;
+		
+		boost::thread::id thread_id_06;
+		boost::asio::ip::tcp::endpoint rs_end_06;
+		boost::mutex		sync_mutex_06;
+		protocol_module_cinsert::EVENT_TAG	status_06;
+		boost::xtime	start_time_06;
+		boost::xtime	end_time_06;
+		
+		boost::thread::id thread_id_07;
+		boost::asio::ip::tcp::endpoint rs_end_07;
+		boost::mutex		sync_mutex_07;
+		protocol_module_cinsert::EVENT_TAG	status_07;
+		boost::xtime	start_time_07;
+		boost::xtime	end_time_07;
+		
+		boost::thread::id thread_id_08;
+		boost::asio::ip::tcp::endpoint rs_end_08;
+		boost::mutex		sync_mutex_08;
+		protocol_module_cinsert::EVENT_TAG	status_08;
+		boost::xtime	start_time_08;
+		boost::xtime	end_time_08;
+		
+		boost::thread::id thread_id_09;
+		boost::asio::ip::tcp::endpoint rs_end_09;
+		boost::mutex		sync_mutex_09;
+		protocol_module_cinsert::EVENT_TAG	status_09;
+		boost::xtime	start_time_09;
+		boost::xtime	end_time_09;
+		
+		boost::thread::id thread_id_10;
+		boost::asio::ip::tcp::endpoint rs_end_10;
+		boost::mutex		sync_mutex_10;
+		protocol_module_cinsert::EVENT_TAG	status_10;
+		boost::xtime	start_time_10;
+		boost::xtime	end_time_10;
+		
+		void test_thread_01_run(){
+			thread_id_01 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_01 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_01, boost::TIME_UTC);
+			status_01 = handle_sorryserver_connection_fail(thread_id_01,rs_end_01);
+			boost::xtime_get(&end_time_01, boost::TIME_UTC);
+		};
+		
+		void test_thread_02_run(){
+			thread_id_02 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_02 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_02, boost::TIME_UTC);
+			status_02 = handle_sorryserver_connection_fail(thread_id_02,rs_end_02);
+			boost::xtime_get(&end_time_02, boost::TIME_UTC);
+		};
+		
+		void test_thread_03_run(){
+			thread_id_03 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_03 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_03, boost::TIME_UTC);
+			status_03 = handle_sorryserver_connection_fail(thread_id_03,rs_end_03);
+			boost::xtime_get(&end_time_03, boost::TIME_UTC);
+		};
+		
+		void test_thread_04_run(){
+			thread_id_04 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_04 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_04, boost::TIME_UTC);
+			status_04 = handle_sorryserver_connection_fail(thread_id_04,rs_end_04);
+			boost::xtime_get(&end_time_04, boost::TIME_UTC);
+		};
+		
+		void test_thread_05_run(){
+			thread_id_05 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_05 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_05, boost::TIME_UTC);
+			status_05 = handle_sorryserver_connection_fail(thread_id_05,rs_end_05);
+			boost::xtime_get(&end_time_05, boost::TIME_UTC);
+		};
+		
+		void test_thread_06_run(){
+			thread_id_06 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_06 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_06, boost::TIME_UTC);
+			status_06 = handle_sorryserver_connection_fail(thread_id_06,rs_end_06);
+			boost::xtime_get(&end_time_06, boost::TIME_UTC);
+		};
+		
+		void test_thread_07_run(){
+			thread_id_07 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_07 );
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_07, boost::TIME_UTC);
+			status_07 = handle_sorryserver_connection_fail(thread_id_07,rs_end_07);
+			boost::xtime_get(&end_time_07, boost::TIME_UTC);
+		};
+		
+		void test_thread_08_run(){
+			thread_id_07 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_08);
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_08, boost::TIME_UTC);
+			status_08 = handle_sorryserver_connection_fail(thread_id_08,rs_end_08);
+			boost::xtime_get(&end_time_08, boost::TIME_UTC);
+		};
+		
+		void test_thread_09_run(){
+			thread_id_09 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_09);
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_09, boost::TIME_UTC);
+			status_09 = handle_sorryserver_connection_fail(thread_id_09,rs_end_09);
+			boost::xtime_get(&end_time_09, boost::TIME_UTC);
+		};
+		
+		void test_thread_10_run(){
+			thread_id_10 = boost::this_thread::get_id();
+			boost::mutex::scoped_lock	lk( sync_mutex_10);
+			sync_condition.wait( lk );
+			boost::xtime_get(&start_time_10, boost::TIME_UTC);
+			status_10 = handle_sorryserver_connection_fail(thread_id_10,rs_end_10);
+			boost::xtime_get(&end_time_10, boost::TIME_UTC);
+		};
+		
+		
+		t_session_thread_data_map& get_session_thread_data_map(){
+			return session_thread_data_map;
+		};
+		
+};
+
+void handle_sorryserver_connection_fail_test(){
+	BOOST_MESSAGE( "----- handle_sorryserver_connection_fail test end -----" );
+	
+	handle_sorryserver_connection_fail_test_class	test_obj;
+	protocol_module_cinsert::t_session_thread_data_map& session_thread_data_map = test_obj.get_session_thread_data_map();
+	
+	// session_thread_data_map empty
+	session_thread_data_map.clear();
+	
+	// unit_test [1] handle_sorryserver_connection_fail session_thread_data_map empty return STOP
+	std::cout << "[1] handle_sorryserver_connection_fail session_thread_data_map empty return STOP" << std::endl;
+	protocol_module_cinsert::EVENT_TAG status = test_obj.handle_realserver_connection_fail(boost::this_thread::get_id(),boost::asio::ip::tcp::endpoint());
+	// check1 return STOP 
+	BOOST_CHECK_EQUAL(status,protocol_module_cinsert::STOP);
+	
+	boost::thread test_thread_01(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_01_run,&test_obj));
+	boost::thread test_thread_02(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_02_run,&test_obj));
+	boost::thread test_thread_03(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_03_run,&test_obj));
+	boost::thread test_thread_04(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_04_run,&test_obj));
+	boost::thread test_thread_05(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_05_run,&test_obj));
+	boost::thread test_thread_06(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_06_run,&test_obj));
+	boost::thread test_thread_07(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_07_run,&test_obj));
+	boost::thread test_thread_08(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_08_run,&test_obj));
+	boost::thread test_thread_09(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_09_run,&test_obj));
+	boost::thread test_thread_10(boost::bind(&handle_sorryserver_connection_fail_test_class::test_thread_10_run,&test_obj));
+
+	// sync_condition wait
+	sleep(2);
+	
+	// set session_thread_data_map
+	
+	// thread 1
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_1_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_1_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_1_data.first = test_obj.thread_id_01;
+	session_thread_data_map.insert(thread_1_data);
+	
+	// thread 2
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_2_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_2_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_2_data.first = test_obj.thread_id_02;
+	thread_2_data.second = thread_2_read_data;
+	thread_2_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_2_data);
+	
+	// thread 3
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_3_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_3_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_3_data.first = test_obj.thread_id_03;
+	session_thread_data_map.insert(thread_3_data);
+	
+	// thread 4
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_4_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_4_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_4_data.first = test_obj.thread_id_04;
+	thread_4_data.second = thread_4_read_data;
+	thread_4_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_4_data);
+	
+	// thread 5
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_5_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_5_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_5_data.first = test_obj.thread_id_05;
+	session_thread_data_map.insert(thread_5_data);
+	
+	// thread 6
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_6_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_6_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_6_data.first = test_obj.thread_id_06;
+	thread_6_data.second = thread_6_read_data;
+	thread_6_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_6_data);
+	
+	// thread 7
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_7_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_7_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_7_data.first = test_obj.thread_id_07;
+	session_thread_data_map.insert(thread_7_data);
+	
+	// thread 8
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_8_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_8_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_8_data.first = test_obj.thread_id_08;
+	thread_8_data.second = thread_8_read_data;
+	thread_8_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_8_data);
+	
+	// thread 9
+	// session_thread_data_map fond thread id
+	// thread_data is NULL
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_9_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_9_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_9_data.first = test_obj.thread_id_09;
+	session_thread_data_map.insert(thread_9_data);
+	
+	// thread 10
+	// session_thread_data_map fond thread id
+	// thread_data is not NULL
+	// thread_data->end_flag = END_FLAG_OFF
+	std::pair< boost::thread::id, protocol_module_cinsert::t_session_thread_data_cinsert > thread_10_data;
+	boost::shared_ptr< protocol_module_cinsert::session_thread_data_cinsert > thread_10_read_data(new protocol_module_cinsert::session_thread_data_cinsert);
+	thread_10_data.first = test_obj.thread_id_10;
+	thread_10_data.second = thread_10_read_data;
+	thread_10_read_data->end_flag = protocol_module_cinsert::END_FLAG_OFF;
+	session_thread_data_map.insert(thread_10_data);
+	
+	
+	test_obj.sync_condition.notify_all();
+	
+//	std::cout << "sync_condition.notify_all" << std::endl;
+	
+	test_thread_01.join();
+//	std::cout << "test_thread_01 stop" << std::endl;
+	test_thread_02.join();
+//	std::cout << "test_thread_02 stop" << std::endl;
+	test_thread_03.join();
+//	std::cout << "test_thread_03 stop" << std::endl;
+	test_thread_04.join();
+//	std::cout << "test_thread_04 stop" << std::endl;
+	test_thread_05.join();
+//	std::cout << "test_thread_05 stop" << std::endl;
+	test_thread_06.join();
+//	std::cout << "test_thread_06 stop" << std::endl;
+	test_thread_07.join();
+//	std::cout << "test_thread_07 stop" << std::endl;
+	test_thread_08.join();
+//	std::cout << "test_thread_08 stop" << std::endl;
+	test_thread_09.join();
+//	std::cout << "test_thread_09 stop" << std::endl;
+	test_thread_10.join();
+//	std::cout << "test_thread_10 stop" << std::endl;
+ 	
+	std::cout << "test_thread_01 start time [" << test_obj.start_time_01.nsec << "]" << std::endl;
+	std::cout << "test_thread_02 start time [" << test_obj.start_time_02.nsec << "]" << std::endl;
+	std::cout << "test_thread_03 start time [" << test_obj.start_time_03.nsec << "]" << std::endl;
+	std::cout << "test_thread_04 start time [" << test_obj.start_time_04.nsec << "]" << std::endl;
+	std::cout << "test_thread_05 start time [" << test_obj.start_time_05.nsec << "]" << std::endl;
+	std::cout << "test_thread_06 start time [" << test_obj.start_time_06.nsec << "]" << std::endl;
+	std::cout << "test_thread_07 start time [" << test_obj.start_time_07.nsec << "]" << std::endl;
+	std::cout << "test_thread_08 start time [" << test_obj.start_time_08.nsec << "]" << std::endl;
+	std::cout << "test_thread_09 start time [" << test_obj.start_time_09.nsec << "]" << std::endl;
+	std::cout << "test_thread_10 start time [" << test_obj.start_time_10.nsec << "]" << std::endl;
+	
+	std::cout << "test_thread_01 end time [" << test_obj.end_time_01.nsec << "]" << std::endl;
+	std::cout << "test_thread_02 end time [" << test_obj.end_time_02.nsec << "]" << std::endl;
+	std::cout << "test_thread_03 end time [" << test_obj.end_time_03.nsec << "]" << std::endl;
+	std::cout << "test_thread_04 end time [" << test_obj.end_time_04.nsec << "]" << std::endl;
+	std::cout << "test_thread_05 end time [" << test_obj.end_time_05.nsec << "]" << std::endl;
+	std::cout << "test_thread_06 end time [" << test_obj.end_time_06.nsec << "]" << std::endl;
+	std::cout << "test_thread_07 end time [" << test_obj.end_time_07.nsec << "]" << std::endl;
+	std::cout << "test_thread_08 end time [" << test_obj.end_time_08.nsec << "]" << std::endl;
+	std::cout << "test_thread_09 end time [" << test_obj.end_time_09.nsec << "]" << std::endl;
+	std::cout << "test_thread_10 end time [" << test_obj.end_time_10.nsec << "]" << std::endl;
+	
+	// unit_test [2] handle_sorryserver_connection_fail thread_data is NULL return STOP
+	std::cout << "[2] handle_sorryserver_connection_fail thread_data is NULL return STOP" << std::endl;
+	
+	// thread 1
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_01,protocol_module_cinsert::STOP);
+	
+	// thread 3
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_03,protocol_module_cinsert::STOP);
+	
+	// thread 5
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_05,protocol_module_cinsert::STOP);
+	
+	// thread 7
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_07,protocol_module_cinsert::STOP);
+	
+	// thread 9
+	// check1 return STOP
+	BOOST_CHECK_EQUAL(test_obj.status_09,protocol_module_cinsert::STOP);
+	
+	// unit_test [3] handle_sorryserver_connection_fail thread_data is not NULL return SORRYSERVER_DISCONNECT
+	std::cout << "[3] handle_sorryserver_connection_fail thread_data is not NULL return SORRYSERVER_DISCONNECT" << std::endl;
+	
+	// thread 2
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_2_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_02,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+		
+	// thread 4
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_4_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_04,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+
+	// thread 6
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_6_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_06,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	
+	// thread 8
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_8_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_08,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	
+	// thread 10
+	// check1 thread_data->end_flag = END_FLAG_ON
+	BOOST_CHECK( thread_10_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
+	// check2 return REALSERVER_DISCONNECT
+	BOOST_CHECK_EQUAL(test_obj.status_10,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+
+	BOOST_MESSAGE( "----- handle_sorryserver_connection_fail test end -----" );
+}
+
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
@@ -1973,7 +2796,9 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	ts->add( BOOST_TEST_CASE( &handle_sorry_enable_test ) );
 	ts->add( BOOST_TEST_CASE( &handle_sorry_disable_test ) );
-
+	ts->add( BOOST_TEST_CASE( &handle_realserver_connection_fail_test ) );
+	ts->add( BOOST_TEST_CASE( &handle_sorryserver_connection_fail_test ) );
+	
 	framework::master_test_suite().add( ts );
 
 	return 0;
