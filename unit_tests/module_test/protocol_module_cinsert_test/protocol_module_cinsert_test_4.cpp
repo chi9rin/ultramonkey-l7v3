@@ -1214,8 +1214,7 @@ void	handle_realserver_select_test()
 	strcpy( recive_data_itr->second.recive_buffer, data.c_str() );
 	recive_data_itr->second.recive_buffer_rest_size -= data.size();
 	send_status_itr->send_possible_size = data.size();
-	memcpy( cookie_name.data(), "CookieName", sizeof( "CookieName" ) );
-
+	strcpy( cookie_name.data(), "CookieName" );
 
 	thread_data_itr->second->end_flag = END_FLAG_OFF;
 	schedule_tcp.clear();
