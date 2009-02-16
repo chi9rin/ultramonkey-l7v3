@@ -1555,13 +1555,14 @@ protocol_module_cinsert::handle_realserver_select(
 	size_t	http_header_offset	= 0;
 	size_t	http_header_len		= 0;
 	std::string		http_header_name_cookie = "Cookie";
+	std::string		cookie_name_str = cookie_name.data();
 	std::string		cookie;
 	std::string		cookie_address;
 	std::string		cookie_port;
 	match_results< const char* >	regex_result;
 	cregex	cookie_regex
 				=	icase("Cookie") >> ":" >> *_ >>
-					cookie_name >> "=" >>
+					cookie_name_str >> "=" >>
 					( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
 					":" >> ( s2 = +_d ) >> ";";
 
@@ -4059,10 +4060,12 @@ protocol_module_cinsert::handle_client_connection_check(
 
 		if( thread_data != NULL )
 		{
+
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->last_endpoint_tcp );
 
 			if( recive_data_itr == thread_data->recive_data_map.end())
 			{
+
 				recive_data_itr = thread_data->recive_data_map.begin();
 				thread_data->last_endpoint_tcp = recive_data_itr->first;
 			}
@@ -4089,6 +4092,7 @@ protocol_module_cinsert::handle_client_connection_check(
 
 				if( send_ok_flag == 1 )
 				{
+
 					break;
 				}
 
@@ -4096,11 +4100,13 @@ protocol_module_cinsert::handle_client_connection_check(
 
 				if( recive_data_itr == thread_data->recive_data_map.end())
 				{
-					recive_data_itr == thread_data->recive_data_map.begin();
+
+					recive_data_itr = thread_data->recive_data_map.begin();
 				}
 
 				if( recive_data_itr->first == thread_data->last_endpoint_tcp )
 				{
+
 					break;
 				}
 			}
@@ -4131,8 +4137,8 @@ protocol_module_cinsert::handle_client_connection_check(
 							edit_data_cookie.data
 								=	str(boost::format(	"Set-Cookie: %1%=%2%:%3%;" )
 														% cookie_name.data()
-														% send_status_itr->send_endpoint.address()
-														% send_status_itr->send_endpoint.port());
+														% recive_data_itr->first.address()
+														% recive_data_itr->first.port());
 
 							now = boost::posix_time::second_clock::universal_time();
 
