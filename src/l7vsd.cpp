@@ -661,13 +661,13 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	try{
 		// check options
 		if( !check_options( argc, argv ) ){
-			std::cerr << usage() << std::endl;
+			std::cerr << usage();
 			return -1;
 		}
 	
 		// help mode ?
 		if( help ){
-			std::cout << usage() <<std::endl;
+			std::cout << usage();
 			return 0;
 		}
 	
@@ -764,7 +764,7 @@ bool	l7vsd::check_options( int argc, char* argv[] ){
 		else{	// don't find option function.
 			std::stringstream buf;
 			buf << "l7vsd: unknown option: " << argv[ pos ] << "\n";
-			std::cerr << buf.str() << std::endl;
+			std::cerr << buf.str();
 			return false;
 		}
 	}
@@ -795,7 +795,6 @@ std::string	l7vsd::usage(){
 	"Usage: l7vsd [-d] [-h]\n"
 	"   -d    --debug        run in debug mode (in foreground)\n"
 	"   -h    --help         print this help messages and exit\n"
-	<< std::endl;
 	return stream.str();
 }
 
