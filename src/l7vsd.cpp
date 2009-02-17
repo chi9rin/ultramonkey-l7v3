@@ -794,7 +794,7 @@ std::string	l7vsd::usage(){
 	stream <<
 	"Usage: l7vsd [-d] [-h]\n"
 	"   -d    --debug        run in debug mode (in foreground)\n"
-	"   -h    --help         print this help messages and exit\n"
+	"   -h    --help         print this help messages and exit\n";
 	return stream.str();
 }
 
