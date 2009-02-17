@@ -702,8 +702,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 			return -1;
 		}
 		if( 0 > rep->initialize() ){
-			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication initialize failed.", __FILE__, __LINE__ );
-			return -1;
+			logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication initialize failed.", __FILE__, __LINE__ );
 		}
 	
 		// snmp bridge initialize
