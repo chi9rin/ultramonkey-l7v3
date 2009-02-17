@@ -29,7 +29,7 @@ sslid_session_data_processor::sslid_session_data_processor(
                                 "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
                                 "maxlist = %d, timeout = %d, replication_data_processor = &(%d).");
         formatter % maxlist % timeout % static_cast<void*>(replication_data_processor);
-        putLogDebug(30000, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30171, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -39,7 +39,7 @@ sslid_session_data_processor::sslid_session_data_processor(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30001, "out_function : Constructor sslid_session_data_processor::"
+            putLogDebug(30172, "out_function : Constructor sslid_session_data_processor::"
                                 "sslid_session_data_processor(int maxlist, int timeout, "
                                 "sslid_replication_data_processor* replication_data_processor, "
                                 "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
@@ -55,7 +55,7 @@ sslid_session_data_processor::sslid_session_data_processor(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30002, "out_function : Constructor sslid_session_data_processor::"
+        putLogDebug(30173, "out_function : Constructor sslid_session_data_processor::"
                     "sslid_session_data_processor(int maxlist, int timeout, "
                     "sslid_replication_data_processor* replication_data_processor, "
                     "getloglevel_func_type	ingetloglevel, logger_func_type inputLogFatal, "
@@ -73,7 +73,7 @@ sslid_session_data_processor::~sslid_session_data_processor()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30003, "in/out_function : Destructor sslid_session_data_processor::"
+        putLogDebug(30174, "in/out_function : Destructor sslid_session_data_processor::"
                     "~sslid_session_data_processor().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -97,7 +97,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                                 "boost::asio::ip::tcp::endpoint& endpoint) : "
                                 "session_id = %s, endpoint = [%s]:%d.");
         formatter % session_id % endpoint.address().to_string() % endpoint.port();
-        putLogDebug(30004, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30175, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -122,7 +122,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30005, "out_function : int sslid_session_data_processor::"
+                    putLogDebug(30176, "out_function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data(const std::string& session_id, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.",
                                 __FILE__, __LINE__);
@@ -177,7 +177,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30006, "function : int sslid_session_data_processor::"
+                putLogDebug(30177, "function : int sslid_session_data_processor::"
                             "get_endpoint_from_session_data() : put_into_temp_list() --delete item-- end.",
                             __FILE__, __LINE__);
             }
@@ -190,7 +190,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data() : exception : error = %s.");
         formatter % -1 % e.what();
-        putLogError(37000, formatter.str(), __FILE__, __LINE__);
+        putLogError(37068, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
@@ -202,7 +202,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                                 "get_endpoint_from_session_data(const std::string& session_id, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
         formatter % ret;
-        putLogDebug(30007, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30178, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -230,7 +230,7 @@ int sslid_session_data_processor::write_session_data(
                                 "time_t now_time) : session_id = %s, "
                                 "endpoint = [%s]:%d, now_time = %lu.");
         formatter % session_id % endpoint.address().to_string() % endpoint.port() % now_time;
-        putLogDebug(30008, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30179, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -244,7 +244,7 @@ int sslid_session_data_processor::write_session_data(
              /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30009, "out_function : int sslid_session_data_processor::"
+                putLogDebug(30180, "out_function : int sslid_session_data_processor::"
                             "write_session_data(const std::string& session_id, "
                             "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                             "return_value = 0.", __FILE__, __LINE__);
@@ -275,7 +275,7 @@ int sslid_session_data_processor::write_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30010, "function : int sslid_session_data_processor::"
+                putLogDebug(30181, "function : int sslid_session_data_processor::"
                             "write_session_data() : put_into_temp_list() --update item-- end.",
                             __FILE__, __LINE__);
             }
@@ -292,7 +292,7 @@ int sslid_session_data_processor::write_session_data(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30011, "out_function : int sslid_session_data_processor::"
+                        putLogDebug(30182, "out_function : int sslid_session_data_processor::"
                                     "write_session_data(const std::string& session_id, "
                                     "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                                     "return_value = 0.", __FILE__, __LINE__);
@@ -305,7 +305,7 @@ int sslid_session_data_processor::write_session_data(
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30012, "function : int sslid_session_data_processor::"
+                    putLogDebug(30183, "function : int sslid_session_data_processor::"
                                 "write_session_data() : clear_expired_session_data() END.",
                                 __FILE__, __LINE__);
                 }
@@ -328,7 +328,7 @@ int sslid_session_data_processor::write_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30013, "function : int sslid_session_data_processor::"
+                putLogDebug(30184, "function : int sslid_session_data_processor::"
                             "write_session_data() : put_into_temp_list() --add item-- end.",
                             __FILE__, __LINE__);
             }
@@ -341,12 +341,12 @@ int sslid_session_data_processor::write_session_data(
         boost::format formatter("function: int sslid_session_data_processor::"
                                 "write_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37001, formatter.str(), __FILE__, __LINE__);
+        putLogError(37069, formatter.str(), __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30014, "out_function: int sslid_session_data_processor::"
+            putLogDebug(30185, "out_function: int sslid_session_data_processor::"
                         "write_session_data(const std::string& session_id, "
                         "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                         "return_value = -1.", __FILE__, __LINE__);
@@ -359,7 +359,7 @@ int sslid_session_data_processor::write_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30015, "out_function : int sslid_session_data_processor::"
+        putLogDebug(30186, "out_function : int sslid_session_data_processor::"
                     "write_session_data(const std::string& session_id, "
                     "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                     "return_value = 0.", __FILE__, __LINE__);
@@ -383,18 +383,18 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
                                 "read_session_data_from_replication_area(sslid_replication_data* replication_area) : "
                                 "replication_area = &(%d).");
         formatter % static_cast<void*>(replication_area);
-        putLogDebug(30016, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30187, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
     // null check
     if (replication_area == NULL)
     {
-        putLogError(37002, "Replication area is NULL.", __FILE__, __LINE__);
+        putLogError(37070, "Replication area is NULL.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30017, "out_function : int sslid_session_data_processor::"
+            putLogDebug(30188, "out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area("
                                 "sslid_replication_data* replication_area) : return_value = -1", __FILE__, __LINE__);
         }
@@ -417,7 +417,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
                                     "read_session_data_from_replication_area() : "
                                     "data begin = 0, data_size = %d, data = %s");
             formatter % maxlist % datadump;
-            putLogDebug(30018, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(30189, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         for (int i = 0; i < maxlist; ++i)
@@ -443,7 +443,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
         boost::format formatter("function : int sslid_session_data_processor::"
                                             "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37003, formatter.str(), __FILE__, __LINE__);
+        putLogError(37071, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
@@ -455,7 +455,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
                                 "read_session_data_from_replication_area(slid_replication_data* replication_area) : "
                                 "return_value = %d.");
         formatter % ret;
-        putLogDebug(30019, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(30190, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -469,7 +469,7 @@ int sslid_session_data_processor::clear_expired_session_data()
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30020, "in_function : int sslid_session_data_processor::"
+        putLogDebug(30191, "in_function : int sslid_session_data_processor::"
                     "clear_expired_session_data().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -484,7 +484,7 @@ int sslid_session_data_processor::clear_expired_session_data()
          /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30021, "out_function : int sslid_session_data_processor::"
+            putLogDebug(30192, "out_function : int sslid_session_data_processor::"
                         "clear_expired_session_data() : return_value = 1.",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -518,7 +518,7 @@ int sslid_session_data_processor::clear_expired_session_data()
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30022, "function : int sslid_session_data_processor::"
+                putLogDebug(30193, "function : int sslid_session_data_processor::"
                             "clear_expired_session_data() : put_into_temp_list() "
                             "--delete expired time item-- end.", __FILE__, __LINE__);
             }
@@ -545,7 +545,7 @@ int sslid_session_data_processor::clear_expired_session_data()
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30023, "function : int sslid_session_data_processor::"
+            putLogDebug(30194, "function : int sslid_session_data_processor::"
                         "clear_expired_session_data() : put_into_temp_list() "
                         "--delete oldest time item-- end.", __FILE__, __LINE__);
         }
@@ -558,7 +558,7 @@ int sslid_session_data_processor::clear_expired_session_data()
         boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "clear_expired_session_data() : return_value = %d.");
         formatter % ret;
-        putLogDebug(30024, formatter.str(),  __FILE__, __LINE__);
+        putLogDebug(30195, formatter.str(),  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 

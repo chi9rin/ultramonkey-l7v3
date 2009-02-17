@@ -53,6 +53,24 @@ public:
             recive_buffer_max_size = 0;
             recive_buffer_rest_size = 0;
         }
+        ~recive_data()
+        {
+            if (recive_buffer1 != NULL)
+            {
+                delete [] recive_buffer1;
+                recive_buffer1 = NULL;
+            }
+
+            if (recive_buffer2 != NULL)
+            {
+                delete [] recive_buffer2;
+                recive_buffer2 = NULL;
+            }
+
+            recive_buffer = NULL;
+            recive_buffer_max_size = 0;
+            recive_buffer_rest_size = 0;
+        }
 	};
 
 

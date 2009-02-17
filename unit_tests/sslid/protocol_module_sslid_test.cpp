@@ -2018,7 +2018,10 @@ void handle_session_initialize_test_thread() {
             this->handle_session_initialize(boost::this_thread::get_id(),
                     down_thread.get_id(), client_endpoint_tcp,
                     client_endpoint_udp);
-    BOOST_CHECK_EQUAL(status, ACCEPT);
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(status, ACCEPT);
+    }
     std::map<const boost::thread::id, thread_data_ptr>::iterator itr;
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
@@ -2103,7 +2106,10 @@ void handle_session_finalize_test_thread() {
             down_thread.get_id(), client_endpoint_tcp, client_endpoint_udp);
     status = this->handle_session_finalize(boost::this_thread::get_id(),
             down_thread.get_id());
-    BOOST_CHECK_EQUAL(status, STOP);
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
+        BOOST_CHECK_EQUAL(status, STOP);
+    }
     std::map<const boost::thread::id, thread_data_ptr>::iterator itr;
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
@@ -3462,23 +3468,7 @@ void handle_realserver_select_tcp_test_thread() {
     boost::asio::ip::tcp::endpoint
             ep1(boost::asio::ip::address::from_string("192.168.120.249"),
                     12345);
-//    int maxlist = 1;
-//    char* sslid_replication_area_begain = new char[10];
-//    int sslid_replication_area_size = 0;
     boost::asio::ip::tcp::endpoint ep2;
-//    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
-//    std::string session_id;
-//    boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
-//    boost::function<void(const unsigned int, const std::string&,
-//            const char*, int)> inputLogFatal = stb_putLogFatal;
-//    boost::function<void(const unsigned int, const std::string&,
-//            const char*, int)> inputLogError = stb_putLogError;
-//    boost::function<void(const unsigned int, const std::string&,
-//            const char*, int)> inputLogWarn = stb_putLogWarn;
-//    boost::function<void(const unsigned int, const std::string&,
-//            const char*, int)> inputLogInfo = stb_putLogInfo;
-//    boost::function<void(const unsigned int, const std::string&,
-//            const char*, int)> inputLogDebug = stb_putLogDebug;
 
     cout << "[171]------------------------------------------\n";
     // unit_test[171] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
@@ -3499,14 +3489,6 @@ void handle_realserver_select_tcp_test_thread() {
         {
             boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
             this->session_thread_data_map[boost::this_thread::get_id()] = up_thread_data;
-//            this->reschedule = 1;
-//            this->replication_data_processor = new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
-//                    sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-//                    inputLogWarn, inputLogInfo, inputLogDebug);
-//            this->session_data_processor = new sslid_session_data_processor_stub(
-//                    1024, 3600, this->replication_data_processor, ingetloglevel,
-//                    inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-//                    inputLogDebug);
         }
         status = this->handle_realserver_select(boost::this_thread::get_id(),
                 rs_endpoint);
@@ -3949,8 +3931,8 @@ void handle_realserver_connection_fail_test_thread_reschedule(){
 	}
 
     cout << "[187]------------------------------------------\n";
-	//unit_test[187] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-	//unit_test[187] test data:rescheduleモード、３目失敗するの場合
+	//unit_test[187] realserver_connect_failed_count で3を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+	//unit_test[187] test data:rescheduleモード、３目失敗する、マルチスレッドの場合
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
@@ -3983,7 +3965,7 @@ void handle_realserver_connection_fail_test_thread_noreschedule(){
 
     cout << "[188]------------------------------------------\n";
 	//unit_test[188] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-	//unit_test[188] test data:no rescheduleモード、初めて失敗するの場合
+	//unit_test[188] test data:no rescheduleモード、マルチスレッドの場合
 	EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 	{
 	    boost::mutex::scoped_lock sclock(check_mutex);
@@ -5122,7 +5104,7 @@ void handle_client_send_test_thread() {
 //handle_client_disconnect
 void handle_client_disconnect_test(){
     cout << "[240]------------------------------------------" << endl;
-	//unit_test[240] handle_client_disconnect()メソッドのテスト,up and down threads,正常系で必ずFINALIZEを返す
+	//unit_test[240] handle_client_disconnect()メソッドのテスト,上りスレッドと下りスレッドの場合,正常系で必ずFINALIZEを返す
 	boost::thread tdown_for_get_id(down_thread_func);
 	boost::thread_group threads;
     	threads.create_thread(bind(&protocol_module_sslid_test_class::handle_client_disconnect_test_thread_func,
@@ -5134,7 +5116,7 @@ void handle_client_disconnect_test(){
     	threads.join_all();
 
     cout << "[241]------------------------------------------" << endl;
-	//unit_test[241] one thread,return FINALIZE
+	//unit_test[241] 上りスレッドの場合,正常系で必ずFINALIZEを返す
 	BOOST_CHECK_EQUAL(this->handle_client_disconnect(boost::this_thread::get_id()),FINALIZE);
 }
 void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id){
@@ -5794,7 +5776,6 @@ void handle_realserver_select_tcp_test_thread(){
             inputLogWarn, inputLogInfo, inputLogDebug);
     std::vector<std::string> args;
     obj.install_stb_replication_func();
-    //obj.set_parameter(args);
     obj.set_replication_data_processor(new sslid_replication_data_processor(maxlist, sslid_replication_area_begain,
             sslid_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
             inputLogWarn, inputLogInfo, inputLogDebug));

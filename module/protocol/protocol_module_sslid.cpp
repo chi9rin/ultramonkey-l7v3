@@ -3128,12 +3128,20 @@ void protocol_module_sslid::replication_interrupt()
                     __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
-    replication_data_processor->write_replicaion_area();
+    if (replication_data_processor)
+    {
+        replication_data_processor->write_replicaion_area();
+        /*-------- DEBUG LOG --------*/
+        if (LOG_LV_DEBUG == getloglevel())
+        {
+            putLogDebug(30121, "function : void protocol_module_sslid::replication_interrupt() : "
+                        "write_replication_area() end.", __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+    }
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
-        putLogDebug(30121, "function : void protocol_module_sslid::replication_interrupt() : "
-                    "write_replication_area() end.", __FILE__, __LINE__);
         putLogDebug(30122, "out_function : void protocol_module_sslid::replication_interrupt().",
                     __FILE__, __LINE__);
     }
@@ -3481,4 +3489,14 @@ bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endp
     }
 }
 
+}
+
+extern "C" l7vs::protocol_module_base*
+create_module(){
+	return dynamic_cast<l7vs::protocol_module_base*>(new l7vs::protocol_module_sslid());
+}
+
+extern "C" void
+destroy_module( l7vs::protocol_module_base* in ){
+	delete in;
 }

@@ -11667,13 +11667,13 @@ void handle_sorry_disable_test_thread(){
     cout << "[510]------------------------------------------\n";
 	// unit_test[510] 終了フラグをON,status = SORRYSERVER_DISCONNECT
 	// unit_test[510] test data:accept完了フラグONの場合,sorry状態の場合,送信継続データあり list 1件
-	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+	thread_data->accept_end_flag = ACCEPT_END_FLAG_ON;
+	thread_data->sorry_flag = SORRY_FLAG_ON;
 	sendstatus.status = SEND_CONTINUE;
 	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+	thread_data->recive_data_map.insert(
 				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+						thread_data->client_endpoint_tcp,
 						receivedata));
 	status = this->handle_sorry_disable(boost::this_thread::get_id());
 	{

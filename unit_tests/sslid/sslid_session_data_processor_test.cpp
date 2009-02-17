@@ -1380,6 +1380,8 @@ void sslid_session_data_processor_test(){
 
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
+	bool bret = (replication_data_area != NULL);
+	BOOST_REQUIRE_EQUAL(bret, true);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 	memset(replication_data_area, 0, data_area_size);
 	l7vs::sslid_replication_data_processor replication_data_processor(3,
@@ -1400,6 +1402,8 @@ void get_endpoint_from_session_data_test(){
 
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
+	bool bret = (replication_data_area != NULL);
+	BOOST_REQUIRE_EQUAL(bret, true);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
 	memset(replication_data_area, 0, data_area_size);
@@ -1421,6 +1425,8 @@ void write_session_data_test(){
 
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
+	bool bret = (replication_data_area != NULL);
+	BOOST_REQUIRE_EQUAL(bret, true);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
 	memset(replication_data_area, 0, data_area_size);
@@ -1442,6 +1448,8 @@ void clear_expired_session_data_test(){
 
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
+	bool bret = (replication_data_area != NULL);
+	BOOST_REQUIRE_EQUAL(bret, true);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
 	memset(replication_data_area, 0, data_area_size);
@@ -1463,6 +1471,8 @@ void read_session_data_from_replication_area_test(){
 
 	int data_area_size = 128*sizeof(struct l7vs::sslid_replication_data_header) + STRUCT_NUMBER*sizeof(struct l7vs::sslid_replication_data);
 	char *replication_data_area = new char[data_area_size];
+	bool bret = (replication_data_area != NULL);
+	BOOST_REQUIRE_EQUAL(bret, true);
 	boost::asio::ip::tcp::endpoint virtual_service_endpoint;
 
 	memset(replication_data_area, 0, data_area_size);
