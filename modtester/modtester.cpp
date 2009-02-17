@@ -309,7 +309,7 @@ test_suite*     init_unit_test_suite( int argc, char* argv[] ){
 	}
 
 	// command check
-	if( string( argv[1] ) != string( "-s" ) ||
+	if( string( argv[1] ) != string( "-s" ) &&
 		string( argv[1] ) != string( "-p" ) ){
 		cout << "\n\n commad not found : " << argv[1] << endl;
 		usage();
@@ -331,7 +331,7 @@ test_suite*     init_unit_test_suite( int argc, char* argv[] ){
 	test_suite*	ts = BOOST_TEST_SUITE( "modtester" );
 
 	if( string( argv[1] ) == string( "-s" ) ) ts->add( BOOST_TEST_CASE( &schedule_module_test ) );
-	if( string( argv[2] ) == string( "-p" ) ) ts->add( BOOST_TEST_CASE( &protocol_module_test ) );
+	if( string( argv[1] ) == string( "-p" ) ) ts->add( BOOST_TEST_CASE( &protocol_module_test ) );
 
 	framework::master_test_suite().add( ts );
 
