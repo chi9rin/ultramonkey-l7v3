@@ -402,10 +402,10 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 
 		}
 
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		check_result.flag = false;
+		check_result.message = "Option error.";
 	}
 
 	return	check_result;
@@ -760,10 +760,10 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 
 		}
 
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		check_result.flag = false;
+		check_result.message = "Option error.";
 	}
 
 	return check_result;
@@ -789,10 +789,10 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 
 		}
 
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		check_result.flag = false;
+		check_result.message = "Cannot add option.";
 	}
 
 	return check_result;
@@ -866,10 +866,9 @@ protocol_module_cinsert::handle_session_initialize(
 			session_thread_data_map[ down_thread_id ]	= down_thread_data;
 		}
 
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 
 	return	ACCEPT;
@@ -904,10 +903,9 @@ protocol_module_cinsert::handle_session_finalize(
 			session_thread_data_map.erase( thread_data_itr );
 		}
 
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	STOP;
 	}
 	return	STOP;
 }
@@ -943,10 +941,9 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 			status = CLIENT_RECV;
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 
@@ -1528,12 +1525,9 @@ protocol_module_cinsert::handle_client_recv(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
-
 	} catch (...)
 	{
-
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -1708,10 +1702,9 @@ protocol_module_cinsert::handle_realserver_select(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -2070,12 +2063,9 @@ protocol_module_cinsert::handle_realserver_connect(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
-
 	} catch (...)
 	{
-
+		return	FINALIZE;
 	}
 	return	status;
 
@@ -2113,10 +2103,9 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 			status = REALSERVER_DISCONNECT;
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -2222,10 +2211,9 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -2290,10 +2278,9 @@ protocol_module_cinsert::handle_sorryserver_select(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -2661,10 +2648,9 @@ protocol_module_cinsert::handle_sorryserver_connect(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -2701,10 +2687,9 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 			status = SORRYSERVER_DISCONNECT;
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -2810,10 +2795,9 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -3402,10 +3386,9 @@ protocol_module_cinsert::handle_realserver_recv(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -3995,10 +3978,9 @@ protocol_module_cinsert::handle_sorryserver_recv(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 }
@@ -4368,10 +4350,9 @@ protocol_module_cinsert::handle_client_connection_check(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 
@@ -4535,10 +4516,9 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 	return	status;
 
@@ -4739,10 +4719,9 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 
 	return	status;
@@ -4936,10 +4915,9 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 
 	return	status;
@@ -5061,10 +5039,9 @@ protocol_module_cinsert::handle_realserver_disconnect(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 
 	return	status;
@@ -5186,10 +5163,9 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 			}
 
 		}
-	} catch (const std::exception& ex)
-	{
 	} catch (...)
 	{
+		return	FINALIZE;
 	}
 
 	return	status;
