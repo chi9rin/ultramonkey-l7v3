@@ -139,6 +139,7 @@ protected:
 	std::map<std::string, mutex_ptr>	replication_mutex;
 	boost::asio::io_service				service_io;
 	boost::asio::ip::udp::endpoint 		replication_endpoint;
+	boost::asio::ip::udp::endpoint 		bind_endpoint;
 	boost::asio::ip::udp::socket		replication_receive_socket;
 	boost::asio::ip::udp::socket		replication_send_socket;
 	struct replication_state_struct		replication_state;
