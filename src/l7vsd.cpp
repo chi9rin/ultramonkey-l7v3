@@ -764,7 +764,7 @@ bool	l7vsd::check_options( int argc, char* argv[] ){
 		else{	// don't find option function.
 			std::stringstream buf;
 			buf << "l7vsd: unknown option: " << argv[ pos ] << "\n";
-			std::cerr << buf << std::endl;
+			std::cerr << buf.str() << std::endl;
 			return false;
 		}
 	}
