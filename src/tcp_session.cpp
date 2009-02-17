@@ -382,12 +382,38 @@ namespace l7vs{
 	}
 	//! up stream thread main function
 	void tcp_session::up_thread_run(void){
-		
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up_thread_run start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		up_thread_id = boost::this_thread::get_id(); 
 		thread_state_update(UP_THREAD_ALIVE,true);
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread down thread alive wait start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		while(!thread_state.test(1)){ // DOWN_THREAD_ALIVE
 			//wait down thread get id
 		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread down thread alive wait end";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		if(protocol_module == NULL){
 			//Error!
 			std::stringstream buf;
@@ -465,6 +491,15 @@ namespace l7vs{
 		}
 		thread_state_update(UP_THREAD_ACTIVE,true);
 		up_thread_next_call_function = func->second;
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread loop start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		while(!exit_flag){
 			thread_state_update(UP_THREAD_LOCK,true);
 			while(session_pause_flag){
@@ -481,26 +516,106 @@ namespace l7vs{
 				up_thread_next_call_function(LOCAL_PROC);
 			}
 		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread loop end";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		
 		up_thread_all_socket_close();
 		thread_state_update(UP_THREAD_ACTIVE,false);
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread down thread dead wait start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		while(thread_state.test(1)){ // DOWN_THREAD_ALIVE
 			// wait down thread alive
 		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread down thread dead wait start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		protocol_module->handle_session_finalize(up_thread_id,down_thread_id);
-		
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread call protocol_module_base handle_session_finalize() return";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		thread_state_update(UP_THREAD_ALIVE,false);
 		parent_service.release_session(up_thread_id);
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up thread call parent service release_session() return";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] up_thread_run end";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 	}
 	
 	//! down stream thread main function
 	void tcp_session::down_thread_run(void){
-		
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] down_thread_run start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		down_thread_id = boost::this_thread::get_id(); 
 		thread_state_update(DOWN_THREAD_ALIVE,true);
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] down_thread_run up thread active wait start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		while(!thread_state.test(2)){ // UP_THREAD_ACTIVE
 			// wait up thread active
 			if(exit_flag) break;
 		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] down_thread_run up thread active wait end";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		thread_state_update(DOWN_THREAD_ACTIVE,true);
 		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func =  down_thread_function_map.find(DOWN_FUNC_REALSERVER_RECEIVE);
 		if(func == down_thread_function_map.end()){
@@ -514,6 +629,15 @@ namespace l7vs{
 		}else{
 			down_thread_next_call_function = func->second;
 		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] down thread loop start";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		while(!exit_flag){
 			thread_state_update(DOWN_THREAD_LOCK,true);
 			while(session_pause_flag){
@@ -535,9 +659,27 @@ namespace l7vs{
 				down_thread_next_call_function(LOCAL_PROC);
 			}
 		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] down thread loop end";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 		down_thread_all_socket_close();
 		thread_state_update(DOWN_THREAD_ACTIVE,false);
 		thread_state_update(DOWN_THREAD_ALIVE,false);
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] down_thread_run end";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 	}
 
 	//! up and down thread state update
