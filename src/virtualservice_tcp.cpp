@@ -949,6 +949,7 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 		session_thread_control_ptr	stc_ptr;
 		boost::thread::id	t_id = itr->first;
 		stc_ptr	= itr->second;
+		stc_ptr->get_session()->initialize();
 		pool_sessions.insert( session_map_pair_type( t_id, stc_ptr ) );
 		active_sessions.erase( itr );
 	}
