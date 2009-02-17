@@ -322,8 +322,8 @@ void receiver_thread(){
 				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Replication stub receiving is success.", __FILE__, __LINE__ );
 
 				int size;
-				char* p;
-				char* head;
+				unsigned char* p;
+				unsigned char* head;
 				int h = 0;
 				int i = 0;
 				std::string	buf;
@@ -332,7 +332,7 @@ void receiver_thread(){
 				size = DATA_SIZE * replication_state.total_block;
 
 				// Memory Dump
-				p = ( char * )replication_state.replication_memory;
+				p = ( unsigned char * )replication_state.replication_memory;
 
 				// Output mode
 				l7vs::Logger::putLogInfo( l7vs::LOG_CAT_L7VSD_REPLICATION, 1, "Replication check Start ----------------------------", __FILE__, __LINE__ );
@@ -2489,19 +2489,19 @@ void	replication_handle_receive_test(){
 	ptr = repli1.pay_memory( "virtualservice", size );
 	BOOST_CHECK( NULL != ptr );
 	BOOST_CHECK_EQUAL( repli1.lock( "virtualservice" ), 0 );
-	memset( ptr, '1', size * DATA_SIZE );
+	memset( ptr, 0xFF, size * DATA_SIZE );
 	repli1.unlock( "virtualservice" );
 
 	ptr = repli1.pay_memory( "chash", size );
 	BOOST_CHECK( NULL != ptr );
 	BOOST_CHECK_EQUAL( repli1.lock( "chash" ), 0 );
-	memset( ptr, '2', size * DATA_SIZE );
+	memset( ptr, 0xFF, size * DATA_SIZE );
 	repli1.unlock( "chash" );
 
 	ptr = repli1.pay_memory( "sslid", size );
 	BOOST_CHECK( NULL != ptr );
 	BOOST_CHECK_EQUAL( repli1.lock( "sslid" ), 0 );
-	memset( ptr, '3', size * DATA_SIZE );
+	memset( ptr, 0xFF, size * DATA_SIZE );
 	repli1.unlock( "sslid" );
 
 	repli1.switch_to_master();

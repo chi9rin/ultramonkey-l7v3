@@ -601,8 +601,8 @@ void		replication::dump_memory(){
 	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::dump_memory", __FILE__, __LINE__ );
 
 	int size;
-	char* p;
-	char* head;
+	unsigned char* p;
+	unsigned char* head;
 	int h = 0;
 	int i = 0;
 	std::string	buf;
@@ -627,7 +627,7 @@ void		replication::dump_memory(){
 	}
 
 	// Memory Dump
-	p = ( char * )replication_state.replication_memory;
+	p = ( unsigned char* )replication_state.replication_memory;
 
 	// Output mode
 	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Replication Dump Start ----------------------------", __FILE__, __LINE__ );
