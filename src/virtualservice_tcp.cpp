@@ -222,6 +222,8 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
  */
 void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
 													const boost::system::error_code& err ){
+// 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
+// 	}
 	if( !err ){
 		//if active session count equal
 		//element.sorry_maxconnectionが1以上の場合

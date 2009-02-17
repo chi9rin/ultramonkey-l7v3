@@ -1209,12 +1209,15 @@ void	virtualservice_tcp_test5(){
 	//1秒待ってmainをSTOP
 	usleep( 1000000 );
 	vs->stop();
+std::cout << "!" << std::endl;
 
 	usleep( 1000 );
 	cl_thread.join();
 	vs_main.join();
+std::cout << "!" << std::endl;
 
 	vs->finalize( vs_err );
+std::cout << "!" << std::endl;
 	delete vs;
 }
 

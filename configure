@@ -20955,7 +20955,7 @@ exec_prefix=/usr
 
 
 
-                                                                                          ac_config_files="$ac_config_files parameter/Makefile logger/Makefile module/Makefile module/schedule/Makefile module/protocol/Makefile src/Makefile snmpagent/Makefile Makefile conf/Makefile"
+                                                                                                    ac_config_files="$ac_config_files parameter/Makefile logger/Makefile module/Makefile module/schedule/Makefile module/protocol/Makefile src/Makefile snmpagent/Makefile Makefile conf/Makefile modtester/Makefile"
 
 
           ac_config_files="$ac_config_files l7vsd.spec"
@@ -21524,6 +21524,7 @@ do
   "snmpagent/Makefile" ) CONFIG_FILES="$CONFIG_FILES snmpagent/Makefile" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "conf/Makefile" ) CONFIG_FILES="$CONFIG_FILES conf/Makefile" ;;
+  "modtester/Makefile" ) CONFIG_FILES="$CONFIG_FILES modtester/Makefile" ;;
   "l7vsd.spec" ) CONFIG_FILES="$CONFIG_FILES l7vsd.spec" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;

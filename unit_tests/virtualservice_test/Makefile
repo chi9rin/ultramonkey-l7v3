@@ -5,7 +5,8 @@
 #
 TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
+# CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
+CPPFLAGS	= -O2 -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I./ \
