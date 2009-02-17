@@ -1093,15 +1093,22 @@ int			replication::check_parameter(){
 	size_t sum=0;
 	std::string buf;
 
-	// set address
+//std::cout << "check1 " << replication_info.ip_addr << ":" << replication_info.service_name << "\n";
+	// Whether IP and the port are effective is confirmed.
 	try{
-		replication_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+//		replication_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+
+		boost::asio::ip::udp::resolver				udp_resolver( service_io );
+		boost::asio::ip::udp::resolver::query		udp_query( replication_info.ip_addr, replication_info.service_name );
+		boost::asio::ip::udp::resolver::iterator	itr = udp_resolver.resolve( udp_query );
+		replication_endpoint = *itr;
 	}
 	catch(...){
 		buf = boost::io::str( boost::format( "Failed to get IP or Service Name.(%s:%s)" ) % replication_info.ip_addr % replication_info.service_name );
 		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 		goto END;
 	}
+//std::cout << "check2 " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
 
 	// Interval check
 	if ((MIN_INTERVAL>replication_info.interval) || (MAX_INTERVAL<replication_info.interval)){
@@ -1269,15 +1276,21 @@ int			replication::send_data(){
 	boost::system::error_code err;
 	std::string buf;
 
-	// make send socket
+	// Whether IP and the port are effective is confirmed.
 	try{
-		replication_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+//		replication_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+
+		boost::asio::ip::udp::resolver				udp_resolver( service_io );
+		boost::asio::ip::udp::resolver::query		udp_query( replication_info.ip_addr, replication_info.service_name );
+		boost::asio::ip::udp::resolver::iterator	itr = udp_resolver.resolve( udp_query );
+		replication_endpoint = *itr;
 	}
 	catch(...){
 		buf = boost::io::str( boost::format( "Failed to get IP or Service Name.(%s:%s)" ) % replication_info.ip_addr % replication_info.service_name );
 		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 		return -1;
 	}
+
 //std::cout << "master " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
 	replication_send_socket.connect( replication_endpoint, err );
 	if ( err ){

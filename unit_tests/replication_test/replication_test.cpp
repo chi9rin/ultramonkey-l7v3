@@ -2458,6 +2458,7 @@ void	replication_handle_receive_test(){
 
 	l7vs::replication	repli1;
 
+	get_string_table[0] = "um05";					//	"ip_addr"
 	get_int_table[1] = 1;							//	"cmponent_size_00"
 	get_int_table[2] = 1;							//	"cmponent_size_01"
 	get_int_table[3] = 1;							//	"cmponent_size_02"
