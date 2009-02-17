@@ -1109,7 +1109,7 @@ int			replication::check_parameter(){
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 1, buf, __FILE__, __LINE__ );
 		goto END;
 	}
-std::cout << "check2 " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
+//std::cout << "check2 " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
 
 	// get ip address from nic
 	try{
@@ -1139,7 +1139,7 @@ std::cout << "check2 " << replication_endpoint.address() << ":" << replication_e
 		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 1, "You can not get IP address from nic.", __FILE__, __LINE__ );
 		goto END;
 	}
-std::cout << "check3 " << bind_endpoint.address() << ":" << bind_endpoint.port() << "\n";
+//std::cout << "check3 " << bind_endpoint.address() << ":" << bind_endpoint.port() << "\n";
 
 	// Interval check
 	if ((MIN_INTERVAL>replication_info.interval) || (MAX_INTERVAL<replication_info.interval)){
