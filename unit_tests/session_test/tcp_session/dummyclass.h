@@ -262,12 +262,14 @@ namespace l7vs{
 				boost::asio::ip::tcp::endpoint& sorry_endpoint ){
 				
 				handle_sorryserver_select_in_thread_id = thread_id;
+				handle_sorryserver_select_in_sorry_endpoint = sorry_endpoint;
 				sorry_endpoint = handle_sorryserver_select_out_sorry_endpoint;
 				return handle_sorryserver_select_res_tag;
 			};
 			protocol_module_base::EVENT_TAG handle_sorryserver_select_res_tag;
 			boost::thread::id handle_sorryserver_select_in_thread_id;
 			boost::asio::ip::tcp::endpoint handle_sorryserver_select_out_sorry_endpoint;
+			boost::asio::ip::tcp::endpoint handle_sorryserver_select_in_sorry_endpoint;
 			
 			//! called from after sorryserver connect
 			//!	@param[in]	upstream thread id
@@ -538,6 +540,14 @@ namespace l7vs{
 			boost::asio::ip::udp::endpoint handle_realserver_close_rs_endpoint;
 			
 	};
+
+	class 	virtualservice_element{
+		public:
+			virtualservice_element(){};
+			~virtualservice_element(){};
+			boost::asio::ip::tcp::endpoint
+							sorry_endpoint;
+	};
 	
 	// Dummy virtualservice_tcp Class
 	class	virtualservice_tcp{
@@ -546,6 +556,12 @@ namespace l7vs{
 				get_protocol_module_res = NULL;
 			};
 			~virtualservice_tcp(){};
+			
+			virtualservice_element my_element;
+
+			virtualservice_element& get_element(){
+				return my_element;
+			};
 			
 			unsigned long long			get_qos_upstream(){
 				return get_qos_upstream_res;
@@ -622,7 +638,9 @@ namespace l7vs{
 			};
 			
 			boost::asio::ip::tcp::socket my_socket;
-				
+			
+			//! accept
+			void accept(){};
 			
 			//! @param[in]		connect_endpoint is connection endpoint
 			//! @param[out]		ec is reference error code object
