@@ -133,6 +133,10 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			return false;
 		}
 	}
+	if( 0 > request.vs_element.sorry_maxconnection ){
+		l7vsadm_err.setter( true, "invalid sorry_maxconnection value." );
+		return false;
+	}
 	return true;
 }
 //
