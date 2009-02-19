@@ -1121,7 +1121,13 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 			% args;
 		if( !vse.udpmode ){
 			std::string	sorryepstr;
-			sorryepstr = endpoint_to_string<boost::asio::ip::tcp>( vse.sorry_endpoint, numeric_flag );
+			boost::asio::ip::tcp::endpoint	zeropoint;
+			if( zeropoint == vse.sorry_endpoint ){
+				sorryepstr = "none";
+			}
+			else{
+				sorryepstr = endpoint_to_string<boost::asio::ip::tcp>( vse.sorry_endpoint, numeric_flag );
+			}
 			buf << boost::format( "    %s %d %d\n" )
 				% sorryepstr
 				% vse.sorry_maxconnection
