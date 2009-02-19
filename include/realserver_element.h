@@ -14,6 +14,7 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/list.hpp>
+#include <boost/format.hpp>
 #include "endpoint.h"
 
 namespace l7vs{
@@ -71,6 +72,25 @@ public:
 
     void	set_inact( const int in_inact ){
 		ninact = in_inact ;
+	}
+
+	template <typename Elem, typename Traits>
+	friend std::basic_ostream<Elem, Traits>& operator<<(
+    	std::basic_ostream<Elem, Traits>& os,
+    	const realserver_element& elem ){
+
+		os << "realserver_element={";
+		os << boost::format(	"nactive=%d: "
+								"ninact=%d: "
+								"tcp_endpoint=%s: "
+								"udp_endpoint=%s: "
+								"weight=%d}" )
+								% elem.nactive
+								% elem.ninact
+								% elem.tcp_endpoint
+								% elem.udp_endpoint
+								% elem.weight;
+		return os;
 	}
 
 private:

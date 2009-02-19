@@ -17,6 +17,8 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/list.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 #include "realserver_element.h"
 #include "endpoint.h"
 
@@ -149,6 +151,52 @@ public:
 			return elem1.udp_recv_endpoint < elem2.udp_recv_endpoint;
 		}
 		return false;
+	}
+
+	template <typename Elem, typename Traits>
+	friend std::basic_ostream<Elem, Traits>& operator<<(
+    	std::basic_ostream<Elem, Traits>& os,
+    	const virtualservice_element& elem ){
+
+		os << "virtualservice_element={";
+		os << boost::format(	"udpmode=%s: "
+								"tcp_accept_endpoint=%s: "
+								"udp_recv_endpoint=%s: " )
+								% elem.udpmode
+								% elem.tcp_accept_endpoint
+								% elem.udp_recv_endpoint;
+
+		unsigned int i = 0;
+		BOOST_FOREACH( realserver_element rs_elem, elem.realserver_vector ){
+			os << boost::format( "realserver_vector[%d]=" ) % i;
+			os << rs_elem;
+			os << ": ";
+			++i;
+		}
+
+		os << boost::format(	"protocol_module_name=%s: "
+								"schedule_module_name=%s: " )
+								% elem.protocol_module_name
+								% elem.schedule_module_name;
+
+		std::string	args = boost::algorithm::join( elem.protocol_args, " " );
+		os << boost::format(	"protocol_args=%s: "
+								"sorry_maxconnection=%d: "
+								"sorry_endpoint=%s: "
+								"sorry_flag=%d: "
+								"qos_upstream=%d: "
+								"qos_downstream=%d: "
+								"throughput_upstream=%d: " 
+								"throughput_downstream=%d}" )
+								% args
+								% elem.sorry_maxconnection
+								% elem.sorry_endpoint
+								% elem.sorry_flag
+								% elem.qos_upstream
+								% elem.qos_downstream
+								% elem.throughput_upstream
+								% elem.throughput_downstream;
+		return os;
 	}
 
 private:

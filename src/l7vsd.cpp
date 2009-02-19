@@ -170,6 +170,15 @@ void	l7vsd::add_virtual_service( const virtualservice_element* in_vselement, err
 		return;
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::add_virtual_service arguments:";
+		debugstr << boost::format( "*in_vselement=%s" ) % *in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	if( vslist.end() == search_vslist( *in_vselement ) ){
 		// replication null check
 		if( NULL == rep ){
@@ -241,6 +250,15 @@ void	l7vsd::del_virtual_service( const virtualservice_element* in_vselement, err
 		return;
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::del_virtual_service arguments:";
+		debugstr << boost::format( "*in_vselement=%s" ) % *in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// vs stop
@@ -278,6 +296,15 @@ void	l7vsd::edit_virtual_service( const virtualservice_element* in_vselement, er
 		return;
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::edit_virtual_service arguments:";
+		debugstr << boost::format( "*in_vselement=%s" ) % *in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// edit virtualservice
@@ -308,6 +335,15 @@ void	l7vsd::add_real_server( const virtualservice_element* in_vselement, error_c
 		err.setter( true, msg );
 		return;
 	}
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::add_real_server arguments:";
+		debugstr << boost::format( "*in_vselement=%s" ) % *in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
@@ -340,6 +376,15 @@ void	l7vsd::del_real_server( const virtualservice_element* in_vselement, error_c
 		return;
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::del_real_server arguments:";
+		debugstr << boost::format( "*in_vselement=%s" ) % *in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
 		// del realserver
@@ -370,6 +415,15 @@ void	l7vsd::edit_real_server( const virtualservice_element* in_vselement, error_
 		err.setter( true, msg );
 		return;
 	}
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::edit_real_server arguments:";
+		debugstr << boost::format( "*in_vselement=%s" ) % *in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	vslist_type::iterator vsitr = search_vslist( *in_vselement );
 	if( vslist.end() !=  vsitr ){
