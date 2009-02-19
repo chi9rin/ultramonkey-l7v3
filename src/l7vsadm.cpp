@@ -195,6 +195,10 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 		return false;
 	}
 	std::string	module_name = argv[pos];
+	if( L7VS_MODNAME_LEN < module_name.length() ){
+		l7vsadm_err.setter( true, "protomod name is too long." );
+		return false;
+	}
 	protocol_module_control&	ctrl = protocol_module_control::getInstance();
 	ctrl.initialize( L7VS_MODULE_PATH );
 	protocol_module_base* module;
@@ -261,6 +265,10 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 	}
 	//schedule module check.
 	std::string	scheduler_name = argv[pos];
+	if( L7VS_MODNAME_LEN < scheduler_name.length() ){
+		l7vsadm_err.setter( true, "scheduler name is too long." );
+		return false;
+	}
 	schedule_module_control&	ctrl = schedule_module_control::getInstance();
 	ctrl.initialize( L7VS_MODULE_PATH );
 	schedule_module_base* module;
