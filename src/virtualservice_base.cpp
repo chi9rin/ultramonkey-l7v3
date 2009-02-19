@@ -310,7 +310,7 @@ l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 		boost::format element_dump( "element struct data, "
 								 "udpmode = %s, tcp_accept_endpoint = %s, "
 								 "udp_recv_endpoint = %s, "
-								 "%s, realserver_vector:size = %d, "
+								 "realserver_vector:size = %d, "
 								 "protocol_module_name = %s, schedule_module_name = %s, "
 								 "protocol_args.size = %d, sorry_maxconnection = %d, "
 								 "sorry_endpoint = %s, sorry_flag = %d, qos_upstream = %d"
