@@ -115,12 +115,13 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	sregex	cookie_name_regex = +( alpha | digit );
 	sregex	cookie_expire_regex = +digit;
 	sregex	sorry_uri_regex
-				=	+(	"/" >>
+				=	+(	'/' >>
 						*(	alpha |
 							digit |
+							( set = ';', ':', '@', '&', '=' ) |
 							( set = '$', '-', '_', '.', '+' ) |
 							( set = '!', '*', '\'', '\(', ')', ',' ) |
-							"%" >> repeat<2>(xdigit)));
+							'%' >> repeat<2>(xdigit)));
 
 	int	cookie_expire_tmp;
 
@@ -435,8 +436,9 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	sregex	cookie_expire_regex = +digit;
 	sregex	sorry_uri_regex
 				=	+(	'/' >>
-						+(	alpha |
+						*(	alpha |
 							digit |
+							( set = ';', ':', '@', '&', '=' ) |
 							( set = '$', '-', '_', '.', '+' ) |
 							( set = '!', '*', '\'', '\(', ')', ',' ) |
 							'%' >> repeat<2>(xdigit)));
