@@ -2199,6 +2199,7 @@ class up_thread_run_test_class : public l7vs::tcp_session{
 		void test_run(){
 			boost::mutex::scoped_lock scope_lock(test_thread_wait);
 			while(!test_end){
+				std::cout << "up_thread_run test call" << std::endl;
 				test_wait = true;
 				up_thread_run();
 				while(test_wait){};
@@ -2298,7 +2299,6 @@ void up_thread_run_test(){
 	while(!test_server.bconnect_flag){
 		sleep(1);
 	}
-	
 		
 	test_obj.test_thread_wait.lock();
 	thread_state[0] = 0;	// UP_THREAD_ALIVE
@@ -2458,11 +2458,12 @@ void up_thread_run_test(){
 	BOOST_CHECK(test_obj.up_thread_exit_process_type == l7vs::tcp_session::MESSAGE_PROC);
 	
 	thread_state[1] = 0;
+	sleep(1);
 	
 	// error test not find function map 
 	test_obj.clear_function_map();
 	exit_flag = false;
-	session_pause_flag = true;
+	session_pause_flag = false;
 	thread_state[1] = 1;
 	
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -2476,11 +2477,14 @@ void up_thread_run_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
+
+	thread_state[1] = 0;
+	sleep(1);
 	
 	//error test protocol_module returnd illegal EVENT_TAG
 	test_obj.clear_event_map();
 	exit_flag = false;
-	session_pause_flag = true;
+	session_pause_flag = false;
 	thread_state[1] = 1;
 	
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -2495,12 +2499,14 @@ void up_thread_run_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
+	thread_state[1] = 0;
+	sleep(1);
 	
 	
 	// unit_test [17] up_thread_run set non blocking fail check
 	std::cout << "[17] up_thread_run set non blocking fail check" << std::endl;
 	exit_flag = false;
-	session_pause_flag = true;
+	session_pause_flag = false;
 	thread_state[1] = 1;
 	
 	l7vs::tcp_socket::set_non_blocking_mode_res = false;
@@ -2516,11 +2522,14 @@ void up_thread_run_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	l7vs::tcp_socket::set_non_blocking_mode_res = true;
 	l7vs::tcp_socket::set_non_blocking_mode_ec.clear();
+
+	thread_state[1] = 0;
+	sleep(1);
 	
 	//error test client endpoint get error 
 	client_socket.get_socket().close(ec);
 	exit_flag = false;
-	session_pause_flag = true;
+	session_pause_flag = false;
 	thread_state[1] = 1;
 	
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -2535,10 +2544,14 @@ void up_thread_run_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
+	thread_state[1] = 0;
+	sleep(1);
+	
 	//error test protocol module null error 
 	test_obj.set_protocol_module(NULL);
 	exit_flag = false;
-	session_pause_flag = true;
+	session_pause_flag = false;
+	thread_state[1] = 1;
 	
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -2552,14 +2565,21 @@ void up_thread_run_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
+	thread_state[1] = 0;
+	sleep(1);
+	
 	test_obj.test_end = true;
 	test_obj.test_wait = false;
+	std::cout << "test_thread.join wait" << std::endl;
 	test_thread.join();
+	std::cout << "test_thread.join ok" << std::endl;
 	
 	
 	test_server.breq_close_wait_flag = false;	
 	test_server.bstop_flag = true;
+	std::cout << "server_thread.join wait" << std::endl;
 	server_thread.join();
+	std::cout << "server_thread.join ok" << std::endl;
 	
 	
 	BOOST_MESSAGE( "----- up_thread_run test end -----" );
@@ -3622,6 +3642,8 @@ void up_thread_sorryserver_get_detination_event_test(){
 	
 	proto_test.handle_sorryserver_select_res_tag = l7vs::protocol_module_base::SORRYSERVER_CONNECT;
 	proto_test.handle_sorryserver_select_out_sorry_endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("100.101.102.103"), 7777);
+	vs.my_element.sorry_endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("200.201.202.203"), 8888);
+
 	up_thread_data_dest_side.initialize();
 	BOOST_CHECK(proto_test.handle_sorryserver_select_in_thread_id != proc_id);
 	
@@ -3632,6 +3654,7 @@ void up_thread_sorryserver_get_detination_event_test(){
 	BOOST_CHECK(proto_test.handle_sorryserver_select_in_thread_id == proc_id);
 	boost::asio::ip::tcp::endpoint get_endpoint = up_thread_data_dest_side.get_endpoint();
 	BOOST_CHECK(get_endpoint == proto_test.handle_sorryserver_select_out_sorry_endpoint);
+	BOOST_CHECK(vs.my_element.sorry_endpoint == proto_test.handle_sorryserver_select_in_sorry_endpoint);
 	
 	// unit_test [2] up_thread_sorryserver_get_detination_event up_thread_next_call_function update check
 	std::cout << "[2] up_thread_sorryserver_get_detination_event up_thread_next_call_function update check" << std::endl;
@@ -7602,7 +7625,8 @@ void up_thread_realserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_realserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + 0));
 	test_obj.up_thread_realserver_send_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_send_call_check);
@@ -7611,7 +7635,8 @@ void up_thread_realserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_realserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + 0));
 	test_obj.up_thread_realserver_send_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_send_call_check);
@@ -7620,7 +7645,8 @@ void up_thread_realserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_realserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3)));
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3)));
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + (MAX_BUFFER_SIZE / 3)));
 	test_obj.up_thread_realserver_send_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_send_call_check);
@@ -7629,7 +7655,8 @@ void up_thread_realserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_realserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3) * 2));
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3) * 2));
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + (MAX_BUFFER_SIZE / 3) * 2));
 	test_obj.up_thread_client_receive_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
@@ -7794,7 +7821,8 @@ void up_thread_sorryserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_sorryserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + 0));
 	test_obj.up_thread_sorryserver_send_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_sorryserver_send_call_check);
@@ -7803,7 +7831,8 @@ void up_thread_sorryserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_sorryserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + 0));
 	test_obj.up_thread_sorryserver_send_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_sorryserver_send_call_check);
@@ -7812,7 +7841,8 @@ void up_thread_sorryserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_sorryserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3)));
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3)));
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + (MAX_BUFFER_SIZE / 3)));
 	test_obj.up_thread_sorryserver_send_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_sorryserver_send_call_check);
@@ -7821,7 +7851,8 @@ void up_thread_sorryserver_send_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_sorryserver_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3) * 2));
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3) * 2));
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + (MAX_BUFFER_SIZE / 3) * 2));
 	test_obj.up_thread_client_receive_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
@@ -7983,7 +8014,8 @@ void down_thread_client_send_test(){
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_client_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + 0));
 	test_obj.down_thread_client_send_call_check = false;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_send_call_check);
@@ -7992,7 +8024,8 @@ void down_thread_client_send_test(){
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_client_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)&(send_data.get_data()) + 0);
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + 0));
 	test_obj.down_thread_client_send_call_check = false;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_send_call_check);
@@ -8001,7 +8034,8 @@ void down_thread_client_send_test(){
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_client_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3)));
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3)));
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + (MAX_BUFFER_SIZE / 3)));
 	test_obj.down_thread_client_send_call_check = false;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_send_call_check);
@@ -8010,7 +8044,8 @@ void down_thread_client_send_test(){
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_buffers_in = NULL;
 	test_obj.test_call_client_send();
-	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3) * 2));
+//	BOOST_CHECK((char*)socket.write_some_buffers_in == (char*)(&(send_data.get_data()) + (MAX_BUFFER_SIZE / 3) * 2));
+	BOOST_CHECK((char*)socket.write_some_buffers_in == (send_data.get_data().data() + (MAX_BUFFER_SIZE / 3) * 2));
 	test_obj.down_thread_realserver_receive_call_check = false;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
