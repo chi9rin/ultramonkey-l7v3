@@ -1157,7 +1157,7 @@ int			replication::check_parameter(){
 		sum += replication_info.component_info[i].block_size ;
 		for ( int j=i+1; j<replication_info.component_num; j++)	{
 			if ( replication_info.component_info[j].id == replication_info.component_info[i].id ){
-				buf = boost::io::str( boost::format( "Too many component block. Max is %d." ) % replication_state.total_block );
+				buf = boost::io::str( boost::format( "Component ID was repeated.(%s)" ) % replication_info.component_info[i].id );
 				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 				goto END;
 			}
