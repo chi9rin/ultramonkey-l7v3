@@ -1,14 +1,28 @@
-//
-//	@file	schedule_module_rr.cpp
-//	@brief	shared object schedule module class
-//
-//	copyright (c) xxx corporation. 2009
-//	mail: 
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*
+ *	@file	schedule_module_rr.cpp
+ *	@brief	shared object schedule module class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include "schedule_module_rr.h"
+#include <boost/format.hpp>
 
 namespace l7vs{
 
@@ -21,6 +35,14 @@ schedule_module_round_robin::~schedule_module_round_robin(){}
 
 //!	initialize function
 void	schedule_module_round_robin::initialize(){
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function in : schedule_module_round_robin::initialize", __FILE__, __LINE__);
+			}
+		}
+	}
+
 	boost::asio::ip::tcp::endpoint	tcp_local_endpoint ;
 	boost::asio::ip::udp::endpoint	udp_local_endpoint ;
 
@@ -30,6 +52,14 @@ void	schedule_module_round_robin::initialize(){
 	if ( !putLogInfo.empty() )
 	{
 		putLogInfo( 1, "Saved endpoint was initialized.", __FILE__, __LINE__);
+	}
+
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function out : schedule_module_round_robin::initialize", __FILE__, __LINE__);
+			}
+		}
 	}
 }
 
@@ -55,8 +85,18 @@ void	schedule_module_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&		outendpoint ){
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+			}
+		}
+	}
+
 	boost::asio::ip::tcp::endpoint	tcp_local_endpoint ;
 	rslist_type::iterator			itr;
+	std::string	buf;
+	int			loop;
 
 	//! set clear data as NULL
 	outendpoint = tcp_local_endpoint;
@@ -67,8 +107,25 @@ void	schedule_module_round_robin::handle_schedule(
 		{
 			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
+
+	//! Debug log
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
+					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
+														% loop
+														% itr->tcp_endpoint.address()
+														% itr->tcp_endpoint.port()
+														% itr->weight );
+					putLogDebug( 1, buf, __FILE__, __LINE__);
+				}
+			}
+		}
+	}
+	//! Debug log END
 
 	for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 		//! keep first data of list
@@ -83,15 +140,28 @@ void	schedule_module_round_robin::handle_schedule(
 		{
 			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
 
 	//! first time
 	if ( tcp_local_endpoint == tcp_endpoint ){
 		//! set first data
 		tcp_endpoint = outendpoint;
-		return;
+		goto END;
 	}
+
+	//! Debug log
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" ) 
+													% tcp_endpoint.address()
+													% tcp_endpoint.port() );
+				putLogDebug( 1, buf, __FILE__, __LINE__);
+			}
+		}
+	}
+	//! Debug log END
 
 	for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 		if ( itr->weight > 0 ){
@@ -104,6 +174,21 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 	for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 		if ( itr->weight > 0 ){
+
+			//! Debug log
+			if ( !getloglevel.empty() ){
+				if ( LOG_LV_DEBUG == getloglevel() ){
+					if ( !putLogDebug.empty() ){
+						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d)" )
+															% itr->tcp_endpoint.address()
+															% itr->tcp_endpoint.port()
+															% itr->weight );
+						putLogDebug( 1, buf, __FILE__, __LINE__);
+					}
+				}
+			}
+			//! Debug log END
+
 			//! set found data
 			outendpoint = itr->tcp_endpoint;
 			break ;
@@ -112,6 +197,15 @@ void	schedule_module_round_robin::handle_schedule(
 
 	//! set found or first data
 	tcp_endpoint = outendpoint;
+
+END:
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+			}
+		}
+	}
 }
 
 //! handle schedule calles then schedule function for UDP endpoint
@@ -126,8 +220,18 @@ void	schedule_module_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&		outendpoint ){
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+			}
+		}
+	}
+
 	boost::asio::ip::udp::endpoint	udp_local_endpoint ;
 	rslist_type::iterator			itr;
+	std::string	buf;
+	int			loop;
 
 	//! set clear data as NULL
 	outendpoint = udp_local_endpoint;
@@ -138,8 +242,25 @@ void	schedule_module_round_robin::handle_schedule(
 		{
 			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
+
+	//! Debug log
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
+					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
+														% loop
+														% itr->udp_endpoint.address()
+														% itr->udp_endpoint.port()
+														% itr->weight );
+					putLogDebug( 1, buf, __FILE__, __LINE__);
+				}
+			}
+		}
+	}
+	//! Debug log END
 
 	for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 		//! keep first data of list
@@ -154,15 +275,28 @@ void	schedule_module_round_robin::handle_schedule(
 		{
 			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
 
 	//! first time
 	if ( udp_local_endpoint == udp_endpoint ){
 		//! set first data
 		udp_endpoint = outendpoint;
-		return;
+		goto END;
 	}
+
+	//! Debug log
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" ) 
+													% udp_endpoint.address()
+													% udp_endpoint.port() );
+				putLogDebug( 1, buf, __FILE__, __LINE__);
+			}
+		}
+	}
+	//! Debug log END
 
 	for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 		if ( itr->weight > 0 ){
@@ -175,6 +309,21 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 	for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 		if ( itr->weight > 0 ){
+
+			//! Debug log
+			if ( !getloglevel.empty() ){
+				if ( LOG_LV_DEBUG == getloglevel() ){
+					if ( !putLogDebug.empty() ){
+						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d)" )
+															% itr->udp_endpoint.address()
+															% itr->udp_endpoint.port()
+															% itr->weight );
+						putLogDebug( 1, buf, __FILE__, __LINE__);
+					}
+				}
+			}
+			//! Debug log END
+
 			//! set found data
 			outendpoint = itr->udp_endpoint;
 			break ;
@@ -183,6 +332,15 @@ void	schedule_module_round_robin::handle_schedule(
 
 	//! set found or first data
 	udp_endpoint = outendpoint;
+
+END:
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+			}
+		}
+	}
 }
 
 //! replication interval interrrupt
