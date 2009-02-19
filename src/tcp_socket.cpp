@@ -43,11 +43,22 @@ namespace l7vs{
 	bool tcp_socket::connect(boost::asio::ip::tcp::endpoint connect_endpoint,
 		boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::connect", __FILE__, __LINE__ );
-			
+		
 		boost::mutex::scoped_lock scope_lock(socket_mutex);
 		my_socket.connect(connect_endpoint,ec);
 		if(!ec){
 			open_flag = true;
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] tcp_socket::connect [";
+				buf << connect_endpoint;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 		}else{
 			open_flag = false;
 		}
@@ -59,6 +70,18 @@ namespace l7vs{
 	void tcp_socket::accept(){
 		boost::mutex::scoped_lock scope_lock(socket_mutex);
 		open_flag = true;
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			boost::system::error_code ec;
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] tcp_socket::accept [";
+			buf << my_socket.remote_endpoint(ec);
+			buf << "]";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
 	}
 
 	//! close socket
@@ -69,6 +92,20 @@ namespace l7vs{
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::close", __FILE__, __LINE__ );
 		
 		boost::mutex::scoped_lock scope_lock(socket_mutex);
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			if(open_flag){
+				boost::system::error_code ec;
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] tcp_socket::close [";
+				buf << my_socket.remote_endpoint(ec);
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+		}
+		//----Debug log----------------------------------------------------------------------
 		my_socket.close(ec);
 		bool bres = false;
 		if(open_flag){
