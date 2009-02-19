@@ -147,19 +147,39 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 	}
 	// get host endpoint from string
 	std::string	src_str = argv[pos];
-	try{
-		if( request.vs_element.udpmode ){
-			request.vs_element.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( src_str );
+	if( request.vs_element.udpmode ){
+		error_code	err;
+		request.vs_element.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( src_str, err );
+		if( err ){
+			std::stringstream buf;
+			buf << "target endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
 		}
-		else{
-			request.vs_element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( src_str );
+		check_endpoint<boost::asio::ip::udp>( request.vs_element.udp_recv_endpoint, err );
+		if ( err ){
+			std::stringstream buf;
+			buf << "target endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
 		}
 	}
-	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & sys_err ){
-		std::stringstream buf;
-		buf << "target endpoint parse error:" << src_str;
-		l7vsadm_err.setter( true, buf.str() );
-		return false;
+	else{
+		error_code	err;
+		request.vs_element.tcp_accept_endpoint = string_to_endpoint<boost::asio::ip::tcp>( src_str, err );
+		if( err ){
+			std::stringstream buf;
+			buf << "target endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
+		}
+		check_endpoint<boost::asio::ip::tcp>( request.vs_element.tcp_accept_endpoint, err );
+		if ( err ){
+			std::stringstream buf;
+			buf << "target endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
+		}
 	}
 	return true;
 }
@@ -288,20 +308,33 @@ bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] )
 		return false;
 	}
 	std::string sorry_endpoint = argv[pos];
-	try{
-		request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( sorry_endpoint );
-		// clear endpoint check
-		if( request.vs_element.sorry_endpoint == boost::asio::ip::tcp::endpoint() ){
-			std::string	clear_endpoint = "255.255.255.255:0";		// clear value
-			request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( clear_endpoint );
-		}
-	}
-	catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > & sys_err ){
-		//don't resolve sorryserver endpoint
+	error_code err;
+	request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( sorry_endpoint, err );
+	if( err ){
 		std::stringstream buf;
-		buf << "sorryserver endpoint parse error:" << sorry_endpoint;
+		buf << "sorryserver endpoint parse error:" << err.get_message() << sorry_endpoint;
 		l7vsadm_err.setter( true, buf.str() );
 		return false;
+	}
+	// clear endpoint check
+	if( request.vs_element.sorry_endpoint == boost::asio::ip::tcp::endpoint() ){
+		std::string	clear_endpoint = "255.255.255.255:0";		// clear value
+		request.vs_element.sorry_endpoint = string_to_endpoint< boost::asio::ip::tcp > ( clear_endpoint, err );
+		if( err ){
+			std::stringstream buf;
+			buf << "sorryserver endpoint parse error:" << err.get_message() << clear_endpoint;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
+		}
+	}
+	else{
+		check_endpoint<boost::asio::ip::tcp>( request.vs_element.sorry_endpoint, err );
+		if ( err ){
+			std::stringstream buf;
+			buf << "sorryserver endpoint parse error:" << err.get_message() << sorry_endpoint;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
+		}
 	}
 	return true;	//
 }
@@ -437,31 +470,29 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 		std::stringstream	sstream;
 		sstream	<< elem.tcp_accept_endpoint;
 		std::string	endpoint	= sstream.str();
-		try{
-			elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( endpoint );
-			elem.tcp_accept_endpoint = zeropoint;
-		}
-		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
+		error_code err;
+		elem.udp_recv_endpoint = string_to_endpoint<boost::asio::ip::udp>( endpoint, err );
+		if( err ){
 			std::stringstream buf;
-			buf << "target endpoint parse error:" << endpoint;
+			buf << "target endpoint parse error:" << err.get_message() << endpoint;
 			l7vsadm_err.setter( true, buf.str() );
 			return false;
 		}
+		elem.tcp_accept_endpoint = zeropoint;
 	}
 	if( elem.realserver_vector.size() != 0 && elem.realserver_vector.front().tcp_endpoint != zeropoint ){
 		std::stringstream 	sstream;
 		sstream << elem.realserver_vector.front().tcp_endpoint;
 		std::string	endpoint = sstream.str();
-		try{
-			elem.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp > ( endpoint );
-			elem.realserver_vector.front().tcp_endpoint = zeropoint;
-		}
-		catch( boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& e ){
+		error_code err;
+		elem.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp > ( endpoint, err );
+		if( err ){
 			std::stringstream buf;
-			buf << "realserver endpoint parse error:" << endpoint;
+			buf << "realserver endpoint parse error:" << err.get_message() << endpoint;
 			l7vsadm_err.setter( true, buf.str() );
 			return false;
 		}
+		elem.realserver_vector.front().tcp_endpoint = zeropoint;
 	}
 	return true;
 }
@@ -551,20 +582,41 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 		return false;
 	}
 	std::string	src_str = argv[pos];
-	try{
-		if( request.vs_element.udpmode ){
-			request.vs_element.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp >( src_str );
+	if( request.vs_element.udpmode ){
+		error_code err;
+		request.vs_element.realserver_vector.front().udp_endpoint = string_to_endpoint< boost::asio::ip::udp >( src_str, err );
+		if ( err ){
+			// address string error.
+			std::stringstream buf;
+			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
 		}
-		else{
-			request.vs_element.realserver_vector.front().tcp_endpoint = string_to_endpoint< boost::asio::ip::tcp >( src_str );
+		check_endpoint<boost::asio::ip::udp>( request.vs_element.realserver_vector.front().udp_endpoint, err );
+		if ( err ){
+			std::stringstream buf;
+			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
 		}
 	}
-	catch( ... ){
-		// address string error.
-		std::stringstream buf;
-		buf << "realserver endpoint parse error:" << src_str;
-		l7vsadm_err.setter( true, buf.str() );
-		return false;
+	else{
+		error_code err;
+		request.vs_element.realserver_vector.front().tcp_endpoint = string_to_endpoint< boost::asio::ip::tcp >( src_str, err );
+		if ( err ){
+			// address string error.
+			std::stringstream buf;
+			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
+		}
+		check_endpoint<boost::asio::ip::tcp>( request.vs_element.realserver_vector.front().tcp_endpoint, err );
+		if ( err ){
+			std::stringstream buf;
+			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
+			l7vsadm_err.setter( true, buf.str() );
+			return false;
+		}
 	}
 	return true;
 }

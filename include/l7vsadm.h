@@ -13,6 +13,7 @@
 #include <map>
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
+#include <boost/regex.hpp>
 #include <sstream>
 #include "error_code.h"
 #include "l7vs_command.h"
@@ -38,17 +39,58 @@
 namespace l7vs{
 
 template < class T >
-typename T::endpoint string_to_endpoint( std::string& str ){
-	std::string::size_type pos = str.find( ":" );
+typename T::endpoint string_to_endpoint( std::string& str, error_code& err ){
+	std::string::size_type pos = str.rfind( ":" );
 	std::string	hostname = str.substr( 0, pos );
 	std::string	portname = str.substr( pos+1, str.length() );
+	if( 0 == hostname.length() ){
+		err.setter( 1, "hostname is not specified:" );
+		return typename T::endpoint();
+	}
+	boost::regex re("\\d+");
+	if( boost::regex_match( portname.c_str(), re ) ){
+		try{
+			boost::lexical_cast<unsigned short>(portname);
+		}
+		catch( boost::bad_lexical_cast& ){
+			err.setter( 1, "invalid port number:" );
+			return typename T::endpoint();
+		}
+	}
 	boost::asio::io_service		io_service;
 	typename T::resolver				resolver(io_service);
 	typename T::resolver::query		query( hostname, portname );
 	typename T::resolver::iterator	end;
-	typename T::resolver::iterator	itr = resolver.resolve( query );
+	boost::system::error_code	ec;
+	typename T::resolver::iterator	itr = resolver.resolve( query, ec );
+	if( ec ){
+		std::stringstream buf;
+		buf << "invalid endpoint:" << ec.message() << ":";
+		err.setter( 1, buf.str() );
+		return typename T::endpoint();
+	}
 	if( itr == end ) return typename T::endpoint();
 	return *itr;
+}
+
+template < class T >
+void	check_endpoint( typename T::endpoint& ep, error_code& err ){
+	if( ep.address().is_v4() ){
+		if( ep.address().to_v4() == boost::asio::ip::address_v4::any() ){
+			err.setter( 1, "invalid address (INADDR_ANY):" );
+			return;
+		}
+	}
+	else{
+		if( ep.address().to_v6() == boost::asio::ip::address_v6::any() ){
+			err.setter( 1, "invalid address (INADDR_ANY):" );
+			return;
+		}
+	}
+	if( ep.port() == 0 ){
+		err.setter( 1, "invalid port number (0):" );
+		return;
+	}
 }
 
 template < class T >

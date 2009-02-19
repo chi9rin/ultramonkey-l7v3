@@ -294,6 +294,22 @@ void	parse_opt_vs_target_func_test(){
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.udp_recv_endpoint, ep );
 	}
 
+	// parse_opt_vs_target_func normal case 3 (tcp endpoint specified in name)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-t", "localhost:pop3" };
+	
+		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+		// unit_test[14] parse_opt_vs_target_func normal case 3 (tcp endpoint specified in name) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[15] parse_opt_vs_target_func normal case 3 (tcp endpoint specified in name) endpoint check
+		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "127.0.0.1:110" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, ep );
+	}
+
 	// parse_opt_vs_target_func error case 1 (invalid endpoint)
 	{
 		l7vsadm_test	adm;
@@ -303,7 +319,7 @@ void	parse_opt_vs_target_func_test(){
 
 		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
 
-		// unit_test[14] parse_opt_vs_target_func error case 1 (invalid endpoint) return value check
+		// unit_test[16] parse_opt_vs_target_func error case 1 (invalid endpoint) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -316,10 +332,74 @@ void	parse_opt_vs_target_func_test(){
 
 		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
 
-		// unit_test[15] parse_opt_vs_target_func error case 2 (no endpoint) return value check
+		// unit_test[17] parse_opt_vs_target_func error case 2 (no endpoint) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
+	// parse_opt_vs_target_func error case 3 (0.0.0.0 address)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-t", "0.0.0.0:8080" };
+
+		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+		// unit_test[18] parse_opt_vs_target_func error case 3 (0.0.0.0 address) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_target_func error case 4 (0 port)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-t", "10.144.169.87:0" };
+
+		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+		// unit_test[19] parse_opt_vs_target_func error case 4 (0 port) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_target_func error case 5 (invalid port (99999))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-t", "10.144.169.87:99999" };
+
+		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+		// unit_test[20] parse_opt_vs_target_func error case 5 (invalid port (99999)) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_target_func error case 6 (hostname omitted)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-t", ":22100" };
+
+		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+		// unit_test[21] parse_opt_vs_target_func error case 6 (hostname omitted) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_target_func error case 7 (port omitted)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-t", "10.144.169.87:" };
+
+		bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+		// unit_test[22] parse_opt_vs_target_func error case 7 (port omitted) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
 
 	BOOST_MESSAGE( "----- parse_opt_vs_target_func_test end -----" );
 
@@ -340,13 +420,13 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[16] parse_opt_vs_module_func normal case 1 (end with module option) return value check
+		// unit_test[23] parse_opt_vs_module_func normal case 1 (end with module option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[17] parse_opt_vs_module_func normal case 1 (end with module option) check_parameter call check
+		// unit_test[24] parse_opt_vs_module_func normal case 1 (end with module option) check_parameter call check
 		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
-		// unit_test[18] parse_opt_vs_module_func normal case 1 (end with module option) module name check
+		// unit_test[25] parse_opt_vs_module_func normal case 1 (end with module option) module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[19] parse_opt_vs_module_func normal case 1 (end with module option) module arg check
+		// unit_test[26] parse_opt_vs_module_func normal case 1 (end with module option) module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "option" );
 	}
 
@@ -362,13 +442,13 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[20] parse_opt_vs_module_func normal case 2 (end with next vs option) return value check
+		// unit_test[27] parse_opt_vs_module_func normal case 2 (end with next vs option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[21] parse_opt_vs_module_func normal case 2 (end with next vs option) check_parameter call check
+		// unit_test[28] parse_opt_vs_module_func normal case 2 (end with next vs option) check_parameter call check
 		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
-		// unit_test[22] parse_opt_vs_module_func normal case 2 (end with next vs option) module name check
+		// unit_test[29] parse_opt_vs_module_func normal case 2 (end with next vs option) module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[23] parse_opt_vs_module_func normal case 2 (end with next vs option) module arg check
+		// unit_test[30] parse_opt_vs_module_func normal case 2 (end with next vs option) module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "option" );
 
 	}
@@ -385,13 +465,13 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[24] parse_opt_vs_module_func normal case 3 (no protocol module arg) return value check
+		// unit_test[31] parse_opt_vs_module_func normal case 3 (no protocol module arg) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[25] parse_opt_vs_module_func normal case 3 (no protocol module arg) check_parameter call check
+		// unit_test[32] parse_opt_vs_module_func normal case 3 (no protocol module arg) check_parameter call check
 		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
-		// unit_test[26] parse_opt_vs_module_func normal case 3 (no protocol module arg) module name check
+		// unit_test[33] parse_opt_vs_module_func normal case 3 (no protocol module arg) module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[27] parse_opt_vs_module_func normal case 3 (no protocol module arg) module arg check
+		// unit_test[34] parse_opt_vs_module_func normal case 3 (no protocol module arg) module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.size(), 0U );
 
 	}
@@ -408,7 +488,7 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[28] parse_opt_vs_module_func error case 1 (no protocol module name) return value check
+		// unit_test[35] parse_opt_vs_module_func error case 1 (no protocol module name) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 
 	}
@@ -425,7 +505,7 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[29] parse_opt_vs_module_func error case 2 (protocol module load failed) return value check
+		// unit_test[36] parse_opt_vs_module_func error case 2 (protocol module load failed) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 
 	}
@@ -442,9 +522,9 @@ void	parse_opt_vs_module_func_test(){
 	
 		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
 
-		// unit_test[30] parse_opt_vs_module_func error case 3 (check parameter failed) return value check
+		// unit_test[37] parse_opt_vs_module_func error case 3 (check parameter failed) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
-		// unit_test[31] parse_opt_vs_module_func error case 3 (check parameter failed) check_parameter call check
+		// unit_test[38] parse_opt_vs_module_func error case 3 (check parameter failed) check_parameter call check
 		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
 
 	}
@@ -470,9 +550,9 @@ void	parse_opt_vs_scheduler_func_test(){
 	
 		bool ret = adm.parse_opt_vs_scheduler_func_wp( pos, argc, argv );
 
-		// unit_test[32] parse_opt_vs_scheduler_func normal case 1 return value check
+		// unit_test[39] parse_opt_vs_scheduler_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[33] parse_opt_vs_scheduler_func normal case 1 module name check
+		// unit_test[40] parse_opt_vs_scheduler_func normal case 1 module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "rr" );
 	}
 
@@ -486,7 +566,7 @@ void	parse_opt_vs_scheduler_func_test(){
 	
 		bool ret = adm.parse_opt_vs_scheduler_func_wp( pos, argc, argv );
 
-		// unit_test[34] parse_opt_vs_scheduler_func error case 1 (no schedule module name) return value check
+		// unit_test[41] parse_opt_vs_scheduler_func error case 1 (no schedule module name) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 
 	}
@@ -501,7 +581,7 @@ void	parse_opt_vs_scheduler_func_test(){
 	
 		bool ret = adm.parse_opt_vs_scheduler_func_wp( pos, argc, argv );
 
-		// unit_test[35] parse_opt_vs_scheduler_func error case 2 (schedule module load failed) return value check
+		// unit_test[42] parse_opt_vs_scheduler_func error case 2 (schedule module load failed) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 
 	}
@@ -524,9 +604,9 @@ void	parse_opt_vs_upper_func_test(){
 	
 		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
 
-		// unit_test[36] parse_opt_vs_upper_func normal case 1 return value check
+		// unit_test[43] parse_opt_vs_upper_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[37] parse_opt_vs_upper_func normal case 1 sorry_maxconnection check
+		// unit_test[44] parse_opt_vs_upper_func normal case 1 sorry_maxconnection check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_maxconnection, 128 );
 	}
 
@@ -539,7 +619,7 @@ void	parse_opt_vs_upper_func_test(){
 	
 		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
 
-		// unit_test[38] parse_opt_vs_upper_func error case 1 (invalid maxconnection value (charactor)) return value check
+		// unit_test[45] parse_opt_vs_upper_func error case 1 (invalid maxconnection value (charactor)) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -554,7 +634,7 @@ void	parse_opt_vs_upper_func_test(){
 	
 		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
 
-		// unit_test[39] parse_opt_vs_upper_func error case 2 (invalid maxconnection value(long long over)) return value check
+		// unit_test[46] parse_opt_vs_upper_func error case 2 (invalid maxconnection value(long long over)) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -567,7 +647,7 @@ void	parse_opt_vs_upper_func_test(){
 	
 		bool ret = adm.parse_opt_vs_upper_func_wp( pos, argc, argv );
 
-		// unit_test[40] parse_opt_vs_upper_func error case 3 (no maxconnection value) return value check
+		// unit_test[47] parse_opt_vs_upper_func error case 3 (no maxconnection value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -587,9 +667,9 @@ void	parse_opt_vs_bypass_func_test(){
 	
 		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
 
-		// unit_test[41] parse_opt_vs_bypass_func normal case 1 return value check
+		// unit_test[48] parse_opt_vs_bypass_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[42] parse_opt_vs_bypass_func normal case 1 sorry_endpoint check
+		// unit_test[49] parse_opt_vs_bypass_func normal case 1 sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, ep );
 	}
@@ -603,10 +683,26 @@ void	parse_opt_vs_bypass_func_test(){
 	
 		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
 
-		// unit_test[43] parse_opt_vs_bypass_func normal case 2 (sorryserver_clear) return value check
+		// unit_test[50] parse_opt_vs_bypass_func normal case 2 (sorryserver_clear) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[44] parse_opt_vs_bypass_func normal case 2 (sorryserver_clear) sorry_endpoint check
+		// unit_test[51] parse_opt_vs_bypass_func normal case 2 (sorryserver_clear) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "255.255.255.255:0" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, ep );
+	}
+
+	// parse_opt_vs_bypass_func normal case 3 (sorryserver specified in name)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-b", "localhost:http" };
+	
+		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+		// unit_test[52] parse_opt_vs_bypass_func normal case 3 (sorryserver specified in name) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[53] parse_opt_vs_bypass_func normal case 3 (sorryserver specified in name) endpoint check
+		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "127.0.0.1:80" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, ep );
 	}
 
@@ -619,7 +715,7 @@ void	parse_opt_vs_bypass_func_test(){
 
 		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
 
-		// unit_test[45] parse_opt_vs_bypass_func error case 1 (invalid endpoint) return value check
+		// unit_test[54] parse_opt_vs_bypass_func error case 1 (invalid endpoint) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -632,7 +728,72 @@ void	parse_opt_vs_bypass_func_test(){
 
 		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
 
-		// unit_test[46] parse_opt_vs_bypass_func error case 2 (no endpoint) return value check
+		// unit_test[55] parse_opt_vs_bypass_func error case 2 (no endpoint) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_bypass_func error case 3 (0.0.0.0 address)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-b", "0.0.0.0:8080" };
+
+		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+		// unit_test[56] parse_opt_vs_bypass_func error case 3 (0.0.0.0 address) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_bypass_func error case 4 (0 port)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-b", "10.144.169.87:0" };
+
+		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+		// unit_test[57] parse_opt_vs_bypass_func error case 4 (0 port) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_bypass_func error case 5 (invalid port (99999))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-b", "10.144.169.87:99999" };
+
+		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+		// unit_test[58] parse_opt_vs_bypass_func error case 5 (invalid port (99999)) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_bypass_func error case 6 (hostname omitted)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-b", ":22100" };
+
+		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+		// unit_test[59] parse_opt_vs_bypass_func error case 6 (hostname omitted) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_vs_bypass_func error case 7 (port omitted)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-b", "10.144.169.87:" };
+
+		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+		// unit_test[60] parse_opt_vs_bypass_func error case 7 (port omitted) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -652,9 +813,9 @@ void	parse_opt_vs_flag_func_test(){
 	
 		bool ret = adm.parse_opt_vs_flag_func_wp( pos, argc, argv );
 
-		// unit_test[47] parse_opt_vs_flag_func normal case 1 (flag on) return value check
+		// unit_test[61] parse_opt_vs_flag_func normal case 1 (flag on) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[48] parse_opt_vs_flag_func normal case 1 (flag on) sorry_flag check
+		// unit_test[62] parse_opt_vs_flag_func normal case 1 (flag on) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
 	}
 
@@ -667,9 +828,9 @@ void	parse_opt_vs_flag_func_test(){
 	
 		bool ret = adm.parse_opt_vs_flag_func_wp( pos, argc, argv );
 
-		// unit_test[49] parse_opt_vs_flag_func normal case 2 (flag off) return value check
+		// unit_test[63] parse_opt_vs_flag_func normal case 2 (flag off) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[50] parse_opt_vs_flag_func normal case 2 (flag off) sorry_flag check
+		// unit_test[64] parse_opt_vs_flag_func normal case 2 (flag off) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, false );
 	}
 
@@ -682,7 +843,7 @@ void	parse_opt_vs_flag_func_test(){
 
 		bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
 
-		// unit_test[51] parse_opt_vs_flag_func error case 1 (no flag) return value check
+		// unit_test[65] parse_opt_vs_flag_func error case 1 (no flag) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -702,9 +863,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[52] parse_opt_vs_qosup_func normal case 1 (no unit postfix) return value check
+		// unit_test[66] parse_opt_vs_qosup_func normal case 1 (no unit postfix) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[53] parse_opt_vs_qosup_func normal case 1 (no unit postfix) qos_upstream check
+		// unit_test[67] parse_opt_vs_qosup_func normal case 1 (no unit postfix) qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 128ULL );
 	}
 
@@ -717,9 +878,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[54] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') return value check
+		// unit_test[68] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[55] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') qos_upstream check
+		// unit_test[69] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 137438953472ULL );
 	}
 
@@ -732,9 +893,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[56] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') return value check
+		// unit_test[70] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[57] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') qos_upstream check
+		// unit_test[71] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 137438953472ULL );
 	}
 
@@ -747,9 +908,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[58] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') return value check
+		// unit_test[72] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[59] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') qos_upstream check
+		// unit_test[73] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 134217728ULL );
 	}
 
@@ -762,9 +923,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[60] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') return value check
+		// unit_test[74] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[61] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') qos_upstream check
+		// unit_test[75] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 134217728ULL );
 	}
 
@@ -777,9 +938,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[62] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') return value check
+		// unit_test[76] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[63] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') qos_upstream check
+		// unit_test[77] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 131072ULL );
 	}
 
@@ -792,9 +953,9 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[64] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') return value check
+		// unit_test[78] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[65] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') qos_upstream check
+		// unit_test[79] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 131072ULL );
 	}
 
@@ -807,7 +968,7 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[66] parse_opt_vs_qosup_func error case 1 (invalid qos_upstream value (charactor)) return value check
+		// unit_test[80] parse_opt_vs_qosup_func error case 1 (invalid qos_upstream value (charactor)) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -822,7 +983,7 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[67] parse_opt_vs_qosup_func error case 2 (invalid qos_upstream value(unsigned long long over)) return value check
+		// unit_test[81] parse_opt_vs_qosup_func error case 2 (invalid qos_upstream value(unsigned long long over)) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -837,7 +998,7 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[68] parse_opt_vs_qosup_func error case 3 (invalid qos_upstream value(unsigned long long over in postfix 'G')) return value check
+		// unit_test[82] parse_opt_vs_qosup_func error case 3 (invalid qos_upstream value(unsigned long long over in postfix 'G')) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -852,7 +1013,7 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[69] parse_opt_vs_qosup_func error case 4 (invalid qos_upstream value(unsigned long long over in postfix 'M')) return value check
+		// unit_test[83] parse_opt_vs_qosup_func error case 4 (invalid qos_upstream value(unsigned long long over in postfix 'M')) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -867,7 +1028,7 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[70] parse_opt_vs_qosup_func error case 5 (invalid qos_upstream value(unsigned long long over in postfix 'K')) return value check
+		// unit_test[84] parse_opt_vs_qosup_func error case 5 (invalid qos_upstream value(unsigned long long over in postfix 'K')) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -880,7 +1041,7 @@ void	parse_opt_vs_qosup_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosup_func_wp( pos, argc, argv );
 
-		// unit_test[71] parse_opt_vs_qosup_func error case 6 (no qos_upstream value) return value check
+		// unit_test[85] parse_opt_vs_qosup_func error case 6 (no qos_upstream value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -900,9 +1061,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[72] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) return value check
+		// unit_test[86] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[73] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) qos_downstream check
+		// unit_test[87] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 128ULL );
 	}
 
@@ -915,9 +1076,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[74] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') return value check
+		// unit_test[88] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[75] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') qos_downstream check
+		// unit_test[89] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 137438953472ULL );
 	}
 
@@ -930,9 +1091,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[76] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') return value check
+		// unit_test[90] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[77] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') qos_downstream check
+		// unit_test[91] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 137438953472ULL );
 	}
 
@@ -945,9 +1106,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[78] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') return value check
+		// unit_test[92] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[79] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') qos_downstream check
+		// unit_test[93] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 134217728ULL );
 	}
 
@@ -960,9 +1121,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[80] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') return value check
+		// unit_test[94] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[81] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') qos_downstream check
+		// unit_test[95] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 134217728ULL );
 	}
 
@@ -975,9 +1136,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[82] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') return value check
+		// unit_test[96] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[83] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') qos_downstream check
+		// unit_test[97] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 131072ULL );
 	}
 
@@ -990,9 +1151,9 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[84] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') return value check
+		// unit_test[98] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[85] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') qos_downstream check
+		// unit_test[99] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 131072ULL );
 	}
 
@@ -1005,7 +1166,7 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[86] parse_opt_vs_qosdown_func error case 1 (invalid qos_upstream value (charactor)) return value check
+		// unit_test[100] parse_opt_vs_qosdown_func error case 1 (invalid qos_upstream value (charactor)) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1020,7 +1181,7 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[87] parse_opt_vs_qosdown_func error case 2 (invalid qos_downstream value(unsigned long long over)) return value check
+		// unit_test[101] parse_opt_vs_qosdown_func error case 2 (invalid qos_downstream value(unsigned long long over)) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1035,7 +1196,7 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[88] parse_opt_vs_qosdown_func error case 3 (invalid qos_downstream value(unsigned long long over in postfix 'G')) return value check
+		// unit_test[102] parse_opt_vs_qosdown_func error case 3 (invalid qos_downstream value(unsigned long long over in postfix 'G')) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1050,7 +1211,7 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[89] parse_opt_vs_qosdown_func error case 4 (invalid qos_downstream value(unsigned long long over in postfix 'M')) return value check
+		// unit_test[103] parse_opt_vs_qosdown_func error case 4 (invalid qos_downstream value(unsigned long long over in postfix 'M')) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1065,7 +1226,7 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[90] parse_opt_vs_qosdown_func error case 5 (invalid qos_downstream value(unsigned long long over in postfix 'K')) return value check
+		// unit_test[104] parse_opt_vs_qosdown_func error case 5 (invalid qos_downstream value(unsigned long long over in postfix 'K')) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1078,7 +1239,7 @@ void	parse_opt_vs_qosdown_func_test(){
 	
 		bool ret = adm.parse_opt_vs_qosdown_func_wp( pos, argc, argv );
 
-		// unit_test[91] parse_opt_vs_qosdown_func error case 6 (no qos_downstream value) return value check
+		// unit_test[105] parse_opt_vs_qosdown_func error case 6 (no qos_downstream value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1098,9 +1259,9 @@ void	parse_opt_vs_udp_func_test(){
 	
 		bool ret = adm.parse_opt_vs_udp_func_wp( pos, argc, argv );
 
-		// unit_test[92] parse_opt_vs_udp_func normal case 1 return value check
+		// unit_test[106] parse_opt_vs_udp_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[93] parse_opt_vs_udp_func normal case 1 udp_mode check
+		// unit_test[107] parse_opt_vs_udp_func normal case 1 udp_mode check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.udpmode, true );
 	}
 
@@ -1117,23 +1278,23 @@ void	parse_opt_vs_udp_func_test(){
 	
 		bool ret = adm.parse_opt_vs_udp_func_wp( pos, argc, argv );
 
-		// unit_test[94] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) return value check
+		// unit_test[108] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[95] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) udp_mode check
+		// unit_test[109] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) udp_mode check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.udpmode, true );
 
-		// unit_test[96] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) tcp_accept_endpoint check
+		// unit_test[110] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	zeropoint;
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, zeropoint );
 
-		// unit_test[97] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) udp_recv_endpoint check
+		// unit_test[111] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) udp_recv_endpoint check
 		boost::asio::ip::udp::endpoint	udp_recv_ep = string_to_endpoint<boost::asio::ip::udp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.udp_recv_endpoint, udp_recv_ep );
 
-		// unit_test[98] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) realserver tcp_endpoint check
+		// unit_test[112] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) realserver tcp_endpoint check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, zeropoint );
 
-		// unit_test[99] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) realserver udp_endpoint check
+		// unit_test[113] parse_opt_vs_udp_func normal case 2 (already set tcp_endpoint) realserver udp_endpoint check
 		boost::asio::ip::udp::endpoint	rs_udp_ep = string_to_endpoint<boost::asio::ip::udp>( "10.144.169.86:80" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().udp_endpoint, rs_udp_ep );
 
@@ -1172,27 +1333,27 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[100] parse_vs_func normal case 1 (CMD_ADD_VS short_option) return value check
+		// unit_test[114] parse_vs_func normal case 1 (CMD_ADD_VS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[101] parse_vs_func normal case 1 (CMD_ADD_VS short_option) request check
+		// unit_test[115] parse_vs_func normal case 1 (CMD_ADD_VS short_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_VS );
-		// unit_test[102] parse_vs_func normal case 1 (CMD_ADD_VS short_option) tcp_accept_endpoint check
+		// unit_test[116] parse_vs_func normal case 1 (CMD_ADD_VS short_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[103] parse_vs_func normal case 1 (CMD_ADD_VS short_option) protocol module name check
+		// unit_test[117] parse_vs_func normal case 1 (CMD_ADD_VS short_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[104] parse_vs_func normal case 1 (CMD_ADD_VS short_option) protocol module arg check
+		// unit_test[118] parse_vs_func normal case 1 (CMD_ADD_VS short_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[105] parse_vs_func normal case 1 (CMD_ADD_VS short_option) schedule module name check
+		// unit_test[119] parse_vs_func normal case 1 (CMD_ADD_VS short_option) schedule module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "lc" );
-		// unit_test[106] parse_vs_func normal case 1 (CMD_ADD_VS short_option) sorry_maxconnection check
+		// unit_test[120] parse_vs_func normal case 1 (CMD_ADD_VS short_option) sorry_maxconnection check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_maxconnection, 50 );
-		// unit_test[107] parse_vs_func normal case 1 (CMD_ADD_VS short_option) sorry_endpoint check
+		// unit_test[121] parse_vs_func normal case 1 (CMD_ADD_VS short_option) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
-		// unit_test[108] parse_vs_func normal case 1 (CMD_ADD_VS short_option) qos_upstream check
+		// unit_test[122] parse_vs_func normal case 1 (CMD_ADD_VS short_option) qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 104857600ULL );
-		// unit_test[109] parse_vs_func normal case 1 (CMD_ADD_VS short_option) qos_downstream check
+		// unit_test[123] parse_vs_func normal case 1 (CMD_ADD_VS short_option) qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 209715200ULL );
 	}
 
@@ -1222,27 +1383,27 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 	
-		// unit_test[110] parse_vs_func normal case 2 (CMD_ADD_VS long_option) return value check
+		// unit_test[124] parse_vs_func normal case 2 (CMD_ADD_VS long_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[111] parse_vs_func normal case 2 (CMD_ADD_VS long_option) request check
+		// unit_test[125] parse_vs_func normal case 2 (CMD_ADD_VS long_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_VS );
-		// unit_test[112] parse_vs_func normal case 2 (CMD_ADD_VS long_option) tcp_accept_endpoint check
+		// unit_test[126] parse_vs_func normal case 2 (CMD_ADD_VS long_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[113] parse_vs_func normal case 2 (CMD_ADD_VS long_option) protocol module name check
+		// unit_test[127] parse_vs_func normal case 2 (CMD_ADD_VS long_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "curl" );
-		// unit_test[114] parse_vs_func normal case 2 (CMD_ADD_VS long_option) protocol module arg check
+		// unit_test[128] parse_vs_func normal case 2 (CMD_ADD_VS long_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "specified_url" );
-		// unit_test[115] parse_vs_func normal case 2 (CMD_ADD_VS long_option) schedule module name check
+		// unit_test[129] parse_vs_func normal case 2 (CMD_ADD_VS long_option) schedule module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "wrr" );
-		// unit_test[116] parse_vs_func normal case 2 (CMD_ADD_VS long_option) sorry_maxconnection check
+		// unit_test[130] parse_vs_func normal case 2 (CMD_ADD_VS long_option) sorry_maxconnection check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_maxconnection, 96 );
-		// unit_test[117] parse_vs_func normal case 2 (CMD_ADD_VS long_option) sorry_endpoint check
+		// unit_test[131] parse_vs_func normal case 2 (CMD_ADD_VS long_option) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:80" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
-		// unit_test[118] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_upstream check
+		// unit_test[132] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 13107200ULL );
-		// unit_test[119] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_downstream check
+		// unit_test[133] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 26214400ULL );
 	}
 
@@ -1274,29 +1435,29 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[120] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) return value check
+		// unit_test[134] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[121] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) request check
+		// unit_test[135] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_EDIT_VS );
-		// unit_test[122] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) tcp_accept_endpoint check
+		// unit_test[136] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[123] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) protocol module name check
+		// unit_test[137] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[124] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) protocol module arg check
+		// unit_test[138] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[125] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) schedule module name check
+		// unit_test[139] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) schedule module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "rr" );
-		// unit_test[126] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_maxconnection check
+		// unit_test[140] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_maxconnection check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_maxconnection, 50 );
-		// unit_test[127] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_endpoint check
+		// unit_test[141] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
-		// unit_test[128] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_flag check
+		// unit_test[142] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
-		// unit_test[129] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_upstream check
+		// unit_test[143] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 104857600ULL );
-		// unit_test[130] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_downstream check
+		// unit_test[144] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 209715200ULL );
 	}
 
@@ -1328,29 +1489,29 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 	
-		// unit_test[131] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) return value check
+		// unit_test[145] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[132] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) request check
+		// unit_test[146] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_EDIT_VS );
-		// unit_test[133] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) tcp_accept_endpoint check
+		// unit_test[147] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[134] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) protocol module name check
+		// unit_test[148] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "curl" );
-		// unit_test[135] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) protocol module arg check
+		// unit_test[149] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "specified_url" );
-		// unit_test[136] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) schedule module name check
+		// unit_test[150] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) schedule module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "lc" );
-		// unit_test[137] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_maxconnection check
+		// unit_test[151] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_maxconnection check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_maxconnection, 96 );
-		// unit_test[138] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_endpoint check
+		// unit_test[152] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:80" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
-		// unit_test[139] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_flag check
+		// unit_test[153] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
-		// unit_test[140] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_upstream check
+		// unit_test[154] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_upstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 13107200ULL );
-		// unit_test[141] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_downstream check
+		// unit_test[155] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_downstream check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 26214400ULL );
 	}
 
@@ -1370,16 +1531,16 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[142] parse_vs_func normal case 5 (CMD_DEL_VS short_option) return value check
+		// unit_test[156] parse_vs_func normal case 5 (CMD_DEL_VS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[143] parse_vs_func normal case 5 (CMD_DEL_VS short_option) request check
+		// unit_test[157] parse_vs_func normal case 5 (CMD_DEL_VS short_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_DEL_VS );
-		// unit_test[144] parse_vs_func normal case 5 (CMD_DEL_VS short_option) tcp_accept_endpoint check
+		// unit_test[158] parse_vs_func normal case 5 (CMD_DEL_VS short_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[145] parse_vs_func normal case 5 (CMD_DEL_VS short_option) protocol module name check
+		// unit_test[159] parse_vs_func normal case 5 (CMD_DEL_VS short_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[146] parse_vs_func normal case 5 (CMD_DEL_VS short_option) protocol module arg check
+		// unit_test[160] parse_vs_func normal case 5 (CMD_DEL_VS short_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
 	}
 
@@ -1399,16 +1560,16 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 	
-		// unit_test[147] parse_vs_func normal case 6 (CMD_DEL_VS long_option) return value check
+		// unit_test[161] parse_vs_func normal case 6 (CMD_DEL_VS long_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );
-		// unit_test[148] parse_vs_func normal case 6 (CMD_DEL_VS long_option) request check
+		// unit_test[162] parse_vs_func normal case 6 (CMD_DEL_VS long_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_DEL_VS );
-		// unit_test[149] parse_vs_func normal case 6 (CMD_DEL_VS long_option) tcp_accept_endpoint check
+		// unit_test[163] parse_vs_func normal case 6 (CMD_DEL_VS long_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[150] parse_vs_func normal case 6 (CMD_DEL_VS long_option) protocol module name check
+		// unit_test[164] parse_vs_func normal case 6 (CMD_DEL_VS long_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "curl" );
-		// unit_test[151] parse_vs_func normal case 6 (CMD_DEL_VS long_option) protocol module arg check
+		// unit_test[165] parse_vs_func normal case 6 (CMD_DEL_VS long_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "specified_url" );
 	}
 
@@ -1428,18 +1589,18 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[152] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) return value check
+		// unit_test[166] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[153] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) request check
+		// unit_test[167] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_VS );
-		// unit_test[154] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) tcp_accept_endpoint check
+		// unit_test[168] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[155] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) protocol module name check
+		// unit_test[169] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[156] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) protocol module arg check
+		// unit_test[170] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[157] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) schedule module name check
+		// unit_test[171] parse_vs_func normal case 7 (CMD_ADD_VS scheduler omit) schedule module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "rr" );
 	}
 
@@ -1454,9 +1615,9 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[158] parse_vs_func normal case 8 (CMD_FLUSH_VS) return value check
+		// unit_test[172] parse_vs_func normal case 8 (CMD_FLUSH_VS) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[159] parse_vs_func normal case 8 (CMD_FLUSH_VS) request check
+		// unit_test[173] parse_vs_func normal case 8 (CMD_FLUSH_VS) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_FLUSH_VS );
 	}
 
@@ -1473,7 +1634,7 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[160] parse_vs_func error case 1 (CMD_ADD_VS protocol module not specified) return value check
+		// unit_test[174] parse_vs_func error case 1 (CMD_ADD_VS protocol module not specified) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1491,7 +1652,7 @@ void	parse_vs_func_test(){
 	
 		bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
 
-		// unit_test[161] parse_vs_func error case 2 (CMD_ADD_VS target address not specified) return value check
+		// unit_test[175] parse_vs_func error case 2 (CMD_ADD_VS target address not specified) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1512,9 +1673,9 @@ void	parse_opt_rs_weight_func_test(){
 
 		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
 
-		// unit_test[162] parse_opt_rs_weight_func normal case 1 return value check
+		// unit_test[176] parse_opt_rs_weight_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[163] parse_opt_rs_weight_func normal case 1 weight check
+		// unit_test[177] parse_opt_rs_weight_func normal case 1 weight check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 128 );
 	}
 
@@ -1528,7 +1689,7 @@ void	parse_opt_rs_weight_func_test(){
 	
 		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
 
-		// unit_test[164] parse_opt_rs_weight_func error case 1 (invalid weight value (charactor)) return value check
+		// unit_test[178] parse_opt_rs_weight_func error case 1 (invalid weight value (charactor)) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -1544,7 +1705,7 @@ void	parse_opt_rs_weight_func_test(){
 	
 		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
 
-		// unit_test[165] parse_opt_rs_weight_func error case 2 (invalid weight value(int over)) return value check
+		// unit_test[179] parse_opt_rs_weight_func error case 2 (invalid weight value(int over)) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -1558,7 +1719,7 @@ void	parse_opt_rs_weight_func_test(){
 	
 		bool ret = adm.parse_opt_rs_weight_func_wp( pos, argc, argv );
 
-		// unit_test[166] parse_opt_rs_weight_func error case 3 (no weight value) return value check
+		// unit_test[180] parse_opt_rs_weight_func error case 3 (no weight value) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -1579,10 +1740,27 @@ void	parse_opt_rs_realserver_func_test(){
 	
 		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
 
-		// unit_test[167] parse_opt_rs_realserver_func normal case 1 return value check
+		// unit_test[181] parse_opt_rs_realserver_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[168] parse_opt_rs_realserver_func normal case 1 endpoint check
+		// unit_test[182] parse_opt_rs_realserver_func normal case 1 endpoint check
 		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8080" );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, ep );
+	}
+
+	// parse_opt_rs_realserver_func normal case 2 (realserver specified in name)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "localhost:http" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[183] parse_opt_rs_realserver_func normal case 2 (realserver specified in name) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[184] parse_opt_rs_realserver_func normal case 2 (realserver specified in name) endpoint check
+		boost::asio::ip::tcp::endpoint	ep = string_to_endpoint<boost::asio::ip::tcp>( "127.0.0.1:80" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, ep );
 	}
 
@@ -1596,7 +1774,7 @@ void	parse_opt_rs_realserver_func_test(){
 
 		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
 
-		// unit_test[169] parse_opt_rs_realserver_func error case 1 (invalid endpoint) return value check
+		// unit_test[185] parse_opt_rs_realserver_func error case 1 (invalid endpoint) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1610,7 +1788,77 @@ void	parse_opt_rs_realserver_func_test(){
 
 		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
 
-		// unit_test[170] parse_opt_rs_realserver_func error case 2 (no endpoint) return value check
+		// unit_test[186] parse_opt_rs_realserver_func error case 2 (no endpoint) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_rs_realserver_func error case 3 (0.0.0.0 address)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "0.0.0.0:8080" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[187] parse_opt_rs_realserver_func error case 3 (0.0.0.0 address) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_rs_realserver_func error case 4 (0 port)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "10.144.169.87:0" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[188] parse_opt_rs_realserver_func error case 4 (0 port) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_rs_realserver_func error case 5 (invalid port (99999))
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "10.144.169.87:99999" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[189] parse_opt_rs_realserver_func error case 5 (invalid port (99999)) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_rs_realserver_func error case 6 (hostname omitted)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", ":22100" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[190] parse_opt_rs_realserver_func error case 6 (hostname omitted) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+	}
+
+	// parse_opt_rs_realserver_func error case 7 (port omitted)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 4;
+		char*	argv[]	= { "l7vsadm_test", "-a", "-r", "10.144.169.87:" };
+		adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+		bool ret = adm.parse_opt_rs_realserver_func_wp( pos, argc, argv );
+
+		// unit_test[191] parse_opt_rs_realserver_func error case 7 (port omitted) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1641,21 +1889,21 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[171] parse_rs_func normal case 1 (CMD_ADD_RS short_option) return value check
+		// unit_test[192] parse_rs_func normal case 1 (CMD_ADD_RS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[172] parse_rs_func normal case 1 (CMD_ADD_RS short_option) request check
+		// unit_test[193] parse_rs_func normal case 1 (CMD_ADD_RS short_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_RS );
-		// unit_test[173] parse_rs_func normal case 1 (CMD_ADD_RS short_option) tcp_accept_endpoint check
+		// unit_test[194] parse_rs_func normal case 1 (CMD_ADD_RS short_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[174] parse_rs_func normal case 1 (CMD_ADD_RS short_option) protocol module name check
+		// unit_test[195] parse_rs_func normal case 1 (CMD_ADD_RS short_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[175] parse_rs_func normal case 1 (CMD_ADD_RS short_option) protocol module arg check
+		// unit_test[196] parse_rs_func normal case 1 (CMD_ADD_RS short_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[176] parse_rs_func normal case 1 (CMD_ADD_RS short_option) realserver endpoint check
+		// unit_test[197] parse_rs_func normal case 1 (CMD_ADD_RS short_option) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
-		// unit_test[177] parse_rs_func normal case 1 (CMD_ADD_RS short_option) weight check
+		// unit_test[198] parse_rs_func normal case 1 (CMD_ADD_RS short_option) weight check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 10 );
 	}
 
@@ -1679,21 +1927,21 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[178] parse_rs_func normal case 2 (CMD_ADD_RS long_option) return value check
+		// unit_test[199] parse_rs_func normal case 2 (CMD_ADD_RS long_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[179] parse_rs_func normal case 2 (CMD_ADD_RS long_option) request check
+		// unit_test[200] parse_rs_func normal case 2 (CMD_ADD_RS long_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_RS );
-		// unit_test[180] parse_rs_func normal case 2 (CMD_ADD_RS long_option) tcp_accept_endpoint check
+		// unit_test[201] parse_rs_func normal case 2 (CMD_ADD_RS long_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[181] parse_rs_func normal case 2 (CMD_ADD_RS long_option) protocol module name check
+		// unit_test[202] parse_rs_func normal case 2 (CMD_ADD_RS long_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[182] parse_rs_func normal case 2 (CMD_ADD_RS long_option) protocol module arg check
+		// unit_test[203] parse_rs_func normal case 2 (CMD_ADD_RS long_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[183] parse_rs_func normal case 2 (CMD_ADD_RS long_option) realserver endpoint check
+		// unit_test[204] parse_rs_func normal case 2 (CMD_ADD_RS long_option) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8888" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
-		// unit_test[184] parse_rs_func normal case 2 (CMD_ADD_RS long_option) weight check
+		// unit_test[205] parse_rs_func normal case 2 (CMD_ADD_RS long_option) weight check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 20 );
 	}
 
@@ -1717,21 +1965,21 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[185] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) return value check
+		// unit_test[206] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[186] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) request check
+		// unit_test[207] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_EDIT_RS );
-		// unit_test[187] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) tcp_accept_endpoint check
+		// unit_test[208] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[188] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) protocol module name check
+		// unit_test[209] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[189] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) protocol module arg check
+		// unit_test[210] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[190] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) realserver endpoint check
+		// unit_test[211] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
-		// unit_test[191] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) weight check
+		// unit_test[212] parse_rs_func normal case 3 (CMD_EDIT_RS short_option) weight check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 20 );
 	}
 
@@ -1755,21 +2003,21 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[192] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) return value check
+		// unit_test[213] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[193] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) request check
+		// unit_test[214] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_EDIT_RS );
-		// unit_test[194] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) tcp_accept_endpoint check
+		// unit_test[215] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[195] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) protocol module name check
+		// unit_test[216] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[196] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) protocol module arg check
+		// unit_test[217] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[197] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) realserver endpoint check
+		// unit_test[218] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8888" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
-		// unit_test[198] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) weight check
+		// unit_test[219] parse_rs_func normal case 4 (CMD_EDIT_RS long_option) weight check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 30 );
 	}
 
@@ -1791,18 +2039,18 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[199] parse_rs_func normal case 5 (CMD_DEL_RS short_option) return value check
+		// unit_test[220] parse_rs_func normal case 5 (CMD_DEL_RS short_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[200] parse_rs_func normal case 5 (CMD_DEL_RS short_option) request check
+		// unit_test[221] parse_rs_func normal case 5 (CMD_DEL_RS short_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_DEL_RS );
-		// unit_test[201] parse_rs_func normal case 5 (CMD_DEL_RS short_option) tcp_accept_endpoint check
+		// unit_test[222] parse_rs_func normal case 5 (CMD_DEL_RS short_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[202] parse_rs_func normal case 5 (CMD_DEL_RS short_option) protocol module name check
+		// unit_test[223] parse_rs_func normal case 5 (CMD_DEL_RS short_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[203] parse_rs_func normal case 5 (CMD_DEL_RS short_option) protocol module arg check
+		// unit_test[224] parse_rs_func normal case 5 (CMD_DEL_RS short_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[204] parse_rs_func normal case 5 (CMD_DEL_RS short_option) realserver endpoint check
+		// unit_test[225] parse_rs_func normal case 5 (CMD_DEL_RS short_option) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
 	}
@@ -1825,18 +2073,18 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[205] parse_rs_func normal case 6 (CMD_DEL_RS long_option) return value check
+		// unit_test[226] parse_rs_func normal case 6 (CMD_DEL_RS long_option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[206] parse_rs_func normal case 6 (CMD_DEL_RS long_option) request check
+		// unit_test[227] parse_rs_func normal case 6 (CMD_DEL_RS long_option) request check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_DEL_RS );
-		// unit_test[207] parse_rs_func normal case 6 (CMD_DEL_RS long_option) tcp_accept_endpoint check
+		// unit_test[228] parse_rs_func normal case 6 (CMD_DEL_RS long_option) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[208] parse_rs_func normal case 6 (CMD_DEL_RS long_option) protocol module name check
+		// unit_test[229] parse_rs_func normal case 6 (CMD_DEL_RS long_option) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[209] parse_rs_func normal case 6 (CMD_DEL_RS long_option) protocol module arg check
+		// unit_test[230] parse_rs_func normal case 6 (CMD_DEL_RS long_option) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[210] parse_rs_func normal case 6 (CMD_DEL_RS long_option) realserver endpoint check
+		// unit_test[231] parse_rs_func normal case 6 (CMD_DEL_RS long_option) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:8888" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
 	}
@@ -1856,7 +2104,7 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[211] parse_rs_func error case 1 (CMD_ADD_RS protocol module not specified) return value check
+		// unit_test[232] parse_rs_func error case 1 (CMD_ADD_RS protocol module not specified) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -1876,7 +2124,7 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[212] parse_rs_func error case 2 (CMD_ADD_RS target address not specified) return value check
+		// unit_test[233] parse_rs_func error case 2 (CMD_ADD_RS target address not specified) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -1896,7 +2144,7 @@ void	parse_rs_func_test(){
 	
 		bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
-		// unit_test[213] parse_rs_func error case 3 (CMD_ADD_RS realserver address not specified) return value check
+		// unit_test[234] parse_rs_func error case 3 (CMD_ADD_RS realserver address not specified) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -1916,9 +2164,9 @@ void	parse_opt_replication_switch_func_test(){
 
 		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
 	
-		// unit_test[214] parse_opt_replication_switch_func normal case 1 (replication start) return value check
+		// unit_test[235] parse_opt_replication_switch_func normal case 1 (replication start) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[215] parse_opt_replication_switch_func normal case 1 (replication start) replication command check
+		// unit_test[236] parse_opt_replication_switch_func normal case 1 (replication start) replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_START );
 	}
 
@@ -1931,9 +2179,9 @@ void	parse_opt_replication_switch_func_test(){
 
 		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
 	
-		// unit_test[216] parse_opt_replication_switch_func normal case 2 (replication stop) return value check
+		// unit_test[237] parse_opt_replication_switch_func normal case 2 (replication stop) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[217] parse_opt_replication_switch_func normal case 2 (replication stop) replication command check
+		// unit_test[238] parse_opt_replication_switch_func normal case 2 (replication stop) replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_STOP );
 	}
 
@@ -1946,7 +2194,7 @@ void	parse_opt_replication_switch_func_test(){
 
 		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
 	
-		// unit_test[218] parse_opt_replication_switch_func error case 1 (invalid switch option) return value check
+		// unit_test[239] parse_opt_replication_switch_func error case 1 (invalid switch option) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1959,7 +2207,7 @@ void	parse_opt_replication_switch_func_test(){
 
 		bool ret = adm.parse_opt_replication_switch_func_wp( pos, argc, argv );
 	
-		// unit_test[219] parse_opt_replication_switch_func error case 2 (no switch option) return value check
+		// unit_test[240] parse_opt_replication_switch_func error case 2 (no switch option) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -1979,9 +2227,9 @@ void	parse_opt_replication_force_func_test(){
 
 		bool ret = adm.parse_opt_replication_force_func_wp( pos, argc, argv );
 	
-		// unit_test[220] parse_opt_replication_force_func normal case 1 return value check
+		// unit_test[241] parse_opt_replication_force_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[221] parse_opt_replication_force_func normal case 1 replication command check
+		// unit_test[242] parse_opt_replication_force_func normal case 1 replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_FORCE );
 	}
 
@@ -2001,9 +2249,9 @@ void	parse_opt_replication_dump_func_test(){
 
 		bool ret = adm.parse_opt_replication_dump_func_wp( pos, argc, argv );
 	
-		// unit_test[222] parse_opt_replication_dump_func normal case 1 return value check
+		// unit_test[243] parse_opt_replication_dump_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[223] parse_opt_replication_dump_func normal case 1 replication command check
+		// unit_test[244] parse_opt_replication_dump_func normal case 1 replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_DUMP );
 	}
 
@@ -2023,11 +2271,11 @@ void	parse_replication_func_test(){
 	
 		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
 
-		// unit_test[224] parse_replication_func normal case 1 (replication start) return value check
+		// unit_test[245] parse_replication_func normal case 1 (replication start) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[225] parse_replication_func normal case 1 (replication start) request command check
+		// unit_test[246] parse_replication_func normal case 1 (replication start) request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
-		// unit_test[226] parse_replication_func normal case 1 (replication start) replication command check
+		// unit_test[247] parse_replication_func normal case 1 (replication start) replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_START );
 	}
 
@@ -2040,11 +2288,11 @@ void	parse_replication_func_test(){
 	
 		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
 	
-		// unit_test[227] parse_replication_func normal case 2 (replication stop) return value check
+		// unit_test[248] parse_replication_func normal case 2 (replication stop) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[228] parse_replication_func normal case 2 (replication stop) request command check
+		// unit_test[249] parse_replication_func normal case 2 (replication stop) request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
-		// unit_test[229] parse_replication_func normal case 2 (replication stop) replication command check
+		// unit_test[250] parse_replication_func normal case 2 (replication stop) replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_STOP );
 	}
 
@@ -2057,11 +2305,11 @@ void	parse_replication_func_test(){
 	
 		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
 	
-		// unit_test[230] parse_replication_func normal case 3 (replication force) return value check
+		// unit_test[251] parse_replication_func normal case 3 (replication force) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[231] parse_replication_func normal case 3 (replication force) request command check
+		// unit_test[252] parse_replication_func normal case 3 (replication force) request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
-		// unit_test[232] parse_replication_func normal case 3 (replication force) replication command check
+		// unit_test[253] parse_replication_func normal case 3 (replication force) replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_FORCE );
 	}
 
@@ -2074,11 +2322,11 @@ void	parse_replication_func_test(){
 	
 		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
 	
-		// unit_test[233] parse_replication_func normal case 4 (replication dump) return value check
+		// unit_test[254] parse_replication_func normal case 4 (replication dump) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[234] parse_replication_func normal case 4 (replication dump) request command check
+		// unit_test[255] parse_replication_func normal case 4 (replication dump) request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_REPLICATION );
-		// unit_test[235] parse_replication_func normal case 4 (replication dump) replication command check
+		// unit_test[256] parse_replication_func normal case 4 (replication dump) replication command check
 		BOOST_CHECK_EQUAL( adm.get_request().replication_command, l7vs::l7vsadm_request::REP_DUMP );
 	}
 
@@ -2091,7 +2339,7 @@ void	parse_replication_func_test(){
 	
 		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
 	
-		// unit_test[236] parse_replication_func error case 1 (command duplicate) return value check
+		// unit_test[257] parse_replication_func error case 1 (command duplicate) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2104,7 +2352,7 @@ void	parse_replication_func_test(){
 	
 		bool ret = adm.parse_replication_func_wp( cmd, argc, argv );
 		
-		// unit_test[237] parse_replication_func error case 2 (no replication command) return value check
+		// unit_test[258] parse_replication_func error case 2 (no replication command) return value check
 		BOOST_CHECK_EQUAL( ret, false );
 	}
 
@@ -2124,9 +2372,9 @@ void	parse_opt_log_category_func_test(){
 	
 		bool ret = adm.parse_opt_log_category_func_wp( pos, argc, argv );
 
-		// unit_test[238] parse_opt_log_category_func normal case 1 return value check
+		// unit_test[259] parse_opt_log_category_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[239] parse_opt_log_category_func normal case 1 logcategory check
+		// unit_test[260] parse_opt_log_category_func normal case 1 logcategory check
 		BOOST_CHECK_EQUAL( adm.get_request().log_category, l7vs::LOG_CAT_L7VSD_NETWORK );
 	}
 
@@ -2139,7 +2387,7 @@ void	parse_opt_log_category_func_test(){
 	
 		bool ret = adm.parse_opt_log_category_func_wp( pos, argc, argv );
 
-		// unit_test[240] parse_opt_log_category_func error case 1 (invalid logcategory value) return value check
+		// unit_test[261] parse_opt_log_category_func error case 1 (invalid logcategory value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2152,7 +2400,7 @@ void	parse_opt_log_category_func_test(){
 	
 		bool ret = adm.parse_opt_log_category_func_wp( pos, argc, argv );
 
-		// unit_test[241] parse_opt_log_category_func error case 2 (no logcategory value) return value check
+		// unit_test[262] parse_opt_log_category_func error case 2 (no logcategory value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2172,9 +2420,9 @@ void	parse_opt_log_level_func_test(){
 	
 		bool ret = adm.parse_opt_log_level_func_wp( pos, argc, argv );
 
-		// unit_test[242] parse_opt_log_level_func normal case 1 return value check
+		// unit_test[263] parse_opt_log_level_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[243] parse_opt_log_level_func normal case 1 loglevel check
+		// unit_test[264] parse_opt_log_level_func normal case 1 loglevel check
 		BOOST_CHECK_EQUAL( adm.get_request().log_level, l7vs::LOG_LV_ERROR );
 	}
 
@@ -2187,7 +2435,7 @@ void	parse_opt_log_level_func_test(){
 	
 		bool ret = adm.parse_opt_log_level_func_wp( pos, argc, argv );
 
-		// unit_test[244] parse_opt_log_level_func error case 1 (invalid loglevel value) return value check
+		// unit_test[265] parse_opt_log_level_func error case 1 (invalid loglevel value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2200,7 +2448,7 @@ void	parse_opt_log_level_func_test(){
 	
 		bool ret = adm.parse_opt_log_level_func_wp( pos, argc, argv );
 
-		// unit_test[245] parse_opt_log_level_func error case 2 (no loglevel value) return value check
+		// unit_test[266] parse_opt_log_level_func error case 2 (no loglevel value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2226,13 +2474,13 @@ void	parse_log_func_test(){
 	
 		bool ret = adm.parse_log_func_wp( cmd, argc, argv );
 
-		// unit_test[246] parse_log_func normal case 1 return value check
+		// unit_test[267] parse_log_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[247] parse_log_func normal case 1 request command check
+		// unit_test[268] parse_log_func normal case 1 request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_LOG );
-		// unit_test[248] parse_log_func normal case 1 logcategory check
+		// unit_test[269] parse_log_func normal case 1 logcategory check
 		BOOST_CHECK_EQUAL( adm.get_request().log_category, l7vs::LOG_CAT_L7VSD_NETWORK );
-		// unit_test[249] parse_log_func normal case 1 logcategory check
+		// unit_test[270] parse_log_func normal case 1 logcategory check
 		BOOST_CHECK_EQUAL( adm.get_request().log_level, l7vs::LOG_LV_DEBUG );
 	}
 
@@ -2249,7 +2497,7 @@ void	parse_log_func_test(){
 	
 		bool ret = adm.parse_log_func_wp( cmd, argc, argv );
 
-		// unit_test[250] parse_log_func error case 1 (no logcategory) return value check
+		// unit_test[271] parse_log_func error case 1 (no logcategory) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2266,7 +2514,7 @@ void	parse_log_func_test(){
 	
 		bool ret = adm.parse_log_func_wp( cmd, argc, argv );
 
-		// unit_test[251] parse_log_func error case 2 (no loglevel) return value check
+		// unit_test[272] parse_log_func error case 2 (no loglevel) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2286,9 +2534,9 @@ void	parse_opt_snmp_log_category_func_test(){
 	
 		bool ret = adm.parse_opt_snmp_log_category_func_wp( pos, argc, argv );
 
-		// unit_test[252] parse_opt_snmp_log_category_func normal case 1 return value check
+		// unit_test[273] parse_opt_snmp_log_category_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[253] parse_opt_snmp_log_category_func normal case 1 logcategory check
+		// unit_test[274] parse_opt_snmp_log_category_func normal case 1 logcategory check
 		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_category, l7vs::LOG_CAT_SNMPAGENT_START_STOP );
 	}
 
@@ -2301,7 +2549,7 @@ void	parse_opt_snmp_log_category_func_test(){
 	
 		bool ret = adm.parse_opt_snmp_log_category_func_wp( pos, argc, argv );
 
-		// unit_test[254] parse_opt_snmp_log_category_func error case 1 (invalid logcategory value) return value check
+		// unit_test[275] parse_opt_snmp_log_category_func error case 1 (invalid logcategory value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2314,7 +2562,7 @@ void	parse_opt_snmp_log_category_func_test(){
 	
 		bool ret = adm.parse_opt_snmp_log_category_func_wp( pos, argc, argv );
 
-		// unit_test[255] parse_opt_snmp_log_category_func error case 2 (no logcategory value) return value check
+		// unit_test[276] parse_opt_snmp_log_category_func error case 2 (no logcategory value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2334,9 +2582,9 @@ void	parse_opt_snmp_log_level_func_test(){
 	
 		bool ret = adm.parse_opt_snmp_log_level_func_wp( pos, argc, argv );
 
-		// unit_test[256] parse_opt_snmp_log_level_func normal case 1 return value check
+		// unit_test[277] parse_opt_snmp_log_level_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[257] parse_opt_snmp_log_level_func normal case 1 loglevel check
+		// unit_test[278] parse_opt_snmp_log_level_func normal case 1 loglevel check
 		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_level, l7vs::LOG_LV_INFO );
 	}
 
@@ -2349,7 +2597,7 @@ void	parse_opt_snmp_log_level_func_test(){
 	
 		bool ret = adm.parse_opt_snmp_log_level_func_wp( pos, argc, argv );
 
-		// unit_test[258] parse_opt_snmp_log_level_func error case 1 (invalid loglevel value) return value check
+		// unit_test[279] parse_opt_snmp_log_level_func error case 1 (invalid loglevel value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2362,7 +2610,7 @@ void	parse_opt_snmp_log_level_func_test(){
 	
 		bool ret = adm.parse_opt_snmp_log_level_func_wp( pos, argc, argv );
 
-		// unit_test[259] parse_opt_snmp_log_level_func error case 2 (no loglevel value) return value check
+		// unit_test[280] parse_opt_snmp_log_level_func error case 2 (no loglevel value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2388,13 +2636,13 @@ void	parse_snmp_func_test(){
 	
 		bool ret = adm.parse_snmp_func_wp( cmd, argc, argv );
 
-		// unit_test[260] parse_snmp_func normal case 1 return value check
+		// unit_test[281] parse_snmp_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[261] parse_snmp_func normal case 1 request command check
+		// unit_test[282] parse_snmp_func normal case 1 request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_SNMP );
-		// unit_test[262] parse_snmp_func normal case 1 logcategory check
+		// unit_test[283] parse_snmp_func normal case 1 logcategory check
 		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_category, l7vs::LOG_CAT_SNMPAGENT_START_STOP );
-		// unit_test[263] parse_snmp_func normal case 1 logcategory check
+		// unit_test[284] parse_snmp_func normal case 1 logcategory check
 		BOOST_CHECK_EQUAL( adm.get_request().snmp_log_level, l7vs::LOG_LV_WARN );
 	}
 
@@ -2411,7 +2659,7 @@ void	parse_snmp_func_test(){
 	
 		bool ret = adm.parse_snmp_func_wp( cmd, argc, argv );
 
-		// unit_test[264] parse_snmp_func error case 1 (no logcategory) return value check
+		// unit_test[285] parse_snmp_func error case 1 (no logcategory) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2428,7 +2676,7 @@ void	parse_snmp_func_test(){
 	
 		bool ret = adm.parse_snmp_func_wp( cmd, argc, argv );
 
-		// unit_test[265] parse_snmp_func error case 2 (no loglevel) return value check
+		// unit_test[286] parse_snmp_func error case 2 (no loglevel) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2448,9 +2696,9 @@ void	parse_opt_parameter_reload_func_test(){
 	
 		bool ret = adm.parse_opt_parameter_reload_func_wp( pos, argc, argv );
 
-		// unit_test[266] parse_opt_parameter_reload_func normal case 1 return value check
+		// unit_test[287] parse_opt_parameter_reload_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[267] parse_opt_parameter_reload_func normal case 1 reload_component check
+		// unit_test[288] parse_opt_parameter_reload_func normal case 1 reload_component check
 		BOOST_CHECK_EQUAL( adm.get_request().reload_param, l7vs::PARAM_COMP_REPLICATION );
 	}
 
@@ -2463,7 +2711,7 @@ void	parse_opt_parameter_reload_func_test(){
 	
 		bool ret = adm.parse_opt_parameter_reload_func_wp( pos, argc, argv );
 
-		// unit_test[268] parse_opt_parameter_reload_func error case 1 (invalid reload_component value) return value check
+		// unit_test[289] parse_opt_parameter_reload_func error case 1 (invalid reload_component value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2476,7 +2724,7 @@ void	parse_opt_parameter_reload_func_test(){
 	
 		bool ret = adm.parse_opt_parameter_reload_func_wp( pos, argc, argv );
 
-		// unit_test[269] parse_opt_parameter_reload_func error case 2 (no reload_component value) return value check
+		// unit_test[290] parse_opt_parameter_reload_func error case 2 (no reload_component value) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2500,11 +2748,11 @@ void	parse_parameter_func_test(){
 	
 		bool ret = adm.parse_parameter_func_wp( cmd, argc, argv );
 
-		// unit_test[270] parse_parameter_func normal case 1 return value check
+		// unit_test[291] parse_parameter_func normal case 1 return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[271] parse_parameter_func normal case 1 request command check
+		// unit_test[292] parse_parameter_func normal case 1 request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_PARAMETER );
-		// unit_test[272] parse_parameter_func normal case 1 reload_component check
+		// unit_test[293] parse_parameter_func normal case 1 reload_component check
 		BOOST_CHECK_EQUAL( adm.get_request().reload_param, l7vs::PARAM_COMP_LOGGER );
 	}
 
@@ -2519,7 +2767,7 @@ void	parse_parameter_func_test(){
 	
 		bool ret = adm.parse_parameter_func_wp( cmd, argc, argv );
 
-		// unit_test[273] parse_parameter_func error case 1 (no reload_component) return value check
+		// unit_test[294] parse_parameter_func error case 1 (no reload_component) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -2562,11 +2810,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[274] execute normal case 1 (no option) return value check
+		// unit_test[295] execute normal case 1 (no option) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[275] execute normal case 1 (no option) request command check
+		// unit_test[296] execute normal case 1 (no option) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST );
-		// unit_test[276] execute normal case 1 (no option) response value check
+		// unit_test[297] execute normal case 1 (no option) response value check
 		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
 	}
 
@@ -2604,11 +2852,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[277] execute normal case 2 (list operation) return value check
+		// unit_test[298] execute normal case 2 (list operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[278] execute normal case 2 (list operation) request command check
+		// unit_test[299] execute normal case 2 (list operation) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST );
-		// unit_test[279] execute normal case 2 (list operation) response value check
+		// unit_test[300] execute normal case 2 (list operation) response value check
 		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
 	}
 
@@ -2646,11 +2894,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[280] execute normal case 3 (list operation numeric) return value check
+		// unit_test[301] execute normal case 3 (list operation numeric) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[281] execute normal case 3 (list operation numeric) request command check
+		// unit_test[302] execute normal case 3 (list operation numeric) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST );
-		// unit_test[282] execute normal case 3 (list operation numeric) response value check
+		// unit_test[303] execute normal case 3 (list operation numeric) response value check
 		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
 
 	}
@@ -2688,11 +2936,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[283] execute normal case 4 (list operation key) return value check
+		// unit_test[304] execute normal case 4 (list operation key) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[284] execute normal case 4 (list operation key) request command check
+		// unit_test[305] execute normal case 4 (list operation key) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST_KEY );
-		// unit_test[285] execute normal case 4 (list operation key) response value check
+		// unit_test[306] execute normal case 4 (list operation key) response value check
 		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
 	}
 
@@ -2729,11 +2977,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[286] execute normal case 5 (list operation verbose) return value check
+		// unit_test[307] execute normal case 5 (list operation verbose) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[287] execute normal case 5 (list operation verbose) request command check
+		// unit_test[308] execute normal case 5 (list operation verbose) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LIST_VERBOSE );
-		// unit_test[288] execute normal case 5 (list operation verbose) response value check
+		// unit_test[309] execute normal case 5 (list operation verbose) response value check
 		BOOST_CHECK_EQUAL( adm.get_response().virtualservice_status_list.size(), 2U );
 	}
 
@@ -2774,27 +3022,27 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[289] execute normal case 6 (vs operation add-vs) return value check
+		// unit_test[310] execute normal case 6 (vs operation add-vs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[290] execute normal case 6 (vs operation add-vs) request command check
+		// unit_test[311] execute normal case 6 (vs operation add-vs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_ADD_VS );
-		// unit_test[291] execute normal case 6 (vs operation add-vs) tcp_accept_endpoint check
+		// unit_test[312] execute normal case 6 (vs operation add-vs) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[292] execute normal case 6 (vs operation add-vs) protocol module name check
+		// unit_test[313] execute normal case 6 (vs operation add-vs) protocol module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
-		// unit_test[293] execute normal case 6 (vs operation add-vs) protocol module arg check
+		// unit_test[314] execute normal case 6 (vs operation add-vs) protocol module arg check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[294] execute normal case 6 (vs operation add-vs) schedule module name check
+		// unit_test[315] execute normal case 6 (vs operation add-vs) schedule module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.schedule_module_name, "lc" );
-		// unit_test[295] execute normal case 6 (vs operation add-vs) sorry_maxconnection check
+		// unit_test[316] execute normal case 6 (vs operation add-vs) sorry_maxconnection check
 		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_maxconnection, 50 );
-		// unit_test[296] execute normal case 6 (vs operation add-vs) sorry_endpoint check
+		// unit_test[317] execute normal case 6 (vs operation add-vs) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_endpoint, sorry_ep );
-		// unit_test[297] execute normal case 6 (vs operation add-vs) qos_upstream check
+		// unit_test[318] execute normal case 6 (vs operation add-vs) qos_upstream check
 		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, 104857600ULL );
-		// unit_test[298] execute normal case 6 (vs operation add-vs) qos_downstream check
+		// unit_test[319] execute normal case 6 (vs operation add-vs) qos_downstream check
 		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, 209715200ULL );
 	}
 
@@ -2837,29 +3085,29 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[299] execute normal case 7 (vs operation edit-vs) return value check
+		// unit_test[320] execute normal case 7 (vs operation edit-vs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[300] execute normal case 7 (vs operation edit-vs) request command check
+		// unit_test[321] execute normal case 7 (vs operation edit-vs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_EDIT_VS );
-		// unit_test[301] execute normal case 7 (vs operation edit-vs) tcp_accept_endpoint check
+		// unit_test[322] execute normal case 7 (vs operation edit-vs) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[302] execute normal case 7 (vs operation edit-vs) protocol module name check
+		// unit_test[323] execute normal case 7 (vs operation edit-vs) protocol module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
-		// unit_test[303] execute normal case 7 (vs operation edit-vs) protocol module arg check
+		// unit_test[324] execute normal case 7 (vs operation edit-vs) protocol module arg check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[304] execute normal case 7 (vs operation edit-vs) schedule module name check
+		// unit_test[325] execute normal case 7 (vs operation edit-vs) schedule module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.schedule_module_name, "rr" );
-		// unit_test[305] execute normal case 7 (vs operation edit-vs) sorry_maxconnection check
+		// unit_test[326] execute normal case 7 (vs operation edit-vs) sorry_maxconnection check
 		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_maxconnection, 50 );
-		// unit_test[306] execute normal case 7 (vs operation edit-vs) sorry_endpoint check
+		// unit_test[327] execute normal case 7 (vs operation edit-vs) sorry_endpoint check
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_endpoint, sorry_ep );
-		// unit_test[307] execute normal case 7 (vs operation edit-vs) sorry_flag check
+		// unit_test[328] execute normal case 7 (vs operation edit-vs) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
-		// unit_test[308] execute normal case 7 (vs operation edit-vs) qos_upstream check
+		// unit_test[329] execute normal case 7 (vs operation edit-vs) qos_upstream check
 		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, 104857600ULL );
-		// unit_test[309] execute normal case 7 (vs operation edit-vs) qos_downstream check
+		// unit_test[330] execute normal case 7 (vs operation edit-vs) qos_downstream check
 		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, 209715200ULL );
 	}
 
@@ -2890,16 +3138,16 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[310] execute normal case 8 (vs operation del-vs) return value check
+		// unit_test[331] execute normal case 8 (vs operation del-vs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[311] execute normal case 8 (vs operation del-vs) request command check
+		// unit_test[332] execute normal case 8 (vs operation del-vs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_DEL_VS );
-		// unit_test[312] execute normal case 8 (vs operation del-vs) tcp_accept_endpoint check
+		// unit_test[333] execute normal case 8 (vs operation del-vs) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[313] execute normal case 8 (vs operation del-vs) protocol module name check
+		// unit_test[334] execute normal case 8 (vs operation del-vs) protocol module name check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
-		// unit_test[314] execute normal case 8 (vs operation del-vs) protocol module arg check
+		// unit_test[335] execute normal case 8 (vs operation del-vs) protocol module arg check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
 	}
 
@@ -2925,9 +3173,9 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[315] execute normal case 9 (vs operation flush-vs) return value check
+		// unit_test[336] execute normal case 9 (vs operation flush-vs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[316] execute normal case 9 (vs operation flush-vs) request command check
+		// unit_test[337] execute normal case 9 (vs operation flush-vs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_FLUSH_VS );
 	}
 
@@ -2962,21 +3210,21 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[317] execute normal case 10 (rs operation add-rs) return value check
+		// unit_test[338] execute normal case 10 (rs operation add-rs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[318] execute normal case 10 (rs operation add-rs) request command check
+		// unit_test[339] execute normal case 10 (rs operation add-rs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_ADD_RS );
-		// unit_test[319] execute normal case 10 (rs operation add-rs) tcp_accept_endpoint check
+		// unit_test[340] execute normal case 10 (rs operation add-rs) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[320] execute normal case 10 (rs operation add-rs) protocol module name check
+		// unit_test[341] execute normal case 10 (rs operation add-rs) protocol module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
-		// unit_test[321] execute normal case 10 (rs operation add-rs) protocol module arg check
+		// unit_test[342] execute normal case 10 (rs operation add-rs) protocol module arg check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[322] execute normal case 10 (rs operation add-rs) realserver endpoint check
+		// unit_test[343] execute normal case 10 (rs operation add-rs) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
-		// unit_test[323] execute normal case 10 (rs operation add-rs) weight check
+		// unit_test[344] execute normal case 10 (rs operation add-rs) weight check
 		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().weight, 10 );
 	}
 
@@ -3011,21 +3259,21 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[324] execute normal case 11 (rs operation edit-rs) return value check
+		// unit_test[345] execute normal case 11 (rs operation edit-rs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[325] execute normal case 11 (rs operation edit-rs) request command check
+		// unit_test[346] execute normal case 11 (rs operation edit-rs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_EDIT_RS );
-		// unit_test[326] execute normal case 11 (rs operation edit-rs) tcp_accept_endpoint check
+		// unit_test[347] execute normal case 11 (rs operation edit-rs) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[327] execute normal case 11 (rs operation edit-rs) protocol module name check
+		// unit_test[348] execute normal case 11 (rs operation edit-rs) protocol module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
-		// unit_test[328] execute normal case 11 (rs operation edit-rs) protocol module arg check
+		// unit_test[349] execute normal case 11 (rs operation edit-rs) protocol module arg check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[329] execute normal case 11 (rs operation edit-rs) realserver endpoint check
+		// unit_test[350] execute normal case 11 (rs operation edit-rs) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
-		// unit_test[330] execute normal case 11 (rs operation edit-rs) weight check
+		// unit_test[351] execute normal case 11 (rs operation edit-rs) weight check
 		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().weight, 20 );
 	}
 
@@ -3058,18 +3306,18 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[331] execute normal case 12 (rs operation del-rs) return value check
+		// unit_test[352] execute normal case 12 (rs operation del-rs) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[332] execute normal case 12 (rs operation del-rs) request command check
+		// unit_test[353] execute normal case 12 (rs operation del-rs) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_DEL_RS );
-		// unit_test[333] execute normal case 12 (rs operation del-rs) tcp_accept_endpoint check
+		// unit_test[354] execute normal case 12 (rs operation del-rs) tcp_accept_endpoint check
 		boost::asio::ip::tcp::endpoint	tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.tcp_accept_endpoint, tcp_acc_ep );
-		// unit_test[334] execute normal case 12 (rs operation del-rs) protocol module name check
+		// unit_test[355] execute normal case 12 (rs operation del-rs) protocol module name check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_module_name, "cinsert" );
-		// unit_test[335] execute normal case 12 (rs operation del-rs) protocol module arg check
+		// unit_test[356] execute normal case 12 (rs operation del-rs) protocol module arg check
 		BOOST_CHECK_EQUAL( test_request.vs_element.protocol_args.front(), "mod_arg" );
-		// unit_test[336] execute normal case 12 (rs operation del-rs) realserver endpoint check
+		// unit_test[357] execute normal case 12 (rs operation del-rs) realserver endpoint check
 		boost::asio::ip::tcp::endpoint	rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
 	}
@@ -3098,11 +3346,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[337] execute normal case 13 (replication operation) return value check
+		// unit_test[358] execute normal case 13 (replication operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[338] execute normal case 13 (replication operation) request command check
+		// unit_test[359] execute normal case 13 (replication operation) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_REPLICATION );
-		// unit_test[339] execute normal case 13 (replication operation) replication command check
+		// unit_test[360] execute normal case 13 (replication operation) replication command check
 		BOOST_CHECK_EQUAL( test_request.replication_command, l7vs::l7vsadm_request::REP_START );
 	}
 
@@ -3132,13 +3380,13 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[340] execute normal case 14 (log operation) return value check
+		// unit_test[361] execute normal case 14 (log operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[341] execute normal case 14 (log operation) request command check
+		// unit_test[362] execute normal case 14 (log operation) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_LOG );
-		// unit_test[342] execute normal case 14 (log operation) logcategory check
+		// unit_test[363] execute normal case 14 (log operation) logcategory check
 		BOOST_CHECK_EQUAL( test_request.log_category, l7vs::LOG_CAT_L7VSD_NETWORK );
-		// unit_test[343] execute normal case 14 (log operation) logcategory check
+		// unit_test[364] execute normal case 14 (log operation) logcategory check
 		BOOST_CHECK_EQUAL( test_request.log_level, l7vs::LOG_LV_DEBUG );
 	}
 
@@ -3168,13 +3416,13 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[344] execute normal case 15 (snmp log operation) return value check
+		// unit_test[365] execute normal case 15 (snmp log operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[345] execute normal case 15 (snmp log operation) request command check
+		// unit_test[366] execute normal case 15 (snmp log operation) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_SNMP );
-		// unit_test[346] execute normal case 15 (snmp log operation) logcategory check
+		// unit_test[367] execute normal case 15 (snmp log operation) logcategory check
 		BOOST_CHECK_EQUAL( test_request.snmp_log_category, l7vs::LOG_CAT_SNMPAGENT_START_STOP );
-		// unit_test[347] execute normal case 15 (snmp log operation) logcategory check
+		// unit_test[368] execute normal case 15 (snmp log operation) logcategory check
 		BOOST_CHECK_EQUAL( test_request.snmp_log_level, l7vs::LOG_LV_WARN );
 	}
 
@@ -3202,11 +3450,11 @@ void	execute_test(){
 		bool ret = adm.execute_wp( argc, argv );
 		thd1.join();
 
-		// unit_test[348] execute normal case 16 (parameter operation) return value check
+		// unit_test[369] execute normal case 16 (parameter operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[349] execute normal case 16 (parameter operation) request command check
+		// unit_test[370] execute normal case 16 (parameter operation) request command check
 		BOOST_CHECK_EQUAL( test_request.command, l7vs::l7vsadm_request::CMD_PARAMETER );
-		// unit_test[350] execute normal case 16 (parameter operation) reload_component check
+		// unit_test[371] execute normal case 16 (parameter operation) reload_component check
 		BOOST_CHECK_EQUAL( test_request.reload_param, l7vs::PARAM_COMP_LOGGER );
 	}
 
@@ -3223,9 +3471,9 @@ void	execute_test(){
 
 		bool ret = adm.execute_wp( argc, argv );
 
-		// unit_test[351] execute normal case 17 (help operation) return value check
+		// unit_test[372] execute normal case 17 (help operation) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
-		// unit_test[352] execute normal case 17 (help operation) request command check
+		// unit_test[373] execute normal case 17 (help operation) request command check
 		BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_HELP );
 	}
 
@@ -3242,7 +3490,7 @@ void	execute_test(){
 
 		bool ret = adm.execute_wp( argc, argv );
 
-		// unit_test[353] execute 1 (invalid operation) return value check
+		// unit_test[374] execute 1 (invalid operation) return value check
 		BOOST_CHECK_EQUAL( ret, false );	
 	}
 
@@ -3260,20 +3508,20 @@ void	l7vsadm_test::file_lock_class_test(){
 	{
 		l7vs::error_code	err;
 	
-		// unit_test[354] file_lock_class normal case 1 (first lock) error check
+		// unit_test[375] file_lock_class normal case 1 (first lock) error check
 		l7vs::l7vsadm::file_lock	lock( file_path, err );
 		BOOST_CHECK( !err );	
 	
-		// unit_test[355] file_lock_class normal case 1 (first lock) locable check
+		// unit_test[376] file_lock_class normal case 1 (first lock) locable check
 		bool ret = lock.try_lock();
 		BOOST_CHECK( ret );
 	
 		l7vs::error_code	err2;
-		// unit_test[356] file_lock_class normal case 2 (second lock) error check
+		// unit_test[377] file_lock_class normal case 2 (second lock) error check
 		l7vs::l7vsadm::file_lock	lock2( file_path, err2 );
 		BOOST_CHECK( !err );	
 	
-		// unit_test[357] file_lock_class normal case 2 (second lock) unlocable check
+		// unit_test[378] file_lock_class normal case 2 (second lock) unlocable check
 		ret = lock2.try_lock();
 		BOOST_CHECK( !ret );
 	}
@@ -3281,11 +3529,11 @@ void	l7vsadm_test::file_lock_class_test(){
 	{
 		l7vs::error_code	err;
 	
-		// unit_test[358] file_lock_class normal case 3 (relock) error check
+		// unit_test[379] file_lock_class normal case 3 (relock) error check
 		l7vs::l7vsadm::file_lock	lock( file_path, err );
 		BOOST_CHECK( !err );	
 	
-		// unit_test[359] file_lock_class normal case 3 (relock) locable check
+		// unit_test[380] file_lock_class normal case 3 (relock) locable check
 		bool ret = lock.try_lock();
 		BOOST_CHECK( ret );
 	}

@@ -111,7 +111,8 @@ l7vsadm_LDADD	=	\
 			-lrt \
 			-lboost_thread-gcc41-mt \
 			-lboost_system-gcc41-mt \
-			-lboost_serialization-gcc41-mt
+			-lboost_serialization-gcc41-mt \
+			-lboost_regex-gcc41-mt
 
 install:
 	$(INSTALL) -m 755 -d $(CONFIG_SOCK_PATH)

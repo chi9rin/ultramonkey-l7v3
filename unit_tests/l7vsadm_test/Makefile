@@ -13,6 +13,7 @@ LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_serialization-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt \
+				-lboost_regex-gcc41-mt \
 				-llog4cxx 
 
 LDFLAGS		= -lrt -ldl
