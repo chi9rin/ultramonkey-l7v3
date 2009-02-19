@@ -551,7 +551,7 @@ namespace l7vs{
 			std::stringstream buf;
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
-			buf << "] up thread down thread dead wait start";
+			buf << "] up thread down thread dead wait end";
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
