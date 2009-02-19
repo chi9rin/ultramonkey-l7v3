@@ -27,7 +27,7 @@
 namespace l7vs{
 
 //!	constractor
-schedule_module_weighted_round_robin::schedule_module_weighted_round_robin() : schedule_module_base( "schedule weighted round robin" ){
+schedule_module_weighted_round_robin::schedule_module_weighted_round_robin() : schedule_module_base( "wrr" ){
 }
 
 //! destractor

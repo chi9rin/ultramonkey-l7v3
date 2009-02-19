@@ -27,7 +27,7 @@
 namespace l7vs{
 
 //!	constractor
-schedule_module_least_connection::schedule_module_least_connection() : schedule_module_base( "schedule least connection" ){
+schedule_module_least_connection::schedule_module_least_connection() : schedule_module_base( "lc" ){
 }
 
 //! destractor

@@ -27,7 +27,7 @@
 namespace l7vs{
 
 //!	constractor
-schedule_module_round_robin::schedule_module_round_robin() : schedule_module_base( "schedule round robin" ){
+schedule_module_round_robin::schedule_module_round_robin() : schedule_module_base( "rr" ){
 }
 
 //! destractor

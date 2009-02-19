@@ -14,7 +14,7 @@
 
 using namespace boost::unit_test;
 
-#define	CHECK_NAME	"schedule least connection"
+#define	CHECK_NAME	"lc"
 #define	SM1			"schedule_module_lc"
 
 //l7vs::schedule_module_base::rslist_type::iterator	list_begin( l7vs::schedule_module_base::rslist_type& list );

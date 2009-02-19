@@ -14,7 +14,7 @@
 
 using namespace boost::unit_test;
 
-#define	CHECK_NAME	"schedule round robin"
+#define	CHECK_NAME	"rr"
 #define	SM1			"schedule_module_rr"
 
 namespace l7vs{
