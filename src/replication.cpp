@@ -452,7 +452,7 @@ void		replication::switch_to_slave(){
 				}
 
 				buf = boost::io::str( boost::format( "Switch to slave OK. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+				Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 			}
 			break;
 		case REPLICATION_SINGLE:
