@@ -440,7 +440,7 @@ namespace l7vs{
 		client_socket.accept();
 		endpoint cl_end;
 		if(!exit_flag){
-			endpoint cl_end = client_socket.get_socket().remote_endpoint(ec);
+			cl_end = client_socket.get_socket().remote_endpoint(ec);
 			if(ec){
 				//client endpoint get Error!
 				std::stringstream buf;
@@ -555,7 +555,8 @@ namespace l7vs{
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
-		protocol_module->handle_session_finalize(up_thread_id,down_thread_id);
+		if(protocol_module != NULL)
+			protocol_module->handle_session_finalize(up_thread_id,down_thread_id);
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
 			std::stringstream buf;
@@ -1020,7 +1021,7 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
 		std::size_t data_size = up_thread_data_dest_side.get_size();
 		std::size_t send_data_size = up_thread_data_dest_side.get_send_size();
-		std::size_t send_size = send_socket->second->write_some(boost::asio::buffer(&data_buff+send_data_size,data_size-send_data_size),ec);
+		std::size_t send_size = send_socket->second->write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			send_data_size += send_size;
@@ -1439,7 +1440,7 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
 		std::size_t data_size = up_thread_data_dest_side.get_size();
 		std::size_t send_data_size = up_thread_data_dest_side.get_send_size();
-		std::size_t send_size = sorryserver_socket.second->write_some(boost::asio::buffer(&data_buff+send_data_size,data_size-send_data_size),ec);
+		std::size_t send_size = sorryserver_socket.second->write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			send_data_size += send_size;
@@ -1508,7 +1509,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		
+		virtualservice_element& vs_element = parent_service.get_element();
+		server_endpoint = vs_element.sorry_endpoint;
 		protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_select(up_thread_id,server_endpoint);
 		up_thread_data_dest_side.set_endpoint(server_endpoint);
 		
@@ -2230,7 +2232,7 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
 		std::size_t data_size = down_thread_data_client_side.get_size();
 		std::size_t send_data_size = down_thread_data_client_side.get_send_size();
-		std::size_t send_size = client_socket.write_some(boost::asio::buffer(&data_buff+send_data_size,data_size-send_data_size),ec);
+		std::size_t send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
 		DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			send_data_size += send_size;
