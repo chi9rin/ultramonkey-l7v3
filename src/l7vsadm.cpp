@@ -244,7 +244,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 	protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
 	if( !module_message.flag ){
 		// args is not supported.
-		l7vsadm_err.setter( true, "protocol module argument error." );
+		std::stringstream	buf;
+		buf << "protocol module argument error: " << module_message.message;
+		l7vsadm_err.setter( true, buf.str() );
 		return false;
 	}
 	request.vs_element.protocol_module_name = module_name;
