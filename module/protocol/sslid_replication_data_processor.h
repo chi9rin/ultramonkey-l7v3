@@ -71,7 +71,7 @@ class sslid_replication_data_processor
         void register_replication_area_unlock(boost::function<void(void)> intable_unlock);
 
     protected:
-        void get_from_temp_list(sslid_replication_temp_data& data);
+        int get_from_temp_list(sslid_replication_temp_data& data);
 
     protected:
         int maxlist;

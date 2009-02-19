@@ -805,9 +805,9 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_init
             // data dump
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_session_initialize() : session_thread_data_sessionless(down_thread_id) : "
-                                    "accept_end_flag = %d, end_flag = %d, "
-                                    "pair_thread_id = %d, sorryserver_switch_flag = %d, realserver_switch_flag = %d, sorry_flag = %d, "
-                                    "thread_division = %d, thread_id = %d, last_status = %d, client_endpoint_tcp = [%s]:%d.");
+                                    "thread_id = %d, thread_division = %d, pair_thread_id = %d, accept_end_flag = %d, end_flag = %d, "
+                                    "sorry_flag = %d, sorryserver_switch_flag = %d, realserver_switch_flag = %d, "
+                                    "last_status = %d, client_endpoint_tcp = [%s]:%d.");
             formatter % p_down->thread_id % p_down->thread_division % p_down->pair_thread_id % p_down->accept_end_flag
             % p_down->end_flag % p_down->sorry_flag % p_down->sorryserver_switch_flag
             % p_down->realserver_switch_flag % p_down->last_status % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port();
@@ -2073,7 +2073,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_client_recv() : Unknown exception." << std::endl;
-        putLogError(17035, "function : protocol_module_base::check_message_result "
+        putLogError(17035, "function : protocol_module_base::EVENT_TAG "
                     "protocol_module_sessionless::handle_client_recv() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -2727,7 +2727,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     std::string datadump;
-                    dump_memory(recv_data.recive_buffer + it->send_offset, copy_size, datadump);
+                    dump_memory(recv_data.recive_buffer + it->send_offset, send_buffer_remian_size, datadump);
 
                     boost::format formatter(
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -2744,7 +2744,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     std::string datadump;
-                    dump_memory(sendbuffer.data(), copy_size, datadump);
+                    dump_memory(sendbuffer.data(), send_buffer_remian_size, datadump);
                     boost::format formatter(
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                         "handle_realserver_connect() : after memcpy (data dump) : "
@@ -4430,7 +4430,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s");
-                        formatter % data_remain_start % (data_remain_size+recvlen) % datadump;
+                        formatter % data_remain_start % data_remain_size % datadump;
                         putLogDebug(10156, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -5017,7 +5017,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_realserver_recv() : Unknown exception." << std::endl;
-        putLogError(17085, "function : protocol_module_base::check_message_result "
+        putLogError(17085, "function : protocol_module_base::EVENT_TAG "
                     "protocol_module_sessionless::handle_realserver_recv() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -5290,7 +5290,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                         "handle_sorryserver_recv() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
-                    formatter % recvlen % datadump;
+                    formatter % data_remain_size % datadump;
                     putLogDebug(10181, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -5313,7 +5313,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 if (LOG_LV_DEBUG == getloglevel())
                 {
                     std::string datadump;
-                    dump_memory(buffer1 + data_remain_size, data_remain_size, datadump);
+                    dump_memory(buffer1 + data_remain_size, recvlen, datadump);
                     boost::format formatter(
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                         "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5399,7 +5399,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
-                        formatter % recvlen % datadump;
+                        formatter % data_remain_size % datadump;
                         putLogDebug(10187, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -5421,7 +5421,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                     if (LOG_LV_DEBUG == getloglevel())
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer2 + data_remain_size, data_remain_size, datadump);
+                        dump_memory(recv_data.recive_buffer2 + data_remain_size, recvlen, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5462,7 +5462,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
-                        formatter % recvlen % datadump;
+                        formatter % data_remain_size % datadump;
                         putLogDebug(10191, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
@@ -5485,7 +5485,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                     if (LOG_LV_DEBUG == getloglevel())
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer1 + data_remain_size, data_remain_size, datadump);
+                        dump_memory(recv_data.recive_buffer1 + data_remain_size, recvlen, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5544,7 +5544,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
             if (LOG_LV_DEBUG == getloglevel())
             {
                 std::string datadump;
-                dump_memory(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size, data_remain_size, datadump);
+                dump_memory(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size, recvlen, datadump);
                 boost::format formatter(
                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                     "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -6021,7 +6021,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
     catch (...)
     {
         std::cerr << "protocol_module_sessionless::handle_sorryserver_recv() : Unknown exception." << std::endl;
-        putLogError(17095, "function : protocol_module_base::check_message_result "
+        putLogError(17095, "function : protocol_module_base::EVENT_TAG "
                     "protocol_module_sessionless::handle_sorryserver_recv() : "
                     "Unknown exception.", __FILE__, __LINE__ );
         status = FINALIZE;
@@ -6157,10 +6157,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
             /*------DEBUG LOG END------*/
             //send_end_size recalc
             it->send_end_size = it->send_possible_size;
+	    //set copyed data length
+            datalen = it->send_possible_size;
             //sending_possible size recalc
             it->send_possible_size = 0;
-            //set copyed data length
-            datalen = it->send_possible_size;
         }
         //buffer size < sending_possible size
         else
@@ -6980,7 +6980,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
     /*------DEBUG LOG END------*/
     EVENT_TAG status = FINALIZE;
     bool possible_flag = false;
-    boost::asio::ip::tcp::endpoint endpoint;
     thread_data_ptr session_data;
 
     try
@@ -6998,7 +6997,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
             session_data = session_thread_it->second;
         }
 
-        recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
+        recive_data_map_it recive_data_it = session_data->recive_data_map.find(rs_endpoint);
         if (recive_data_it == session_data->recive_data_map.end())
         {
             putLogError(17116, "Invalid endpoint.", __FILE__, __LINE__ );

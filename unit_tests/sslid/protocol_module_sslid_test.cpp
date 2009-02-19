@@ -4537,11 +4537,12 @@ void handle_client_connection_check_test() {
     BOOST_CHECK_EQUAL(status, FINALIZE);
 
     cout << "[212]------------------------------------------" << endl;
-    // unit_test[212] current_record_rest_size>0で,且つdata_begain_offset が 0の場合
+    // unit_test[212] hello_message_flagがtrueで,current_record_rest_size>0で,且つdata_begain_offset が 0の場合
     // unit_test[212] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 10u;
+	down_thread_data->hello_message_flag = true;
         down_thread_data->data_size = 76u;
         down_thread_data->data_begain_offset = 0u;
         this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
@@ -4549,17 +4550,19 @@ void handle_client_connection_check_test() {
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
+	BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         this->session_thread_data_map.clear();
     }
 
     cout << "[213]------------------------------------------" << endl;
-    // unit_test[213] current_record_rest_size>0で,且つdata_begain_offset >0の場合
+    // unit_test[213] hello_message_flagがtrueで,current_record_rest_size>0で,且つdata_begain_offset >0の場合
     // unit_test[213] 戻り値がCLIENT_SENDで設定する。
     {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->current_record_rest_size = 10u;
+	down_thread_data->hello_message_flag = true;
         down_thread_data->data_size = 76u;
         down_thread_data->data_begain_offset = 10u;
         this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
@@ -4567,7 +4570,8 @@ void handle_client_connection_check_test() {
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 66u);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 20u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 20u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         this->session_thread_data_map.clear();
     }
@@ -4603,7 +4607,8 @@ void handle_client_connection_check_test() {
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         delete replication_data_processor;
@@ -4640,7 +4645,8 @@ void handle_client_connection_check_test() {
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL((dynamic_cast<sslid_session_data_processor_stub*>(this->session_data_processor))->get_session_endpoint_map()[session_id], rs_endpoint);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         delete replication_data_processor;
@@ -4663,7 +4669,8 @@ void handle_client_connection_check_test() {
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         this->session_thread_data_map.clear();
@@ -4684,7 +4691,8 @@ void handle_client_connection_check_test() {
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         this->session_thread_data_map.clear();
@@ -4703,7 +4711,8 @@ void handle_client_connection_check_test() {
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         this->session_thread_data_map.clear();
@@ -4722,7 +4731,8 @@ void handle_client_connection_check_test() {
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
                 sendbuffer, datalen);
         BOOST_CHECK_EQUAL(status, CLIENT_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
+        BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
+	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         this->session_thread_data_map.clear();
@@ -4764,6 +4774,7 @@ void handle_client_connection_check_test_thread() {
         {
             boost::mutex::scoped_lock sclock(check_mutex);
             BOOST_CHECK_EQUAL(status, CLIENT_SEND);
+	    BOOST_CHECK(!this->session_thread_data_map[boost::this_thread::get_id()]->hello_message_flag);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 76u);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);

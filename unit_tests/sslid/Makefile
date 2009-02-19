@@ -5,7 +5,7 @@
 #
 TARGET		= sslid_ut
 CPP			= g++
-CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DDATA_SIZE=480 -DMAX_BUFFER_SIZE=65535
+CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	-I../../include \
 				-I../../logger \
 				-I../../module/protocol

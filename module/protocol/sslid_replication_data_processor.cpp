@@ -1,4 +1,5 @@
 #include "sslid_replication_data_processor.h"
+#include "replication.h"
 #include "protocol_module_base.h"
 #include "boost/format.hpp"
 
@@ -340,7 +341,7 @@ void sslid_replication_data_processor::put_into_temp_list(
         boost::format formatter("in_function : void sslid_replication_data_processor::put_into_temp_list("
                                  "const sslid_replication_temp_data& data) : data.op_code = %c, "
                                  "data.session_id = %s, data.last_time = %lu, data.endpoint = [%s]:%d.");
-        formatter % data.op_code % data.session_id % data.last_time % data.realserver_addr.address().to_string() 
+        formatter % data.op_code % data.session_id % data.last_time % data.realserver_addr.address().to_string()
 	% data.realserver_addr.port();
         putLogDebug(30155, formatter.str(), __FILE__, __LINE__);
     }
@@ -400,7 +401,10 @@ void sslid_replication_data_processor::write_replicaion_area()
 
         while (true)
         {
-            get_from_temp_list(temp_data);
+            if (get_from_temp_list(temp_data) == -1)
+            {
+                break;
+            }
             blocked = false;
             replication_area_lock();
             blocked = true;
@@ -625,7 +629,9 @@ void sslid_replication_data_processor::register_replication_area_unlock(
 
 //! get data from temp list
 //! @param[out] sslid_replication_temp_data refrence
-void sslid_replication_data_processor::get_from_temp_list(
+//! @return  0 : success for get data
+//! @return  -1 : faild to get data
+int sslid_replication_data_processor::get_from_temp_list(
     sslid_replication_temp_data& data)
 {
     /*-------- DEBUG LOG --------*/
@@ -636,29 +642,34 @@ void sslid_replication_data_processor::get_from_temp_list(
     }
     /*------DEBUG LOG END------*/
 
+    int ret = 0;
     boost::mutex::scoped_lock sclock(temp_list_mutex);
-    while (temp_list.size() <= 0)
+    if (temp_list.size() <= 0)
     {
-        temp_list_condition.wait(sclock);
+        ret = -1;
     }
+    else
+    {
+        data = temp_list[0];
+        temp_list.pop_front();
 
-    data = temp_list[0];
-    temp_list.pop_front();
-
-    temp_list_condition.notify_one();
+        temp_list_condition.notify_one();
+    }
 
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
         boost::format formatter("out_function : void sslid_replication_data_processor::"
-                                 "get_from_temp_list(sslid_replication_temp_data& data) : "
-                                 "data.op_code = %c, data.session_id = %s, data.last_time = %lu, "
-                                 "data.endpoint = [%s]:%d.");
-        formatter % data.op_code % data.session_id % data.last_time % data. realserver_addr.address().to_string() %
-        data. realserver_addr.port();
+                                "get_from_temp_list(sslid_replication_temp_data& data) : "
+                                "return_value = %d, data.op_code = %c, data.session_id = %s, "
+                                "data.last_time = %lu, data.endpoint = [%s]:%d.");
+        formatter % ret % data.op_code % data.session_id % data.last_time %
+        data.realserver_addr.address().to_string() % data.realserver_addr.port();
         putLogDebug(30170, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
+
+    return ret;
 }
 
 }

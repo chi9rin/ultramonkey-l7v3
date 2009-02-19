@@ -58,7 +58,7 @@ sslid_session_data_processor::sslid_session_data_processor(
         putLogDebug(30173, "out_function : Constructor sslid_session_data_processor::"
                     "sslid_session_data_processor(int maxlist, int timeout, "
                     "sslid_replication_data_processor* replication_data_processor, "
-                    "getloglevel_func_type	ingetloglevel, logger_func_type inputLogFatal, "
+                    "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
                     "logger_func_type inputLogError, logger_func_type inputLogWarn, "
                     "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
                     , __FILE__, __LINE__);
@@ -189,7 +189,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
         std::cerr << "sslid_session_data_processor::get_endpoint_from_session_data() : exception: error = " << e.what() << "." << std::endl;
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data() : exception : error = %s.");
-        formatter % -1 % e.what();
+        formatter % e.what();
         putLogError(37068, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
@@ -338,7 +338,7 @@ int sslid_session_data_processor::write_session_data(
     catch (const std::exception& e)
     {
         std::cerr << "write_session_data exception : error = " << e.what() << "." << std::endl;
-        boost::format formatter("function: int sslid_session_data_processor::"
+        boost::format formatter("function : int sslid_session_data_processor::"
                                 "write_session_data() : exception : error = %s.");
         formatter % e.what();
         putLogError(37069, formatter.str(), __FILE__, __LINE__);
@@ -346,7 +346,7 @@ int sslid_session_data_processor::write_session_data(
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30185, "out_function: int sslid_session_data_processor::"
+            putLogDebug(30185, "out_function : int sslid_session_data_processor::"
                         "write_session_data(const std::string& session_id, "
                         "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                         "return_value = -1.", __FILE__, __LINE__);
@@ -396,7 +396,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
         {
             putLogDebug(30188, "out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area("
-                                "sslid_replication_data* replication_area) : return_value = -1", __FILE__, __LINE__);
+                                "sslid_replication_data* replication_area) : return_value = -1.", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         return -1;

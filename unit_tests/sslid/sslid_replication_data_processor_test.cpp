@@ -13,7 +13,6 @@ bool is_put_into_temp_list_test_thread6_waiting = false;
 bool is_put_into_temp_list_test_thread8_waiting = false;
 bool is_put_into_temp_list_test_thread9_waiting = false;
 bool is_put_into_temp_list_test_thread10_waiting = false;
-bool is_get_from_temp_list_called = false;
 
 // function for testing register_replication_area_lock
 void lock_function(){
@@ -75,12 +74,6 @@ public:
                 inputLogWarn,
                 inputLogInfo,
                 inputLogDebug ) {
-	}
-
-	// get_from_temp_list function
-	void get_from_temp_list(sslid_replication_temp_data& data){
-		sslid_replication_data_processor::get_from_temp_list(data);
-		is_get_from_temp_list_called = true;
 	}
 
 	// put_into_temp_list test thread
@@ -236,25 +229,7 @@ public:
 	}
 
 	// get_from_temp_list test thread
-	void get_from_temp_list_thread1(){
-
-		boost::asio::ip::tcp::endpoint endpoint;
-		l7vs::sslid_replication_temp_data test_data1;
-		l7vs::sslid_replication_temp_data get_data;
-
-		test_data1.session_id = "test_id123456789abcdefghijklmnop";
-		test_data1.op_code = 'A';
-		test_data1.realserver_addr = endpoint;
-		test_data1.last_time = 1000;
-		this->temp_list.push_back(test_data1);
-		this->temp_list.push_back(test_data1);
-		this->temp_list.push_back(test_data1);
-		this->temp_list.push_back(test_data1);
-		this->get_from_temp_list(get_data);
-	}
-
-	// get_from_temp_list test thread
-	void get_from_temp_list_thread2() {
+	void get_from_temp_list_thread1() {
 		boost::asio::ip::tcp::endpoint endpoint;
 		l7vs::sslid_replication_temp_data get_data;
 		this->get_from_temp_list(get_data);
@@ -836,21 +811,49 @@ public:
 		this->replication_area_unlock = unlock_function;
 
     cout << "[24]------------------------------------------" << endl;
-		// unit_test[24] temp_listが空の場合、例外が発生しない。
+		// unit_test[24] maxlistが0の場合、例外が発生しない。
+		int old_maxlist = this->maxlist;
 		try {
-			this->temp_list.clear();
-			boost::thread test_thread1(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			sleep(1);
-			test_thread1.interrupt();
+			this->maxlist = 0;
+			this->write_replicaion_area();
 		} catch(...) {
 			BOOST_ERROR("exception: write_replicaion_area");
 		}
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[25]------------------------------------------" << endl;
-		// unit_test[25] op_codeが「A」で、且つreplication_areaに１つのデータが存在する場合、新データを追加する。
+	cout << "[25]------------------------------------------" << endl;
+		// unit_test[25] maxlist < 0の場合、例外が発生しない。
+		try {
+			this->maxlist = -1;
+			this->write_replicaion_area();
+		} catch (...) {
+			BOOST_ERROR("exception: write_replicaion_area");
+		}
+		this->maxlist = old_maxlist;
+
+
+	cout << "[26]------------------------------------------" << endl;
+		// unit_test[26] replication_area が NULLの場合、例外が発生しない。
+		sslid_replication_data* old_replication_area = this->replication_area;
+		try {
+			this->temp_list.clear();
+			this->replication_area = NULL;
+			this->write_replicaion_area();
+		} catch (...) {
+			BOOST_ERROR("exception: write_replicaion_area");
+		}
+		this->replication_area = old_replication_area;
+
+	cout << "[27]------------------------------------------" << endl;
+		// unit_test[27] temp_listが空の場合、例外が発生しない。
+		try {
+			this->temp_list.clear();
+			this->write_replicaion_area();
+		} catch (...) {
+			BOOST_ERROR("exception: write_replicaion_area");
+		}
+
+    cout << "[28]------------------------------------------" << endl;
+		// unit_test[28] op_codeが「A」で、且つreplication_areaに１つのデータが存在する場合、新データを追加する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		temp_session_id = "temp_id1rtrrrrtttttteeeeeeemmmmp";
@@ -872,15 +875,12 @@ public:
 		l7vs::sslid_replication_data old_data;
 		memset(&old_data, 0, sizeof(sslid_replication_data));
 		memcpy(&old_data, this->replication_area, sizeof(sslid_replication_data));
-		boost::thread test_thread2(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread2.interrupt();
+		this->write_replicaion_area();
 		// data add position: after the old existing data, check it
 		// get the added data information
-		char session_id_array[SSLID_LENGTH + 1];
+		char session_id_array[SSLID_LENGTH + 1] = { 0 };
 		memcpy(session_id_array, (this->replication_area + 1)->session_id, SSLID_LENGTH);
-		temp_session_id[SSLID_LENGTH] = 0;
+		session_id_array[SSLID_LENGTH] = 0;
 		std::string added_session_id(session_id_array);
 		std::string added_address_ip((this->replication_area + 1)->realserver_ip);
 		unsigned short added_address_port = (this->replication_area + 1)->realserver_port;
@@ -897,12 +897,9 @@ public:
 		BOOST_CHECK_EQUAL(added_address_ip, test_data1.realserver_addr.address().to_string());
 		// added realserver_addr port check
 		BOOST_CHECK_EQUAL(added_address_port, test_data1.realserver_addr.port());
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[26]------------------------------------------" << endl;
-		// unit_test[26] op_codeが「A」で、且つreplication_areaに２つのデータが存在して、且つ１つ目データのvalidフラグが０の場合、新のデータを追加する。
+    cout << "[29]------------------------------------------" << endl;
+		// unit_test[29] op_codeが「A」で、且つreplication_areaに２つのデータが存在して、且つ１つ目データのvalidフラグが０の場合、新のデータを追加する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
@@ -928,10 +925,7 @@ public:
 		// get the second existing data
 		memset(&old_data, 0, sizeof(sslid_replication_data));
 		memcpy(&old_data, this->replication_area + 1, sizeof(sslid_replication_data));
-		boost::thread test_thread3(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread3.interrupt();
+		this->write_replicaion_area();
 		// data add position: the first existing data position, check it
 		// get the added data information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
@@ -952,12 +946,9 @@ public:
 		BOOST_CHECK_EQUAL(added_address_ip, test_data1.realserver_addr.address().to_string());
 		// added realserver_addr port check
 		BOOST_CHECK_EQUAL(added_address_port, test_data1.realserver_addr.port());
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[27]------------------------------------------" << endl;
-		// unit_test[27] op_codeが「A」で、且つreplication_areaにデータが存在しない場合、新のデータを追加する。
+    cout << "[30]------------------------------------------" << endl;
+		// unit_test[30] op_codeが「A」で、且つreplication_areaにデータが存在しない場合、新のデータを追加する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
@@ -969,10 +960,7 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread4(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread4.interrupt();
+		this->write_replicaion_area();
 		// get added data information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
 		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
@@ -989,12 +977,9 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("192.168.120.102"));
 		// realserver_addr port check
 		BOOST_CHECK_EQUAL(saved_address_port, 80);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[28]------------------------------------------" << endl;
-		// unit_test[28] op_codeが「U」で、且つセッションIDが存在している場合、該当データを更新する。
+    cout << "[31]------------------------------------------" << endl;
+		// unit_test[31] op_codeが「U」で、且つセッションIDが存在している場合、該当データを更新する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("255.255.255.255"));
@@ -1004,10 +989,7 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread5(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread5.interrupt();
+		this->write_replicaion_area();
 		// get saved information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
 		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
@@ -1024,12 +1006,9 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("255.255.255.255"));
 		// realserver_addr port is changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[29]------------------------------------------" << endl;
-		// unit_test[29] op_codeが「D」で、且つセッションIDが存在している場合、該当データを削除する。
+    cout << "[32]------------------------------------------" << endl;
+		// unit_test[32] op_codeが「D」で、且つセッションIDが存在している場合、該当データを削除する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
@@ -1039,10 +1018,7 @@ public:
 		test_data1.last_time = delete_time;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread6(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread6.interrupt();
+		this->write_replicaion_area();
 		// get saved information
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
 		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
@@ -1057,12 +1033,9 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("255.255.255.255"));
 		// realserver_addr port is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[30]------------------------------------------" << endl;
-		// unit_test[30] op_codeが「A」,「U」,「D」以外の場合、データを変更しない。
+    cout << "[33]------------------------------------------" << endl;
+		// unit_test[33] op_codeが「A」,「U」,「D」以外の場合、データを変更しない。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
@@ -1077,20 +1050,14 @@ public:
 		// get old session data
 		l7vs::sslid_replication_data old_session_data[3];
 		memcpy(&old_session_data, this->replication_area, 3*sizeof(sslid_replication_data));
-		boost::thread test_thread7(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread7.interrupt();
+		this->write_replicaion_area();
 		// test_data1 is not saved, so old data is not changed, check it
 		// old data not changed check
 		compare_result = memcmp(&old_session_data, this->replication_area, 3*sizeof(sslid_replication_data));
 		BOOST_CHECK_EQUAL(compare_result, 0);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[31]------------------------------------------" << endl;
-		// unit_test[31] データを追加するの場合、replication_area_lock関数を呼び出す。
+    cout << "[34]------------------------------------------" << endl;
+		// unit_test[34] データを追加するの場合、replication_area_lock関数を呼び出す。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
@@ -1101,22 +1068,12 @@ public:
 		this->replication_area_unlock = unlock_function;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		try{
-			boost::thread test_thread8(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			while(!is_lock_function_called || !is_unlock_function_called){
-			}
-			test_thread8.interrupt();
-		} catch(...) {
-			BOOST_ERROR("exception: write_replicaion_area_test");
-		}
+		this->write_replicaion_area();
 		// replication_area_lock function called check
 		BOOST_CHECK(is_lock_function_called);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[32]------------------------------------------" << endl;
-		// unit_test[32] データを追加するの場合、replication_area_unlock関数を呼び出す。
+    cout << "[35]------------------------------------------" << endl;
+		// unit_test[35] データを追加するの場合、replication_area_unlock関数を呼び出す。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
@@ -1127,22 +1084,12 @@ public:
 		this->replication_area_unlock = unlock_function;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		try{
-			boost::thread test_thread9(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-			while(!is_lock_function_called || !is_unlock_function_called){
-			}
-			test_thread9.interrupt();
-		} catch(...) {
-			BOOST_ERROR("exception: write_replicaion_area_test");
-		}
+		this->write_replicaion_area();
 		// replication_area_unlock function called check
 		BOOST_CHECK(is_unlock_function_called);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[33]------------------------------------------" << endl;
-		// unit_test[33] endpointがipv6で、replicationエリアにデータがなくて、該当ipv6のendpointを追加する。
+    cout << "[36]------------------------------------------" << endl;
+		// unit_test[36] endpointがipv6で、replicationエリアにデータがなくて、該当ipv6のendpointを追加する。
 		is_lock_function_called = false;
     	is_unlock_function_called = false;
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
@@ -1154,10 +1101,7 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread10(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread10.interrupt();
+		this->write_replicaion_area();
 		memset(session_id_array, 0, SSLID_LENGTH + 1);
 		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
 		saved_session_id = std::string(session_id_array);
@@ -1173,12 +1117,9 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		// realserver_addr port check
 		BOOST_CHECK_EQUAL(saved_address_port, 80);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[34]------------------------------------------" << endl;
-		// unit_test[34] op_codeが「U」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを更新する。
+    cout << "[37]------------------------------------------" << endl;
+		// unit_test[37] op_codeが「U」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを更新する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("1:21d0:1:4866:1:1:3a4b:1230"));
@@ -1188,10 +1129,7 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread11(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread11.interrupt();
+		this->write_replicaion_area();
 		// get saved information
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
 		saved_address_port = this->replication_area->realserver_port;
@@ -1199,12 +1137,9 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("1:21d0:1:4866:1:1:3a4b:1230"));
 		// realserver_addr port check
 		BOOST_CHECK_EQUAL(saved_address_port, port);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 
-    cout << "[35]------------------------------------------" << endl;
-		// unit_test[35] op_codeが「D」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを変更しない、validに０を設定する。
+    cout << "[38]------------------------------------------" << endl;
+		// unit_test[38] op_codeが「D」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを変更しない、validに０を設定する。
 		is_lock_function_called = false;
 		is_unlock_function_called = false;
 		realserver_addr.address(boost::asio::ip::address::from_string("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
@@ -1213,10 +1148,7 @@ public:
 		test_data1.realserver_addr = realserver_addr;
 		this->temp_list.clear();
 		this->put_into_temp_list(test_data1);
-		boost::thread test_thread12(boost::bind(&sslid_replication_data_processor_test_class::write_replicaion_area, this));
-		while(!is_lock_function_called || !is_unlock_function_called){
-		}
-		test_thread12.interrupt();
+		this->write_replicaion_area();
 		// get saved information
 		saved_address_ip = std::string(this->replication_area->realserver_ip);
 		saved_address_port = this->replication_area->realserver_port;
@@ -1228,9 +1160,6 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("1:21d0:1:4866:1:1:3a4b:1230"));
 		// realserver_addr port is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
-		// clean the created thread's temp_list_condition
-		this->put_into_temp_list(test_data1);
-		sleep(1);
 	}
 
 	// register_replication_area_lock_test
@@ -1238,13 +1167,13 @@ public:
 
 		boost::function<void(void)> register_function = &lock_function;
 
-    cout << "[36]------------------------------------------" << endl;
-		// unit_test[36] register_replication_area_lock（）関数のパラメータがNULLの場合、replication_area_lockがNULLある。
+    cout << "[39]------------------------------------------" << endl;
+		// unit_test[39] register_replication_area_lock（）関数のパラメータがNULLの場合、replication_area_lockがNULLある。
 		this->register_replication_area_lock(NULL);
 		BOOST_CHECK_EQUAL(this->replication_area_lock.empty(), true);
 
-    cout << "[37]------------------------------------------" << endl;
-		// unit_test[37] register_replication_area_lock（）関数のパラメータがNULLでない場合、replication_area_lockがパラメータと一致する。
+    cout << "[40]------------------------------------------" << endl;
+		// unit_test[40] register_replication_area_lock（）関数のパラメータがNULLでない場合、replication_area_lockがパラメータと一致する。
 		this->register_replication_area_lock(register_function);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_lock, lock_function);
@@ -1255,14 +1184,14 @@ public:
 
 		boost::function<void(void)> register_function = &unlock_function;
 
-    cout << "[38]------------------------------------------" << endl;
-		// unit_test[38] register_replication_area_unlock（）関数のパラメータがNULLの場合、replication_area_unlockがNULLある。
+    cout << "[41]------------------------------------------" << endl;
+		// unit_test[41] register_replication_area_unlock（）関数のパラメータがNULLの場合、replication_area_unlockがNULLある。
 		this->register_replication_area_unlock(NULL);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_unlock.empty(), true);
 
-    cout << "[39]------------------------------------------" << endl;
-		// unit_test[39] register_replication_area_unlock（）関数のパラメータがNULLでない場合、replication_area_unlockがパラメータと一致する。
+    cout << "[42]------------------------------------------" << endl;
+		// unit_test[42] register_replication_area_unlock（）関数のパラメータがNULLでない場合、replication_area_unlockがパラメータと一致する。
 		this->register_replication_area_unlock(register_function);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_unlock, unlock_function);
@@ -1271,41 +1200,57 @@ public:
 	// get_from_temp_list_test
 	void get_from_temp_list_test(){
 
+		int result = 10;
 		l7vs::sslid_replication_temp_data test_data1;
 		l7vs::sslid_replication_temp_data test_data2;
 		l7vs::sslid_replication_temp_data get_data;
 		boost::asio::ip::tcp::endpoint endpoint;
 
-    cout << "[40]------------------------------------------" << endl;
-		// unit_test[40] temp_listが空の場合、例外が発生しない。
-		try{
-			this->temp_list.clear();
-			boost::thread test_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list, this, get_data));
-			sleep(1);
-		} catch(...) {
-			BOOST_ERROR("exception: get_from_temp_list");
-		}
-		// clean the created thread's temp_list_condition
-		is_get_from_temp_list_called = false;
-		this->put_into_temp_list(test_data1);
-		while(!is_get_from_temp_list_called){
-		}
+    cout << "[43]------------------------------------------" << endl;
+		// unit_test[43] temp_listのサイズが0の場合、戻り値が失敗（-１）で設定する。
+		this->temp_list.clear();
+		result = this->get_from_temp_list(get_data);
+		BOOST_CHECK_EQUAL(result, -1);
 
-    cout << "[41]------------------------------------------" << endl;
-		// unit_test[41] マルチスレッドの場合、temp_listにデータを正常取得する。
+	cout << "[44]------------------------------------------" << endl;
+		// unit_test[44] temp_listのサイズが1の場合、戻り値が正常（0）で設定する。
+		test_data1.session_id = "test_id123456789abcdefghijklmnop";
+		test_data1.op_code = 'A';
+		test_data1.realserver_addr = endpoint;
+		test_data1.last_time = 1000;
+		this->temp_list.clear();
+		this->temp_list.push_back(test_data1);
+		result = this->get_from_temp_list(get_data);
+		BOOST_CHECK_EQUAL(result, 0);
+
+	cout << "[45]------------------------------------------" << endl;
+		// unit_test[45] temp_listのサイズが3の場合、戻り値が正常（0）で設定する。
+		this->temp_list.clear();
+		this->temp_list.push_back(test_data1);
+		this->temp_list.push_back(test_data1);
+		this->temp_list.push_back(test_data1);
+		result = this->get_from_temp_list(get_data);
+		BOOST_CHECK_EQUAL(result, 0);
+
+    cout << "[46]------------------------------------------" << endl;
+		// unit_test[46] マルチスレッドの場合、temp_listにデータを正常取得する。
 		try {
 			this->temp_list.clear();
+			this->temp_list.push_back(test_data1);
+			this->temp_list.push_back(test_data1);
+			this->temp_list.push_back(test_data1);
+			this->temp_list.push_back(test_data1);
 			boost::thread_group thread_group1;
 			thread_group1.create_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list_thread1, this));
-			thread_group1.create_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list_thread2, this));
-			thread_group1.create_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list_thread2, this));
+			thread_group1.create_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list_thread1, this));
+			thread_group1.create_thread(boost::bind(&sslid_replication_data_processor_test_class::get_from_temp_list_thread1, this));
 			thread_group1.join_all();
 		} catch(...) {
 			BOOST_ERROR("exception: get_from_temp_list");
 		}
 
-    cout << "[42]------------------------------------------" << endl;
-		// unit_test[42] temp_listにデータがある場合、１つ目のデータを削除する。
+    cout << "[47]------------------------------------------" << endl;
+		// unit_test[47] temp_listにデータがある場合、１つ目のデータを削除する。
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
 		test_data1.op_code = 'T';
 		test_data1.realserver_addr = endpoint;
@@ -1330,8 +1275,8 @@ public:
 		// last_time check
 		BOOST_CHECK_EQUAL(leave_data.last_time, test_data2.last_time);
 
-    cout << "[43]------------------------------------------" << endl;
-		// unit_test[43] temp_listに１つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの内容と一致する。
+    cout << "[48]------------------------------------------" << endl;
+		// unit_test[48] temp_listに１つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの内容と一致する。
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
 		this->temp_list.push_back(test_data1);
@@ -1346,8 +1291,8 @@ public:
 		// last_time check
 		BOOST_CHECK_EQUAL(get_data.last_time, test_data1.last_time);
 
-    cout << "[44]------------------------------------------" << endl;
-		// unit_test[44] temp_listに２つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの１つ目の内容と一致する。
+    cout << "[49]------------------------------------------" << endl;
+		// unit_test[49] temp_listに２つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの１つ目の内容と一致する。
 		test_data1.op_code = 'U';
 		test_data2.op_code = 'D';
 		this->temp_list.clear();
@@ -1368,8 +1313,8 @@ public:
 	// get_replication_area_test
 	void get_replication_area_test(sslid_replication_data* expecting_sslid_replication_data) {
 
-    cout << "[45]------------------------------------------" << endl;
-		// unit_test[45] get_replication_area（）関数の戻り値はコンストラクタが正常に生成する値と一致する。
+    cout << "[50]------------------------------------------" << endl;
+		// unit_test[50] get_replication_area（）関数の戻り値はコンストラクタが正常に生成する値と一致する。
 		sslid_replication_data* get_data = this->get_replication_area();
 		BOOST_CHECK_EQUAL(get_data, expecting_sslid_replication_data);
 	}
