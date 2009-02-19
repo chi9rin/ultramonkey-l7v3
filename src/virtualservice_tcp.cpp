@@ -67,10 +67,10 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 		replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
 		if( (rep_header_ptr == NULL) || (0 == rep_size) ){
 			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
-			return;
 			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
 			}
+			return;
 		}
 	
 		//check maxdatasize
@@ -871,7 +871,6 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
 		err.setter( true, "Virtual Service does not exist." );
-		return;
 		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::edit_realserver( "
 									"const l7vs::virtualservice_element& in,"
@@ -879,6 +878,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 			formatter % ( err ? "true" : "false") % err.get_message();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
 		}
+		return;
 	}	
 
 	//lock rs_list_ref_count_inc_mutex
