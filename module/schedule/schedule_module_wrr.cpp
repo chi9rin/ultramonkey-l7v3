@@ -1,14 +1,28 @@
-//
-//	@file	schedule_module_wrr.cpp
-//	@brief	shared object schedule module class
-//
-//	copyright (c) xxx corporation. 2009
-//	mail: 
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*
+ *	@file	schedule_module_wrr.cpp
+ *	@brief	shared object schedule module class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include "schedule_module_wrr.h"
+#include <boost/format.hpp>
 
 namespace l7vs{
 
@@ -21,6 +35,14 @@ schedule_module_weighted_round_robin::~schedule_module_weighted_round_robin(){}
 
 //!	initialize function
 void	schedule_module_weighted_round_robin::initialize(){
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function in : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
+			}
+		}
+	}
+
 	boost::asio::ip::tcp::endpoint	tcp_local_endpoint ;
 	boost::asio::ip::udp::endpoint	udp_local_endpoint ;
 
@@ -31,9 +53,16 @@ void	schedule_module_weighted_round_robin::initialize(){
 	vs_weights.maxWeight = 0;
 	vs_weights.gcd = 0;
 
-	if ( !putLogInfo.empty() )
-	{
+	if ( !putLogInfo.empty() ){
 		putLogInfo( 1, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
+	}
+
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function out : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
+			}
+		}
 	}
 }
 
@@ -59,8 +88,18 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&		outendpoint ){
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+			}
+		}
+	}
+
 	boost::asio::ip::tcp::endpoint	tcp_local_endpoint ;
 	rslist_type::iterator			itr;
+	std::string	buf;
+	int			loop;
 
 	//! set clear data as NULL
 	outendpoint = tcp_local_endpoint;
@@ -71,8 +110,25 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		{
 			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
+
+	//! Debug log
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
+					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
+														% loop
+														% itr->tcp_endpoint.address()
+														% itr->tcp_endpoint.port()
+														% itr->weight );
+					putLogDebug( 1, buf, __FILE__, __LINE__);
+				}
+			}
+		}
+	}
+	//! Debug log END
 
 	if ( -1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next ) ){
 		//! init error( no data )
@@ -80,7 +136,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		{
 			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
 
 	//! first time
@@ -93,11 +149,32 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 			vs_weights.currentWeight = vs_weights.maxWeight;
 		}
 
+		//! Debug log
+		if ( !getloglevel.empty() ){
+			if ( LOG_LV_DEBUG == getloglevel() ){
+				if ( !putLogDebug.empty() ){
+					buf = boost::io::str( boost::format( "previous endpoint : %s:%d currentweight(%d)" ) 
+														% tcp_endpoint.address()
+														% tcp_endpoint.port()
+														% vs_weights.currentWeight );
+					putLogDebug( 1, buf, __FILE__, __LINE__);
+				}
+			}
+		}
+		//! Debug log END
+
 		for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 			if ( itr->weight > 0 ){
 				//! prev endpoint
 				if ( tcp_endpoint == itr->tcp_endpoint ){
 					itr = inlist_next( itr );
+					if ( itr == inlist_end() ){
+						itr = inlist_begin();
+						vs_weights.currentWeight -= vs_weights.gcd;
+						if ( vs_weights.currentWeight <= 0 ) {
+							vs_weights.currentWeight = vs_weights.maxWeight;
+						}
+					}
 					break;
 				}
 			}
@@ -109,10 +186,26 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 
 	for ( ; ; ){
 		for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
+
+			//! Debug log
+			if ( !getloglevel.empty() ){
+				if ( LOG_LV_DEBUG == getloglevel() ){
+					if ( !putLogDebug.empty() ){
+						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d) currentweight(%d)" )
+															% itr->tcp_endpoint.address()
+															% itr->tcp_endpoint.port()
+															% itr->weight
+															% vs_weights.currentWeight );
+						putLogDebug( 1, buf, __FILE__, __LINE__);
+					}
+				}
+			}
+			//! Debug log END
+
 			if ( itr->weight >= vs_weights.currentWeight ){
 				//! set found data
 				tcp_endpoint = outendpoint = itr->tcp_endpoint;
-				return ;
+				goto END ;
 			}
 		}
 		if ( itr == inlist_end() ){
@@ -120,6 +213,15 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 			vs_weights.currentWeight -= vs_weights.gcd;
 			if ( vs_weights.currentWeight <= 0 ) {
 				vs_weights.currentWeight = vs_weights.maxWeight;
+			}
+		}
+	}
+
+END:
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -137,8 +239,18 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&		outendpoint ){
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+			}
+		}
+	}
+
 	boost::asio::ip::udp::endpoint	udp_local_endpoint ;
 	rslist_type::iterator			itr;
+	std::string	buf;
+	int			loop;
 
 	//! set clear data as NULL
 	outendpoint = udp_local_endpoint;
@@ -149,16 +261,33 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		{
 			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
 
+	//! Debug log
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
+					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
+														% loop
+														% itr->udp_endpoint.address()
+														% itr->udp_endpoint.port()
+														% itr->weight );
+					putLogDebug( 1, buf, __FILE__, __LINE__);
+				}
+			}
+		}
+	}
+
+	//! Debug log END
 	if ( -1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next ) ){
 		//! init error( no data )
 		if ( !putLogError.empty() )
 		{
 			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
-		return;
+		goto END;
 	}
 
 	//! first time
@@ -171,11 +300,32 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 			vs_weights.currentWeight = vs_weights.maxWeight;
 		}
 
+		//! Debug log
+		if ( !getloglevel.empty() ){
+			if ( LOG_LV_DEBUG == getloglevel() ){
+				if ( !putLogDebug.empty() ){
+					buf = boost::io::str( boost::format( "previous endpoint : %s:%d currentweight(%d)" ) 
+														% udp_endpoint.address()
+														% udp_endpoint.port()
+														% vs_weights.currentWeight );
+					putLogDebug( 1, buf, __FILE__, __LINE__);
+				}
+			}
+		}
+		//! Debug log END
+
 		for ( itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ) ){
 			if ( itr->weight > 0 ){
 				//! prev endpoint
 				if ( udp_endpoint == itr->udp_endpoint ){
 					itr = inlist_next( itr );
+					if ( itr == inlist_end() ){
+						itr = inlist_begin();
+						vs_weights.currentWeight -= vs_weights.gcd;
+						if ( vs_weights.currentWeight <= 0 ) {
+							vs_weights.currentWeight = vs_weights.maxWeight;
+						}
+					}
 					break;
 				}
 			}
@@ -187,10 +337,26 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 
 	for ( ; ; ){
 		for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
+
+			//! Debug log
+			if ( !getloglevel.empty() ){
+				if ( LOG_LV_DEBUG == getloglevel() ){
+					if ( !putLogDebug.empty() ){
+						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d) currentweight(%d)" )
+															% itr->udp_endpoint.address()
+															% itr->udp_endpoint.port()
+															% itr->weight
+															% vs_weights.currentWeight );
+						putLogDebug( 1, buf, __FILE__, __LINE__);
+					}
+				}
+			}
+			//! Debug log END
+
 			if ( itr->weight >= vs_weights.currentWeight ){
 				//! set found data
 				udp_endpoint = outendpoint = itr->udp_endpoint;
-				return ;
+				goto END ;
 			}
 		}
 		if ( itr == inlist_end() ){
@@ -198,6 +364,15 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 			vs_weights.currentWeight -= vs_weights.gcd;
 			if ( vs_weights.currentWeight <= 0 ) {
 				vs_weights.currentWeight = vs_weights.maxWeight;
+			}
+		}
+	}
+
+END:
+	if ( !getloglevel.empty() ){
+		if ( LOG_LV_DEBUG == getloglevel() ){
+			if ( !putLogDebug.empty() ){
+				putLogDebug( 1, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
