@@ -351,6 +351,10 @@ bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
 	}
 	try{
 		int	tmp = boost::lexical_cast< int >( argv[pos] );
+		if( ( 0 != tmp ) && ( 1 != tmp ) ){
+			l7vsadm_err.setter( true, "invalid sorryflag value." );
+			return false;
+		}
 		if( 0 == tmp )
 			request.vs_element.sorry_flag = INT_MAX;	// clear value
 		else
