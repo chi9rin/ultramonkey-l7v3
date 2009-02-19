@@ -1646,6 +1646,12 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 				boost::thread::sleep(xt);
 			}
 
+			// display err
+			if( l7vsadm_err ){
+				std::cerr << "COMMON ERROR : " << l7vsadm_err.get_message() << std::endl;
+				return false;
+			}
+
 			// write sockfile
 			std::stringstream	send_stream;
 			boost::archive::text_oarchive	oa( send_stream );
