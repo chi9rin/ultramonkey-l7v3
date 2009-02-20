@@ -16,7 +16,7 @@ libprotomod_cinsert_la_SOURCES	=	protocol_module_base.h \
 									http_protocol_module_base.h \
 									http_protocol_module_base.cpp \
 									protocol_module_cinsert.cpp
-libprotomod_cinsert_la_LIBADD	=	-lrt -lboost_thread
+libprotomod_cinsert_la_LIBADD	=	-lrt -lboost_thread-gcc41-mt
 
 libprotomod_sslid_la_SOURCES	=	protocol_module_base.h \
 									ssl_protocol_module_base.h \
@@ -26,13 +26,13 @@ libprotomod_sslid_la_SOURCES	=	protocol_module_base.h \
 									sslid_replication_data_processor.cpp \
 									sslid_session_data_processor.h \
 									sslid_session_data_processor.cpp
-libprotomod_sslid_la_LIBADD		=	-lrt -lboost_thread
+libprotomod_sslid_la_LIBADD		=	-lrt -lboost_thread-gcc41-mt
 
 libprotomod_sessionless_la_SOURCES	=	protocol_module_base.h \
 									http_protocol_module_base.h \
 									http_protocol_module_base.cpp \
 									protocol_module_sessionless.cpp
-libprotomod_sessionless_la_LIBADD	= -lrt -lboost_thread
+libprotomod_sessionless_la_LIBADD	= -lrt -lboost_thread-gcc41-mt
 
 install:
 	cp ./.libs/libprotomod_cinsert.so ./.libs/protomod_cinsert.so && \
