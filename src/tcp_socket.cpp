@@ -18,7 +18,8 @@ namespace l7vs{
 
 	//! construcor
 	tcp_socket::tcp_socket(boost::asio::io_service& io):
-		my_socket(io){
+		my_socket(io),
+		open_flag(false){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
 
 	}
