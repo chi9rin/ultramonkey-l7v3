@@ -112,6 +112,8 @@ protected:
 							rep_interval( REP_INTERVAL_DEFAULT ) {}
 	};
 
+	boost::thread::id			this_id;
+
 	const	l7vsd&				vsd;			//! l7vsd reference
 	const	replication&		rep;			//! replication reference
 
