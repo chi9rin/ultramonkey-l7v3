@@ -264,10 +264,10 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( !err ){
-		//if active session count equal
-		//element.sorry_maxconnectionが1以上の場合
+		//if active session count equal and element.sorry_maxconnection is over num 1
+		//active_sessions is include a waiting(prepare accept) session
 		if( ( ( 0 < element.sorry_maxconnection ) && 
-			( active_sessions.size() >= static_cast<size_t>( element.sorry_maxconnection ) ) ) ||
+			( active_sessions.size() > static_cast<size_t>( element.sorry_maxconnection ) ) ) ||
 			( 0 != element.sorry_flag ) ){
 				in_session->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 		}
