@@ -212,6 +212,8 @@ protected:
 
 	void	set_parameter();
 
+	std::string	argument_debug_dump( int, char*[] );
+
 	// command parse function object.type.
 	typedef	boost::function< bool ( int, char*[] ) >
 			parse_cmd_func_type;

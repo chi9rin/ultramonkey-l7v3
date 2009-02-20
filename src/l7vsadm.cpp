@@ -41,6 +41,8 @@ static int	received_sig = 0;
 //
 //! list command parsing.
 bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_list_func", __FILE__, __LINE__ );
+
 	request.command = cmd;	// set command
 	if( argc < 3 ) return true;	// option is none. this pattern is true
 	for( int pos = 2; pos < argc; ++pos ){ 	//search option function from argv strings
@@ -63,12 +65,16 @@ bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 //
 //! list numeric flag check.
 bool	l7vs::l7vsadm::parse_opt_list_numeric_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_list_numeric_func", __FILE__, __LINE__ );
+
 	numeric_flag = true;	//numeric flag on.
 	return true;
 }
 
 //! virtualservice command parsing.
 bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_vs_func", __FILE__, __LINE__ );
+
 	request.command = cmd;	// set command
 	for( int pos = 2; pos < argc; ++pos ){	// check options.
 		parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
@@ -144,6 +150,8 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 //
 //! target option check
 bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		//don't target recvaddress:port
 		l7vsadm_err.setter( true, "target endpoint is not specified." );
@@ -189,6 +197,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 }
 //! module option check
 bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_module_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		//don't target protomod name.
 		l7vsadm_err.setter( true, "protomod name is not specified." );
@@ -260,6 +270,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 
 //! scheduler option check.
 bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_scheduler_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		// don't target scheduler name.
 		l7vsadm_err.setter( true, "scheduler name is not specified." );
@@ -296,6 +308,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 }
 //! upper flag check
 bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_upper_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		// don't target maxconnection_num
 		l7vsadm_err.setter( true, "maxconnection value is not specified." );
@@ -316,6 +330,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
 }
 //! bypass(SorryServer) option check
 bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_bypass_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		//don't target sorryserver:port
 		l7vsadm_err.setter( true, "sorryserver endpoint is not specified." );
@@ -354,6 +370,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] )
 }
 //! virtualservice option flag function
 bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_flag_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		//don't target sorry flag
 		l7vsadm_err.setter( true, "sorryflag value is not specified." );
@@ -379,6 +397,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
 }
 //! virtualservice option qosupstream function
 bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_qosup_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		//don't rarget QoS upstream value.
 		l7vsadm_err.setter( true, "qos_upstream value is not specified." );
@@ -430,6 +450,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 }
 //! virtualservice option qosdownstream functipn
 bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_qosdown_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		// don't target QoS downstream value
 		l7vsadm_err.setter( true, "qos_downstream value is not specified." );
@@ -481,6 +503,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] 
 }
 //! virtualservice option udp func.
 bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_udp_func", __FILE__, __LINE__ );
+
 	virtualservice_element& elem = request.vs_element;	// request virtualservie element reference get.
 	elem.udpmode = true;	// udpmode on.
 	boost::asio::ip::tcp::endpoint	zeropoint;
@@ -517,6 +541,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 
 //! realserver command parsing.
 bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_rs_func", __FILE__, __LINE__ );
+
 	request.command = cmd;
 	request.vs_element.realserver_vector.push_back( realserver_element() );
 	for( int pos = 2; pos < argc; ++pos ){
@@ -575,6 +601,8 @@ bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 
 //! weight is set 
 bool	l7vs::l7vsadm::parse_opt_rs_weight_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_rs_weight_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		//don't target weight value
 		l7vsadm_err.setter( true, "weight value is not specified." );
@@ -594,6 +622,8 @@ bool	l7vs::l7vsadm::parse_opt_rs_weight_func( int& pos, int argc, char* argv[] )
 }
 //! realserver target set
 bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_rs_realserver_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		// don't target realserver address
 		l7vsadm_err.setter( true, "realserver address is not specified." );
@@ -641,6 +671,8 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 	
 //! replication command parsing.
 bool	l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_replication_func", __FILE__, __LINE__ );
+
 	request.command = cmd;
 	for( int pos = 2; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = replication_option_dic.find( argv[pos] );
@@ -667,6 +699,8 @@ bool	l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_
 //
 //! switch function
 bool	l7vs::l7vsadm::parse_opt_replication_switch_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_switch_func", __FILE__, __LINE__ );
+
 	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
 		// double command target.
 		l7vsadm_err.setter( true, "replication option is double specified." );
@@ -692,16 +726,22 @@ bool	l7vs::l7vsadm::parse_opt_replication_switch_func( int& pos, int argc, char*
 }
 //! start function
 bool	l7vs::l7vsadm::parse_opt_replication_start_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_start_func", __FILE__, __LINE__ );
+
 	request.replication_command = l7vsadm_request::REP_START;
 	return true;
 }
 //! stop function
 bool	l7vs::l7vsadm::parse_opt_replication_stop_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_stop_func", __FILE__, __LINE__ );
+
 	request.replication_command = l7vsadm_request::REP_STOP;
 	return true;
 }
 //! force function
 bool	l7vs::l7vsadm::parse_opt_replication_force_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_force_func", __FILE__, __LINE__ );
+
 	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
 		// double command target.
 		l7vsadm_err.setter( true, "replication option is double specified." );
@@ -712,6 +752,8 @@ bool	l7vs::l7vsadm::parse_opt_replication_force_func( int& pos, int argc, char* 
 }
 //! dump function
 bool	l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_dump_func", __FILE__, __LINE__ );
+
 	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
 		// double command target.
 		l7vsadm_err.setter( true, "replication option is double specified." );
@@ -723,6 +765,8 @@ bool	l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char* a
 
 //! log command parsing.
 bool	l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_log_func", __FILE__, __LINE__ );
+
 	request.command = cmd;
 	for( int pos = 2; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = log_option_dic.find( argv[pos] );
@@ -754,6 +798,8 @@ bool	l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 //
 //! log category set function
 bool	l7vs::l7vsadm::parse_opt_log_category_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_log_category_func", __FILE__, __LINE__ );
+
 	if( request.log_category != LOG_CAT_NONE ){
 		// double target commands.
 		l7vsadm_err.setter( true, "logcategory is double specified." );
@@ -776,6 +822,8 @@ bool	l7vs::l7vsadm::parse_opt_log_category_func( int& pos, int argc, char* argv[
 }
 //! log level set function
 bool	l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_log_level_func", __FILE__, __LINE__ );
+
 	if( request.log_level != LOG_LV_NONE ){
 		// double target commands.
 		l7vsadm_err.setter( true, "loglevel is double specified." );
@@ -799,6 +847,8 @@ bool	l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[] )
 
 //! snmp command parsing
 bool	l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_snmp_func", __FILE__, __LINE__ );
+
 	request.command = cmd;
 	for( int pos = 2; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = snmp_option_dic.find( argv[pos] );
@@ -827,6 +877,8 @@ bool	l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 }
 //! snmp log category set function
 bool	l7vs::l7vsadm::parse_opt_snmp_log_category_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_snmp_log_category_func", __FILE__, __LINE__ );
+
 	if( request.snmp_log_category != LOG_CAT_NONE ){
 		// double target commands.
 		l7vsadm_err.setter( true, "snmp logcategory is double specified." );
@@ -849,6 +901,8 @@ bool	l7vs::l7vsadm::parse_opt_snmp_log_category_func( int& pos, int argc, char* 
 }
 //! log level set function
 bool	l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_snmp_log_level_func", __FILE__, __LINE__ );
+
 	if( request.snmp_log_level != LOG_LV_NONE ){
 		// double target commands.
 		l7vsadm_err.setter( true, "snmp loglevel is double specified." );
@@ -872,6 +926,8 @@ bool	l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* arg
 
 //! parameter command parsing
 bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_parameter_func", __FILE__, __LINE__ );
+
 	request.command = cmd;
 	for( int pos = 2; pos < argc; ++pos ){
 		parse_opt_map_type::iterator itr = parameter_option_dic.find( argv[pos] );
@@ -897,6 +953,8 @@ bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TA
 //	parameter command 
 //
 bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_parameter_reload_func", __FILE__, __LINE__ );
+
 	if( ++pos >= argc ){
 		// don't target reload component
 		l7vsadm_err.setter( true, "reload component is not specified." );
@@ -915,6 +973,8 @@ bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* a
 
 //! help command parsing
 bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_help_func", __FILE__, __LINE__ );
+
 	request.command = cmd;
 
 	std::cout << usage() << std::endl;
@@ -966,6 +1026,8 @@ bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 
 //! usage function.
 std::string	l7vs::l7vsadm::usage(){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::usage", __FILE__, __LINE__ );
+
 	std::stringstream	stream;
 	stream <<
 	"Usage: \n"
@@ -995,6 +1057,8 @@ std::string	l7vs::l7vsadm::usage(){
 
 //!	disp_list function
 void	l7vs::l7vsadm::disp_list(){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::disp_list", __FILE__, __LINE__ );
+
 	std::stringstream buf;
 	buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % VERSION;
 	buf << "Prot LocalAddress:Port ProtoMod Scheduler\n";
@@ -1029,6 +1093,8 @@ void	l7vs::l7vsadm::disp_list(){
 
 //!	disp_list_key function
 void	l7vs::l7vsadm::disp_list_key(){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::disp_list_key", __FILE__, __LINE__ );
+
 	std::stringstream buf;
 	buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % VERSION;
 	buf << "Prot LocalAddress:Port ProtoMod Scheduler\n";
@@ -1063,6 +1129,8 @@ void	l7vs::l7vsadm::disp_list_key(){
 
 //!	disp_list_verbose function
 void	l7vs::l7vsadm::disp_list_verbose(){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::disp_list_verbose", __FILE__, __LINE__ );
+
 	std::stringstream	buf;
 	buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % VERSION;
 
@@ -1165,6 +1233,7 @@ l7vs::l7vsadm::l7vsadm()
 					command_wait_count( L7VSADM_DEFAULT_WAIT_COUNT ),
 					connect_wait_interval( L7VSADM_DEFAULT_WAIT_INTERVAL ),
 					connect_wait_count( L7VSADM_DEFAULT_WAIT_COUNT ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::l7vsadm(constructor)", __FILE__, __LINE__ );
 
 	// create command dictionary.
 	command_dic["-l"]				= boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
@@ -1455,6 +1524,8 @@ l7vs::l7vsadm::l7vsadm()
  * Get l7vsadm parameter data and set to global data
  */
 void	l7vs::l7vsadm::set_parameter(){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::set_parameter", __FILE__, __LINE__ );
+
 	// Get and Set l7vsadm all parameter value.
 	Parameter	param;
 	error_code	err;
@@ -1541,6 +1612,16 @@ void	l7vs::l7vsadm::set_parameter(){
 }
 
 bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::execute", __FILE__, __LINE__ );
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSADM_COMMON ) ){
+		std::stringstream	debugstr;
+		debugstr << boost::format( "l7vsadm::execute arguments:%s" ) % argument_debug_dump( argc, argv );
+		Logger::putLogDebug( LOG_CAT_L7VSADM_COMMON, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	// set sighanlder
 	if ( 0 > set_sighandlers() ) {
 		std::cerr << "COMMON ERROR : set_sighandlers failed." << std::endl;
@@ -1706,6 +1787,21 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 		return false;
 	}
 	return true;
+}
+
+std::string	l7vs::l7vsadm::argument_debug_dump( int argc, char* argv[] ){
+	std::stringstream buf;
+	if( !argv ){
+		buf << "argument=(null)";
+	}
+	else{
+		buf << boost::format( "argument={argc=%d: " ) % argc;
+		for( int i = 0; i < argc; ++i){
+			buf << boost::format( "argv[%d]=%s: " ) % i % argv[i];
+		}
+		buf << "}";
+	}
+	return buf.str();
 }
 
 //! signal handler function
