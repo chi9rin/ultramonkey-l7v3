@@ -1,5 +1,31 @@
+/*
+ * @file  sslid_session_data_processor.cpp
+ * @brief read session data from replication area and set session
+ * @brief data to replication area.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "sslid_session_data_processor.h"
 #include "protocol_module_base.h"
+#include "ssl_protocol_module_base.h"
 #include "boost/format.hpp"
 
 namespace l7vs
@@ -92,11 +118,13 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        std::string buffer;
+        ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
         boost::format formatter("in_function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data(const std::string& session_id, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : "
                                 "session_id = %s, endpoint = [%s]:%d.");
-        formatter % session_id % endpoint.address().to_string() % endpoint.port();
+        formatter % buffer % endpoint.address().to_string() % endpoint.port();
         putLogDebug(30175, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -177,9 +205,13 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30177, "function : int sslid_session_data_processor::"
-                            "get_endpoint_from_session_data() : put_into_temp_list() --delete item-- end.",
-                            __FILE__, __LINE__);
+                std::string buffer;
+                ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
+                boost::format formatter("function : int sslid_session_data_processor::"
+                                        "get_endpoint_from_session_data() : put_into_temp_list() "
+                                        "--delete item session_id = %s -- end.");
+                formatter % buffer;
+                putLogDebug(30177, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -224,12 +256,14 @@ int sslid_session_data_processor::write_session_data(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        std::string buffer;
+        ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
         boost::format formatter("in_function : int sslid_session_data_processor::"
                                 "write_session_data(const std::string& session_id, "
                                 "const boost::asio::ip::tcp::endpoint& endpoint, "
                                 "time_t now_time) : session_id = %s, "
                                 "endpoint = [%s]:%d, now_time = %lu.");
-        formatter % session_id % endpoint.address().to_string() % endpoint.port() % now_time;
+        formatter % buffer % endpoint.address().to_string() % endpoint.port() % now_time;
         putLogDebug(30179, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -275,9 +309,13 @@ int sslid_session_data_processor::write_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30181, "function : int sslid_session_data_processor::"
-                            "write_session_data() : put_into_temp_list() --update item-- end.",
-                            __FILE__, __LINE__);
+                std::string buffer;
+                ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
+                boost::format formatter("function : int sslid_session_data_processor::"
+                                        "write_session_data() : put_into_temp_list() "
+                                        "--update item session_id = %s -- end.");
+                formatter % buffer;
+                putLogDebug(30181, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -328,9 +366,13 @@ int sslid_session_data_processor::write_session_data(
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30184, "function : int sslid_session_data_processor::"
-                            "write_session_data() : put_into_temp_list() --add item-- end.",
-                            __FILE__, __LINE__);
+                std::string buffer;
+                ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
+                boost::format formatter("function : int sslid_session_data_processor::"
+                                        "write_session_data() : put_into_temp_list() "
+                                        "--add item session_id = %s -- end.");
+                formatter % buffer;
+                putLogDebug(30184, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -439,9 +481,9 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     catch(const std::exception& e)
     {
         std::cerr << "sslid_session_data_processor::read_session_data_from_replication_area() : "
-											"exception : error = " << e.what() << "." << std::endl;
+                    "exception : error = " << e.what() << "." << std::endl;
         boost::format formatter("function : int sslid_session_data_processor::"
-                                            "read_session_data_from_replication_area() : exception : error = %s.");
+                                "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();
         putLogError(37071, formatter.str(), __FILE__, __LINE__);
 
@@ -518,9 +560,13 @@ int sslid_session_data_processor::clear_expired_session_data()
             /*-------- DEBUG LOG --------*/
             if (LOG_LV_DEBUG == getloglevel())
             {
-                putLogDebug(30193, "function : int sslid_session_data_processor::"
+                std::string buffer;
+                ssl_protocol_module_base::dump_session_id(temp_data.session_id.c_str(), temp_data.session_id.size(), buffer);
+                boost::format formatter("function : int sslid_session_data_processor::"
                             "clear_expired_session_data() : put_into_temp_list() "
-                            "--delete expired time item-- end.", __FILE__, __LINE__);
+                            "--delete expired time item session_id = %s -- end.");
+                formatter % buffer;
+                putLogDebug(30193, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -545,9 +591,13 @@ int sslid_session_data_processor::clear_expired_session_data()
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == getloglevel())
         {
-            putLogDebug(30194, "function : int sslid_session_data_processor::"
+            std::string buffer;
+            ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
+            boost::format formatter("function : int sslid_session_data_processor::"
                         "clear_expired_session_data() : put_into_temp_list() "
-                        "--delete oldest time item-- end.", __FILE__, __LINE__);
+                        "--delete oldest time item session_id = %s -- end.");
+            formatter % buffer;
+            putLogDebug(30194, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
     }

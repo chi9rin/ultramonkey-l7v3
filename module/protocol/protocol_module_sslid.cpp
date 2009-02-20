@@ -1,3 +1,28 @@
+/*
+ * @file  protocol_module_sslid.cpp
+ * @brief protocol module of HTTPS(SSL/TLS).
+ * @brief this module provide session persistence by SSL session ID.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "protocol_module_sslid.h"
 #include <boost/format.hpp>
 
@@ -1623,8 +1648,12 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                     /*-------- DEBUG LOG --------*/
                     if (LOG_LV_DEBUG == getloglevel())
                     {
-                        putLogDebug(30060, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                    "handle_realserver_select() : get_ssl_session_id() end.", __FILE__, __LINE__);
+                        std::string buffer;
+                        dump_session_id(session_id.c_str(), session_id.size(), buffer);
+                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                    "handle_realserver_select() : get_ssl_session_id() session_id = %s end.");
+                        formatter % buffer;
+                        putLogDebug(30060, formatter.str(), __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
 
@@ -2707,9 +2736,13 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
-                    putLogDebug(30103, "function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                "handle_client_connection_check() : write_session_data() end.",
-                                __FILE__, __LINE__);
+                    std::string buffer;
+                    dump_session_id(session_id.c_str(), session_id.size(), buffer);
+                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                                            "handle_client_connection_check() : write_session_data() end."
+                                            "session_id = %s.");
+                    formatter % buffer;
+                    putLogDebug(30103, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
             }

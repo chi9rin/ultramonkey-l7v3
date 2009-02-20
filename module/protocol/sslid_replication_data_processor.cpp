@@ -1,6 +1,31 @@
+/*
+ * @file  sslid_replication_data_processor.cpp
+ * @brief the replication of data between ACT and SBY.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "sslid_replication_data_processor.h"
 #include "replication.h"
 #include "protocol_module_base.h"
+#include "ssl_protocol_module_base.h"
 #include "boost/format.hpp"
 
 #define SSLID_SERVICE_NUMBER (128)
@@ -338,11 +363,13 @@ void sslid_replication_data_processor::put_into_temp_list(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        std::string buffer;
+        ssl_protocol_module_base::dump_session_id(data.session_id.c_str(), data.session_id.size(), buffer);
         boost::format formatter("in_function : void sslid_replication_data_processor::put_into_temp_list("
                                  "const sslid_replication_temp_data& data) : data.op_code = %c, "
                                  "data.session_id = %s, data.last_time = %lu, data.endpoint = [%s]:%d.");
-        formatter % data.op_code % data.session_id % data.last_time % data.realserver_addr.address().to_string()
-	% data.realserver_addr.port();
+        formatter % data.op_code % buffer % data.last_time % data.realserver_addr.address().to_string()
+        % data.realserver_addr.port();
         putLogDebug(30155, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -427,9 +454,11 @@ void sslid_replication_data_processor::write_replicaion_area()
                         {
                             char session_id_temp[SSLID_LENGTH+1] = {0};
                             memcpy(session_id_temp, replication_area[i].session_id, SSLID_LENGTH);
+                            std::string buffer;
+                            ssl_protocol_module_base::dump_session_id(session_id_temp, SSLID_LENGTH, buffer);
                             boost::format formatter("function : void sslid_replication_data_processor::"
-                                                     "write_replicaion_area() : 'A' : session_id = %s.");
-                            formatter % session_id_temp;
+                                                    "write_replicaion_area() : 'A' : session_id = %s.");
+                            formatter % buffer;
                             putLogDebug(30159, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
@@ -659,11 +688,13 @@ int sslid_replication_data_processor::get_from_temp_list(
     /*-------- DEBUG LOG --------*/
     if (LOG_LV_DEBUG == getloglevel())
     {
+        std::string buffer;
+        ssl_protocol_module_base::dump_session_id(data.session_id.c_str(), data.session_id.size(), buffer);
         boost::format formatter("out_function : void sslid_replication_data_processor::"
                                 "get_from_temp_list(sslid_replication_temp_data& data) : "
                                 "return_value = %d, data.op_code = %c, data.session_id = %s, "
                                 "data.last_time = %lu, data.endpoint = [%s]:%d.");
-        formatter % ret % data.op_code % data.session_id % data.last_time %
+        formatter % ret % data.op_code % buffer % data.last_time %
         data.realserver_addr.address().to_string() % data.realserver_addr.port();
         putLogDebug(30170, formatter.str(), __FILE__, __LINE__);
     }
