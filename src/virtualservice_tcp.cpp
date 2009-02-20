@@ -631,7 +631,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::edit_virtualservice( "
 								"const l7vs::virtualservice_element& in,"
-								"l7vs::error_code& err )");
+								"l7vs::error_code& err ) : dump in ");
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
 
@@ -653,7 +653,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 	}
 
 	//if change ScueduleModule Name, unload old ScheduleModule and load new ScheduleModule
-	if( element.schedule_module_name != elem.schedule_module_name ){
+	if( ( element.schedule_module_name != elem.schedule_module_name ) && ( "" != elem.schedule_module_name ) ){
 		schedule_module_control::getInstance().unload_module( schedmod );
 		schedmod = schedule_module_control::getInstance().load_module( elem.schedule_module_name );
 		if( NULL == schedmod ){
@@ -700,10 +700,12 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 	element.qos_downstream	= elem.qos_downstream;
 	//if endpoint of SorryServer equal 255.255.255.255:0,not update
 	if( elem.sorry_endpoint !=
-			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "255.255.255.255" ), (0)) ){
+			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) ) ){
 		element.sorry_endpoint		= elem.sorry_endpoint;
 		//if equal endpoint 255.255.255.255:0, clear sorry parameters
-		if( elem.sorry_endpoint == boost::asio::ip::tcp::endpoint() ){
+		if( elem.sorry_endpoint ==
+				boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "255.255.255.255" ), (0)) ){
+			element.sorry_endpoint			= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) );
 			element.sorry_maxconnection	= 0LL;
 			element.sorry_flag			= false;
 			boost::mutex::scoped_lock lk( sessions_mutex );
@@ -713,7 +715,10 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 			}
 		}else{
-			element.sorry_maxconnection	= elem.sorry_maxconnection;
+			if( LLONG_MAX == elem.sorry_maxconnection )
+				element.sorry_maxconnection	= 0;
+			else
+				element.sorry_maxconnection	= elem.sorry_maxconnection;
 			element.sorry_flag			= elem.sorry_flag;
 			boost::mutex::scoped_lock lk( sessions_mutex );
 			for( session_map_type::iterator itr = active_sessions.begin();
