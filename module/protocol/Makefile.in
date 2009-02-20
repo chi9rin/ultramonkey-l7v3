@@ -65,7 +65,8 @@ libprotomod_sessionless_la_OBJECTS =  \
 	$(am_libprotomod_sessionless_la_OBJECTS)
 libprotomod_sslid_la_DEPENDENCIES =
 am_libprotomod_sslid_la_OBJECTS = ssl_protocol_module_base.lo \
-	protocol_module_sslid.lo
+	protocol_module_sslid.lo sslid_replication_data_processor.lo \
+	sslid_session_data_processor.lo
 libprotomod_sslid_la_OBJECTS = $(am_libprotomod_sslid_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -221,7 +222,11 @@ libprotomod_cinsert_la_LIBADD = -lrt -lboost_thread
 libprotomod_sslid_la_SOURCES = protocol_module_base.h \
 									ssl_protocol_module_base.h \
 									ssl_protocol_module_base.cpp \
-									protocol_module_sslid.cpp
+									protocol_module_sslid.cpp \
+									sslid_replication_data_processor.h \
+									sslid_replication_data_processor.cpp \
+									sslid_session_data_processor.h \
+									sslid_session_data_processor.cpp
 
 libprotomod_sslid_la_LIBADD = -lrt -lboost_thread
 libprotomod_sessionless_la_SOURCES = protocol_module_base.h \
@@ -308,6 +313,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_module_sessionless.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_module_sslid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ssl_protocol_module_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sslid_replication_data_processor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sslid_session_data_processor.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

@@ -21,7 +21,11 @@ libprotomod_cinsert_la_LIBADD	=	-lrt -lboost_thread
 libprotomod_sslid_la_SOURCES	=	protocol_module_base.h \
 									ssl_protocol_module_base.h \
 									ssl_protocol_module_base.cpp \
-									protocol_module_sslid.cpp
+									protocol_module_sslid.cpp \
+									sslid_replication_data_processor.h \
+									sslid_replication_data_processor.cpp \
+									sslid_session_data_processor.h \
+									sslid_session_data_processor.cpp
 libprotomod_sslid_la_LIBADD		=	-lrt -lboost_thread
 
 libprotomod_sessionless_la_SOURCES	=	protocol_module_base.h \
