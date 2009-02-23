@@ -1,8 +1,5 @@
 #include <vector>
 #include <list>
-//#include <sstream>
-//#include <algorithm>
-//#include <boost/thread/pthread/mutex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -12,37 +9,61 @@
 
 namespace l7vs
 {
-
-//---------------------------------------------------------------------------------
+//! constractor
 protocol_module_cinsert::protocol_module_cinsert() : http_protocol_module_base( "cinsert" )
 {
 }
 
-//---------------------------------------------------------------------------------
+//! destractor
 protocol_module_cinsert::~protocol_module_cinsert()
 {
 }
 
-//---------------------------------------------------------------------------------
+//! tcp protocol support check
+//! @return tcp support is true
+//! @return tcp not-support is false
 bool	protocol_module_cinsert::is_tcp()
 {
+	//---------- DEBUG LOG START ------------------------------ 
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		putLogDebug(	0,
+						"function in  : [protocol_module_cinsert::is_tcp]",
+						__FILE__,
+						__LINE__ );
+		putLogDebug(	0,
+						"function out : [protocol_module_cinsert::is_tcp] : return = [true]",
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 	return	true;
 }
 
-//---------------------------------------------------------------------------------
 bool	protocol_module_cinsert::is_udp()
 {
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		putLogDebug(	0,
+						"function in  : [protocol_module_cinsert::is_udp]",
+						__FILE__,
+						__LINE__ );
+		putLogDebug(	0,
+						"function out : [protocol_module_cinsert::is_udp] : return = [false]",
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 	return	false;
 }
 
-//---------------------------------------------------------------------------------
 void	protocol_module_cinsert::replication_interrupt()
 {
 	// NOP
 	return;
 }
 
-//---------------------------------------------------------------------------------
 void	protocol_module_cinsert::initialize(
 				rs_list_itr_func_type			inlist_begin,
 				rs_list_itr_func_type			inlist_end,
@@ -50,16 +71,64 @@ void	protocol_module_cinsert::initialize(
 				boost::function< void( void ) >	inlist_lock,
 				boost::function< void( void ) >	inlist_unlock )
 {
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::initialize] : "
+									"inlist_begin = [%p], "
+									"inlist_end = [%p], "
+									"inlist_next = [%p], "
+									"inlist_lock = [%p], "
+									"inlist_unlock = [%p]");
+
+		outform % &inlist_begin % &inlist_end % &inlist_next % &inlist_lock % &inlist_unlock;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	rs_list_begin	= inlist_begin;
 	rs_list_end		= inlist_end;
 	rs_list_next	= inlist_next;
 	rs_list_lock	= inlist_lock;
 	rs_list_unlock	= inlist_unlock;
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::initialize] : "
+									"rs_list_begin = [%p], "
+									"rs_list_end = [%p], "
+									"rs_list_next = [%p], "
+									"rs_list_lock = [%p], "
+									"rs_list_unlock = [%p]");
+
+		outform % &rs_list_begin % &rs_list_end % &rs_list_next % &rs_list_lock % &rs_list_unlock;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 }
 
-//---------------------------------------------------------------------------------
 void	protocol_module_cinsert::finalize()
 {
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		putLogDebug(	0,
+						"function in  : [protocol_module_cinsert::finalize]",
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	getloglevel.clear();
 	putLogFatal.clear();
 	putLogError.clear();
@@ -85,6 +154,17 @@ void	protocol_module_cinsert::finalize()
 	reschedule		= 0;
 	cookie_name.assign( '\0' );
 	sorry_uri.assign( '\0' );
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		putLogDebug(	0,
+						"function out : [protocol_module_cinsert::finalize]",
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 }
 
 //---------------------------------------------------------------------------------
@@ -97,6 +177,36 @@ bool	protocol_module_cinsert::is_use_sorry()
 protocol_module_cinsert::check_message_result
 protocol_module_cinsert::check_parameter( const std::vector< std::string >& args )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::check_parameter] : "
+									"args.size = [%d], "
+									"args = [%s] ");
+
+		std::string	str = "";
+
+		for( unsigned int i = 0; i < args.size(); i++ )
+		{
+			if( i != 0 )
+			{
+				str += ", ";
+			}
+			str += "{";
+			str += args[i];
+			str += "}";
+		}
+
+		outform % args.size() % str;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	using namespace boost::xpressive;
 
 	check_message_result check_result;
@@ -409,6 +519,22 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 		check_result.message = "Option error.";
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::check_parameter] : "
+									"check_result.flag = [%d], "
+									"check_result.message = [%s] ");
+
+		outform % check_result.flag % check_result.message;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	check_result;
 }
 
@@ -416,6 +542,35 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 protocol_module_cinsert::check_message_result
 protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::set_parameter] : "
+									"args.size = [%d], "
+									"args = [%s] ");
+
+		std::string	str = "";
+
+		for( unsigned int i = 0; i < args.size(); i++ )
+		{
+			if( i != 0 )
+			{
+				str += ", ";
+			}
+			str += "{";
+			str += args[i];
+			str += "}";
+		}
+
+		outform % args.size() % str;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	using namespace boost::xpressive;
 
@@ -768,6 +923,22 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 		check_result.message = "Option error.";
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::set_parameter] : "
+									"check_result.flag = [%d], "
+									"check_result.message = [%s] ");
+
+		outform % check_result.flag % check_result.message;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return check_result;
 }
 
@@ -775,6 +946,36 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 protocol_module_cinsert::check_message_result
 protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::add_parameter] : "
+									"args.size = [%d], "
+									"args = [%s] ");
+
+		std::string	str = "";
+
+		for( unsigned int i = 0; i < args.size(); i++ )
+		{
+			if( i != 0 )
+			{
+				str += ", ";
+			}
+			str += "{";
+			str += args[i];
+			str += "}";
+		}
+
+		outform % args.size() % str;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	check_message_result check_result;
 
 	try
@@ -797,6 +998,22 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 		check_result.message = "Cannot add option.";
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::add_parameter] : "
+									"check_result.flag = [%d], "
+									"check_result.message = [%s] ");
+
+		outform % check_result.flag % check_result.message;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return check_result;
 }
 
@@ -810,7 +1027,38 @@ void	protocol_module_cinsert::handle_rslist_update()
 //---------------------------------------------------------------------------------
 void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedule )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::register_schedule] : "
+									"inschedule = [%p]");
+
+		outform % &inschedule;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	schedule_tcp = inschedule;
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::register_schedule] : "
+									"schedule_tcp = [%p]");
+
+		outform % &schedule_tcp;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 }
 
 //---------------------------------------------------------------------------------
@@ -828,6 +1076,24 @@ protocol_module_cinsert::handle_session_initialize(
 				const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
 				const boost::asio::ip::udp::endpoint& client_endpoint_udp )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_session_initialize] : "
+									"up_thread_id = [%s], "
+									"down_thread_id = [%s], "
+									"client_endpoint_tcp = [%s], "
+									"client_endpoint_udp = [%s]");
+
+		outform % up_thread_id % down_thread_id % client_endpoint_tcp % client_endpoint_udp;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	recive_data						client_recv_data;
 	char*							buffer				= NULL;
@@ -870,8 +1136,38 @@ protocol_module_cinsert::handle_session_initialize(
 
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_initialize] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_initialize] : "
+									"next_status = [%d]");
+
+		outform % ACCEPT;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	return	ACCEPT;
 
@@ -883,6 +1179,22 @@ protocol_module_cinsert::handle_session_finalize(
 				const boost::thread::id up_thread_id,
 				const boost::thread::id down_thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_session_finalize] : "
+									"up_thread_id = [%s], "
+									"down_thread_id = [%s]");
+
+		outform % up_thread_id % down_thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_map_itr	thread_data_itr;
 
@@ -907,8 +1219,40 @@ protocol_module_cinsert::handle_session_finalize(
 
 	} catch (...)
 	{
+
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_finalize] : "
+										"next_status = [%d]");
+	
+			outform % STOP;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	STOP;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_finalize] : "
+									"next_status = [%d]");
+
+		outform % STOP;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	STOP;
 }
 
@@ -916,6 +1260,21 @@ protocol_module_cinsert::handle_session_finalize(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_accept] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_cinsert	thread_data;
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -945,8 +1304,40 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 		}
 	} catch (...)
 	{
+
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_accept] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_accept] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 
 }
@@ -958,6 +1349,22 @@ protocol_module_cinsert::handle_client_recv(
 				const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 				const size_t recvlen )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_client_recv] : "
+									"thread_id = [%s], "
+									"recvlen = [%d]");
+
+		outform % thread_id % recvlen;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	using namespace boost::xpressive;
 
@@ -1529,8 +1936,39 @@ protocol_module_cinsert::handle_client_recv(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_recv] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_recv] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -1540,6 +1978,21 @@ protocol_module_cinsert::handle_realserver_select(
 				const boost::thread::id thread_id,
 				boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_select] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	using namespace boost::xpressive;
 
@@ -1706,9 +2159,42 @@ protocol_module_cinsert::handle_realserver_select(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_select] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_select] : "
+									"next_status = [%d], "
+									"rs_endpoint = [%s]");
+
+		outform % status % rs_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
+
 }
 
 //---------------------------------------------------------------------------------
@@ -1730,6 +2216,21 @@ protocol_module_cinsert::handle_realserver_connect(
 				boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 				size_t& datalen )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_connect] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_cinsert		thread_data;
 
@@ -2067,8 +2568,40 @@ protocol_module_cinsert::handle_realserver_connect(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connect] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connect] : "
+									"next_status = [%d], "
+									"datalen = [%d]");
+
+		outform % status % datalen;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 
 }
@@ -2079,6 +2612,23 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_connection_fail] : "
+									"thread_id = [%s], "
+									"rs_endpoint = [%s]");
+
+		outform % thread_id % rs_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 	t_session_thread_data_map_itr	thread_data_itr;
 
@@ -2107,8 +2657,39 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connection_fail] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connection_fail] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -2116,6 +2697,22 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_send] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -2215,8 +2812,39 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_send] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_send] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -2226,6 +2854,23 @@ protocol_module_cinsert::handle_sorryserver_select(
 				const boost::thread::id thread_id,
 				boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_select] : "
+									"thread_id = [%s], "
+									"sorry_endpoint = [%s]");
+
+		outform % thread_id % sorry_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -2282,8 +2927,40 @@ protocol_module_cinsert::handle_sorryserver_select(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_select] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_select] : "
+									"next_status = [%d], "
+									"sorry_endpoint = [%s]");
+
+		outform % status % sorry_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -2294,6 +2971,22 @@ protocol_module_cinsert::handle_sorryserver_connect(
 				boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 				size_t& datalen )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_connect] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 
 	edit_data	edit_data_uri;
@@ -2652,8 +3345,40 @@ protocol_module_cinsert::handle_sorryserver_connect(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connect] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connect] : "
+									"next_status = [%d], "
+									"datalen = [%d]");
+
+		outform % status % datalen;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -2663,6 +3388,23 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_connection_fail] : "
+									"thread_id = [%s], "
+									"sorry_endpoint = [%s]");
+
+		outform % thread_id % sorry_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 	t_session_thread_data_map_itr	thread_data_itr;
 
@@ -2691,8 +3433,39 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connection_fail] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connection_fail] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -2700,6 +3473,22 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_send] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -2799,8 +3588,39 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_send] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_send] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -2812,6 +3632,24 @@ protocol_module_cinsert::handle_realserver_recv(
 				const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 				const size_t recvlen )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_recv] : "
+									"thread_id = [%s], "
+									"rs_endpoint = [%s], "
+									"recvlen = [%d]");
+
+		outform % thread_id % rs_endpoint % recvlen;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	using namespace boost::xpressive;
 
 	t_session_thread_data_cinsert	thread_data;
@@ -3390,8 +4228,39 @@ protocol_module_cinsert::handle_realserver_recv(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_recv] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_recv] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -3414,6 +4283,24 @@ protocol_module_cinsert::handle_sorryserver_recv(
 				const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 				const size_t recvlen )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_recv] : "
+									"thread_id = [%s], "
+									"sorry_endpoint = [%s], "
+									"recvlen = [%d]");
+
+		outform % thread_id % sorry_endpoint % recvlen;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	using namespace boost::xpressive;
 
 	t_session_thread_data_cinsert	thread_data;
@@ -3982,8 +4869,39 @@ protocol_module_cinsert::handle_sorryserver_recv(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_recv] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_recv] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 }
 
@@ -4002,6 +4920,21 @@ protocol_module_cinsert::handle_client_connection_check(
 				boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 				size_t& datalen )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_client_connection_check] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_cinsert	thread_data;
 
@@ -4354,8 +5287,40 @@ protocol_module_cinsert::handle_client_connection_check(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_connection_check] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_connection_check] : "
+									"next_status = [%d], "
+									"datalen = [%d]");
+
+		outform % status % datalen;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 
 }
@@ -4376,6 +5341,21 @@ protocol_module_cinsert::handle_client_select(
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_client_send] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_cinsert	thread_data;
 
@@ -4520,8 +5500,39 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_send] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_send] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	status;
 
 }
@@ -4530,6 +5541,32 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_disconnect( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform_1(	"function in  : [protocol_module_cinsert::handle_client_disconnect] : "
+									"thread_id = [%s]");
+
+		outform_1 % thread_id;
+
+		putLogDebug(	0,
+						outform_1.str(),
+						__FILE__,
+						__LINE__ );
+
+		boost::format	outform_2(	"function out : [protocol_module_cinsert::handle_client_disconnect] : "
+									"next_status = [%d]");
+
+		outform_2 % FINALIZE;
+
+		putLogDebug(	0,
+						outform_2.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return	FINALIZE;
 }
 
@@ -4537,6 +5574,21 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorry_enable] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_cinsert	thread_data;
 
@@ -4723,8 +5775,38 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_enable] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_enable] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	return	status;
 
@@ -4734,6 +5816,22 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorry_disable] : "
+									"thread_id = [%s]");
+
+		outform % thread_id;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -4919,8 +6017,38 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_disable] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_disable] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	return	status;
 }
@@ -4931,6 +6059,22 @@ protocol_module_cinsert::handle_realserver_disconnect(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & rs_endpoint )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_disconnect] : "
+									"thread_id = [%s], "
+									"rs_endpoint = [%s]");
+
+		outform % thread_id % rs_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	t_session_thread_data_cinsert	thread_data;
 
@@ -5043,8 +6187,38 @@ protocol_module_cinsert::handle_realserver_disconnect(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_disconnect] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_disconnect] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	return	status;
 }
@@ -5055,6 +6229,23 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 				const boost::thread::id thread_id,
 				const boost::asio::ip::tcp::endpoint & sorry_endpoint )
 {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_disconnect] : "
+									"thread_id = [%s], "
+									"sorry_endpoint = [%s]");
+
+		outform % thread_id % sorry_endpoint;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	t_session_thread_data_cinsert	thread_data;
 
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -5167,8 +6358,38 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 		}
 	} catch (...)
 	{
+		//---------- DEBUG LOG START ------------------------------
+		if( LOG_LV_DEBUG == getloglevel())
+		{
+			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_disconnect] : "
+										"next_status = [%d]");
+	
+			outform % FINALIZE;
+	
+			putLogDebug(	0,
+							outform.str(),
+							__FILE__,
+							__LINE__ );
+		}
+		//---------- DEBUG LOG END ------------------------------
+
 		return	FINALIZE;
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_disconnect] : "
+									"next_status = [%d]");
+
+		outform % status;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	return	status;
 
