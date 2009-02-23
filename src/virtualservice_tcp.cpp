@@ -679,7 +679,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		( element.protocol_module_name != elem.protocol_module_name ) ){
 		err.setter( true, "Virtual Service does not exist." );
 		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-			boost::format formatter("out_function : void virtualservice_tcp::set_virtualservice( "
+			boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -697,7 +697,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 			err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
 			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-				boost::format formatter("out_function : void virtualservice_tcp::set_virtualservice( "
+				boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 										"const l7vs::virtualservice_element& in,"
 										"l7vs::error_code& err ) : err = %s, err.message = %s");
 				formatter % ( err ? "true" : "false") % err.get_message();
@@ -722,7 +722,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
 		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-			boost::format formatter("out_function : void virtualservice_tcp::set_virtualservice( "
+			boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
