@@ -1431,14 +1431,18 @@ namespace l7vs{
 			close_socket++;
 		}
 		if(!realserver_fond){
-			//Error not fond realserver
-			std::stringstream buf;
-			buf << "Thread ID[";
-			buf << boost::this_thread::get_id();
-			buf << "] close realserver not fond ";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
-			up_thread_exit(process_type);
-			return;
+			//not fond realserver
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] close realserver not fond";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+			module_event = protocol_module->handle_realserver_disconnect(up_thread_id,boost::asio::ip::tcp::endpoint());
 		}
 		up_thread_send_realserver_socket_map.clear();
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -2153,14 +2157,18 @@ namespace l7vs{
 			close_socket++;
 		}
 		if(!realserver_fond){
-			//Error not fond realserver
-			std::stringstream buf;
-			buf << "Thread ID[";
-			buf << boost::this_thread::get_id();
-			buf << "] close realserver not fond ";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
-			down_thread_exit(process_type);
-			return;
+			//not fond realserver
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] close realserver not fond";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+			module_event = protocol_module->handle_realserver_disconnect(down_thread_id,boost::asio::ip::tcp::endpoint());
 		}
 		down_thread_receive_realserver_socket_list.clear();
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
