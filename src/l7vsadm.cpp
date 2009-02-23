@@ -317,6 +317,10 @@ bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
 	}
 	try{
 		request.vs_element.sorry_maxconnection = boost::lexical_cast< long long >( argv[pos] );
+		if( ( 0LL > request.vs_element.sorry_maxconnection ) || ( 100000 < request.vs_element.sorry_maxconnection ) ){
+			l7vsadm_err.setter( true, "invalid sorry_maxconnection value." );
+			return false;
+		}
 		if( 0LL == request.vs_element.sorry_maxconnection )
 			request.vs_element.sorry_maxconnection = LLONG_MAX;		// clear value
 	}
