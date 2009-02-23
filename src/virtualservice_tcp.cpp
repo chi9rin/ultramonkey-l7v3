@@ -526,6 +526,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 	//stop main loop
 	stop();
 
+	//unload ProtocolModule
 	if( protomod ){
 		//finalize ProtocolModule
 		protomod->finalize();
@@ -539,7 +540,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 		schedmod = NULL;
 	}
 
-	//セッションプール開放
+	//release sessions
 	boost::mutex::scoped_lock lk( sessions_mutex );
 
 	for( session_map_type::iterator itr = pool_sessions.begin();
@@ -696,8 +697,15 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 	}
 
 	//update values
-	element.qos_upstream	= elem.qos_upstream;
-	element.qos_downstream	= elem.qos_downstream;
+	if( ULLONG_MAX == elem.qos_upstream )
+		element.qos_upstream	= 0ULL;
+	else if( 0ULL != elem.qos_upstream )
+		element.qos_upstream	= elem.qos_upstream;
+	if( ULLONG_MAX == elem.qos_downstream )
+		element.qos_downstream	= 0ULL;
+	else if( 0ULL != elem.qos_downstream )
+		element.qos_downstream	= elem.qos_downstream;
+
 	//if endpoint of SorryServer equal 255.255.255.255:0,not update
 	if( elem.sorry_endpoint !=
 			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) ) ){
@@ -724,7 +732,10 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			for( session_map_type::iterator itr = active_sessions.begin();
 				itr != active_sessions.end();
 				++itr ){
-				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
+				if( INT_MAX == elem.sorry_flag )
+					itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
+				else if( 0 != elem.sorry_flag )
+					itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 			}
 		}
 	}
