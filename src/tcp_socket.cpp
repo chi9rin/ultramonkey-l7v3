@@ -46,24 +46,26 @@ namespace l7vs{
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::connect", __FILE__, __LINE__ );
 		
 		boost::mutex::scoped_lock scope_lock(socket_mutex);
-		my_socket.connect(connect_endpoint,ec);
-		if(!ec){
-			open_flag = true;
-			//----Debug log----------------------------------------------------------------------
-			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] tcp_socket::connect [";
-				buf << connect_endpoint;
-				buf << "]";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		
+		if(!open_flag){
+			my_socket.connect(connect_endpoint,ec);
+			if(!ec){
+				open_flag = true;
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] tcp_socket::connect [";
+					buf << connect_endpoint;
+					buf << "]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
+			}else{
+				open_flag = false;
 			}
-			//----Debug log----------------------------------------------------------------------
-		}else{
-			open_flag = false;
 		}
-			
 		return open_flag;
 	}
 	
