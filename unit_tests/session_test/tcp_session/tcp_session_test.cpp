@@ -9075,8 +9075,22 @@ void up_thread_all_realserver_disconnect_test(){
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
 	
-	// unit_test [5] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check
-	std::cout << "[5] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check" << std::endl;
+	// unit_test [5] up_thread_all_realserver_disconnect realserver not fond check
+	std::cout << "[5] up_thread_all_realserver_disconnect realserver not fond check" << std::endl;
+	proto_test.handle_realserver_disconnect_thread_id = boost::thread::id();
+	proto_test.handle_realserver_disconnect_rs_endpoint_list.clear();
+	test_obj.up_thread_client_disconnect_call_check = false;
+
+	test_obj.test_up_all_call();
+
+	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == proc_id);
+	BOOST_CHECK(!proto_test.handle_realserver_disconnect_rs_endpoint_list.empty());
+	BOOST_CHECK( *(proto_test.handle_realserver_disconnect_rs_endpoint_list.begin()) == boost::asio::ip::tcp::endpoint() );
+	test_obj.next_up_function_call();
+	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
+
+	// unit_test [6] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check
+	std::cout << "[6] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_map.insert(*ref_rs_it);
@@ -9088,8 +9102,8 @@ void up_thread_all_realserver_disconnect_test(){
 	sleep(1);
 	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == boost::thread::id());
 	
-	// unit_test [6] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check
-	std::cout << "[6] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check" << std::endl;
+	// unit_test [7] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check
+	std::cout << "[7] up_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check" << std::endl;
 	boost::thread::id test_id = test_thread.get_id();
 	test_obj.set_up_thread_id(test_id);
 	test_obj.mutex_unlock();
@@ -9097,13 +9111,13 @@ void up_thread_all_realserver_disconnect_test(){
 	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == test_id);
 	test_thread.join();
 	
-	// unit_test [7] up_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check
-	std::cout << "[7] up_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check" << std::endl;
+	// unit_test [8] up_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check
+	std::cout << "[8] up_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check" << std::endl;
 	BOOST_CHECK(test_obj.mutex_trylock());
 	test_obj.mutex_unlock();
-	
-	// unit_test [8] up_thread_all_realserver_disconnect not fond function error check
-	std::cout << "[8] up_thread_all_realserver_disconnect not fond function error check" << std::endl;
+
+	// unit_test [9] up_thread_all_realserver_disconnect not fond function error check
+	std::cout << "[9] up_thread_all_realserver_disconnect not fond function error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_map.insert(*ref_rs_it);
@@ -9119,8 +9133,8 @@ void up_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [9] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
-	std::cout << "[9] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [10] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
+	std::cout << "[10] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_map.insert(*ref_rs_it);
@@ -9136,8 +9150,8 @@ void up_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [10] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check
-	std::cout << "[10] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check" << std::endl;
+	// unit_test [11] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check
+	std::cout << "[11] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check" << std::endl;
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -9147,8 +9161,8 @@ void up_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [11] up_thread_all_realserver_disconnect protocol_module NULL error check
-	std::cout << "[11] up_thread_all_realserver_disconnect protocol_module NULL error check" << std::endl;
+	// unit_test [12] up_thread_all_realserver_disconnect protocol_module NULL error check
+	std::cout << "[12] up_thread_all_realserver_disconnect protocol_module NULL error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_map.insert(*ref_rs_it);
@@ -9268,9 +9282,23 @@ void down_thread_all_realserver_disconnect_test(){
 	std::cout << "[4] down_thread_all_realserver_disconnect update up_thread_next_call_function check" << std::endl;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
+
+	// unit_test [5] down_thread_all_realserver_disconnect realserver not fond check
+	std::cout << "[5] down_thread_all_realserver_disconnect realserver not fond check" << std::endl;
+	proto_test.handle_realserver_disconnect_thread_id = boost::thread::id();
+	proto_test.handle_realserver_disconnect_rs_endpoint_list.clear();
+	test_obj.down_thread_client_disconnect_call_check = false;
+
+	test_obj.test_down_all_call();
+
+	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == proc_id);
+	BOOST_CHECK(!proto_test.handle_realserver_disconnect_rs_endpoint_list.empty());
+	BOOST_CHECK( *(proto_test.handle_realserver_disconnect_rs_endpoint_list.begin()) == boost::asio::ip::tcp::endpoint() );
+	test_obj.next_down_function_call();
+	BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
 	
-	// unit_test [5] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check
-	std::cout << "[5] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check" << std::endl;
+	// unit_test [6] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check
+	std::cout << "[6] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex lock check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_list.push_back(*ref_rs_it);
@@ -9282,8 +9310,8 @@ void down_thread_all_realserver_disconnect_test(){
 	sleep(1);
 	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == boost::thread::id());
 	
-	// unit_test [6] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check
-	std::cout << "[6] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check" << std::endl;
+	// unit_test [7] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check
+	std::cout << "[7] down_thread_all_realserver_disconnect handle_realserver_disconnect mutex unlock run check" << std::endl;
 	boost::thread::id test_id = test_thread.get_id();
 	test_obj.set_down_thread_id(test_id);
 	test_obj.mutex_unlock();
@@ -9291,13 +9319,13 @@ void down_thread_all_realserver_disconnect_test(){
 	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == test_id);
 	test_thread.join();
 	
-	// unit_test [7] down_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check
-	std::cout << "[7] down_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check" << std::endl;
+	// unit_test [8] down_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check
+	std::cout << "[8] down_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check" << std::endl;
 	BOOST_CHECK(test_obj.mutex_trylock());
 	test_obj.mutex_unlock();
 	
-	// unit_test [8] down_thread_all_realserver_disconnect not fond function error check
-	std::cout << "[8] down_thread_all_realserver_disconnect not fond function error check" << std::endl;
+	// unit_test [9] down_thread_all_realserver_disconnect not fond function error check
+	std::cout << "[9] down_thread_all_realserver_disconnect not fond function error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_list.push_back(*ref_rs_it);
@@ -9313,8 +9341,8 @@ void down_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [9] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
-	std::cout << "[9] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [10] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
+	std::cout << "[10] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_list.push_back(*ref_rs_it);
@@ -9330,8 +9358,8 @@ void down_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 		
-	// unit_test [10] down_thread_all_realserver_disconnect protocol_module NULL error check
-	std::cout << "[10] down_thread_all_realserver_disconnect protocol_module NULL error check" << std::endl;
+	// unit_test [11] down_thread_all_realserver_disconnect protocol_module NULL error check
+	std::cout << "[11] down_thread_all_realserver_disconnect protocol_module NULL error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_list.push_back(*ref_rs_it);
