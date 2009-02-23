@@ -1,3 +1,27 @@
+/*
+ * @file  sessionless_ut.cpp
+ * @brief protocol module sessionless test file.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include <boost/test/included/unit_test.hpp>
 #include "../../module/protocol/http_protocol_module_base.cpp"
 #include "../../module/protocol/protocol_module_sessionless.cpp"
@@ -4773,8 +4797,8 @@ void handle_sorryserver_select_test(){
 
     //送信先endpointにendpointを設定する
     BOOST_CHECK_EQUAL(dataup->target_endpoint, ep);
-    //遷移先ステータス status = SORRYSERVER_CONNECT
-    BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
+    //遷移先ステータス status = CLIENT_RECV
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 
     cout << "[211]------------------------------------------" << endl;
     //unit_test[211] 	session_thread_data_map中に上りスレッド中にThreadID対応のデータがない
@@ -4807,8 +4831,8 @@ void handle_sorryserver_select_test(){
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
     //送信先endpointにendpointを設定する
     BOOST_CHECK_EQUAL(dataup->target_endpoint, ep);
-    //遷移先ステータス status = SORRYSERVER_CONNECT
-    BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
+    //遷移先ステータス status = CLIENT_RECV
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 }
 
 
@@ -4847,8 +4871,8 @@ void handle_sorryserver_select_test_thread(){
         boost::mutex::scoped_lock sclock(check_mutex);
         //送信先endpointにendpointを設定する
         BOOST_CHECK_EQUAL(dataup->target_endpoint, ep);
-        //遷移先ステータス status = SORRYSERVER_CONNECT
-        BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
+        //遷移先ステータス status = CLIENT_RECV
+        BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
     }
 }
 
@@ -11148,7 +11172,7 @@ void handle_sorry_enable_test() {
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
     cout << "[486]------------------------------------------" << endl;
-	// unit_test[486] endpoint対応のrecive_dataなし場合,status = FINALIZE
+	// unit_test[486] 下りスレッドのendpoint対応のrecive_dataなし場合,status = SORRYSERVER_RECV
 	init_send_status(sendstatus);
 	init_recive_data(receivedata);
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
@@ -11156,7 +11180,7 @@ void handle_sorry_enable_test() {
 						string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
 						receivedata));
 	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
+	BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
     cout << "[487]------------------------------------------" << endl;
@@ -11559,7 +11583,7 @@ void handle_sorry_disable_test(){
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
     cout << "[506]------------------------------------------" << endl;
-	// unit_test[506] endpoint対応のrecive_dataなし場合,status = FINALIZE
+	// unit_test[506] 下りスレッドのendpoint対応のrecive_dataなし場合,status = REALSERVER_RECV
 	init_send_status(sendstatus);
 	init_recive_data(receivedata);
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
@@ -11567,7 +11591,7 @@ void handle_sorry_disable_test(){
 						string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
 						receivedata));
 	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
+	BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
 	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
     cout << "[507]------------------------------------------" << endl;

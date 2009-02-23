@@ -1,3 +1,27 @@
+/*
+ * @file  sslid_session_data_processor_test.cpp
+ * @brief sslid session data processor test file.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "sslid_to_be_test_file.h"
 
 using namespace boost::unit_test;
@@ -481,6 +505,7 @@ public:
 		boost::asio::ip::tcp::endpoint old_saved_endpoint;
 		boost::asio::ip::tcp::endpoint new_saved_endpoint;
 		std::multimap<time_t, std::string>::iterator lasttime_session_map_iterator;
+		std::multimap<time_t, std::string>::iterator delete_item_iterator;
 		sslid_replication_temp_data temp_list_data;
 		sslid_replication_data_processor_replacement *this_replication_data_processor =
 			dynamic_cast<sslid_replication_data_processor_replacement *> (this->replication_data_processor);
@@ -545,6 +570,7 @@ public:
 		BOOST_CHECK_EQUAL(this->session_lasttime_map[session_id], write_time);
 		// lasttime_session_map is setted check
 		BOOST_CHECK_EQUAL(lasttime_session_map_iterator->second, session_id);
+		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 1u);
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
 		// the item which put into the temp_list check
@@ -568,6 +594,7 @@ public:
 		this->lasttime_session_map.insert(std::make_pair(last_time, temp_session_id));
 		result = this->write_session_data(session_id, new_saved_endpoint, write_time);
 		lasttime_session_map_iterator = this->lasttime_session_map.find(write_time);
+		delete_item_iterator = this->lasttime_session_map.begin();
 		// get the item which put into the temp_list
 		this_replication_data_processor->to_get_from_temp_list(temp_list_data);
 		// session_endpoint_map is setted check
@@ -576,6 +603,13 @@ public:
 		BOOST_CHECK_EQUAL(this->session_lasttime_map[session_id], write_time);
 		// lasttime_session_map is setted check
 		BOOST_CHECK_EQUAL(lasttime_session_map_iterator->second, session_id);
+		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 2u);
+		for(;delete_item_iterator != this->lasttime_session_map.end(); delete_item_iterator++){
+			if(delete_item_iterator->first == last_time
+					&& delete_item_iterator->second == session_id){
+				BOOST_ERROR("error: write_session_data");
+			}
+		}
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
 		// the item which put into the temp_list check
@@ -602,6 +636,7 @@ public:
 		this->lasttime_session_map.insert(std::make_pair(last_time, temp_session_id1));
 		result = this->write_session_data(session_id, new_saved_endpoint, write_time);
 		lasttime_session_map_iterator = this->lasttime_session_map.find(write_time);
+		delete_item_iterator = this->lasttime_session_map.begin();
 		// get the item which put into the temp_list
 		this_replication_data_processor->to_get_from_temp_list(temp_list_data);
 		// session_endpoint_map is setted check
@@ -610,6 +645,13 @@ public:
 		BOOST_CHECK_EQUAL(this->session_lasttime_map[session_id], write_time);
 		// lasttime_session_map is setted check
 		BOOST_CHECK_EQUAL(lasttime_session_map_iterator->second, session_id);
+		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 3u);
+		for(;delete_item_iterator != this->lasttime_session_map.end(); delete_item_iterator++){
+			if(delete_item_iterator->first == last_time
+					&& delete_item_iterator->second == session_id){
+				BOOST_ERROR("error: write_session_data");
+			}
+		}
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
 		// the item which put into the temp_list check
@@ -1044,11 +1086,13 @@ public:
 		unsigned short port3 = 333;
 		unsigned short port4 = 444;
 		unsigned short port5 = 555;
+		unsigned short port6 = 666;
 		time_t last_time1 = time(0);
 		time_t last_time2 = last_time1 - 10;
 		time_t last_time3 = last_time2 - 10;
 		time_t last_time4 = last_time3 - 10;
 		time_t last_time5 = last_time4 - 10;
+		time_t last_time6 = last_time5 - 10;
 		std::map<std::string, boost::asio::ip::tcp::endpoint>::iterator it1;
 		std::map<std::string, time_t>::iterator it2;
 		std::multimap<time_t, std::string>::iterator it3;
@@ -1101,6 +1145,15 @@ public:
 		(first_real_data + 4)->valid = 1;
 		(first_real_data + 4)->realserver_port = port5;
 		(first_real_data + 4)->last_time = last_time5;
+
+		// set the real data area(the sixth data)
+		std::string session_id6 = "00000000000000000000000000000000";
+		std::string realserver_ip6 = "0.0.0.0";
+		memcpy((first_real_data + 5)->session_id, session_id6.c_str(), session_id6.length());
+		memcpy((first_real_data + 5)->realserver_ip, realserver_ip6.c_str(), realserver_ip6.length());
+		(first_real_data + 5)->valid = 1;
+		(first_real_data + 5)->realserver_port = port6;
+		(first_real_data + 5)->last_time = last_time6;
 
     cout << "[35]------------------------------------------" << endl;
 		// unit_test[35] パラメータがNULLの場合、戻り値が異常（-1）で設定する。
@@ -1372,6 +1425,32 @@ public:
 		it1 = this->session_endpoint_map.begin();
 		BOOST_CHECK_EQUAL(it1->second.address().to_string(), realserver_ipv6_ip1);
 		BOOST_CHECK_EQUAL(it1->second.port(), port1);
+
+	cout << "[43]------------------------------------------" << endl;
+		// unit_test[43] session_idが"00000000000000000000000000000000"の場合、取得のデータが正しいです。
+		result = 10;
+		this->maxlist = 1;
+		this->session_endpoint_map.clear();
+		this->session_lasttime_map.clear();
+		this->lasttime_session_map.clear();
+		result = this->read_session_data_from_replication_area(first_real_data + 5);
+		it1 = this->session_endpoint_map.begin();
+		it2 = this->session_lasttime_map.begin();
+		it3 = this->lasttime_session_map.begin();
+		BOOST_CHECK_EQUAL(result, 0);
+		// session_endpoint_map check
+		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 1u);
+		BOOST_CHECK_EQUAL(it1->first, session_id6);
+		BOOST_CHECK_EQUAL(it1->second.address().to_string(), realserver_ip6);
+		BOOST_CHECK_EQUAL(it1->second.port(), port6);
+		// session_lasttime_map check(only maxlist
+		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 1u);
+		BOOST_CHECK_EQUAL(it2->first, session_id6);
+		BOOST_CHECK_EQUAL(it2->second, last_time6);
+		// lasttime_session_map check
+		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 1u);
+		BOOST_CHECK_EQUAL(it3->first, last_time6);
+		BOOST_CHECK_EQUAL(it3->second, session_id6);
 	}
 };
 

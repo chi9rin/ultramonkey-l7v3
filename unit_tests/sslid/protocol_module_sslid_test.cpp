@@ -1,3 +1,27 @@
+/*
+ * @file  protocol_module_sslid_test.cpp
+ * @brief protocol module sslid test file.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "sslid_to_be_test_file.h"
 #include "../../include/protocol_module_base.h"
 #include <string.h>
@@ -2716,14 +2740,14 @@ void handle_client_recv_test() {
     }
 
     cout << "[143]------------------------------------------" << endl;
-    // unit_test[143] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
+    // unit_test[143] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 12
     // unit_test[143] 且つheck_ssl_record_sendable()の戻り値が０（送信可能）の場合
     // unit_test[143] 戻り値がREALSERVER_SELECTで設定する。
     {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
         up_thread_data->data_size = 3u;
-        up_thread_data->data_begain_offset = 0u;
+        up_thread_data->data_begain_offset = 12u;
         up_thread_data->current_record_rest_size = 0u;
         up_thread_data->data_buffer[12] = 0x16;
         up_thread_data->data_buffer[13] = 0x03;
@@ -4544,6 +4568,7 @@ void handle_client_connection_check_test() {
         down_thread_data->current_record_rest_size = 10u;
 	down_thread_data->hello_message_flag = true;
         down_thread_data->data_size = 76u;
+        down_thread_data->data_buffer[43] = 0x00;
         down_thread_data->data_begain_offset = 0u;
         this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
@@ -4565,6 +4590,7 @@ void handle_client_connection_check_test() {
 	down_thread_data->hello_message_flag = true;
         down_thread_data->data_size = 76u;
         down_thread_data->data_begain_offset = 10u;
+        down_thread_data->data_buffer[53] = 0x00;
         this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
         status = this->handle_client_connection_check(boost::this_thread::get_id(),
                 sendbuffer, datalen);

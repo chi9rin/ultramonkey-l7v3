@@ -1,3 +1,27 @@
+/*
+ * @file  ssl_protocol_module_base_test.cpp
+ * @brief ssl protocol module base test file.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "sslid_to_be_test_file.h"
 
 using namespace std;
@@ -1714,6 +1738,94 @@ public:
 
 	}
 
+	void dump_session_id_test(){
+	struct check_condition
+	{
+		char memory[256];
+		size_t memory_size;
+		std::string out_string;
+	};
+
+	// テスト条件（正常系）：
+	check_condition condition_empty_string[12] =
+	{
+	    {"a", 0, ""},
+	    {"a", 1, "61"},
+	    {"ab", 2, "6162"},
+	    {"abc", 3, "616263"},
+	    {"abcd", 4, "61626364"},
+	    {"abcde", 5, "6162636465"},
+	    {"abcdefghijklmnopqrstuvwxyzABCDEF", 32,
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A414243444546"},
+	    {"abcdefghijklmnopqrstuvwxyzABCDEFG", 33,
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A41424344454647"},
+	    {"abcdefghijklmnopqrstuvwxyzABCDEFGH", 34,
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A4142434445464748"},
+	    {"abcdefghijklmnopqrstuvwxyzABCDEFGHI", 35,
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A414243444546474849"},
+	    {"abcdefghijklmnopqrstuvwxyzABCDEFabcdefghijklmnopqrstuvwxyzABCDEF", 64,
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A414243444546"
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A414243444546"},
+	    {"abcdefghijklmnopqrstuvwxyzABCDEFabcdefghijklmnopqrstuvwxyzABCDEFG", 65,
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A414243444546"
+	    "6162636465666768696A6B6C6D6E6F707172737475767778797A41424344454647"},
+	};
+
+	// unit_test[1]　ヌルポイントのテスト（異常系）
+    std::string out_string = "123";
+    std::string out_string_src(out_string);
+    protocol_module_base::dump_memory(NULL, 100, out_string);
+    BOOST_CHECK_EQUAL(out_string, out_string_src);
+    std::cout << "out_string = \n" <<  out_string << std::endl;
+    std::cout << "unit_test[1]-----------------------------\n" << std::endl;
+
+	// unit_test[2]　ポイントの内容のサイズ　＜　データサイズのテスト（異常系）
+    out_string = "";
+	char* less_data = "abcdefghij";
+    this->dump_session_id(less_data, 65, out_string);
+    BOOST_CHECK_EQUAL(out_string.size(), 130u );
+    std::cout << "out_string = \n" <<  out_string << std::endl;
+    std::cout << "unit_test[2]-----------------------------\n" << std::endl;
+
+	// 正常系テスト
+    for (size_t i = 0; i < 2; i++)
+    {
+        for (size_t j = 0; j < 12; j++)
+        {
+            out_string_src = "";
+
+            if (i == 0)
+            {
+                out_string = "";
+            }
+            else
+            {
+                out_string = "test";
+                out_string_src = out_string;
+            }
+            this->dump_session_id(condition_empty_string[j].memory,
+                                              condition_empty_string[j].memory_size,
+                                              out_string);
+            BOOST_CHECK_EQUAL(out_string, out_string_src + condition_empty_string[j].out_string);
+
+            std::cout << "condition[" << j << "].memory = " <<  condition_empty_string[j].memory << std::endl;
+            std::cout << "condition[" << j << "].memory_size = " <<  condition_empty_string[j].memory_size << std::endl;
+            std::cout << "condition[" << j << "].out_string = " <<  condition_empty_string[j].out_string << std::endl;
+
+            std::cout << "out_string = " <<  out_string << std::endl;
+
+            if ((j + 12 * i) >= 10)
+            {
+                std::cout << "unit_test[" << j + 12 * i + 3 << "]------------------------------------\n" << std::endl;
+            }
+            else
+            {
+                std::cout << "unit_test[" << j + 12 * i + 3 << "]-------------------------------------\n" << std::endl;
+            }
+        }
+    }
+    }
+
 };
 
 void get_ssl_session_id_test() {
@@ -1726,9 +1838,15 @@ void check_ssl_record_sendable_test() {
 	obj.check_ssl_record_sendable_test();
 }
 
+void dump_session_id_test() {
+    ssl_protocol_module_base_test_class obj;
+    obj.dump_session_id_test();
+}
+
 void ssl_protocol_module_base_test_main() {
 	test_suite* ts = BOOST_TEST_SUITE( "ssl_protocol_module_base_ut" );
 	ts->add(BOOST_TEST_CASE( &get_ssl_session_id_test ));
 	ts->add(BOOST_TEST_CASE( &check_ssl_record_sendable_test ));
+	ts->add(BOOST_TEST_CASE( &dump_session_id_test ));
 	framework::master_test_suite().add(ts);
 }

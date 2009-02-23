@@ -252,7 +252,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
             else
             {
                 // restore session data from replication direct
-                head->size = maxlist * sizeof(sslid_replication_data_header);
+                head->size = maxlist * sizeof(sslid_replication_data);
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == getloglevel())
                 {
@@ -263,6 +263,8 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                     putLogDebug(30149, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
+                replication_area = reinterpret_cast<sslid_replication_data*>(sslid_replication_area_begain +
+                                    head->offset);
             }
         }
 

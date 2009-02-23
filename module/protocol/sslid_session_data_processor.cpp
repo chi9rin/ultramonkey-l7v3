@@ -293,8 +293,24 @@ int sslid_session_data_processor::write_session_data(
         if (itendpoint != session_endpoint_map.end())
         {
             // endpoint exist
+            time_t oldtime = session_lasttime_map[session_id];
             session_endpoint_map[session_id] = endpoint;
             session_lasttime_map[session_id] = now_time;
+            // delete session from the map
+            std::multimap<time_t, std::string>::iterator itbegin;
+            std::multimap<time_t, std::string>::iterator itend;
+            itbegin = lasttime_session_map.lower_bound(oldtime);
+            itend = lasttime_session_map.upper_bound(oldtime);
+
+            while (itbegin != itend)
+            {
+                if (itbegin->first == oldtime && itbegin->second == session_id)
+                {
+                    lasttime_session_map.erase(itbegin);
+                    break;
+                }
+                ++itbegin;
+            }
             lasttime_session_map.insert(std::make_pair(now_time, session_id));
 
             sclock.unlock();

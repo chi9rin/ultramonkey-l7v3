@@ -1,3 +1,27 @@
+/*
+ * @file  sslid_replication_data_processor_test.cpp
+ * @brief sslid replication data processor test file.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include "sslid_to_be_test_file.h"
 
 using namespace boost::unit_test;
@@ -323,9 +347,9 @@ public:
 		// unit_test[6] sslid_replication_area_size < 0, 例外が発生する。
 		exception_occured = false;
 		try {
-			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			memset(replication_data_area, 0, 128*sizeof(l7vs::sslid_replication_data_header));
 			for(int i = 0; i < 128; i++){
-				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				l7vs::sslid_replication_data_header* temp= reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + i;
 				temp->size = static_cast<size_t>(2 * sizeof(l7vs::sslid_replication_data));
 			}
 			l7vs::sslid_replication_data_processor test_object2(2,
@@ -341,9 +365,9 @@ public:
 	cout << "[7]------------------------------------------" << endl;
 		// unit_test[7] sslid_replication_area_sizeが0の場合, 例外が発生しない。
 		try {
-			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			memset(replication_data_area, 0, 128*sizeof(l7vs::sslid_replication_data_header));
 			for(int i = 0; i < 128; i++){
-				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				l7vs::sslid_replication_data_header* temp= reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + i;
 				temp->size = static_cast<size_t>(2 * sizeof(l7vs::sslid_replication_data));
 			}
 			l7vs::sslid_replication_data_processor test_object2(2,
@@ -375,14 +399,50 @@ public:
 				replication_inputLogInfo, replication_inputLogDebug);
 		// the virtual service's size is resetted, check it
 		size_t expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+		size_t expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
+		sslid_replication_data* expecting_replication_data_area = reinterpret_cast<sslid_replication_data*>(header_start_address + first_header->offset);
 		BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
+		BOOST_CHECK_EQUAL((first_header+1)->offset, expecting_offset);
+		BOOST_CHECK_EQUAL(this->replication_area, expecting_replication_data_area);
 
 	cout << "[9]------------------------------------------" << endl;
-		// unit_test[9] virtual service対応のreplicationデータヘッダーの情報を再設定して、ヘッダーエリアがfullの場合,処理を行わない。
+		// unit_test[9] virtual service が存在して、且つvirtual serviceのデータエリアが実際サイズより小さい、
+		// unit_test[9] 且つsslid replicationエリアが足りないの場合、処理を行わない。
+		virtual_service_ip = "192.168.120.102";
+		memset(replication_data_area, 0, data_area_size);
+		test_virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
+		test_virtual_service_endpoint.port(80);
+		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(),virtual_service_ip.length());
+		first_header->virtualserver_port = 80;
+		first_header->size = static_cast<size_t> ((max_list_size - 1) * sizeof(l7vs::sslid_replication_data));
+		first_header->offset = static_cast<size_t> (real_data_start_address - header_start_address);
+		unsigned old_port = first_header->virtualserver_port;
+		std::string old_virtual_service_ip(first_header->virtualserver_ip);
+		size_t old_size = first_header->size;
+		size_t old_offset = first_header->offset;
+		sslid_replication_data_header temp_old_data;
+		memcpy(&temp_old_data, first_header + 1, sizeof(sslid_replication_data_header));
+		l7vs::sslid_replication_data_processor temp_test_object(10000,
+				replication_data_area, 20,
+				test_virtual_service_endpoint, replication_ingetloglevel,
+				replication_inputLogFatal, replication_inputLogError,
+				replication_inputLogWarn, replication_inputLogInfo,
+				replication_inputLogDebug);
+		// first_header not changed check
+		std::string new_virtual_service_ip(first_header->virtualserver_ip);
+		BOOST_CHECK_EQUAL(new_virtual_service_ip, old_virtual_service_ip);
+		BOOST_CHECK_EQUAL(first_header->virtualserver_port, old_port);
+		BOOST_CHECK_EQUAL(first_header->size, old_size);
+		BOOST_CHECK_EQUAL(first_header->offset, old_offset);
+		int compare_result = memcmp(first_header + 1, &temp_old_data, sizeof(sslid_replication_data_header));
+		BOOST_CHECK_EQUAL(compare_result, 0);
+
+	cout << "[10]------------------------------------------" << endl;
+		// unit_test[10] virtual service対応のreplicationデータヘッダーの情報を再設定して、ヘッダーエリアがfullの場合,処理を行わない。
 		try {
-			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			memset(replication_data_area, 0, 128*sizeof(l7vs::sslid_replication_data_header));
 			for(int i = 0; i < 128; i++){
-				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				l7vs::sslid_replication_data_header* temp= reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + i;
 				temp->size = sizeof(l7vs::sslid_replication_data);
 			}
 			memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
@@ -399,9 +459,9 @@ public:
 			BOOST_ERROR("exception: sslid_replication_data_processor");
 		}
 
-	cout << "[10]------------------------------------------" << endl;
-		// unit_test[10] virtual service対応のreplicationデータヘッダーの情報を再設定する時, ヘッダーエリアがfullでない場合
-		// unit_test[10] replicationデータヘッダーの情報を変更する。
+	cout << "[11]------------------------------------------" << endl;
+		// unit_test[11] virtual service対応のreplicationデータヘッダーの情報を再設定する時, ヘッダーエリアがfullでない場合
+		// unit_test[11] replicationデータヘッダーの情報を変更する。
 		memset(replication_data_area, 0, data_area_size);
 		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
 		first_header->virtualserver_port = 80;
@@ -416,40 +476,52 @@ public:
 		// the virtual service information's size is resized, get it
 		expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
 		// the virtual service information's offset is resized, get it
-		size_t expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
+		expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
+		expecting_replication_data_area = reinterpret_cast<sslid_replication_data*>(header_start_address + first_header->offset);
 		// size check
 		BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
 		// offset check
 		BOOST_CHECK_EQUAL((first_header+1)->offset, expecting_offset);
+		BOOST_CHECK_EQUAL(this->replication_area, expecting_replication_data_area);
 
-	cout << "[11]------------------------------------------" << endl;
-		// unit_test[11] virtual service対応のreplicationデータヘッダーが存在しなくて、且つヘッダーエリアがfullでなく、且つ
-		// unit_test[11] replicationデータエリアの領域が足りない場合、処理を行わない。
+	cout << "[12]------------------------------------------" << endl;
+		// unit_test[12] virtual service対応のreplicationデータヘッダーが存在しなくて、且つヘッダーエリアがfullでなく、且つ
+		// unit_test[12] replicationデータエリアの領域が足りない場合、処理を行わない。
 		try {
-			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			memset(replication_data_area, 0, 128*sizeof(l7vs::sslid_replication_data_header));
 			std::string temp_virtual_service_ip = "255.255.255.255";
-			for(int i = 0; i < 128; i++){
-				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
-				temp->size = static_cast<size_t>((max_list_size + 1) * sizeof(l7vs::sslid_replication_data));
+			test_virtual_service_endpoint.address(boost::asio::ip::address::from_string("192.168.120.102"));
+			test_virtual_service_endpoint.port(90);
+			for(int i = 0; i < 127; i++){
+				l7vs::sslid_replication_data_header* temp= reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + i;
+				temp->size = 0;
+				temp->virtualserver_port = 80;
 				memcpy(temp->virtualserver_ip, temp_virtual_service_ip.c_str(), temp_virtual_service_ip.length());
-				if(i == 127) {
-					temp->size = 0;
-				}
 			}
+			sslid_replication_data_header old_data;
+			memcpy(&old_data, reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + 127, sizeof(sslid_replication_data_header));
 			l7vs::sslid_replication_data_processor test_object6(
-					max_list_size, replication_data_area,
-					SECTION_NUMBER, test_virtual_service_endpoint,
+					10000, replication_data_area,
+					20, test_virtual_service_endpoint,
 					replication_ingetloglevel, replication_inputLogFatal,
 					replication_inputLogError, replication_inputLogWarn,
 					replication_inputLogInfo, replication_inputLogDebug);
+			compare_result = memcmp(reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + 127, &old_data, sizeof(sslid_replication_data_header));
+			BOOST_CHECK_EQUAL(compare_result, 0);
 		} catch (...) {
 			BOOST_ERROR("exception: sslid_replication_data_processor");
 		}
 
-	cout << "[12]------------------------------------------" << endl;
-		// unit_test[12] virtual service対応のreplicationデータヘッダーが存在しなくて、且つreplicationデータエリアの領域が足りる場合、
-		// unit_test[12] ヘッダーエリアに、virtual serviceを追加する。
-		memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+	cout << "[13]------------------------------------------" << endl;
+		// unit_test[13] virtual service対応のreplicationデータヘッダーが存在して、且つreplicationデータエリアの領域が足りる場合、
+		// unit_test[13] ヘッダーエリアに、virtual serviceを追加する。
+		memset(replication_data_area, 0, 128*sizeof(l7vs::sslid_replication_data_header));
+		test_virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
+		test_virtual_service_endpoint.port(80);
+		memcpy(first_header->virtualserver_ip, virtual_service_ip.c_str(), virtual_service_ip.length());
+		first_header->virtualserver_port = 80;
+		first_header->offset = static_cast<size_t>(real_data_start_address - header_start_address);
+		first_header->size = (max_list_size + 1) * sizeof(sslid_replication_data);
 		l7vs::sslid_replication_data_processor test_object7(
 				max_list_size, replication_data_area,
 				SECTION_NUMBER, test_virtual_service_endpoint,
@@ -458,18 +530,21 @@ public:
 				replication_inputLogInfo, replication_inputLogDebug);
 		expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
 		expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address);
+		expecting_replication_data_area = reinterpret_cast<sslid_replication_data*>(real_data_start_address);
 		// session information's size check
 		BOOST_CHECK_EQUAL(first_header->size, expecting_size);
 		// session information's offset check
 		BOOST_CHECK_EQUAL(first_header->offset, expecting_offset);
+		// replication_area check
+		BOOST_CHECK_EQUAL(replication_area, expecting_replication_data_area);
 
-	cout << "[13]------------------------------------------" << endl;
-		// unit_test[13] virtual serviceが存在しなくて、且つヘッダーエリアがfullの場合,処理を行わない。
+	cout << "[14]------------------------------------------" << endl;
+		// unit_test[14] virtual serviceが存在しなくて、且つヘッダーエリアがfullの場合,処理を行わない。
 		try {
-			memset(replication_data_area, 0, 128*sizeof(struct l7vs::sslid_replication_data_header));
+			memset(replication_data_area, 0, 128*sizeof(l7vs::sslid_replication_data_header));
 			std::string temp_virtual_service_ip = "255.255.255.255";
 			for(int i = 0; i < 128; i++){
-				l7vs::sslid_replication_data_header* temp= ((l7vs::sslid_replication_data_header*)replication_data_area) + i;
+				l7vs::sslid_replication_data_header* temp= reinterpret_cast<sslid_replication_data_header*>(replication_data_area) + i;
 				temp->size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
 				memcpy(temp->virtualserver_ip, temp_virtual_service_ip.c_str(), temp_virtual_service_ip.length());
 			}
@@ -483,9 +558,9 @@ public:
 			BOOST_ERROR("exception: sslid_replication_data_processor");
 		}
 
-	cout << "[14]------------------------------------------" << endl;
-		// unit_test[14] virtual serviceのipがipv6で、virtual serviceが存在して、且つ
-		// unit_test[14] virtual service対応のデータ領域が足りない場合、virtual service対応のreplicationデータヘッダーの情報を再設定する。
+	cout << "[15]------------------------------------------" << endl;
+		// unit_test[15] virtual serviceのipがipv6で、virtual serviceが存在して、且つ
+		// unit_test[15] virtual service対応のデータ領域が足りない場合、virtual service対応のreplicationデータヘッダーの情報を再設定する。
 		virtual_service_ip = "abcd:21d0:8936:4866:eefe:567d:3a4b:1230";
 		memset(replication_data_area, 0, data_area_size);
 		test_virtual_service_endpoint.address(boost::asio::ip::address::from_string(virtual_service_ip));
@@ -502,7 +577,11 @@ public:
 				replication_inputLogInfo, replication_inputLogDebug);
 		// the virtual service's size is resetted, check it
 		expecting_size = static_cast<size_t>(max_list_size * sizeof(l7vs::sslid_replication_data));
+		expecting_offset = static_cast<size_t>(real_data_start_address - header_start_address + first_header->size);
+		expecting_replication_data_area = reinterpret_cast<sslid_replication_data*>(real_data_start_address);
 		BOOST_CHECK_EQUAL((first_header+1)->size, expecting_size);
+		BOOST_CHECK_EQUAL((first_header+1)->offset, expecting_offset);
+		BOOST_CHECK_EQUAL(this->replication_area, expecting_replication_data_area);
 	}
 
 	// put_into_temp_list_test
@@ -517,8 +596,8 @@ public:
 		l7vs::sslid_replication_temp_data test_data2;
 		l7vs::sslid_replication_temp_data test_data3;
 
-    cout << "[15]------------------------------------------" << endl;
-		// unit_test[15] １つのアイテムの場合、temp_listにデータを追加する。
+    cout << "[16]------------------------------------------" << endl;
+		// unit_test[16] １つのアイテムの場合、temp_listにデータを追加する。
 		test_data1.session_id = session_id1;
 		test_data1.last_time = last_time;
 		test_data1.op_code = 'A';
@@ -536,8 +615,8 @@ public:
 		// realserver_addr check
 		BOOST_CHECK_EQUAL(put_into_data.realserver_addr, test_data1.realserver_addr);
 
-    cout << "[16]------------------------------------------" << endl;
-		// unit_test[16] ２つのアイテムの場合、temp_listにデータを追加する。
+    cout << "[17]------------------------------------------" << endl;
+		// unit_test[17] ２つのアイテムの場合、temp_listにデータを追加する。
 		test_data1.session_id = session_id1;
 		test_data1.last_time = last_time;
 		test_data1.op_code = 'U';
@@ -565,8 +644,8 @@ public:
 		BOOST_CHECK_EQUAL(first_put_into_data.realserver_addr, test_data1.realserver_addr);
 		BOOST_CHECK_EQUAL(second_put_into_data.realserver_addr, test_data2.realserver_addr);
 
-    cout << "[17]------------------------------------------" << endl;
-		// unit_test[17] ３つのアイテムの場合、temp_listにデータを追加する。
+    cout << "[18]------------------------------------------" << endl;
+		// unit_test[18] ３つのアイテムの場合、temp_listにデータを追加する。
 		test_data1.session_id = session_id1;
 		test_data1.last_time = last_time;
 		test_data1.op_code = 'U';
@@ -604,8 +683,8 @@ public:
 		BOOST_CHECK_EQUAL(second_put_into_data.realserver_addr, test_data2.realserver_addr);
 		BOOST_CHECK_EQUAL(third_put_into_data.realserver_addr, test_data3.realserver_addr);
 
-    cout << "[18]------------------------------------------" << endl;
-		// unit_test[18] マルチスレッドの場合、temp_listにデータを正常追加する。
+    cout << "[19]------------------------------------------" << endl;
+		// unit_test[19] マルチスレッドの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
 			this->temp_list.clear();
@@ -644,8 +723,8 @@ public:
 			}
 		}
 
-    cout << "[19]------------------------------------------" << endl;
-		// unit_test[19] マルチスレッド　がつ　temp_listのサイズが max_temp_listの場合、temp_listにデータを正常追加する。
+    cout << "[20]------------------------------------------" << endl;
+		// unit_test[20] マルチスレッド　がつ　temp_listのサイズが max_temp_listの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
 			is_put_into_temp_list_test_thread4_waiting = false;
@@ -671,8 +750,8 @@ public:
 			BOOST_CHECK_EQUAL(temp.op_code, 'A');
 		}
 
-    cout << "[20]------------------------------------------" << endl;
-		// unit_test[20] ルチスレッド　がつ　temp_list size > max_temp_listの場合、temp_listにデータを正常追加する。
+    cout << "[21]------------------------------------------" << endl;
+		// unit_test[21] ルチスレッド　がつ　temp_list size > max_temp_listの場合、temp_listにデータを正常追加する。
 		try{
 			boost::thread_group thread_group;
 			is_put_into_temp_list_test_thread6_waiting = false;
@@ -698,8 +777,8 @@ public:
 			BOOST_CHECK_EQUAL(temp.op_code, 'A');
 		}
 
-    cout << "[21]------------------------------------------" << endl;
-		// unit_test[21] temp_listがfullで、且１つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
+    cout << "[22]------------------------------------------" << endl;
+		// unit_test[22] temp_listがfullで、且１つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
 		try{
 			boost::thread_group thread_group;
 
@@ -721,8 +800,8 @@ public:
 			BOOST_ERROR("exception: put_into_temp_list");
 		}
 
-    cout << "[22]------------------------------------------" << endl;
-		// unit_test[22] temp_listがfullで、且２つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
+    cout << "[23]------------------------------------------" << endl;
+		// unit_test[23] temp_listがfullで、且２つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
 		try{
 			boost::thread_group thread_group;
 
@@ -754,8 +833,8 @@ public:
 			BOOST_ERROR("exception: put_into_temp_list");
 		}
 
-    cout << "[23]------------------------------------------" << endl;
-		// unit_test[23] temp_listがfullで、且３つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
+    cout << "[24]------------------------------------------" << endl;
+		// unit_test[24] temp_listがfullで、且３つのスレッドが待ち状態の場合、waitingフラグを待ちに設定する。
 		try{
 			boost::thread_group thread_group;
 
@@ -810,8 +889,8 @@ public:
 		this->replication_area_lock = lock_function;
 		this->replication_area_unlock = unlock_function;
 
-    cout << "[24]------------------------------------------" << endl;
-		// unit_test[24] maxlistが0の場合、例外が発生しない。
+    cout << "[25]------------------------------------------" << endl;
+		// unit_test[25] maxlistが0の場合、例外が発生しない。
 		int old_maxlist = this->maxlist;
 		try {
 			this->maxlist = 0;
@@ -820,8 +899,8 @@ public:
 			BOOST_ERROR("exception: write_replicaion_area");
 		}
 
-	cout << "[25]------------------------------------------" << endl;
-		// unit_test[25] maxlist < 0の場合、例外が発生しない。
+	cout << "[26]------------------------------------------" << endl;
+		// unit_test[26] maxlist < 0の場合、例外が発生しない。
 		try {
 			this->maxlist = -1;
 			this->write_replicaion_area();
@@ -831,8 +910,8 @@ public:
 		this->maxlist = old_maxlist;
 
 
-	cout << "[26]------------------------------------------" << endl;
-		// unit_test[26] replication_area が NULLの場合、例外が発生しない。
+	cout << "[27]------------------------------------------" << endl;
+		// unit_test[27] replication_area が NULLの場合、例外が発生しない。
 		sslid_replication_data* old_replication_area = this->replication_area;
 		try {
 			this->temp_list.clear();
@@ -843,8 +922,8 @@ public:
 		}
 		this->replication_area = old_replication_area;
 
-	cout << "[27]------------------------------------------" << endl;
-		// unit_test[27] temp_listが空の場合、例外が発生しない。
+	cout << "[28]------------------------------------------" << endl;
+		// unit_test[28] temp_listが空の場合、例外が発生しない。
 		try {
 			this->temp_list.clear();
 			this->write_replicaion_area();
@@ -852,10 +931,8 @@ public:
 			BOOST_ERROR("exception: write_replicaion_area");
 		}
 
-    cout << "[28]------------------------------------------" << endl;
-		// unit_test[28] op_codeが「A」で、且つreplication_areaに１つのデータが存在する場合、新データを追加する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[29]------------------------------------------" << endl;
+		// unit_test[29] op_codeが「A」で、且つreplication_areaに１つのデータが存在する場合、新データを追加する。
 		temp_session_id = "temp_id1rtrrrrtttttteeeeeeemmmmp";
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_data.last_time = time(0);
@@ -898,10 +975,8 @@ public:
 		// added realserver_addr port check
 		BOOST_CHECK_EQUAL(added_address_port, test_data1.realserver_addr.port());
 
-    cout << "[29]------------------------------------------" << endl;
-		// unit_test[29] op_codeが「A」で、且つreplication_areaに２つのデータが存在して、且つ１つ目データのvalidフラグが０の場合、新のデータを追加する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[30]------------------------------------------" << endl;
+		// unit_test[30] op_codeが「A」で、且つreplication_areaに２つのデータが存在して、且つ１つ目データのvalidフラグが０の場合、新のデータを追加する。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		temp_session_id = "temp_id2eeeeeetttteeeeeeemmmmuui";
 		temp_data.last_time = time(0);
@@ -947,10 +1022,8 @@ public:
 		// added realserver_addr port check
 		BOOST_CHECK_EQUAL(added_address_port, test_data1.realserver_addr.port());
 
-    cout << "[30]------------------------------------------" << endl;
-		// unit_test[30] op_codeが「A」で、且つreplication_areaにデータが存在しない場合、新のデータを追加する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[31]------------------------------------------" << endl;
+		// unit_test[31] op_codeが「A」で、且つreplication_areaにデータが存在しない場合、新のデータを追加する。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
@@ -978,10 +1051,8 @@ public:
 		// realserver_addr port check
 		BOOST_CHECK_EQUAL(saved_address_port, 80);
 
-    cout << "[31]------------------------------------------" << endl;
-		// unit_test[31] op_codeが「U」で、且つセッションIDが存在している場合、該当データを更新する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[32]------------------------------------------" << endl;
+		// unit_test[32] op_codeが「U」で、且つセッションIDが存在している場合、該当データを更新する。
 		realserver_addr.address(boost::asio::ip::address::from_string("255.255.255.255"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
@@ -1007,10 +1078,8 @@ public:
 		// realserver_addr port is changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
 
-    cout << "[32]------------------------------------------" << endl;
-		// unit_test[32] op_codeが「D」で、且つセッションIDが存在している場合、該当データを削除する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[33]------------------------------------------" << endl;
+		// unit_test[33] op_codeが「D」で、且つセッションIDが存在している場合、該当データを削除する。
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(80);
 		test_data1.op_code = 'D';
@@ -1034,10 +1103,8 @@ public:
 		// realserver_addr port is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
 
-    cout << "[33]------------------------------------------" << endl;
-		// unit_test[33] op_codeが「A」,「U」,「D」以外の場合、データを変更しない。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[34]------------------------------------------" << endl;
+		// unit_test[34] op_codeが「A」,「U」,「D」以外の場合、データを変更しない。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("192.168.120.102"));
 		realserver_addr.port(port);
@@ -1056,10 +1123,8 @@ public:
 		compare_result = memcmp(&old_session_data, this->replication_area, 3*sizeof(sslid_replication_data));
 		BOOST_CHECK_EQUAL(compare_result, 0);
 
-    cout << "[34]------------------------------------------" << endl;
-		// unit_test[34] データを追加するの場合、replication_area_lock関数を呼び出す。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[35]------------------------------------------" << endl;
+		// unit_test[35] データを追加するの場合、replication_area_lock関数を呼び出す。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
@@ -1072,10 +1137,8 @@ public:
 		// replication_area_lock function called check
 		BOOST_CHECK(is_lock_function_called);
 
-    cout << "[35]------------------------------------------" << endl;
-		// unit_test[35] データを追加するの場合、replication_area_unlock関数を呼び出す。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[36]------------------------------------------" << endl;
+		// unit_test[36] データを追加するの場合、replication_area_unlock関数を呼び出す。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
@@ -1088,10 +1151,8 @@ public:
 		// replication_area_unlock function called check
 		BOOST_CHECK(is_unlock_function_called);
 
-    cout << "[36]------------------------------------------" << endl;
-		// unit_test[36] endpointがipv6で、replicationエリアにデータがなくて、該当ipv6のendpointを追加する。
-		is_lock_function_called = false;
-    	is_unlock_function_called = false;
+    cout << "[37]------------------------------------------" << endl;
+		// unit_test[37] endpointがipv6で、replicationエリアにデータがなくて、該当ipv6のendpointを追加する。
 		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
 		realserver_addr.address(boost::asio::ip::address::from_string("abcd:21d0:8936:4866:eefe:567d:3a4b:1230"));
 		realserver_addr.port(80);
@@ -1118,10 +1179,8 @@ public:
 		// realserver_addr port check
 		BOOST_CHECK_EQUAL(saved_address_port, 80);
 
-    cout << "[37]------------------------------------------" << endl;
-		// unit_test[37] op_codeが「U」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを更新する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[38]------------------------------------------" << endl;
+		// unit_test[38] op_codeが「U」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを更新する。
 		realserver_addr.address(boost::asio::ip::address::from_string("1:21d0:1:4866:1:1:3a4b:1230"));
 		realserver_addr.port(port);
 		test_data1.op_code = 'U';
@@ -1138,10 +1197,8 @@ public:
 		// realserver_addr port check
 		BOOST_CHECK_EQUAL(saved_address_port, port);
 
-    cout << "[38]------------------------------------------" << endl;
-		// unit_test[38] op_codeが「D」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを変更しない、validに０を設定する。
-		is_lock_function_called = false;
-		is_unlock_function_called = false;
+    cout << "[39]------------------------------------------" << endl;
+		// unit_test[39] op_codeが「D」で、endpointがipv6で、replicationエリアにデータがある場合、該当ipv6のendpointを変更しない、validに０を設定する。
 		realserver_addr.address(boost::asio::ip::address::from_string("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
 		test_data1.op_code = 'D';
 		test_data1.last_time = delete_time;
@@ -1160,6 +1217,69 @@ public:
 		BOOST_CHECK_EQUAL(saved_address_ip, std::string("1:21d0:1:4866:1:1:3a4b:1230"));
 		// realserver_addr port is not changed, check it
 		BOOST_CHECK_EQUAL(saved_address_port, port);
+
+	cout << "[40]------------------------------------------" << endl;
+		// unit_test[40] op_codeが「A」で、session_idが"00000000000000000000000000000000"で、該当のデータを追加する。
+		std::string zero_string = "00000000000000000000000000000000";
+		memset(this->replication_area, 0, this->maxlist*sizeof(struct l7vs::sslid_replication_data));
+		test_data1.session_id = zero_string;
+		test_data1.op_code = 'A';
+		test_data1.last_time = last_time;
+		test_data1.realserver_addr = realserver_addr;
+		this->temp_list.clear();
+		this->put_into_temp_list(test_data1);
+		this->write_replicaion_area();
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		saved_session_id = std::string(session_id_array);
+		saved_address_ip = std::string(this->replication_area->realserver_ip);
+		saved_address_port = this->replication_area->realserver_port;
+		BOOST_CHECK_EQUAL(this->replication_area->valid, 1);
+		BOOST_CHECK_EQUAL(this->replication_area->last_time, last_time);
+		BOOST_CHECK_EQUAL(saved_address_ip, realserver_addr.address().to_string());
+		BOOST_CHECK_EQUAL(saved_address_port, realserver_addr.port());
+		BOOST_CHECK_EQUAL(saved_session_id, zero_string);
+
+	cout << "[41]------------------------------------------" << endl;
+		// unit_test[41] op_codeが「U」で、session_idが"00000000000000000000000000000000"で、該当のデータを更新する。
+		realserver_addr.address(boost::asio::ip::address::from_string("255.255.255.0"));
+		test_data1.session_id = zero_string;
+		test_data1.op_code = 'U';
+		test_data1.last_time = update_time;
+		test_data1.realserver_addr = realserver_addr;
+		this->temp_list.clear();
+		this->put_into_temp_list(test_data1);
+		this->write_replicaion_area();
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		saved_session_id = std::string(session_id_array);
+		saved_address_ip = std::string(this->replication_area->realserver_ip);
+		saved_address_port = this->replication_area->realserver_port;
+		BOOST_CHECK_EQUAL(this->replication_area->valid, 1);
+		BOOST_CHECK_EQUAL(this->replication_area->last_time, update_time);
+		BOOST_CHECK_EQUAL(saved_address_ip, realserver_addr.address().to_string());
+		BOOST_CHECK_EQUAL(saved_address_port, realserver_addr.port());
+		BOOST_CHECK_EQUAL(saved_session_id, zero_string);
+
+	cout << "[42]------------------------------------------" << endl;
+		// unit_test[42] op_codeが「D」で、session_idが"00000000000000000000000000000000"で、該当のデータを削除する。
+		test_data1.op_code = 'D';
+		test_data1.session_id = zero_string;
+		test_data1.last_time = delete_time;
+		this->temp_list.clear();
+		this->put_into_temp_list(test_data1);
+		this->write_replicaion_area();
+		// get saved information
+		memset(session_id_array, 0, SSLID_LENGTH + 1);
+		memcpy(session_id_array, this->replication_area->session_id, SSLID_LENGTH);
+		saved_session_id = std::string(session_id_array);
+		saved_address_ip = std::string(this->replication_area->realserver_ip);
+		saved_address_port = this->replication_area->realserver_port;
+		BOOST_CHECK_EQUAL(this->replication_area->valid, 0);
+		BOOST_CHECK_EQUAL(this->replication_area->last_time, delete_time);
+		BOOST_CHECK_EQUAL(saved_address_ip, realserver_addr.address().to_string());
+		BOOST_CHECK_EQUAL(saved_address_port, realserver_addr.port());
+		BOOST_CHECK_EQUAL(saved_session_id, zero_string);
 	}
 
 	// register_replication_area_lock_test
@@ -1167,13 +1287,13 @@ public:
 
 		boost::function<void(void)> register_function = &lock_function;
 
-    cout << "[39]------------------------------------------" << endl;
-		// unit_test[39] register_replication_area_lock（）関数のパラメータがNULLの場合、replication_area_lockがNULLある。
+    cout << "[43]------------------------------------------" << endl;
+		// unit_test[43] register_replication_area_lock（）関数のパラメータがNULLの場合、replication_area_lockがNULLある。
 		this->register_replication_area_lock(NULL);
 		BOOST_CHECK_EQUAL(this->replication_area_lock.empty(), true);
 
-    cout << "[40]------------------------------------------" << endl;
-		// unit_test[40] register_replication_area_lock（）関数のパラメータがNULLでない場合、replication_area_lockがパラメータと一致する。
+    cout << "[44]------------------------------------------" << endl;
+		// unit_test[44] register_replication_area_lock（）関数のパラメータがNULLでない場合、replication_area_lockがパラメータと一致する。
 		this->register_replication_area_lock(register_function);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_lock, lock_function);
@@ -1184,14 +1304,14 @@ public:
 
 		boost::function<void(void)> register_function = &unlock_function;
 
-    cout << "[41]------------------------------------------" << endl;
-		// unit_test[41] register_replication_area_unlock（）関数のパラメータがNULLの場合、replication_area_unlockがNULLある。
+    cout << "[45]------------------------------------------" << endl;
+		// unit_test[45] register_replication_area_unlock（）関数のパラメータがNULLの場合、replication_area_unlockがNULLある。
 		this->register_replication_area_unlock(NULL);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_unlock.empty(), true);
 
-    cout << "[42]------------------------------------------" << endl;
-		// unit_test[42] register_replication_area_unlock（）関数のパラメータがNULLでない場合、replication_area_unlockがパラメータと一致する。
+    cout << "[46]------------------------------------------" << endl;
+		// unit_test[46] register_replication_area_unlock（）関数のパラメータがNULLでない場合、replication_area_unlockがパラメータと一致する。
 		this->register_replication_area_unlock(register_function);
 		// function registered correctly check;
 		BOOST_CHECK_EQUAL(this->replication_area_unlock, unlock_function);
@@ -1206,14 +1326,14 @@ public:
 		l7vs::sslid_replication_temp_data get_data;
 		boost::asio::ip::tcp::endpoint endpoint;
 
-    cout << "[43]------------------------------------------" << endl;
-		// unit_test[43] temp_listのサイズが0の場合、戻り値が失敗（-１）で設定する。
+    cout << "[47]------------------------------------------" << endl;
+		// unit_test[47] temp_listのサイズが0の場合、戻り値が失敗（-１）で設定する。
 		this->temp_list.clear();
 		result = this->get_from_temp_list(get_data);
 		BOOST_CHECK_EQUAL(result, -1);
 
-	cout << "[44]------------------------------------------" << endl;
-		// unit_test[44] temp_listのサイズが1の場合、戻り値が正常（0）で設定する。
+	cout << "[48]------------------------------------------" << endl;
+		// unit_test[48] temp_listのサイズが1の場合、戻り値が正常（0）で設定する。
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
 		test_data1.op_code = 'A';
 		test_data1.realserver_addr = endpoint;
@@ -1223,8 +1343,8 @@ public:
 		result = this->get_from_temp_list(get_data);
 		BOOST_CHECK_EQUAL(result, 0);
 
-	cout << "[45]------------------------------------------" << endl;
-		// unit_test[45] temp_listのサイズが3の場合、戻り値が正常（0）で設定する。
+	cout << "[49]------------------------------------------" << endl;
+		// unit_test[49] temp_listのサイズが3の場合、戻り値が正常（0）で設定する。
 		this->temp_list.clear();
 		this->temp_list.push_back(test_data1);
 		this->temp_list.push_back(test_data1);
@@ -1232,8 +1352,8 @@ public:
 		result = this->get_from_temp_list(get_data);
 		BOOST_CHECK_EQUAL(result, 0);
 
-    cout << "[46]------------------------------------------" << endl;
-		// unit_test[46] マルチスレッドの場合、temp_listにデータを正常取得する。
+    cout << "[50]------------------------------------------" << endl;
+		// unit_test[50] マルチスレッドの場合、temp_listにデータを正常取得する。
 		try {
 			this->temp_list.clear();
 			this->temp_list.push_back(test_data1);
@@ -1249,8 +1369,8 @@ public:
 			BOOST_ERROR("exception: get_from_temp_list");
 		}
 
-    cout << "[47]------------------------------------------" << endl;
-		// unit_test[47] temp_listにデータがある場合、１つ目のデータを削除する。
+    cout << "[51]------------------------------------------" << endl;
+		// unit_test[51] temp_listにデータがある場合、１つ目のデータを削除する。
 		test_data1.session_id = "test_id123456789abcdefghijklmnop";
 		test_data1.op_code = 'T';
 		test_data1.realserver_addr = endpoint;
@@ -1275,8 +1395,8 @@ public:
 		// last_time check
 		BOOST_CHECK_EQUAL(leave_data.last_time, test_data2.last_time);
 
-    cout << "[48]------------------------------------------" << endl;
-		// unit_test[48] temp_listに１つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの内容と一致する。
+    cout << "[52]------------------------------------------" << endl;
+		// unit_test[52] temp_listに１つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの内容と一致する。
 		test_data1.op_code = 'A';
 		this->temp_list.clear();
 		this->temp_list.push_back(test_data1);
@@ -1291,8 +1411,8 @@ public:
 		// last_time check
 		BOOST_CHECK_EQUAL(get_data.last_time, test_data1.last_time);
 
-    cout << "[49]------------------------------------------" << endl;
-		// unit_test[49] temp_listに２つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの１つ目の内容と一致する。
+    cout << "[53]------------------------------------------" << endl;
+		// unit_test[53] temp_listに２つデータがある場合、get_from_temp_list（）で取得したデータがtemp_listの１つ目の内容と一致する。
 		test_data1.op_code = 'U';
 		test_data2.op_code = 'D';
 		this->temp_list.clear();
@@ -1313,8 +1433,8 @@ public:
 	// get_replication_area_test
 	void get_replication_area_test(sslid_replication_data* expecting_sslid_replication_data) {
 
-    cout << "[50]------------------------------------------" << endl;
-		// unit_test[50] get_replication_area（）関数の戻り値はコンストラクタが正常に生成する値と一致する。
+    cout << "[54]------------------------------------------" << endl;
+		// unit_test[54] get_replication_area（）関数の戻り値はコンストラクタが正常に生成する値と一致する。
 		sslid_replication_data* get_data = this->get_replication_area();
 		BOOST_CHECK_EQUAL(get_data, expecting_sslid_replication_data);
 	}
