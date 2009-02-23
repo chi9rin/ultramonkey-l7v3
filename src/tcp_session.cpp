@@ -337,15 +337,60 @@ namespace l7vs{
 		switch(message){
 			case SESSION_PAUSE_ON:
 				session_pause_flag = true;
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] set_virtual_service_message message:[SESSION_PAUSE_ON]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				return;
 			case SESSION_PAUSE_OFF:
 				session_pause_flag = false;
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] set_virtual_service_message message:[SESSION_PAUSE_OFF]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				return;
 			case SORRY_STATE_ENABLE:
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] set_virtual_service_message message:[SORRY_STATE_ENABLE]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				break;
 			case SORRY_STATE_DISABLE:
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] set_virtual_service_message message:[SORRY_STATE_DISABLE]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				break;
 			case SESSION_END:
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] set_virtual_service_message message:[SESSION_END]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				break;
 		}
 		// set message
@@ -1771,6 +1816,15 @@ namespace l7vs{
 				up_thread_exit(process_type);
 				return;
 			}
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] handle_sorry_enable call";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_enable(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1815,6 +1869,15 @@ namespace l7vs{
 				up_thread_exit(process_type);
 				return;
 			}
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] handle_sorry_disable call";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_disable(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -2540,6 +2603,15 @@ namespace l7vs{
 				down_thread_exit(process_type);
 				return;
 			}
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] handle_sorry_enable call";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_enable(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -2584,6 +2656,15 @@ namespace l7vs{
 				down_thread_exit(process_type);
 				return;
 			}
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] handle_sorry_disable call";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_disable(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
