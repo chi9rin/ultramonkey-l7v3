@@ -2025,7 +2025,7 @@ protocol_module_cinsert::handle_realserver_select(
 				=	icase("Cookie") >> ":" >> *_ >>
 					cookie_name_str >> "=" >>
 					( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
-					":" >> ( s2 = +_d ) >> ";";
+					":" >> ( s2 = +_d );
 
 	realserverlist_type::iterator	rs_list_itr;
 	t_session_thread_data_map_itr	thread_data_itr;
