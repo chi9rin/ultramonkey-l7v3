@@ -197,7 +197,7 @@ con_count = 10
 #cmponent_id_01 = "chash"
 #cmponent_size_01 = 1
 #cmponent_id_02 = "sslid"
-#cmponent_size_02 = 200
+#cmponent_size_02 = 222
 
 #
 # snmpagent settings
