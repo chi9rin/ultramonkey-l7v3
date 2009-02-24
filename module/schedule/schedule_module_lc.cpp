@@ -1,5 +1,5 @@
 /*
- *	@file	schedule_module_lc.h
+ *	@file	schedule_module_lc.cpp
  *	@brief	shared object schedule module class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
