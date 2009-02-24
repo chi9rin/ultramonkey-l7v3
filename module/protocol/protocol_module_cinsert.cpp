@@ -5730,6 +5730,8 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 					recive_data_itr = thread_data->recive_data_map.begin();
 
+					thread_data->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
+
 					thread_data->sorry_flag = SORRY_FLAG_ON;
 					status = SORRYSERVER_RECV;
 
@@ -5972,6 +5974,8 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 
 					recive_data_itr = thread_data->recive_data_map.begin();
 
+					thread_data->realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
+
 					thread_data->sorry_flag = SORRY_FLAG_OFF;
 					status = REALSERVER_RECV;
 
@@ -6110,6 +6114,8 @@ protocol_module_cinsert::handle_realserver_disconnect(
 					if( thread_data->sorryserver_switch_flag == SORRYSERVER_SWITCH_FLAG_ON )
 					{
 
+						thread_data->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_OFF;
+
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
 						if( recive_data_itr != thread_data->recive_data_map.end() )
@@ -6147,11 +6153,30 @@ protocol_module_cinsert::handle_realserver_disconnect(
 			}
 			else
 			{
-				thread_data->end_flag = END_FLAG_ON;
+
+				if( thread_data->end_flag == END_FLAG_ON )
+				{
+					status = CLIENT_DISCONNECT;
+				}
+				else
+				{
+					if( thread_data->sorryserver_switch_flag == SORRYSERVER_SWITCH_FLAG_ON )
+					{
+					
+						thread_data->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_OFF;
+						status = SORRYSERVER_RECV;
+					
+					}
+					else
+					{
+					
+						thread_data->end_flag = END_FLAG_ON;
+						status = CLIENT_DISCONNECT;
+					
+					}
+				}
 
 				recive_data_itr = thread_data->recive_data_map.begin();
-
-				status = CLIENT_DISCONNECT;
 
 				while( recive_data_itr != thread_data->recive_data_map.end() )
 				{
@@ -6278,8 +6303,10 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 				else
 				{
 
- 					if( thread_data->realserver_switch_flag == REALSERVER_SWITCH_FLAG_ON )
+					if( thread_data->realserver_switch_flag == REALSERVER_SWITCH_FLAG_ON )
 					{
+
+						thread_data->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
@@ -6318,11 +6345,30 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 			}
 			else
 			{
-				thread_data->end_flag = END_FLAG_ON;
+
+				if( thread_data->end_flag == END_FLAG_ON )
+				{
+					status = CLIENT_DISCONNECT;
+				}
+				else
+				{
+					if( thread_data->realserver_switch_flag == REALSERVER_SWITCH_FLAG_ON )
+					{
+					
+						thread_data->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
+						status = REALSERVER_RECV;
+					
+					}
+					else
+					{
+					
+						thread_data->end_flag = END_FLAG_ON;
+						status = CLIENT_DISCONNECT;
+					
+					}
+				}
 
 				recive_data_itr = thread_data->recive_data_map.begin();
-
-				status = CLIENT_DISCONNECT;
 
 				while( recive_data_itr != thread_data->recive_data_map.end() )
 				{
