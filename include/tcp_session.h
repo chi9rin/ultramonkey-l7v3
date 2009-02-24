@@ -99,6 +99,7 @@ namespace l7vs{
 				UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT,		//! up_thread_sorryserver_connection_fail_event function
 				UP_FUNC_SORRYSERVER_SEND,					//! up_thread_sorryserver_send function
 				UP_FUNC_SORRYSERVER_DISCONNECT,				//! up_thread_sorryserver_disconnect function
+				UP_FUNC_SORRYSERVER_MOD_DISCONNECT,			//! up_thread_sorryserver_mod_disconnect function
 				UP_FUNC_SORRYSERVER_DISCONNECT_EVENT,		//! up_thread_sorryserver_disconnect_event function
 				UP_FUNC_SORRY_ENABLE_EVENT,					//! up_thread_sorry_enable_event function
 				UP_FUNC_SORRY_DISABLE_EVENT,				//! up_thread_sorry_disable_event function
@@ -117,6 +118,7 @@ namespace l7vs{
 				DOWN_FUNC_REALSERVER_ALL_DISCONNECT,		//! down_thread_all_realserver_disconnect function
 				DOWN_FUNC_SORRYSERVER_RECEIVE,				//! down_thread_sorryserver_receive function
 				DOWN_FUNC_SORRYSERVER_DISCONNECT,			//! down_thread_sorryserver_disconnect function
+				DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT,		//! down_thread_sorryserver_mod_disconnect function
 				DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT,		//! down_thread_sorryserver_disconnect_event function
 				DOWN_FUNC_SORRY_ENABLE_EVENT,				//! down_thread_sorry_enable_event function
 				DOWN_FUNC_SORRY_DISABLE_EVENT,				//! down_thread_sorry_disable_event function
@@ -270,6 +272,9 @@ namespace l7vs{
 			//! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
 			//! @param[in]		process_type is prosecess type
 			virtual void up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
+			//! up thread close sorryserver socket and raise module sorryserver disconnect event
+			//! @param[in]		process_type is prosecess type
+			virtual void up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
 			//! up thread raise module event of handle_sorryserver_disconnect
 			//! @param[in]		process_type is prosecess type
 			virtual void up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
@@ -318,6 +323,9 @@ namespace l7vs{
 			//! down thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
 			//! @param[in]		process_type is prosecess type
 			virtual void down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
+			//! down thread close sorryserver socket and raise module sorryserver disconnect event
+			//! @param[in]		process_type is prosecess type
+			virtual void down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type);
 			//! down thread raise module event of handle_sorryserver_disconnect
 			//! @param[in]		process_type is prosecess type
 			virtual void down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type);
