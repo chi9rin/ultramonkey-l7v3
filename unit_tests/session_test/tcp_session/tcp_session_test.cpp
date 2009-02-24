@@ -957,6 +957,12 @@ class constructer_test_class : public l7vs::tcp_session{
 			up_thread_sorryserver_disconnect_call_check = true;
 		};
 		bool up_thread_sorryserver_disconnect_call_check;
+
+		void up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+			up_thread_sorryserver_mod_disconnect_call_check = true;
+		};
+		bool up_thread_sorryserver_mod_disconnect_call_check;
+
 		//! up thread raise module event of handle_sorryserver_disconnect
 		//! @param[in]		process_type is prosecess type
 		void up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
@@ -1047,6 +1053,11 @@ class constructer_test_class : public l7vs::tcp_session{
 			down_thread_sorryserver_disconnect_call_check = true;
 		};
 		bool down_thread_sorryserver_disconnect_call_check;
+
+		void down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+			down_thread_sorryserver_mod_disconnect_call_check = true;
+		};
+		bool down_thread_sorryserver_mod_disconnect_call_check;
 		//! down thread raise module event of handle_sorryserver_disconnect
 		//! @param[in]		process_type is prosecess type
 		void down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
@@ -1091,7 +1102,7 @@ class constructer_test_class : public l7vs::tcp_session{
 			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::CLIENT_SEND) == up_thread_module_event_map.end());
 			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::CLIENT_RESPONSE_SEND)->second == l7vs::tcp_session::UP_FUNC_CLIENT_RESPOND_SEND);
 			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::REALSERVER_DISCONNECT)->second == l7vs::tcp_session::UP_FUNC_REALSERVER_ALL_DISCONNECT);
-			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::SORRYSERVER_DISCONNECT)->second == l7vs::tcp_session::UP_FUNC_SORRYSERVER_DISCONNECT);
+			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::SORRYSERVER_DISCONNECT)->second == l7vs::tcp_session::UP_FUNC_SORRYSERVER_MOD_DISCONNECT);
 			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::CLIENT_DISCONNECT)->second == l7vs::tcp_session::UP_FUNC_CLIENT_DISCONNECT);
 			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::REALSERVER_CLOSE) == up_thread_module_event_map.end());
 			BOOST_CHECK(up_thread_module_event_map.find(l7vs::protocol_module_base::FINALIZE)->second == l7vs::tcp_session::UP_FUNC_EXIT);
@@ -1114,7 +1125,7 @@ class constructer_test_class : public l7vs::tcp_session{
 			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::CLIENT_SEND)->second == l7vs::tcp_session::DOWN_FUNC_CLIENT_SEND);
 			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::CLIENT_RESPONSE_SEND) == down_thread_module_event_map.end());
 			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::REALSERVER_DISCONNECT)->second == l7vs::tcp_session::DOWN_FUNC_REALSERVER_ALL_DISCONNECT);
-			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::SORRYSERVER_DISCONNECT)->second == l7vs::tcp_session::DOWN_FUNC_SORRYSERVER_DISCONNECT);
+			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::SORRYSERVER_DISCONNECT)->second == l7vs::tcp_session::DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT);
 			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::CLIENT_DISCONNECT)->second == l7vs::tcp_session::DOWN_FUNC_CLIENT_DISCONNECT);
 			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::REALSERVER_CLOSE) == down_thread_module_event_map.end());
 			BOOST_CHECK(down_thread_module_event_map.find(l7vs::protocol_module_base::FINALIZE)->second == l7vs::tcp_session::DOWN_FUNC_EXIT);
@@ -1264,6 +1275,13 @@ class constructer_test_class : public l7vs::tcp_session{
 			check_it->second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_disconnect_call_check);
 			
+			// UP_FUNC_SORRYSERVER_MOD_DISCONNECT  up_thread_sorryserver_mod_disconnect function 
+			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_MOD_DISCONNECT);
+			BOOST_CHECK(check_it != up_thread_function_map.end());
+			up_thread_sorryserver_mod_disconnect_call_check = false;
+			check_it->second(LOCAL_PROC);
+			BOOST_CHECK(up_thread_sorryserver_mod_disconnect_call_check);
+			
 			// UP_FUNC_SORRYSERVER_DISCONNECT_EVENT  up_thread_sorryserver_disconnect_event function 
 			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
 			BOOST_CHECK(check_it != up_thread_function_map.end());
@@ -1364,6 +1382,13 @@ class constructer_test_class : public l7vs::tcp_session{
 			down_thread_sorryserver_disconnect_call_check = false;
 			check_it->second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_sorryserver_disconnect_call_check);
+			
+			// DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT  down_thread_sorryserver_mod_disconnect function
+			check_it = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT);
+			BOOST_CHECK(check_it != down_thread_function_map.end());
+			down_thread_sorryserver_mod_disconnect_call_check = false;
+			check_it->second(LOCAL_PROC);
+			BOOST_CHECK(down_thread_sorryserver_mod_disconnect_call_check);
 			
 			// DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT  down_thread_sorryserver_disconnect_event function 
 			check_it = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
@@ -4272,6 +4297,435 @@ void up_thread_sorryserver_disconnect_event_test(){
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_disconnect_event_test test end -----" );
 }
+
+// up_thread_sorryserver_mod_disconnect test
+// up_thread_sorryserver_mod_disconnect test class
+class up_thread_sorryserver_mod_disconnect_test_class : public module_event_map_test_base_class{
+	public:
+		up_thread_sorryserver_mod_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+		};
+		
+		~up_thread_sorryserver_mod_disconnect_test_class(){};
+		
+		void test_call(){
+			l7vs::tcp_session::up_thread_sorryserver_mod_disconnect(LOCAL_PROC);
+		};
+		
+		boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
+			return sorryserver_socket.second;
+		};
+
+		boost::asio::ip::tcp::endpoint& get_sorry_endpoint(){
+			return sorryserver_socket.first;
+		}
+		
+};
+
+void up_thread_sorryserver_mod_disconnect_test(){
+	
+	BOOST_MESSAGE( "----- up_thread_sorryserver_mod_disconnect test start -----" );
+	
+	boost::asio::io_service io;
+	
+	l7vs::virtualservice_tcp vs;	
+	
+	up_thread_sorryserver_mod_disconnect_test_class test_obj(vs,io);
+	
+	std::string test_protocol_name("test protocol");
+	l7vs::test_protocol_module proto_test(test_protocol_name);
+
+	test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
+	
+	l7vs::protocol_module_base::EVENT_TAG chek_event[13];
+	chek_event[0] = l7vs::protocol_module_base::ACCEPT;
+	chek_event[1] = l7vs::protocol_module_base::CLIENT_DISCONNECT;
+	chek_event[2] = l7vs::protocol_module_base::CLIENT_RECV;
+	chek_event[3] = l7vs::protocol_module_base::CLIENT_RESPONSE_SEND;
+	chek_event[4] = l7vs::protocol_module_base::REALSERVER_SELECT;
+	chek_event[5] = l7vs::protocol_module_base::REALSERVER_CONNECT;
+	chek_event[6] = l7vs::protocol_module_base::REALSERVER_SEND;
+	chek_event[7] = l7vs::protocol_module_base::REALSERVER_DISCONNECT;
+	chek_event[8] = l7vs::protocol_module_base::SORRYSERVER_SELECT;
+	chek_event[9] = l7vs::protocol_module_base::SORRYSERVER_CONNECT;
+	chek_event[10] = l7vs::protocol_module_base::SORRYSERVER_SEND;
+	chek_event[11] = l7vs::protocol_module_base::SORRYSERVER_DISCONNECT;
+	chek_event[12] = l7vs::protocol_module_base::FINALIZE;
+	
+	// unit_test [1] up_thread_sorryserver_mod_disconnect up_thread_next_call_function update check
+	std::cout << "[1] up_thread_sorryserver_mod_disconnect up_thread_next_call_function update check" << std::endl;
+	for(int i = 0; i < 13;i++){
+		proto_test.handle_sorryserver_disconnect_res_tag = chek_event[i];
+		test_obj.test_call();
+		BOOST_CHECK(test_obj.chk_up_thread_next_call_function(chek_event[i]));
+	}
+	
+	// module parameter check
+	boost::thread::id def_id;
+	boost::thread::id proc_id = boost::this_thread::get_id();
+	boost::asio::ip::tcp::endpoint test_end(boost::asio::ip::address::from_string("100.102.103.104"), 7777);
+	test_obj.get_sorry_endpoint() = test_end;
+	test_obj.set_up_thread_id(proc_id);
+	proto_test.handle_sorryserver_disconnect_thread_id = def_id;
+	proto_test.handle_sorryserver_disconnect_rs_endpoint = boost::asio::ip::tcp::endpoint();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id != proc_id);
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint != test_end);
+	test_obj.get_sorry_socket()->close_call_check = false;
+	test_obj.get_sorry_socket()->close_res = true;
+
+	test_obj.test_call();
+
+	// unit_test [2] up_thread_sorryserver_mod_disconnect socket close check
+	std::cout << "[2] up_thread_sorryserver_mod_disconnect socket close check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_socket()->close_call_check);
+
+	// unit_test [3] up_thread_sorryserver_mod_disconnect endpoint not update check
+	std::cout << "[3] up_thread_sorryserver_mod_disconnect endpoint not update  check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_endpoint() == test_end);
+
+	// unit_test [4] up_thread_sorryserver_mod_disconnect module parameter check thread id
+	std::cout << "[4] up_thread_sorryserver_mod_disconnect module parameter check thread id" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id == proc_id);
+	
+	// unit_test [5] up_thread_sorryserver_mod_disconnect module parameter check endpoint
+	std::cout << "[5] up_thread_sorryserver_mod_disconnect module parameter check endpoint" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint == test_end);
+	
+
+	proto_test.handle_sorryserver_disconnect_thread_id = def_id;
+	proto_test.handle_sorryserver_disconnect_rs_endpoint = boost::asio::ip::tcp::endpoint();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	test_obj.get_sorry_socket()->close_call_check = false;
+	test_obj.get_sorry_socket()->close_res = false;
+
+	test_obj.test_call();
+
+	// unit_test [6] up_thread_sorryserver_mod_disconnect socket close check
+	std::cout << "[6] up_thread_sorryserver_mod_disconnect socket close check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_socket()->close_call_check);
+
+	// unit_test [7] up_thread_sorryserver_mod_disconnect endpoint not update check
+	std::cout << "[7] up_thread_sorryserver_mod_disconnect endpoint not update  check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_endpoint() == boost::asio::ip::tcp::endpoint());
+
+	// unit_test [8] up_thread_sorryserver_mod_disconnect module parameter check thread id
+	std::cout << "[8] up_thread_sorryserver_mod_disconnect module parameter check thread id" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id == proc_id);
+	
+	// unit_test [9] up_thread_sorryserver_mod_disconnect module parameter check endpoint
+	std::cout << "[9] up_thread_sorryserver_mod_disconnect module parameter check endpoint" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint == test_end);
+	
+	proto_test.handle_sorryserver_disconnect_thread_id = def_id;
+	proto_test.handle_sorryserver_disconnect_rs_endpoint = boost::asio::ip::tcp::endpoint();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	test_obj.get_sorry_socket()->close_call_check = false;
+	test_obj.get_sorry_socket()->close_res = false;
+
+	test_obj.test_call();
+
+	// unit_test [10] up_thread_sorryserver_mod_disconnect socket close check
+	std::cout << "[10] up_thread_sorryserver_mod_disconnect socket close check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_socket()->close_call_check);
+
+	// unit_test [11] up_thread_sorryserver_mod_disconnect endpoint not update check
+	std::cout << "[11] up_thread_sorryserver_mod_disconnect endpoint not update  check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_endpoint() == boost::asio::ip::tcp::endpoint());
+
+	// unit_test [12] up_thread_sorryserver_mod_disconnect module parameter check thread id
+	std::cout << "[12] up_thread_sorryserver_mod_disconnect module parameter check thread id" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id == proc_id);
+	
+	// unit_test [13] up_thread_sorryserver_mod_disconnect module parameter check endpoint
+	std::cout << "[13] up_thread_sorryserver_mod_disconnect module parameter check endpoint" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint == boost::asio::ip::tcp::endpoint());
+	
+	// unit_test [14] up_thread_sorryserver_mod_disconnect not fond function error check
+	std::cout << "[14] up_thread_sorryserver_mod_disconnect not fond function error check" << std::endl;
+	test_obj.up_thread_function_map_clear();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogError_id = 0;
+	test_obj.test_call();
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	
+	// unit_test [15] up_thread_sorryserver_mod_disconnect returnd illegal EVENT_TAG error check
+	std::cout << "[15] up_thread_sorryserver_mod_disconnect returnd illegal EVENT_TAG error check" << std::endl;
+	test_obj.up_thread_module_event_map_clear();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogError_id = 0;
+	test_obj.test_call();
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	
+	// unit_test [16] up_thread_sorryserver_mod_disconnect protocol_module NULL error check
+	std::cout << "[16] up_thread_sorryserver_mod_disconnect protocol_module NULL error check" << std::endl;
+	test_obj.set_protocol_module(NULL);
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogError_id = 0;
+	test_obj.test_call();
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	
+	mutex_lock_test test_lock_obj(vs,io);
+	test_lock_obj.set_up_thread_sorryserver_disconnect_event_test();
+	
+	test_lock_obj.test_thread_wait.lock();
+	test_lock_obj.befor_thread_id = proc_id;
+	test_lock_obj.after_thread_id = proc_id;
+	test_lock_obj.mutex_lock();
+	
+	boost::thread test_thread(boost::bind(&mutex_lock_test::test_run,&test_lock_obj));
+	
+	BOOST_CHECK(test_lock_obj.befor_thread_id == proc_id);
+	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
+	
+	boost::thread::id test_id = test_thread.get_id();
+	
+	BOOST_CHECK(test_id != proc_id);
+	
+	// test start
+	test_lock_obj.test_thread_wait.unlock();
+	sleep(1);
+	
+	// unit_test [17] up_thread_sorryserver_mod_disconnect thread block test (mutex lock)
+	std::cout << "[17] up_thread_sorryserver_mod_disconnect thread block test (mutex lock)" << std::endl;
+	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
+	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
+	
+	test_lock_obj.mutex_unlock();
+	sleep(1);
+	
+	// unit_test [18] up_thread_sorryserver_mod_disconnect thread run test (mutex unlock)
+	std::cout << "[18] up_thread_sorryserver_mod_disconnect thread run test (mutex unlock)" << std::endl;
+	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
+	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
+	
+	// unit_test [19] up_thread_sorryserver_mod_disconnect thread run after mutex unlock test
+	std::cout << "[19] up_thread_sorryserver_mod_disconnect thread run after mutex unlock test" << std::endl;
+	BOOST_CHECK(test_lock_obj.mutex_trylock());
+	test_lock_obj.mutex_unlock();
+	
+	BOOST_MESSAGE( "----- up_thread_sorryserver_mod_disconnect test end -----" );
+}
+
+// down_thread_sorryserver_mod_disconnect test
+// down_thread_sorryserver_mod_disconnect test class
+class down_thread_sorryserver_mod_disconnect_test_class : public module_event_map_test_base_class{
+	public:
+		down_thread_sorryserver_mod_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+		};
+		
+		~down_thread_sorryserver_mod_disconnect_test_class(){};
+		
+		void test_call(){
+			l7vs::tcp_session::down_thread_sorryserver_mod_disconnect(LOCAL_PROC);
+		};
+		
+		boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
+			return sorryserver_socket.second;
+		};
+
+		boost::asio::ip::tcp::endpoint& get_sorry_endpoint(){
+			return sorryserver_socket.first;
+		}
+		
+};
+
+void down_thread_sorryserver_mod_disconnect_test(){
+	
+	BOOST_MESSAGE( "----- down_thread_sorryserver_mod_disconnect test start -----" );
+	
+	boost::asio::io_service io;
+	
+	l7vs::virtualservice_tcp vs;	
+	
+	down_thread_sorryserver_mod_disconnect_test_class test_obj(vs,io);
+	
+	std::string test_protocol_name("test protocol");
+	l7vs::test_protocol_module proto_test(test_protocol_name);
+
+	test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
+	
+	l7vs::protocol_module_base::EVENT_TAG chek_event[7];
+	chek_event[0] = l7vs::protocol_module_base::CLIENT_DISCONNECT;
+	chek_event[1] = l7vs::protocol_module_base::CLIENT_CONNECTION_CHECK;
+	chek_event[2] = l7vs::protocol_module_base::REALSERVER_RECV;
+	chek_event[3] = l7vs::protocol_module_base::REALSERVER_DISCONNECT;
+	chek_event[4] = l7vs::protocol_module_base::SORRYSERVER_RECV;
+	chek_event[5] = l7vs::protocol_module_base::SORRYSERVER_DISCONNECT;
+	chek_event[6] = l7vs::protocol_module_base::FINALIZE;
+	
+	// unit_test [1] down_thread_sorryserver_mod_disconnect down_thread_next_call_function update check
+	std::cout << "[1] down_thread_sorryserver_mod_disconnect down_thread_next_call_function update check" << std::endl;
+	for(int i = 0; i < 7;i++){
+		proto_test.handle_sorryserver_disconnect_res_tag = chek_event[i];
+		test_obj.test_call();
+		BOOST_CHECK(test_obj.chk_down_thread_next_call_function(chek_event[i]));
+	}
+
+	// module parameter check
+	boost::thread::id def_id;
+	boost::thread::id proc_id = boost::this_thread::get_id();
+	boost::asio::ip::tcp::endpoint test_end(boost::asio::ip::address::from_string("100.102.103.104"), 7777);
+	test_obj.get_sorry_endpoint() = test_end;
+	test_obj.set_down_thread_id(proc_id);
+	proto_test.handle_sorryserver_disconnect_thread_id = def_id;
+	proto_test.handle_sorryserver_disconnect_rs_endpoint = boost::asio::ip::tcp::endpoint();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id != proc_id);
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint != test_end);
+	test_obj.get_sorry_socket()->close_call_check = false;
+	test_obj.get_sorry_socket()->close_res = true;
+
+	test_obj.test_call();
+
+	// unit_test [2] down_thread_sorryserver_mod_disconnect socket close check
+	std::cout << "[2] down_thread_sorryserver_mod_disconnect socket close check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_socket()->close_call_check);
+
+	// unit_test [3] down_thread_sorryserver_mod_disconnect endpoint not update check
+	std::cout << "[3] down_thread_sorryserver_mod_disconnect endpoint not update  check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_endpoint() == test_end);
+
+	// unit_test [4] down_thread_sorryserver_mod_disconnect module parameter check thread id
+	std::cout << "[4] down_thread_sorryserver_mod_disconnect module parameter check thread id" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id == proc_id);
+	
+	// unit_test [5] down_thread_sorryserver_mod_disconnect module parameter check endpoint
+	std::cout << "[5] down_thread_sorryserver_mod_disconnect module parameter check endpoint" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint == test_end);
+	
+	proto_test.handle_sorryserver_disconnect_thread_id = def_id;
+	proto_test.handle_sorryserver_disconnect_rs_endpoint = boost::asio::ip::tcp::endpoint();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	test_obj.get_sorry_socket()->close_call_check = false;
+	test_obj.get_sorry_socket()->close_res = false;
+
+	test_obj.test_call();
+
+	// unit_test [6] down_thread_sorryserver_mod_disconnect socket close check
+	std::cout << "[6] down_thread_sorryserver_mod_disconnect socket close check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_socket()->close_call_check);
+
+	// unit_test [7] down_thread_sorryserver_mod_disconnect endpoint not update check
+	std::cout << "[7] down_thread_sorryserver_mod_disconnect endpoint not update  check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_endpoint() == boost::asio::ip::tcp::endpoint());
+
+	// unit_test [8] down_thread_sorryserver_mod_disconnect module parameter check thread id
+	std::cout << "[8] down_thread_sorryserver_mod_disconnect module parameter check thread id" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id == proc_id);
+	
+	// unit_test [9] down_thread_sorryserver_mod_disconnect module parameter check endpoint
+	std::cout << "[9] down_thread_sorryserver_mod_disconnect module parameter check endpoint" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint == test_end);
+	
+	proto_test.handle_sorryserver_disconnect_thread_id = def_id;
+	proto_test.handle_sorryserver_disconnect_rs_endpoint = boost::asio::ip::tcp::endpoint();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	test_obj.get_sorry_socket()->close_call_check = false;
+	test_obj.get_sorry_socket()->close_res = false;
+
+	test_obj.test_call();
+
+	// unit_test [10] down_thread_sorryserver_mod_disconnect socket close check
+	std::cout << "[10] down_thread_sorryserver_mod_disconnect socket close check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_socket()->close_call_check);
+
+	// unit_test [11] down_thread_sorryserver_mod_disconnect endpoint not update check
+	std::cout << "[11] down_thread_sorryserver_mod_disconnect endpoint not update  check" << std::endl;
+	BOOST_CHECK(test_obj.get_sorry_endpoint() == boost::asio::ip::tcp::endpoint());
+
+	// unit_test [12] down_thread_sorryserver_mod_disconnect module parameter check thread id
+	std::cout << "[12] down_thread_sorryserver_mod_disconnect module parameter check thread id" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_thread_id == proc_id);
+	
+	// unit_test [13] down_thread_sorryserver_mod_disconnect module parameter check endpoint
+	std::cout << "[13] down_thread_sorryserver_mod_disconnect module parameter check endpoint" << std::endl;
+	BOOST_CHECK(proto_test.handle_sorryserver_disconnect_rs_endpoint == boost::asio::ip::tcp::endpoint());
+	
+	// unit_test [14] down_thread_sorryserver_mod_disconnect not fond function error check
+	std::cout << "[14] down_thread_sorryserver_mod_disconnect not fond function error check" << std::endl;
+	test_obj.down_thread_function_map_clear();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogError_id = 0;
+	test_obj.test_call();
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	
+	// unit_test [15] down_thread_sorryserver_mod_disconnect returnd illegal EVENT_TAG error check
+	std::cout << "[15] down_thread_sorryserver_mod_disconnect returnd illegal EVENT_TAG error check" << std::endl;
+	test_obj.down_thread_module_event_map_clear();
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogError_id = 0;
+	test_obj.test_call();
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	
+	// unit_test [16] down_thread_sorryserver_mod_disconnect protocol_module NULL error check
+	std::cout << "[16] down_thread_sorryserver_mod_disconnect protocol_module NULL error check" << std::endl;
+	test_obj.set_protocol_module(NULL);
+	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
+	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogError_id = 0;
+	test_obj.test_call();
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	
+	mutex_lock_test test_lock_obj(vs,io);
+	test_lock_obj.set_down_thread_sorryserver_disconnect_event_test();
+	
+	test_lock_obj.test_thread_wait.lock();
+	test_lock_obj.befor_thread_id = proc_id;
+	test_lock_obj.after_thread_id = proc_id;
+	test_lock_obj.mutex_lock();
+	
+	boost::thread test_thread(boost::bind(&mutex_lock_test::test_run,&test_lock_obj));
+	
+	BOOST_CHECK(test_lock_obj.befor_thread_id == proc_id);
+	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
+	
+	boost::thread::id test_id = test_thread.get_id();
+	
+	BOOST_CHECK(test_id != proc_id);
+	
+	// test start
+	test_lock_obj.test_thread_wait.unlock();
+	sleep(1);
+	
+	// unit_test [17] down_thread_sorryserver_mod_disconnect thread block test (mutex lock)
+	std::cout << "[17] down_thread_sorryserver_mod_disconnect thread block test (mutex lock)" << std::endl;
+	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
+	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
+	
+	test_lock_obj.mutex_unlock();
+	sleep(1);
+	
+	// unit_test [18] down_thread_sorryserver_mod_disconnect thread run test (mutex unlock)
+	std::cout << "[18] down_thread_sorryserver_mod_disconnect thread run test (mutex unlock)" << std::endl;
+	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
+	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
+	
+	// unit_test [19] down_thread_sorryserver_mod_disconnect thread run after mutex unlock test
+	std::cout << "[19] down_thread_sorryserver_mod_disconnect thread run after mutex unlock test" << std::endl;
+	BOOST_CHECK(test_lock_obj.mutex_trylock());
+	test_lock_obj.mutex_unlock();
+	
+	BOOST_MESSAGE( "----- down_thread_sorryserver_mod_disconnect test end -----" );
+}
+
+
 
 // down_thread_sorryserver_disconnetc_event test
 // down_thread_sorryserver_disconnetc_event test class
@@ -9426,6 +9880,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_event_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_event_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_event_test ) );
+	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_mod_disconnect_test ) );
+	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_mod_disconnect_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorry_enable_event_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );

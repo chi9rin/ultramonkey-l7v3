@@ -650,7 +650,7 @@ namespace l7vs{
 				tcp_socket::connect_ec = &ec;
 				return tcp_socket::connect_res;
 			};
-				
+			
 			//! close socket
 			//! @param[out]		ec is reference error code object
 			//! @return 		true is socket close
@@ -660,6 +660,7 @@ namespace l7vs{
 				ec = close_out_ec;
 				return close_res;
 			};
+			
 			bool close_res;
 			boost::system::error_code close_out_ec;
 			bool close_call_check;
@@ -670,7 +671,7 @@ namespace l7vs{
 				ec = tcp_socket::set_non_blocking_mode_ec;
 				return tcp_socket::set_non_blocking_mode_res;
 			};
-				
+			
 			//! write socket
 			//! @param[in]		buffers is wite data buffer
 			//! @param[out]		ec is reference error code object
@@ -682,12 +683,13 @@ namespace l7vs{
 				ec = write_some_ec;
 				return write_some_res;
 			};
+			
 			std::size_t write_some_res;
 			boost::system::error_code write_some_ec;
 			void* write_some_buffers_in;
 			std::size_t write_some_buffers_size_in;
 			bool write_some_call_check;
-				
+			
 			//! read socket
 			//! @param[out]		buffers is read data buffer
 			//! @param[out]		ec is reference error code object
@@ -703,6 +705,7 @@ namespace l7vs{
 				ec = read_some_ec;
 				return read_some_res;
 			};
+			
 			std::size_t read_some_res;
 			boost::system::error_code read_some_ec;
 			boost::array<char,MAX_BUFFER_SIZE> read_some_buffers_out;
