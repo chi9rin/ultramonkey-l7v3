@@ -28,11 +28,11 @@ bool	protocol_module_cinsert::is_tcp()
 	if( LOG_LV_DEBUG == getloglevel())
 	{
 		putLogDebug(	0,
-						"function in  : [protocol_module_cinsert::is_tcp]",
+						"function in  : [is_tcp]",
 						__FILE__,
 						__LINE__ );
 		putLogDebug(	0,
-						"function out : [protocol_module_cinsert::is_tcp] : return = [true]",
+						"function out : [is_tcp] : return = [true]",
 						__FILE__,
 						__LINE__ );
 	}
@@ -46,11 +46,11 @@ bool	protocol_module_cinsert::is_udp()
 	if( LOG_LV_DEBUG == getloglevel())
 	{
 		putLogDebug(	0,
-						"function in  : [protocol_module_cinsert::is_udp]",
+						"function in  : [is_udp]",
 						__FILE__,
 						__LINE__ );
 		putLogDebug(	0,
-						"function out : [protocol_module_cinsert::is_udp] : return = [false]",
+						"function out : [is_udp] : return = [false]",
 						__FILE__,
 						__LINE__ );
 	}
@@ -74,7 +74,7 @@ void	protocol_module_cinsert::initialize(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::initialize] : "
+		boost::format	outform(	"function in  : [initialize] : "
 									"inlist_begin = [%p], "
 									"inlist_end = [%p], "
 									"inlist_next = [%p], "
@@ -99,7 +99,7 @@ void	protocol_module_cinsert::initialize(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::initialize] : "
+		boost::format	outform(	"function out : [initialize] : "
 									"rs_list_begin = [%p], "
 									"rs_list_end = [%p], "
 									"rs_list_next = [%p], "
@@ -123,18 +123,11 @@ void	protocol_module_cinsert::finalize()
 	if( LOG_LV_DEBUG == getloglevel())
 	{
 		putLogDebug(	0,
-						"function in  : [protocol_module_cinsert::finalize]",
+						"function in  : [finalize]",
 						__FILE__,
 						__LINE__ );
 	}
 	//---------- DEBUG LOG END ------------------------------
-
-	getloglevel.clear();
-	putLogFatal.clear();
-	putLogError.clear();
-	putLogWarn.clear();
-	putLogInfo.clear();
-	putLogDebug.clear();
 
 	rs_list_begin.clear();
 	rs_list_end.clear();
@@ -159,11 +152,18 @@ void	protocol_module_cinsert::finalize()
 	if( LOG_LV_DEBUG == getloglevel())
 	{
 		putLogDebug(	0,
-						"function out : [protocol_module_cinsert::finalize]",
+						"function out : [finalize]",
 						__FILE__,
 						__LINE__ );
 	}
 	//---------- DEBUG LOG END ------------------------------
+
+	getloglevel.clear();
+	putLogFatal.clear();
+	putLogError.clear();
+	putLogWarn.clear();
+	putLogInfo.clear();
+	putLogDebug.clear();
 
 }
 
@@ -181,7 +181,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::check_parameter] : "
+		boost::format	outform(	"function in  : [check_parameter] : "
 									"args.size = [%d], "
 									"args = [%s] ");
 
@@ -522,7 +522,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::check_parameter] : "
+		boost::format	outform(	"function out : [check_parameter] : "
 									"check_result.flag = [%d], "
 									"check_result.message = [%s] ");
 
@@ -546,7 +546,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::set_parameter] : "
+		boost::format	outform(	"function in  : [set_parameter] : "
 									"args.size = [%d], "
 									"args = [%s] ");
 
@@ -926,7 +926,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::set_parameter] : "
+		boost::format	outform(	"function out : [set_parameter] : "
 									"check_result.flag = [%d], "
 									"check_result.message = [%s] ");
 
@@ -950,7 +950,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::add_parameter] : "
+		boost::format	outform(	"function in  : [add_parameter] : "
 									"args.size = [%d], "
 									"args = [%s] ");
 
@@ -1001,7 +1001,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::add_parameter] : "
+		boost::format	outform(	"function out : [add_parameter] : "
 									"check_result.flag = [%d], "
 									"check_result.message = [%s] ");
 
@@ -1031,7 +1031,7 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::register_schedule] : "
+		boost::format	outform(	"function in  : [register_schedule] : "
 									"inschedule = [%p]");
 
 		outform % &inschedule;
@@ -1048,7 +1048,7 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::register_schedule] : "
+		boost::format	outform(	"function out : [register_schedule] : "
 									"schedule_tcp = [%p]");
 
 		outform % &schedule_tcp;
@@ -1080,7 +1080,7 @@ protocol_module_cinsert::handle_session_initialize(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_session_initialize] : "
+		boost::format	outform(	"function in  : [handle_session_initialize] : "
 									"up_thread_id = [%s], "
 									"down_thread_id = [%s], "
 									"client_endpoint_tcp = [%s], "
@@ -1139,10 +1139,12 @@ protocol_module_cinsert::handle_session_initialize(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_initialize] : "
+			boost::format	outform(	"function out : [handle_session_initialize] : "
+										"up_thread_id = [%s], "
+										"down_thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % up_thread_id % down_thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -1157,10 +1159,12 @@ protocol_module_cinsert::handle_session_initialize(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_initialize] : "
+		boost::format	outform(	"function out : [handle_session_initialize] : "
+									"up_thread_id = [%s], "
+									"down_thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % ACCEPT;
+		outform % up_thread_id % down_thread_id % ACCEPT;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -1183,7 +1187,7 @@ protocol_module_cinsert::handle_session_finalize(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_session_finalize] : "
+		boost::format	outform(	"function in  : [handle_session_finalize] : "
 									"up_thread_id = [%s], "
 									"down_thread_id = [%s]");
 
@@ -1223,10 +1227,12 @@ protocol_module_cinsert::handle_session_finalize(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_finalize] : "
+			boost::format	outform(	"function out : [handle_session_finalize] : "
+										"up_thread_id = [%s], "
+										"down_thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % STOP;
+			outform % up_thread_id % down_thread_id % STOP;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -1241,10 +1247,12 @@ protocol_module_cinsert::handle_session_finalize(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_session_finalize] : "
+		boost::format	outform(	"function out : [handle_session_finalize] : "
+									"up_thread_id = [%s], "
+									"down_thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % STOP;
+		outform % up_thread_id % down_thread_id % STOP;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -1264,7 +1272,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_accept] : "
+		boost::format	outform(	"function in  : [handle_accept] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -1308,10 +1316,11 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_accept] : "
+			boost::format	outform(	"function out : [handle_accept] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -1326,10 +1335,11 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_accept] : "
+		boost::format	outform(	"function out : [handle_accept] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -1353,7 +1363,7 @@ protocol_module_cinsert::handle_client_recv(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_client_recv] : "
+		boost::format	outform(	"function in  : [handle_client_recv] : "
 									"thread_id = [%s], "
 									"recvlen = [%d]");
 
@@ -1939,10 +1949,11 @@ protocol_module_cinsert::handle_client_recv(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_recv] : "
+			boost::format	outform(	"function out : [handle_client_recv] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -1957,10 +1968,11 @@ protocol_module_cinsert::handle_client_recv(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_recv] : "
+		boost::format	outform(	"function out : [handle_client_recv] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -1982,7 +1994,7 @@ protocol_module_cinsert::handle_realserver_select(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_select] : "
+		boost::format	outform(	"function in  : [handle_realserver_select] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -2162,10 +2174,11 @@ protocol_module_cinsert::handle_realserver_select(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_select] : "
+			boost::format	outform(	"function out : [handle_realserver_select] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -2180,11 +2193,12 @@ protocol_module_cinsert::handle_realserver_select(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_select] : "
+		boost::format	outform(	"function out : [handle_realserver_select] : "
+									"thread_id = [%s], "
 									"next_status = [%d], "
 									"rs_endpoint = [%s]");
 
-		outform % status % rs_endpoint;
+		outform % thread_id % status % rs_endpoint;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -2220,7 +2234,7 @@ protocol_module_cinsert::handle_realserver_connect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_connect] : "
+		boost::format	outform(	"function in  : [handle_realserver_connect] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -2571,10 +2585,11 @@ protocol_module_cinsert::handle_realserver_connect(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connect] : "
+			boost::format	outform(	"function out : [handle_realserver_connect] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -2589,11 +2604,12 @@ protocol_module_cinsert::handle_realserver_connect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connect] : "
+		boost::format	outform(	"function out : [handle_realserver_connect] : "
+									"thread_id = [%s], "
 									"next_status = [%d], "
 									"datalen = [%d]");
 
-		outform % status % datalen;
+		outform % thread_id % status % datalen;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -2616,7 +2632,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_connection_fail] : "
+		boost::format	outform(	"function in  : [handle_realserver_connection_fail] : "
 									"thread_id = [%s], "
 									"rs_endpoint = [%s]");
 
@@ -2660,10 +2676,11 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connection_fail] : "
+			boost::format	outform(	"function out : [handle_realserver_connection_fail] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -2678,10 +2695,11 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_connection_fail] : "
+		boost::format	outform(	"function out : [handle_realserver_connection_fail] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -2701,7 +2719,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_send] : "
+		boost::format	outform(	"function in  : [handle_realserver_send] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -2815,10 +2833,11 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_send] : "
+			boost::format	outform(	"function out : [handle_realserver_send] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -2833,10 +2852,11 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_send] : "
+		boost::format	outform(	"function out : [handle_realserver_send] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -2858,7 +2878,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_select] : "
+		boost::format	outform(	"function in  : [handle_sorryserver_select] : "
 									"thread_id = [%s], "
 									"sorry_endpoint = [%s]");
 
@@ -2930,10 +2950,11 @@ protocol_module_cinsert::handle_sorryserver_select(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_select] : "
+			boost::format	outform(	"function out : [handle_sorryserver_select] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -2948,11 +2969,12 @@ protocol_module_cinsert::handle_sorryserver_select(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_select] : "
+		boost::format	outform(	"function out : [handle_sorryserver_select] : "
+									"thread_id = [%s], "
 									"next_status = [%d], "
 									"sorry_endpoint = [%s]");
 
-		outform % status % sorry_endpoint;
+		outform % thread_id % status % sorry_endpoint;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -2975,7 +2997,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_connect] : "
+		boost::format	outform(	"function in  : [handle_sorryserver_connect] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -3348,10 +3370,11 @@ protocol_module_cinsert::handle_sorryserver_connect(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connect] : "
+			boost::format	outform(	"function out : [handle_sorryserver_connect] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -3366,11 +3389,12 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connect] : "
+		boost::format	outform(	"function out : [handle_sorryserver_connect] : "
+									"thread_id = [%s], "
 									"next_status = [%d], "
 									"datalen = [%d]");
 
-		outform % status % datalen;
+		outform % thread_id % status % datalen;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -3392,7 +3416,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_connection_fail] : "
+		boost::format	outform(	"function in  : [handle_sorryserver_connection_fail] : "
 									"thread_id = [%s], "
 									"sorry_endpoint = [%s]");
 
@@ -3436,10 +3460,11 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connection_fail] : "
+			boost::format	outform(	"function out : [handle_sorryserver_connection_fail] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -3454,10 +3479,11 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_connection_fail] : "
+		boost::format	outform(	"function out : [handle_sorryserver_connection_fail] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -3477,7 +3503,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_send] : "
+		boost::format	outform(	"function in  : [handle_sorryserver_send] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -3591,10 +3617,11 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_send] : "
+			boost::format	outform(	"function out : [handle_sorryserver_send] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -3609,10 +3636,11 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_send] : "
+		boost::format	outform(	"function out : [handle_sorryserver_send] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -3636,7 +3664,7 @@ protocol_module_cinsert::handle_realserver_recv(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_recv] : "
+		boost::format	outform(	"function in  : [handle_realserver_recv] : "
 									"thread_id = [%s], "
 									"rs_endpoint = [%s], "
 									"recvlen = [%d]");
@@ -4231,10 +4259,11 @@ protocol_module_cinsert::handle_realserver_recv(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_recv] : "
+			boost::format	outform(	"function out : [handle_realserver_recv] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -4249,10 +4278,11 @@ protocol_module_cinsert::handle_realserver_recv(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_recv] : "
+		boost::format	outform(	"function out : [handle_realserver_recv] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -4287,7 +4317,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_recv] : "
+		boost::format	outform(	"function in  : [handle_sorryserver_recv] : "
 									"thread_id = [%s], "
 									"sorry_endpoint = [%s], "
 									"recvlen = [%d]");
@@ -4872,10 +4902,11 @@ protocol_module_cinsert::handle_sorryserver_recv(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_recv] : "
+			boost::format	outform(	"function out : [handle_sorryserver_recv] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -4890,10 +4921,11 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_recv] : "
+		boost::format	outform(	"function out : [handle_sorryserver_recv] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -4924,7 +4956,7 @@ protocol_module_cinsert::handle_client_connection_check(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_client_connection_check] : "
+		boost::format	outform(	"function in  : [handle_client_connection_check] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -5290,10 +5322,11 @@ protocol_module_cinsert::handle_client_connection_check(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_connection_check] : "
+			boost::format	outform(	"function out : [handle_client_connection_check] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -5308,11 +5341,12 @@ protocol_module_cinsert::handle_client_connection_check(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_connection_check] : "
+		boost::format	outform(	"function out : [handle_client_connection_check] : "
+									"thread_id = [%s], "
 									"next_status = [%d], "
 									"datalen = [%d]");
 
-		outform % status % datalen;
+		outform % thread_id % status % datalen;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -5345,7 +5379,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_client_send] : "
+		boost::format	outform(	"function in  : [handle_client_send] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -5503,10 +5537,11 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_send] : "
+			boost::format	outform(	"function out : [handle_client_send] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -5521,10 +5556,11 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_client_send] : "
+		boost::format	outform(	"function out : [handle_client_send] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -5545,7 +5581,7 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform_1(	"function in  : [protocol_module_cinsert::handle_client_disconnect] : "
+		boost::format	outform_1(	"function in  : [handle_client_disconnect] : "
 									"thread_id = [%s]");
 
 		outform_1 % thread_id;
@@ -5555,10 +5591,11 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 						__FILE__,
 						__LINE__ );
 
-		boost::format	outform_2(	"function out : [protocol_module_cinsert::handle_client_disconnect] : "
+		boost::format	outform_2(	"function out : [handle_client_disconnect] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform_2 % FINALIZE;
+		outform_2 % thread_id % FINALIZE;
 
 		putLogDebug(	0,
 						outform_2.str(),
@@ -5578,7 +5615,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorry_enable] : "
+		boost::format	outform(	"function in  : [handle_sorry_enable] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -5780,10 +5817,11 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_enable] : "
+			boost::format	outform(	"function out : [handle_sorry_enable] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -5798,10 +5836,11 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_enable] : "
+		boost::format	outform(	"function out : [handle_sorry_enable] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -5822,7 +5861,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorry_disable] : "
+		boost::format	outform(	"function in  : [handle_sorry_disable] : "
 									"thread_id = [%s]");
 
 		outform % thread_id;
@@ -6024,10 +6063,11 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_disable] : "
+			boost::format	outform(	"function out : [handle_sorry_disable] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -6042,10 +6082,11 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorry_disable] : "
+		boost::format	outform(	"function out : [handle_sorry_disable] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -6067,7 +6108,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_realserver_disconnect] : "
+		boost::format	outform(	"function in  : [handle_realserver_disconnect] : "
 									"thread_id = [%s], "
 									"rs_endpoint = [%s]");
 
@@ -6215,10 +6256,11 @@ protocol_module_cinsert::handle_realserver_disconnect(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_disconnect] : "
+			boost::format	outform(	"function out : [handle_realserver_disconnect] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -6233,10 +6275,11 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_realserver_disconnect] : "
+		boost::format	outform(	"function out : [handle_realserver_disconnect] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
@@ -6258,7 +6301,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function in  : [protocol_module_cinsert::handle_sorryserver_disconnect] : "
+		boost::format	outform(	"function in  : [handle_sorryserver_disconnect] : "
 									"thread_id = [%s], "
 									"sorry_endpoint = [%s]");
 
@@ -6407,10 +6450,11 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 		//---------- DEBUG LOG START ------------------------------
 		if( LOG_LV_DEBUG == getloglevel())
 		{
-			boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_disconnect] : "
+			boost::format	outform(	"function out : [handle_sorryserver_disconnect] : "
+										"thread_id = [%s], "
 										"next_status = [%d]");
 	
-			outform % FINALIZE;
+			outform % thread_id % FINALIZE;
 	
 			putLogDebug(	0,
 							outform.str(),
@@ -6425,10 +6469,11 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	//---------- DEBUG LOG START ------------------------------
 	if( LOG_LV_DEBUG == getloglevel())
 	{
-		boost::format	outform(	"function out : [protocol_module_cinsert::handle_sorryserver_disconnect] : "
+		boost::format	outform(	"function out : [handle_sorryserver_disconnect] : "
+									"thread_id = [%s], "
 									"next_status = [%d]");
 
-		outform % status;
+		outform % thread_id % status;
 
 		putLogDebug(	0,
 						outform.str(),
