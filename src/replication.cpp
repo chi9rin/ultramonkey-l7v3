@@ -1,13 +1,26 @@
-//
-//	@file	replication.h
-//	@brief	Replication class
-//
-//	copyright (c) xxx corporation. 2009
-//	mail: 
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*
+ *	@file	replication.cpp
+ *	@brief	Replication class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include	<boost/lexical_cast.hpp>
 #include	<boost/format.hpp>
 #include	"replication.h"
@@ -894,7 +907,7 @@ int			replication::handle_send(){
 		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 		return -1;
 	}else if ( REPLICATION_MASTER_STOP == replication_state.service_status ){ 
-		Logger::putLogInfo( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Can not send Replication data, because mode is MASTER_STOP.", __FILE__, __LINE__ );
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Can not send Replication data, because mode is MASTER_STOP.", __FILE__, __LINE__ );
 		return 0;
 	}
 
