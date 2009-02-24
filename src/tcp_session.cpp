@@ -73,7 +73,7 @@ namespace l7vs{
 		add_up_thread_event.second = UP_FUNC_SORRYSERVER_SEND;
 		up_thread_module_event_map.insert(add_up_thread_event);
 		add_up_thread_event.first = protocol_module_base::SORRYSERVER_DISCONNECT;
-		add_up_thread_event.second = UP_FUNC_SORRYSERVER_DISCONNECT;
+		add_up_thread_event.second = UP_FUNC_SORRYSERVER_MOD_DISCONNECT;
 		up_thread_module_event_map.insert(add_up_thread_event);
 		add_up_thread_event.first = protocol_module_base::FINALIZE;
 		add_up_thread_event.second = UP_FUNC_EXIT;
@@ -141,6 +141,9 @@ namespace l7vs{
 		add_up_thread_func.first = UP_FUNC_SORRYSERVER_DISCONNECT;
 		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1);
 		up_thread_function_map.insert(add_up_thread_func);
+		add_up_thread_func.first = UP_FUNC_SORRYSERVER_MOD_DISCONNECT;
+		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1);
+		up_thread_function_map.insert(add_up_thread_func);
 		add_up_thread_func.first = UP_FUNC_SORRYSERVER_DISCONNECT_EVENT;
 		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1);
 		up_thread_function_map.insert(add_up_thread_func);
@@ -184,7 +187,7 @@ namespace l7vs{
 		add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_RECEIVE;
 		down_thread_module_event_map.insert(add_down_thread_event);
 		add_down_thread_event.first = protocol_module_base::SORRYSERVER_DISCONNECT;
-		add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_DISCONNECT;
+		add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
 		down_thread_module_event_map.insert(add_down_thread_event);
 		add_down_thread_event.first = protocol_module_base::FINALIZE;
 		add_down_thread_event.second = DOWN_FUNC_EXIT;
@@ -221,6 +224,9 @@ namespace l7vs{
 		down_thread_function_map.insert(add_down_thread_func);
 		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT;
 		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect,this,_1);
+		down_thread_function_map.insert(add_down_thread_func);
+		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
+		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_mod_disconnect,this,_1);
 		down_thread_function_map.insert(add_down_thread_func);
 		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT;
 		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1);
@@ -1758,7 +1764,57 @@ namespace l7vs{
 			down_thread_message_que.push(down_msg);
 		}
 	}
-	
+	//! up thread close sorryserver socket and raise module sorryserver disconnect event
+	//! @param[in]		process_type is prosecess type
+	void tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		protocol_module_base::EVENT_TAG module_event;
+		if(protocol_module == NULL){
+			//Error protocol_module NULL
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] protocol_module is NULL!";
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			up_thread_exit(process_type);
+			return;
+		}
+		
+		boost::system::error_code ec;
+		boost::asio::ip::tcp::endpoint sorry_endpoint = sorryserver_socket.first;
+		bool bres = sorryserver_socket.second->close(ec);
+		if(!bres){
+			sorryserver_socket.first = boost::asio::ip::tcp::endpoint();
+		}
+		{
+			boost::mutex::scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+			module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
+		}
+		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+		if(func_type == up_thread_module_event_map.end()){
+			//Error unknown protocol_module_base::EVENT_TAG return
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] protocol_module returnd illegal EVENT_TAG : ";
+			buf << module_event;	
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			up_thread_exit(process_type);
+			return;
+		}
+		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
+		if(func == up_thread_function_map.end()){
+			//Error not find function map
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
+			buf << func_type->second;
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			up_thread_exit(process_type);
+			return;
+		}
+		up_thread_next_call_function = func->second;
+	}
 	//! up thread raise module event of handle_sorryserver_disconnect
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
@@ -2549,6 +2605,58 @@ namespace l7vs{
 			up_thread_message_que.push(up_msg);
 			down_thread_message_que.push(down_msg);
 		}
+	}
+	//! down thread close sorryserver socket and raise module sorryserver disconnect event
+	//! @param[in]		process_type is prosecess type
+	void tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		protocol_module_base::EVENT_TAG module_event;
+		if(protocol_module == NULL){
+			//Error protocol_module NULL
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] protocol_module is NULL!";
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			down_thread_exit(process_type);
+			return;
+		}
+
+		boost::system::error_code ec;
+		boost::asio::ip::tcp::endpoint sorry_endpoint = sorryserver_socket.first;
+		bool bres = sorryserver_socket.second->close(ec);
+		if(!bres){
+			sorryserver_socket.first = boost::asio::ip::tcp::endpoint();
+		}
+		{
+			boost::mutex::scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+			module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id,sorry_endpoint);
+		}
+
+		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+		if(func_type == down_thread_module_event_map.end()){
+			//Error unknown protocol_module_base::EVENT_TAG return
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] protocol_module returnd illegal EVENT_TAG : ";
+			buf << module_event;
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			down_thread_exit(process_type);
+			return;
+		}
+		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
+		if(func == down_thread_function_map.end()){
+			//Error not find function map
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
+			buf << func_type->second;
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			down_thread_exit(process_type);
+			return;
+		}
+		down_thread_next_call_function = func->second;
 	}
 	//! down thread raise module event of handle_sorryserver_disconnect
 	//! @param[in]		process_type is prosecess type
