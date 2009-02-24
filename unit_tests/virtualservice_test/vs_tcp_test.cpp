@@ -43,7 +43,7 @@ void	virtualservice_tcp_test1(){
 	l7vs::virtualservice_element	element;
 	//set element value
 	element.udpmode					= false;
-	element.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+	element.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	element.udp_recv_endpoint		= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	element.realserver_vector.clear();
 	element.protocol_module_name	= "PMtest1";
@@ -150,6 +150,7 @@ void	virtualservice_tcp_test2(){
 	BOOST_CHECK( SESSION_POOL_NUM_PARAM == vs->get_pool_sessions().size() );
 	BOOST_CHECK( vs_err == false );
 	vs->finalize( vs_err );
+	BOOST_CHECK( vs_err == false );
 	delete vs;
 	vs = NULL;
 
@@ -382,7 +383,7 @@ void	virtualservice_tcp_test3(){
 	//set element value
 
 	element.udpmode					= false;
-	element.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	element.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	element.udp_recv_endpoint		= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	element.realserver_vector.clear();
 	element.protocol_module_name	= "PMtest1";
@@ -396,6 +397,8 @@ void	virtualservice_tcp_test3(){
 
 	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, element );
 	vs->initialize( vs_err );
+	BOOST_CHECK( vs_err == false );
+	BOOST_MESSAGE( vs_err.get_message() );
 
 	// unit_test[24]  replication dataが作成できるか確認(初回作成)
 	BOOST_MESSAGE( "-------24" );
@@ -435,7 +438,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_MESSAGE( "-------25" );
 	//変更前の値確認
 	BOOST_CHECK( false == vs->get_element().udpmode );
-	BOOST_CHECK( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) ) ==  vs->get_element().tcp_accept_endpoint );
+	BOOST_CHECK( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ) ==  vs->get_element().tcp_accept_endpoint );
 	BOOST_CHECK( udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) ) ==  vs->get_element().udp_recv_endpoint );
 	BOOST_CHECK( "PMtest1" == vs->get_element().protocol_module_name );
 	BOOST_CHECK( "SMtest1" == vs->get_element().schedule_module_name );
@@ -448,7 +451,7 @@ void	virtualservice_tcp_test3(){
 	//変更値の設定
 	l7vs::virtualservice_element	elem2;
 	elem2.udpmode					= false;
-	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
 	elem2.realserver_vector.clear();
 	elem2.protocol_module_name		= "PMtest1";
@@ -480,7 +483,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_MESSAGE( "-------26" );
 	l7vs::virtualservice_element	elem3;
 	elem3.udpmode					= true;
-	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
 	elem3.realserver_vector.clear();
 	elem3.protocol_module_name		= "PMtest1";
@@ -554,14 +557,14 @@ void	virtualservice_tcp_test3(){
 	// unit_test[29]  edit_virtualserviceのテスト(sorry_endpointの変更無し)
 	BOOST_MESSAGE( "-------29" );
 	elem2.udpmode					= false;
-	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
 	elem2.realserver_vector.clear();
 	elem2.protocol_module_name		= "PMtest1";
 	elem2.schedule_module_name		= "SMtest2";
 	elem2.protocol_args.clear();
 	elem2.sorry_maxconnection		= 5678LL;
-	elem2.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "255.255.255.255" ), (0) );
+	elem2.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) );
 	elem2.sorry_flag				= true;
 	elem2.qos_upstream				= 1024ULL;
 	elem2.qos_downstream			= 4096ULL;
@@ -584,14 +587,14 @@ void	virtualservice_tcp_test3(){
 	// unit_test[30]  edit_virtualserviceのテスト(sorry_endpointクリア)
 	BOOST_MESSAGE( "-------30" );
 	elem2.udpmode					= false;
-	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (60000) );
+	elem2.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
 	elem2.realserver_vector.clear();
 	elem2.protocol_module_name		= "PMtest1";
 	elem2.schedule_module_name		= "SMtest2";
 	elem2.protocol_args.clear();
 	elem2.sorry_maxconnection		= 5678LL;
-	elem2.sorry_endpoint			= tcp_ep_type();
+	elem2.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "255.255.255.255" ), (0) );
 	elem2.sorry_flag				= true;
 	elem2.qos_upstream				= 1024ULL;
 	elem2.qos_downstream			= 4096ULL;
@@ -615,7 +618,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_MESSAGE( "-------31" );
 	vs->call_handle_replication_interrupt( test_err );
 	rep_head =	reinterpret_cast<l7vs::virtualservice_base::replication_header*>( debugg_flug_struct::getInstance().get_rep_area() );
-	//data_numが0になってることを確認
+	//data_numが1になってることを確認
 	BOOST_CHECK( rep_head->data_num == 1 );
 	rep_data =	reinterpret_cast<l7vs::virtualservice_base::replication_data*>( ++rep_head );
 	//udpmode
@@ -644,7 +647,7 @@ void	virtualservice_tcp_test3(){
 	// unit_test[32]  vsをもう一つ作って、そこからもレプリケーションデータを作成する
 	BOOST_MESSAGE( "-------32" );
 	elem3.udpmode					= false;
-	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (8080) );
+	elem3.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (65000) );
 	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (40000) );
 	elem3.realserver_vector.clear();
 	elem3.protocol_module_name		= "PMtest1";
@@ -666,7 +669,7 @@ void	virtualservice_tcp_test3(){
 	//data_numが2になってることを確認
 	vs2->call_handle_replication_interrupt( test_err );
 	rep_head =	reinterpret_cast<l7vs::virtualservice_base::replication_header*>( debugg_flug_struct::getInstance().get_rep_area() );
-	//data_numが0になってることを確認
+	//data_numが2になってることを確認
 	BOOST_CHECK( rep_head->data_num == 2 );
 	rep_data =	reinterpret_cast<l7vs::virtualservice_base::replication_data*>( ++rep_head );
 	++rep_data;
@@ -697,15 +700,16 @@ void	virtualservice_tcp_test3(){
 	vs->finalize( vs_err );
 	delete vs;
 
-	// unit_test[33]  VSを再度作りなおして、レプリケーションデータが読み出せるか
+	// unit_test[33]  VSを削除したら、レプリケーションデータが読み出せないことを確認
 	BOOST_MESSAGE( "-------33" );
 	vs = new l7vs::vs_tcp( vsd, rep, element );
 	vs->initialize( vs_err );
 
 	//replication dataの確認
+	vs->call_handle_replication_interrupt( test_err );
 	vs2->call_handle_replication_interrupt( test_err );
 	rep_head =	reinterpret_cast<l7vs::virtualservice_base::replication_header*>( debugg_flug_struct::getInstance().get_rep_area() );
-	//data_numが0になってることを確認
+	//data_numが2になってることを確認
 	BOOST_CHECK( rep_head->data_num == 2 );
 	rep_data =	reinterpret_cast<l7vs::virtualservice_base::replication_data*>( ++rep_head );
 	//udpmode
@@ -719,29 +723,31 @@ void	virtualservice_tcp_test3(){
 	tmp_udp_ep << element.udp_recv_endpoint;
 	BOOST_CHECK( 0 == strncmp( rep_data->udp_endpoint, tmp_udp_ep.str().c_str(), 47 ) );
 	//sorry_maxconnection
-	BOOST_CHECK( rep_data->sorry_maxconnection == 0LL );
+	BOOST_CHECK( rep_data->sorry_maxconnection == 1234LL );
+	BOOST_MESSAGE( rep_data->sorry_maxconnection );
 	//sorry_endpoint
 	tmp_sorry_ep.str( "" );
-	tmp_sorry_ep << tcp_ep_type();
+	tmp_sorry_ep << tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
 	BOOST_CHECK( 0 == strncmp( rep_data->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 ) );
 	//sorry_flag
 	BOOST_CHECK( rep_data->sorry_flag == false );
 	//qos_up
-	BOOST_CHECK( rep_data->qos_up == 1024ULL );
+	BOOST_CHECK( rep_data->qos_up == 65535ULL );
 	//qos_down
-	BOOST_CHECK( rep_data->qos_down == 4096ULL );
+	BOOST_CHECK( rep_data->qos_down == 32767ULL );
 
-	//反映されたデータの確認
+	//古いデータの確認
 	BOOST_MESSAGE( "sorry max_conn : " << vs->get_element().sorry_maxconnection );
-	BOOST_CHECK( 0LL == vs->get_element().sorry_maxconnection );
+	BOOST_CHECK( 1234LL == vs->get_element().sorry_maxconnection );
 	BOOST_MESSAGE( "sorry endpoint : " << vs->get_element().sorry_endpoint );
-	BOOST_CHECK( tcp_ep_type() == vs->get_element().sorry_endpoint );
+	BOOST_CHECK( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) ) 
+					== vs->get_element().sorry_endpoint );
 	BOOST_MESSAGE( "sorry flag     : " << vs->get_element().sorry_flag );
 	BOOST_CHECK( false == vs->get_element().sorry_flag );
 	BOOST_MESSAGE( "QoS upstream   : " << vs->get_element().qos_upstream );
-	BOOST_CHECK( 1024ULL == vs->get_element().qos_upstream );
+	BOOST_CHECK( 65535ULL == vs->get_element().qos_upstream );
 	BOOST_MESSAGE( "QoS downstream : " << vs->get_element().qos_downstream );
-	BOOST_CHECK( 4096ULL == vs->get_element().qos_downstream );
+	BOOST_CHECK( 32767ULL == vs->get_element().qos_downstream );
 
 
 	//テストが終わったらStubのレプリケーションエリアを削除
@@ -783,7 +789,7 @@ void	virtualservice_tcp_test4(){
 	//set element value
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
@@ -857,7 +863,7 @@ void	virtualservice_tcp_test4(){
 	l7vs::virtualservice_element	elem2;
 	elem2.udpmode					= false;
 	elem2.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA00" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (55000) );
 	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem2.realserver_vector.clear();
 	elem2.protocol_module_name		= "PMtest1";
@@ -886,7 +892,7 @@ void	virtualservice_tcp_test4(){
 	l7vs::virtualservice_element	elem3;
 	elem3.udpmode					= false;
 	elem3.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 	elem3.udp_recv_endpoint			= 
 			udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem3.realserver_vector.clear();
@@ -894,20 +900,21 @@ void	virtualservice_tcp_test4(){
 	elem3.schedule_module_name		= "SMtest1";
 	elem3.protocol_args.clear();
 	elem3.sorry_maxconnection		= 3333LL;
-	elem3.sorry_endpoint			= tcp_ep_type();
+	elem3.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "255.255.255.255" ), (0) );
 	elem3.sorry_flag				= true;
 	elem3.qos_upstream				= 10ULL;
 	elem3.qos_downstream			= 20ULL;
 
 	vs->edit_virtualservice( elem3, vs_err );
 	BOOST_CHECK( vs_err == false );
+	BOOST_MESSAGE( vs_err.get_message() );
 	BOOST_CHECK( vs->get_element().sorry_endpoint == tcp_ep_type() );
 	BOOST_CHECK( vs->get_element().sorry_maxconnection == 0LL );
 	BOOST_CHECK( vs->get_element().sorry_flag == false );
 	BOOST_CHECK( vs->get_element().qos_upstream == elem3.qos_upstream );
 	BOOST_CHECK( vs->get_element().qos_downstream == elem3.qos_downstream );
 
-	// unit_test[42]  IPv6アドレスでレプリケーションデータの読み出し
+	// unit_test[42]  IPv6アドレスでレプリケーションデータの読み出し：削除したら作りなおしたデータになること
 	BOOST_MESSAGE( "-------42" );
 	//一旦VSを削除
 	vs->finalize( vs_err );
@@ -916,19 +923,16 @@ void	virtualservice_tcp_test4(){
 	vs = new l7vs::vs_tcp( vsd, rep, elem3 );
 	BOOST_CHECK( vs_err == false );
 	vs->call_read_replicationdata();
-	BOOST_CHECK( vs->get_element().udpmode == elem1.udpmode );
-	BOOST_CHECK( vs->get_element().tcp_accept_endpoint == elem1.tcp_accept_endpoint );
-	BOOST_CHECK( vs->get_element().udp_recv_endpoint == elem1.udp_recv_endpoint );
-	BOOST_CHECK( vs->get_element().protocol_module_name == elem1.protocol_module_name );
-	BOOST_CHECK( vs->get_element().schedule_module_name == elem1.schedule_module_name );
-	BOOST_CHECK( vs->get_element().sorry_maxconnection == elem1.sorry_maxconnection );
-	BOOST_CHECK( vs->get_element().sorry_endpoint == elem1.sorry_endpoint );
-	BOOST_CHECK( vs->get_element().sorry_flag == elem1.sorry_flag );
-	BOOST_CHECK( vs->get_element().qos_upstream == elem1.qos_upstream );
-	BOOST_CHECK( vs->get_element().qos_downstream == elem1.qos_downstream );
-
-	vs->initialize( vs_err );
-	BOOST_CHECK( vs_err == false );
+	BOOST_CHECK( vs->get_element().udpmode == elem3.udpmode );
+	BOOST_CHECK( vs->get_element().tcp_accept_endpoint == elem3.tcp_accept_endpoint );
+	BOOST_CHECK( vs->get_element().udp_recv_endpoint == elem3.udp_recv_endpoint );
+	BOOST_CHECK( vs->get_element().protocol_module_name == elem3.protocol_module_name );
+	BOOST_CHECK( vs->get_element().schedule_module_name == elem3.schedule_module_name );
+	BOOST_CHECK( vs->get_element().sorry_maxconnection == elem3.sorry_maxconnection );
+	BOOST_CHECK( vs->get_element().sorry_endpoint == elem3.sorry_endpoint );
+	BOOST_CHECK( vs->get_element().sorry_flag == elem3.sorry_flag );
+	BOOST_CHECK( vs->get_element().qos_upstream == elem3.qos_upstream );
+	BOOST_CHECK( vs->get_element().qos_downstream == elem3.qos_downstream );
 
 	// unit_test[43]  IPv6アドレスでVS変更(TCP endpoint不一致による失敗ケース)
 	BOOST_MESSAGE( "-------43" );
@@ -951,15 +955,15 @@ void	virtualservice_tcp_test4(){
 	vs->edit_virtualservice( elem4, vs_err );
 	BOOST_CHECK( vs_err == true );
 	BOOST_MESSAGE( vs->get_element().sorry_endpoint );
-	BOOST_CHECK( vs->get_element().sorry_endpoint == elem1.sorry_endpoint );
+	BOOST_CHECK( vs->get_element().sorry_endpoint == elem3.sorry_endpoint );
 	BOOST_MESSAGE( vs->get_element().sorry_maxconnection );
-	BOOST_CHECK( vs->get_element().sorry_maxconnection == elem1.sorry_maxconnection );
+	BOOST_CHECK( vs->get_element().sorry_maxconnection == elem3.sorry_maxconnection );
 	BOOST_MESSAGE( vs->get_element().sorry_flag );
-	BOOST_CHECK( vs->get_element().sorry_flag == elem1.sorry_flag );
+	BOOST_CHECK( vs->get_element().sorry_flag == elem3.sorry_flag );
 	BOOST_MESSAGE( vs->get_element().qos_upstream );
-	BOOST_CHECK( vs->get_element().qos_upstream == elem1.qos_upstream );
+	BOOST_CHECK( vs->get_element().qos_upstream == elem3.qos_upstream );
 	BOOST_MESSAGE( vs->get_element().qos_downstream );
-	BOOST_CHECK( vs->get_element().qos_downstream == elem1.qos_downstream );
+	BOOST_CHECK( vs->get_element().qos_downstream == elem3.qos_downstream );
 
 	// unit_test[44]  IPv6アドレスでRS追加
 	BOOST_MESSAGE( "-------44" );
@@ -967,7 +971,7 @@ void	virtualservice_tcp_test4(){
 	l7vs::virtualservice_element	elem_add_rs1;
 	elem_add_rs1.udpmode					= false;
 	elem_add_rs1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 	elem_add_rs1.udp_recv_endpoint			= 
 			udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem_add_rs1.realserver_vector.clear();
@@ -996,7 +1000,7 @@ void	virtualservice_tcp_test4(){
 	{
 		elem_add_rs2.udpmode					= false;
 		elem_add_rs2.tcp_accept_endpoint		= 
-				tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 		elem_add_rs2.udp_recv_endpoint			= 
 				udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 		elem_add_rs2.realserver_vector.clear();
@@ -1036,7 +1040,7 @@ void	virtualservice_tcp_test4(){
 	{
 		elem_edit_rs1.udpmode					= false;
 		elem_edit_rs1.tcp_accept_endpoint		= 
-				tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 		elem_edit_rs1.udp_recv_endpoint			= 
 				udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 		elem_edit_rs1.realserver_vector.clear();
@@ -1057,7 +1061,7 @@ void	virtualservice_tcp_test4(){
 	{
 		elem_edit_rs2.udpmode					= false;
 		elem_edit_rs2.tcp_accept_endpoint		= 
-				tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 		elem_edit_rs2.udp_recv_endpoint			= 
 				udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 		elem_edit_rs2.realserver_vector.clear();
@@ -1117,7 +1121,7 @@ void	virtualservice_tcp_test4(){
 	{
 		elem_del_rs2.udpmode					= false;
 		elem_del_rs2.tcp_accept_endpoint		= 
-				tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 		elem_del_rs2.udp_recv_endpoint			= 
 				udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 		elem_del_rs2.realserver_vector.clear();
@@ -1137,7 +1141,7 @@ void	virtualservice_tcp_test4(){
 	{
 		elem_del_rs3.udpmode					= false;
 		elem_del_rs3.tcp_accept_endpoint		= 
-				tcp_ep_type( boost::asio::ip::address::from_string( "1234:5678:90AB:CDEF:0000:0000:FEDC:BA09" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v6::loopback(), (50000) );
 		elem_del_rs3.udp_recv_endpoint			= 
 				udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 		elem_del_rs3.realserver_vector.clear();

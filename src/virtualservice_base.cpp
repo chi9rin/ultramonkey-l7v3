@@ -47,10 +47,21 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
 	schedmod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	rs_list.clear();
 	rs_mutex_list.clear();
-	element = inelement;
 	protomod = NULL;
 	schedmod = NULL;
 	this_id = boost::this_thread::get_id();
+	//
+	element = inelement;
+	if( LLONG_MAX == inelement.sorry_maxconnection )
+		element.sorry_maxconnection = 0LL;
+	if( INT_MAX == inelement.sorry_flag )
+		element.sorry_flag = 0;
+	if( inelement.sorry_endpoint ==
+			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "255.255.255.255" ), (0)) ){
+		element.sorry_endpoint			= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) );
+		element.sorry_maxconnection	= 0LL;
+		element.sorry_flag			= false;
+	}
 };
 
 /*!

@@ -1,6 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+
 #include "data_buff_base.h"
 #include "tcp_thread_message.h"
 #include "tcp_thread_message_que.h"
@@ -217,7 +218,7 @@ l7vs::Logger::~Logger(){}
 void	l7vs::Logger::loadConf(){}
 
 l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel( l7vs::LOG_CATEGORY_TAG ){
-	l7vs::LOG_LEVEL_TAG		ret_tag = l7vs::LOG_LV_DEBUG;
+	l7vs::LOG_LEVEL_TAG		ret_tag = l7vs::LOG_LV_ERROR;
 	return ret_tag;
 }
 
@@ -349,8 +350,28 @@ bool	l7vs::tcp_session::is_thread_wait(void){
 }
 
 void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){
-	if( message == SESSION_END ){
+	switch( message ){
+	case	SORRY_STATE_ENABLE:{
+		std::cout<< "set_virtual_service_message called : SORRY_STATE_ENABLE" << std::endl;
+		break;
+	}
+	case	SORRY_STATE_DISABLE:{
+		std::cout<< "set_virtual_service_message called : SORRY_STATE_DISABLE" << std::endl;
+		break;
+	}
+	case	SESSION_END:{
+		std::cout<< "set_virtual_service_message called : SESSION_END" << std::endl;
 		exit_flag = true;
+		break;
+	}
+	case	SESSION_PAUSE_ON:{
+		std::cout<< "set_virtual_service_message called : SESSION_PAUSE_ON" << std::endl;
+		break;
+	}
+	case	SESSION_PAUSE_OFF:{
+		std::cout<< "set_virtual_service_message called : SESSION_PAUSE_OFF" << std::endl;
+		break;
+	}
 	}
 }
 
@@ -387,6 +408,7 @@ void	l7vs::tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG
 void	l7vs::tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
+void	l7vs::tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){}
@@ -404,6 +426,7 @@ void	l7vs::tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG
 void	l7vs::tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
+void	l7vs::tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){}

@@ -266,7 +266,7 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 		//active_sessions is include a waiting(prepare accept) session
 		if( ( ( 0 < element.sorry_maxconnection ) && 
 			( active_sessions.size() > static_cast<size_t>( element.sorry_maxconnection ) ) ) ||
-			( 0 != element.sorry_flag ) ){
+			( ( 0 != element.sorry_flag ) && ( INT_MAX != element.sorry_flag ) ) ){
 				in_session->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 		}
 		//switch status runing, session_thread_control
@@ -354,9 +354,33 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 		}
 		return;
 	}
-// 	l7vs::replication&	tmp_rep = const_cast<l7vs::replication&>( rep );
+
 	//load parameter value
 	load_parameter();
+
+	//bind acceptor
+	boost::system::error_code	acceptor_err;
+	acceptor_.open( element.tcp_accept_endpoint.protocol(), acceptor_err );
+	if( acceptor_err ){
+		l7vs::Logger::putLogError( 
+			l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, acceptor_err.message(), __FILE__, __LINE__ );
+		err.setter( true, acceptor_err.message() );
+		return;
+	}
+	acceptor_.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ), acceptor_err );
+	if( acceptor_err ){
+		l7vs::Logger::putLogError( 
+			l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, acceptor_err.message(), __FILE__, __LINE__ );
+		err.setter( true, acceptor_err.message() );
+		return;
+	}
+	acceptor_.bind( element.tcp_accept_endpoint, acceptor_err );
+	if( acceptor_err ){
+		l7vs::Logger::putLogError( 
+			l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, acceptor_err.message(), __FILE__, __LINE__ );
+		err.setter( true, acceptor_err.message() );
+		return;
+	}
 
 	//read replication data
 	read_replicationdata();
@@ -581,7 +605,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		replication_status = false;
 	}
-	if( (!rep_header_ptr) && (replication_status) ){
+	if( (NULL != rep_header_ptr) && (replication_status) ){
 		//lock replication area
 		replication.lock( REP_AREA_NAME );
 		//set data_num = 0
@@ -648,7 +672,7 @@ void	l7vs::virtualservice_tcp::set_virtualservice( const l7vs::virtualservice_el
 }
 
 /*!
- * edit VirtualService( not-imprement )
+ * edit VirtualService
  *
  * @param   virtualservice_element
  * @param   err
@@ -723,51 +747,53 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 	}
 
 	//update values
+	//qos_upstream;
 	if( ULLONG_MAX == elem.qos_upstream )
 		element.qos_upstream	= 0ULL;
 	else if( 0ULL != elem.qos_upstream )
 		element.qos_upstream	= elem.qos_upstream;
+	//qos_downstream;
 	if( ULLONG_MAX == elem.qos_downstream )
 		element.qos_downstream	= 0ULL;
 	else if( 0ULL != elem.qos_downstream )
 		element.qos_downstream	= elem.qos_downstream;
-
+	//sorry_maxconnection;
+	if( LLONG_MAX == elem.sorry_maxconnection )
+		element.sorry_maxconnection	= 0;
+	else if( 0 != elem.sorry_maxconnection )
+		element.sorry_maxconnection	= elem.sorry_maxconnection;
+	//sorry_flag;
+	if( INT_MAX == elem.sorry_flag )
+		element.sorry_flag			= 0;
+	else if( 0 != elem.sorry_flag )
+		element.sorry_flag			= 1;
+	//sorry_endpoint;
 	//if endpoint of SorryServer equal 255.255.255.255:0,not update
-	if( elem.sorry_endpoint !=
-			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) ) ){
-		element.sorry_endpoint		= elem.sorry_endpoint;
-		//if equal endpoint 255.255.255.255:0, clear sorry parameters
-		if( elem.sorry_endpoint ==
-				boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "255.255.255.255" ), (0)) ){
-			element.sorry_endpoint			= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) );
-			element.sorry_maxconnection	= 0LL;
-			element.sorry_flag			= false;
-			boost::mutex::scoped_lock lk( sessions_mutex );
-			for( session_map_type::iterator itr = active_sessions.begin();
-				itr != active_sessions.end();
-				++itr ){
-				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
-			}
-		}else{
-			if( LLONG_MAX == elem.sorry_maxconnection )
-				element.sorry_maxconnection	= 0;
-			else if( 0 != elem.sorry_maxconnection )
-				element.sorry_maxconnection	= elem.sorry_maxconnection;
+	//if equal endpoint 255.255.255.255:0, clear sorry parameters
+	if( elem.sorry_endpoint ==
+			boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "255.255.255.255" ), (0)) ){
+		element.sorry_endpoint			= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) );
+		element.sorry_maxconnection	= 0LL;
+		element.sorry_flag			= false;
+		boost::mutex::scoped_lock lk( sessions_mutex );
+		for( session_map_type::iterator itr = active_sessions.begin();
+			itr != active_sessions.end();
+			++itr ){
+			itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
+		}
+	}else{
+		if( elem.sorry_endpoint !=
+				boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) ) )
+			element.sorry_endpoint		= elem.sorry_endpoint;
 
+		boost::mutex::scoped_lock lk( sessions_mutex );
+		for( session_map_type::iterator itr = active_sessions.begin();
+			itr != active_sessions.end();
+			++itr ){
 			if( INT_MAX == elem.sorry_flag )
-				element.sorry_flag			= 0;
+				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
 			else if( 0 != elem.sorry_flag )
-				element.sorry_flag			= 1;
-
-			boost::mutex::scoped_lock lk( sessions_mutex );
-			for( session_map_type::iterator itr = active_sessions.begin();
-				itr != active_sessions.end();
-				++itr ){
-				if( INT_MAX == element.sorry_flag )
-					itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
-				else if( 0 != element.sorry_flag )
-					itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
-			}
+				itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 		}
 	}
 
@@ -1138,10 +1164,8 @@ void	l7vs::virtualservice_tcp::run(){
 		}
 		return;
 	}
-	//bind acceptor
-	acceptor_.open( element.tcp_accept_endpoint.protocol() );
-	acceptor_.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
-	acceptor_.bind( element.tcp_accept_endpoint );
+
+	//start listen
 	acceptor_.listen();
 
 	//switch active a session
