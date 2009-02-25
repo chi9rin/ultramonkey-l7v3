@@ -2100,72 +2100,82 @@ protocol_module_cinsert::handle_realserver_select(
 					else
 					{
 
-						find_result = find_http_header(
-										(const char*)recive_data_itr->second.recive_buffer
-											+ send_status_itr->send_offset,
-										send_status_itr->send_possible_size,
-										http_header_name_cookie,
-										http_header_offset,
-										http_header_len );
-
-						if( find_result == true )
+						if( thread_data->last_endpoint_tcp != endpoint_init )
 						{
-
-							cookie.assign(	recive_data_itr->second.recive_buffer
-												+ send_status_itr->send_offset
-												+ http_header_offset,
-												http_header_len );
-
-							find_result = regex_search(	cookie.c_str(),
-														regex_result,
-														cookie_regex );
-						}
-
-						if( find_result == true )
-						{
-
-							cookie_address	= cookie.substr(	regex_result.position(1),
-																regex_result.length(1));
-
-							cookie_port		= cookie.substr(	regex_result.position(2),
-																regex_result.length(2));
-
-							boost::asio::ip::tcp::endpoint
-								endpoint_tmp(	boost::asio::ip::address::from_string(cookie_address),
-												boost::lexical_cast<unsigned short>(cookie_port));
-
-							rs_list_itr = rs_list_begin();
-
-							while( rs_list_itr != rs_list_end())
-							{
-
-								if( rs_list_itr->tcp_endpoint == endpoint_tmp )
-								{
-
-									rs_endpoint = endpoint_tmp;
-									break;
-								}
-
-								rs_list_itr = rs_list_next( rs_list_itr );
-							}
-
-							if( rs_endpoint == endpoint_init && reschedule == 1 )
-							{
-
-								schedule_tcp( thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint );
-
-							}
-
+							rs_endpoint = thread_data->last_endpoint_tcp;
 						}
 						else
 						{
-							schedule_tcp( thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint );
+
+							find_result = find_http_header(
+											(const char*)recive_data_itr->second.recive_buffer
+												+ send_status_itr->send_offset,
+											send_status_itr->send_possible_size,
+											http_header_name_cookie,
+											http_header_offset,
+											http_header_len );
+	
+							if( find_result == true )
+							{
+	
+								cookie.assign(	recive_data_itr->second.recive_buffer
+													+ send_status_itr->send_offset
+													+ http_header_offset,
+													http_header_len );
+	
+								find_result = regex_search(	cookie.c_str(),
+															regex_result,
+															cookie_regex );
+							}
+	
+							if( find_result == true )
+							{
+	
+								cookie_address	= cookie.substr(	regex_result.position(1),
+																	regex_result.length(1));
+	
+								cookie_port		= cookie.substr(	regex_result.position(2),
+																	regex_result.length(2));
+	
+								boost::asio::ip::tcp::endpoint
+									endpoint_tmp(	boost::asio::ip::address::from_string(cookie_address),
+													boost::lexical_cast<unsigned short>(cookie_port));
+	
+								rs_list_itr = rs_list_begin();
+	
+								while( rs_list_itr != rs_list_end())
+								{
+	
+									if( rs_list_itr->tcp_endpoint == endpoint_tmp )
+									{
+	
+										rs_endpoint = endpoint_tmp;
+										break;
+									}
+	
+									rs_list_itr = rs_list_next( rs_list_itr );
+								}
+	
+								if( rs_endpoint == endpoint_init && reschedule == 1 )
+								{
+	
+									schedule_tcp( thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint );
+	
+								}
+	
+							}
+							else
+							{
+								schedule_tcp( thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint );
+							}
 						}
 
 						if( rs_endpoint != endpoint_init )
 						{
 
 							send_status_itr->send_endpoint = rs_endpoint;
+
+							thread_data->last_endpoint_tcp = rs_endpoint;
 
 							status = REALSERVER_CONNECT;
 
