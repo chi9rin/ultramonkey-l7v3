@@ -109,12 +109,12 @@ namespace l7vs{
 			}
 		}
 		//----Debug log----------------------------------------------------------------------
-		my_socket.close(ec);
 		bool bres = false;
 		if(open_flag){
 			open_flag = false;
 			bres = true;
 		}
+		my_socket.close(ec);
 		
 		return bres;
 	}
