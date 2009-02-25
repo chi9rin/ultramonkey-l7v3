@@ -711,6 +711,11 @@ namespace l7vs{
 			boost::array<char,MAX_BUFFER_SIZE> read_some_buffers_out;
 			std::size_t read_some_buffers_size_in;
 			bool read_some_call_check;
+
+			bool is_open(){
+				return is_open_res;
+			};
+			bool is_open_res;
 	};
 	
 	bool tcp_socket::connect_res;
