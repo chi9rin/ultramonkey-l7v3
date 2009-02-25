@@ -257,6 +257,7 @@ protected:
 
 	session_map_type			pool_sessions;
 	session_map_type			active_sessions;
+	session_map_type			sorry_sessions;
 	boost::mutex				sessions_mutex;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );

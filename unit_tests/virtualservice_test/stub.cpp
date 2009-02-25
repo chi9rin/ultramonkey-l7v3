@@ -218,7 +218,7 @@ l7vs::Logger::~Logger(){}
 void	l7vs::Logger::loadConf(){}
 
 l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel( l7vs::LOG_CATEGORY_TAG ){
-	l7vs::LOG_LEVEL_TAG		ret_tag = l7vs::LOG_LV_ERROR;
+	l7vs::LOG_LEVEL_TAG		ret_tag = debugg_flug_struct::getInstance().stub_loglevel();
 	return ret_tag;
 }
 
@@ -376,12 +376,16 @@ void	l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_ME
 }
 
 void	l7vs::tcp_session::up_thread_run(void){
+	size_t	count = 0;
 	std::cout << "active session";
 	std::cout << boost::this_thread::get_id() << std::endl;
 	exit_flag = false;
-	while(!exit_flag){
-		
+	while( !exit_flag ){
+		++count;
+		if( !debugg_flug_struct::getInstance().session_loop_flag() && (count > 30000) )
+			break;
 	}
+	std::cout << "release session";
 	parent_service.release_session( boost::this_thread::get_id() );
 }
 

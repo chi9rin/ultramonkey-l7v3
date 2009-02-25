@@ -8,9 +8,11 @@
 class	debugg_flug_struct{
 protected:
 	bool	session_pool_param_flg;
+	bool	session_loop_mode;
 	bool	pmcontrol_error_flag;
 	bool	smcontrol_error_flag;
 	bool	pm_function_called;
+	l7vs::LOG_LEVEL_TAG	loglevel;
 
 	int		pm_rep_count;
 	int		sm_rep_count;
@@ -20,6 +22,8 @@ protected:
 	debugg_flug_struct() : session_pool_param_flg( false ),
 								pm_rep_count( 0 ),
 								sm_rep_count( 0 ) {
+		loglevel = l7vs::LOG_LV_ERROR;
+		session_loop_mode = true;
 	}
 	debugg_flug_struct( const debugg_flug_struct & in ){ rep_area = NULL; }
 	debugg_flug_struct& operator=( const debugg_flug_struct & in ){ return *this; }
@@ -27,6 +31,12 @@ public:
 	static debugg_flug_struct&	getInstance(){
 		static	debugg_flug_struct	instance;
 		return	instance;
+	}
+	bool&	session_loop_flag(){
+		return session_loop_mode;
+	}
+	l7vs::LOG_LEVEL_TAG&	stub_loglevel(){
+		return loglevel;
 	}
 	bool&	param_exist_flag(){
 		return session_pool_param_flg;

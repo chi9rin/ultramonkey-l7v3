@@ -17,8 +17,29 @@ using namespace boost::unit_test;
 typedef	boost::asio::ip::tcp::endpoint	tcp_ep_type;
 typedef	boost::asio::ip::udp::endpoint	udp_ep_type;
 
+class	client{
+protected:
+	boost::asio::io_service			dispatcher;
+	boost::asio::ip::tcp::socket	sock;
+	boost::system::error_code		err;
+	std::string						name;
+public:
+	client( std::string in ) : sock( dispatcher ), name( in ) {}
+	~client(){}
+	void	connect(){
+		sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ), err );
+		if( err )
+			std::cout << err.message() << std::endl;
+		else
+			std::cout << "connect : " << name << std::endl;
+	}
+	void	disconnect(){
+		sock.close();
+		std::cout << "disconnect : " << name << std::endl;
+	}
+};
 
-void	virtualservice_tcp_test1(){
+void	vs_tcp_test1(){
 	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
 	debugg_flug_struct::getInstance().param_exist_flag() = false;
@@ -112,7 +133,7 @@ void	virtualservice_tcp_test1(){
 
 }
 
-void	virtualservice_tcp_test2(){
+void	vs_tcp_test2(){
 	l7vs::error_code	vs_err;
 	boost::system::error_code	test_err;
 
@@ -303,14 +324,79 @@ void	virtualservice_tcp_test2(){
 	debugg_flug_struct::getInstance().create_rep_area();
 }
 
+void	vs_tcp_test3(){
+	l7vs::error_code	vs_err;
+	boost::system::error_code	test_err;
+
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
+
+	l7vs::l7vsd					vsd;
+	boost::asio::io_service		dispatcher;
+	l7vs::replication			rep;
+	l7vs::virtualservice_element	elem1;
+	//set element value
+	elem1.udpmode					= false;
+	elem1.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
+	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem1.realserver_vector.clear();
+	elem1.protocol_module_name		= "PMtest1";
+	elem1.schedule_module_name		= "SMtest1";
+	elem1.protocol_args.clear();
+	elem1.protocol_args.push_back( "testarg" );
+	elem1.protocol_args.push_back( "testarg2" );
+	elem1.sorry_maxconnection		= 2LL;
+	elem1.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
+	elem1.sorry_flag				= false;
+	elem1.qos_upstream				= 0ULL;
+	elem1.qos_downstream			= 0ULL;
+
+	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, elem1 );
+	vs->initialize( vs_err );
+	usleep( 1000 );
+	boost::thread	vs_main( &l7vs::vs_tcp::run, vs );
+	usleep( 1000 );
+
+	// unit_test[]  RSに繋がるSession数がsorry_maxconnectionを越えたときに、Sorry状態ONでSessionをスタートすることを確認する
+	BOOST_MESSAGE( "-------" );
+	debugg_flug_struct::getInstance().stub_loglevel() = l7vs::LOG_LV_DEBUG;
+	debugg_flug_struct::getInstance().session_loop_flag() = false;
+	client	cl1("1"),cl2("2"),cl3("3"),cl4("4"),cl5("5");
+	cl1.connect();
+	cl2.connect();
+	cl3.connect();
+	cl4.connect();
+	cl5.connect();
+
+	usleep( 200 );
+	cl1.disconnect();
+	cl2.disconnect();
+	cl3.disconnect();
+	cl4.disconnect();
+	cl5.disconnect();
+	usleep( 1000 );
+	BOOST_MESSAGE( "-------" );
+
+	// unit_test[]  RSに繋がるSession数がsorry_maxconenctionを下回ったとき(Sorryへ接続しているSession数はカウントに入れない)、Sorry状態OFFでSessionをスタートすることを確認する
+
+	// unit_test[]  session_pool_sizeを上回った接続数でSessionが増えても、切断されれば元の数に戻ることを確認する
+
+
+	vs->finalize( vs_err );
+	debugg_flug_struct::getInstance().stub_loglevel() = l7vs::LOG_LV_ERROR;
+	delete vs;
+}
+
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	// create unit test suite
 	test_suite* ts = BOOST_TEST_SUITE( "virtualservice_tcp_test(UT for IT-bug)" );
 
 	// add test case to test suite
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
+	ts->add( BOOST_TEST_CASE( &vs_tcp_test1 ) );
+	ts->add( BOOST_TEST_CASE( &vs_tcp_test2 ) );
+	ts->add( BOOST_TEST_CASE( &vs_tcp_test3 ) );
 
 	framework::master_test_suite().add( ts );
 
