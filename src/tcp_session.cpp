@@ -838,7 +838,23 @@ namespace l7vs{
 		}
 		unsigned long long qos = parent_service.get_qos_upstream();
 		unsigned long long up_throughput = parent_service.get_throughput_upstream();
-		if(qos < up_throughput) return; // try again
+		if(qos < up_throughput){
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] up_thread_client_receive";
+				buf << " over throghput qos upstream threshold [";
+				buf << qos;
+				buf << "] upstream throughput [";
+				buf << up_throughput;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			return; // try again
+		}
 		up_thread_data_client_side.initialize();
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_client_side.get_data();
 		boost::system::error_code ec;
@@ -856,7 +872,7 @@ namespace l7vs{
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
-					buf << module_event;	
+					buf << module_event;
 					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
@@ -874,13 +890,15 @@ namespace l7vs{
 				func_tag = UP_FUNC_CLIENT_DISCONNECT;
 			}else{
 				func_tag = UP_FUNC_CLIENT_DISCONNECT;
-				//receive socket error
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] receive socket error :";
-				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				if(client_socket.is_open()){
+					//receive socket error
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] receive socket error :";
+					buf << ec.message();
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
 			}
 		}
 		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_tag);
@@ -1105,11 +1123,11 @@ namespace l7vs{
 				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
 			}else{
 				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
-				//receive socket error
+				//send socket error
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
-				buf << "] receive socket error :";
+				buf << "] send socket error :";
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
@@ -1527,11 +1545,11 @@ namespace l7vs{
 				func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
 			}else{
 				func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
-				//receive socket error
+				//send socket error
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
-				buf << "] receive socket error :";
+				buf << "] send socket error :";
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
@@ -2007,7 +2025,23 @@ namespace l7vs{
 		if(is_emp)return;
 		unsigned long long qos = parent_service.get_qos_downstream();
 		unsigned long long down_throughput = parent_service.get_throughput_downstream();
-		if(qos < down_throughput) return;
+		if(qos < down_throughput){
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] down_thread_realserver_receive";
+				buf << " over throghput qos downstream threshold [";
+				buf << qos;
+				buf << "] downstream throughput [";
+				buf << down_throughput;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+		 	return;
+		}
 		down_thread_data_dest_side.initialize();
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
 		boost::system::error_code ec;
@@ -2045,13 +2079,15 @@ namespace l7vs{
 				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
 			}else{
 				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-				//receive socket error
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] receive socket error :";
-				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				if(down_thread_current_receive_realserver_socket->second->is_open()){
+					//receive socket error
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] receive socket error :";
+					buf << ec.message();
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
 			}
 		}
 		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_tag);
@@ -2392,11 +2428,11 @@ namespace l7vs{
 				func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
 			}else{
 				func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
-				//receive socket error
+				//send socket error
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
-				buf << "] receive socket error :";
+				buf << "] send socket error :";
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
@@ -2545,13 +2581,15 @@ namespace l7vs{
 				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
 			}else{
 				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-				//receive socket error
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] receive socket error :";
-				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				if(sorryserver_socket.second->is_open()){
+					//receive socket error
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] receive socket error :";
+					buf << ec.message();
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
 			}
 		}
 		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_tag);

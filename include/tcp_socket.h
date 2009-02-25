@@ -54,6 +54,10 @@ namespace l7vs{
 			//! @param[out]		ec is reference error code object
 			//! @return			read data size
 			std::size_t read_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec);
+			//! is open
+			//! @return 		true is open
+			//! @return 		false is close
+			bool is_open();
 
 		protected:
 			//! control socket

@@ -170,5 +170,12 @@ namespace l7vs{
 		return res_size;
 	}
 
+	//! is open
+	//! @return 		true is open
+	//! @return 		false is close
+	bool tcp_socket::is_open(){
+		return open_flag;
+	}
+
 }// namespace l7vs
  
