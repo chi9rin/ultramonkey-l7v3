@@ -2185,7 +2185,7 @@ protocol_module_cinsert::handle_realserver_select(
 
 							thread_data->end_flag = END_FLAG_ON;
 
-							status = REALSERVER_DISCONNECT;
+							status = CLIENT_DISCONNECT;
 
 						}
 					}
@@ -2919,6 +2919,8 @@ protocol_module_cinsert::handle_sorryserver_select(
 
 	t_session_thread_data_cinsert	thread_data;
 
+	boost::asio::ip::tcp::endpoint	endpoint_init;
+
 	t_session_thread_data_map_itr	thread_data_itr;
 	t_recive_data_map_itr			recive_data_itr;
 	t_send_status_list_itr			send_status_itr;
@@ -2940,36 +2942,47 @@ protocol_module_cinsert::handle_sorryserver_select(
 
 		if( thread_data != NULL )
 		{
-			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != thread_data->recive_data_map.end() )
+			if( sorry_endpoint == endpoint_init )
 			{
 
-				send_status_itr = recive_data_itr->second.send_status_list.begin();
+				thread_data->end_flag = END_FLAG_ON;
 
-				while( send_status_itr != recive_data_itr->second.send_status_list.end())
+				status = CLIENT_DISCONNECT;
+
+			}
+			else
+			{
+				recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
+	
+				if( recive_data_itr != thread_data->recive_data_map.end() )
 				{
-
-					if( send_status_itr->status == SEND_OK )
+	
+					send_status_itr = recive_data_itr->second.send_status_list.begin();
+	
+					while( send_status_itr != recive_data_itr->second.send_status_list.end())
 					{
-
-						break;
-
+	
+						if( send_status_itr->status == SEND_OK )
+						{
+	
+							break;
+	
+						}
+	
+						send_status_itr++;
+	
 					}
-
-					send_status_itr++;
-
-				}
-
-				if( send_status_itr != recive_data_itr->second.send_status_list.end())
-				{
-
-					send_status_itr->send_endpoint = sorry_endpoint;
-
-					status = SORRYSERVER_CONNECT;
+	
+					if( send_status_itr != recive_data_itr->second.send_status_list.end())
+					{
+	
+						send_status_itr->send_endpoint = sorry_endpoint;
+	
+						status = SORRYSERVER_CONNECT;
+					}
 				}
 			}
-
 		}
 	} catch (...)
 	{
