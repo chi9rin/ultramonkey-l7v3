@@ -2694,7 +2694,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 
 			thread_data->end_flag = END_FLAG_ON;
 
-			status = REALSERVER_DISCONNECT;
+			status = CLIENT_DISCONNECT;
 
 		}
 	} catch (...)
@@ -3491,7 +3491,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 
 			thread_data->end_flag = END_FLAG_ON;
 
-			status = SORRYSERVER_DISCONNECT;
+			status = CLIENT_DISCONNECT;
 
 		}
 	} catch (...)
