@@ -1636,8 +1636,16 @@ protocol_module_cinsert::handle_client_recv(
 								if( find_result == true )
 								{
 
-									send_status_itr->send_rest_size
+									if( http_header_len == 0 )
+									{
+										send_status_itr->send_rest_size
+														= http_header_offset + http_header_len + 2;
+									}
+									else
+									{
+										send_status_itr->send_rest_size
 														= http_header_offset + http_header_len + 4;
+									}
 
 									find_result = find_http_header(
 													(const char*)recive_data_itr->second.recive_buffer
@@ -1798,8 +1806,16 @@ protocol_module_cinsert::handle_client_recv(
 							if( find_result == true )
 							{
 
-								send_status_add.send_rest_size
+								if( http_header_len == 0 )
+								{
+									send_status_add.send_rest_size
+													= http_header_offset + http_header_len + 2;
+								}
+								else
+								{
+									send_status_add.send_rest_size
 													= http_header_offset + http_header_len + 4;
+								}
 
 								find_result = find_http_header(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -3955,8 +3971,16 @@ protocol_module_cinsert::handle_realserver_recv(
 							if( find_result == true )
 							{
 
-								send_status_itr->send_rest_size
+								if( http_header_len == 0 )
+								{
+									send_status_itr->send_rest_size
+													= http_header_offset + http_header_len + 2;
+								}
+								else
+								{
+									send_status_itr->send_rest_size
 													= http_header_offset + http_header_len + 4;
+								}
 
 								find_result = find_http_header(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -4119,8 +4143,16 @@ protocol_module_cinsert::handle_realserver_recv(
 						if( find_result == true )
 						{
 
-							send_status_add.send_rest_size
+							if( http_header_len == 0 )
+							{
+								send_status_add.send_rest_size
+												= http_header_offset + http_header_len + 2;
+							}
+							else
+							{
+								send_status_add.send_rest_size
 												= http_header_offset + http_header_len + 4;
+							}
 
 							find_result = find_http_header(
 											(const char*)recive_data_itr->second.recive_buffer
@@ -4602,8 +4634,16 @@ protocol_module_cinsert::handle_sorryserver_recv(
 							if( find_result == true )
 							{
 
-								send_status_itr->send_rest_size
-													= http_header_offset + http_header_len + 4;
+								if( http_header_len == 0 )
+								{
+									send_status_itr->send_rest_size
+														= http_header_offset + http_header_len + 2;
+								}
+								else
+								{
+									send_status_itr->send_rest_size
+														= http_header_offset + http_header_len + 4;
+								}
 
 								find_result = find_http_header(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -4763,8 +4803,16 @@ protocol_module_cinsert::handle_sorryserver_recv(
 						if( find_result == true )
 						{
 
-							send_status_add.send_rest_size
+							if( http_header_len == 0 )
+							{
+								send_status_add.send_rest_size
+												= http_header_offset + http_header_len + 2;
+							}
+							else
+							{
+								send_status_add.send_rest_size
 												= http_header_offset + http_header_len + 4;
+							}
 
 							find_result = find_http_header(
 											(const char*)recive_data_itr->second.recive_buffer
