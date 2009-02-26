@@ -965,7 +965,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[74] parse_opt_vs_qosup_func normal case 1 (no unit postfix) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[75] parse_opt_vs_qosup_func normal case 1 (no unit postfix) qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 128ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 128ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func normal case 2 (unit postfix 'G')
@@ -980,7 +980,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[76] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[77] parse_opt_vs_qosup_func normal case 2 (unit postfix 'G') qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 137438953472ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 137438953472ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func normal case 3 (unit postfix 'g')
@@ -995,7 +995,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[78] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[79] parse_opt_vs_qosup_func normal case 3 (unit postfix 'g') qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 137438953472ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 137438953472ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func normal case 4 (unit postfix 'M')
@@ -1010,7 +1010,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[80] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[81] parse_opt_vs_qosup_func normal case 4 (unit postfix 'M') qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 134217728ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 134217728ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func normal case 5 (unit postfix 'm')
@@ -1025,7 +1025,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[82] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[83] parse_opt_vs_qosup_func normal case 5 (unit postfix 'm') qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 134217728ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 134217728ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func normal case 6 (unit postfix 'K')
@@ -1040,7 +1040,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[84] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[85] parse_opt_vs_qosup_func normal case 6 (unit postfix 'K') qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 131072ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 131072ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func normal case 7 (unit postfix 'k')
@@ -1055,7 +1055,7 @@ void	parse_opt_vs_qosup_func_test(){
 		// unit_test[86] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[87] parse_opt_vs_qosup_func normal case 7 (unit postfix 'k') qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 131072ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 131072ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosup_func error case 1 (invalid qos_upstream value (charactor))
@@ -1163,7 +1163,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[94] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[95] parse_opt_vs_qosdown_func normal case 1 (no unit postfix) qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 128ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 128ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G')
@@ -1178,7 +1178,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[96] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[97] parse_opt_vs_qosdown_func normal case 2 (unit postfix 'G') qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 137438953472ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 137438953472ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g')
@@ -1193,7 +1193,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[98] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[99] parse_opt_vs_qosdown_func normal case 3 (unit postfix 'g') qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 137438953472ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 137438953472ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M')
@@ -1208,7 +1208,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[100] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[101] parse_opt_vs_qosdown_func normal case 4 (unit postfix 'M') qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 134217728ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 134217728ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm')
@@ -1223,7 +1223,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[102] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[103] parse_opt_vs_qosdown_func normal case 5 (unit postfix 'm') qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 134217728ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 134217728ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K')
@@ -1238,7 +1238,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[104] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[105] parse_opt_vs_qosdown_func normal case 6 (unit postfix 'K') qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 131072ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 131072ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k')
@@ -1253,7 +1253,7 @@ void	parse_opt_vs_qosdown_func_test(){
 		// unit_test[106] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') return value check
 		BOOST_CHECK_EQUAL( ret, true );	
 		// unit_test[107] parse_opt_vs_qosdown_func normal case 7 (unit postfix 'k') qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 131072ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 131072ULL / 8 ) );
 	}
 
 	// parse_opt_vs_qosdown_func error case 1 (invalid qos_downstream value (charactor))
@@ -1451,9 +1451,9 @@ void	parse_vs_func_test(){
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
 		// unit_test[130] parse_vs_func normal case 1 (CMD_ADD_VS short_option) qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 104857600ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 104857600ULL / 8 ) );
 		// unit_test[131] parse_vs_func normal case 1 (CMD_ADD_VS short_option) qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 209715200ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 209715200ULL / 8 ) );
 	}
 
 	// parse_vs_func normal case 2 (CMD_ADD_VS long_option)
@@ -1501,9 +1501,9 @@ void	parse_vs_func_test(){
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:80" );
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
 		// unit_test[140] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 13107200ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 13107200ULL / 8 ) );
 		// unit_test[141] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 26214400ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 26214400ULL / 8 ) );
 	}
 
 	// parse_vs_func normal case 3 (CMD_EDIT_VS short_option)
@@ -1555,9 +1555,9 @@ void	parse_vs_func_test(){
 		// unit_test[150] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
 		// unit_test[151] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 104857600ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 104857600ULL / 8 ) );
 		// unit_test[152] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 209715200ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 209715200ULL / 8 ) );
 	}
 
 	// parse_vs_func normal case 4 (CMD_EDIT_VS long_option)
@@ -1609,9 +1609,9 @@ void	parse_vs_func_test(){
 		// unit_test[161] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
 		// unit_test[162] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_upstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, 13107200ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 13107200ULL / 8 ) );
 		// unit_test[163] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_downstream check
-		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, 26214400ULL );
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 26214400ULL / 8 ) );
 	}
 
 	// parse_vs_func normal case 5 (CMD_DEL_VS short_option)
@@ -3242,9 +3242,9 @@ void	execute_test(){
 		boost::asio::ip::tcp::endpoint	sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
 		BOOST_CHECK_EQUAL( test_request.vs_element.sorry_endpoint, sorry_ep );
 		// unit_test[337] execute normal case 6 (vs operation add-vs) qos_upstream check
-		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, 104857600ULL );
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, ( 104857600ULL / 8 ) );
 		// unit_test[338] execute normal case 6 (vs operation add-vs) qos_downstream check
-		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, 209715200ULL );
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, ( 209715200ULL / 8 ) );
 	}
 
 	// execute normal case 7 (vs operation edit-vs)
@@ -3307,9 +3307,9 @@ void	execute_test(){
 		// unit_test[347] execute normal case 7 (vs operation edit-vs) sorry_flag check
 		BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
 		// unit_test[348] execute normal case 7 (vs operation edit-vs) qos_upstream check
-		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, 104857600ULL );
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, ( 104857600ULL / 8 ) );
 		// unit_test[349] execute normal case 7 (vs operation edit-vs) qos_downstream check
-		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, 209715200ULL );
+		BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, ( 209715200ULL / 8 ) );
 	}
 
 	// execute normal case 8 (vs operation del-vs)

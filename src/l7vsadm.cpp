@@ -445,6 +445,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 		}
 		if( 0ULL == elem.qos_upstream )
 			elem.qos_upstream = ULLONG_MAX;		// clear value
+		else
+			elem.qos_upstream /= 8;		//qos convert to bytes per sec to bit per sec
 	}
 	catch( boost::bad_lexical_cast& ex ){	// don't convert string to qos_upsatream
 		// don't conv qos upstream
@@ -498,6 +500,8 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] 
 		}
 		if( 0ULL == elem.qos_downstream )
 			elem.qos_downstream = ULLONG_MAX;		// clear value
+		else
+			elem.qos_downstream /= 8;		//qos convert to bytes per sec to bit per sec
 	}
 	catch( boost::bad_lexical_cast& ex ){
 		// don' conv qos downstream
