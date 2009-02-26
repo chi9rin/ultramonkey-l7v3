@@ -616,6 +616,17 @@ namespace l7vs{
 				connection_inactive_list.push_back(inactive_endpoint);
 			};
 			std::list<boost::asio::ip::tcp::endpoint> connection_inactive_list;
+
+			unsigned long long get_wait_upstream(){
+				return get_wait_upstream_res;
+			}
+			unsigned long long get_wait_upstream_res;
+
+			unsigned long long get_wait_downstream(){
+				return get_wait_downstream_res;
+			}
+			unsigned long long get_wait_downstream_res;
+
 	};
 	
 	// Dummy tcp_socket Class

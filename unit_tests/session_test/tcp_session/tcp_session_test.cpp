@@ -7387,8 +7387,9 @@ void up_thread_client_receive_test(){
 	test_obj.up_thread_exit_call_check = false;
 	test_obj.up_thread_client_receive_call_check = false;
 	// vs set
-	vs.get_qos_upstream_res = 104857600;
-	vs.get_throughput_upstream_res = 0;
+//	vs.get_qos_upstream_res = 104857600;
+//	vs.get_throughput_upstream_res = 0;
+ 	vs.get_wait_upstream_res = 0;
 	vs.update_up_recv_size_in = 0;
 	// socket set
 	socket.read_some_res = MAX_BUFFER_SIZE;
@@ -7410,6 +7411,11 @@ void up_thread_client_receive_test(){
 		proto_test.handle_client_recv_in_recvbuffer[i] = '\0';
 	}
 	proto_test.handle_client_recv_in_recvlen = 0;
+
+	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogDebug_id = 0;
+
 	
 	test_obj.test_call_client_receive();
 	
@@ -7435,12 +7441,20 @@ void up_thread_client_receive_test(){
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_get_destination_event_call_check);
 	
-	// unit_test [5] up_thread_client_receive qos check
-	std::cout << "[5] up_thread_client_receive qos check" << std::endl;
+	// unit_test [5] up_thread_client_receive receive debug log check
+	std::cout << "[5] up_thread_client_receive receive debug log check" << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+
+	// unit_test [6] up_thread_client_receive qos check
+	std::cout << "[6] up_thread_client_receive qos check" << std::endl;
+	socket.read_some_res = 0;
+ 	vs.get_wait_upstream_res = 1;
+
+	// wait = 0 >> receive
 	socket.read_some_call_check = false;
-	vs.get_qos_upstream_res = 104857600;
-	vs.get_throughput_upstream_res = 104857600;
-	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	vs.get_wait_upstream_res = 0;
 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogDebug_id = 0;
 	test_obj.test_call_client_receive();
@@ -7448,9 +7462,9 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
 
+	// wait = 1 >> not receive
 	socket.read_some_call_check = false;
-	vs.get_qos_upstream_res = 104857600;
-	vs.get_throughput_upstream_res = 104857601;
+	vs.get_wait_upstream_res = 1;
 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogDebug_id = 0;
 	test_obj.test_call_client_receive();
@@ -7459,53 +7473,114 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-	socket.read_some_call_check = false;
-	vs.get_qos_upstream_res = ULLONG_MAX;
-	vs.get_throughput_upstream_res = ULLONG_MAX;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_client_receive();
-	BOOST_CHECK(socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
 
-	socket.read_some_call_check = false;
-	vs.get_qos_upstream_res = ULLONG_MAX - 1;
-	vs.get_throughput_upstream_res = ULLONG_MAX;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_client_receive();
-	BOOST_CHECK(!socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 	// qos = 0 wait = 0 qos < throughput		>> receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = 0;
+// 	vs.get_throughput_upstream_res = 2;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 	
+// 	// qos = 0 wait > 0 qos < throughput		 >> receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = 0;
+// 	vs.get_throughput_upstream_res = 2;
+// 	vs.get_wait_upstream_res = 1;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 	
+// 	// qos != 0 wait = 0 qos < throughput				>> not receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = 104857600;
+// 	vs.get_throughput_upstream_res = 104857601;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 	
+// 	// qos != 0 wait = 0 qos = throughput				>> receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = 104857600;
+// 	vs.get_throughput_upstream_res = 104857600;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 	
+// 	// qos = ULLONG_MAX - 1 wait = 0 qos < throughput	>> not receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = ULLONG_MAX - 1;
+// 	vs.get_throughput_upstream_res = ULLONG_MAX;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 	
+// 	// qos = ULLONG_MAX wait = 0 qos = throughput 		>> receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = ULLONG_MAX;
+// 	vs.get_throughput_upstream_res = ULLONG_MAX;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 	
+// 	// qos = 1 wait = 0 qos < throughput		>> not receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = 1;
+// 	vs.get_throughput_upstream_res = 2;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 
+// 	// qos = ULLONG_MAX wait > 1 qos > throughput >> not receive
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_upstream_res = ULLONG_MAX;
+// 	vs.get_throughput_upstream_res = 0;
+// 	vs.get_wait_upstream_res = 1;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_client_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-	socket.read_some_call_check = false;
-	vs.get_qos_upstream_res = 0;
+	socket.read_some_res = MAX_BUFFER_SIZE;
+//	vs.get_qos_upstream_res = 104857600;
 	vs.get_throughput_upstream_res = 0;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_client_receive();
-	BOOST_CHECK(socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-
-	socket.read_some_call_check = false;
-	vs.get_qos_upstream_res = 0;
-	vs.get_throughput_upstream_res = 1;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_client_receive();
-	BOOST_CHECK(!socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-
-	vs.get_qos_upstream_res = 104857600;
-	vs.get_throughput_upstream_res = 0;
+	vs.get_wait_upstream_res = 0;
 	
-	// unit_test [6] up_thread_client_receive receive size 0 check
-	std::cout << "[6] up_thread_client_receive receive size 0 check" << std::endl;
+	// unit_test [7] up_thread_client_receive receive size 0 check
+	std::cout << "[7] up_thread_client_receive receive size 0 check" << std::endl;
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.read_some_res = 0;
 	test_obj.test_call_client_receive();
@@ -7514,8 +7589,8 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
 	socket.read_some_res = MAX_BUFFER_SIZE;
 	
-	// unit_test [7] up_thread_client_receive socket error (try_again) check
-	std::cout << "[7] up_thread_client_receive socket error (try_again) check" << std::endl;
+	// unit_test [8] up_thread_client_receive socket error (try_again) check
+	std::cout << "[8] up_thread_client_receive socket error (try_again) check" << std::endl;
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::try_again;
 	test_obj.test_call_client_receive();
@@ -7524,8 +7599,8 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [8] up_thread_client_receive socket error (eof) check
-	std::cout << "[8] up_thread_client_receive socket error (eof) check" << std::endl;
+	// unit_test [9] up_thread_client_receive socket error (eof) check
+	std::cout << "[9] up_thread_client_receive socket error (eof) check" << std::endl;
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::eof;
 	test_obj.test_call_client_receive();
@@ -7534,8 +7609,8 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [9] up_thread_client_receive socket error (connection_reset) check
-	std::cout << "[9] up_thread_client_receive socket error (connection_reset) check" << std::endl;
+	// unit_test [10] up_thread_client_receive socket error (connection_reset) check
+	std::cout << "[10] up_thread_client_receive socket error (connection_reset) check" << std::endl;
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::connection_reset;
 	test_obj.test_call_client_receive();
@@ -7544,8 +7619,8 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [10] up_thread_client_receive socket error (bad_descriptor) check
-	std::cout << "[10] up_thread_client_receive socket error (bad_descriptor) check" << std::endl;
+	// unit_test [11] up_thread_client_receive socket error (bad_descriptor) check
+	std::cout << "[11] up_thread_client_receive socket error (bad_descriptor) check" << std::endl;
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::bad_descriptor;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7559,8 +7634,8 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 
-	// unit_test [11] up_thread_client_receive closed socket error (bad_descriptor) check
-	std::cout << "[11] up_thread_client_receive closed socket error (bad_descriptor) check" << std::endl;
+	// unit_test [12] up_thread_client_receive closed socket error (bad_descriptor) check
+	std::cout << "[12] up_thread_client_receive closed socket error (bad_descriptor) check" << std::endl;
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::bad_descriptor;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7574,8 +7649,8 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [12] up_thread_client_receive not fond function error check
-	std::cout << "[12] up_thread_client_receive not fond function error check" << std::endl;
+	// unit_test [13] up_thread_client_receive not fond function error check
+	std::cout << "[13] up_thread_client_receive not fond function error check" << std::endl;
 	test_obj.up_thread_function_map_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7586,8 +7661,8 @@ void up_thread_client_receive_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [13] up_thread_client_receive returnd illegal EVENT_TAG error check
-	std::cout << "[13] up_thread_client_receive returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [14] up_thread_client_receive returnd illegal EVENT_TAG error check
+	std::cout << "[14] up_thread_client_receive returnd illegal EVENT_TAG error check" << std::endl;
 	test_obj.up_thread_module_event_map_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7598,8 +7673,8 @@ void up_thread_client_receive_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [14] up_thread_client_receive protocol_module NULL error check
-	std::cout << "[14] up_thread_client_receive protocol_module NULL error check" << std::endl;
+	// unit_test [15] up_thread_client_receive protocol_module NULL error check
+	std::cout << "[15] up_thread_client_receive protocol_module NULL error check" << std::endl;
 	test_obj.set_protocol_module(NULL);
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7668,8 +7743,9 @@ void down_thread_realserver_receive_test(){
 	test_obj.down_thread_exit_call_check = false;
 	test_obj.down_thread_realserver_receive_call_check = false;
 	// vs set
-	vs.get_qos_downstream_res = 104857600;
-	vs.get_throughput_downstream_res = 0;
+//	vs.get_qos_downstream_res = 104857600;
+//	vs.get_throughput_downstream_res = 0;
+	vs.get_wait_downstream_res = 0;
 	vs.update_down_recv_size_in = 0;
 	// protocol module set
 	proto_test.handle_realserver_recv_tcp_res_tag = l7vs::protocol_module_base::CLIENT_CONNECTION_CHECK;
@@ -7682,6 +7758,9 @@ void down_thread_realserver_receive_test(){
 	
 	boost::asio::ip::tcp::endpoint rs_end = rs_cur->first;
 	l7vs::tcp_socket& socket = *(rs_cur->second);
+	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogDebug_id = 0;
 	
 	test_obj.test_call_realserver_receive();
 	
@@ -7709,8 +7788,14 @@ void down_thread_realserver_receive_test(){
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_connection_chk_event_call_check);
 	
-	// unit_test [5] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check
-	std::cout << "[5] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check" << std::endl;
+	// unit_test [5] down_thread_realserver_receive debug log check
+	std::cout << "[5] down_thread_realserver_receive debug log check" << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+
+	// unit_test [6] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check
+	std::cout << "[6] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check" << std::endl;
 	std::list< std::pair< boost::asio::ip::tcp::endpoint, boost::shared_ptr< l7vs::tcp_socket > > >::iterator check_it;
 	rs_cur = rs_list.begin();
 	check_it = rs_list.begin();
@@ -7724,25 +7809,25 @@ void down_thread_realserver_receive_test(){
 	check_it = rs_list.begin();
 	BOOST_CHECK(check_it == rs_cur);
 	
-	// unit_test [6] down_thread_realserver_receive qos check
-	std::cout << "[6] down_thread_realserver_receive qos check" << std::endl;
-	
+	// unit_test [7] down_thread_realserver_receive qos check
+	std::cout << "[7] down_thread_realserver_receive qos check" << std::endl;
+	socket.read_some_res = 0;
+
+	// wait = 0 >> receive
 	rs_cur = rs_list.begin();
 	socket.read_some_call_check = false;
-	vs.get_qos_downstream_res = 104857600;
-	vs.get_throughput_downstream_res = 104857600;
-	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	vs.get_wait_downstream_res = 0;
 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogDebug_id = 0;
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK(socket.read_some_call_check);
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-	
+
+	// wait = 1 >> not receive
 	rs_cur = rs_list.begin();
 	socket.read_some_call_check = false;
-	vs.get_qos_downstream_res = 104857600;
-	vs.get_throughput_downstream_res = 104857601;
+	vs.get_wait_downstream_res = 1;
 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogDebug_id = 0;
 	test_obj.test_call_realserver_receive();
@@ -7750,58 +7835,123 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+
+
+// 	// qos = 0 wait = 0 qos < throughput		>> receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = 0;
+// 	vs.get_throughput_downstream_res = 2;
+// 	vs.get_wait_downstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 
+// 	// qos = 0 wait > 0 qos < throughput		 >> receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = 0;
+// 	vs.get_throughput_downstream_res = 2;
+// 	vs.get_wait_downstream_res = 1;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 
+// 	// qos != 0 wait = 0 qos < throughput				>> not receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = 104857600;
+// 	vs.get_throughput_downstream_res = 104857601;
+// 	vs.get_wait_downstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 
+// 	// qos != 0 wait = 0 qos = throughput				>> receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = 104857600;
+// 	vs.get_throughput_downstream_res = 104857600;
+// 	vs.get_wait_downstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 	
+// 	// qos = ULLONG_MAX - 1 wait = 0 qos < throughput	>> not receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = ULLONG_MAX - 1;
+// 	vs.get_throughput_downstream_res = ULLONG_MAX;
+// 	vs.get_wait_upstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 	
+// 	// qos = ULLONG_MAX wait = 0 qos = throughput 		>> receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = ULLONG_MAX;
+// 	vs.get_throughput_downstream_res = ULLONG_MAX;
+// 	vs.get_wait_downstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+// 	
+// 	// qos = 1 wait = 0 qos < throughput		>> not receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = 1;
+// 	vs.get_throughput_downstream_res = 2;
+// 	vs.get_wait_downstream_res = 0;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+// 	
+// 	// qos = ULLONG_MAX wait > 1 qos > throughput >> not receive
+// 	rs_cur = rs_list.begin();
+// 	socket.read_some_call_check = false;
+// 	vs.get_qos_downstream_res = ULLONG_MAX;
+// 	vs.get_throughput_downstream_res = 1;
+// 	vs.get_wait_downstream_res = 1;
+// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+// 	l7vs::Logger::putLogDebug_id = 0;
+// 	test_obj.test_call_realserver_receive();
+// 	BOOST_CHECK(!socket.read_some_call_check);
+// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 	
-	rs_cur = rs_list.begin();
-	socket.read_some_call_check = false;
-	vs.get_qos_downstream_res = ULLONG_MAX;
-	vs.get_throughput_downstream_res = ULLONG_MAX;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_realserver_receive();
-	BOOST_CHECK(socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-	
-	rs_cur = rs_list.begin();
-	socket.read_some_call_check = false;
-	vs.get_qos_downstream_res = ULLONG_MAX - 1;
-	vs.get_throughput_downstream_res = ULLONG_MAX;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_realserver_receive();
-	BOOST_CHECK(!socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-	
-	rs_cur = rs_list.begin();
-	socket.read_some_call_check = false;
-	vs.get_qos_downstream_res = 0;
+	socket.read_some_res = MAX_BUFFER_SIZE;
+//	vs.get_qos_downstream_res = 104857600;
 	vs.get_throughput_downstream_res = 0;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_realserver_receive();
-	BOOST_CHECK(socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
+	vs.get_wait_downstream_res = 0;
 	
-	rs_cur = rs_list.begin();
-	socket.read_some_call_check = false;
-	vs.get_qos_downstream_res = 0;
-	vs.get_throughput_downstream_res = 1;
-	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogDebug_id = 0;
-	test_obj.test_call_realserver_receive();
-	BOOST_CHECK(!socket.read_some_call_check);
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-	
-	vs.get_qos_downstream_res = 104857600;
-	vs.get_throughput_downstream_res = 0;
-	
-	// unit_test [7] down_thread_realserver_receive receive size 0 check
-	std::cout << "[7] down_thread_realserver_receive receive size 0 check" << std::endl;
+	// unit_test [8] down_thread_realserver_receive receive size 0 check
+	std::cout << "[8] down_thread_realserver_receive receive size 0 check" << std::endl;
 	rs_cur = rs_list.begin();
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_res = 0;
@@ -7811,8 +7961,8 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
 	socket.read_some_res = MAX_BUFFER_SIZE;
 	
-	// unit_test [8] down_thread_realserver_receive socket error (try_again) check
-	std::cout << "[8] down_thread_realserver_receive socket error (try_again) check" << std::endl;
+	// unit_test [9] down_thread_realserver_receive socket error (try_again) check
+	std::cout << "[9] down_thread_realserver_receive socket error (try_again) check" << std::endl;
 	rs_cur = rs_list.begin();
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::try_again;
@@ -7822,8 +7972,8 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [9] down_thread_realserver_receive socket error (eof) check
-	std::cout << "[9] down_thread_realserver_receive socket error (eof) check" << std::endl;
+	// unit_test [10] down_thread_realserver_receive socket error (eof) check
+	std::cout << "[10] down_thread_realserver_receive socket error (eof) check" << std::endl;
 	rs_cur = rs_list.begin();
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::eof;
@@ -7833,8 +7983,8 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [10] down_thread_realserver_receive socket error (connection_reset) check
-	std::cout << "[10] down_thread_realserver_receive socket error (connection_reset) check" << std::endl;
+	// unit_test [11] down_thread_realserver_receive socket error (connection_reset) check
+	std::cout << "[11] down_thread_realserver_receive socket error (connection_reset) check" << std::endl;
 	rs_cur = rs_list.begin();
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::connection_reset;
@@ -7844,8 +7994,8 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [11] down_thread_realserver_receive socket error (bad_descriptor) check
-	std::cout << "[11] down_thread_realserver_receive socket error (bad_descriptor) check" << std::endl;
+	// unit_test [12] down_thread_realserver_receive socket error (bad_descriptor) check
+	std::cout << "[12] down_thread_realserver_receive socket error (bad_descriptor) check" << std::endl;
 	rs_cur = rs_list.begin();
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::bad_descriptor;
@@ -7860,8 +8010,8 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 
-	// unit_test [12] down_thread_realserver_receive closed socket error (bad_descriptor) check
-	std::cout << "[12] down_thread_realserver_receive closed socket error (bad_descriptor) check" << std::endl;
+	// unit_test [13] down_thread_realserver_receive closed socket error (bad_descriptor) check
+	std::cout << "[13] down_thread_realserver_receive closed socket error (bad_descriptor) check" << std::endl;
 	rs_cur = rs_list.begin();
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::bad_descriptor;
@@ -7876,8 +8026,8 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 		
-	// unit_test [13] down_thread_realserver_receive not fond function error check
-	std::cout << "[13] down_thread_realserver_receive not fond function error check" << std::endl;
+	// unit_test [14] down_thread_realserver_receive not fond function error check
+	std::cout << "[14] down_thread_realserver_receive not fond function error check" << std::endl;
 	test_obj.down_thread_function_map_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7888,8 +8038,8 @@ void down_thread_realserver_receive_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [14] down_thread_realserver_receive returnd illegal EVENT_TAG error check
-	std::cout << "[14] down_thread_realserver_receive returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [15] down_thread_realserver_receive returnd illegal EVENT_TAG error check
+	std::cout << "[15] down_thread_realserver_receive returnd illegal EVENT_TAG error check" << std::endl;
 	test_obj.down_thread_module_event_map_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7900,8 +8050,8 @@ void down_thread_realserver_receive_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [15] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check
-	std::cout << "[15] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check" << std::endl;
+	// unit_test [16] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check
+	std::cout << "[16] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check" << std::endl;
 	rs_cur = rs_list.begin();
 	std::pair< boost::asio::ip::tcp::endpoint, boost::shared_ptr< l7vs::tcp_socket > > sock_pair = *rs_cur;
 	rs_list.clear();
@@ -7910,8 +8060,8 @@ void down_thread_realserver_receive_test(){
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK(!socket.read_some_call_check);
 	
-	// unit_test [16] down_thread_realserver_receive protocol_module NULL error check
-	std::cout << "[16] down_thread_realserver_receive protocol_module NULL error check" << std::endl;
+	// unit_test [17] down_thread_realserver_receive protocol_module NULL error check
+	std::cout << "[17] down_thread_realserver_receive protocol_module NULL error check" << std::endl;
 	test_obj.set_protocol_module(NULL);
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -7979,6 +8129,10 @@ void down_thread_sorryserver_receive_test(){
 	proto_test.handle_sorryserver_recv_in_recvlen = 0;
 	proto_test.handle_sorryserver_recv_in_sorry_endpoint = boost::asio::ip::tcp::endpoint();
 	
+	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogDebug_id = 0;
+
 	test_obj.test_call_sorryserver_receive();
 
 	// unit_test [1] down_thread_sorryserver_receive sorryserver read_some call check
@@ -8001,8 +8155,14 @@ void down_thread_sorryserver_receive_test(){
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_connection_chk_event_call_check);
 	
-	// unit_test [4] down_thread_sorryserver_receive receive size 0 check
-	std::cout << "[4] down_thread_sorryserver_receive receive size 0 check" << std::endl;
+	// unit_test [4] down_thread_sorryserver_receive debug log check
+	std::cout << "[4] down_thread_sorryserver_receive debug log check" << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+
+	// unit_test [5] down_thread_sorryserver_receive receive size 0 check
+	std::cout << "[5] down_thread_sorryserver_receive receive size 0 check" << std::endl;
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_res = 0;
 	test_obj.test_call_sorryserver_receive();
@@ -8011,8 +8171,8 @@ void down_thread_sorryserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_sorryserver_receive_call_check);
 	socket.read_some_res = MAX_BUFFER_SIZE;
 	
-	// unit_test [5] down_thread_sorryserver_receive socket error (try_again) check
-	std::cout << "[5] down_thread_sorryserver_receive socket error (try_again) check" << std::endl;
+	// unit_test [6] down_thread_sorryserver_receive socket error (try_again) check
+	std::cout << "[6] down_thread_sorryserver_receive socket error (try_again) check" << std::endl;
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::try_again;
 	test_obj.test_call_sorryserver_receive();
@@ -8021,8 +8181,8 @@ void down_thread_sorryserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_sorryserver_receive_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [6] down_thread_sorryserver_receive socket error (eof) check
-	std::cout << "[6] down_thread_sorryserver_receive socket error (eof) check" << std::endl;
+	// unit_test [7] down_thread_sorryserver_receive socket error (eof) check
+	std::cout << "[7] down_thread_sorryserver_receive socket error (eof) check" << std::endl;
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::eof;
 	test_obj.test_call_sorryserver_receive();
@@ -8031,8 +8191,8 @@ void down_thread_sorryserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [7] down_thread_sorryserver_receive socket error (connection_reset) check
-	std::cout << "[7] down_thread_sorryserver_receive socket error (connection_reset) check" << std::endl;
+	// unit_test [8] down_thread_sorryserver_receive socket error (connection_reset) check
+	std::cout << "[8] down_thread_sorryserver_receive socket error (connection_reset) check" << std::endl;
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::connection_reset;
 	test_obj.test_call_sorryserver_receive();
@@ -8041,8 +8201,8 @@ void down_thread_sorryserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [8] down_thread_sorryserver_receive socket error (bad_descriptor) check
-	std::cout << "[8] down_thread_sorryserver_receive socket error (bad_descriptor) check" << std::endl;
+	// unit_test [9] down_thread_sorryserver_receive socket error (bad_descriptor) check
+	std::cout << "[9] down_thread_sorryserver_receive socket error (bad_descriptor) check" << std::endl;
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::bad_descriptor;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -8056,8 +8216,8 @@ void down_thread_sorryserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 
-	// unit_test [9] down_thread_sorryserver_receive closed socket error (bad_descriptor) check
-	std::cout << "[9] down_thread_sorryserver_receive closed socket error (bad_descriptor) check" << std::endl;
+	// unit_test [10] down_thread_sorryserver_receive closed socket error (bad_descriptor) check
+	std::cout << "[10] down_thread_sorryserver_receive closed socket error (bad_descriptor) check" << std::endl;
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.read_some_ec = boost::asio::error::bad_descriptor;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -8071,8 +8231,8 @@ void down_thread_sorryserver_receive_test(){
 	BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 
-	// unit_test [10] down_thread_sorryserver_receive not fond function error check
-	std::cout << "[10] down_thread_sorryserver_receive not fond function error check" << std::endl;
+	// unit_test [11] down_thread_sorryserver_receive not fond function error check
+	std::cout << "[11] down_thread_sorryserver_receive not fond function error check" << std::endl;
 	test_obj.down_thread_function_map_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -8083,8 +8243,8 @@ void down_thread_sorryserver_receive_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 
-	// unit_test [11] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check
-	std::cout << "[11] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [12] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check
+	std::cout << "[12] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check" << std::endl;
 	test_obj.down_thread_module_event_map_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -8095,8 +8255,8 @@ void down_thread_sorryserver_receive_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 
-	// unit_test [12] down_thread_sorryserver_receive protocol_module NULL error check
-	std::cout << "[12] down_thread_sorryserver_receive protocol_module NULL error check" << std::endl;
+	// unit_test [13] down_thread_sorryserver_receive protocol_module NULL error check
+	std::cout << "[13] down_thread_sorryserver_receive protocol_module NULL error check" << std::endl;
 	test_obj.set_protocol_module(NULL);
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -8161,6 +8321,10 @@ void up_thread_realserver_send_test(){
 	rs_it = rs_map.find(send_end);
 	l7vs::tcp_socket& socket = *(rs_it->second);
 	
+	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogDebug_id = 0;
+	
 	test_obj.test_call_realserver_send();
 	
 	// unit_test [1] up_thread_realserver_send realserver_socket write_some call check
@@ -8182,9 +8346,15 @@ void up_thread_realserver_send_test(){
 	std::cout << "[4] up_thread_realserver_send up_thread_next_call_function update check" << std::endl;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
-	
-	// unit_test [5] up_thread_realserver_send send size check
-	std::cout << "[5] up_thread_realserver_send send size check" << std::endl;
+
+	// unit_test [5] up_thread_realserver_send debug log check
+	std::cout << "[5] up_thread_realserver_send debug log check" << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+
+	// unit_test [6] up_thread_realserver_send send size check
+	std::cout << "[6] up_thread_realserver_send send size check" << std::endl;
 	send_data.set_send_size(0);
 	socket.write_some_res = 0;
 	test_obj.set_up_thread_next_function_call_exit();
@@ -8228,8 +8398,8 @@ void up_thread_realserver_send_test(){
 	
 	socket.write_some_res = MAX_BUFFER_SIZE;
 	
-	// unit_test [6] up_thread_realserver_send socket error (try_again) check
-	std::cout << "[6] up_thread_realserver_send socket error (try_again) check" << std::endl;
+	// unit_test [7] up_thread_realserver_send socket error (try_again) check
+	std::cout << "[7] up_thread_realserver_send socket error (try_again) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::try_again;
@@ -8239,8 +8409,8 @@ void up_thread_realserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_realserver_send_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [7] up_thread_realserver_send socket error (eof) check
-	std::cout << "[7] up_thread_realserver_send socket error (eof) check" << std::endl;
+	// unit_test [8] up_thread_realserver_send socket error (eof) check
+	std::cout << "[8] up_thread_realserver_send socket error (eof) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::eof;
@@ -8250,8 +8420,8 @@ void up_thread_realserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [8] up_thread_realserver_send socket error (connection_reset) check
-	std::cout << "[8] up_thread_realserver_send socket error (connection_reset) check" << std::endl;
+	// unit_test [9] up_thread_realserver_send socket error (connection_reset) check
+	std::cout << "[9] up_thread_realserver_send socket error (connection_reset) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::connection_reset;
@@ -8261,8 +8431,8 @@ void up_thread_realserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [9] up_thread_realserver_send socket error (bad_descriptor) check
-	std::cout << "[9] up_thread_realserver_send socket error (bad_descriptor) check" << std::endl;
+	// unit_test [10] up_thread_realserver_send socket error (bad_descriptor) check
+	std::cout << "[10] up_thread_realserver_send socket error (bad_descriptor) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::bad_descriptor;
@@ -8277,8 +8447,8 @@ void up_thread_realserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [10] up_thread_realserver_send not fond function error check
-	std::cout << "[10] up_thread_realserver_send not fond function error check" << std::endl;
+	// unit_test [11] up_thread_realserver_send not fond function error check
+	std::cout << "[11] up_thread_realserver_send not fond function error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.up_thread_function_map_clear();
 	test_obj.up_thread_exit_call_check = false;
@@ -8290,8 +8460,8 @@ void up_thread_realserver_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [11] up_thread_realserver_send returnd illegal EVENT_TAG error check
-	std::cout << "[11] up_thread_realserver_send returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [12] up_thread_realserver_send returnd illegal EVENT_TAG error check
+	std::cout << "[12] up_thread_realserver_send returnd illegal EVENT_TAG error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.up_thread_module_event_map_clear();
 	test_obj.up_thread_exit_call_check = false;
@@ -8303,8 +8473,8 @@ void up_thread_realserver_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [12] up_thread_realserver_send protocol_module NULL error check
-	std::cout << "[12] up_thread_realserver_send protocol_module NULL error check" << std::endl;
+	// unit_test [13] up_thread_realserver_send protocol_module NULL error check
+	std::cout << "[13] up_thread_realserver_send protocol_module NULL error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_protocol_module(NULL);
 	test_obj.up_thread_exit_call_check = false;
@@ -8361,6 +8531,10 @@ void up_thread_sorryserver_send_test(){
 	socket.write_some_buffers_size_in = 0;
 	socket.write_some_call_check = false;
 	
+	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogDebug_id = 0;
+	
 	test_obj.test_call_sorryserver_send();
 	
 	// unit_test [1] up_thread_sorryserver_send realserver_socket write_some call check
@@ -8378,9 +8552,15 @@ void up_thread_sorryserver_send_test(){
 	std::cout << "[3] up_thread_sorryserver_send up_thread_next_call_function update check" << std::endl;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
-	
-	// unit_test [4] up_thread_sorryserver_send send size check
-	std::cout << "[4] up_thread_sorryserver_send send size check" << std::endl;
+
+	// unit_test [4] up_thread_sorryserver_send debug log check
+	std::cout << "[4] up_thread_sorryserver_send debug log check" << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
+
+	// unit_test [5] up_thread_sorryserver_send send size check
+	std::cout << "[5] up_thread_sorryserver_send send size check" << std::endl;
 	send_data.set_send_size(0);
 	socket.write_some_res = 0;
 	test_obj.set_up_thread_next_function_call_exit();
@@ -8424,8 +8604,8 @@ void up_thread_sorryserver_send_test(){
 	
 	socket.write_some_res = MAX_BUFFER_SIZE;
 		
-	// unit_test [5] up_thread_sorryserver_send socket error (try_again) check
-	std::cout << "[5] up_thread_sorryserver_send socket error (try_again) check" << std::endl;
+	// unit_test [6] up_thread_sorryserver_send socket error (try_again) check
+	std::cout << "[6] up_thread_sorryserver_send socket error (try_again) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::try_again;
@@ -8435,8 +8615,8 @@ void up_thread_sorryserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_sorryserver_send_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [6] up_thread_sorryserver_send socket error (eof) check
-	std::cout << "[6] up_thread_sorryserver_send socket error (eof) check" << std::endl;
+	// unit_test [7] up_thread_sorryserver_send socket error (eof) check
+	std::cout << "[7] up_thread_sorryserver_send socket error (eof) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::eof;
@@ -8446,8 +8626,8 @@ void up_thread_sorryserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [7] up_thread_sorryserver_send socket error (connection_reset) check
-	std::cout << "[7] up_thread_sorryserver_send socket error (connection_reset) check" << std::endl;
+	// unit_test [8] up_thread_sorryserver_send socket error (connection_reset) check
+	std::cout << "[8] up_thread_sorryserver_send socket error (connection_reset) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::connection_reset;
@@ -8457,8 +8637,8 @@ void up_thread_sorryserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [8] up_thread_sorryserver_send socket error (bad_descriptor) check
-	std::cout << "[8] up_thread_sorryserver_send socket error (bad_descriptor) check" << std::endl;
+	// unit_test [9] up_thread_sorryserver_send socket error (bad_descriptor) check
+	std::cout << "[9] up_thread_sorryserver_send socket error (bad_descriptor) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_up_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::bad_descriptor;
@@ -8473,8 +8653,8 @@ void up_thread_sorryserver_send_test(){
 	BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [9] up_thread_sorryserver_send not fond function error check
-	std::cout << "[9] up_thread_sorryserver_send not fond function error check" << std::endl;
+	// unit_test [10] up_thread_sorryserver_send not fond function error check
+	std::cout << "[10] up_thread_sorryserver_send not fond function error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.up_thread_function_map_clear();
 	test_obj.up_thread_exit_call_check = false;
@@ -8486,8 +8666,8 @@ void up_thread_sorryserver_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [10] up_thread_sorryserver_send returnd illegal EVENT_TAG error check
-	std::cout << "[10] up_thread_sorryserver_send returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [11] up_thread_sorryserver_send returnd illegal EVENT_TAG error check
+	std::cout << "[11] up_thread_sorryserver_send returnd illegal EVENT_TAG error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.up_thread_module_event_map_clear();
 	test_obj.up_thread_exit_call_check = false;
@@ -8499,8 +8679,8 @@ void up_thread_sorryserver_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [11] up_thread_sorryserver_send protocol_module NULL error check
-	std::cout << "[11] up_thread_sorryserver_send protocol_module NULL error check" << std::endl;
+	// unit_test [12] up_thread_sorryserver_send protocol_module NULL error check
+	std::cout << "[12] up_thread_sorryserver_send protocol_module NULL error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_protocol_module(NULL);
 	test_obj.up_thread_exit_call_check = false;
@@ -8532,6 +8712,32 @@ void down_thread_client_send_test(){
 	// get client socket
 	l7vs::tcp_socket& socket = test_obj.get_client_socket();
 	
+	// dummy server client socket connect
+	boost::system::error_code ec;
+	test_mirror_server test_server;
+	// accept req
+	test_server.breq_acc_flag = true;
+	// close wait req
+	test_server.breq_close_wait_flag = true;
+	// recv cont
+	test_server.req_recv_cnt = 0;
+	// test server start
+	boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+	while( !test_server.brun_flag ){
+		sleep(1);
+	}
+	
+	boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+	socket.get_socket().connect(connect_end,ec);
+	BOOST_CHECK(!ec);
+	socket.is_open_res = true;
+
+	while(!test_server.bconnect_flag){
+		sleep(1);
+	}
+	boost::asio::ip::tcp::endpoint local_endpoint = socket.get_socket().local_endpoint(ec);
+	BOOST_CHECK(!ec);
+
 	// tcp_session set
 	send_data.initialize();
 	send_data.set_size(MAX_BUFFER_SIZE);
@@ -8553,6 +8759,10 @@ void down_thread_client_send_test(){
 	socket.write_some_buffers_in = NULL;
 	socket.write_some_buffers_size_in = 0;
 	socket.write_some_call_check = false;
+
+	l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
+	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
+	l7vs::Logger::putLogDebug_id = 0;
 	
 	test_obj.test_call_client_send();
 	
@@ -8571,9 +8781,15 @@ void down_thread_client_send_test(){
 	std::cout << "[3] down_thread_client_send up_thread_next_call_function update check" << std::endl;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
+
+	// unit_test [4] down_thread_client_send send debug log check
+	std::cout << "[4] down_thread_client_send  send debug log check" << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
+	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 	
-	// unit_test [4] down_thread_client_send send size check
-	std::cout << "[4] down_thread_client_send send size check" << std::endl;
+	// unit_test [5] down_thread_client_send send size check
+	std::cout << "[5] down_thread_client_send send size check" << std::endl;
 	send_data.set_send_size(0);
 	socket.write_some_res = 0;
 	test_obj.set_down_thread_next_function_call_exit();
@@ -8617,8 +8833,8 @@ void down_thread_client_send_test(){
 	
 	socket.write_some_res = MAX_BUFFER_SIZE;
 		
-	// unit_test [5] down_thread_client_send socket error (try_again) check
-	std::cout << "[5] down_thread_client_send socket error (try_again) check" << std::endl;
+	// unit_test [6] down_thread_client_send socket error (try_again) check
+	std::cout << "[6] down_thread_client_send socket error (try_again) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::try_again;
@@ -8628,8 +8844,8 @@ void down_thread_client_send_test(){
 	BOOST_CHECK(test_obj.down_thread_client_send_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [6] down_thread_client_send socket error (eof) check
-	std::cout << "[6] down_thread_client_send socket error (eof) check" << std::endl;
+	// unit_test [7] down_thread_client_send socket error (eof) check
+	std::cout << "[7] down_thread_client_send socket error (eof) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::eof;
@@ -8639,8 +8855,8 @@ void down_thread_client_send_test(){
 	BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [7] down_thread_client_send socket error (connection_reset) check
-	std::cout << "[7] down_thread_client_send socket error (connection_reset) check" << std::endl;
+	// unit_test [8] down_thread_client_send socket error (connection_reset) check
+	std::cout << "[8] down_thread_client_send socket error (connection_reset) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::connection_reset;
@@ -8650,8 +8866,8 @@ void down_thread_client_send_test(){
 	BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [8] down_thread_client_send socket error (bad_descriptor) check
-	std::cout << "[8] down_thread_client_send socket error (bad_descriptor) check" << std::endl;
+	// unit_test [9] down_thread_client_send socket error (bad_descriptor) check
+	std::cout << "[9] down_thread_client_send socket error (bad_descriptor) check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_down_thread_next_function_call_exit();
 	socket.write_some_ec = boost::asio::error::bad_descriptor;
@@ -8666,8 +8882,8 @@ void down_thread_client_send_test(){
 	BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
 	socket.read_some_ec.clear();
 	
-	// unit_test [9] down_thread_client_send not fond function error check
-	std::cout << "[9] down_thread_client_send not fond function error check" << std::endl;
+	// unit_test [10] down_thread_client_send not fond function error check
+	std::cout << "[10] down_thread_client_send not fond function error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.down_thread_function_map_clear();
 	test_obj.down_thread_exit_call_check = false;
@@ -8679,8 +8895,8 @@ void down_thread_client_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [10] down_thread_client_send returnd illegal EVENT_TAG error check
-	std::cout << "[10] down_thread_client_send returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [11] down_thread_client_send returnd illegal EVENT_TAG error check
+	std::cout << "[11] down_thread_client_send returnd illegal EVENT_TAG error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.down_thread_module_event_map_clear();
 	test_obj.down_thread_exit_call_check = false;
@@ -8692,8 +8908,8 @@ void down_thread_client_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [11] down_thread_client_send protocol_module NULL error check
-	std::cout << "[11] down_thread_client_send protocol_module NULL error check" << std::endl;
+	// unit_test [12] down_thread_client_send protocol_module NULL error check
+	std::cout << "[12] down_thread_client_send protocol_module NULL error check" << std::endl;
 	send_data.set_send_size(0);
 	test_obj.set_protocol_module(NULL);
 	test_obj.down_thread_exit_call_check = false;
@@ -8704,6 +8920,11 @@ void down_thread_client_send_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
+
+	// dummy server stop
+	test_server.breq_close_wait_flag = false;	
+	test_server.bstop_flag = true;
+	server_thread.join();
 
 	BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
 }
@@ -9972,7 +10193,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
-	ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
+ 	ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
