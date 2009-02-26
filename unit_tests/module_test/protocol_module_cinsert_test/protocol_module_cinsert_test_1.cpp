@@ -18,6 +18,28 @@ void	thread_method()
 {
 }
 
+//--stub functions--
+LOG_LEVEL_TAG	stb_getloglevel(){
+//	std::cout << "getloglevel called." << std::endl;
+	return LOG_LV_NONE;
+}
+
+void	stb_putLogFatal( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogFatal called." << std::endl;
+}
+void	stb_putLogError( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogError called." << std::endl;
+}
+void	stb_putLogWarn( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogWarn called." << std::endl;
+}
+void	stb_putLogInfo( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogInfo called." << std::endl;
+}
+void	stb_putLogDebug( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogDebug called." << std::endl;
+}
+
 //--test class--
 class	protocol_module_cinsert_test : public protocol_module_cinsert
 {
@@ -26,7 +48,15 @@ boost::mutex		sync_mutex;
 boost::condition	sync_condition;
 boost::condition	session_thread_data_map_condition;
 
-protocol_module_cinsert_test() : protocol_module_cinsert() {}
+protocol_module_cinsert_test() : protocol_module_cinsert()
+{
+	getloglevel	= &stb_getloglevel;
+	putLogFatal	= &stb_putLogFatal;
+	putLogError	= &stb_putLogError;
+	putLogWarn	= &stb_putLogWarn;
+	putLogInfo	= &stb_putLogInfo;
+	putLogDebug	= &stb_putLogDebug;
+}
 ~protocol_module_cinsert_test(){}
 //-------------------------------------------------------------------
 void	session_thread_data_map_lock()
@@ -758,7 +788,8 @@ void	get_name_test_thread( int thread_no, bool* ret )
 void	is_tcp_test()
 {
 	// unit_test[01]  is_tcp( Result = true )
-	BOOST_CHECK( is_tcp() == true );
+	BOOST_CHECK( is_tcp() == 1 );
+
 }
 
 void	is_tcp_test_thread( int thread_no, bool* ret )
