@@ -3,7 +3,7 @@
 #	Makefile for protocol_module_cinsert unit test frameworks.
 #
 #
-TARGET		= protocol_module_cinsert_ut protocol_module_cinsert3_ut protocol_module_cinsert4_ut
+TARGET		= protocol_module_cinsert_ut protocol_module_cinsert2_ut protocol_module_cinsert3_ut protocol_module_cinsert4_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../../../logger \
@@ -23,6 +23,11 @@ SRCS		=	\
 			../../../module/protocol/protocol_module_cinsert.cpp \
 			protocol_module_cinsert_test_1.cpp
 
+SRCS2		=	\
+			../../../module/protocol/http_protocol_module_base.cpp \
+			../../../module/protocol/protocol_module_cinsert.cpp \
+			protocol_module_cinsert_test_2.cpp
+
 SRCS3		=	\
 			../../../module/protocol/http_protocol_module_base.cpp \
 			../../../module/protocol/protocol_module_cinsert.cpp \
@@ -39,6 +44,8 @@ SRCS4		=	\
 
 OBJS		= $(SRCS:.cpp=.o)
 
+OBJS2		= $(SRCS2:.cpp=.o)
+
 OBJS3		= $(SRCS3:.cpp=.o)
 
 OBJS4		= $(SRCS4:.cpp=.o)
@@ -48,6 +55,9 @@ all:	$(TARGET)
 protocol_module_cinsert_ut:	$(OBJS)
 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
+protocol_module_cinsert2_ut:	$(OBJS2)
+	$(CPP) $(INCLUDES) -o $@ $(OBJS2) $(LIBS)
+
 protocol_module_cinsert3_ut:	$(OBJS3)
 	$(CPP) $(INCLUDES) -o $@ $(OBJS3) $(LIBS)
 
@@ -55,4 +65,4 @@ protocol_module_cinsert4_ut:	$(OBJS4)
 	$(CPP) $(INCLUDES) -o $@ $(OBJS4) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(OBJS) $(OBJS3) $(OBJS4)
+	rm -f $(TARGET) $(OBJS) $(OBJS2) $(OBJS3) $(OBJS4)
