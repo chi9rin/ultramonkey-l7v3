@@ -19,33 +19,33 @@ void	thread_method()
 }
 
 LOG_LEVEL_TAG	stb_getloglevel(){
-	std::cout << "getloglevel called." << std::endl;
+//	std::cout << "getloglevel called." << std::endl;
 	return LOG_LV_NONE;
 }
 void	stb_putLogFatal( const unsigned int, const std::string&, const char*, int ){
-	std::cout << "putLogFatal called." << std::endl;
+//	std::cout << "putLogFatal called." << std::endl;
 }
 void	stb_putLogError( const unsigned int, const std::string&, const char*, int ){
-	std::cout << "putLogError called." << std::endl;
+//	std::cout << "putLogError called." << std::endl;
 }
 void	stb_putLogWarn( const unsigned int, const std::string&, const char*, int ){
-	std::cout << "putLogWarn called." << std::endl;
+//	std::cout << "putLogWarn called." << std::endl;
 }
 void	stb_putLogInfo( const unsigned int, const std::string&, const char*, int ){
-	std::cout << "putLogInfo called." << std::endl;
+//	std::cout << "putLogInfo called." << std::endl;
 }
 void	stb_putLogDebug( const unsigned int, const std::string&, const char*, int ){
-	std::cout << "putLogDebug called." << std::endl;
+//	std::cout << "putLogDebug called." << std::endl;
 }
 void*	stb_replication_pay_memory( const std::string&, unsigned int* ){
-	std::cout << "replication_pay_memory called." << std::endl;
+//	std::cout << "replication_pay_memory called." << std::endl;
 	return NULL;
 }
 void	stb_replication_area_lock(){
-	std::cout << "replication_area_lock called." << std::endl;
+//	std::cout << "replication_area_lock called." << std::endl;
 }
 void	stb_replication_area_unlock(){
-	std::cout << "replication_area_unlock called." << std::endl;
+//	std::cout << "replication_area_unlock called." << std::endl;
 }
 
 protocol_module_cinsert::realserverlist_type::iterator stb_rslist_begin() {
@@ -83,7 +83,15 @@ boost::mutex		sync_mutex;
 boost::condition	sync_condition;
 boost::condition	session_thread_data_map_condition;
 
-protocol_module_cinsert_test() : protocol_module_cinsert() {}
+protocol_module_cinsert_test() : protocol_module_cinsert()
+{
+	getloglevel	= &stb_getloglevel;
+	putLogFatal	= &stb_putLogFatal;
+	putLogError	= &stb_putLogError;
+	putLogWarn	= &stb_putLogWarn;
+	putLogInfo	= &stb_putLogInfo;
+	putLogDebug	= &stb_putLogDebug;
+}
 ~protocol_module_cinsert_test(){}
 //-------------------------------------------------------------------
 void	session_thread_data_map_lock()
@@ -1106,37 +1114,37 @@ void	handle_sorryserver_disconnect_test_thread( int thread_no, bool* ret )
 	std::cout << "handle_sorryserver_disconnect_test_thread end:" << thread_no << std::endl;//debug
 }
 
-void	init_logger_functions_test()
-{
-	boost::function< LOG_LEVEL_TAG(void) >	ingetloglevel = &stb_getloglevel;
-	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogFatal	= &stb_putLogFatal;
-	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogError	= &stb_putLogError;
-	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogWarn	= &stb_putLogWarn;
-	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogInfo	= &stb_putLogInfo;
-	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogDebug	= &stb_putLogDebug;
-
-	BOOST_CHECK( getloglevel	== NULL );
-	BOOST_CHECK( putLogFatal	== NULL );
-	BOOST_CHECK( putLogError	== NULL );
-	BOOST_CHECK( putLogWarn		== NULL );
-	BOOST_CHECK( putLogInfo		== NULL );
-	BOOST_CHECK( putLogDebug	== NULL );
-
-	init_logger_functions(	ingetloglevel,
-							inputLogFatal,
-							inputLogError,
-							inputLogWarn,
-							inputLogInfo,
-							inputLogDebug);
-
-	// unit_test[23] init_logger_functions check value
-	BOOST_CHECK( getloglevel	!= NULL );
-	BOOST_CHECK( putLogFatal	!= NULL );
-	BOOST_CHECK( putLogError	!= NULL );
-	BOOST_CHECK( putLogWarn		!= NULL );
-	BOOST_CHECK( putLogInfo		!= NULL );
-	BOOST_CHECK( putLogDebug	!= NULL );
-}
+// void	init_logger_functions_test()
+// {
+// 	boost::function< LOG_LEVEL_TAG(void) >	ingetloglevel = &stb_getloglevel;
+// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogFatal	= &stb_putLogFatal;
+// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogError	= &stb_putLogError;
+// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogWarn	= &stb_putLogWarn;
+// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogInfo	= &stb_putLogInfo;
+// 	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogDebug	= &stb_putLogDebug;
+// 
+// 	BOOST_CHECK( getloglevel	== NULL );
+// 	BOOST_CHECK( putLogFatal	== NULL );
+// 	BOOST_CHECK( putLogError	== NULL );
+// 	BOOST_CHECK( putLogWarn		== NULL );
+// 	BOOST_CHECK( putLogInfo		== NULL );
+// 	BOOST_CHECK( putLogDebug	== NULL );
+// 
+// 	init_logger_functions(	ingetloglevel,
+// 							inputLogFatal,
+// 							inputLogError,
+// 							inputLogWarn,
+// 							inputLogInfo,
+// 							inputLogDebug);
+// 
+// 	// unit_test[23] init_logger_functions check value
+// 	BOOST_CHECK( getloglevel	!= NULL );
+// 	BOOST_CHECK( putLogFatal	!= NULL );
+// 	BOOST_CHECK( putLogError	!= NULL );
+// 	BOOST_CHECK( putLogWarn		!= NULL );
+// 	BOOST_CHECK( putLogInfo		!= NULL );
+// 	BOOST_CHECK( putLogDebug	!= NULL );
+// }
 
 void	init_replication_functions_test()
 {
@@ -1373,6 +1381,50 @@ void	handle_realserver_close_test()
 
 }; // protocol_module_cinsert_test
 
+//--test class--
+class	protocol_module_cinsert_test_2 : public protocol_module_cinsert
+{
+public:
+boost::mutex		sync_mutex;
+boost::condition	sync_condition;
+boost::condition	session_thread_data_map_condition;
+
+protocol_module_cinsert_test_2() : protocol_module_cinsert() {}
+~protocol_module_cinsert_test_2(){}
+
+void	init_logger_functions_test()
+{
+	boost::function< LOG_LEVEL_TAG(void) >	ingetloglevel = &stb_getloglevel;
+	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogFatal	= &stb_putLogFatal;
+	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogError	= &stb_putLogError;
+	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogWarn	= &stb_putLogWarn;
+	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogInfo	= &stb_putLogInfo;
+	boost::function< void ( const unsigned int, const std::string&, const char*, int ) >	inputLogDebug	= &stb_putLogDebug;
+
+	BOOST_CHECK( getloglevel	== NULL );
+	BOOST_CHECK( putLogFatal	== NULL );
+	BOOST_CHECK( putLogError	== NULL );
+	BOOST_CHECK( putLogWarn		== NULL );
+	BOOST_CHECK( putLogInfo		== NULL );
+	BOOST_CHECK( putLogDebug	== NULL );
+
+	init_logger_functions(	ingetloglevel,
+							inputLogFatal,
+							inputLogError,
+							inputLogWarn,
+							inputLogInfo,
+							inputLogDebug);
+
+	// unit_test[23] init_logger_functions check value
+	BOOST_CHECK( getloglevel	!= NULL );
+	BOOST_CHECK( putLogFatal	!= NULL );
+	BOOST_CHECK( putLogError	!= NULL );
+	BOOST_CHECK( putLogWarn		!= NULL );
+	BOOST_CHECK( putLogInfo		!= NULL );
+	BOOST_CHECK( putLogDebug	!= NULL );
+}
+
+}; // protocol_module_cinsert_test_2
 
 
 //-------------------------------------------------------------------
@@ -1532,7 +1584,7 @@ void	handle_sorryserver_disconnect_test2()
 
 void	init_logger_functions_test()
 {
-	protocol_module_cinsert_test	protocol_module_cinsert_test_1;
+	protocol_module_cinsert_test_2	protocol_module_cinsert_test_1;
 
 	BOOST_MESSAGE( "----- init_logger_functions test start -----" );
 	protocol_module_cinsert_test_1.init_logger_functions_test();
