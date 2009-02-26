@@ -1,13 +1,26 @@
-//
-//!	@file	l7vscommand.h
-//!	@brief	l7vsadm and l7vsd connection data prototype
-//
-//	copyright (c) sdy corporation. 2008
-//	mail: n dot nakai at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*!
+ *	@file	l7vscommand.h
+ *	@brief	l7vsadm and l7vsd connection data prototype
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 
 #ifndef	L7VS_COMMAND_H
 #define	L7VS_COMMAND_H
@@ -75,6 +88,32 @@ public:
 								reload_param( PARAM_COMP_NOCAT ),
 								snmp_log_category( LOG_CAT_NONE ),
 								snmp_log_level( LOG_LV_NONE ){}
+
+	template <typename Elem, typename Traits>
+	friend std::basic_ostream<Elem, Traits>& operator<<(
+		std::basic_ostream<Elem, Traits>& os,
+		const l7vsadm_request& request ){
+
+		os << "l7vsadm_request={";
+		os << boost::format(	"command=%d: "
+								"vs_element=%s: "
+								"replication_command=%d: "
+								"log_category=%d: "
+								"log_level=%d: "
+								"reload_param=%d: "
+								"snmp_log_category=%d: "
+								"snmp_log_level=%d: " )
+								% request.command
+								% request.vs_element
+								% request.replication_command
+								% request.log_category
+								% request.log_level
+								% request.reload_param
+								% request.snmp_log_category
+								% request.snmp_log_level;
+		return os;
+	}
+
 private:
 	friend class	boost::serialization::access;		//!< serializable access class is friend.
 	//! serializable function
@@ -117,6 +156,8 @@ public:
 		RESPONSE_PARAMETER_ERROR	//!<	parameter error
 	};
 
+	typedef	std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> log_category_level_type;
+
 	l7vsadm_request::COMMAND_CODE_TAG
 							code;	//!<	request command.
 	
@@ -129,12 +170,12 @@ public:
 	
 	replication::REPLICATION_MODE_TAG	replication_mode_status;//!< replication status.
 	
-	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
+	std::list< log_category_level_type >
 							log_status_list;	//!< log cateogries statuses.
 							
 	bool					snmp_connection_status;	//!< snmp connection status
 	
-	std::list< std::pair<LOG_CATEGORY_TAG, LOG_LEVEL_TAG> >
+	std::list< log_category_level_type >
 							snmp_log_status_list;	//!< snmp log statuses
 	
 	unsigned long long		total_bps;					//!< l7vsd's total bit par sec
@@ -155,6 +196,77 @@ public:
 							total_client_send_byte( 0ULL ),
 							total_realserver_recv_byte( 0ULL ),
 							total_realserver_send_byte( 0ULL ){}
+
+	template <typename Elem, typename Traits>
+	friend std::basic_ostream<Elem, Traits>& operator<<(
+		std::basic_ostream<Elem, Traits>& os,
+		const l7vsd_response& response ){
+
+		os << "l7vsd_response={";
+		os << boost::format(	"code=%d: "
+								"status=%d: "
+								"message=%s: " )
+								% response.code
+								% response.status
+								% response.message;
+		{
+			unsigned int i = 0;
+			BOOST_FOREACH( virtualservice_element vs_elem, response.virtualservice_status_list ){
+				os << boost::format( "virtualservice_status_list[%d]=" ) % i;
+				os << vs_elem;
+				os << ": ";
+				++i;
+			}
+		}
+		os << boost::format(	"replication_mode_status=%d: " )
+								% response.replication_mode_status;
+		{
+			unsigned int i = 0;
+			BOOST_FOREACH( log_category_level_type log_pair, response.log_status_list ){
+				os << boost::format(	"log_status_list[%d]={log_category=%d, log_level=%d}" )
+										% i
+										% log_pair.first
+										% log_pair.second;
+				os << ": ";
+				++i;
+			}
+		}
+		os << boost::format(	"snmp_connection_status=%d: " )
+								% response.snmp_connection_status;
+		{
+			unsigned int i = 0;
+			BOOST_FOREACH( log_category_level_type log_pair, response.snmp_log_status_list ){
+				os << boost::format(	"snmp_log_status_list[%d]={log_category=%d, log_level=%d}" )
+										% i
+										% log_pair.first
+										% log_pair.second;
+				os << ": ";
+				++i;
+			}
+		}
+		os << boost::format(	"total_bps=%d: "
+								"total_client_recv_byte=%d: "
+								"total_client_send_byte=%d: "
+								"total_realserver_recv_byte=%d: "
+								"total_realserver_send_byte=%d: " )
+								% response.total_bps
+								% response.total_client_recv_byte
+								% response.total_client_send_byte
+								% response.total_realserver_recv_byte
+								% response.total_realserver_send_byte;
+		{
+			unsigned int i = 0;
+			BOOST_FOREACH( virtualservice_element vs_elem, response.virtualservice_vec ){
+				os << boost::format( "virtualservice_vec[%d]=" ) % i;
+				os << vs_elem;
+				os << ": ";
+				++i;
+			}
+		}
+
+		return os;
+	}
+
 private:
 	friend class	boost::serialization::access;		//! friend boost serializable class
 	//! serializable
@@ -178,7 +290,6 @@ private:
 		ar & virtualservice_vec;
 	}
 };
-
 
 }	// namespase l7vsd
 #endif	//L7COMMAND_H

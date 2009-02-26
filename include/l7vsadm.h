@@ -1,13 +1,27 @@
-//
-//	l7vsadm.h
-//	^^^^^^^^^
-//	l7vsd control application.
-//
-// Copyright (c) Norihisa Nakai ( n dot nakai at sdy dot co dot jp )
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*!
+ *	@file	l7vsadm.h
+ *	@brief	l7vsd control application.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #ifndef	L7VSADM_H
 #define	L7VSADM_H
 #include <map>
@@ -39,6 +53,10 @@
 
 namespace l7vs{
 
+//! endpoint string parse function
+//! @param[in]	endpoint string
+//! @param[out]	error_code
+//! @return		endpoint
 template < class T >
 typename T::endpoint string_to_endpoint( std::string& str, error_code& err ){
 	std::string::size_type pos = str.rfind( ":" );
@@ -74,6 +92,9 @@ typename T::endpoint string_to_endpoint( std::string& str, error_code& err ){
 	return *itr;
 }
 
+//! check endpoint function
+//! @param[in]	endpoint
+//! @param[out]	error_code
 template < class T >
 void	check_endpoint( typename T::endpoint& ep, error_code& err ){
 	if( ep.address().is_v4() ){
@@ -94,6 +115,10 @@ void	check_endpoint( typename T::endpoint& ep, error_code& err ){
 	}
 }
 
+//! endpoint to string function
+//! @param[in]	endpoint
+//! @param[in]	return numeric expression or not
+//! @return		endpoint string
 template < class T >
 std::string	endpoint_to_string( typename T::endpoint ep, bool numeric_flag ){
 	std::stringstream	buf;
@@ -113,11 +138,14 @@ std::string	endpoint_to_string( typename T::endpoint ep, bool numeric_flag ){
 
 class	l7vsadm{
 protected:
+	//! @class	file_lock
+	//! @brief	l7vsadm execute file lock class
 	class	file_lock{
 	protected:
 		int			fd;
 		int			lock;
 	public:
+		//! constructor
 		file_lock( const std::string& path, error_code& err )
 			:	fd(-1),
 				lock(-1){
@@ -129,6 +157,7 @@ protected:
 			}
 		}
 
+		//! destructor
 		~file_lock(){
 			if( lock != -1 ){
 				// fd unlock.
@@ -140,6 +169,8 @@ protected:
 			}
 		}
 
+		//! try lock function
+		//! @return	lock succeed(true) / lock failed(false)
 		bool	try_lock(){
 			lock = flock( fd, LOCK_EX | LOCK_NB );
 			if ( lock == 0 ) {
@@ -175,134 +206,160 @@ protected:
 	//
 	//
 	// list option functions.
+	//! list numeric flag check.
 	bool	parse_opt_list_numeric_func( int&, int, char*[] );
 	//
 	// virtualservice option functions.
+	//! target option check
 	bool	parse_opt_vs_target_func( int&, int, char*[] );
+	//! module option check
 	bool	parse_opt_vs_module_func( int&, int, char*[] );
+	//! scheduler option check.
 	bool	parse_opt_vs_scheduler_func( int&, int, char*[] );
+	//! upper flag check
 	bool	parse_opt_vs_upper_func( int&, int, char*[] );
+	//! bypass(SorryServer) option check
 	bool	parse_opt_vs_bypass_func( int&, int, char*[] );
+	//! virtualservice option flag function
 	bool	parse_opt_vs_flag_func( int&, int, char*[] );
+	//! virtualservice option qosupstream function
 	bool	parse_opt_vs_qosup_func( int&, int, char*[] );
+	//! virtualservice option qosdownstream functipn
 	bool	parse_opt_vs_qosdown_func( int&, int, char*[] );
+	//! virtualservice option udp func.
 	bool	parse_opt_vs_udp_func( int&, int, char*[] );
 	// realserver option function
+	//! realserver weight set
 	bool	parse_opt_rs_weight_func( int&, int, char*[] );
+	//! realserver target set
 	bool	parse_opt_rs_realserver_func( int&, int, char*[] );
 	// replication option function
+	//! replication switch function
 	bool	parse_opt_replication_switch_func( int&, int, char*[] );
+	//! replication start function
 	bool	parse_opt_replication_start_func( int&, int, char*[] );
+	//! replication stop function
 	bool	parse_opt_replication_stop_func( int&, int, char*[] );
+	//! replication force function
 	bool	parse_opt_replication_force_func( int&, int, char*[] );
+	//! replication dump function
 	bool	parse_opt_replication_dump_func( int&, int, char*[] );
 	// log option function
+	//! log category set function
 	bool	parse_opt_log_category_func( int&, int, char*[] );
+	//! log level set function
 	bool	parse_opt_log_level_func( int&, int, char*[] );
 	// snmp option function
+	//! snmp log category set function
 	bool	parse_opt_snmp_log_category_func( int&, int, char*[] );
+	//! snmp log level set function
 	bool	parse_opt_snmp_log_level_func( int&, int, char*[] );
 	// parameter option function
+	//! parameter reload component parsing
 	bool	parse_opt_parameter_reload_func( int&, int, char*[] );
 
-	// display result function
+	//!	disp_list function
 	void	disp_list();
+	//!	disp_list_key function
 	void	disp_list_key();
+	//!	disp_list_verbose function
 	void	disp_list_verbose();
 
+	//! Get l7vsadm parameter data
 	void	set_parameter();
 
+	//! argument dump for debug
 	std::string	argument_debug_dump( int, char*[] );
 
-	// command parse function object.type.
+	//! command parse function object.type.
 	typedef	boost::function< bool ( int, char*[] ) >
 			parse_cmd_func_type;
-	// command string - parse function object map type. 
+	//! command string - parse function object map type. 
 	typedef	std::map< std::string, parse_cmd_func_type >
 			parse_cmd_map_type;
-	// command function map dictionary.
+	//! command function map dictionary.
 	parse_cmd_map_type	command_dic;
 
-	// option parse function object type.
+	//! option parse function object type.
 	typedef	boost::function< bool ( int&, int, char*[] ) >
 			parse_opt_func_type;
-	// option string - parse function object map type
+	//! option string - parse function object map type
 	typedef	std::map< std::string, parse_opt_func_type >
 			parse_opt_map_type;
-	// list option function map dictionary.
+	//! list option function map dictionary.
 	parse_opt_map_type	list_option_dic;
-	// virtualservice option function map dictionary
+	//! virtualservice option function map dictionary
 	parse_opt_map_type	vs_option_dic;
-	// realserver option function map dictionary
+	//! realserver option function map dictionary
 	parse_opt_map_type	rs_option_dic;
-	// replication option function map dictionary
+	//! replication option function map dictionary
 	parse_opt_map_type	replication_option_dic;
-	// replication switch option function map dictionary
+	//! replication switch option function map dictionary
 	parse_opt_map_type	replication_switch_option_dic;
-	// log option function map dictionary
+	//! log option function map dictionary
 	parse_opt_map_type	log_option_dic;
-	// snmp option_function map dictionary
+	//! snmp option_function map dictionary
 	parse_opt_map_type	snmp_option_dic;
-	// parameter option function map dictionary
+	//! parameter option function map dictionary
 	parse_opt_map_type	parameter_option_dic;
 
-	// log category string -> log category enum convert map type.
+	//! log category string -> log category enum convert map type.
 	typedef	std::map< std::string, LOG_CATEGORY_TAG >	string_logcategory_map_type;
-	// log category string to log category enum dictionary.
+	//! log category string to log category enum dictionary.
 	string_logcategory_map_type	string_logcategory_dic;
-	// snmp log category string to snmp log category enum dictionary.
+	//! snmp log category string to snmp log category enum dictionary.
 	string_logcategory_map_type	string_snmp_logcategory_dic;
 
-	// log category enum -> log category string convert map type.
+	//! log category enum -> log category string convert map type.
 	typedef	std::map< LOG_CATEGORY_TAG, std::string >	logcategory_string_map_type;
-	// log category enum to log category string dictionary.
+	//! log category enum to log category string dictionary.
 	logcategory_string_map_type	logcategory_string_dic;
-	// snmp log category enum to snmp log category string dictionary.
+	//! snmp log category enum to snmp log category string dictionary.
 	logcategory_string_map_type	snmp_logcategory_string_dic;
 
-	// log level string -> log level enum convert map type
+	//! log level string -> log level enum convert map type
 	typedef	std::map< std::string, LOG_LEVEL_TAG >		string_loglevel_map_type;
-	// log level string to log level enum dictionary
+	//! log level string to log level enum dictionary
 	string_loglevel_map_type	string_loglevel_dic;
 
-	// log level enum convert map -> log level string type
+	//! log level enum convert map -> log level string type
 	typedef	std::map< LOG_LEVEL_TAG, std::string >		loglevel_string_map_type;
-	// log level enum to log level string dictionary
+	//! log level enum to log level string dictionary
 	loglevel_string_map_type	loglevel_string_dic;
 
-	// parameter category string -> parameter category enum convert map type
+	//! parameter category string -> parameter category enum convert map type
 	typedef	std::map< std::string, PARAMETER_COMPONENT_TAG >	string_parameter_map_type;
 	string_parameter_map_type	string_parameter_dic;
-	// COMMAND_RESPONSE_CODE -> message convert map type
+	//! COMMAND_RESPONSE_CODE -> message convert map type
 	typedef	std::map< l7vsd_response::COMMAND_RESPONSE_CODE, std::string >	response_error_message_map_type;
 	response_error_message_map_type	response_error_message_dic;
 
-	// disp result function object type.
+	//! disp result function object type.
 	typedef	boost::function< void () >
 			disp_result_func_type;
-	// command - disp result function object map type
+	//! command - disp result function object map type
 	typedef	std::map< l7vsadm_request::COMMAND_CODE_TAG, disp_result_func_type >
 			disp_result_map_type;
-	// disp result function map dictionary.
+	//! disp result function map dictionary.
 	disp_result_map_type	disp_result_dic;
 
-	// replication mode enum -> replication mode string convert map type
+	//! replication mode enum -> replication mode string convert map type
 	typedef	std::map< replication::REPLICATION_MODE_TAG, std::string >	replication_mode_string_map_type;
-	// replication mode enum to replication mode string dictionary
+	//! replication mode enum to replication mode string dictionary
 	replication_mode_string_map_type	replication_mode_string_dic;
 
-	// usage function
+	//! usage function
 	std::string	usage();
 
 	//
 	// l7vsd request data
-	l7vsadm_request	request;
-	l7vsd_response	response;
+	l7vsadm_request	request;				//!< send_request
+	l7vsd_response	response;				//!< recv_response
 
 	//
 	// l7vsadm using datas.
-	bool					numeric_flag;	//! numeric flag
-	boost::asio::io_service	io_service;		//! io_service
+	bool					numeric_flag;	//!< numeric flag
+	boost::asio::io_service	io_service;		//!< io_service
 
 	error_code	l7vsadm_err;
 
@@ -316,7 +373,7 @@ protected:
 	int connect_wait_count;
 
 public:
-	// constractor
+	//! constractor
 	l7vsadm();
 
 	//! execute function 

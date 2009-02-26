@@ -1,15 +1,26 @@
-//
-//
-//
-//
-// l7vsadm.cpp
-// ^^^^^^^^^^^
-//	l7vsadm command is l7vsd control application
-//
-//	Copyrigh (c) Norihisa Nakai ( n dot nakai at sdy dot co dot jp )
-//
-//	Distributed under the Boost Software License. Version 1.0
-//	See http://www.boost.org/LICENSE_1_0.txt
+/*!
+ *	@file	l7vsadm.cpp
+ *	@brief	l7vsadm command is l7vsd control application
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 
 #include <iostream>
 #include <sstream>
@@ -19,7 +30,6 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-//#include <fcntl.h>
 #include <sys/file.h>
 #include "l7vsadm.h"
 #include "logger.h"
@@ -40,6 +50,9 @@ static int	received_sig = 0;
 // command functions.
 //
 //! list command parsing.
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_list_func", __FILE__, __LINE__ );
 
@@ -55,6 +68,7 @@ bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 			std::stringstream buf;
 			buf << "list option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -64,6 +78,9 @@ bool	l7vs::l7vsadm::parse_list_func(	l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 // option list functions.
 //
 //! list numeric flag check.
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_list_numeric_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_list_numeric_func", __FILE__, __LINE__ );
 
@@ -72,6 +89,9 @@ bool	l7vs::l7vsadm::parse_opt_list_numeric_func( int& pos, int argc, char* argv[
 }
 
 //! virtualservice command parsing.
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_vs_func", __FILE__, __LINE__ );
 
@@ -85,6 +105,7 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			std::stringstream buf;
 			buf << "virtualservice option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -108,6 +129,7 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			std::stringstream buf;
 			buf << "scheduler module load error:" << scheduler_name;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		if( !module ){
@@ -115,6 +137,7 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			std::stringstream buf;
 			buf << "scheduler module not found:" << scheduler_name;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		ctrl.unload_module( module );
@@ -122,25 +145,33 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 	}
 	if( request.vs_element.protocol_module_name.length() == 0 ){
 		//protocol module name error
-		l7vsadm_err.setter( true, "protocol module not specified." );
+		std::string	buf("protocol module not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( request.vs_element.udpmode ){
 		if( request.vs_element.udp_recv_endpoint == boost::asio::ip::udp::endpoint() ){
 			// udp mode,but not acceptor endpoint
-			l7vsadm_err.setter( true, "udp recv endpoint not specified." );
+			std::string buf("udp recv endpoint not specified.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	else{
 		if( request.vs_element.tcp_accept_endpoint == boost::asio::ip::tcp::endpoint() ){
 			// tcp mode, but not acceptor endpoint
-			l7vsadm_err.setter( true, "tcp accpeptor endpoint not specified." );
+			std::string buf("tcp accpeptor endpoint not specified.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	if( 0 > request.vs_element.sorry_maxconnection ){
-		l7vsadm_err.setter( true, "invalid sorry_maxconnection value." );
+		std::string	buf("invalid sorry_maxconnection value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
@@ -149,12 +180,17 @@ bool	l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 // option virtualservice functions.
 //
 //! target option check
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		//don't target recvaddress:port
-		l7vsadm_err.setter( true, "target endpoint is not specified." );
+		std::string	buf("target endpoint is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	// get host endpoint from string
@@ -166,6 +202,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 			std::stringstream buf;
 			buf << "target endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		check_endpoint<boost::asio::ip::udp>( request.vs_element.udp_recv_endpoint, err );
@@ -173,6 +210,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 			std::stringstream buf;
 			buf << "target endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -183,6 +221,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 			std::stringstream buf;
 			buf << "target endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		check_endpoint<boost::asio::ip::tcp>( request.vs_element.tcp_accept_endpoint, err );
@@ -190,23 +229,31 @@ bool	l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[] )
 			std::stringstream buf;
 			buf << "target endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	return true;
 }
 //! module option check
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_module_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		//don't target protomod name.
-		l7vsadm_err.setter( true, "protomod name is not specified." );
+		std::string	buf("protomod name is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	std::string	module_name = argv[pos];
 	if( L7VS_MODNAME_LEN < module_name.length() ){
-		l7vsadm_err.setter( true, "protomod name is too long." );
+		std::string	buf("protomod name is too long.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	protocol_module_control&	ctrl = protocol_module_control::getInstance();
@@ -219,6 +266,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 		std::stringstream buf;
 		buf << "protocol module load error:" << module_name;
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	if( !module ){
@@ -226,6 +274,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 		std::stringstream buf;
 		buf << "protocol module not found:" << module_name;
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	module->init_logger_functions(
@@ -257,6 +306,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 		std::stringstream	buf;
 		buf << "protocol module argument error: " << module_message.message;
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	request.vs_element.protocol_module_name = module_name;
@@ -269,18 +319,25 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 }
 
 //! scheduler option check.
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_scheduler_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		// don't target scheduler name.
-		l7vsadm_err.setter( true, "scheduler name is not specified." );
+		std::string	buf("scheduler name is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	//schedule module check.
 	std::string	scheduler_name = argv[pos];
 	if( L7VS_MODNAME_LEN < scheduler_name.length() ){
-		l7vsadm_err.setter( true, "scheduler name is too long." );
+		std::string	buf("scheduler name is too long.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	schedule_module_control&	ctrl = schedule_module_control::getInstance();
@@ -293,6 +350,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 		std::stringstream buf;
 		buf << "scheduler module load error:" << scheduler_name;
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	if( !module ){
@@ -300,6 +358,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 		std::stringstream buf;
 		buf << "scheduler module not found:" << scheduler_name;
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	ctrl.unload_module( module );
@@ -307,39 +366,53 @@ bool	l7vs::l7vsadm::parse_opt_vs_scheduler_func( int& pos, int argc, char* argv[
 	return true;
 }
 //! upper flag check
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_upper_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_upper_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		// don't target maxconnection_num
-		l7vsadm_err.setter( true, "maxconnection value is not specified." );
+		std::string	buf("maxconnection value is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	try{
 		request.vs_element.sorry_maxconnection = boost::lexical_cast< long long >( argv[pos] );
 		if( ( 0LL > request.vs_element.sorry_maxconnection ) ||
 			( 100000LL < request.vs_element.sorry_maxconnection ) ){
-			l7vsadm_err.setter( true, "invalid sorry_maxconnection value." );
+			std::string	buf("invalid sorry_maxconnection value.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 		if( 0LL == request.vs_element.sorry_maxconnection )
 			request.vs_element.sorry_maxconnection = LLONG_MAX;		// clear value
 	}
 	catch( boost::bad_lexical_cast& e ){
-		// don't convert argv[pos] is 
-		l7vsadm_err.setter( true, "invalid sorry_maxconnection value." );
+		// don't convert argv[pos] is
+		std::string	buf("invalid sorry_maxconnection value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	//check connection limit and zero
 	return true;
 }
 //! bypass(SorryServer) option check
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_bypass_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		//don't target sorryserver:port
-		l7vsadm_err.setter( true, "sorryserver endpoint is not specified." );
+		std::string	buf("sorryserver endpoint is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	std::string sorry_endpoint = argv[pos];
@@ -349,6 +422,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] )
 		std::stringstream buf;
 		buf << "sorryserver endpoint parse error:" << err.get_message() << sorry_endpoint;
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	// clear endpoint check
@@ -359,6 +433,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] )
 			std::stringstream buf;
 			buf << "sorryserver endpoint parse error:" << err.get_message() << clear_endpoint;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -368,24 +443,32 @@ bool	l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[] )
 			std::stringstream buf;
 			buf << "sorryserver endpoint parse error:" << err.get_message() << sorry_endpoint;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	return true;	//
 }
 //! virtualservice option flag function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_flag_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		//don't target sorry flag
-		l7vsadm_err.setter( true, "sorryflag value is not specified." );
+		std::string	buf("sorryflag value is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	try{
 		int	tmp = boost::lexical_cast< int >( argv[pos] );
 		if( ( 0 != tmp ) && ( 1 != tmp ) ){
-			l7vsadm_err.setter( true, "invalid sorryflag value." );
+			std::string	buf("invalid sorryflag value.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 		if( 0 == tmp )
@@ -394,19 +477,26 @@ bool	l7vs::l7vsadm::parse_opt_vs_flag_func( int& pos, int argc, char* argv[] ){
 			request.vs_element.sorry_flag = 1;
 	}
 	catch( boost::bad_lexical_cast& e ){
-		// don't convert argv[pos] is 
-		l7vsadm_err.setter( true, "invalid sorryflag value." );
+		// don't convert argv[pos] is
+		std::string	buf("invalid sorryflag value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;	//
 }
 //! virtualservice option qosupstream function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_qosup_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		//don't rarget QoS upstream value.
-		l7vsadm_err.setter( true, "qos_upstream value is not specified." );
+		std::string	buf("qos_upstream value is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	try{
@@ -417,7 +507,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 			std::string	strval = tmp.substr(0, tmp.length() - 1);
 			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
 			if( ( ULLONG_MAX / 1024 / 1024 / 1024 ) < ullval ){
-				l7vsadm_err.setter( true, "qos_upstream value is too big." );
+				std::string	buf("qos_upstream value is too big.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 				return false;
 			}
 			elem.qos_upstream = ullval * 1024 * 1024 * 1024;		// set qos_upstream
@@ -426,7 +518,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 			std::string	strval = tmp.substr(0, tmp.length() - 1);
 			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
 			if( ( ULLONG_MAX / 1024 / 1024 ) < ullval ){
-				l7vsadm_err.setter( true, "qos_upstream value is too big." );
+				std::string	buf("qos_upstream value is too big.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 				return false;
 			}
 			elem.qos_upstream = ullval * 1024 * 1024;		// set qos_upstream
@@ -435,7 +529,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 			std::string	strval = tmp.substr(0, tmp.length() - 1);
 			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
 			if( ( ULLONG_MAX / 1024 ) < ullval ){
-				l7vsadm_err.setter( true, "qos_upstream value is too big." );
+				std::string	buf("qos_upstream value is too big.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 				return false;
 			}
 			elem.qos_upstream = ullval * 1024;		// set qos_upstream
@@ -450,18 +546,25 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[] ){
 	}
 	catch( boost::bad_lexical_cast& ex ){	// don't convert string to qos_upsatream
 		// don't conv qos upstream
-		l7vsadm_err.setter( true, "invalid qos_upstream value." );
+		std::string	buf("invalid qos_upstream value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;		
 }
 //! virtualservice option qosdownstream functipn
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_qosdown_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		// don't target QoS downstream value
-		l7vsadm_err.setter( true, "qos_downstream value is not specified." );
+		std::string	buf("qos_downstream value is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	try{
@@ -472,7 +575,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] 
 			std::string	strval = tmp.substr(0, tmp.length() - 1);
 			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
 			if( ( ULLONG_MAX / 1024 / 1024 / 1024 ) < ullval ){
-				l7vsadm_err.setter( true, "qos_downstream value is too big." );
+				std::string	buf("qos_downstream value is too big.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 				return false;
 			}
 			elem.qos_downstream = ullval * 1024 * 1024 * 1024;		// set qos_upstream
@@ -481,7 +586,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] 
 			std::string	strval = tmp.substr(0, tmp.length() - 1);
 			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
 			if( ( ULLONG_MAX / 1024 / 1024 ) < ullval ){
-				l7vsadm_err.setter( true, "qos_downstream value is too big." );
+				std::string	buf("qos_downstream value is too big.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 				return false;
 			}
 			elem.qos_downstream = ullval * 1024 * 1024;		// set qos_upstream
@@ -490,7 +597,9 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] 
 			std::string	strval = tmp.substr(0, tmp.length() - 1);
 			unsigned long long	ullval	= boost::lexical_cast< unsigned long long > ( strval );
 			if( ( ULLONG_MAX / 1024 ) < ullval ){
-				l7vsadm_err.setter( true, "qos_downstream value is too big." );
+				std::string	buf("qos_downstream value is too big.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 				return false;
 			}
 			elem.qos_downstream = ullval * 1024;		// set qos_upstream
@@ -505,12 +614,17 @@ bool	l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv[] 
 	}
 	catch( boost::bad_lexical_cast& ex ){
 		// don' conv qos downstream
-		l7vsadm_err.setter( true, "invalid qos_downstream value." );
+		std::string	buf("invalid qos_downstream value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
 }
 //! virtualservice option udp func.
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_vs_udp_func", __FILE__, __LINE__ );
 
@@ -527,6 +641,7 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 			std::stringstream buf;
 			buf << "target endpoint parse error:" << err.get_message() << endpoint;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		elem.tcp_accept_endpoint = zeropoint;
@@ -541,14 +656,17 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 			std::stringstream buf;
 			buf << "realserver endpoint parse error:" << err.get_message() << endpoint;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		elem.realserver_vector.front().tcp_endpoint = zeropoint;
 	}
 	return true;
 }
-
 //! realserver command parsing.
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_rs_func", __FILE__, __LINE__ );
 
@@ -563,36 +681,47 @@ bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 			std::stringstream buf;
 			buf << "realserver option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 
 	if( request.vs_element.protocol_module_name.length() == 0 ){
 		//protocol module name error
-		l7vsadm_err.setter( true, "protocol module not specified." );
+		std::string	buf("protocol module not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( request.vs_element.udpmode ){
 		if( request.vs_element.udp_recv_endpoint == boost::asio::ip::udp::endpoint() ){
 			// udp mode,but not acceptor endpoint
-			l7vsadm_err.setter( true, "udp recv endpoint not specified." );
+			std::string	buf("udp recv endpoint not specified.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 		if( request.vs_element.realserver_vector.front().udp_endpoint == boost::asio::ip::udp::endpoint() ){
 			// udp mode,but not realserver endpoint
-			l7vsadm_err.setter( true, "realserver udp endpoint not specified." );
+			std::string	buf("realserver udp endpoint not specified.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	else{
 		if( request.vs_element.tcp_accept_endpoint == boost::asio::ip::tcp::endpoint() ){
 			// tcp mode, but not acceptor endpoint
-			l7vsadm_err.setter( true, "tcp accpeptor endpoint not specified." );
+			std::string	buf("tcp accpeptor endpoint not specified.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 		if( request.vs_element.realserver_vector.front().tcp_endpoint == boost::asio::ip::tcp::endpoint() ){
 			// tcp mode,but not realserver endpoint
-			l7vsadm_err.setter( true, "realserver tcp endpoint not specified." );
+			std::string	buf("realserver tcp endpoint not specified.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -606,39 +735,51 @@ bool	l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 //
 // realserver option functions.
 //
-//! realserver target set
-
-//! weight is set 
+//! realserver weight set
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_rs_weight_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_rs_weight_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		//don't target weight value
-		l7vsadm_err.setter( true, "weight value is not specified." );
+		std::string	buf("weight value is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	try{
 		request.vs_element.realserver_vector.front().weight = boost::lexical_cast<int>( argv[pos] );
 		if( ( 0 > request.vs_element.realserver_vector.front().weight ) ||
 			( 100 < request.vs_element.realserver_vector.front().weight ) ){
-			l7vsadm_err.setter( true, "invalid weight value." );
+			std::string	buf("invalid weight value.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	catch( boost::bad_lexical_cast& ex ){
 		// lexical cast error
-		l7vsadm_err.setter( true, "invalid weight value." );
+		std::string	buf("invalid weight value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
 }
 //! realserver target set
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_rs_realserver_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		// don't target realserver address
-		l7vsadm_err.setter( true, "realserver address is not specified." );
+		std::string	buf("realserver address is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	std::string	src_str = argv[pos];
@@ -650,6 +791,7 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 			std::stringstream buf;
 			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		check_endpoint<boost::asio::ip::udp>( request.vs_element.realserver_vector.front().udp_endpoint, err );
@@ -657,6 +799,7 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 			std::stringstream buf;
 			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -668,6 +811,7 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 			std::stringstream buf;
 			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 		check_endpoint<boost::asio::ip::tcp>( request.vs_element.realserver_vector.front().tcp_endpoint, err );
@@ -675,6 +819,7 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 			std::stringstream buf;
 			buf << "realserver endpoint parse error:" << err.get_message() << src_str;
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
@@ -682,6 +827,9 @@ bool	l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* argv
 }
 	
 //! replication command parsing.
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_replication_func", __FILE__, __LINE__ );
 
@@ -695,12 +843,15 @@ bool	l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_
 			std::stringstream buf;
 			buf << "replication option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	if( l7vsadm_request::REP_NONE == request.replication_command ){
 		// not specified replication command
-		l7vsadm_err.setter( true, "replication command not specified." );
+		std::string	buf("replication command not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
@@ -709,18 +860,25 @@ bool	l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_
 //
 //	replication option functions.
 //
-//! switch function
+//! replication switch function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_replication_switch_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_switch_func", __FILE__, __LINE__ );
 
 	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
 		// double command target.
-		l7vsadm_err.setter( true, "replication option is double specified." );
+		std::string	buf("replication option is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( ++pos >= argc ){
 		// don't target replication switch value
-		l7vsadm_err.setter( true, "replication switch option is not specified." );
+		std::string	buf("replication switch option is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	parse_opt_map_type::iterator itr = replication_switch_option_dic.find( argv[pos] );
@@ -732,43 +890,60 @@ bool	l7vs::l7vsadm::parse_opt_replication_switch_func( int& pos, int argc, char*
 		std::stringstream buf;
 		buf << "replication switch option not found:" << argv[pos];
 		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
 }
-//! start function
+//! replication start function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_replication_start_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_start_func", __FILE__, __LINE__ );
 
 	request.replication_command = l7vsadm_request::REP_START;
 	return true;
 }
-//! stop function
+//! replication stop function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_replication_stop_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_stop_func", __FILE__, __LINE__ );
 
 	request.replication_command = l7vsadm_request::REP_STOP;
 	return true;
 }
-//! force function
+//! replication force function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_replication_force_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_force_func", __FILE__, __LINE__ );
 
 	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
 		// double command target.
-		l7vsadm_err.setter( true, "replication option is double specified." );
+		std::string	buf("replication option is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	request.replication_command = l7vsadm_request::REP_FORCE;
 	return true;
 }
-//! dump function
+//! replication dump function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_replication_dump_func", __FILE__, __LINE__ );
 
 	if( request.replication_command != l7vsadm_request::REP_NONE ){ 
 		// double command target.
-		l7vsadm_err.setter( true, "replication option is double specified." );
+		std::string	buf("replication option is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	request.replication_command = l7vsadm_request::REP_DUMP;
@@ -776,6 +951,9 @@ bool	l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char* a
 }
 
 //! log command parsing.
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_log_func", __FILE__, __LINE__ );
 
@@ -790,17 +968,22 @@ bool	l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 			std::stringstream buf;
 			buf << "log option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	if( LOG_CAT_NONE == request.log_category ){
 		// not specified logcategory
-		l7vsadm_err.setter( true, "logcategory not specified." );
+		std::string	buf("logcategory not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( LOG_LV_NONE == request.log_level ){
 		// not specified loglevel
-		l7vsadm_err.setter( true, "loglevel not specified." );
+		std::string	buf("loglevel not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
@@ -809,17 +992,24 @@ bool	l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 //	log option function
 //
 //! log category set function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_log_category_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_log_category_func", __FILE__, __LINE__ );
 
 	if( request.log_category != LOG_CAT_NONE ){
 		// double target commands.
-		l7vsadm_err.setter( true, "logcategory is double specified." );
+		std::string	buf("logcategory is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( ++pos >= argc ){
 		// don't target logcategory
-		l7vsadm_err.setter( true, "logcategory is not specified." );
+		std::string	buf("logcategory is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	string_logcategory_map_type::iterator itr = string_logcategory_dic.find( argv[pos] );
@@ -830,20 +1020,28 @@ bool	l7vs::l7vsadm::parse_opt_log_category_func( int& pos, int argc, char* argv[
 	std::stringstream buf;
 	buf << "logcategory not found:" << argv[pos];
 	l7vsadm_err.setter( true, buf.str() );
+	Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 	return false;
 }
 //! log level set function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_log_level_func", __FILE__, __LINE__ );
 
 	if( request.log_level != LOG_LV_NONE ){
 		// double target commands.
-		l7vsadm_err.setter( true, "loglevel is double specified." );
+		std::string	buf("loglevel is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( ++pos >= argc ){
 		// don't target loglevel
-		l7vsadm_err.setter( true, "loglevel is not specified." );
+		std::string	buf("loglevel is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	string_loglevel_map_type::iterator itr = string_loglevel_dic.find( argv[pos] );
@@ -854,10 +1052,14 @@ bool	l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[] )
 	std::stringstream buf;
 	buf << "loglevel not found:" << argv[pos];
 	l7vsadm_err.setter( true, buf.str() );
+	Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 	return false;
 }
 
 //! snmp command parsing
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_snmp_func", __FILE__, __LINE__ );
 
@@ -872,33 +1074,45 @@ bool	l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 			std::stringstream buf;
 			buf << "snmp log option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	if( LOG_CAT_NONE == request.snmp_log_category ){
 		// not specified logcategory
-		l7vsadm_err.setter( true, "snmp logcategory not specified." );
+		std::string	buf("snmp logcategory not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( LOG_LV_NONE == request.snmp_log_level ){
 		// not specified loglevel
-		l7vsadm_err.setter( true, "snmp loglevel not specified." );
+		std::string	buf("snmp loglevel not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
 }
 //! snmp log category set function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_snmp_log_category_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_snmp_log_category_func", __FILE__, __LINE__ );
 
 	if( request.snmp_log_category != LOG_CAT_NONE ){
 		// double target commands.
-		l7vsadm_err.setter( true, "snmp logcategory is double specified." );
+		std::string	buf("snmp logcategory is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( ++pos >= argc ){
 		// don't target logcategory
-		l7vsadm_err.setter( true, "snmp logcategory is not specified." );
+		std::string	buf("snmp logcategory is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	string_logcategory_map_type::iterator itr = string_snmp_logcategory_dic.find( argv[pos] );
@@ -909,20 +1123,28 @@ bool	l7vs::l7vsadm::parse_opt_snmp_log_category_func( int& pos, int argc, char* 
 	std::stringstream buf;
 	buf << "snmp logcategory not found:" << argv[pos];
 	l7vsadm_err.setter( true, buf.str() );
+	Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 	return false;
 }
-//! log level set function
+//! snmp log level set function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_snmp_log_level_func", __FILE__, __LINE__ );
 
 	if( request.snmp_log_level != LOG_LV_NONE ){
 		// double target commands.
-		l7vsadm_err.setter( true, "snmp loglevel is double specified." );
+		std::string	buf("snmp loglevel is double specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	if( ++pos >= argc ){
 		// don't rarget logcategory
-		l7vsadm_err.setter( true, "snmp loglevel is not specified." );
+		std::string	buf("snmp loglevel is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	string_loglevel_map_type::iterator itr = string_loglevel_dic.find( argv[pos] );
@@ -933,10 +1155,14 @@ bool	l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* arg
 	std::stringstream buf;
 	buf << "snmp loglevel not found:" << argv[pos];
 	l7vsadm_err.setter( true, buf.str() );
+	Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 	return false;
 }
 
 //! parameter command parsing
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_parameter_func", __FILE__, __LINE__ );
 
@@ -951,12 +1177,15 @@ bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TA
 			std::stringstream buf;
 			buf << "parameter option not found:" << argv[pos];
 			l7vsadm_err.setter( true, buf.str() );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 			return false;
 		}
 	}
 	if( PARAM_COMP_NOCAT == request.reload_param ){
 		// not specified reload_param
-		l7vsadm_err.setter( true, "reload component not specified." );
+		std::string	buf("reload component not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
@@ -964,12 +1193,18 @@ bool	l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TA
 //
 //	parameter command 
 //
+//! parameter reload component parsing
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_opt_parameter_reload_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
 		// don't target reload component
-		l7vsadm_err.setter( true, "reload component is not specified." );
+		std::string	buf("reload component is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 	string_parameter_map_type::iterator itr = string_parameter_dic.find( argv[pos] );
@@ -980,10 +1215,14 @@ bool	l7vs::l7vsadm::parse_opt_parameter_reload_func( int& pos, int argc, char* a
 	std::stringstream buf;
 	buf << "reload component not found:" << argv[pos];
 	l7vsadm_err.setter( true, buf.str() );
+	Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf.str(), __FILE__, __LINE__ );
 	return false;
 }
 
 //! help command parsing
+//! @param[in]	request command
+//! @param[in]	argument count
+//! @param[in]	argument value
 bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_help_func", __FILE__, __LINE__ );
 
@@ -1236,9 +1475,8 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 	}
 	std::cout << buf.str();
 }
-//
-// l7vsadm constractor.
-// create including all dictionary.
+//! l7vsadm constractor.
+//! create including all dictionary.
 l7vs::l7vsadm::l7vsadm()
 				:	numeric_flag(false),
 					command_wait_interval( L7VSADM_DEFAULT_WAIT_INTERVAL ),
@@ -1531,10 +1769,7 @@ l7vs::l7vsadm::l7vsadm()
 
 }
 
-/*!
- * Set l7vsadm parameter data.
- * Get l7vsadm parameter data and set to global data
- */
+//! Get l7vsadm parameter data
 void	l7vs::l7vsadm::set_parameter(){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::set_parameter", __FILE__, __LINE__ );
 
@@ -1623,6 +1858,7 @@ void	l7vs::l7vsadm::set_parameter(){
 	}
 }
 
+//! l7vsadm command execute
 bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::execute", __FILE__, __LINE__ );
 
@@ -1636,7 +1872,9 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 
 	// set sighanlder
 	if ( 0 > set_sighandlers() ) {
-		std::cerr << "COMMON ERROR : set_sighandlers failed." << std::endl;
+		std::string	buf("set_sighandlers failed.");
+		std::cerr << "COMMON ERROR : " << buf << std::endl;
+		Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf, __FILE__, __LINE__ );
 		return false;
 	}
 
@@ -1652,6 +1890,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 	file_lock	lock( l7vsadm_file_path, l7vsadm_err );
 	if( l7vsadm_err ){
 		std::cerr << "COMMON ERROR : " << l7vsadm_err.get_message() << std::endl;
+		Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, l7vsadm_err.get_message(), __FILE__, __LINE__ );
 		return false;
 	}
 
@@ -1664,6 +1903,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 				std::stringstream buf;
 				buf << boost::format( "Signal (%d) Received." ) % received_sig;
 				l7vsadm_err.setter( true, buf.str() );
+				Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf.str(), __FILE__, __LINE__ );
 				break;
 			}
 	
@@ -1675,8 +1915,9 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 			++command_retry_count;
 			if (command_retry_count > command_wait_count) {
 				// L7vsadm file lock error. (l7vsadm is executing)
-				std::string	msg( "L7vsadm file lock timeout. (l7vsadm is already executing)" );
-				l7vsadm_err.setter( true, msg );
+				std::string	buf( "L7vsadm file lock timeout. (l7vsadm is already executing)" );
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf, __FILE__, __LINE__ );
 				break;
 			}
 			// Lock retrying.
@@ -1704,7 +1945,9 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 				itr->second( argc, argv );
 			}
 			else{
-				l7vsadm_err.setter( true, "command not found." );
+				std::string	buf("command not found.");
+				l7vsadm_err.setter( true, buf );
+				Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 1, buf, __FILE__, __LINE__ );
 			}
 		}
 	
@@ -1732,6 +1975,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 					std::stringstream buf;
 					buf << boost::format( "Signal (%d) Received." ) % received_sig;
 					l7vsadm_err.setter( true, buf.str() );
+					Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf.str(), __FILE__, __LINE__ );
 					break;
 				}
 		
@@ -1746,6 +1990,7 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 					std::stringstream	buf;
 					buf << boost::format( "connect() to daemon timeout: %s." ) % err.message();
 					l7vsadm_err.setter( true, buf.str() );
+					Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf.str(), __FILE__, __LINE__ );
 					break;
 				}
 				// Connect retrying.
@@ -1761,6 +2006,14 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 				return false;
 			}
 
+			/*-------- DEBUG LOG --------*/
+			if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSADM_COMMON ) ){
+				std::stringstream	debugstr;
+				debugstr << boost::format( "l7vsadm_send_request:%s" ) % request;
+				Logger::putLogDebug( LOG_CAT_L7VSADM_COMMON, 1, debugstr.str(), __FILE__, __LINE__ );
+			}
+			/*------ DEBUG LOG END ------*/
+
 			// write sockfile
 			std::stringstream	send_stream;
 			boost::archive::text_oarchive	oa( send_stream );
@@ -1774,6 +2027,14 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 			recv_stream << &(response_buffer[0]);
 			boost::archive::text_iarchive	ia( recv_stream );
 			ia >> response;
+
+			/*-------- DEBUG LOG --------*/
+			if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSADM_COMMON ) ){
+				std::stringstream	debugstr;
+				debugstr << boost::format( "l7vsadm_recv_response:%s" ) % response;
+				Logger::putLogDebug( LOG_CAT_L7VSADM_COMMON, 1, debugstr.str(), __FILE__, __LINE__ );
+			}
+			/*------ DEBUG LOG END ------*/
 	
 			// close socket
 			s.close();
@@ -1785,22 +2046,31 @@ bool	l7vs::l7vsadm::execute( int argc, char* argv[] ){
 					itr->second();
 			}
 			else{
+				std::stringstream	buf;
 				response_error_message_map_type::iterator	itr = response_error_message_dic.find( response.status );
 				if( itr != response_error_message_dic.end() )
-					std::cerr << itr->second << response.message << std::endl;
+					buf << itr->second << response.message;
 				else
-					std::cerr << "COMMAND ERROR : " << response.message << std::endl;
+					buf << "COMMAND ERROR : " << response.message;
+				std::cerr << buf.str() << std::endl;
+				Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf.str(), __FILE__, __LINE__ );
 				return false;
 			}
 		}	//if help_mode
 	}	//try
 	catch( std::exception& e ){
-		std::cerr << "COMMON ERROR : " << e.what() << std::endl;
+		std::stringstream	buf;
+		buf << "COMMON ERROR : " << e.what();
+		std::cerr << buf.str() << std::endl;
+		Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 1, buf.str(), __FILE__, __LINE__ );
 		return false;
 	}
 	return true;
 }
 
+//! argument dump for debug
+//! @param[in]	argument count
+//! @param[in]	argument value
 std::string	l7vs::l7vsadm::argument_debug_dump( int argc, char* argv[] ){
 	std::stringstream buf;
 	if( !argv ){
