@@ -11,12 +11,41 @@
 using namespace boost::unit_test_framework;
 using namespace l7vs;
 
+//--stub functions--
+LOG_LEVEL_TAG	stb_getloglevel(){
+//	std::cout << "getloglevel called." << std::endl;
+	return LOG_LV_NONE;
+}
+
+void	stb_putLogFatal( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogFatal called." << std::endl;
+}
+void	stb_putLogError( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogError called." << std::endl;
+}
+void	stb_putLogWarn( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogWarn called." << std::endl;
+}
+void	stb_putLogInfo( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogInfo called." << std::endl;
+}
+void	stb_putLogDebug( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogDebug called." << std::endl;
+}
 
 //--handle_sorry_enable_test_class --
 class	handle_sorry_enable_test_class : public protocol_module_cinsert
 {
 	public:
-		handle_sorry_enable_test_class() : protocol_module_cinsert() {};
+		handle_sorry_enable_test_class() : protocol_module_cinsert()
+		{
+			getloglevel	= &stb_getloglevel;
+			putLogFatal	= &stb_putLogFatal;
+			putLogError	= &stb_putLogError;
+			putLogWarn	= &stb_putLogWarn;
+			putLogInfo	= &stb_putLogInfo;
+			putLogDebug	= &stb_putLogDebug;
+		};
 		~handle_sorry_enable_test_class(){};
 		
 		
@@ -987,7 +1016,15 @@ void	handle_sorry_enable_test(){
 class	handle_sorry_disable_test_class : public protocol_module_cinsert
 {
 	public:
-		handle_sorry_disable_test_class() : protocol_module_cinsert() {};
+		handle_sorry_disable_test_class() : protocol_module_cinsert()
+		{
+			getloglevel	= &stb_getloglevel;
+			putLogFatal	= &stb_putLogFatal;
+			putLogError	= &stb_putLogError;
+			putLogWarn	= &stb_putLogWarn;
+			putLogInfo	= &stb_putLogInfo;
+			putLogDebug	= &stb_putLogDebug;
+		};
 		~handle_sorry_disable_test_class(){};
 		
 		
@@ -1972,7 +2009,15 @@ void	handle_sorry_disable_test(){
 class	handle_realserver_connection_fail_test_class : public protocol_module_cinsert
 {
 	public:
-		handle_realserver_connection_fail_test_class() : protocol_module_cinsert() {};
+		handle_realserver_connection_fail_test_class() : protocol_module_cinsert()
+		{
+			getloglevel	= &stb_getloglevel;
+			putLogFatal	= &stb_putLogFatal;
+			putLogError	= &stb_putLogError;
+			putLogWarn	= &stb_putLogWarn;
+			putLogInfo	= &stb_putLogInfo;
+			putLogDebug	= &stb_putLogDebug;
+		};
 		~handle_realserver_connection_fail_test_class(){};
 		
 		
@@ -2348,31 +2393,31 @@ void handle_realserver_connection_fail_test(){
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_2_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_02,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_02,protocol_module_cinsert::CLIENT_DISCONNECT);
 		
 	// thread 4
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_4_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_04,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_04,protocol_module_cinsert::CLIENT_DISCONNECT);
 
 	// thread 6
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_6_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_06,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_06,protocol_module_cinsert::CLIENT_DISCONNECT);
 	
 	// thread 8
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_8_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_08,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_08,protocol_module_cinsert::CLIENT_DISCONNECT);
 	
 	// thread 10
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_10_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_10,protocol_module_cinsert::REALSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_10,protocol_module_cinsert::CLIENT_DISCONNECT);
 
 	BOOST_MESSAGE( "----- handle_realserver_connection_fail test end -----" );
 }
@@ -2381,7 +2426,15 @@ void handle_realserver_connection_fail_test(){
 class	handle_sorryserver_connection_fail_test_class : public protocol_module_cinsert
 {
 	public:
-		handle_sorryserver_connection_fail_test_class() : protocol_module_cinsert() {};
+		handle_sorryserver_connection_fail_test_class() : protocol_module_cinsert()
+		{
+			getloglevel	= &stb_getloglevel;
+			putLogFatal	= &stb_putLogFatal;
+			putLogError	= &stb_putLogError;
+			putLogWarn	= &stb_putLogWarn;
+			putLogInfo	= &stb_putLogInfo;
+			putLogDebug	= &stb_putLogDebug;
+		};
 		~handle_sorryserver_connection_fail_test_class(){};
 		
 		
@@ -2758,31 +2811,31 @@ void handle_sorryserver_connection_fail_test(){
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_2_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_02,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_02,protocol_module_cinsert::CLIENT_DISCONNECT);
 		
 	// thread 4
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_4_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_04,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_04,protocol_module_cinsert::CLIENT_DISCONNECT);
 
 	// thread 6
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_6_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_06,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_06,protocol_module_cinsert::CLIENT_DISCONNECT);
 	
 	// thread 8
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_8_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_08,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_08,protocol_module_cinsert::CLIENT_DISCONNECT);
 	
 	// thread 10
 	// check1 thread_data->end_flag = END_FLAG_ON
 	BOOST_CHECK( thread_10_read_data->end_flag == protocol_module_cinsert::END_FLAG_ON );
 	// check2 return REALSERVER_DISCONNECT
-	BOOST_CHECK_EQUAL(test_obj.status_10,protocol_module_cinsert::SORRYSERVER_DISCONNECT);
+	BOOST_CHECK_EQUAL(test_obj.status_10,protocol_module_cinsert::CLIENT_DISCONNECT);
 
 	BOOST_MESSAGE( "----- handle_sorryserver_connection_fail test end -----" );
 }
