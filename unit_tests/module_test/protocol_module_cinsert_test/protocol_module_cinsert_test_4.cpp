@@ -18,6 +18,28 @@ void	thread_method()
 {
 }
 
+//--stub functions--
+LOG_LEVEL_TAG	stb_getloglevel(){
+//	std::cout << "getloglevel called." << std::endl;
+	return LOG_LV_NONE;
+}
+
+void	stb_putLogFatal( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogFatal called." << std::endl;
+}
+void	stb_putLogError( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogError called." << std::endl;
+}
+void	stb_putLogWarn( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogWarn called." << std::endl;
+}
+void	stb_putLogInfo( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogInfo called." << std::endl;
+}
+void	stb_putLogDebug( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogDebug called." << std::endl;
+}
+
 void	handle_schedule1(
 							boost::thread::id					thread_id,
 							l7vs::protocol_module_base::rs_list_itr_func_type				inlist_begin,
@@ -57,7 +79,15 @@ boost::mutex		sync_mutex;
 boost::condition	sync_condition;
 boost::condition	session_thread_data_map_condition;
 
-protocol_module_cinsert_test() : protocol_module_cinsert() {}
+protocol_module_cinsert_test() : protocol_module_cinsert()
+{
+	getloglevel	= &stb_getloglevel;
+	putLogFatal	= &stb_putLogFatal;
+	putLogError	= &stb_putLogError;
+	putLogWarn	= &stb_putLogWarn;
+	putLogInfo	= &stb_putLogInfo;
+	putLogDebug	= &stb_putLogDebug;
+}
 ~protocol_module_cinsert_test(){}
 //-------------------------------------------------------------------
 void	session_thread_data_map_lock()
@@ -1175,15 +1205,16 @@ void	handle_realserver_select_test()
 	BOOST_CHECK_EQUAL( status, STOP );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_END );
 
-	// unit_test[x4_49]  handle_realserver_selectのテスト（endpoint無しCookie無しschedule結果無し REALSERVER_DISCONNECT）
+	// unit_test[x4_49]  handle_realserver_selectのテスト（endpoint無しCookie無しschedule結果無し CLIENT_DISCONNECT）
 	schedule_tcp.clear();
 	schedule_tcp = handle_schedule1;
 	send_status_itr->send_endpoint = default_endpoint;
+	thread_data_itr->second->last_endpoint_tcp = default_endpoint;
 
 	send_status_itr->status = SEND_OK;
 
 	status = handle_realserver_select( thread_data_itr->second->thread_id, tcp_endpoint );
-	BOOST_CHECK_EQUAL( status, REALSERVER_DISCONNECT );
+	BOOST_CHECK_EQUAL( status, CLIENT_DISCONNECT );
 	BOOST_CHECK( thread_data_itr->second->end_flag == END_FLAG_ON );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
@@ -1201,7 +1232,7 @@ void	handle_realserver_select_test()
 	BOOST_CHECK_EQUAL( send_status_itr->send_endpoint, tcp_endpoint );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
-	// unit_test[x4_51]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver_list無し STOP）
+	// unit_test[x4_51]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver_list無し FINALIZE）
 	std::string	data;
 
 	data =	"HTTP/1.0 100 abcd\r\n";
@@ -1220,14 +1251,15 @@ void	handle_realserver_select_test()
 	schedule_tcp.clear();
 	schedule_tcp = handle_schedule1;
 	send_status_itr->send_endpoint = default_endpoint;
+	thread_data_itr->second->last_endpoint_tcp = default_endpoint;
 
 	send_status_itr->status = SEND_OK;
 
 	status = handle_realserver_select( thread_data_itr->second->thread_id, tcp_endpoint );
-	BOOST_CHECK_EQUAL( status, STOP );
+	BOOST_CHECK_EQUAL( status, FINALIZE );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
-	// unit_test[x4_52]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver無し REALSERVER_DISCONNECT）
+	// unit_test[x4_52]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver無し CLIENT_DISCONNECT）
 	l7vs::protocol_module_base::realserverlist_type		rs_list;
 
 	rs_list_begin = boost::bind( &list_begin, &rs_list );
@@ -1242,7 +1274,7 @@ void	handle_realserver_select_test()
 	send_status_itr->status = SEND_OK;
 
 	status = handle_realserver_select( thread_data_itr->second->thread_id, tcp_endpoint );
-	BOOST_CHECK_EQUAL( status, REALSERVER_DISCONNECT );
+	BOOST_CHECK_EQUAL( status, CLIENT_DISCONNECT );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
 	// unit_test[x4_53]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver無し強制再設定schedule結果有り REALSERVER_CONNECT）
@@ -1260,17 +1292,18 @@ void	handle_realserver_select_test()
 	BOOST_CHECK_EQUAL( send_status_itr->send_endpoint, tcp_endpoint );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
-	// unit_test[x4_54]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver無し強制再設定schedule結果無し REALSERVER_DISCONNECT）
+	// unit_test[x4_54]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver無し強制再設定schedule結果無し CLIENT_DISCONNECT）
 	thread_data_itr->second->end_flag = END_FLAG_OFF;
 	schedule_tcp.clear();
 	schedule_tcp = handle_schedule1;
 	send_status_itr->send_endpoint = default_endpoint;
+	thread_data_itr->second->last_endpoint_tcp = default_endpoint;
 	reschedule = 1;
 
 	send_status_itr->status = SEND_OK;
 
 	status = handle_realserver_select( thread_data_itr->second->thread_id, tcp_endpoint );
-	BOOST_CHECK_EQUAL( status, REALSERVER_DISCONNECT );
+	BOOST_CHECK_EQUAL( status, CLIENT_DISCONNECT );
 	BOOST_CHECK_EQUAL( send_status_itr->status, SEND_OK );
 
 	// unit_test[x4_55]  handle_realserver_selectのテスト（endpoint無しCookie有り該当結果有りrealserver有り REALSERVER_CONNECT）
@@ -1298,6 +1331,7 @@ void	handle_realserver_select_test()
 	schedule_tcp.clear();
 	schedule_tcp = handle_schedule1;
 	send_status_itr->send_endpoint = default_endpoint;
+	thread_data_itr->second->last_endpoint_tcp = default_endpoint;
 
 	send_status_itr->status = SEND_OK;
 
@@ -1312,6 +1346,7 @@ void	handle_realserver_select_test()
 	schedule_tcp.clear();
 	schedule_tcp = handle_schedule2;
 	send_status_itr->send_endpoint = default_endpoint;
+	thread_data_itr->second->last_endpoint_tcp = default_endpoint;
 	reschedule = 1;
 
 	send_status_itr->status = SEND_OK;
