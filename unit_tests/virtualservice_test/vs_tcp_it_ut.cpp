@@ -384,7 +384,6 @@ void	vs_tcp_test3(){
 
 
 	vs->finalize( vs_err );
-	debugg_flug_struct::getInstance().stub_loglevel() = l7vs::LOG_LV_ERROR;
 	delete vs;
 }
 
@@ -394,8 +393,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "virtualservice_tcp_test(UT for IT-bug)" );
 
 	// add test case to test suite
-	ts->add( BOOST_TEST_CASE( &vs_tcp_test1 ) );
-	ts->add( BOOST_TEST_CASE( &vs_tcp_test2 ) );
+/*	ts->add( BOOST_TEST_CASE( &vs_tcp_test1 ) );
+	ts->add( BOOST_TEST_CASE( &vs_tcp_test2 ) );*/
 	ts->add( BOOST_TEST_CASE( &vs_tcp_test3 ) );
 
 	framework::master_test_suite().add( ts );

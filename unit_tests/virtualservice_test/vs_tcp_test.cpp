@@ -1210,6 +1210,7 @@ void	virtualservice_tcp_test5(){
 	usleep( 2000000 );
 	BOOST_CHECK( vs->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-2 );
 
+	debugg_flug_struct::getInstance().stub_loglevel() = l7vs::LOG_LV_DEBUG;
 	//1秒待ってmainをSTOP
 	usleep( 1000000 );
 	vs->stop();
@@ -1231,10 +1232,10 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "virtualservice_base_test" );
 
 	// add test case to test suite
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
+/*	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );
+	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );*/
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test5 ) );
 
 	framework::master_test_suite().add( ts );
