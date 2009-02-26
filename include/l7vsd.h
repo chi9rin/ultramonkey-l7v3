@@ -1,3 +1,27 @@
+/*!
+ *	@file	l7vsd.h
+ *	@brief	l7vsd main class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #ifndef	L7VSD_H
 #define L7VSD_H
 
@@ -117,6 +141,8 @@ protected:
 	bool	parse_debug( int&, int, char*[] );		//!< parse debug func
 
 	std::string	usage();							//!< make usage message
+	
+	std::string	argument_debug_dump( int, char*[] );	//!< argument dump for debug
 
 };
 

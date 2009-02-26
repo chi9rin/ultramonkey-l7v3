@@ -1,13 +1,27 @@
-//
-//!	@file	l7vsd.cpp
-//!	@brief	l7vsd main class
-//
-//	copyright (c) sdy corporation. 2009
-//	mail: a dot takamaru at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*!
+ *	@file	l7vsd.cpp
+ *	@brief	l7vsd main class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include <signal.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -491,6 +505,15 @@ void	l7vsd::replication_command( const l7vsadm_request::REPLICATION_COMMAND_TAG*
 		return;
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::replication_command arguments:";
+		debugstr << boost::format( "*cmd=%d" ) % *cmd;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	switch( *cmd ){
 	case	l7vsadm_request::REP_START:
 		rep->start();
@@ -534,6 +557,15 @@ void	l7vsd::set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* leve
 		err.setter( true, msg );
 		return;
 	}
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::set_loglevel arguments:";
+		debugstr << boost::format( "*cat=%d, level=%d" ) % *cat % *level;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	if( LOG_CAT_END == *cat ){
 		// set loglevel all
@@ -583,6 +615,15 @@ void	l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG*
 		return;
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::snmp_set_loglevel arguments:";
+		debugstr << boost::format( "*cat=%d, level=%d" ) % *cat % *level;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	if( LOG_CAT_END == *cat ){
 		// set loglevel all
 		if( 0 != bridge->change_loglevel_allcategory( *level ) ){
@@ -629,6 +670,15 @@ void	l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG* comp, error_code& e
 		err.setter( true, msg );
 		return;
 	}
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::reload_parameter arguments:";
+		debugstr << boost::format( "*comp=%d" ) % *comp;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	Parameter	param;
 	Logger		logger_instance;
@@ -697,12 +747,16 @@ void	l7vsd::release_virtual_service( const virtualservice_element& in_vselement 
 //! virtualservice_list getter
 //! @return	vslist
 l7vsd::vslist_type&	l7vsd::get_virtualservice_list(){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::get_virtualservice_list", __FILE__, __LINE__ );
+
 	return vslist;
 }
 
 //! virtualservice_list mutex getter
 //! @return	vslist_mutex
 boost::mutex&	l7vsd::get_virtualservice_list_mutex(){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::get_virtualservice_list_mutex", __FILE__, __LINE__ );
+
 	return vslist_mutex;
 }
 
@@ -711,6 +765,14 @@ boost::mutex&	l7vsd::get_virtualservice_list_mutex(){
 //! @param[in]	argument value
 int	l7vsd::run( int argc, char* argv[] ) {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::run", __FILE__, __LINE__ );
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSADM_COMMON ) ){
+		std::stringstream	debugstr;
+		debugstr << boost::format( "l7vsd::run arguments:%s" ) % argument_debug_dump( argc, argv );
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	try{
 		// check options
@@ -804,10 +866,30 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	return 0;
 }
 
+//! argument dump for debug
+//! @param[in]	argument count
+//! @param[in]	argument value
+std::string	l7vsd::argument_debug_dump( int argc, char* argv[] ){
+	std::stringstream buf;
+	if( !argv ){
+		buf << "argument=(null)";
+	}
+	else{
+		buf << boost::format( "argument={argc=%d: " ) % argc;
+		for( int i = 0; i < argc; ++i){
+			buf << boost::format( "argv[%d]=%s: " ) % i % argv[i];
+		}
+		buf << "}";
+	}
+	return buf.str();
+}
+
 //! command option check
 //! @param[in]	argument count
 //! @param[in]	argument value
 bool	l7vsd::check_options( int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::check_options", __FILE__, __LINE__ );
+
 	for( int pos = 1; pos < argc; ++pos ){	// check options.
 		parse_opt_map_type::iterator itr = option_dic.find( argv[pos] );
 		if( itr != option_dic.end() ){	// find option
@@ -829,6 +911,8 @@ bool	l7vsd::check_options( int argc, char* argv[] ){
 //! @param[in]	argument count
 //! @param[in]	argument value
 bool	l7vsd::parse_help(int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::parse_help", __FILE__, __LINE__ );
+
 	help = true;		//help_mode flag on
 	return true;
 }
@@ -837,6 +921,8 @@ bool	l7vsd::parse_help(int& pos, int argc, char* argv[] ){
 //! @param[in]	argument count
 //! @param[in]	argument value
 bool	l7vsd::parse_debug(int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::parse_debug", __FILE__, __LINE__ );
+
 	debug = true;		//debug_mode flag on
 	return true;
 }
@@ -844,6 +930,8 @@ bool	l7vsd::parse_debug(int& pos, int argc, char* argv[] ){
 //! create usage string
 //! @return		usage string
 std::string	l7vsd::usage(){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::usage", __FILE__, __LINE__ );
+
 	std::stringstream	stream;
 	stream <<
 	"Usage: l7vsd [-d] [-h]\n"
