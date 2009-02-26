@@ -18,24 +18,8 @@ namespace l7vs{
 
 //!	@class	tcp_data
 //! @brief	this class is tcp session object use data for processing.
-	class tcp_data : public data_buff_base{
-		public:
-			//! construcor
-			tcp_data();
-			//! destructor
-			~tcp_data();
-			//! initialize
-			void initialize();
-			//! get endpoint
-			//! @return		endpoint_info
-			boost::asio::ip::tcp::endpoint get_endpoint();
-			//! set endpoint
-			//! @param[in]	copy endpoint
-			void set_endpoint(const boost::asio::ip::tcp::endpoint set_endpoint);
-		protected:
-			//! tcp endpoint
-			boost::asio::ip::tcp::endpoint endpoint_info;
-	};// class tcp_data
+	typedef data_buff_base<boost::asio::ip::tcp> tcp_data;
+
 }// namespace l7vs
 
 #endif//TCP_DATA_H

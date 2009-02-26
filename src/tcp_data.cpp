@@ -12,30 +12,4 @@
 #include "tcp_data.h"
 #include "logger.h"
 
-namespace l7vs{
-	//! construcor
-	tcp_data::tcp_data(){
-		endpoint_info = boost::asio::ip::tcp::endpoint();
-	}
-	//! destructor
-	tcp_data::~tcp_data(){
-	}
-	//! initialize
-	void tcp_data::initialize(){
-		endpoint_info = boost::asio::ip::tcp::endpoint();
-		data_buff_base::initialize();
-	}
-	//! get endpoint
-	//! @return		endpoint_info
-	boost::asio::ip::tcp::endpoint tcp_data::get_endpoint(){
-		return endpoint_info;
-	}
-	//! set endpoint
-	//! @param[in]	copy endpoint
-	void tcp_data::set_endpoint(const boost::asio::ip::tcp::endpoint set_endpoint){
-		endpoint_info = set_endpoint;
-	}
-
-
-}// namespace l7vsd
-
+// this class implementation see data_buff_base.h
