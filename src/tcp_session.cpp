@@ -836,20 +836,13 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		unsigned long long qos = parent_service.get_qos_upstream();
-		unsigned long long up_throughput = parent_service.get_throughput_upstream();
-		if(qos < up_throughput){
+		if(0 < parent_service.get_wait_upstream()){
 			//----Debug log----------------------------------------------------------------------
 			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
-				buf << "] up_thread_client_receive";
-				buf << " over throghput qos upstream threshold [";
-				buf << qos;
-				buf << "] upstream throughput [";
-				buf << up_throughput;
-				buf << "]";
+				buf << "] up_thread_client_receive qos wait active";
 				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
@@ -863,6 +856,21 @@ namespace l7vs{
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			if(recv_size > 0){
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().remote_endpoint(ec);
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] up_thread_client_receive";
+					buf << " receive data size[";
+					buf << recv_size;
+					buf << "] from [";
+					buf << client_endpoint;
+					buf << "]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				parent_service.update_up_recv_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(up_thread_id,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1096,6 +1104,20 @@ namespace l7vs{
 			send_data_size += send_size;
 			up_thread_data_dest_side.set_send_size(send_data_size);
 			parent_service.update_up_send_size(send_size);
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] up_thread_realserver_send";
+				buf << " send data size[";
+				buf << send_size;
+				buf << "] for [";
+				buf << server_endpoint;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			if(data_size > send_data_size){
 				func_tag = UP_FUNC_REALSERVER_SEND;
 			}else{
@@ -1518,6 +1540,20 @@ namespace l7vs{
 		if(!ec){
 			send_data_size += send_size;
 			up_thread_data_dest_side.set_send_size(send_data_size);
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] up_thread_sorryserver_send";
+				buf << " send data size[";
+				buf << send_size;
+				buf << "] for [";
+				buf << sorry_endpoint;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			if(data_size > send_data_size){
 				func_tag = UP_FUNC_SORRYSERVER_SEND;
 			}else{
@@ -2023,20 +2059,14 @@ namespace l7vs{
 		}
 		bool is_emp = down_thread_receive_realserver_socket_list.empty();
 		if(is_emp)return;
-		unsigned long long qos = parent_service.get_qos_downstream();
-		unsigned long long down_throughput = parent_service.get_throughput_downstream();
-		if(qos < down_throughput){
+
+		if( 0 < parent_service.get_wait_downstream() ){
 			//----Debug log----------------------------------------------------------------------
 			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
-				buf << "] down_thread_realserver_receive";
-				buf << " over throghput qos downstream threshold [";
-				buf << qos;
-				buf << "] downstream throughput [";
-				buf << down_throughput;
-				buf << "]";
+				buf << "] down_thread_realserver_receive qos wait active";
 				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
@@ -2052,6 +2082,20 @@ namespace l7vs{
 		DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			if(recv_size > 0){
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] down_thread_realserver_receive";
+					buf << " receive data size[";
+					buf << recv_size;
+					buf << "] from [";
+					buf << server_endpoint;
+					buf << "]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				parent_service.update_down_recv_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id,server_endpoint,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -2401,6 +2445,21 @@ namespace l7vs{
 			send_data_size += send_size;
 			down_thread_data_client_side.set_send_size(send_data_size);
 			parent_service.update_down_send_size(send_size);
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().remote_endpoint(ec);
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] down_thread_client_send";
+				buf << " send data size[";
+				buf << send_size;
+				buf << "] for [";
+				buf << client_endpoint;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
 			if(data_size > send_data_size){
 				func_tag = DOWN_FUNC_CLIENT_SEND;
 			}else{
@@ -2555,6 +2614,20 @@ namespace l7vs{
 		DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			if(recv_size > 0){
+				//----Debug log----------------------------------------------------------------------
+				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] down_thread_sorryserver_receive";
+					buf << " receive data size[";
+					buf << recv_size;
+					buf << "] from [";
+					buf << sorry_endpoint;
+					buf << "]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(down_thread_id,sorry_endpoint,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
 				if(func_type == down_thread_module_event_map.end()){

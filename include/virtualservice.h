@@ -150,11 +150,15 @@ protected:
 	unsigned long long			sendsize_down;					//! downstream total send data size
 	boost::mutex				sendsize_down_mutex;			//! mutex for update downstream send data size
 
-	boost::xtime				last_calc_time;					//! time at calcurate throughput
 	unsigned long long			throughput_up;					//! upstream throughput value
 	boost::mutex				throughput_up_mutex;			//! mutex for update upstream throughput value
 	unsigned long long			throughput_down;				//! downstream throughput value
 	boost::mutex				throughput_down_mutex;			//! mutex for update downstream throughput value
+
+	unsigned long long			wait_count_up;					//! upstream recv wait count
+	boost::mutex				wait_count_up_mutex;			//! mutex for upstream recv wait count
+	unsigned long long			wait_count_down;				//! downstream recv wait count
+	boost::mutex				wait_count_down_mutex;			//! mutex for downstream recv wait count
 
 	void						load_parameter();
 
@@ -231,6 +235,8 @@ public:
 	unsigned long long			get_up_send_size();
 	unsigned long long			get_down_recv_size();
 	unsigned long long			get_down_send_size();
+	unsigned long long			get_wait_upstream();
+	unsigned long long			get_wait_downstream();
 
 	void						update_up_recv_size( unsigned long long );
 	void						update_up_send_size( unsigned long long );

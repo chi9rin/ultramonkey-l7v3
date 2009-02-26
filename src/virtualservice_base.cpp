@@ -40,7 +40,9 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
 													current_down_recvsize( 0 ),
 													sendsize_down( 0 ),
 													throughput_up( 0 ),
-													throughput_down( 0 ) {
+													throughput_down( 0 ),
+													wait_count_up( 0 ),
+													wait_count_down( 0 ) {
 	calc_bps_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	replication_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	protomod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
@@ -174,49 +176,46 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( !err ){
-		//calcurate time difference
-		boost::xtime	current_time;
-		boost::xtime	time_difference;
-		boost::xtime_get( &current_time, boost::TIME_UTC );
-		time_difference.sec = current_time.sec - last_calc_time.sec;
-		time_difference.nsec = current_time.nsec - last_calc_time.nsec;
-		if( 0 > time_difference.nsec ){
-			--time_difference.sec;
-			time_difference.nsec = 1000000000 + time_difference.nsec;
-		}
-		last_calc_time = current_time;
-	
+		// decrease wait count
 		{
-			//mutex lock
+			boost::mutex::scoped_lock wait_up_lock( wait_count_up_mutex );
+			if( 0 != wait_count_up )	wait_count_up -= 1;
+		}
+		{
+			boost::mutex::scoped_lock wait_down_lock( wait_count_down_mutex );
+			if( 0 != wait_count_down )	wait_count_down -= 1;
+		}
+
+		if( 0 != current_up_recvsize ){
 			boost::mutex::scoped_lock throughput_up_lock( throughput_up_mutex );
 			boost::mutex::scoped_lock recvsize_up_lock( recvsize_up_mutex );
-			//calcurate throughput
-	
-			if( 0 < current_up_recvsize ){
-				if( 0 < time_difference.sec )
-					//秒が0でなければ秒をベースにスループットを計算
-					//bps = current_up_recvsize[bytes] * 8[8bit=1byte] / time_difference.sec
-					throughput_up	= current_up_recvsize / time_difference.sec * 8;
-				else
-					throughput_up	= current_up_recvsize / time_difference.nsec / 1000000000 * 8;
-			}else throughput_up = 0ULL;
+			boost::mutex::scoped_lock wait_up_lock( wait_count_up_mutex );
+
+			if( 0 != element.qos_upstream ){
+				// wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
+				wait_count_up = ( ( ( current_up_recvsize / param_data.bps_interval ) * 1000 ) / element.qos_upstream );
+				if( wait_count_up > 0 )	wait_count_up -= 1;
+			}
+			// throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
+			throughput_up = ( current_up_recvsize / ( param_data.bps_interval * ( wait_count_up + 1 ) ) ) * 1000;
 			current_up_recvsize = 0ULL;
 		}
-		{
-			//mutex lock
+
+		if( 0 != current_down_recvsize ){
 			boost::mutex::scoped_lock throughput_down_lock( throughput_down_mutex );
 			boost::mutex::scoped_lock recvsize_down_lock( recvsize_down_mutex );
-			//calcurate throughput
-			//bps = current_down_recvsize[bytes] * 8[8bit=1byte] / ( time_difference / 1000 )
-	
-			if( 0 < current_down_recvsize ){
-				if( 0 < time_difference.sec )
-					throughput_down = current_down_recvsize / time_difference.sec * 8;
-				else
-					throughput_down = current_down_recvsize / time_difference.nsec / 1000000000 * 8;
-			}else throughput_down = 0ULL;
+			boost::mutex::scoped_lock wait_down_lock( wait_count_down_mutex );
+
+			if( 0 != element.qos_downstream ){
+				// wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
+				wait_count_down = ( ( ( current_down_recvsize / param_data.bps_interval ) * 1000 ) / element.qos_downstream );
+				if( wait_count_down > 0 )	wait_count_down -= 1;
+			}
+			// throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
+			throughput_down = ( current_down_recvsize / ( param_data.bps_interval * ( wait_count_down + 1 ) ) ) * 1000;
 			current_down_recvsize = 0ULL;
 		}
+
 		//register timer event
 		calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
 		calc_bps_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_throughput_update, 
@@ -408,6 +407,42 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_downstream(){
 									0, fmt.str(), __FILE__, __LINE__ );
 	}
 	return throughput_down;
+}
+
+/*!
+ * get upstream wait_count value.
+ *
+ * @param   void
+ * @return  upstream wait_count value
+ */
+unsigned long long	l7vs::virtualservice_base::get_wait_upstream(){
+	boost::mutex::scoped_lock lock( wait_count_up_mutex );
+	if(	( (boost::this_thread::get_id() == this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ) ||
+		( (boost::this_thread::get_id() != this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ) ){
+		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_upstream() : ret = %d" );
+		fmt % wait_count_up;
+		l7vs::Logger::putLogDebug( ((boost::this_thread::get_id() == this_id) ? l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE : l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ),
+									0, fmt.str(), __FILE__, __LINE__ );
+	}
+	return wait_count_up;
+}
+
+/*!
+ * get downstream wait_count value.
+ *
+ * @param   void
+ * @return  downstream wait_count value
+ */
+unsigned long long	l7vs::virtualservice_base::get_wait_downstream(){
+	boost::mutex::scoped_lock lock( wait_count_down_mutex );
+	if(	( (boost::this_thread::get_id() == this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ) ||
+		( (boost::this_thread::get_id() != this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ) ){
+		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_downstream() : ret = %d" );
+		fmt % wait_count_down;
+		l7vs::Logger::putLogDebug( ((boost::this_thread::get_id() == this_id) ? l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE : l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ),
+									0, fmt.str(), __FILE__, __LINE__ );
+	}
+	return wait_count_down;
 }
 
 /*!
