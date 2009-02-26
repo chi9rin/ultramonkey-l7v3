@@ -19,9 +19,8 @@ LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
 			../logger_stb/logger.cpp \
-			data_buff_base.cpp \
+			../../../src/udp_data.cpp \
 			udp_data_test.cpp 
-#			../../../src/udp_data.cpp \
 
 .SUFFIX:	.cpp .o
 .cpp.o:
