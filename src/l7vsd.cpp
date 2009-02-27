@@ -46,6 +46,7 @@ namespace l7vs{
 l7vsd::l7vsd()
 	:	help(false),
 		debug(false){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::l7vsd", __FILE__, __LINE__ );
 
 	option_dic["-h"]		= boost::bind( &l7vsd::parse_help, this, _1, _2, _3 );
 	option_dic["--help"]	= boost::bind( &l7vsd::parse_help, this, _1, _2, _3 );
@@ -56,7 +57,9 @@ l7vsd::l7vsd()
 }
 
 //! destructor
-l7vsd::~l7vsd(){}
+l7vsd::~l7vsd(){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::~l7vsd", __FILE__, __LINE__ );
+}
 
 //! virtual_service list command
 //! @param[out]	arry of vs_element
@@ -80,6 +83,22 @@ void	l7vsd::list_virtual_service( vselist_type* out_vslist, error_code& err ){
 		 ++itr ){
 		out_vslist->push_back( (*itr)->get_element() );
 	}
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::list_virtual_service return value:";
+		unsigned int i = 0;
+		BOOST_FOREACH( virtualservice_element vs_elem, *out_vslist ){
+			debugstr << boost::format( "*out_vslist[%d]=" ) % i;
+			debugstr << vs_elem;
+			debugstr << ": ";
+			++i;
+		}
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 }
 
 //! virtual_service list verbose command
@@ -165,6 +184,14 @@ void	l7vsd::list_virtual_service_verbose( l7vsd_response* response, error_code& 
 	response->total_client_send_byte = total_client_send_byte;
 	response->total_realserver_recv_byte = total_realserver_recv_byte;
 	response->total_realserver_send_byte = total_realserver_send_byte;
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << boost::format( "l7vsd::list_virtual_service_verbose return value:%s" ) % *response;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 }
 
@@ -714,6 +741,15 @@ void	l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG* comp, error_code& e
 l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element& in_vselement ) const {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::search_vslist", __FILE__, __LINE__ );
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::search_vslist arguments:";
+		debugstr << boost::format( "in_vselement=%s" ) % in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	for( vslist_type::iterator itr = vslist.begin();
 		 itr != vslist.end();
 		 ++itr ){
@@ -737,6 +773,15 @@ l7vsd::vslist_type::iterator	l7vsd::search_vslist( const virtualservice_element&
 //! @param[in]	vs_element
 void	l7vsd::release_virtual_service( const virtualservice_element& in_vselement ) const {
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::release_virtual_service", __FILE__, __LINE__ );
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+		std::stringstream	debugstr;
+		debugstr << "l7vsd::release_virtual_service arguments:";
+		debugstr << boost::format( "in_vselement=%s" ) % in_vselement;
+		Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	vslist_type::iterator vsitr = search_vslist( in_vselement );
 	if( vslist.end() !=  vsitr ){
