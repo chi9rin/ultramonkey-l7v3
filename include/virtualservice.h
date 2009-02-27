@@ -11,6 +11,10 @@
 #ifndef	VIRTUALSERVICE_H
 #define	VIRTUALSERVICE_H
 
+#include <net/if.h>
+#include <unistd.h>
+#include <sched.h>
+#include <error.h>
 #include <string>
 #include <map>
 #include <boost/noncopyable.hpp>
@@ -30,6 +34,7 @@
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 
+#define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
 #define	PARAM_REP_INTERVAL		"interval"
@@ -104,6 +109,8 @@ public:
 protected:
 
 	struct	parameter_data{
+		std::string
+				nic_realserver_side;
 		int		session_pool_size;
 		long	bps_interval;
 		long	rep_interval;
@@ -160,7 +167,7 @@ protected:
 	unsigned long long			wait_count_down;				//! downstream recv wait count
 	boost::mutex				wait_count_down_mutex;			//! mutex for downstream recv wait count
 
-	void						load_parameter();
+	void						load_parameter( l7vs::error_code& );
 
 	virtual	void				handle_replication_interrupt( const boost::system::error_code& ) = 0;
 	virtual	void				read_replicationdata() = 0;
@@ -195,6 +202,12 @@ protected:
 										boost::asio::ip::tcp::endpoint& in_ep ){
 		schedmod->handle_schedule( thread_id, in_begin, in_end, in_next, in_ep );
 	}
+
+	cpu_set_t					vsnic_cpumask;
+	cpu_set_t					rsnic_cpumask;
+	void						get_nic_list( std::vector< std::string >& );
+	cpu_set_t					get_cpu_mask( boost::asio::ip::address& );
+	cpu_set_t					get_cpu_mask( std::string );
 
 public:
 	virtualservice_base(	const l7vsd&,

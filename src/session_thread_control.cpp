@@ -17,12 +17,12 @@ namespace l7vs{
 //!	@brief upstream thread bind function.
 //
 void	session_thread_control::upstream_run(){
+	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
 	state_tag	state;
 	{	// get first state from class upstream state.
 		boost::mutex::scoped_lock upcond_lock( upthread_condition_mutex );	// upstream state lock
 		state = upthread_state;	//thread local state is update.
 	}
-	boost::mutex::scoped_lock up_exit_lock( upthread_exit_mutex );
 	for(;;){	// thread loop
 		if( state == WAIT ){	// after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( upthread_condition_mutex );
@@ -43,12 +43,12 @@ void	session_thread_control::upstream_run(){
 //! @brief	downstream thread bind function,
 //
 void	session_thread_control::downstream_run(){
+	sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
 	state_tag	state;
 	{
 		boost::mutex::scoped_lock downcond_lock( downthread_condition_mutex );	//downstream state is lock
 		state = downthread_state;	//thread local state is update.
 	}
-	boost::mutex::scoped_lock down_exit_lock( downthread_exit_mutex );
 	for(;;){	//thread loop
 		if( state == WAIT ){	//after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( downthread_condition_mutex );
@@ -102,11 +102,9 @@ void	session_thread_control::join(){
 	boost::mutex::scoped_lock	uplock( upthread_condition_mutex );	//upstream state lock
 	upthread_state = EXIT;	//upstream state update [EXIT] -> thread exit mode
 	upthread_condition.notify_all();	// conditionwait thread is run
-	boost::mutex::scoped_lock( upthread_exit_mutex );
 	boost::mutex::scoped_lock	downlock( downthread_condition_mutex );//downstream state is lock
 	downthread_state = EXIT;	//downstream state update [EXIT] -> thread exit mode
 	downthread_condition.notify_all(); //condition wait thread is run.
-	boost::mutex::scoped_lock( downthread_exit_mutex );
 }
 
 }	//namespace l7vs

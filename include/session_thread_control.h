@@ -39,21 +39,24 @@ protected:
 	state_tag			upthread_state;				//! upstream thread state
 	boost::mutex		upthread_condition_mutex;	//! upthread condition use mutex 
 	boost::condition	upthread_condition;			//! upthread condition
-	boost::mutex		upthread_exit_mutex;
 	thread_ptr			downthread;					//! downstream thread
 	state_tag			downthread_state;			//! downstream thread state
 	boost::mutex		downthread_condition_mutex;	//! downstream condition use mutex
 	boost::condition	downthread_condition;		//! downstream condition
-	boost::mutex		downthread_exit_mutex;
 	session_ptr			session;					//! session class shared pointer
 	void				upstream_run();				//! upstream thread bind function
 	void				downstream_run();			//! downstream thread bind function
+
+	cpu_set_t			vsnic_cpumask;
+	cpu_set_t			rsnic_cpumask;
 public:
 	//! constractor.
 	//! @param session_ptr	session class shared ptr
-	session_thread_control( tcp_session* ptr ) :
+	session_thread_control( tcp_session* ptr, cpu_set_t in_upcpu, cpu_set_t in_downcpu ) :
 			upthread_state( WAIT ),
-			downthread_state( WAIT ){
+			downthread_state( WAIT ),
+			vsnic_cpumask( in_upcpu ),
+			rsnic_cpumask( in_downcpu ){
 		session.reset( ptr );
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	//! upstream thread create
 		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create
@@ -61,6 +64,7 @@ public:
 	//! destractor
 	~session_thread_control(){
 		join();
+		usleep( 10000 );
 		upthread->join();
 		downthread->join();
 	}

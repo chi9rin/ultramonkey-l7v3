@@ -169,6 +169,7 @@ sslproxy_session		= "info"
 sslproxy_connection		= "info"
 
 [virtualservice]
+nic_realserver_side			= "eth0"
 session_thread_pool_size	= 256
 throughput_calc_interval	= 500
 

@@ -11,7 +11,10 @@
 
 #include <new>
 #include <vector>
+#include <fstream>
 #include <sstream>
+#include <cstring>
+#include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
@@ -72,14 +75,23 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
  * @param   void
  * @return  void
  */
-void	l7vs::virtualservice_base::load_parameter(){
+void	l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );
 	}
 
 	l7vs::error_code	vs_err;
 	Parameter			param;
-	int	int_val;
+	int					int_val;
+	std::string			str_val;
+	//get realserver_side networkI/F card name
+	str_val	= param.get_string( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_RS_SIDE_NIC_NAME, vs_err );
+	if( !vs_err )
+		param_data.nic_realserver_side	= str_val;
+	else{
+		err.setter( true, "nic_realserver_side parameter does not exist." );
+		return;
+	}
 	//get session pool size value
 	int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_POOLSIZE_KEY_NAME, vs_err );
 	if( !vs_err )
@@ -237,6 +249,113 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 								"const boost::system::error_code& err )");
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
+}
+
+//!	@brief	get machine using nics
+//!	@param[out]	nic_vec
+//!	@return		void
+void	l7vs::virtualservice_base::get_nic_list( std::vector< std::string >& nic_vec ){
+	using namespace boost;
+	nic_vec.clear();
+	std::string	buff;
+	std::ifstream	ifs( "/proc/net/dev" );
+	if( ifs )	ifs.seekg( 200 );
+	else	return;
+	while( std::getline( ifs, buff ) ){
+		std::string nic = buff.substr( 0, 6 );
+		algorithm::trim( nic );
+		nic_vec.push_back( nic );
+	}	
+}
+
+//! @brief	get cpusetmask from NIC.
+//!	@param[in]	NIC name
+//!	@return		cpu_set_t
+cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( std::string	nic_name ){
+	using namespace boost;
+
+	std::vector< std::string > 		split_vec;
+	std::map< size_t, std::string >	cpu_nic_map;
+	std::string					buff;
+	std::ifstream				ifs( "/proc/interrupts" );
+	unsigned int			target_interrupt;
+	size_t					target_cpuid = 0;
+	cpu_set_t				mask;
+	sched_getaffinity( 0, sizeof( cpu_set_t ), &mask );
+
+	//read cpu lists.
+	if( std::getline( ifs, buff ) ) return mask;
+	algorithm::split( split_vec, buff, algorithm::is_any_of( " " ) );
+	for( std::vector< std::string >::iterator itr = split_vec.begin();
+		 itr != split_vec.end();
+		 ++itr ){
+		algorithm::trim( *itr );
+		if( itr->size() ) cpu_nic_map.insert( std::make_pair( cpu_nic_map.size(), "" ) );
+	}
+	// read interrupts.
+	while( !std::getline( ifs,  buff ) ){
+		if( ! buff.find( nic_name ) ) continue;
+		//割り込みIDを取得
+		algorithm::split( split_vec, buff, algorithm::is_any_of( ":" ));
+		if( !split_vec.size() ) return mask;	//interrupt分割不可
+		target_interrupt = lexical_cast<unsigned int>( split_vec[0] );
+		for( size_t i = 0; i < cpu_nic_map.size(); ++i ){
+			size_t	start_position = 4 + ( i * 11 );
+			size_t	end_position = start_position + 11;
+			std::map< size_t, std::string>::iterator itr = cpu_nic_map.find( i );
+			if( itr == cpu_nic_map.end() ) return mask;
+			itr->second = buff.substr( start_position, end_position );
+		}
+		unsigned long long max_events = 0;
+		for( std::map< size_t, std::string >::iterator itr = cpu_nic_map.begin();
+			 itr != cpu_nic_map.end();
+			 ++itr ){
+			if( lexical_cast< unsigned long long >( itr->second ) > max_events ){
+				target_cpuid = itr->first;
+				max_events = lexical_cast< unsigned long long >( itr->second );
+			}		 
+		}
+		break;
+	}
+	CPU_ZERO( &mask );
+	CPU_SET( static_cast<int>( target_cpuid ), &mask );
+	return mask;
+}
+
+//! @brief get cpumask from address name.
+//! @brief set current cpumask which address is not found
+//! @param[in] address object
+//! @return cpu_set_t cpu mask set.
+cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( boost::asio::ip::address& address ){
+	using namespace boost;
+	cpu_set_t	mask;
+
+	std::vector< std::string > nic_vector;
+	get_nic_list( nic_vector );
+	for( std::vector< std::string >::iterator itr = nic_vector.begin();
+		 itr != nic_vector.end();
+		 ++itr ){
+		struct ifreq	ifr;
+		memset( &ifr, 0, sizeof( struct ifreq ) );
+		if( address.is_v4() )	ifr.ifr_addr.sa_family = AF_INET;
+		else					ifr.ifr_addr.sa_family = AF_INET6;
+		strncpy( ifr.ifr_name, itr->c_str(), IFNAMSIZ -1 );
+		int fd = socket( AF_INET, SOCK_STREAM, 0 );
+		if( ioctl( fd, SIOCGIFADDR, &ifr ) != 0 ){
+			close( fd );
+			continue;
+		}
+		struct sockaddr_in* ifaddr = reinterpret_cast<struct sockaddr_in*>( &( ifr.ifr_addr ) );
+// 		std::cout << inet_ntoa( ifaddr->sin_addr ) << std::endl;
+		asio::ip::address	add = asio::ip::address::from_string( inet_ntoa( ifaddr->sin_addr ) );
+		if( add == address ){
+			mask = get_cpu_mask( *itr );
+			close( fd );
+			return mask;
+		}
+		close( fd );
+	}
+	return mask;
 }
 
 /*!
