@@ -2048,6 +2048,8 @@ protocol_module_cinsert::handle_realserver_select(
 	t_recive_data_map_itr			recive_data_itr;
 	t_send_status_list_itr			send_status_itr;
 
+	int		cookie_not_endpoint_flag	= 0;
+
 	EVENT_TAG	status = STOP;
 
 	try
@@ -2137,26 +2139,44 @@ protocol_module_cinsert::handle_realserver_select(
 								cookie_port		= cookie.substr(	regex_result.position(2),
 																	regex_result.length(2));
 	
-								boost::asio::ip::tcp::endpoint
-									endpoint_tmp(	boost::asio::ip::address::from_string(cookie_address),
-													boost::lexical_cast<unsigned short>(cookie_port));
-	
-								rs_list_itr = rs_list_begin();
-	
-								while( rs_list_itr != rs_list_end())
+								try
 								{
-	
-									if( rs_list_itr->tcp_endpoint == endpoint_tmp )
+									boost::asio::ip::tcp::endpoint
+										endpoint_tmp(	boost::asio::ip::address::from_string(cookie_address),
+														boost::lexical_cast<unsigned short>(cookie_port));
+		
+									rs_list_itr = rs_list_begin();
+		
+									while( rs_list_itr != rs_list_end())
 									{
-	
-										rs_endpoint = endpoint_tmp;
-										break;
+		
+										if( rs_list_itr->tcp_endpoint == endpoint_tmp )
+										{
+		
+											rs_endpoint = endpoint_tmp;
+											break;
+										}
+		
+										rs_list_itr = rs_list_next( rs_list_itr );
 									}
-	
-									rs_list_itr = rs_list_next( rs_list_itr );
+								} catch (...)
+								{
+									boost::format	outform(	"cookie value invalid endpoint : [handle_realserver_select] : "
+																"cookie_address = [%s], "
+																"cookie_port = [%s]");
+
+									outform % cookie_address % cookie_port;
+
+									putLogError(	0,
+													outform.str(),
+													__FILE__,
+													__LINE__ );
+
+									cookie_not_endpoint_flag = 1;
+
 								}
-	
-								if( rs_endpoint == endpoint_init && reschedule == 1 )
+
+								if(( rs_endpoint == endpoint_init && reschedule == 1 ) || cookie_not_endpoint_flag == 1 )
 								{
 	
 									schedule_tcp( thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint );
