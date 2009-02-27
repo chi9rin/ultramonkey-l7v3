@@ -660,8 +660,6 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &snmp_test ) );
 	ts->add( BOOST_TEST_CASE( &param_test ) );
 
-
-
 	framework::master_test_suite().add( ts );
 
 	return 0;

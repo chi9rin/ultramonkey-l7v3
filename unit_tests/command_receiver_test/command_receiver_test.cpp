@@ -4,6 +4,9 @@
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 
+#include "logger.h"
+#include "parameter.h"
+
 #include "l7vsd_stub.h"
 #include "command_session_stub.h"
 
@@ -102,8 +105,12 @@ void	receiver_test(){
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	test_suite* ts = BOOST_TEST_SUITE( "command_receiver class test" );
-	ts->add( BOOST_TEST_CASE( &receiver_test ) );
 
+	l7vs::Logger	logger_instance;
+	l7vs::Parameter	parameter_instance;
+	logger_instance.loadConf();
+
+	ts->add( BOOST_TEST_CASE( &receiver_test ) );
 
 	framework::master_test_suite().add( ts );
 

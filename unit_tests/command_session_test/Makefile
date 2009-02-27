@@ -5,7 +5,7 @@
 #
 TARGET		= command_session_ut
 CPP			= g++
-CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./sample.ini"'
+CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./l7vs.cf"'
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I../../include
@@ -56,4 +56,4 @@ $(LOGGER):	$(LOGGER_OBJS)
 	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
 
 clean:
-	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS)
+	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS) *.log

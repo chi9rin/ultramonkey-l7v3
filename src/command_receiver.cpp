@@ -1,14 +1,29 @@
-//
-//!	@file	command_receiver.cpp
-//!	@brief	l7vsadm message receiver class
-//
-//	copyright (c) sdy corporation. 2008
-//	mail: a dot takamaru at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
-#include	"command_receiver.h"
+/*!
+ *	@file	command_receiver.cpp
+ *	@brief	l7vsadm message receiver class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
+#include "logger.h"
+#include "command_receiver.h"
 
 namespace	l7vs{
 
@@ -20,6 +35,17 @@ command_receiver::command_receiver( boost::asio::io_service& io_service, const s
 		:	dispatcher( io_service ),
 			acceptor_( io_service, boost::asio::local::stream_protocol::endpoint( file ) ),
 			vsd( parent ){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_receiver::command_receiver", __FILE__, __LINE__ );
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_COMMAND ) ){
+		std::stringstream	debugstr;
+		debugstr << "command_receiver::command_receiver arguments:";
+		debugstr << boost::format( "file=%s" ) % file;
+		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	sockfile = file;
 
 	// create command_session for first acception.
@@ -30,12 +56,12 @@ command_receiver::command_receiver( boost::asio::io_service& io_service, const s
 								this,
 								session,
 								boost::asio::placeholders::error));
-
-
 }
 
 //!	@brief		destructor
 command_receiver::~command_receiver(){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_receiver::~command_receiver", __FILE__, __LINE__ );
+
 	unlink(sockfile.c_str());
 }
 
@@ -43,6 +69,8 @@ command_receiver::~command_receiver(){
 //!	@param[in]	command session
 //!	@param[in]	error code
 void	command_receiver::handle_accept( command_session::command_session_ptr session, const boost::system::error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_receiver::handle_accept", __FILE__, __LINE__ );
+
 	// check async_accept() result.
 	if ( !err ) {
 		// command_session start.

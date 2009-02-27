@@ -1,16 +1,31 @@
-//
-//!	@file	command_session.cpp
-//!	@brief	l7vsadm message session class
-//
-//	copyright (c) sdy corporation. 2009
-//	mail: a dot takamaru at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*!
+ *	@file	command_session.cpp
+ *	@brief	l7vsadm message session class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include	"command_session.h"
+#include "logger.h"
+#include "command_session.h"
 
 namespace	l7vs{
 
@@ -20,6 +35,8 @@ namespace	l7vs{
 command_session::command_session(	boost::asio::io_service& io_service, l7vsd& parent )
 								:	unixsocket( io_service ),
 									vsd( parent ){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::command_session", __FILE__, __LINE__ );
+
 	// buffer initialize
 	request_buffer.assign( 0x00 );
 
@@ -82,6 +99,8 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 //!	@param[in]	error code
 //!	@param[in]	read size
 void	command_session::handle_read( const boost::system::error_code& err, size_t size){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::handle_read", __FILE__, __LINE__ );
+
 	if( !err ){
 		// execute received command
 		execute_command();
@@ -105,26 +124,32 @@ void	command_session::handle_read( const boost::system::error_code& err, size_t 
 //!	@brief		write handler
 //!	@param[in]	error code
 void	command_session::handle_write( const boost::system::error_code& err ){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::handle_write", __FILE__, __LINE__ );
+
 	if( err ){
 		std::stringstream buf;
 		buf << "handle_write error:" << err;
 		Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, buf.str(), __FILE__, __LINE__);
 	}
-// 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
-// 								boost::bind(	&command_session::handle_read,
-// 												shared_from_this(),
-// 												boost::asio::placeholders::error,
-// 												boost::asio::placeholders::bytes_transferred ));
-
 }
 
 //!	@brief		execute request command
 void	command_session::execute_command(){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::execute_command", __FILE__, __LINE__ );
+
 	// deserialize requestdata
 	std::stringstream	ss;
 	ss << &( request_buffer[0] );
 	boost::archive::text_iarchive	ia(ss);
 	ia >> request_data;
+
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_COMMAND ) ){
+		std::stringstream	debugstr;
+		debugstr << boost::format( "command_session_recv_request:%s" ) % request_data;
+		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
 
 	// execute command
 	command_handler_map_type::iterator itr = command_handler_map.find( request_data.command );
@@ -145,6 +170,14 @@ void	command_session::execute_command(){
 		response_data.message = "command not found.";
 	}
 
+	/*-------- DEBUG LOG --------*/
+	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_COMMAND ) ){
+		std::stringstream	debugstr;
+		debugstr << boost::format( "command_session_send_response:%s" ) % response_data;
+		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 1, debugstr.str(), __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
 	// serialize responsedata
 	boost::archive::text_oarchive	oa( response_stream );
 	oa << (const l7vsd_response&) response_data;
@@ -152,6 +185,8 @@ void	command_session::execute_command(){
 
 //!	@brief		session start
 void	command_session::start(){
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::start", __FILE__, __LINE__ );
+
 	// start async read requestdata from unixsocket.
 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
 								boost::bind(	&command_session::handle_read,
