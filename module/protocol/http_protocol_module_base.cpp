@@ -11,8 +11,24 @@
 
 using namespace boost::xpressive;
 
-l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
+l7vs::http_protocol_module_base::CHECK_RESULT_TAG
+l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 													const size_t buffer_len ) const {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [check_http_method] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
@@ -77,12 +93,43 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [check_http_method] : "
+									"check_result = [%d]" );
+
+		outform % check_result;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return check_result;
 
 }
 
-l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
+l7vs::http_protocol_module_base::CHECK_RESULT_TAG
+l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 														const size_t buffer_len ) const {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [check_http_version] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
@@ -151,13 +198,44 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [check_http_version] : "
+									"check_result = [%d]" );
+
+		outform % check_result;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return check_result;
 
 }
 
 
-l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
+l7vs::http_protocol_module_base::CHECK_RESULT_TAG
+l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 													const size_t buffer_len ) const {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [check_status_code] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
@@ -220,6 +298,21 @@ l7vs::http_protocol_module_base::CHECK_RESULT_TAG	l7vs::http_protocol_module_bas
 
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [check_status_code] : "
+									"check_result = [%d]" );
+
+		outform % check_result;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return check_result;
 
 }
@@ -229,6 +322,21 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 													const size_t buffer_len,
 													size_t& uri_offset,
 													size_t& uri_len){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_uri] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	bool	find_result	= true;
 
@@ -297,6 +405,23 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_uri] : "
+									"find_result = [%d], "
+									"uri_offset = [%d], "
+									"uri_len = [%d]" );
+
+		outform % find_result % uri_offset % uri_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return find_result;
 
 }
@@ -306,6 +431,21 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 															const size_t buffer_len,
 															size_t& status_code_offset,
 															size_t& status_code_len){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_status_code] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	bool	find_result	= true;
 
@@ -374,6 +514,23 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 	}
 
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_status_code] : "
+									"find_result = [%d], "
+									"status_code_offset = [%d], "
+									"status_code_len = [%d]" );
+
+		outform % find_result % status_code_offset % status_code_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
 	return find_result;
 
 }
@@ -384,6 +541,22 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 															const std::string& http_header_name,
 															size_t& http_header_offset,
 															size_t& http_header_len ){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_http_header] : "
+									"buffer_len = [%d], "
+									"http_header_name = [%s]" );
+
+		outform % buffer_len % http_header_name;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	bool	find_result			= true;
 
@@ -512,6 +685,23 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 		find_result	= false;
 
 	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_http_header] : "
+									"find_result = [%d], "
+									"http_header_offset = [%d], "
+									"http_header_len = [%d]" );
+
+		outform % find_result % http_header_offset % http_header_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
 
 	return find_result;
 
