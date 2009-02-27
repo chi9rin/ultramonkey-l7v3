@@ -272,7 +272,8 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 			}
 			if( ( ( 0 < element.sorry_maxconnection ) && 
 				( ( active_sessions.size() - sorry_sessions.size() ) > static_cast<size_t>( element.sorry_maxconnection ) ) ) ||
-				( ( 0 != element.sorry_flag ) && ( INT_MAX != element.sorry_flag ) ) ){
+				( ( 0 != element.sorry_flag ) && ( INT_MAX != element.sorry_flag ) ) ||
+				( ( 0 == rs_list.size() ) && ( boost::asio::ip::tcp::endpoint() != element.sorry_endpoint ) ) ){
 					in_session->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 					sorry_sessions.insert( session_map_pair_type( in_session->get_upthread_id(), in_session ) );
 			}
