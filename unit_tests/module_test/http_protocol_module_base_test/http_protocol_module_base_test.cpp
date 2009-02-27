@@ -1,10 +1,3 @@
-    memcpy(recive_data_global.recive_buffer, "GET / HTTP/1.0\r\nCook", 20);
-
-    //リクエストデータ
-    memcpy(request.c_array(), "ie: monkey=1\r\n\r\nGET / HTTP/1.0\r\nCookie: monkey=1\r\n\r\nGET / HTTP/1.0\r\nCookie: monk", 80);
-
-
-
 #define	TEST_CASE
 
 #include <boost/test/included/unit_test.hpp>
@@ -36,14 +29,42 @@ using namespace l7vs;
 #define	THREAD_LOOP_NUM	(1)
 
 //--stub functions--
+//--stub functions--
+LOG_LEVEL_TAG	stb_getloglevel(){
+//	std::cout << "getloglevel called." << std::endl;
+	return LOG_LV_NONE;
+}
 
+void	stb_putLogFatal( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogFatal called." << std::endl;
+}
+void	stb_putLogError( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogError called." << std::endl;
+}
+void	stb_putLogWarn( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogWarn called." << std::endl;
+}
+void	stb_putLogInfo( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogInfo called." << std::endl;
+}
+void	stb_putLogDebug( const unsigned int, const std::string&, const char*, int ){
+//	std::cout << "putLogDebug called." << std::endl;
+}
 
 //--test class--
 class	http_protocol_module_base_test : public http_protocol_module_base {
 public:
 boost::mutex		sync_mutex;
 boost::condition	sync_condition;
-http_protocol_module_base_test( std::string in_modulename ) : http_protocol_module_base( in_modulename ){}
+http_protocol_module_base_test( std::string in_modulename ) : http_protocol_module_base( in_modulename )
+{
+	getloglevel	= &stb_getloglevel;
+	putLogFatal	= &stb_putLogFatal;
+	putLogError	= &stb_putLogError;
+	putLogWarn	= &stb_putLogWarn;
+	putLogInfo	= &stb_putLogInfo;
+	putLogDebug	= &stb_putLogDebug;
+}
 ~http_protocol_module_base_test(){}
 bool	is_tcp(){ return true; }
 bool	is_udp(){ return true; }
