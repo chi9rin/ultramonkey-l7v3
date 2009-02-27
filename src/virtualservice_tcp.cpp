@@ -749,7 +749,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		boost::format formatter("in_function : void virtualservice_tcp::edit_virtualservice( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err ) : dump in ");
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
 	}
 
 	l7vs::virtualservice_element&	elem = const_cast<l7vs::virtualservice_element&>( in );
