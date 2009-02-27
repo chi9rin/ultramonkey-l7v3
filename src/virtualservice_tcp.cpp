@@ -797,6 +797,16 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			for( size_t i = 0; i < elem.protocol_args.size(); ++i ){
 				element.protocol_args.push_back( elem.protocol_args[i] );
 			}
+		}else{
+			err.setter( true, result.message );
+			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+				boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
+										"const l7vs::virtualservice_element& in,"
+										"l7vs::error_code& err ) : err = %s, err.message = %s");
+				formatter % ( err ? "true" : "false") % err.get_message();
+				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
+			}
+			return;
 		}
 	}else{
 		//ERROR case
