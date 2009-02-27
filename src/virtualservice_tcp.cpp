@@ -65,7 +65,7 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 		unsigned int	rep_size = 0;
 		replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
 		if( (rep_header_ptr == NULL) || (0 == rep_size) ){
-			l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+			l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
 			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
 			}
@@ -75,7 +75,7 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 		//check maxdatasize
 		if( ( rep_size * DATA_SIZE ) <
 			((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
-			l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+			l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
 			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
 			}
@@ -154,7 +154,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	unsigned int	rep_size = 0;
 	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
 	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
-		l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
@@ -164,7 +164,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	//check maxdatasize
 	if( ( rep_size * DATA_SIZE ) <
 		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
-		l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
@@ -177,7 +177,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	unsigned int loop_cnt = rep_header_ptr->data_num;
 	//if data_num over MAX_REPLICATION_DATA_NUM, set data_num = 0
 	if( static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt ){
-		l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
@@ -660,7 +660,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( replication.pay_memory( REP_AREA_NAME, rep_size) );
 	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
 		err.setter( true, REP_BLOCK_SIZE_ERR_MSG );
-		l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		replication_status = false;
 	}
 
@@ -668,7 +668,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 	if( ( rep_size * DATA_SIZE ) <
 		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
 		err.setter( true, REP_AREA_SIZE_ERR_MSG );
-		l7vs::Logger::putLogWorn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
 		replication_status = false;
 	}
 	if( (NULL != rep_header_ptr) && (replication_status) ){
