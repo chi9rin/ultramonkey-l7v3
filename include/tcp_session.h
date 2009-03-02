@@ -145,6 +145,8 @@ namespace l7vs{
 			protocol_module_base* protocol_module;
 			//! up and down thread wait flag
 			bool session_pause_flag;
+			//! wait flag mutex
+			boost::mutex session_pause_flag_mutex;
 			//! client socket
 			tcp_socket client_socket;
 			//! sorryserver socket
