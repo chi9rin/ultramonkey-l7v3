@@ -63,7 +63,8 @@ namespace l7vs{
 			//! control socket
 			boost::asio::ip::tcp::socket my_socket;
 			//! socket close mutex
-			boost::mutex socket_mutex;
+			boost::mutex read_mutex;
+			boost::mutex write_mutex;
 			//! socket open flag
 			bool open_flag;
 

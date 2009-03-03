@@ -287,14 +287,14 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 		while(1){
 			if( ( l7vs::session_thread_control::WAIT == in_session->get_upthread_status() ) &&
 				( l7vs::session_thread_control::WAIT == in_session->get_downthread_status() ) ){
-					usleep( 10 );
+					usleep( 5 );
 					break;
 				}
 		}
 		//switch status runing, session_thread_control
 		in_session->startupstream();
 		in_session->startdownstream();
-	
+
 		//switch active a session
 		boost::thread::id			t_id;
 		session_thread_control_ptr	stc_ptr;
@@ -335,20 +335,19 @@ void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::se
 				boost::format	fmt1( "active session thread id = %d" );
 				fmt1 % t_id;
 				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
+				boost::format	fmt2( "pool_session.size   = %d" );
+				fmt2 % pool_sessions.size();
+				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt2.str(), __FILE__, __LINE__ );
+				boost::format	fmt3( "active_session.size = %d" );
+				fmt3 % active_sessions.size();
+				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt3.str(), __FILE__, __LINE__ );
+				boost::format	fmt4( "sorry_session.size = %d" );
+				fmt4 % sorry_sessions.size();
+				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt4.str(), __FILE__, __LINE__ );
 			}
 			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-				boost::format	fmt1( "pool_session.size   = %d" );
-				fmt1 % pool_sessions.size();
-				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
-				boost::format	fmt2( "active_session.size = %d" );
-				fmt2 % active_sessions.size();
-				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt2.str(), __FILE__, __LINE__ );
-				boost::format	fmt3( "sorry_session.size = %d" );
-				fmt3 % sorry_sessions.size();
-				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt3.str(), __FILE__, __LINE__ );
 			}
 		}
-
 		//regist accept event handler
 		acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
 								boost::bind( &l7vs::virtualservice_tcp::handle_accept, this, stc_ptr,

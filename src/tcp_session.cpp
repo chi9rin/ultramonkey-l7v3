@@ -331,8 +331,8 @@ namespace l7vs{
 	//! @return 		true is wait
 	//! @return 		false is not wait
 	bool tcp_session::is_thread_wait(){
-		boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
 		bool res = false;
+		boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
 		if(thread_state.test(4) & thread_state.test(5))
 			res = true;
 		return res;
