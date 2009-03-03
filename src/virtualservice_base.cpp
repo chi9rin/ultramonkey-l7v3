@@ -272,42 +272,46 @@ void	l7vs::virtualservice_base::get_nic_list( std::vector< std::string >& nic_ve
 //!	@param[in]	NIC name
 //!	@return		cpu_set_t
 cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( std::string	nic_name ){
+	using namespace std;
 	using namespace boost;
 
-	std::vector< std::string > 		split_vec;
-	std::map< size_t, std::string >	cpu_nic_map;
-	std::string					buff;
-	std::ifstream				ifs( "/proc/interrupts" );
+	vector< string > 		split_vec;
+	map< size_t, string >	cpu_nic_map;
+	string					buff;
+	ifstream				ifs( "/proc/interrupts" );
 	unsigned int			target_interrupt;
 	size_t					target_cpuid = 0;
 	cpu_set_t				mask;
 	sched_getaffinity( 0, sizeof( cpu_set_t ), &mask );
 
 	//read cpu lists.
-	if( std::getline( ifs, buff ) ) return mask;
+	if( !ifs ) return mask;
+	getline( ifs, buff );
 	algorithm::split( split_vec, buff, algorithm::is_any_of( " " ) );
-	for( std::vector< std::string >::iterator itr = split_vec.begin();
+	for( vector< string >::iterator itr = split_vec.begin();
 		 itr != split_vec.end();
 		 ++itr ){
 		algorithm::trim( *itr );
-		if( itr->size() ) cpu_nic_map.insert( std::make_pair( cpu_nic_map.size(), "" ) );
+		if( itr->size() ) cpu_nic_map.insert( make_pair( cpu_nic_map.size(), "" ) );
 	}
 	// read interrupts.
-	while( !std::getline( ifs,  buff ) ){
+	while( getline( ifs,  buff ) ){
 		if( ! buff.find( nic_name ) ) continue;
 		//割り込みIDを取得
 		algorithm::split( split_vec, buff, algorithm::is_any_of( ":" ));
 		if( !split_vec.size() ) return mask;	//interrupt分割不可
+		algorithm::trim( split_vec[0] );
 		target_interrupt = lexical_cast<unsigned int>( split_vec[0] );
 		for( size_t i = 0; i < cpu_nic_map.size(); ++i ){
 			size_t	start_position = 4 + ( i * 11 );
-			size_t	end_position = start_position + 11;
-			std::map< size_t, std::string>::iterator itr = cpu_nic_map.find( i );
+			size_t	end_position = 11;
+			map< size_t, string>::iterator itr = cpu_nic_map.find( i );
 			if( itr == cpu_nic_map.end() ) return mask;
 			itr->second = buff.substr( start_position, end_position );
+			algorithm::trim( itr->second );
 		}
 		unsigned long long max_events = 0;
-		for( std::map< size_t, std::string >::iterator itr = cpu_nic_map.begin();
+		for( map< size_t, string >::iterator itr = cpu_nic_map.begin();
 			 itr != cpu_nic_map.end();
 			 ++itr ){
 			if( lexical_cast< unsigned long long >( itr->second ) > max_events ){
@@ -318,6 +322,7 @@ cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( std::string	nic_name ){
 		break;
 	}
 	CPU_ZERO( &mask );
+	++target_cpuid;
 	CPU_SET( static_cast<int>( target_cpuid ), &mask );
 	return mask;
 }
