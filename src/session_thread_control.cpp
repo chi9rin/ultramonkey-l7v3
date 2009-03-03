@@ -184,4 +184,14 @@ void	session_thread_control::join(){
 	}
 }
 
+session_thread_control::state_tag	session_thread_control::get_upthread_status(){
+	boost::mutex::scoped_lock	uplock( upthread_condition_mutex );	//upstream state lock
+	return	upthread_state;
+}
+
+session_thread_control::state_tag	session_thread_control::get_downthread_status(){
+	boost::mutex::scoped_lock	uplock( downthread_condition_mutex );	//upstream state lock
+	return	downthread_state;
+}
+
 }	//namespace l7vs

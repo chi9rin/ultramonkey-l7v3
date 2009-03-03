@@ -29,12 +29,12 @@ public:
 	typedef	boost::shared_ptr< boost::thread >	thread_ptr;		//! shared_ptr thread typedef
 	typedef	boost::shared_ptr< tcp_session >	session_ptr;	//! shared_ptr session typedef
 	typedef	boost::thread::id					thread_id_type;	//! thread id typedef
-protected:
 	enum	state_tag{	//! @enum state_tag upthread and down thread state enum
 		WAIT	= 0,	//! thread pooling mode
 		RUNNING,		//! thread running mode
 		EXIT			//! thread exit mode
  	};
+protected:
 	thread_ptr			upthread;					//! upstream thread
 	state_tag			upthread_state;				//! upstream thread state
 	boost::mutex		upthread_condition_mutex;	//! upthread condition use mutex 
@@ -87,6 +87,9 @@ public:
 	//! downstream-thread id getter
 	//! @return thread_id_type	downstream thread id
 	thread_id_type	get_downthread_id(){ return downthread->get_id(); }
+
+	state_tag	get_upthread_status();
+	state_tag	get_downthread_status();
 };
 
 }//	namespace l7vs
