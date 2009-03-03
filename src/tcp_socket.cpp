@@ -137,7 +137,8 @@ namespace l7vs{
 	std::size_t tcp_socket::write_some(boost::asio::mutable_buffers_1 buffers,
 		boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::write_some", __FILE__, __LINE__ );
-
+		
+		boost::mutex::scoped_lock scope_lock(socket_mutex);
 		std::size_t res_size = 0;
 		res_size = my_socket.write_some(buffers,ec);
 		if(ec){
@@ -157,7 +158,8 @@ namespace l7vs{
 	std::size_t tcp_socket::read_some(boost::asio::mutable_buffers_1 buffers,
 		boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::read_some", __FILE__, __LINE__ );
-			
+		
+		boost::mutex::scoped_lock scope_lock(socket_mutex);
 		std::size_t res_size = 0;
 		res_size = my_socket.read_some(buffers,ec);
 		if(ec){
