@@ -52,6 +52,21 @@ public:
 	void	set_snmpbridge( boost::shared_ptr< l7vs::snmpbridge > inbridge ){
 		bridge = inbridge;
 	}
+	sig_atomic_t	get_exit_requested(){
+		return l7vsd::exit_requested;
+	}
+	sig_atomic_t	get_received_sig(){
+		return l7vsd::received_sig;
+	}
+	void	set_exit_requested(sig_atomic_t in){
+		l7vsd::exit_requested = in;
+	}
+	void	set_received_sig(sig_atomic_t in){
+		l7vsd::received_sig = in;
+	}
+	void	sig_exit_handler_wp(){
+		l7vsd::sig_exit_handler();
+	}
 
 };
 
@@ -64,8 +79,8 @@ int	daemon( int nochdir, int noclose ){
 	return daemon_ret;
 }
 
-// test_handler
-void		test_handler(int sig);
+// handler_wrapper
+void*	handler_wrapper( void* );
 
 // flags
 int			call_count_test_handler = 0;	//test_handlerの呼出回数
@@ -1374,10 +1389,10 @@ void	run_test(){
 		int		argc	= 1;
 		char*	argv[]	= { "l7vsd_test" };
 	
-		exit_requested = true;
+		vsd_test.set_exit_requested( 1 );
 		int ret = vsd_test.run( argc, argv );
 		//boost::thread	thd( boost::bind( &l7vsd_test::run, &vsd_test, argc, argv ) );
-		exit_requested = false;
+		vsd_test.set_exit_requested( 0 );
 	
 		// unit_test[192] l7vsd::run normal case return value check
 		BOOST_CHECK_EQUAL( ret, 0 );
@@ -1422,9 +1437,9 @@ void	run_test(){
 		int		argc	= 2;
 		char*	argv[]	= { "l7vsd_test", "-h" };
 	
-		exit_requested = true;
+		vsd_test.set_exit_requested( 1 );
 		int ret = vsd_test.run( argc, argv );
-		exit_requested = false;
+		vsd_test.set_exit_requested( 0 );
 	
 		// unit_test[203] l7vsd::run normal case 2(help mode) return value check
 		BOOST_CHECK_EQUAL( ret, 0 );
@@ -1469,9 +1484,9 @@ void	run_test(){
 		int		argc	= 2;
 		char*	argv[]	= { "l7vsd_test", "-d" };
 	
-		exit_requested = true;
+		vsd_test.set_exit_requested( 1 );
 		int ret = vsd_test.run( argc, argv );
-		exit_requested = false;
+		vsd_test.set_exit_requested( 0 );
 	
 		// unit_test[214] l7vsd::run normal case 3(debug mode) return value check
 		BOOST_CHECK_EQUAL( ret, 0 );
@@ -1516,9 +1531,9 @@ void	run_test(){
 		int		argc	= 3;
 		char*	argv[]	= { "l7vsd_test", "-d", "-h" };
 	
-		exit_requested = true;
+		vsd_test.set_exit_requested( 1 );
 		int ret = vsd_test.run( argc, argv );
-		exit_requested = false;
+		vsd_test.set_exit_requested( 0 );
 	
 		// unit_test[225] l7vsd::run normal case 4(help and debug mode) return value check
 		BOOST_CHECK_EQUAL( ret, 0 );
@@ -1561,232 +1576,93 @@ void	run_test(){
 	BOOST_MESSAGE( "----- run_test end -----" );
 }
 
-void	l7vsd_main_test(){
-	BOOST_MESSAGE( "----- l7vsd_main_test start -----" );
-
-// normal case
-	{
-		l7vs::protocol_module_control::initialize_called = false;
-		l7vs::protocol_module_control::finalize_called = false;
-		l7vs::schedule_module_control::initialize_called = false;
-		l7vs::schedule_module_control::finalize_called = false;
-		l7vs::replication::initialize_called = false;
-		l7vs::replication::initialize_fail = false;
-		l7vs::replication::finalize_called = false;
-		l7vs::snmpbridge::initialize_called = false;
-		l7vs::snmpbridge::initialize_fail = false;
-		l7vs::snmpbridge::finalize_called = false;
-
-		daemon_ret = 0;
-	
-		int		argc	= 1;
-		char*	argv[]	= { "l7vsd_test" };
-	
-		exit_requested = true;
-		int ret = l7vsd_main( argc, argv );
-		exit_requested = false;
-	
-		// unit_test[236] l7vsd::run normal case return value check
-		BOOST_CHECK_EQUAL( ret, 0 );
-
-		// unit_test[237] l7vsd::run normal case protocol_module_control initialize call check
-		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, true );
-		// unit_test[238] l7vsd::run normal case protocol_module_control finalize call check
-		BOOST_CHECK_EQUAL( l7vs::protocol_module_control::finalize_called, true );
-		// unit_test[239] l7vsd::run normal case schedule_module_control initilize call check
-		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::initialize_called, true );
-		// unit_test[240] l7vsd::run normal case schedule_module_control finalize call check
-		BOOST_CHECK_EQUAL( l7vs::schedule_module_control::finalize_called, true );
-		// unit_test[241] l7vsd::run normal case replication initilalize call check
-		BOOST_CHECK_EQUAL( l7vs::replication::initialize_called, true );
-		// unit_test[242] l7vsd::run normal case replication finalize call check
-		BOOST_CHECK_EQUAL( l7vs::replication::finalize_called, true );
-		// unit_test[243] l7vsd::run normal case snmpbridge initilalize call check
-		BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, true );
-		// unit_test[244] l7vsd::run normal case snmpbridge finalize call check
-		BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, true );
-
-		l7vs::protocol_module_control::initialize_called = false;
-		l7vs::protocol_module_control::finalize_called = false;
-		l7vs::schedule_module_control::initialize_called = false;
-		l7vs::schedule_module_control::finalize_called = false;
-		l7vs::replication::initialize_called = false;
-		l7vs::replication::initialize_fail = false;
-		l7vs::replication::finalize_called = false;
-		l7vs::snmpbridge::initialize_called = false;
-		l7vs::snmpbridge::initialize_fail = false;
-		l7vs::snmpbridge::finalize_called = false;
-	}
-
-	BOOST_MESSAGE( "----- l7vsd_main_test end -----" );
-}
-
 void	sig_exit_handler_test(){
 	BOOST_MESSAGE( "----- sig_exit_handler test start -----" );
 
-	//通常値で試験
-	received_sig = 0;
-	exit_requested = 0;
-	//sig_exit_handler実行
-	sig_exit_handler(15);
-	// unit_test[245] sig_exit_handler 通常値 received_sig確認
-	BOOST_CHECK_EQUAL(received_sig, 15);
-	// unit_test[246] sig_exit_handler 通常値 exit_requested確認
-	BOOST_CHECK_EQUAL(exit_requested, 1);
+	int ret;
+	sigset_t	newmask;
+	sigset_t	oldmask;
+	sigfillset( &newmask );
+	ret = pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
 
-	//境界値で試験
-	received_sig = 0;
-	exit_requested = 0;
-	//sig_exit_handler実行
-	sig_exit_handler(INT_MAX);
-	// unit_test[247] sig_exit_handler 境界値 received_sig確認
-	BOOST_CHECK_EQUAL(received_sig, INT_MAX);
-	// unit_test[248] sig_exit_handler 境界値 exit_requested確認
-	BOOST_CHECK_EQUAL(exit_requested, 1);
+	pthread_t	th;
+	l7vsd_test			vsd_test;
 
-	//限界値で試験
-	received_sig = 0;
-	exit_requested = 0;
-	//sig_exit_handler実行
-	sig_exit_handler(INT_MAX + 1);
-	// unit_test[249] sig_exit_handler 限界値 received_sig確認
-	BOOST_CHECK_EQUAL(received_sig, INT_MAX + 1);
-	// unit_test[250] sig_exit_handler 限界値 exit_requested確認
-	BOOST_CHECK_EQUAL(exit_requested, 1);
+	// sig_exit_handler SIGHUP
+	vsd_test.set_exit_requested( 0 );
+	vsd_test.set_received_sig( 0 );
+	pthread_create( &th, NULL, handler_wrapper, &vsd_test );
+	usleep( 10 );
+	pthread_kill( th, SIGHUP );
+	pthread_join( th, NULL );
+	// unit_test[236] sig_exit_handler SIGHUP exit_requested check
+	BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
+	// unit_test[237] sig_exit_handler SIGHUP received_sig check
+	BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 1 );
+
+	// sig_exit_handler SIGINT
+	vsd_test.set_exit_requested( 0 );
+	vsd_test.set_received_sig( 0 );
+	pthread_create( &th, NULL, handler_wrapper, &vsd_test );
+	usleep( 10 );
+	pthread_kill( th, SIGINT );
+	pthread_join( th, NULL );
+	// unit_test[238] sig_exit_handler SIGINT exit_requested check
+	BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
+	// unit_test[239] sig_exit_handler SIGINT received_sig check
+	BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 2 );
+
+	// sig_exit_handler SIGQUIT
+	vsd_test.set_exit_requested( 0 );
+	vsd_test.set_received_sig( 0 );
+	pthread_create( &th, NULL, handler_wrapper, &vsd_test );
+	usleep( 10 );
+	pthread_kill( th, SIGQUIT );
+	pthread_join( th, NULL );
+	// unit_test[240] sig_exit_handler SIGQUIT exit_requested check
+	BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
+	// unit_test[241] sig_exit_handler SIGQUIT received_sig check
+	BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 3 );
+
+	// sig_exit_handler SIGTERM
+	vsd_test.set_exit_requested( 0 );
+	vsd_test.set_received_sig( 0 );
+	pthread_create( &th, NULL, handler_wrapper, &vsd_test );
+	usleep( 10 );
+	pthread_kill( th, SIGTERM );
+	pthread_join( th, NULL );
+	// unit_test[242] sig_exit_handler SIGQUIT exit_requested check
+	BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
+	// unit_test[243] sig_exit_handler SIGQUIT received_sig check
+	BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 15 );
+
+	// sig_exit_handler SIGUSR1
+	vsd_test.set_exit_requested( 0 );
+	vsd_test.set_received_sig( 0 );
+	pthread_create( &th, NULL, handler_wrapper, &vsd_test );
+	usleep( 10 );
+	pthread_kill( th, SIGUSR1 );
+	usleep( 10 );
+	// unit_test[244] sig_exit_handler SIGUSR1 exit_requested check
+	BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 0 );
+	// unit_test[245] sig_exit_handler SIGUSR1 received_sig check
+	BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 0 );
+
+	pthread_kill( th, SIGINT );
+	pthread_join( th, NULL );
+	vsd_test.set_exit_requested( 0 );
+	vsd_test.set_received_sig( 0 );
+
+	ret = pthread_sigmask( SIG_SETMASK, &oldmask, NULL );
 
 	BOOST_MESSAGE( "----- sig_exit_handler test end -----" );
 }
 
-void	set_sighandler_test(){
-	BOOST_MESSAGE( "----- set_sighandler test start -----" );
-
-	int ret = 0;
-	struct sigaction oldact, act;
-
-	//SIGUSR1の設定を保存する
-	ret = sigaction(SIGUSR1, NULL, &oldact);
-
-	//正常系
-	//set_sighandler実行
-	ret = set_sighandler(SIGUSR1, test_handler);
-	// unit_test[251] set_sighandler 正常系 返り値確認
-	BOOST_CHECK_EQUAL(ret, 0);
-
-	//SIGUSR1の設定を再度取得する
-	ret = sigaction(SIGUSR1, NULL, &act);
-	// unit_test[252] set_sighander 正常系 handler確認
-	BOOST_CHECK_EQUAL(act.sa_handler, test_handler);
-	//　unit_test[253] set_sighander 正常系 flags確認
-	BOOST_CHECK_EQUAL(act.sa_flags | ~SA_RESETHAND, ~SA_RESETHAND);
-
-
-	//正常系２(handler NULL)
-	//set_sighandler実行
-	ret = set_sighandler(SIGUSR1, NULL);
-	// unit_test[254] set_sighandler 正常系２(handler NULL) 返り値確認
-	BOOST_CHECK_EQUAL(ret, 0);
-	//SIGUSR1の設定を再度取得する
-	ret = sigaction(SIGUSR1, NULL, &act);
-	// unit_test[255] set_sighandler 正常系２(handler NULL) handler確認
-	BOOST_CHECK_EQUAL(act.sa_handler, (void (*)(int))NULL);
-	//　unit_test[256] set_sighander 正常系２(handler NULL) flags確認
-	BOOST_CHECK_EQUAL(act.sa_flags | ~SA_RESETHAND, ~SA_RESETHAND);
-
-
-	//異常系(signal 0)
-	//set_sighandler実行
-	ret = set_sighandler(0, test_handler);
-	// unit_test[257] set_sighandler 異常系(signal 0) 返り値確認
-	BOOST_CHECK_EQUAL(ret, -1);
-
-	
-	//異常系(signal 境界値)
-	//set_sighandler実行
-	ret = set_sighandler(INT_MAX, test_handler);
-	// unit_test[258] set_sighandler 異常系(signal 境界値) 返り値確認
-	BOOST_CHECK_EQUAL(ret, -1);
-
-
-	//異常系(signal 限界値)
-	//set_sighandler実行
-	ret = set_sighandler(INT_MAX + 1, test_handler);
-	// unit_test[259] set_sighandler 異常系(signal 限界値) 返り値確認
-	BOOST_CHECK_EQUAL(ret, -1);
-
-
-	//SIGUSR1の設定を元に戻す
-	ret = sigaction(SIGUSR1, &oldact, NULL);
-
-	BOOST_MESSAGE( "----- set_sighandler test end -----" );
+void*	handler_wrapper( void* args ){
+	l7vsd_test* vsd_test = (l7vsd_test*)args;
+	vsd_test->sig_exit_handler_wp();
+	return NULL;
 }
-
-void	set_sighandlers_test(){
-	BOOST_MESSAGE( "----- set_sighandlers test start -----" );
-
-	int ret = 0;
-	struct sigaction oldact[8], act[8];
-
-	//signalの設定を保存する
-	ret = sigaction(SIGHUP, NULL, &oldact[0]);
-	ret = sigaction(SIGINT, NULL, &oldact[1]);
-	ret = sigaction(SIGQUIT, NULL, &oldact[2]);
-	ret = sigaction(SIGTERM, NULL, &oldact[3]);
-	ret = sigaction(SIGUSR1, NULL, &oldact[4]);
-	ret = sigaction(SIGUSR2, NULL, &oldact[5]);
-	ret = sigaction(SIGALRM, NULL, &oldact[6]);
-	ret = sigaction(SIGCHLD, NULL, &oldact[7]);
-
-	//正常系
-	//set_sighandlers実行
-	ret = set_sighandlers();
-	// unit_test[260] set_sighandlers 正常系 返り値確認
-	BOOST_CHECK_EQUAL(ret, 0);
-	//signalの設定を再度取得する
-	ret = sigaction(SIGHUP, NULL, &act[0]);
-	ret = sigaction(SIGINT, NULL, &act[1]);
-	ret = sigaction(SIGQUIT, NULL, &act[2]);
-	ret = sigaction(SIGTERM, NULL, &act[3]);
-	ret = sigaction(SIGUSR1, NULL, &act[4]);
-	ret = sigaction(SIGUSR2, NULL, &act[5]);
-	ret = sigaction(SIGALRM, NULL, &act[6]);
-	ret = sigaction(SIGCHLD, NULL, &act[7]);
-	// unit_test[261] set_sighandlers 正常系 SIGHUP handler確認
-	BOOST_CHECK_EQUAL(act[0].sa_handler, sig_exit_handler);
-	// unit_test[262] set_sighandlers 正常系 SIGINT handler確認
-	BOOST_CHECK_EQUAL(act[1].sa_handler, sig_exit_handler);
-	// unit_test[263] set_sighandlers 正常系 SIGQUIT handler確認
-	BOOST_CHECK_EQUAL(act[2].sa_handler, sig_exit_handler);
-	// unit_test[264] set_sighandlers 正常系 SIGTERM handler確認
-	BOOST_CHECK_EQUAL(act[3].sa_handler, sig_exit_handler);
-	// unit_test[265] set_sighandlers 正常系 SIGUSR1 handler確認
-	BOOST_CHECK_EQUAL(act[4].sa_handler, SIG_IGN);
-	// unit_test[266] set_sighandlers 正常系 SIGUSR2 handler確認
-	BOOST_CHECK_EQUAL(act[5].sa_handler, SIG_IGN);
-	// unit_test[267] set_sighandlers 正常系 SIGALRM handler確認
-	BOOST_CHECK_EQUAL(act[6].sa_handler, SIG_IGN);
-	// unit_test[268] set_sighandlers 正常系 SIGCHLD handler確認
-	BOOST_CHECK_EQUAL(act[7].sa_handler, SIG_IGN);
-
-	//signalの設定を元に戻す
-	ret = sigaction(SIGHUP, &oldact[0], NULL);
-	ret = sigaction(SIGINT, &oldact[1], NULL);
-	ret = sigaction(SIGQUIT, &oldact[2], NULL);
-	ret = sigaction(SIGTERM, &oldact[3], NULL);
-	ret = sigaction(SIGUSR1, &oldact[4], NULL);
-	ret = sigaction(SIGUSR2, &oldact[5], NULL);
-	ret = sigaction(SIGALRM, &oldact[6], NULL);
-	ret = sigaction(SIGCHLD, &oldact[7], NULL);
-
-	BOOST_MESSAGE( "----- set_sighandlers test end -----" );
-}
-
-void	test_handler(int sig){
-	std::cout << "test_handler called" << std::endl;
-	++call_count_test_handler;
-	arg_sig_test_handler = sig;
-	return;
-}
-
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	//glibc function alias
@@ -1815,12 +1691,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &reload_parameter_test ) );
 
 	ts->add( BOOST_TEST_CASE( &run_test ) );
-	ts->add( BOOST_TEST_CASE( &l7vsd_main_test ) );
 
 	ts->add( BOOST_TEST_CASE( &sig_exit_handler_test ) );
-	ts->add( BOOST_TEST_CASE( &set_sighandler_test ) );
-	ts->add( BOOST_TEST_CASE( &set_sighandlers_test ) );
-	//ts->add( BOOST_TEST_CASE( &usage_test ) );
 
 	framework::master_test_suite().add( ts );
 

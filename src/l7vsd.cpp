@@ -23,6 +23,7 @@
  **********************************************************************/
 
 #include <signal.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <boost/shared_ptr.hpp>
@@ -30,22 +31,14 @@
 #include "l7vsd.h"
 #include "error_code.h"
 
-// global function prototype
-static void	sig_exit_handler(int sig);
-static int	set_sighandler(int sig, void (*handler)(int));
-static int	set_sighandlers();
-int	l7vsd_main( int, char** );
-
-// global variables
-static bool	exit_requested = false;
-static int	received_sig = 0;
-
 namespace l7vs{
 
 //! constructor
 l7vsd::l7vsd()
 	:	help(false),
-		debug(false){
+		debug(false),
+		exit_requested(0),
+		received_sig(0){
 	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::l7vsd", __FILE__, __LINE__ );
 
 	option_dic["-h"]		= boost::bind( &l7vsd::parse_help, this, _1, _2, _3 );
@@ -842,7 +835,11 @@ int	l7vsd::run( int argc, char* argv[] ) {
 				return -1;
 			}
 		}
-	
+
+		// signal handler thread start
+		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
+		sigthread.detach();
+
 		// protoclol module control initialize
 		protocol_module_control::getInstance().initialize( L7VS_MODULE_PATH );
 	
@@ -882,7 +879,12 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	
 		// main loop
 		for(;;){
-			if( exit_requested )	break;
+			if( exit_requested ){
+				std::stringstream buf;
+				buf << boost::format( "l7vsd signal(%d) received. exitting..." ) % received_sig;
+				logger.putLogInfo( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+				break;
+			}
 			dispatcher.poll();
 		}
 	
@@ -985,85 +987,55 @@ std::string	l7vsd::usage(){
 	return stream.str();
 }
 
-};// namespace l7vsd
-
 //! signal handler function
-//! @param[in]	signal
-static void sig_exit_handler( int sig ){
+void	l7vsd::sig_exit_handler(){
+	Logger	logger( LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::sig_exit_handler", __FILE__, __LINE__ );
+
+	sigset_t	sigmask;
+	sigemptyset( &sigmask );
+	sigaddset( &sigmask, SIGHUP );
+	sigaddset( &sigmask, SIGINT );
+	sigaddset( &sigmask, SIGQUIT );
+	sigaddset( &sigmask, SIGTERM );
+	
+	int	sig;
+	sigwait( &sigmask, &sig );
+
 	received_sig = sig;
-	exit_requested = true;
+	exit_requested = 1;
 }
 
-//! set singal handler function
-//! @param[in]	signal
-//! @param[in]	handler function pointer
-//! @return		0/success, -1/fail
-static int set_sighandler( int sig, void ( *handler )( int ) ){
-	struct	sigaction act;
-	int		ret;
-
-	ret = sigaction( sig, NULL, &act );
-	if( 0 > ret )	return ret;
-
-	act.sa_flags &= ~SA_RESETHAND;
-	act.sa_handler = handler;
-
-	ret = sigaction( sig, &act, NULL );
-	if( 0 > ret )	return ret;
-
-	return 0;
-}
-
-//! set all singal handler function
-//! @return		0/success, -1/fail
-static int set_sighandlers() {
-	int ret;
-
-#define SET_SIGHANDLER(sig, handler)				\
-	do {											\
-		ret = set_sighandler((sig), (handler));		\
-		if (ret < 0) {								\
-			return ret;								\
-		}											\
-	} while (0)
-
-	SET_SIGHANDLER( SIGHUP,		sig_exit_handler );
-	SET_SIGHANDLER( SIGINT,		sig_exit_handler );
-	SET_SIGHANDLER( SIGQUIT,	sig_exit_handler );
-	SET_SIGHANDLER( SIGTERM,	sig_exit_handler );
-	SET_SIGHANDLER( SIGUSR1,	SIG_IGN );
-	SET_SIGHANDLER( SIGUSR2,	SIG_IGN );
-	SET_SIGHANDLER( SIGALRM,	SIG_IGN );
-	SET_SIGHANDLER( SIGCHLD,	SIG_IGN );
-
-#undef SET_SIGHANDLER
-
-    return 0;
-}
-
-//! l7vsd main function
-int l7vsd_main( int argc, char* argv[] ){
-	int ret = 0;
-	try{
-		l7vs::Logger	logger_instance;
-		l7vs::Parameter	parameter_instance;
-		logger_instance.loadConf();
-
-		if ( 0 > set_sighandlers() )	return -1;
-
-		l7vs::l7vsd vsd;
-		ret =  vsd.run( argc, argv );
-
-	}
-	catch( ... ){
-		return -1;
-	}
-	return ret;
-}
+};// namespace l7vsd
 
 #ifndef	TEST_CASE
 //! main function
 int main( int argc, char* argv[] ){
-	return l7vsd_main( argc, argv );
+	int ret = 0;
+
+	// signal block
+	sigset_t	newmask;
+	sigset_t	oldmask;
+	sigfillset( &newmask );
+	ret = pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
+	if( 0 != ret )
+		return ret;
+
+	try{
+		l7vs::Logger	logger_instance;
+		l7vs::Parameter	parameter_instance;
+		logger_instance.loadConf();
+	
+		l7vs::l7vsd vsd;
+		ret =  vsd.run( argc, argv );
+	}
+	catch( ... ){
+		return -1;
+	}
+
+	// restore sigmask
+	pthread_sigmask( SIG_SETMASK, &oldmask, NULL );
+
+	return ret;
+
 }
 #endif	//TEST_CASE

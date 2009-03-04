@@ -101,6 +101,11 @@ protected:
 
 	boost::posix_time::ptime	starttime;			//!< l7vsd startup time
 
+	volatile	sig_atomic_t	exit_requested;		//!< signal exit flag
+	volatile	sig_atomic_t	received_sig;		//!< received signal
+
+	void						sig_exit_handler();	//!< signal handler
+
 	//! option parse function object type.
 	typedef	boost::function< bool ( int&, int, char*[] ) >
 			parse_opt_func_type;
