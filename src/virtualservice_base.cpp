@@ -296,7 +296,7 @@ cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( std::string	nic_name ){
 	}
 	// read interrupts.
 	while( getline( ifs,  buff ) ){
-		if( ! buff.find( nic_name ) ) continue;
+		if( string::npos == buff.find( nic_name ) ) continue;
 		//割り込みIDを取得
 		algorithm::split( split_vec, buff, algorithm::is_any_of( ":" ));
 		if( !split_vec.size() ) return mask;	//interrupt分割不可
@@ -322,7 +322,6 @@ cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( std::string	nic_name ){
 		break;
 	}
 	CPU_ZERO( &mask );
-	++target_cpuid;
 	CPU_SET( static_cast<int>( target_cpuid ), &mask );
 	return mask;
 }
