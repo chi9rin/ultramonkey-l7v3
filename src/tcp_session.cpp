@@ -606,21 +606,28 @@ namespace l7vs{
 				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 				if(exit_flag) break;
 			}
-			thread_state_update(UP_THREAD_LOCK,true);
-			while(true){
-				{
-					boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
-					if(!session_pause_flag) break;
+			bool is_pause;
+			{
+				boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+				is_pause = session_pause_flag;
+			}
+			if(is_pause){
+				thread_state_update(UP_THREAD_LOCK,true);
+				while(true){
+					{
+						boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+						if(!session_pause_flag) break;
+					}
+					{
+						boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+						if(exit_flag) break;
+					}
 				}
+				thread_state_update(UP_THREAD_LOCK,false);
 				{
 					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 					if(exit_flag) break;
 				}
-			}
-			thread_state_update(UP_THREAD_LOCK,false);
-			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
-				if(exit_flag) break;
 			}
 			bool is_msg_none = up_thread_message_que.empty();
 			if(!is_msg_none){
@@ -775,21 +782,28 @@ namespace l7vs{
 				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 				if(exit_flag) break;
 			}
-			thread_state_update(DOWN_THREAD_LOCK,true);
-			while(true){
-				{
-					boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
-					if(!session_pause_flag) break;
+			bool is_pause;
+			{
+				boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+				is_pause = session_pause_flag;
+			}
+			if(is_pause){
+				thread_state_update(DOWN_THREAD_LOCK,true);
+				while(true){
+					{
+						boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+						if(!session_pause_flag) break;
+					}
+					{
+						boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+						if(exit_flag) break;
+					}
 				}
+				thread_state_update(DOWN_THREAD_LOCK,false);
 				{
 					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 					if(exit_flag) break;
 				}
-			}
-			thread_state_update(DOWN_THREAD_LOCK,false);
-			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
-				if(exit_flag) break;
 			}
 			while(!down_thread_connect_socket_list.empty()){
 				std::pair<endpoint,tcp_socket_ptr > push_rs_socket = down_thread_connect_socket_list.get_socket();
