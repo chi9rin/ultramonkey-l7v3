@@ -1014,33 +1014,16 @@ void l7vs::LoggerImpl::loadConf(){
 		log4cxx::LayoutPtr layout =
 			new log4cxx::PatternLayout(LOGGER_LAYOUT);
 
-		for( category_level_map_type::iterator cat_itr = category_level_map.begin();
-			 cat_itr != category_level_map.end();
-			 ++cat_itr ){
+		log4cxx::rolling::RollingFileAppenderPtr	normalAppender;
+		log4cxx::rolling::RollingFileAppenderPtr	accessAppender;
+		
+		for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
+			if( "" == property->log_filename_key )	break;	// no conn_log setting.
 
-			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr->first );
-			log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( name_itr->second );
-			if (0 == cat_logger) {
-				throw std::logic_error("getLogger Failed.");
-			}
-
-#if	defined(LOGGER_PROCESS_VSD)
-			if( cat_itr->first == LOG_CAT_L7VSD_NETWORK_ACCESS )
-				property = &access_log_property;
-			else
+			if( 0 == appender_count )
 				property = &normal_log_property;
-#elif defined(LOGGER_PROCESS_ADM)
-			property = &normal_log_property;
-#elif defined(LOGGER_PROCESS_SNM)
-			property = &normal_log_property;
-#elif defined(LOGGER_PROCESS_SSL)
-			if( cat_itr->first == LOG_CAT_SSLPROXY_CONNECTION )
-				property = &access_log_property;
 			else
-				property = &normal_log_property;
-#else
-			property = &normal_log_property;
-#endif
+				property = &access_log_property;
 
 			switch (property->rotation_value) {
 			case LOG_ROT_SIZE:
@@ -1094,8 +1077,12 @@ void l7vs::LoggerImpl::loadConf(){
 					sizeAppender->activateOptions(pool);
 		
 					// add size_base_appender to CategoryLogger
-					cat_logger->addAppender(sizeAppender);
-	
+					//cat_logger->addAppender(sizeAppender);
+					if( 0 == appender_count )
+						normalAppender = sizeAppender;
+					else
+						accessAppender = sizeAppender;
+
 					break;
 				}
 			case LOG_ROT_DATE:
@@ -1145,8 +1132,12 @@ void l7vs::LoggerImpl::loadConf(){
 					dateAppender->activateOptions(pool);
 		
 					// add date_based_appender to CategoryLogger
-					cat_logger->addAppender(dateAppender);
-	
+					//cat_logger->addAppender(dateAppender);
+					if( 0 == appender_count )
+						normalAppender = dateAppender;
+					else
+						accessAppender = dateAppender;
+
 					break;
 				}
 			default:	//LOG_ROT_DATESIZE:
@@ -1199,9 +1190,55 @@ void l7vs::LoggerImpl::loadConf(){
 					dateSizeAppender->activateOptions(pool);
 		
 					// add time_and_size_based_appender to CategoryLogger
-					cat_logger->addAppender(dateSizeAppender);
+					//cat_logger->addAppender(dateSizeAppender);
+					if( 0 == appender_count )
+						normalAppender = dateSizeAppender;
+					else
+						accessAppender = dateSizeAppender;
+
 				}
 			}	//switch
+		}	//for 
+
+		for( category_level_map_type::iterator cat_itr = category_level_map.begin();
+			 cat_itr != category_level_map.end();
+			 ++cat_itr ){
+
+			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr->first );
+			log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( name_itr->second );
+			if (0 == cat_logger) {
+				throw std::logic_error("getLogger Failed.");
+			}
+
+#if	defined(LOGGER_PROCESS_VSD)
+			if( cat_itr->first == LOG_CAT_L7VSD_NETWORK_ACCESS ){
+				//property = &access_log_property;
+				cat_logger->addAppender(accessAppender);
+			}
+			else{
+				//property = &normal_log_property;
+				cat_logger->addAppender(normalAppender);
+			}
+#elif defined(LOGGER_PROCESS_ADM)
+			//property = &normal_log_property;
+			cat_logger->addAppender(normalAppender);
+#elif defined(LOGGER_PROCESS_SNM)
+			//property = &normal_log_property;
+			cat_logger->addAppender(normalAppender);
+#elif defined(LOGGER_PROCESS_SSL)
+			if( cat_itr->first == LOG_CAT_SSLPROXY_CONNECTION ){
+				//property = &access_log_property;
+				cat_logger->addAppender(accessAppender);
+			}
+			else{
+				//property = &normal_log_property;
+				cat_logger->addAppender(normalAppender);
+			}
+#else
+			//property = &normal_log_property;
+			cat_logger->addAppender(normalAppender);
+#endif
+
 
 			//default log level settting
 			cat_itr->second = LOG_LV_INFO;
