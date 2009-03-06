@@ -10,8 +10,7 @@
 # Released: January 2008
 # Licence: GNU General Public Licence
 
-#L7VSD_OPTIONS=""		# run as non-blocking mode
-L7VSD_OPTIONS="-b"		# run as blocking mode
+L7VSD_OPTIONS=""
 
 PROG="l7vsd"
 DAEMON="/usr/sbin/l7vsd"

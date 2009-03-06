@@ -21,6 +21,6 @@
 #
 ######################################################################
 
-SUBDIRS = conf logger parameter src module modtester
+SUBDIRS = conf init.d logger parameter src module modtester
 AUTOMAKE_OPTIONS = foreign
 

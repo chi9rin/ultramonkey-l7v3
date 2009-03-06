@@ -99,6 +99,7 @@ AC_CONFIG_FILES([parameter/Makefile]
                 [snmpagent/Makefile]
                 [Makefile]
                 [conf/Makefile]
-                [modtester/Makefile])
+                [modtester/Makefile]
+				[init.d/Makefile])
 
 AC_OUTPUT(l7vsd.spec)
