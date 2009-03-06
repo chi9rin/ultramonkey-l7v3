@@ -208,7 +208,16 @@ namespace l7vs{
 			std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_up_thread_function_map;
 			//! virtual service message convert to down thread function object map
 			std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_down_thread_function_map;
-
+			
+			//! client receive wait of not data or try again
+			unsigned long client_receive_wait;
+			//! sorryserver receive wait of not data or try again
+			unsigned long sorryserver_receive_wait;
+			//! realserver receive wait of not data or try again
+			unsigned long realserver_receive_wait;
+			//! realserver receive wait of not conection
+			unsigned long realserver_receive_empty_wait;
+			
 			//! up and down thread state update
 			//! @param[in]		thread_flag is regist or unregist bitset
 			//! @param[in]		regist is regist or unregist flag

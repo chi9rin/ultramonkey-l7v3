@@ -12,6 +12,7 @@
 #include "tcp_thread_message.h"
 #include "virtualservice.h"
 #include "logger.h"
+#include "parameter.h"
 
 #define UP_THREAD_ALIVE		std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0001)
 #define DOWN_THREAD_ALIVE	std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0002)
@@ -19,6 +20,11 @@
 #define DOWN_THREAD_ACTIVE	std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0008)
 #define UP_THREAD_LOCK 		std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0010)
 #define DOWN_THREAD_LOCK 	std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020)
+
+#define CLIENT_RECEIVE_WAIT_DEFAULT 5
+#define SORRYSERVER_RECEIVE_WAIT_DEFAULT 5
+#define REALSERVER_RECEIVE_WAIT_DEFAULT 5
+#define REALSERVER_RECEIVE_EMPTY_WAIT_DEFAULT 5
 
 namespace l7vs{
 	//! construcor
@@ -31,7 +37,11 @@ namespace l7vs{
 		thread_state(0),
 		protocol_module(NULL),
 		session_pause_flag(false),
-		client_socket(session_io){
+		client_socket(session_io),
+		client_receive_wait(0),
+		sorryserver_receive_wait(0),
+		realserver_receive_wait(0),
+		realserver_receive_empty_wait(0){
 		
 		// sorryserver socket
 		tcp_socket_ptr sorry_socket(new tcp_socket(session_io));
@@ -309,6 +319,203 @@ namespace l7vs{
 		up_thread_message_que.clear();
 		down_thread_message_que.clear();
 		protocol_module = parent_service.get_protocol_module();
+		
+		// load from cf
+		l7vs::Parameter param;
+		l7vs::error_code err;
+		int tmp_int;
+		
+		// client receive wait load from cf
+		tmp_int = param.get_int( PARAM_COMP_SESSION, "client_receive_wait", err );
+		if( !err ){
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] client_receive_wait load cf [";
+				buf << tmp_int;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			if(tmp_int < 0){
+				client_receive_wait = CLIENT_RECEIVE_WAIT_DEFAULT;
+
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] client_receive_wait set default (load cf error)";
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}else{
+				client_receive_wait = tmp_int;
+			}
+		}else{
+			client_receive_wait = CLIENT_RECEIVE_WAIT_DEFAULT;
+			err.setter( false, "" );
+
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] client_receive_wait set default (load cf error)";
+			Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] client_receive_wait [";
+			buf << client_receive_wait;
+			buf << "]";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+
+		
+		// realserver receive wait load from cf
+		tmp_int = param.get_int( PARAM_COMP_SESSION, "realserver_receive_wait", err );
+		if( !err ){
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] realserver_receive_wait load cf [";
+				buf << tmp_int;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			if(tmp_int < 0){
+				realserver_receive_wait = REALSERVER_RECEIVE_WAIT_DEFAULT;
+
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] realserver_receive_wait set default (load cf error)";
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}else{
+				realserver_receive_wait = tmp_int;
+			}
+		}else{
+			realserver_receive_wait = REALSERVER_RECEIVE_WAIT_DEFAULT;
+			err.setter( false, "" );
+
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] realserver_receive_wait set default (load cf error)";
+			Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] realserver_receive_wait [";
+			buf << realserver_receive_wait;
+			buf << "]";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		
+		// sorryserver receive wait load from cf
+		tmp_int = param.get_int( PARAM_COMP_SESSION, "sorryserver_receive_wait", err );
+		if( !err ){
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] sorryserver_receive_wait load cf [";
+				buf << tmp_int;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			if(tmp_int < 0){
+				sorryserver_receive_wait = SORRYSERVER_RECEIVE_WAIT_DEFAULT;
+
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] sorryserver_receive_wait set default (load cf error)";
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}else{
+				sorryserver_receive_wait = tmp_int;
+			}
+		}
+		else{
+			sorryserver_receive_wait = SORRYSERVER_RECEIVE_WAIT_DEFAULT;
+			err.setter( false, "" );
+
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] sorryserver_receive_wait set default (load cf error)";
+			Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] sorryserver_receive_wait [";
+			buf << sorryserver_receive_wait;
+			buf << "]";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		
+		// realserver receive empty wait load from cf
+		tmp_int = param.get_int( PARAM_COMP_SESSION, "realserver_receive_empty_wait", err );
+		if( !err ){
+			//----Debug log----------------------------------------------------------------------
+			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] realserver_receive_empty_wait load cf [";
+				buf << tmp_int;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			if(tmp_int < 0){
+				realserver_receive_empty_wait = REALSERVER_RECEIVE_EMPTY_WAIT_DEFAULT;
+
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] realserver_receive_empty_wait set default (load cf error)";
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			}else{
+				realserver_receive_empty_wait = tmp_int;
+			}
+		}else{
+			realserver_receive_empty_wait = REALSERVER_RECEIVE_EMPTY_WAIT_DEFAULT;
+			err.setter( false, "" );
+			
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] realserver_receive_empty_wait set default (load cf error)";
+			Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] realserver_receive_empty_wait [";
+			buf << realserver_receive_empty_wait;
+			buf << "]";
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+		}
+		//----Debug log----------------------------------------------------------------------
+
+		
 		if(protocol_module == NULL){
 			//Error protocol_module NULL
 			std::stringstream buf;
@@ -319,6 +526,7 @@ namespace l7vs{
 			msg.flag = true;
 			msg.message = "Not fond protocol module";
 		}
+
 		return msg;
 	}
 	//! get reference client side socket
@@ -461,10 +669,13 @@ namespace l7vs{
 		//----Debug log----------------------------------------------------------------------
 		while(true){ 
 			//wait down thread get id
-			boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
-			if(thread_state.test(1)){// DOWN_THREAD_ALIVE
-				break;
+			{
+				boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+				if(thread_state.test(1)){// DOWN_THREAD_ALIVE
+					break;
+				}
 			}
+			usleep(1);
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -661,10 +872,13 @@ namespace l7vs{
 		//----Debug log----------------------------------------------------------------------
 		while(true){ 
 			// wait down thread alive
-			boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
-			if(!thread_state.test(1)){// DOWN_THREAD_ALIVE
-				break;
+			{
+				boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+				if(!thread_state.test(1)){// DOWN_THREAD_ALIVE
+					break;
+				}
 			}
+			usleep(1);
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -742,6 +956,7 @@ namespace l7vs{
 				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 				if(exit_flag) break;
 			}
+			usleep(1);
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -990,10 +1205,12 @@ namespace l7vs{
 				func_tag = func_type->second;
 			}else{
 				func_tag = UP_FUNC_CLIENT_RECEIVE;
+				usleep(client_receive_wait);
 			}
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = UP_FUNC_CLIENT_RECEIVE;
+				usleep(client_receive_wait);
 			}else if(ec == boost::asio::error::eof){
 				func_tag = UP_FUNC_CLIENT_DISCONNECT;
 			}else if(ec == boost::asio::error::connection_reset){
@@ -2160,7 +2377,10 @@ namespace l7vs{
 			return;
 		}
 		bool is_emp = down_thread_receive_realserver_socket_list.empty();
-		if(is_emp)return;
+		if(is_emp){
+			usleep(realserver_receive_empty_wait);
+			return;
+		}
 
 		if( 0 < parent_service.get_wait_downstream() ){
 			//----Debug log----------------------------------------------------------------------
@@ -2215,10 +2435,12 @@ namespace l7vs{
 				func_tag = func_type->second;
 			}else{
 				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
+				usleep(realserver_receive_wait);
 			}
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
+				usleep(realserver_receive_wait);
 			}else if(ec == boost::asio::error::eof){
 				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
 			}else if(ec == boost::asio::error::connection_reset){
@@ -2746,10 +2968,12 @@ namespace l7vs{
 				func_tag = func_type->second;
 			}else{
 				func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
+				usleep(sorryserver_receive_wait);
 			}
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
+				usleep(sorryserver_receive_wait);
 			}else if(ec == boost::asio::error::eof){
 				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
 			}else if(ec == boost::asio::error::connection_reset){

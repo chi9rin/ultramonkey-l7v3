@@ -5,7 +5,7 @@
 #
 TARGET		= tcp_session_test_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
+CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG -D PARAMETER_FILE='"./l7vs.cf"'
 INCLUDES	=	-I../../../parameter \
 				-I./ \
 				-I../../../src \
@@ -16,6 +16,14 @@ LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt
 
 LDFLAGS		= -lrt -ldl
+
+PARAMETER	= libtest_parameter.a
+AR			= ar
+ARFLAGS		= cru
+
+PARAMETER_SRCS	=	\
+			../../../parameter/parameter.cpp \
+			../../../parameter/parameter_impl.cpp
 
 SRCS		=	\
 			../logger_stb/logger.cpp \
@@ -31,11 +39,15 @@ SRCS		=	\
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 OBJS		= $(SRCS:.cpp=.o)
+PARAMETER_OBJS	= $(PARAMETER_SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS)
-	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
+$(TARGET):	$(OBJS) $(PARAMETER)
+	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS) $(PARAMETER)
+
+$(PARAMETER):	$(PARAMETER_OBJS)
+	$(AR) $(ARFLAGS) $@ $(PARAMETER_OBJS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS)

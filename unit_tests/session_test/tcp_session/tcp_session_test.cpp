@@ -1,4 +1,3 @@
-
 #define	TEST_CASE
 
 #include <boost/asio.hpp>
@@ -1740,6 +1739,24 @@ class initialize_test_class : public l7vs::tcp_session{
 		l7vs::tcp_thread_message_que& get_down_thread_message_que(){
 			return down_thread_message_que;
 		};
+
+		//! client receive wait of not data or try again
+		unsigned long get_client_receive_wait(){
+			return client_receive_wait;
+		};
+		//! sorryserver receive wait of not data or try again
+		unsigned long get_sorryserver_receive_wait(){
+			return sorryserver_receive_wait;
+		};
+		//! realserver receive wait of not data or try again
+		unsigned long get_realserver_receive_wait(){
+			return realserver_receive_wait;
+		};
+		//! realserver receive wait of not conection
+		unsigned long get_realserver_receive_empty_wait(){
+			return realserver_receive_empty_wait;
+		};
+
 };
 void initialize_test(){
 	BOOST_MESSAGE( "----- initialize test start -----" );
@@ -1801,9 +1818,25 @@ void initialize_test(){
 	// unit_test [9] initialize session_result_message flag check
 	std::cout << "[9] initialize session_result_message flag check" << std::endl;
 	BOOST_CHECK(!res_msg.flag);
-	
-	// unit_test [9] initialize protocol_module NULL error check
-	std::cout << "[10] initialize protocol_module NULL error check" << std::endl;
+
+	// unit_test [10] initialize client_receive_wait load cf check
+	std::cout << "[10] initialize client_receive_wait load cf check" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_client_receive_wait() , 1ul);
+
+	// unit_test [11] initialize realserver_receive_wait load cf check
+	std::cout << "[11] initialize realserver_receive_wait load cf check" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_realserver_receive_wait() , 2ul);
+
+	// unit_test [12] initialize sorryserver_receive_wait load cf check
+	std::cout << "[12] initialize sorryserver_receive_wait load cf check" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_sorryserver_receive_wait() , 3ul);
+
+	// unit_test [13] initialize realserver_receive_empty_wait load cf check
+	std::cout << "[13] initialize realserver_receive_empty_wait load cf check" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_realserver_receive_empty_wait() , 4ul);
+
+	// unit_test [14] initialize protocol_module NULL error check
+	std::cout << "[14] initialize protocol_module NULL error check" << std::endl;
 	vs.get_protocol_module_res = NULL;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;

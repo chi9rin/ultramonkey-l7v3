@@ -6,6 +6,7 @@
 #define REALSERVER_H
 
 namespace l7vs{
+
 	// Dummy module base class 
 	class  module_base{
 		public:
