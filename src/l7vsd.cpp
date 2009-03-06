@@ -26,6 +26,8 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <boost/shared_ptr.hpp>
 
 #include "l7vsd.h"
@@ -834,6 +836,26 @@ int	l7vsd::run( int argc, char* argv[] ) {
 				logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
 				return -1;
 			}
+		}
+
+		//set max file open num
+		Parameter	param;
+		error_code	err;
+		int	maxfileno = param.get_int(PARAM_COMP_L7VSD, "maxfileno", err);
+		if( err ){
+			logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 1, "maxfileno parameter not found.", __FILE__, __LINE__ );
+			maxfileno = 1024;
+		}
+
+		struct rlimit lim;
+		lim.rlim_cur = maxfileno;
+		lim.rlim_max = maxfileno;
+		int ret;
+		ret = setrlimit( RLIMIT_NOFILE, &lim );
+		if( 0 != ret ){
+			std::stringstream buf;
+			buf << "setrlimit failed:" << errno;
+			logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
 		}
 
 		// signal handler thread start

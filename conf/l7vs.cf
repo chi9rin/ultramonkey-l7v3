@@ -168,11 +168,6 @@ sslproxy_server			= "info"
 sslproxy_session		= "info"
 sslproxy_connection		= "info"
 
-[virtualservice]
-nic_realserver_side			= "eth0"
-session_thread_pool_size	= 256
-throughput_calc_interval	= 500
-
 #
 # l7vsadm setting
 #
@@ -182,6 +177,19 @@ cmd_count = 10
 con_interval = 1
 con_count = 10
 
+#
+# l7vsd setting
+#
+[l7vsd]
+maxfileno = 65535
+
+#
+# virtualservice setting
+#
+[virtualservice]
+nic_realserver_side			= "eth0"
+session_thread_pool_size	= 256
+throughput_calc_interval	= 500
 
 #
 # l7vsd replication setting
