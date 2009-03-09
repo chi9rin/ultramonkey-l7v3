@@ -17,6 +17,7 @@
 #include <error.h>
 #include <string>
 #include <map>
+#include <vector>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
@@ -265,25 +266,28 @@ public:
 //! @class	virtualservice_tcp is class of virtual service for TCP transfer.
 class	virtualservice_tcp : public virtualservice_base{
 public:
-	typedef	boost::shared_ptr<session_thread_control>		session_thread_control_ptr;
-	typedef	std::map< boost::thread::id, session_thread_control_ptr >
+	typedef	std::vector<session_thread_control*>			session_queue_type;
+	typedef	std::map< boost::thread::id, session_thread_control* >
 								session_map_type;
-	typedef	std::pair< boost::thread::id, session_thread_control_ptr >
+	typedef	std::pair< boost::thread::id, session_thread_control* >
 								session_map_pair_type;
 protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
 
-	session_map_type			pool_sessions;
+	session_queue_type			pool_sessions;
+	boost::mutex				pool_sessions_mutex;
+	session_map_type			waiting_sessions;
+	boost::mutex				waiting_sessions_mutex;
 	session_map_type			active_sessions;
+	boost::mutex				active_sessions_mutex;
 	session_map_type			sorry_sessions;
-	boost::mutex				sessions_mutex;
+	boost::mutex				sorry_sessions_mutex;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
 
-	void						handle_accept(	const session_thread_control_ptr,
-												const boost::system::error_code& );
+	void						handle_accept( const session_thread_control*, const boost::system::error_code& );
 
 public:
 	virtualservice_tcp(		const l7vsd&,

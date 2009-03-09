@@ -37,12 +37,18 @@ public:
 protected:
 	thread_ptr			upthread;					//! upstream thread
 	state_tag			upthread_state;				//! upstream thread state
-	boost::mutex		upthread_condition_mutex;	//! upthread condition use mutex 
+	boost::mutex		upthread_condition_mutex;	//! upthread condition use mutex
 	boost::condition	upthread_condition;			//! upthread condition
+	boost::mutex		upthread_running_mutex;
+	boost::mutex		upthread_joining_mutex;
+	boost::condition	upthread_joining_condition;
 	thread_ptr			downthread;					//! downstream thread
 	state_tag			downthread_state;			//! downstream thread state
 	boost::mutex		downthread_condition_mutex;	//! downstream condition use mutex
 	boost::condition	downthread_condition;		//! downstream condition
+	boost::mutex		downthread_running_mutex;
+	boost::mutex		downthread_joining_mutex;
+	boost::condition	downthread_joining_condition;
 	session_ptr			session;					//! session class shared pointer
 	void				upstream_run();				//! upstream thread bind function
 	void				downstream_run();			//! downstream thread bind function
@@ -63,10 +69,6 @@ public:
 	}
 	//! destractor
 	~session_thread_control(){
-		join();
-		usleep( 10000 );
-		upthread->join();
-		downthread->join();
 	}
 	//! session shared ptr getter
 	//! @return session shared ptr
@@ -88,8 +90,8 @@ public:
 	//! @return thread_id_type	downstream thread id
 	thread_id_type	get_downthread_id(){ return downthread->get_id(); }
 
-	state_tag	get_upthread_status();
-	state_tag	get_downthread_status();
+	boost::mutex&	get_upthread_mutex();
+	boost::mutex&	get_downthread_mutex();
 };
 
 }//	namespace l7vs
