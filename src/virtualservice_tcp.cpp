@@ -397,8 +397,10 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 
 	//get cpumask
 	boost::asio::ip::address	address	= element.tcp_accept_endpoint.address();
+#ifdef	SCHED_SETAFFINITY
 	vsnic_cpumask	= get_cpu_mask( address );
 	rsnic_cpumask	= get_cpu_mask( param_data.nic_realserver_side );
+#endif
 
 	//bind acceptor
 	boost::system::error_code	acceptor_err;

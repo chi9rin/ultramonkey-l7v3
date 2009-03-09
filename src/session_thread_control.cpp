@@ -22,7 +22,9 @@ void	session_thread_control::upstream_run(){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
 
+#ifdef	SCHED_SETAFFINITY
 	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
+#endif
 	state_tag	state;
 	upthread_running_mutex.lock();
 	{	// get first state from class upstream state.
@@ -68,7 +70,9 @@ void	session_thread_control::downstream_run(){
 //		fmt % downthread->native_handle();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
+#ifdef	SCHED_SETAFFINITY
 	sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
+#endif
 	state_tag	state;
 	downthread_running_mutex.lock();
 	{

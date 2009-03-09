@@ -675,7 +675,11 @@ namespace l7vs{
 					break;
 				}
 			}
-			usleep(1);
+			timespec	wait;
+			wait.tv_sec		=	0;
+			wait.tv_nsec	=	1000;
+			timespec	remain;
+			nanosleep( &wait, &remain );
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -878,7 +882,11 @@ namespace l7vs{
 					break;
 				}
 			}
-			usleep(1);
+			timespec	wait;
+			wait.tv_sec		=	0;
+			wait.tv_nsec	=	1000;
+			timespec	remain;
+			nanosleep( &wait, &remain );
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -956,7 +964,11 @@ namespace l7vs{
 				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 				if(exit_flag) break;
 			}
-			usleep(1);
+			timespec	wait;
+			wait.tv_sec		=	0;
+			wait.tv_nsec	=	1000;
+			timespec	remain;
+			nanosleep( &wait, &remain );
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -1205,12 +1217,20 @@ namespace l7vs{
 				func_tag = func_type->second;
 			}else{
 				func_tag = UP_FUNC_CLIENT_RECEIVE;
-				usleep(client_receive_wait);
+				timespec	wait;
+				wait.tv_sec		=	0;
+				wait.tv_nsec	=	client_receive_wait;
+				timespec	remain;
+				nanosleep( &wait, &remain );
 			}
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = UP_FUNC_CLIENT_RECEIVE;
-				usleep(client_receive_wait);
+				timespec	wait;
+				wait.tv_sec		=	0;
+				wait.tv_nsec	=	client_receive_wait;
+				timespec	remain;
+				nanosleep( &wait, &remain );
 			}else if(ec == boost::asio::error::eof){
 				func_tag = UP_FUNC_CLIENT_DISCONNECT;
 			}else if(ec == boost::asio::error::connection_reset){
@@ -2378,7 +2398,11 @@ namespace l7vs{
 		}
 		bool is_emp = down_thread_receive_realserver_socket_list.empty();
 		if(is_emp){
-			usleep(realserver_receive_empty_wait);
+			timespec	wait;
+			wait.tv_sec		=	0;
+			wait.tv_nsec	=	realserver_receive_empty_wait;
+			timespec	remain;
+			nanosleep( &wait, &remain );
 			return;
 		}
 
@@ -2435,12 +2459,20 @@ namespace l7vs{
 				func_tag = func_type->second;
 			}else{
 				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-				usleep(realserver_receive_wait);
+				timespec	wait;
+				wait.tv_sec		=	0;
+				wait.tv_nsec	=	realserver_receive_wait;
+				timespec	remain;
+				nanosleep( &wait, &remain );
 			}
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-				usleep(realserver_receive_wait);
+				timespec	wait;
+				wait.tv_sec		=	0;
+				wait.tv_nsec	=	realserver_receive_wait;
+				timespec	remain;
+				nanosleep( &wait, &remain );
 			}else if(ec == boost::asio::error::eof){
 				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
 			}else if(ec == boost::asio::error::connection_reset){
@@ -2968,12 +3000,20 @@ namespace l7vs{
 				func_tag = func_type->second;
 			}else{
 				func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
-				usleep(sorryserver_receive_wait);
+				timespec	wait;
+				wait.tv_sec		=	0;
+				wait.tv_nsec	=	sorryserver_receive_wait;
+				timespec	remain;
+				nanosleep( &wait, &remain );
 			}
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
-				usleep(sorryserver_receive_wait);
+				timespec	wait;
+				wait.tv_sec		=	0;
+				wait.tv_nsec	=	sorryserver_receive_wait;
+				timespec	remain;
+				nanosleep( &wait, &remain );
 			}else if(ec == boost::asio::error::eof){
 				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
 			}else if(ec == boost::asio::error::connection_reset){
