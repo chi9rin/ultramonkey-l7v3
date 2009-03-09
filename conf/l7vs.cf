@@ -217,13 +217,3 @@ ip_addr = "127.0.0.1"
 port = 60162
 interval = 1000
 status = 0
-
-#
-# session settings
-#
-[session]
-# wait value is nano-second.
-client_receive_wait = 10
-realserver_receive_wait = 10
-sorryserver_receive_wait = 10
-realserver_receive_empty_wait = 10
