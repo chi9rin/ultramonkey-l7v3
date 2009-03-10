@@ -908,6 +908,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 				break;
 			}
 			dispatcher.poll();
+			boost::this_thread::yield();
 		}
 	
 		// snmp trap function unset
