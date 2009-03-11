@@ -953,6 +953,15 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
+		{
+			if( !client_socket.get_socket().is_open() ){
+				up_thread_exit(process_type);
+				return;
+			}
+		}
+
+
+
 		if(0 < parent_service.get_wait_upstream()){
 			//----Debug log----------------------------------------------------------------------
 			if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -2559,6 +2568,14 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
+
+                {
+                        if( !client_socket.get_socket().is_open() ){
+                                down_thread_exit(process_type);
+                                return;
+                        }                
+		}
+
 		boost::system::error_code ec;
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
 		std::size_t data_size = down_thread_data_client_side.get_size();
