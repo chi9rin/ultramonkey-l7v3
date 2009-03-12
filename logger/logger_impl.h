@@ -34,6 +34,8 @@
 #include <log4cxx/rollingfileappender.h>
 #include <log4cxx/patternlayout.h>
 #include <boost/format.hpp>
+#include <boost/tr1/unordered_map.hpp>
+#include <boost/foreach.hpp>
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
 
@@ -68,6 +70,9 @@ protected:
 	//! typedef	category <-> level map
 	typedef	std::map< LOG_CATEGORY_TAG, LOG_LEVEL_TAG>
 		category_level_map_type;
+	//! typedef category <-> level map read only
+	typedef std::tr1::unordered_map< LOG_CATEGORY_TAG, LOG_LEVEL_TAG>
+		category_level_read_map_type;
 	//! typedef	categoryname <-> CATEGORY_TAG map
 	typedef	std::map< std::string, LOG_CATEGORY_TAG>
 		name_category_map_type;
@@ -91,8 +96,7 @@ public:
 	 * @return  log level
 	 */
 	virtual inline LOG_LEVEL_TAG getLogLevel(LOG_CATEGORY_TAG cat){
-		category_level_map_type::iterator itr = category_level_map.find( cat );
-		return itr->second;
+		return category_level_read_map[cat];
 	}
 
 	/*!
@@ -101,10 +105,10 @@ public:
 	 * @param[out]   category level list
 	 */
 	virtual inline void getLogLevelAll( category_level_list_type& list ){
-		for( category_level_map_type::iterator itr = category_level_map.begin();
-			 itr != category_level_map.end();
-			 ++itr ){
-			list.push_back( *itr );
+		category_level_read_map.clear();
+		BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
+			category_level_read_map[itr.first] = itr.second;
+			list.push_back( std::make_pair( itr.first, itr.second ) );
 		}
 	}
 
@@ -119,6 +123,11 @@ public:
 	virtual inline bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level){
 		category_level_map_type::iterator lv_itr = category_level_map.find( cat );
 		lv_itr->second = level;
+
+		category_level_read_map.clear();
+		BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
+			category_level_read_map[itr.first] = itr.second;
+		}
 
 		category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
 
@@ -140,13 +149,12 @@ public:
 	 * @retval  false failed
 	 */
 	virtual inline bool setLogLevelAll( LOG_LEVEL_TAG level ){
-		for( category_level_map_type::iterator itr = category_level_map.begin();
-			 itr != category_level_map.end();
-			 ++itr ){
-			itr->second = level;
+		category_level_read_map.clear();
+		BOOST_FOREACH( category_level_map_type::value_type& itr, category_level_map ){
+			itr.second = level;
+			category_level_read_map[itr.first] = itr.second;
 
-			category_name_map_type::iterator categoryname_itr = category_name_map.find( itr->first );
-
+			category_name_map_type::iterator categoryname_itr = category_name_map.find( itr.first );
 			try {
 				log4cxx::Logger::getLogger(categoryname_itr->second)->setLevel( log4cxx::Level::toLevel( levelTable[level] ) );
 			}
@@ -501,6 +509,7 @@ protected:
 
 	//! category - loglevel hash map
 	category_level_map_type	category_level_map;
+	category_level_read_map_type category_level_read_map;
 	//! category string -> logcateogry hash map
 	name_category_map_type	name_category_map;
 	//! log_category -> category string hash map

@@ -36,7 +36,6 @@
 #include <errno.h>
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
 
 #include "error_code.h"
 #include "logger_enum.h"
@@ -410,7 +409,10 @@ l7vs::LoggerImpl::LoggerImpl()
 	name_category_map["sslproxy_connection"] = LOG_CAT_SSLPROXY_CONNECTION;
 	category_name_map[LOG_CAT_SSLPROXY_CONNECTION] = "sslproxy_connection";
 #endif
-	
+
+	BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
+		category_level_read_map[itr.first] = itr.second;
+	}	
 }
 
 
@@ -458,11 +460,11 @@ bool l7vs::LoggerImpl::init(){
 		root->addAppender(consoleAppender);
 
 		// set all log level to log4cxx
-		for( category_level_map_type::iterator itr = category_level_map.begin();
-			 itr != category_level_map.end();
-			 ++itr ){
-			category_name_map_type::iterator name_itr = category_name_map.find( itr->first );
-			Logger::getLogger( name_itr->second )->setLevel( log4cxx::Level::toLevel( levelTable[itr->second] ) );
+		category_level_read_map.clear();
+		BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
+			category_level_read_map[itr.first] = itr.second;
+			category_name_map_type::iterator name_itr = category_name_map.find( itr.first );
+			Logger::getLogger( name_itr->second )->setLevel( log4cxx::Level::toLevel( levelTable[itr.second] ) );
 		}
 
 	}
@@ -519,11 +521,10 @@ void l7vs::LoggerImpl::errorConf(	unsigned int message_id,
 		root->addAppender(consoleAppender);
 		root->addAppender(syslogAppender);
 
-		for( category_level_map_type::iterator cat_itr = category_level_map.begin();
-			 cat_itr != category_level_map.end();
-			 ++cat_itr ){
-			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr->first );
-			Logger::getLogger( name_itr->second )-> setLevel( cat_itr->second );
+		BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
+			category_level_read_map[itr.first] = itr.second;
+			category_name_map_type::iterator name_itr = category_name_map.find( itr.first );
+			Logger::getLogger( name_itr->second )-> setLevel( itr.second );
 		}
 
 		std::stringstream	buf;
@@ -1295,11 +1296,10 @@ void l7vs::LoggerImpl::loadConf(){
 		}	//for (category logger setteing)
 
 		//category level setting
-		for( category_level_map_type::iterator cat_itr = category_level_map.begin();
-			 cat_itr != category_level_map.end();
-			 ++cat_itr ){
+		category_level_read_map.clear();
+		BOOST_FOREACH( category_level_map_type::value_type& cat_itr, category_level_map ){
 
-			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr->first );
+			category_name_map_type::iterator name_itr = category_name_map.find( cat_itr.first );
 			log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( name_itr->second );
 			if (0 == cat_logger) {
 				throw std::logic_error("getLogger Failed.");
@@ -1324,19 +1324,19 @@ void l7vs::LoggerImpl::loadConf(){
 			std::string levelStr = param.get_string(PARAM_COMP_LOGGER, name_itr->second, ec);
 			if( !ec ) {
 				if ("debug" == levelStr) {
-					cat_itr->second = LOG_LV_DEBUG;
+					cat_itr.second = LOG_LV_DEBUG;
 				}
 				else if ("info" == levelStr) {
-					cat_itr->second = LOG_LV_INFO;
+					cat_itr.second = LOG_LV_INFO;
 				}
 				else if ("warn" == levelStr) {
-					cat_itr->second = LOG_LV_WARN;
+					cat_itr.second = LOG_LV_WARN;
 				}
 				else if ("error" == levelStr) {
-					cat_itr->second = LOG_LV_ERROR;
+					cat_itr.second = LOG_LV_ERROR;
 				}
 				else if ("fatal" == levelStr) {
-					cat_itr->second = LOG_LV_FATAL;
+					cat_itr.second = LOG_LV_FATAL;
 				}
 				else {
 					std::ostringstream oss;
@@ -1345,9 +1345,9 @@ void l7vs::LoggerImpl::loadConf(){
 					if (LOG_LV_WARN >= this->getLogLevel(log_category)) {
 						this->putLogWarn(log_category,2, oss.str(), __FILE__, __LINE__);
 					}
-					cat_itr->second = LOG_LV_INFO;
+					cat_itr.second = LOG_LV_INFO;
 				}
-				cat_logger->setLevel( log4cxx::Level::toLevel( levelTable[cat_itr->second] ) );
+				cat_logger->setLevel( log4cxx::Level::toLevel( levelTable[cat_itr.second] ) );
 			}
 			else {
 				std::ostringstream oss;
@@ -1355,9 +1355,10 @@ void l7vs::LoggerImpl::loadConf(){
 				if (LOG_LV_WARN >= this->getLogLevel(log_category)) {
 					this->putLogWarn(log_category,3, oss.str(), __FILE__, __LINE__);
 				}
-				cat_itr->second = LOG_LV_INFO;
+				cat_itr.second = LOG_LV_INFO;
 				cat_logger->setLevel( log4cxx::Level::getInfo() );
 			}
+			category_level_read_map[cat_itr.first] = cat_itr.second;
 		}	//for (category level setting)
 
 	}
