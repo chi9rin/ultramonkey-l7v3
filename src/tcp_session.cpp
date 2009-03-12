@@ -85,78 +85,31 @@ namespace l7vs{
 		add_up_thread_event.second = UP_FUNC_EXIT;
 		up_thread_module_event_map.insert(add_up_thread_event);
 		
-		// set up_thread_function_map
-		std::pair<UP_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_up_thread_func;
-		add_up_thread_func.first = UP_FUNC_CLIENT_ACCEPT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_client_accept_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_CLIENT_DISCONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_client_disconnect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_CLIENT_DISCONNECT_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_CLIENT_RECEIVE;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_client_receive,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_CLIENT_RESPOND_SEND;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_client_respond,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_CLIENT_RESPOND_SEND_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_client_respond_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_GET_DEST_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_get_destination_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_CONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_connect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_CONNECT_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_connect_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_connection_fail_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_SEND;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_send,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_DISCONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_disconnect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_DISCONNECT_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_REALSERVER_ALL_DISCONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_all_realserver_disconnect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_GET_DEST;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_CONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_connect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_CONNECT_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_connect_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_SEND;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_send,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_DISCONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_MOD_DISCONNECT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_SORRYSERVER_DISCONNECT_EVENT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-		add_up_thread_func.first = UP_FUNC_EXIT;
-		add_up_thread_func.second = boost::bind(&tcp_session::up_thread_exit,this,_1);
-		up_thread_function_map.insert(add_up_thread_func);
-	 	
+		// set up_thread_function_array
+		up_thread_function_array[UP_FUNC_CLIENT_ACCEPT]			= boost::bind(&tcp_session::up_thread_client_accept_event,this,_1);
+		up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT]		= boost::bind(&tcp_session::up_thread_client_disconnect,this,_1);
+		up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT]	= boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1);
+		up_thread_function_array[UP_FUNC_CLIENT_RECEIVE]		= boost::bind(&tcp_session::up_thread_client_receive,this,_1);
+		up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND]	= boost::bind(&tcp_session::up_thread_client_respond,this,_1);
+		up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT]	= boost::bind(&tcp_session::up_thread_client_respond_event,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_GET_DEST_EVENT]	= boost::bind(&tcp_session::up_thread_realserver_get_destination_event,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_CONNECT]	= boost::bind(&tcp_session::up_thread_realserver_connect,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT]	= boost::bind(&tcp_session::up_thread_realserver_connect_event,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT]	= boost::bind(&tcp_session::up_thread_realserver_connection_fail_event,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_SEND]	= boost::bind(&tcp_session::up_thread_realserver_send,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT]	= boost::bind(&tcp_session::up_thread_realserver_disconnect,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT]	= boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1);
+		up_thread_function_array[UP_FUNC_REALSERVER_ALL_DISCONNECT]	= boost::bind(&tcp_session::up_thread_all_realserver_disconnect,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_GET_DEST]	= boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT]	= boost::bind(&tcp_session::up_thread_sorryserver_connect,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT]	= boost::bind(&tcp_session::up_thread_sorryserver_connect_event,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT]	= boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_SEND]	= boost::bind(&tcp_session::up_thread_sorryserver_send,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT]	= boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_MOD_DISCONNECT]	= boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1);
+		up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT]	= boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1);
+		up_thread_function_array[UP_FUNC_EXIT]	= boost::bind(&tcp_session::up_thread_exit,this,_1);
+
 		// set up_thread_message_down_thread_function_map
 		std::pair<DOWN_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_up_thread_message_func;
 		add_up_thread_message_func.first = DOWN_FUNC_CLIENT_DISCONNECT_EVENT;
@@ -198,49 +151,22 @@ namespace l7vs{
 		add_down_thread_event.first = protocol_module_base::FINALIZE;
 		add_down_thread_event.second = DOWN_FUNC_EXIT;
 		down_thread_module_event_map.insert(add_down_thread_event);
-		
-		// set down_thread_function_map
-		std::pair<DOWN_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_down_thread_func;
-		add_down_thread_func.first = DOWN_FUNC_CLIENT_DISCONNECT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_client_disconnect,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_CLIENT_DISCONNECT_EVENT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_client_disconnect_event,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_CLIENT_CONNECTION_CHK;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_client_connection_chk_event,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_CLIENT_SEND;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_client_send,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_REALSERVER_RECEIVE;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_realserver_receive,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_REALSERVER_DISCONNECT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_realserver_disconnect,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_REALSERVER_DISCONNECT_EVENT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_realserver_disconnect_event,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_REALSERVER_ALL_DISCONNECT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_all_realserver_disconnect,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_RECEIVE;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_receive,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_mod_disconnect,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		add_down_thread_func.first = DOWN_FUNC_EXIT;
-		add_down_thread_func.second = boost::bind(&tcp_session::down_thread_exit,this,_1);
-		down_thread_function_map.insert(add_down_thread_func);
-		
+
+		// set down_thread_function_array
+		down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT]	= boost::bind(&tcp_session::down_thread_client_disconnect,this,_1);
+		down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT]	= boost::bind(&tcp_session::down_thread_client_disconnect_event,this,_1);
+		down_thread_function_array[DOWN_FUNC_CLIENT_CONNECTION_CHK]	= boost::bind(&tcp_session::down_thread_client_connection_chk_event,this,_1);
+		down_thread_function_array[DOWN_FUNC_CLIENT_SEND]	= boost::bind(&tcp_session::down_thread_client_send,this,_1);
+		down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE]	= boost::bind(&tcp_session::down_thread_realserver_receive,this,_1);
+		down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT]	= boost::bind(&tcp_session::down_thread_realserver_disconnect,this,_1);
+		down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT]	= boost::bind(&tcp_session::down_thread_realserver_disconnect_event,this,_1);
+		down_thread_function_array[DOWN_FUNC_REALSERVER_ALL_DISCONNECT]	= boost::bind(&tcp_session::down_thread_all_realserver_disconnect,this,_1);
+		down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE]	= boost::bind(&tcp_session::down_thread_sorryserver_receive,this,_1);
+		down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT]	= boost::bind(&tcp_session::down_thread_sorryserver_disconnect,this,_1);
+		down_thread_function_array[DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT]	= boost::bind(&tcp_session::down_thread_sorryserver_mod_disconnect,this,_1);
+		down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT]	= boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1);
+		down_thread_function_array[DOWN_FUNC_EXIT]	= boost::bind(&tcp_session::down_thread_exit,this,_1);
+
 		// set down_thread_message_up_thread_function_map
 		std::pair<UP_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_down_thread_message_func;
 		add_down_thread_message_func.first = UP_FUNC_CLIENT_DISCONNECT_EVENT;
@@ -282,14 +208,10 @@ namespace l7vs{
 	tcp_session::~tcp_session(){
 		// up_thread_module_event_map
 		up_thread_module_event_map.clear();
-		// up_thread_function_map
-		up_thread_function_map.clear();
 		// up_thread_message_down_thread_function_map
 		up_thread_message_down_thread_function_map.clear();
 		// down_thread_module_event_map
 		down_thread_module_event_map.clear();
-		// down_thread_function_map
-		down_thread_function_map.clear();
 		// down_thread_message_down_thread_function_map
 		down_thread_message_up_thread_function_map.clear();
 		// virtual_service_message_up_thread_function_map
@@ -563,7 +485,8 @@ namespace l7vs{
 		boost::asio::ip::udp::endpoint dumy_end;
 		protocol_module_base::EVENT_TAG module_event;
 		std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type;
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func;
+// 		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func;
+		tcp_session_func	func;
 		{
 			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
@@ -584,8 +507,8 @@ namespace l7vs{
 					exit_flag = true;
 				}
 			}else{
-				func =  up_thread_function_map.find(func_type->second);
-				if(func == up_thread_function_map.end()){
+				func = up_thread_function_array[func_type->second];
+				if( !func ){
 					//Error not find function map
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -598,7 +521,7 @@ namespace l7vs{
 						exit_flag = true;
 					}
 				}else{
-					up_thread_next_call_function = func->second;
+					up_thread_next_call_function = func;
 				}
 			}
 		}
@@ -768,8 +691,8 @@ namespace l7vs{
 		}
 		//----Debug log----------------------------------------------------------------------
 		thread_state_update(DOWN_THREAD_ACTIVE,true);
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func =  down_thread_function_map.find(DOWN_FUNC_REALSERVER_RECEIVE);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -781,7 +704,7 @@ namespace l7vs{
 				exit_flag = true;
 			}
 		}else{
-			down_thread_next_call_function = func->second;
+			down_thread_next_call_function = func;
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -926,8 +849,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -938,7 +861,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread receive client side and raise module event of handle_client_recv
 	//! @param[in]		process_type is prosecess type
@@ -1037,8 +960,8 @@ namespace l7vs{
 				}
 			}
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_tag);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1049,15 +972,15 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise client respond send event message for up and down thread
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_type){
 		boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 		boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = up_thread_function_map.find(UP_FUNC_CLIENT_RESPOND_SEND_EVENT);
-		if(up_func == up_thread_function_map.end()){
+		tcp_session_func	up_func	= up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
+		if( !up_func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1067,7 +990,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_msg->message = up_func->second;
+		up_msg->message = up_func;
 		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT);
 		if(down_func == up_thread_message_down_thread_function_map.end()){
 			//Error not find function map
@@ -1113,8 +1036,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1125,7 +1048,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread close client socket and raise client disconnect event message for up and down thread
 	//! @param[in]		process_type is prosecess type
@@ -1135,8 +1058,8 @@ namespace l7vs{
 		if(bres){
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT_EVENT);
-			if(up_func == up_thread_function_map.end()){
+			tcp_session_func	up_func	= up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
+			if( !up_func ){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1146,7 +1069,7 @@ namespace l7vs{
 				up_thread_exit(process_type);
 				return;
 			}
-			up_msg->message = up_func->second;
+			up_msg->message = up_func;
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
 			if(down_func == up_thread_message_down_thread_function_map.end()){
 				//Error not find function map
@@ -1193,8 +1116,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1205,7 +1128,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread send realserver and raise module event of handle_client_recv
 	//! @param[in]		process_type is prosecess type
@@ -1282,8 +1205,8 @@ namespace l7vs{
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_tag);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1294,7 +1217,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_realserver_select
 	//! @param[in]		process_type is prosecess type
@@ -1326,8 +1249,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1338,7 +1261,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread connect realserver
 	//! @param[in]		process_type is prosecess type
@@ -1382,8 +1305,8 @@ namespace l7vs{
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_tag);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1394,7 +1317,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_realserver_connect
 	//! @param[in]		process_type is prosecess type
@@ -1428,8 +1351,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1440,7 +1363,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_realserver_connection_fail
 	//! @param[in]		process_type is prosecess type
@@ -1469,8 +1392,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1481,7 +1404,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread close realserver socket and raise realserver disconnect event message for up and down thread
 	//! @param[in]		process_type is prosecess type
@@ -1494,8 +1417,8 @@ namespace l7vs{
 			parent_service.connection_inactive(server_endpoint);
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT_EVENT);
-			if(up_func == up_thread_function_map.end()){
+			tcp_session_func	up_func	= up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
+			if( !up_func ){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1506,7 +1429,7 @@ namespace l7vs{
 				return;
 			}
 			up_msg->endpoint_info = server_endpoint;
-			up_msg->message = up_func->second;
+			up_msg->message = up_func;
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
 			if(down_func == up_thread_message_down_thread_function_map.end()){
 				//Error not find function map
@@ -1557,8 +1480,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1569,7 +1492,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread close all realserver socket and raise module event of handle_realserver_disconnect
 	//! @param[in]		process_type is prosecess type
@@ -1631,8 +1554,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1643,7 +1566,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread send sorryserver and raise module event of handle_sorryserver_send
 	//! @param[in]		process_type is prosecess type
@@ -1718,8 +1641,8 @@ namespace l7vs{
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_tag);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1730,7 +1653,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_sorryserver_select
 	//! @param[in]		process_type is prosecess type
@@ -1763,8 +1686,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1775,7 +1698,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread connect sorryserver
 	//! @param[in]		process_type is prosecess type
@@ -1807,8 +1730,8 @@ namespace l7vs{
 			buf << ec.message();
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_tag);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1819,7 +1742,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_sorryserver_connect
 	//! @param[in]		process_type is prosecess type
@@ -1853,8 +1776,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1865,7 +1788,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_sorryserver_connection_fail
 	//! @param[in]		process_type is prosecess type
@@ -1894,8 +1817,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1906,7 +1829,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
 	//! @param[in]		process_type is prosecess type
@@ -1916,8 +1839,8 @@ namespace l7vs{
 		if(bres){
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-			if(up_func == up_thread_function_map.end()){
+			tcp_session_func	up_func	= up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
+			if( !up_func ){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1927,7 +1850,7 @@ namespace l7vs{
 				up_thread_exit(process_type);
 				return;
 			}
-			up_msg->message = up_func->second;
+			up_msg->message = up_func;
 			up_msg->endpoint_info = sorryserver_socket.first;
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
 			if(down_func == up_thread_message_down_thread_function_map.end()){
@@ -1983,8 +1906,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1995,7 +1918,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_sorryserver_disconnect
 	//! @param[in]		process_type is prosecess type
@@ -2028,8 +1951,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2040,7 +1963,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_sorry_enable
 	//! @param[in]		process_type is prosecess type
@@ -2081,8 +2004,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2093,7 +2016,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	//! up thread raise module event of handle_sorry_disable
 	//! @param[in]		process_type is prosecess type
@@ -2134,8 +2057,8 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(func_type->second);
-		if(func == up_thread_function_map.end()){
+		tcp_session_func	func	= up_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2146,7 +2069,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
-		up_thread_next_call_function = func->second;
+		up_thread_next_call_function = func;
 	}
 	
 	//! up thread exit main loop
@@ -2267,8 +2190,8 @@ namespace l7vs{
 				}
 			}
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_tag);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2283,7 +2206,7 @@ namespace l7vs{
 		std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
 		if(down_thread_current_receive_realserver_socket == list_end)
 			down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread close realserver socket and raise realserver disconnect event message for up and down thread
 	//! @param[in]		process_type is prosecess type
@@ -2300,8 +2223,8 @@ namespace l7vs{
 					parent_service.connection_inactive(server_endpoint);
 					boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 					boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-					std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
-					if(down_func == down_thread_function_map.end()){
+					tcp_session_func	down_func	= down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
+					if( !down_func ){
 						//Error not find function map
 						std::stringstream buf;
 						buf << "Thread ID[";
@@ -2312,7 +2235,7 @@ namespace l7vs{
 						return;
 					}
 					down_msg->endpoint_info = server_endpoint;
-					down_msg->message = down_func->second;
+					down_msg->message = down_func;
 					std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT_EVENT);
 					if(up_func == down_thread_message_up_thread_function_map.end()){
 						//Error not find function map
@@ -2378,8 +2301,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2390,7 +2313,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread close realserver socket and raise realserver disconnect event message for up and down thread
 	//! @param[in]		process_type is prosecess type
@@ -2452,8 +2375,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2464,7 +2387,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread raise module event of handle_client_connection_check
 	//! @param[in]		process_type is prosecess type
@@ -2496,8 +2419,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2508,7 +2431,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	
 	//! down thread raise module event of handle_response_send_inform
@@ -2541,8 +2464,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2553,7 +2476,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread send for client and raise module event of handle_client_send
 	//! @param[in]		process_type is prosecess type
@@ -2637,8 +2560,8 @@ namespace l7vs{
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_tag);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2649,7 +2572,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread close client socket and raise client disconnect event message for up and down thread 
 	//! @param[in]		process_type is prosecess type
@@ -2659,8 +2582,8 @@ namespace l7vs{
 		if(bres){
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
-			if(down_func == down_thread_function_map.end()){
+			tcp_session_func	down_func	= down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
+			if( !down_func ){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -2670,7 +2593,7 @@ namespace l7vs{
 				down_thread_exit(process_type);
 				return;
 			}
-			down_msg->message = down_func->second;
+			down_msg->message = down_func;
 			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT_EVENT);
 			if(up_func == down_thread_message_up_thread_function_map.end()){
 				//Error not find function map
@@ -2718,8 +2641,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2730,7 +2653,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread receive from sorryserver and raise module event of handle_sorryserver_recv
 	//! @param[in]		process_type is prosecess type
@@ -2808,8 +2731,8 @@ namespace l7vs{
 				}
 			}
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_tag);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_tag];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2820,7 +2743,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread raise module event of handle_sorryserver_disconnect
 	//! @param[in]		process_type is prosecess type
@@ -2830,8 +2753,8 @@ namespace l7vs{
 		if(bres){
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-			if(down_func == down_thread_function_map.end()){
+			tcp_session_func	down_func	= down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
+			if( !down_func ){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -2841,7 +2764,7 @@ namespace l7vs{
 				down_thread_exit(process_type);
 				return;
 			}
-			down_msg->message = down_func->second;
+			down_msg->message = down_func;
 			down_msg->endpoint_info = sorryserver_socket.first;
 			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
 			if(up_func == down_thread_message_up_thread_function_map.end()){
@@ -2898,8 +2821,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2910,7 +2833,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread raise module event of handle_sorryserver_disconnect
 	//! @param[in]		process_type is prosecess type
@@ -2943,8 +2866,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2955,7 +2878,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread raise module event of handle_sorry_enable
 	//! @param[in]		process_type is prosecess type
@@ -2996,8 +2919,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -3008,7 +2931,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread raise module event of handle_sorry_disable
 	//! @param[in]		process_type is prosecess type
@@ -3049,8 +2972,8 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(func_type->second);
-		if(func == down_thread_function_map.end()){
+		tcp_session_func	func	= down_thread_function_array[func_type->second];
+		if( !func ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -3061,7 +2984,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
-		down_thread_next_call_function = func->second;
+		down_thread_next_call_function = func;
 	}
 	//! down thread exit main loop
 	//! @param[in]		process_type is prosecess type
