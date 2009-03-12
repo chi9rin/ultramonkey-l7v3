@@ -186,6 +186,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
 		rep_header_ptr->data_num = 0;
+		rep_noconst.unlock( REP_AREA_NAME );
 		return;
 	}
 
