@@ -521,10 +521,11 @@ void l7vs::LoggerImpl::errorConf(	unsigned int message_id,
 		root->addAppender(consoleAppender);
 		root->addAppender(syslogAppender);
 
-		BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
+		BOOST_FOREACH( category_level_map_type::value_type& itr, category_level_map ){
+			itr.second = LOG_LV_INFO;		//set default level
 			category_level_read_map[itr.first] = itr.second;
 			category_name_map_type::iterator name_itr = category_name_map.find( itr.first );
-			Logger::getLogger( name_itr->second )-> setLevel( itr.second );
+			Logger::getLogger( name_itr->second )-> setLevel( log4cxx::Level::getInfo() );		//set default level
 		}
 
 		std::stringstream	buf;
@@ -1019,12 +1020,12 @@ void l7vs::LoggerImpl::loadConf(){
 		log4cxx::rolling::RollingFileAppender*	accessAppender = NULL;
 		
 		for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
-			if( "" == property->log_filename_key )	break;	// no conn_log setting.
-
 			if( 0 == appender_count )
 				property = &normal_log_property;
 			else
 				property = &access_log_property;
+
+			if( "" == property->log_filename_key )	break;	// no conn_log setting.
 
 			switch (property->rotation_value) {
 			case LOG_ROT_SIZE:
@@ -1366,6 +1367,5 @@ void l7vs::LoggerImpl::loadConf(){
 		std::ostringstream oss;
 		oss <<  "Logger Reload Config Failed : " << e.what();
 		errorConf(7, oss.str(), __FILE__, __LINE__);
-		throw std::logic_error(oss.str());
 	}
 }
