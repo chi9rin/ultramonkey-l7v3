@@ -398,139 +398,157 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 			// set test data
 			
 			up_thread_module_event_map.clear();
-			up_thread_function_map.clear();
+//			up_thread_function_map.clear();
 			
 			index = 0;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::ACCEPT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_CLIENT_ACCEPT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_CLIENT_ACCEPT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 1;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::CLIENT_DISCONNECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_CLIENT_DISCONNECT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_CLIENT_DISCONNECT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 2;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::CLIENT_RECV;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_CLIENT_RECEIVE;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_CLIENT_RECEIVE,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 3;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::CLIENT_RESPONSE_SEND;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_CLIENT_RESPOND_SEND;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_CLIENT_RESPOND_SEND,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 4;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::REALSERVER_SELECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_REALSERVER_GET_DEST_EVENT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_REALSERVER_GET_DEST_EVENT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 5;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::REALSERVER_CONNECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_REALSERVER_CONNECT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_REALSERVER_CONNECT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 6;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::REALSERVER_SEND;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_REALSERVER_SEND;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_REALSERVER_SEND,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 7;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::REALSERVER_DISCONNECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_REALSERVER_ALL_DISCONNECT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_REALSERVER_ALL_DISCONNECT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 8;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::SORRYSERVER_SELECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_SORRYSERVER_GET_DEST;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_SORRYSERVER_GET_DEST,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 9;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::SORRYSERVER_CONNECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_SORRYSERVER_CONNECT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_SORRYSERVER_CONNECT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 10;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::SORRYSERVER_SEND;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_SORRYSERVER_SEND;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_SORRYSERVER_SEND,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 11;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::SORRYSERVER_DISCONNECT;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_SORRYSERVER_DISCONNECT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_SORRYSERVER_DISCONNECT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			index = 12;
 			up_module_map_test_data[index].first = l7vs::protocol_module_base::FINALIZE;
 			up_module_map_test_data[index].second = l7vs::tcp_session::UP_FUNC_EXIT;
 			up_fuc_map_test_data[index].first = up_module_map_test_data[index].second;
 			up_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_UP_FUNC_EXIT,this,_1);
+			up_thread_function_array[up_fuc_map_test_data[index].first] = up_fuc_map_test_data[index];
 			
 			for(int i = 0 ; i < 13;i++){
 				up_thread_module_event_map.insert(up_module_map_test_data[i]);
-				up_thread_function_map.insert(up_fuc_map_test_data[i]);
 			}
 			
 			down_thread_module_event_map.clear();
-			down_thread_function_map.clear();
+//			down_thread_function_map.clear();
 			
 			index = 0;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::CLIENT_DISCONNECT;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_CLIENT_DISCONNECT;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_CLIENT_DISCONNECT,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			index = 1;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::CLIENT_CONNECTION_CHECK;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_CLIENT_CONNECTION_CHK;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_CLIENT_CONNECTION_CHK,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			index = 2;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::REALSERVER_RECV;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_REALSERVER_RECEIVE;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_REALSERVER_RECEIVE,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			index = 3;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::REALSERVER_DISCONNECT;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_REALSERVER_ALL_DISCONNECT;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_REALSERVER_ALL_DISCONNECT,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			index = 4;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::SORRYSERVER_RECV;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_SORRYSERVER_RECEIVE;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_SORRYSERVER_RECEIVE,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			index = 5;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::SORRYSERVER_DISCONNECT;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_SORRYSERVER_DISCONNECT;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_SORRYSERVER_DISCONNECT,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			index = 6;
 			down_module_map_test_data[index].first = l7vs::protocol_module_base::FINALIZE;
 			down_module_map_test_data[index].second = l7vs::tcp_session::DOWN_FUNC_EXIT;
 			down_fuc_map_test_data[index].first = down_module_map_test_data[index].second;
 			down_fuc_map_test_data[index].second = boost::bind(&module_event_map_test_base_class::test_DOWN_FUNC_EXIT,this,_1);
+			down_thread_function_array[down_fuc_map_test_data[index].first] = down_fuc_map_test_data[index];
 			
 			for(int i = 0 ; i < 7;i++){
 				down_thread_module_event_map.insert(down_module_map_test_data[i]);
-				down_thread_function_map.insert(down_fuc_map_test_data[i]);
 			}
 			
 			
@@ -538,9 +556,9 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 		
 		~module_event_map_test_base_class(){
 			up_thread_module_event_map_clear();
-			up_thread_function_map_clear();
+			up_thread_function_array_clear();
 			down_thread_module_event_map_clear();
-			down_thread_function_map_clear();
+			down_thread_function_array_clear();
 		};
 		
 		void set_protocol_module(l7vs::protocol_module_base* test_protocol_module){
@@ -565,7 +583,7 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 				return false;
 			}
 			
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 			
 			return fnc_tag == up_call_func_type;
 		};
@@ -588,7 +606,7 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 				return false;
 			}
 			
-			down_thread_next_call_function(LOCAL_PROC);
+			down_thread_next_call_function.second(LOCAL_PROC);
 			
 			return fnc_tag == down_call_func_type;
 		};
@@ -598,16 +616,20 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 			up_thread_module_event_map.clear();
 		};
 		
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0; i <= l7vs::tcp_session::UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = (tcp_session_func)NULL;
+			}
 		};
 		
 		void down_thread_module_event_map_clear(){
 			down_thread_module_event_map.clear();
 		};
 		
-		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+		void down_thread_function_array_clear(){
+			for(int i = 0; i <= l7vs::tcp_session::DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = (tcp_session_func)NULL;
+			}
 		};
 		
 		void set_up_thread_id(boost::thread::id set_thread_id){
@@ -1132,283 +1154,283 @@ class constructer_test_class : public l7vs::tcp_session{
 		};
 		
 		void check_up_thread_function_map(){
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator check_it;
+			up_thread_function_pair check_it;
 			
 			// UP_FUNC_CLIENT_ACCEPT  up_thread_client_accept_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_CLIENT_ACCEPT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_CLIENT_ACCEPT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_client_accept_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_client_accept_event_call_check);
 			
 			// UP_FUNC_CLIENT_DISCONNECT  up_thread_client_disconnect function 
-			check_it = up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_client_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_client_disconnect_call_check);
 			
 			// UP_FUNC_CLIENT_DISCONNECT_EVENT  up_thread_client_disconnect_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_client_disconnect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_client_disconnect_event_call_check);
 			
 			// UP_FUNC_CLIENT_RECEIVE  up_thread_client_receive function 
-			check_it = up_thread_function_map.find(UP_FUNC_CLIENT_RECEIVE);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_CLIENT_RECEIVE];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_client_receive_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_client_receive_call_check);
 			
 			// UP_FUNC_CLIENT_RESPOND_SEND  up_thread_client_respond function 
-			check_it = up_thread_function_map.find(UP_FUNC_CLIENT_RESPOND_SEND);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_client_respond_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_client_respond_call_check);
 			
 			// UP_FUNC_CLIENT_RESPOND_SEND_EVENT  up_thread_client_respond_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_CLIENT_RESPOND_SEND_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_client_respond_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_client_respond_event_call_check);
 			
 			// UP_FUNC_REALSERVER_GET_DEST_EVENT  up_thread_realserver_get_destination_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_GET_DEST_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_GET_DEST_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_get_destination_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_get_destination_event_call_check);
 			
 			// UP_FUNC_REALSERVER_CONNECT  up_thread_realserver_connect function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_CONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_CONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_connect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_connect_call_check);
 			
 			// UP_FUNC_REALSERVER_CONNECT_EVENT  up_thread_realserver_connect_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_CONNECT_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_connect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_connect_event_call_check);
 			
 			// UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT  up_thread_realserver_connection_fail_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_connection_fail_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_connection_fail_event_call_check);
 			
 			// UP_FUNC_REALSERVER_SEND  up_thread_realserver_send function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_SEND);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_SEND];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_send_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_send_call_check);
 			
 			// UP_FUNC_REALSERVER_DISCONNECT  up_thread_realserver_disconnect function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_disconnect_call_check);
 			
 			// UP_FUNC_REALSERVER_DISCONNECT_EVENT  up_thread_realserver_disconnect_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_realserver_disconnect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_realserver_disconnect_event_call_check);
 			
 			// UP_FUNC_REALSERVER_ALL_DISCONNECT  up_thread_all_realserver_disconnect function 
-			check_it = up_thread_function_map.find(UP_FUNC_REALSERVER_ALL_DISCONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_REALSERVER_ALL_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_all_realserver_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_all_realserver_disconnect_call_check);
 			
 			// UP_FUNC_SORRYSERVER_GET_DEST  up_thread_sorryserver_get_destination_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_GET_DEST);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_GET_DEST];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_get_destination_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_get_destination_event_call_check);
 			
 			// UP_FUNC_SORRYSERVER_CONNECT  up_thread_sorryserver_connect function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_CONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_connect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_connect_call_check);
 			
 			// UP_FUNC_SORRYSERVER_CONNECT_EVENT  up_thread_sorryserver_connect_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_CONNECT_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_connect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_connect_event_call_check);
 			
 			// UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT  up_thread_sorryserver_connection_fail_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_connection_fail_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_connection_fail_event_call_check);
 			
 			// UP_FUNC_SORRYSERVER_SEND  up_thread_sorryserver_send function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_SEND);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_SEND];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_send_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_send_call_check);
 			
 			// UP_FUNC_SORRYSERVER_DISCONNECT  up_thread_sorryserver_disconnect function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_disconnect_call_check);
 			
 			// UP_FUNC_SORRYSERVER_MOD_DISCONNECT  up_thread_sorryserver_mod_disconnect function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_MOD_DISCONNECT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_MOD_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_mod_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_mod_disconnect_call_check);
 			
 			// UP_FUNC_SORRYSERVER_DISCONNECT_EVENT  up_thread_sorryserver_disconnect_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_sorryserver_disconnect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_sorryserver_disconnect_event_call_check);
 			
 			// UP_FUNC_SORRY_ENABLE_EVENT  up_thread_sorry_enable_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRY_ENABLE_EVENT);
-			BOOST_CHECK(check_it == up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRY_ENABLE_EVENT];
+			BOOST_CHECK(check_it.second == NULL);
 			
 			// UP_FUNC_SORRY_DISABLE_EVENT  up_thread_sorry_disable_event function 
-			check_it = up_thread_function_map.find(UP_FUNC_SORRY_DISABLE_EVENT);
-			BOOST_CHECK(check_it == up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_SORRY_DISABLE_EVENT];
+			BOOST_CHECK(check_it.second == NULL);
 			
 			// UP_FUNC_EXIT  up_thread_exit function 
-			check_it = up_thread_function_map.find(UP_FUNC_EXIT);
-			BOOST_CHECK(check_it != up_thread_function_map.end());
+			check_it = up_thread_function_array[UP_FUNC_EXIT];
+			BOOST_CHECK(check_it.second != NULL);
 			up_thread_exit_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(up_thread_exit_call_check);
 			
 		};
 		
 		void check_down_thread_function_map(){
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator check_it;
+			down_thread_function_pair check_it;
 			
 			// DOWN_FUNC_CLIENT_DISCONNECT  down_thread_client_disconnect function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_client_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_client_disconnect_call_check);
 			
 			// DOWN_FUNC_CLIENT_DISCONNECT_EVENT  down_thread_client_disconnect_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_client_disconnect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_client_disconnect_event_call_check);
 			
 			// DOWN_FUNC_CLIENT_CONNECTION_CHK  down_thread_client_connection_chk_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_CLIENT_CONNECTION_CHK);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_CLIENT_CONNECTION_CHK];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_client_connection_chk_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_client_connection_chk_event_call_check);
 			
 			// DOWN_FUNC_CLIENT_SEND  down_thread_client_send function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_CLIENT_SEND);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_CLIENT_SEND];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_client_send_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_client_send_call_check);
 			
 			// DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT  down_thread_client_respond_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT);
-			BOOST_CHECK(check_it == down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT];
+			BOOST_CHECK(check_it.second == NULL);
 			
 			// DOWN_FUNC_REALSERVER_RECEIVE  down_thread_realserver_receive function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_REALSERVER_RECEIVE);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_realserver_receive_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_realserver_receive_call_check);
 			
 			// DOWN_FUNC_REALSERVER_DISCONNECT  down_thread_realserver_disconnect function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_realserver_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_realserver_disconnect_call_check);
 			
 			// DOWN_FUNC_REALSERVER_DISCONNECT_EVENT  down_thread_realserver_disconnect_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_realserver_disconnect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_realserver_disconnect_event_call_check);
 			
 			// DOWN_FUNC_REALSERVER_ALL_DISCONNECT  down_thread_all_realserver_disconnect function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_REALSERVER_ALL_DISCONNECT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_REALSERVER_ALL_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_all_realserver_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_all_realserver_disconnect_call_check);
 			
 			// DOWN_FUNC_SORRYSERVER_RECEIVE  down_thread_sorryserver_receive function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_RECEIVE);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_sorryserver_receive_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_sorryserver_receive_call_check);
 			
 			// DOWN_FUNC_SORRYSERVER_DISCONNECT  down_thread_sorryserver_disconnect function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_sorryserver_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_sorryserver_disconnect_call_check);
 			
 			// DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT  down_thread_sorryserver_mod_disconnect function
-			check_it = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_sorryserver_mod_disconnect_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_sorryserver_mod_disconnect_call_check);
 			
 			// DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT  down_thread_sorryserver_disconnect_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_sorryserver_disconnect_event_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_sorryserver_disconnect_event_call_check);
 			
 			// DOWN_FUNC_SORRY_ENABLE_EVENT  down_thread_sorry_enable_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_SORRY_ENABLE_EVENT);
-			BOOST_CHECK(check_it == down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_SORRY_ENABLE_EVENT];
+			BOOST_CHECK(check_it.second == NULL);
 			
 			// DOWN_FUNC_SORRY_DISABLE_EVENT  down_thread_sorry_disable_event function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_SORRY_DISABLE_EVENT);
-			BOOST_CHECK(check_it == down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_SORRY_DISABLE_EVENT];
+			BOOST_CHECK(check_it.second == NULL);
 			
 			// DOWN_FUNC_EXIT  down_thread_exit function 
-			check_it = down_thread_function_map.find(DOWN_FUNC_EXIT);
-			BOOST_CHECK(check_it != down_thread_function_map.end());
+			check_it = down_thread_function_array[DOWN_FUNC_EXIT];
+			BOOST_CHECK(check_it.second != NULL);
 			down_thread_exit_call_check = false;
-			check_it->second(LOCAL_PROC);
+			check_it.second(LOCAL_PROC);
 			BOOST_CHECK(down_thread_exit_call_check);
 			
 		}
@@ -1739,7 +1761,7 @@ class initialize_test_class : public l7vs::tcp_session{
 		l7vs::tcp_thread_message_que& get_down_thread_message_que(){
 			return down_thread_message_que;
 		};
-
+		/*
 		//! client receive wait of not data or try again
 		unsigned long get_client_receive_wait(){
 			return client_receive_wait;
@@ -1756,7 +1778,7 @@ class initialize_test_class : public l7vs::tcp_session{
 		unsigned long get_realserver_receive_empty_wait(){
 			return realserver_receive_empty_wait;
 		};
-
+		*/
 };
 void initialize_test(){
 	BOOST_MESSAGE( "----- initialize test start -----" );
@@ -1818,7 +1840,7 @@ void initialize_test(){
 	// unit_test [9] initialize session_result_message flag check
 	std::cout << "[9] initialize session_result_message flag check" << std::endl;
 	BOOST_CHECK(!res_msg.flag);
-
+	/*
 	// unit_test [10] initialize client_receive_wait load cf check
 	std::cout << "[10] initialize client_receive_wait load cf check" << std::endl;
 	BOOST_CHECK_EQUAL(test_obj.get_client_receive_wait() , 1ul);
@@ -1834,9 +1856,9 @@ void initialize_test(){
 	// unit_test [13] initialize realserver_receive_empty_wait load cf check
 	std::cout << "[13] initialize realserver_receive_empty_wait load cf check" << std::endl;
 	BOOST_CHECK_EQUAL(test_obj.get_realserver_receive_empty_wait() , 4ul);
-
-	// unit_test [14] initialize protocol_module NULL error check
-	std::cout << "[14] initialize protocol_module NULL error check" << std::endl;
+	*/
+	// unit_test [10] initialize protocol_module NULL error check
+	std::cout << "[10] initialize protocol_module NULL error check" << std::endl;
 	vs.get_protocol_module_res = NULL;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -2299,19 +2321,28 @@ class up_thread_run_test_class : public l7vs::tcp_session{
 			boost::shared_ptr<l7vs::tcp_thread_message> chk_msg(new l7vs::tcp_thread_message);
 			up_thread_message_que.push(chk_msg);
 			chk_msg->endpoint_info = set_endpoint;
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = up_thread_function_map.find(UP_FUNC_EXIT);
-			chk_msg->message = func->second;
+			up_thread_function_pair func = up_thread_function_array[UP_FUNC_EXIT];
+			chk_msg->message = func.second;
 		};
 		
 		l7vs::tcp_data& get_up_thread_message_data(){
 			return up_thread_message_data;
 		}
 		
-		void clear_function_map(){
-			up_thread_function_map.clear();
+		void clear_function_array(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		}
 		void clear_event_map(){
 			up_thread_module_event_map.clear();
+		}
+		
+		void set_up_thread_next_call_function_client_disconnect(){
+			up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+		}
+		void set_up_thread_next_call_function_exit(){
+			up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
 		}
 		
 };
@@ -2499,6 +2530,7 @@ void up_thread_run_test(){
 	msg_data.set_endpoint(boost::asio::ip::tcp::endpoint());
 	test_obj.up_thread_exit_call_check = false;
 	test_obj.up_thread_exit_process_type = l7vs::tcp_session::LOCAL_PROC;
+	proto_test.handle_session_initialize_res_tag = l7vs::protocol_module_base::CLIENT_DISCONNECT;
 	
 	// test thread start
 	test_obj.test_wait = false;
@@ -2515,11 +2547,12 @@ void up_thread_run_test(){
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	BOOST_CHECK(test_obj.up_thread_exit_process_type == l7vs::tcp_session::MESSAGE_PROC);
 	
+	proto_test.handle_session_initialize_res_tag = l7vs::protocol_module_base::FINALIZE;
 	thread_state[1] = 0;
 	sleep(1);
 	
 	// error test not find function map 
-	test_obj.clear_function_map();
+	test_obj.clear_function_array();
 	exit_flag = false;
 	session_pause_flag = false;
 	thread_state[1] = 1;
@@ -2703,16 +2736,18 @@ class down_thread_run_test_class : public l7vs::tcp_session{
 			boost::shared_ptr<l7vs::tcp_thread_message> chk_msg(new l7vs::tcp_thread_message);
 			down_thread_message_que.push(chk_msg);
 			chk_msg->endpoint_info = set_endpoint;
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func = down_thread_function_map.find(DOWN_FUNC_EXIT);
-			chk_msg->message = func->second;
+			down_thread_function_pair func = down_thread_function_array[DOWN_FUNC_EXIT];
+			chk_msg->message = func.second;
 		};
 		
 		l7vs::tcp_data& get_down_thread_message_data(){
 			return down_thread_message_data;
 		}
 		
-		void clear_function_map(){
-			down_thread_function_map.clear();
+		void clear_function_array(){
+			for(int i = 0;i < DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = NULL;	
+			}
 		}
 		
 		void down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type){
@@ -2892,7 +2927,7 @@ void down_thread_run_test(){
 	BOOST_CHECK(test_obj.down_thread_exit_process_type == l7vs::tcp_session::MESSAGE_PROC);
 	
 	// error test not find function map 
-	test_obj.clear_function_map();
+	test_obj.clear_function_array();
 	exit_flag = false;
 	session_pause_flag = true;
 	thread_state[0] = 1;	// UP_THREAD_ALIVE
@@ -3329,7 +3364,7 @@ void up_thread_client_disconnect_event_test(){
 	
 	// unit_test [3] up_thread_client_disconnect_event not fond function error check
 	std::cout << "[3] up_thread_client_disconnect_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_client_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -3463,7 +3498,7 @@ void down_thread_client_disconnect_event_test(){
 	
 	// unit_test [3] down_thread_client_disconnect_event not fond function error check
 	std::cout << "[3] down_thread_client_disconnect_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_client_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -3553,7 +3588,7 @@ class up_thread_realserver_get_detination_event_test_class : public l7vs::tcp_se
 			return up_thread_data_dest_side;
 		};
 		void next_call(){
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 		}
 		
 		void up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG process_type){
@@ -3570,8 +3605,10 @@ class up_thread_realserver_get_detination_event_test_class : public l7vs::tcp_se
 			up_thread_id = set_id;
 		};
 		
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0; i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
 		void up_thread_module_event_map_clear(){
 			up_thread_module_event_map.clear();
@@ -3611,7 +3648,7 @@ void up_thread_realserver_get_detination_event_test(){
 	
 	// unit_test [3] up_thread_realserver_get_detination_event not fond function error check
 	std::cout << "[3] up_thread_realserver_get_detination_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -3661,7 +3698,7 @@ class up_thread_sorryserver_get_detination_event_test_class : public l7vs::tcp_s
 			return up_thread_data_dest_side;
 		};
 		void next_call(){
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 		}
 		
 		void up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG process_type){
@@ -3678,8 +3715,10 @@ class up_thread_sorryserver_get_detination_event_test_class : public l7vs::tcp_s
 			up_thread_id = set_id;
 		};
 		
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0; i <= UP_FUNC_EXIT; i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
 		void up_thread_module_event_map_clear(){
 			up_thread_module_event_map.clear();
@@ -3722,7 +3761,7 @@ void up_thread_sorryserver_get_detination_event_test(){
 	
 	// unit_test [3] up_thread_sorryserver_get_detination_event not fond function error check
 	std::cout << "[3] up_thread_sorryserver_get_detination_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -3890,7 +3929,7 @@ void up_thread_realserver_disconnect_event_test(){
 		
 	// unit_test [5] up_thread_realserver_disconnect_event not fond function error check
 	std::cout << "[5] up_thread_realserver_disconnect_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -4108,7 +4147,7 @@ void down_thread_realserver_disconnect_event_test(){
 
 	// unit_test [5] down_thread_realserver_disconnect_event not fond function error check
 	std::cout << "[5] down_thread_realserver_disconnect_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -4258,7 +4297,7 @@ void up_thread_sorryserver_disconnect_event_test(){
 	
 	// unit_test [4] up_thread_sorryserver_disconnect_event not fond function error check
 	std::cout << "[4] up_thread_sorryserver_disconnect_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -4475,7 +4514,7 @@ void up_thread_sorryserver_mod_disconnect_test(){
 	
 	// unit_test [14] up_thread_sorryserver_mod_disconnect not fond function error check
 	std::cout << "[14] up_thread_sorryserver_mod_disconnect not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -4685,7 +4724,7 @@ void down_thread_sorryserver_mod_disconnect_test(){
 	
 	// unit_test [14] down_thread_sorryserver_mod_disconnect not fond function error check
 	std::cout << "[14] down_thread_sorryserver_mod_disconnect not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -4830,7 +4869,7 @@ void down_thread_sorryserver_disconnect_event_test(){
 	
 	// unit_test [4] down_thread_sorryserver_disconnect_event not fond function error check
 	std::cout << "[4] down_thread_sorryserver_disconnect_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -4969,7 +5008,7 @@ void up_thread_sorry_enable_event_test(){
 	
 	// unit_test [3] up_thread_sorry_enable_event not fond function error check
 	std::cout << "[3] up_thread_sorry_enable_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorry_enable_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -5109,7 +5148,7 @@ void up_thread_sorry_disable_event_test(){
 	
 	// unit_test [3] up_thread_sorry_disable_event not fond function error check
 	std::cout << "[3] up_thread_sorry_disable_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorry_disable_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -5244,7 +5283,7 @@ void down_thread_sorry_enable_event_test(){
 	
 	// unit_test [3] down_thread_sorry_enable_event not fond function error check
 	std::cout << "[3] down_thread_sorry_enable_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_sorry_enable_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -5376,7 +5415,7 @@ void down_thread_sorry_disable_event_test(){
 	
 	// unit_test [3] down_thread_sorry_disable_event not fond function error check
 	std::cout << "[3] down_thread_sorry_disable_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_sorry_disable_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -5515,7 +5554,7 @@ void up_thread_client_accept_event_test(){
 	
 	// unit_test [3] up_thread_client_accept_event not fond function error check
 	std::cout << "[3] up_thread_client_accept_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_accept_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -5571,8 +5610,10 @@ class up_thread_client_respond_test_class : public l7vs::tcp_session{
 			return down_thread_message_que;
 		};
 		
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
 		void up_thread_message_down_thread_function_map_clear(){
 			up_thread_message_down_thread_function_map.clear();
@@ -5639,7 +5680,7 @@ void up_thread_client_respond_test(){
 	
 	// unit_test [4] up_thread_client_respond not fond up_thread_client_respond_event function error check
 	std::cout << "[4] up_thread_client_respond not fond up_thread_client_respond_event function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.up_thread_exit_call_chek = false;
@@ -5717,7 +5758,7 @@ void up_thread_client_respond_event_test(){
 	
 	// unit_test [3] up_thread_client_respond_event not fond function error check
 	std::cout << "[3] up_thread_client_respond_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_response_send_inform_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -5851,7 +5892,7 @@ void down_thread_client_respond_event_test(){
 	
 	// unit_test [3] down_thread_client_respond_event not fond function error check
 	std::cout << "[3] down_thread_client_respond_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_response_send_inform_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -6170,8 +6211,10 @@ class up_thread_client_disconnect : public l7vs::tcp_session{
 			return down_thread_message_que;
 		};
 		
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
 		void up_thread_message_down_thread_function_map_clear(){
 			up_thread_message_down_thread_function_map.clear();
@@ -6259,7 +6302,7 @@ void up_thread_client_disconnect_test(){
 	
 	// unit_test [6] up_thread_client_disconnect not fond up_thread_client_disconnect_event function error check
 	std::cout << "[6] up_thread_client_disconnect not fond up_thread_client_disconnect_event function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.up_thread_exit_call_chek = false;
@@ -6291,8 +6334,10 @@ class down_thread_client_disconnect_test_class : public l7vs::tcp_session{
 			return down_thread_message_que;
 		};
 		
-		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+		void down_thread_function_array_clear(){
+			for(int i = 0; i <= DOWN_FUNC_EXIT; i++){
+				down_thread_function_array[i].second = NULL;
+			}
 		};
 		void down_thread_message_up_thread_function_map_clear(){
 			down_thread_message_up_thread_function_map.clear();
@@ -6380,7 +6425,7 @@ void down_thread_client_disconnect_test(){
 	
 	// unit_test [6] down_thread_client_disconnect not fond down_thread_client_disconnect_event function error check
 	std::cout << "[6] down_thread_client_disconnect not fond down_thread_client_disconnect_event function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.down_thread_exit_call_chek = false;
@@ -6413,8 +6458,10 @@ class up_thread_sorryserver_disconnect_test_class : public l7vs::tcp_session{
 			return down_thread_message_que;
 		};
 		
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
 		void up_thread_message_down_thread_function_map_clear(){
 			up_thread_message_down_thread_function_map.clear();
@@ -6508,7 +6555,7 @@ void up_thread_sorryserver_disconnect_test(){
 	
 	// unit_test [6] up_thread_sorryserver_disconnect not fond up_thread_sorryserver_disconnect_event function error check
 	std::cout << "[6] up_thread_sorryserver_disconnect not fond up_thread_sorryserver_disconnect_event function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.up_thread_exit_call_chek = false;
@@ -6540,8 +6587,10 @@ class down_thread_sorryserver_disconnect_test_class : public l7vs::tcp_session{
 			return down_thread_message_que;
 		};
 		
-		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+		void down_thread_function_array_clear(){
+			for(int i = 0; i <= DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = NULL;
+			}
 		};
 		void down_thread_message_up_thread_function_map_clear(){
 			down_thread_message_up_thread_function_map.clear();
@@ -6635,7 +6684,7 @@ void down_thread_sorryserver_disconnect_test(){
 	
 	// unit_test [6] down_thread_sorryserver_disconnect not fond down_thread_sorryserver_disconnect_event function error check
 	std::cout << "[6] down_thread_sorryserver_disconnect not fond down_thread_sorryserver_disconnect_event function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.down_thread_exit_call_chek = false;
@@ -6727,7 +6776,7 @@ void up_thread_realserver_connect_event_test(){
 	
 	// unit_test [3] up_thread_realserver_connect_event not fond function error check
 	std::cout << "[3] up_thread_realserver_connect_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_realserver_connect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -6841,7 +6890,7 @@ void up_thread_sorryserver_connect_event_test(){
 	
 	// unit_test [3] up_thread_sorryserver_connect_event not fond function error check
 	std::cout << "[3] up_thread_sorryserver_connect_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorryserver_connect_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -6944,7 +6993,7 @@ void down_thread_client_connection_chk_event_test(){
 	
 	// unit_test [3] down_thread_client_connection_chk_event not fond function error check
 	std::cout << "[3] down_thread_client_connection_chk_event not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	proto_test.handle_client_connection_check_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -7043,7 +7092,7 @@ void up_thread_realserver_connection_fail_event_test(){
 	
 	// unit_test [3] up_thread_realserver_connection_fail_event not fond function error check
 	std::cout << "[3] up_thread_realserver_connection_fail_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_realserver_connection_fail_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -7144,7 +7193,7 @@ void up_thread_sorryserver_connection_fail_event_test(){
 	
 	// unit_test [3] up_thread_sorryserver_connection_fail_event not fond function error check
 	std::cout << "[3] up_thread_sorryserver_connection_fail_event not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	proto_test.handle_sorryserver_connection_fail_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -7243,20 +7292,20 @@ class receive_send_test_class : public l7vs::tcp_session{
 		}
 		
 		void next_up_function_call(){
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 		}
 		void next_down_function_call(){
-			down_thread_next_call_function(LOCAL_PROC);
+			down_thread_next_call_function.second(LOCAL_PROC);
 		}
 		
 		void set_up_thread_next_function_call_exit(){
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = up_thread_function_map.find(UP_FUNC_EXIT);
-			up_thread_next_call_function = fun_it->second;
+			up_thread_function_pair fun_it = up_thread_function_array[UP_FUNC_EXIT];
+			up_thread_next_call_function = fun_it;
 		};
 		
 		void set_down_thread_next_function_call_exit(){
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = down_thread_function_map.find(DOWN_FUNC_EXIT);
-			down_thread_next_call_function = fun_it->second;
+			down_thread_function_pair fun_it = down_thread_function_array[DOWN_FUNC_EXIT];
+			down_thread_next_call_function = fun_it;
 		};
 		
 		// next call function check
@@ -7349,11 +7398,15 @@ class receive_send_test_class : public l7vs::tcp_session{
 		bool down_thread_client_connection_chk_event_call_check;
 		
 		// map clear
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
-		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+		void down_thread_function_array_clear(){
+			for(int i = 0; i <= DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = NULL;
+			}
 		};
 		
 		void up_thread_module_event_map_clear(){
@@ -7684,7 +7737,7 @@ void up_thread_client_receive_test(){
 	
 	// unit_test [13] up_thread_client_receive not fond function error check
 	std::cout << "[13] up_thread_client_receive not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -8061,7 +8114,7 @@ void down_thread_realserver_receive_test(){
 		
 	// unit_test [14] down_thread_realserver_receive not fond function error check
 	std::cout << "[14] down_thread_realserver_receive not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -8266,7 +8319,7 @@ void down_thread_sorryserver_receive_test(){
 
 	// unit_test [11] down_thread_sorryserver_receive not fond function error check
 	std::cout << "[11] down_thread_sorryserver_receive not fond function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -8483,7 +8536,7 @@ void up_thread_realserver_send_test(){
 	// unit_test [11] up_thread_realserver_send not fond function error check
 	std::cout << "[11] up_thread_realserver_send not fond function error check" << std::endl;
 	send_data.set_send_size(0);
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -8689,7 +8742,7 @@ void up_thread_sorryserver_send_test(){
 	// unit_test [10] up_thread_sorryserver_send not fond function error check
 	std::cout << "[10] up_thread_sorryserver_send not fond function error check" << std::endl;
 	send_data.set_send_size(0);
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -8918,7 +8971,7 @@ void down_thread_client_send_test(){
 	// unit_test [10] down_thread_client_send not fond function error check
 	std::cout << "[10] down_thread_client_send not fond function error check" << std::endl;
 	send_data.set_send_size(0);
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -9016,20 +9069,20 @@ class up_thread_realserver_connect_test_class : public l7vs::tcp_session{
 		}
 		
 		void next_up_function_call(){
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 		}
 		void next_down_function_call(){
-			down_thread_next_call_function(LOCAL_PROC);
+			down_thread_next_call_function.second(LOCAL_PROC);
 		}
 		
 		void set_up_thread_next_function_call_exit(){
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = up_thread_function_map.find(UP_FUNC_EXIT);
-			up_thread_next_call_function = fun_it->second;
+			up_thread_function_pair fun_it = up_thread_function_array[UP_FUNC_EXIT];
+			up_thread_next_call_function = fun_it;
 		};
 		
 		void set_down_thread_next_function_call_exit(){
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = down_thread_function_map.find(DOWN_FUNC_EXIT);
-			down_thread_next_call_function = fun_it->second;
+			down_thread_function_pair fun_it = down_thread_function_array[DOWN_FUNC_EXIT];
+			down_thread_next_call_function = fun_it;
 		};
 		
 		// next call function check
@@ -9053,11 +9106,15 @@ class up_thread_realserver_connect_test_class : public l7vs::tcp_session{
 		bool down_thread_exit_call_check;
 		
 		// map clear
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
-		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+		void down_thread_function_array_clear(){
+			for(int i = 0;i <= DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = NULL;
+			}
 		};
 		
 		void up_thread_module_event_map_clear(){
@@ -9188,7 +9245,7 @@ void up_thread_realserver_connect_test(){
 	std::cout << "[9] up_thread_realserver_connect not fond function error check" << std::endl;
 	rs_map.clear();
 	con_list.clear();
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -9256,20 +9313,20 @@ class up_thread_sorryserver_connect_test_class : public l7vs::tcp_session{
 		}
 		
 		void next_up_function_call(){
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 		}
 		void next_down_function_call(){
-			down_thread_next_call_function(LOCAL_PROC);
+			down_thread_next_call_function.second(LOCAL_PROC);
 		}
 		
 		void set_up_thread_next_function_call_exit(){
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = up_thread_function_map.find(UP_FUNC_EXIT);
-			up_thread_next_call_function = fun_it->second;
+			up_thread_function_pair fun_it = up_thread_function_array[UP_FUNC_EXIT];
+			up_thread_next_call_function = fun_it;
 		};
 		
 		void set_down_thread_next_function_call_exit(){
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = down_thread_function_map.find(DOWN_FUNC_EXIT);
-			down_thread_next_call_function = fun_it->second;
+			down_thread_function_pair fun_it = down_thread_function_array[DOWN_FUNC_EXIT];
+			down_thread_next_call_function = fun_it;
 		};
 		
 		// next call function check
@@ -9294,11 +9351,15 @@ class up_thread_sorryserver_connect_test_class : public l7vs::tcp_session{
 		bool down_thread_exit_call_check;
 		
 		// map clear
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
 		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+			for(int i = 0;i <= DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = NULL;
+			}
 		};
 		
 		void up_thread_module_event_map_clear(){
@@ -9385,7 +9446,7 @@ void up_thread_sorryserver_connect_test(){
 	
 	// unit_test [5] up_thread_sorryserver_connect not fond function error check
 	std::cout << "[5] up_thread_sorryserver_connect not fond function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -9477,20 +9538,20 @@ class realserver_disconnect_test_class : public l7vs::tcp_session{
 		}
 		
 		void next_up_function_call(){
-			up_thread_next_call_function(LOCAL_PROC);
+			up_thread_next_call_function.second(LOCAL_PROC);
 		}
 		void next_down_function_call(){
-			down_thread_next_call_function(LOCAL_PROC);
+			down_thread_next_call_function.second(LOCAL_PROC);
 		}
 		
 		void set_up_thread_next_function_call_exit(){
-			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = up_thread_function_map.find(UP_FUNC_EXIT);
-			up_thread_next_call_function = fun_it->second;
+			up_thread_function_pair fun_it = up_thread_function_array[UP_FUNC_EXIT];
+			up_thread_next_call_function = fun_it;
 		};
 		
 		void set_down_thread_next_function_call_exit(){
-			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator fun_it = down_thread_function_map.find(DOWN_FUNC_EXIT);
-			down_thread_next_call_function = fun_it->second;
+			down_thread_function_pair fun_it = down_thread_function_array[DOWN_FUNC_EXIT];
+			down_thread_next_call_function = fun_it;
 		};
 		
 		// next call function check
@@ -9525,11 +9586,15 @@ class realserver_disconnect_test_class : public l7vs::tcp_session{
 		bool down_thread_exit_call_check;
 		
 		// map clear
-		void up_thread_function_map_clear(){
-			up_thread_function_map.clear();
+		void up_thread_function_array_clear(){
+			for(int i = 0;i <= UP_FUNC_EXIT;i++){
+				up_thread_function_array[i].second = NULL;
+			}
 		};
-		void down_thread_function_map_clear(){
-			down_thread_function_map.clear();
+		void down_thread_function_array_clear(){
+			for(int i = 0;i <= DOWN_FUNC_EXIT;i++){
+				down_thread_function_array[i].second = NULL;
+			}
 		};
 		
 		void up_thread_module_event_map_clear(){
@@ -9654,7 +9719,7 @@ void up_thread_realserver_disconnect_test(){
 	
 	// unit_test [7] up_thread_realserver_disconnect not fond up_thread_sorryserver_disconnect_event function error check
 	std::cout << "[7] up_thread_realserver_disconnect not fond up_thread_sorryserver_disconnect_event function error check" << std::endl;
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.up_thread_exit_call_check = false;
@@ -9778,7 +9843,7 @@ void down_thread_realserver_disconnect_test(){
 	
 	// unit_test [7] down_thread_realserver_disconnect not fond up_thread_sorryserver_disconnect_event function error check
 	std::cout << "[7] down_thread_realserver_disconnect not fond up_thread_sorryserver_disconnect_event function error check" << std::endl;
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.down_thread_exit_call_check = false;
@@ -9942,7 +10007,7 @@ void up_thread_all_realserver_disconnect_test(){
 		rs_map.insert(*ref_rs_it);
 		ref_rs_it++;
 	}
-	test_obj.up_thread_function_map_clear();
+	test_obj.up_thread_function_array_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -10150,7 +10215,7 @@ void down_thread_all_realserver_disconnect_test(){
 		rs_list.push_back(*ref_rs_it);
 		ref_rs_it++;
 	}
-	test_obj.down_thread_function_map_clear();
+	test_obj.down_thread_function_array_clear();
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -10203,13 +10268,13 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 
-	ts->add( BOOST_TEST_CASE( &constructer_test ) );
-	ts->add( BOOST_TEST_CASE( &initialize_test ) );
-	ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
-	ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
-	ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
-	ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
-	ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
+ 	ts->add( BOOST_TEST_CASE( &constructer_test ) );
+ 	ts->add( BOOST_TEST_CASE( &initialize_test ) );
+ 	ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+ 	ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
+ 	ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
+ 	ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
+ 	ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
 	ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
@@ -10226,7 +10291,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
- 	ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
+	ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );

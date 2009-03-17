@@ -124,6 +124,8 @@ namespace l7vs{
 				DOWN_FUNC_SORRY_DISABLE_EVENT,				//! down_thread_sorry_disable_event function
 				DOWN_FUNC_EXIT								//! down_thread_exit function
 			};
+			typedef std::pair< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func > up_thread_function_pair;
+			typedef std::pair< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func > down_thread_function_pair;
 			//! tcp_session use io service
 			boost::asio::io_service& io;
 			//! parent virtualservice
@@ -172,13 +174,13 @@ namespace l7vs{
 			//! module function mutex (handle_sorry_disable) 
 			boost::mutex module_function_sorry_disable_mutex;
 			//! up thread call function object array
-			tcp_session_func	up_thread_function_array[UP_FUNC_EXIT+1];
+			up_thread_function_pair	up_thread_function_array[UP_FUNC_EXIT+1];
 			//! up thread recept module event convert to up thread function type map
 			std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG > up_thread_module_event_map;
 			//! up thread raise message map for down thread
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func > up_thread_message_down_thread_function_map;
 			//! up thread next call function object
-			tcp_session_func up_thread_next_call_function;
+			up_thread_function_pair up_thread_next_call_function;
 			//! up thread use client side buffer
 			tcp_data up_thread_data_client_side;
 			//! up thread use destination side buffer
@@ -188,13 +190,13 @@ namespace l7vs{
 			//! up thread use message data
 			tcp_data up_thread_message_data;
 			//! down thread call function object array
-			tcp_session_func	down_thread_function_array[DOWN_FUNC_EXIT+1];
+			down_thread_function_pair	down_thread_function_array[DOWN_FUNC_EXIT+1];
 			//! down thread recept module event convert to down thread function type map
 			std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG > down_thread_module_event_map;
 			//! down thread raise message map for up thread
 			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func > down_thread_message_up_thread_function_map;
 			//! down thread next call function object
-			tcp_session_func down_thread_next_call_function;
+			down_thread_function_pair down_thread_next_call_function;
 			//! down thread use client side buffer
 			tcp_data down_thread_data_client_side;
 			//! down thread use destination side buffer
