@@ -1016,8 +1016,8 @@ void l7vs::LoggerImpl::loadConf(){
 		log4cxx::LayoutPtr layout =
 			new log4cxx::PatternLayout(LOGGER_LAYOUT);
 
-		log4cxx::rolling::RollingFileAppender*	normalAppender = NULL;
-		log4cxx::rolling::RollingFileAppender*	accessAppender = NULL;
+		log4cxx::rolling::RollingFileAppenderPtr	normalAppender;
+		log4cxx::rolling::RollingFileAppenderPtr	accessAppender;
 		
 		for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
 			if( 0 == appender_count )
@@ -1053,54 +1053,37 @@ void l7vs::LoggerImpl::loadConf(){
 					sizeTriggeringPolicy->setMaxFileSize(property->max_file_size_value);
 		
 					// create RollingFileAppender
-					if( 0 == appender_count ){
-						normalAppender = new log4cxx::rolling::RollingFileAppender();
+					log4cxx::rolling::RollingFileAppenderPtr sizeAppender =
+						new log4cxx::rolling::RollingFileAppender();
 		
-						// set layout
-						normalAppender->setLayout(layout);
-			
-						// set RollingPolicy
-						normalAppender->setRollingPolicy(fixedRollingPolicy);
-			
-						// set TriggeringPolicy
-						normalAppender->setTriggeringPolicy(sizeTriggeringPolicy);
+					// set layout
+					sizeAppender->setLayout(layout);
 		
-						// set Log Filename
-						try{
-							normalAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-						}
-						catch( const std::exception& e ){
-							std::stringstream	buf;
-							buf << "File Create Failed:" << property->log_filename_value;
-							throw std::logic_error( buf.str() );
-						}
-						// activate appender options
-						normalAppender->activateOptions(pool);
+					// set RollingPolicy
+					sizeAppender->setRollingPolicy(fixedRollingPolicy);
+		
+					// set TriggeringPolicy
+					sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
+	
+					// set Log Filename
+					try{
+						sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 					}
-					else{
-						accessAppender = new log4cxx::rolling::RollingFileAppender();
-		
-						// set layout
-						accessAppender->setLayout(layout);
-			
-						// set RollingPolicy
-						accessAppender->setRollingPolicy(fixedRollingPolicy);
-			
-						// set TriggeringPolicy
-						accessAppender->setTriggeringPolicy(sizeTriggeringPolicy);
-		
-						// set Log Filename
-						try{
-							accessAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-						}
-						catch( const std::exception& e ){
-							std::stringstream	buf;
-							buf << "File Create Failed:" << property->log_filename_value;
-							throw std::logic_error( buf.str() );
-						}
-						// activate appender options
-						accessAppender->activateOptions(pool);
+					catch( const std::exception& e ){
+						std::stringstream	buf;
+						buf << "File Create Failed:" << property->log_filename_value;
+						throw std::logic_error( buf.str() );
 					}
+		
+					// activate appender options
+					sizeAppender->activateOptions(pool);
+		
+					// add size_base_appender to CategoryLogger
+					//cat_logger->addAppender(sizeAppender);
+					if( 0 == appender_count )
+						normalAppender = sizeAppender;
+					else
+						accessAppender = sizeAppender;
 
 					break;
 				}
@@ -1128,50 +1111,34 @@ void l7vs::LoggerImpl::loadConf(){
 					strictRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
 		
 					//create RollingFileAppender
-					if( 0 == appender_count ){
-						normalAppender = new log4cxx::rolling::RollingFileAppender();
-
-						// set layout
-						normalAppender->setLayout(layout);
+					log4cxx::rolling::RollingFileAppenderPtr dateAppender =
+						new log4cxx::rolling::RollingFileAppender();
+				
+					// set layout
+					dateAppender->setLayout(layout);
+	
+					// set RollingPolicy (TriggeringPolicy also included RollingPolicy)
+					dateAppender->setRollingPolicy(strictRollingPolicy);
 		
-						// set RollingPolicy (TriggeringPolicy also included RollingPolicy)
-						normalAppender->setRollingPolicy(strictRollingPolicy);
-			
-						// set Log Filename
-						try{
-							normalAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-						}
-						catch( const std::exception& e ){
-							std::stringstream	buf;
-							buf << "File Create Failed:" << property->log_filename_value;
-							throw std::logic_error( buf.str() );
-						}
-			
-						// activate appender options
-						normalAppender->activateOptions(pool);
+					// set Log Filename
+					try{
+						dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 					}
-					else{
-						accessAppender = new log4cxx::rolling::RollingFileAppender();
-
-						// set layout
-						accessAppender->setLayout(layout);
+					catch( const std::exception& e ){
+						std::stringstream	buf;
+						buf << "File Create Failed:" << property->log_filename_value;
+						throw std::logic_error( buf.str() );
+					}
 		
-						// set RollingPolicy (TriggeringPolicy also included RollingPolicy)
-						accessAppender->setRollingPolicy(strictRollingPolicy);
-			
-						// set Log Filename
-						try{
-							accessAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-						}
-						catch( const std::exception& e ){
-							std::stringstream	buf;
-							buf << "File Create Failed:" << property->log_filename_value;
-							throw std::logic_error( buf.str() );
-						}
-			
-						// activate appender options
-						accessAppender->activateOptions(pool);
-					}
+					// activate appender options
+					dateAppender->activateOptions(pool);
+		
+					// add date_based_appender to CategoryLogger
+					//cat_logger->addAppender(dateAppender);
+					if( 0 == appender_count )
+						normalAppender = dateAppender;
+					else
+						accessAppender = dateAppender;
 
 					break;
 				}
@@ -1202,50 +1169,35 @@ void l7vs::LoggerImpl::loadConf(){
 					timeSizeRollingPolicy->setMaxFileSize(property->max_file_size_value);
 		
 					// create Rolling FileAppender
-					if( 0 == appender_count ){
-						normalAppender = new log4cxx::rolling::RollingFileAppender();
-
-						// set layout
-						normalAppender->setLayout(layout);
-			
-						// set RollingPolicy (TriggeringPolicy also included RollingPolicy)
-						normalAppender->setRollingPolicy(timeSizeRollingPolicy);
-			
-						// set Log Filename
-						try{
-							normalAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-						}
-						catch( const std::exception& e ){
-							std::stringstream	buf;
-							buf << "File Create Failed:" << property->log_filename_value;
-							throw std::logic_error( buf.str() );
-						}
-			
-						// activate appender options
-						normalAppender->activateOptions(pool);
+					log4cxx::rolling::RollingFileAppenderPtr dateSizeAppender =
+						new log4cxx::rolling::RollingFileAppender();
+		
+					// set layout
+					dateSizeAppender->setLayout(layout);
+		
+					// set RollingPolicy (TriggeringPolicy also included RollingPolicy)
+					dateSizeAppender->setRollingPolicy(timeSizeRollingPolicy);
+		
+					// set Log Filename
+					try{
+						dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
 					}
-					else{
-						accessAppender = new log4cxx::rolling::RollingFileAppender();
-
-						// set layout
-						accessAppender->setLayout(layout);
-			
-						// set RollingPolicy (TriggeringPolicy also included RollingPolicy)
-						accessAppender->setRollingPolicy(timeSizeRollingPolicy);
-			
-						// set Log Filename
-						try{
-							accessAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-						}
-						catch( const std::exception& e ){
-							std::stringstream	buf;
-							buf << "File Create Failed:" << property->log_filename_value;
-							throw std::logic_error( buf.str() );
-						}
-			
-						// activate appender options
-						accessAppender->activateOptions(pool);
+					catch( const std::exception& e ){
+						std::stringstream	buf;
+						buf << "File Create Failed:" << property->log_filename_value;
+						throw std::logic_error( buf.str() );
 					}
+		
+					// activate appender options
+					dateSizeAppender->activateOptions(pool);
+		
+					// add time_and_size_based_appender to CategoryLogger
+					//cat_logger->addAppender(dateSizeAppender);
+					if( 0 == appender_count )
+						normalAppender = dateSizeAppender;
+					else
+						accessAppender = dateSizeAppender;
+	
 				}
 			}	//switch
 		}	//for 
