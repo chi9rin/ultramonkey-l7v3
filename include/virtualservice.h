@@ -11,6 +11,7 @@
 #ifndef	VIRTUALSERVICE_H
 #define	VIRTUALSERVICE_H
 
+#include <sched.h>
 #include <net/if.h>
 #include <unistd.h>
 #include <sched.h>
@@ -38,6 +39,7 @@
 #define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
+#define	PARAM_SCHED_ALGORITHM	"task_scheduler_algorithm"
 #define	PARAM_REP_INTERVAL		"interval"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
@@ -114,9 +116,11 @@ protected:
 				nic_realserver_side;
 		int		session_pool_size;
 		long	bps_interval;
+		int		schedule_algorithm;
 		long	rep_interval;
 		parameter_data() :	session_pool_size( SESSION_POOL_NUM_DEFAULT ),
 							bps_interval( BPS_INTERVAL_DEFAULT ),
+							schedule_algorithm( SCHED_OTHER ),
 							rep_interval( REP_INTERVAL_DEFAULT ) {}
 	};
 

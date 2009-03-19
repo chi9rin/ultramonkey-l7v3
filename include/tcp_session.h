@@ -25,6 +25,9 @@
 
 #define TCP_SESSION_THREAD_STATE_BIT 8
 
+#define	PARAM_UP_BUFFER_SIZE	"upstream_buffer_size"
+#define	PARAM_DOWN_BUFFER_SIZE	"downstream_buffer_size"
+
 namespace l7vs{
 
 //!	@class	virtualservice_tcp
@@ -205,6 +208,11 @@ namespace l7vs{
 			tcp_thread_message_que down_thread_message_que;
 			//! up thread use message data
 			tcp_data down_thread_message_data;
+
+			//! upstream socket buffer size
+			int		upstream_buffer_size;
+			//! downstream socket buffer size
+			int		downstream_buffer_size;
 			
 			//! virtual service message convert to up thread function object map
 			std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_up_thread_function_map;

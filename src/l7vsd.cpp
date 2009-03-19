@@ -21,7 +21,7 @@
  * 02110-1301 USA
  *
  **********************************************************************/
-
+#include <sys/mman.h>
 #include <signal.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -814,16 +814,20 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	}
 	/*------ DEBUG LOG END ------*/
 
+	mlockall(MCL_FUTURE);
+
 	try{
 		// check options
 		if( !check_options( argc, argv ) ){
 			std::cerr << usage();
+			munlockall();
 			return -1;
 		}
 	
 		// help mode ?
 		if( help ){
 			std::cout << usage();
+			munlockall();
 			return 0;
 		}
 	
@@ -834,6 +838,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 				std::stringstream buf;
 				buf << "daemon() failed: " << strerror( errno );
 				logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+				munlockall();
 				return -1;
 			}
 		}
@@ -872,6 +877,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		receiver.reset( new command_receiver( dispatcher, L7VS_CONFIG_SOCKNAME, *this ) );
 		if( NULL ==  receiver ){
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "command receiver pointer null.", __FILE__, __LINE__ );
+			munlockall();
 			return -1;
 		}
 	
@@ -879,6 +885,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		rep.reset( new replication() );
 		if( NULL ==  rep ){
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "replication pointer null.", __FILE__, __LINE__ );
+			munlockall();
 			return -1;
 		}
 		if( 0 > rep->initialize() ){
@@ -889,10 +896,12 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		bridge.reset( new snmpbridge( *this, dispatcher ) );
 		if( NULL ==  bridge ){
 			logger.putLogFatal( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge pointer null.", __FILE__, __LINE__ );
+			munlockall();
 			return -1;
 		}
 		if( 0 > bridge->initialize() ){
 			logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, "snmpbridge initialize failed.", __FILE__, __LINE__ );
+			munlockall();
 			return -1;
 		}
 	
@@ -930,9 +939,11 @@ int	l7vsd::run( int argc, char* argv[] ) {
 		std::stringstream	buf;
 		buf << "l7vsd run error:" << e.what();
 		logger.putLogError( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
+		munlockall();
 		return -1;
 	}
 
+	munlockall();
 	return 0;
 }
 

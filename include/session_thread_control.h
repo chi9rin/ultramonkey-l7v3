@@ -55,14 +55,17 @@ protected:
 
 	cpu_set_t			vsnic_cpumask;
 	cpu_set_t			rsnic_cpumask;
+
+	int					sched_algorithm;
 public:
 	//! constractor.
 	//! @param session_ptr	session class shared ptr
-	session_thread_control( tcp_session* ptr, cpu_set_t in_upcpu, cpu_set_t in_downcpu ) :
+	session_thread_control( tcp_session* ptr, cpu_set_t in_upcpu, cpu_set_t in_downcpu, int	in_sched_algorithm ) :
 			upthread_state( WAIT ),
 			downthread_state( WAIT ),
 			vsnic_cpumask( in_upcpu ),
-			rsnic_cpumask( in_downcpu ){
+			rsnic_cpumask( in_downcpu ),
+			sched_algorithm( in_sched_algorithm ){
 		session.reset( ptr );
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	//! upstream thread create
 		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create

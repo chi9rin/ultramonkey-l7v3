@@ -37,7 +37,9 @@ namespace l7vs{
 		thread_state(0),
 		protocol_module(NULL),
 		session_pause_flag(false),
-		client_socket(session_io){
+		client_socket(session_io),
+		upstream_buffer_size(8192),
+		downstream_buffer_size(8192){
 		
 		// sorryserver socket
 		tcp_socket_ptr sorry_socket(new tcp_socket(session_io));
@@ -238,6 +240,25 @@ namespace l7vs{
 		down_thread_message_que.clear();
 		protocol_module = parent_service.get_protocol_module();
 		
+		//load parameter
+		l7vs::Parameter		param;
+		l7vs::error_code	vs_err;
+		int					int_val;
+
+		int_val	= param.get_int( PARAM_COMP_SESSION, PARAM_UP_BUFFER_SIZE, vs_err );
+		if( !vs_err ){
+			upstream_buffer_size	= int_val;
+		}else{
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, "up buffer param error set default 8192" , __FILE__, __LINE__ );	
+		}
+
+		int_val	= param.get_int( PARAM_COMP_SESSION, PARAM_DOWN_BUFFER_SIZE, vs_err );
+		if( !vs_err ){
+			downstream_buffer_size	= int_val;
+		}else{
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, "down buffer param error set default 8192" , __FILE__, __LINE__ );	
+		}
+		
 		if(protocol_module == NULL){
 			//Error protocol_module NULL
 			std::stringstream buf;
@@ -248,7 +269,6 @@ namespace l7vs{
 			msg.flag = true;
 			msg.message = "Not fond protocol module";
 		}
-
 		return msg;
 	}
 	//! get reference client side socket
@@ -482,6 +502,53 @@ namespace l7vs{
 				}
 			}
 		}
+
+		{
+			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+			is_exit = exit_flag;
+		}
+		if(!is_exit){
+			//set client_socket options(recieve buffer size)
+			boost::asio::socket_base::receive_buffer_size	opt1( upstream_buffer_size );
+			client_socket.get_socket().set_option( opt1 ,ec);
+			if(ec){
+				//client socket Error!
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] client socket recieve buffer size error : ";
+				buf << ec.message();
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				{
+					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+					exit_flag = true;
+				}
+			}
+		}
+
+		{
+			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+			is_exit = exit_flag;
+		}
+		if(!is_exit){
+			//set client_socket options(send buffer size)
+			boost::asio::socket_base::send_buffer_size		opt2( downstream_buffer_size );
+			client_socket.get_socket().set_option( opt2 ,ec);
+			if(ec){
+				//client socket Error!
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] client socket send buffer size error : ";
+				buf << ec.message();
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				{
+					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+					exit_flag = true;
+				}
+			}
+		}
+
 		boost::asio::ip::udp::endpoint dumy_end;
 		protocol_module_base::EVENT_TAG module_event;
 		std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type;
@@ -903,7 +970,6 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_client_side.get_data();
 		boost::system::error_code ec;
 		size_t recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
-		up_thread_data_client_side.set_size(recv_size);
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			if(recv_size > 0){
@@ -922,6 +988,7 @@ namespace l7vs{
 					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
+				up_thread_data_client_side.set_size(recv_size);
 				parent_service.update_up_recv_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(up_thread_id,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1289,7 +1356,38 @@ namespace l7vs{
 					buf << ec.message();
 					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
+					return;
 				}
+
+				//set realserver_socket options(recieve buffer size)
+				boost::asio::socket_base::receive_buffer_size	opt1( downstream_buffer_size );
+				new_socket->get_socket().set_option(opt1 , ec);
+				if(ec){
+					// socket set nonblocking mode error
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] realserver socket recieve buffer size error : ";
+					buf << ec.message();
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					up_thread_exit(process_type);
+					return;
+				}
+				//set realserver_socket options(send buffer size)
+				boost::asio::socket_base::send_buffer_size		opt2( upstream_buffer_size );
+				new_socket->get_socket().set_option(opt2 , ec);
+				if(ec){
+					// socket set nonblocking mode error
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] realserver socket send buffer size error : ";
+					buf << ec.message();
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					up_thread_exit(process_type);
+					return;
+				}
+
 				socket_element push_element;
 				push_element.first = server_endpoint;
 				push_element.second = new_socket;
@@ -2132,7 +2230,6 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
 		boost::system::error_code ec;
 		size_t recv_size = down_thread_current_receive_realserver_socket->second->read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE),ec);
-		down_thread_data_dest_side.set_size(recv_size);
 		boost::asio::ip::tcp::endpoint server_endpoint = down_thread_current_receive_realserver_socket->first;
 		down_thread_data_dest_side.set_endpoint(server_endpoint);
 		DOWN_THREAD_FUNC_TYPE_TAG func_tag;
@@ -2152,6 +2249,7 @@ namespace l7vs{
 					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
+				down_thread_data_dest_side.set_size(recv_size);
 				parent_service.update_down_recv_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id,server_endpoint,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -2667,7 +2765,6 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
 		boost::system::error_code ec;
 		size_t recv_size = sorryserver_socket.second->read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE),ec);
-		down_thread_data_dest_side.set_size(recv_size);
 		boost::asio::ip::tcp::endpoint sorry_endpoint = sorryserver_socket.first;
 		down_thread_data_dest_side.set_endpoint(sorry_endpoint);
 		DOWN_THREAD_FUNC_TYPE_TAG func_tag;
@@ -2687,6 +2784,7 @@ namespace l7vs{
 					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
+				down_thread_data_dest_side.set_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(down_thread_id,sorry_endpoint,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
 				if(func_type == down_thread_module_event_map.end()){

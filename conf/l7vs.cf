@@ -190,6 +190,7 @@ maxfileno = 65535
 nic_realserver_side			= "eth0"
 session_thread_pool_size	= 256
 throughput_calc_interval	= 500
+task_scheduler_algorithm	= 0
 
 #
 # l7vsd replication setting
@@ -217,3 +218,8 @@ ip_addr = "127.0.0.1"
 port = 60162
 interval = 1000
 status = 0
+
+[session]
+upstream_buffer_size = 8192
+downstream_buffer_size = 8192
+

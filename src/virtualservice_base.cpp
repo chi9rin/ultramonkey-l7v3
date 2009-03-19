@@ -100,6 +100,12 @@ void	l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
 	int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_BPS_CALC_INTERVAL, vs_err );
 	if( !vs_err )
 		param_data.bps_interval = int_val;
+	//get task schedule algorithm
+	int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SCHED_ALGORITHM, vs_err );
+	if( !vs_err ){
+		if( (SCHED_FIFO == int_val) || (SCHED_RR == int_val) || (SCHED_OTHER == int_val) || (SCHED_BATCH == int_val) )
+			param_data.schedule_algorithm = int_val;
+	}
 	//get replication interval
 	int_val	= param.get_int( l7vs::PARAM_COMP_REPLICATION, PARAM_REP_INTERVAL, vs_err );
 	if( !vs_err )
@@ -540,11 +546,10 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_downstream(){
  */
 unsigned long long	l7vs::virtualservice_base::get_wait_upstream(){
 	boost::mutex::scoped_lock lock( wait_count_up_mutex );
-	if(	( (boost::this_thread::get_id() == this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ) ||
-		( (boost::this_thread::get_id() != this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ) ){
+	if(	LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_upstream() : ret = %d" );
 		fmt % wait_count_up;
-		l7vs::Logger::putLogDebug( ((boost::this_thread::get_id() == this_id) ? l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE : l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ),
+		l7vs::Logger::putLogDebug(	l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD,
 									0, fmt.str(), __FILE__, __LINE__ );
 	}
 	return wait_count_up;
@@ -558,11 +563,10 @@ unsigned long long	l7vs::virtualservice_base::get_wait_upstream(){
  */
 unsigned long long	l7vs::virtualservice_base::get_wait_downstream(){
 	boost::mutex::scoped_lock lock( wait_count_down_mutex );
-	if(	( (boost::this_thread::get_id() == this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ) ||
-		( (boost::this_thread::get_id() != this_id) && ( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ) ){
+	if(	LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_downstream() : ret = %d" );
 		fmt % wait_count_down;
-		l7vs::Logger::putLogDebug( ((boost::this_thread::get_id() == this_id) ? l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE : l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ),
+		l7vs::Logger::putLogDebug(	l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD,
 									0, fmt.str(), __FILE__, __LINE__ );
 	}
 	return wait_count_down;

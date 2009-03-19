@@ -531,7 +531,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					}
 					return;
 				}
-				session_thread_control*	p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask );
+				session_thread_control*	p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, param_data.schedule_algorithm );
 				pool_sessions.push_back( p_stc );
 			}
 			catch( std::bad_alloc ex ){
@@ -1238,7 +1238,8 @@ void	l7vs::virtualservice_tcp::run(){
 		}
 		return;
 	}
-
+	boost::asio::socket_base::receive_buffer_size option(8192 * 192);
+	acceptor_.set_option(option);
 	//start listen
 	acceptor_.listen();
 
