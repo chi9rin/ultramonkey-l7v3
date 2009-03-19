@@ -40,7 +40,7 @@ void	session_thread_control::upstream_run(){
 	}else if( SCHED_BATCH == sched_algorithm ){
 		sched_policy	= SCHED_BATCH;
 	}
-	//ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
+	ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 		boost::format	fmt( "upstream_run : parameter of task scheduler algorithm : priority = %d / algorithm : %d" );
 		fmt % scheduler_param.__sched_priority % sched_policy;
@@ -114,7 +114,7 @@ void	session_thread_control::downstream_run(){
 	}else if( SCHED_BATCH == sched_algorithm ){
 		sched_policy	= SCHED_BATCH;
 	}
-	//ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
+	ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 		boost::format	fmt( "upstream_run : parameter of task scheduler algorithm : priority = %d / algorithm : %d" );
 		fmt % scheduler_param.__sched_priority % sched_policy;
