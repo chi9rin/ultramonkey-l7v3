@@ -199,7 +199,7 @@ public:
 				% hostname;
 			break;
 		default:
-			buf << boost::format( "%s%d%03d%04d %s %s" )
+			buf << boost::format( "%s%d%02d%05d %s %s" )
 				% LOGGER_PROCESS_ID
 				% LOG_LV_FATAL
 				% cat
@@ -257,7 +257,7 @@ public:
 				% hostname;
 			break;
 		default:
-			buf << boost::format( "%s%d%03d%04d %s %s" )
+			buf << boost::format( "%s%d%02d%05d %s %s" )
 				% LOGGER_PROCESS_ID
 				% LOG_LV_ERROR
 				% cat
@@ -315,7 +315,7 @@ public:
 				% hostname;
 			break;
 		default:
-			buf << boost::format( "%s%d%03d%04d %s %s" )
+			buf << boost::format( "%s%d%02d%05d %s %s" )
 				% LOGGER_PROCESS_ID
 				% LOG_LV_WARN
 				% cat
@@ -369,7 +369,7 @@ public:
 				% hostname;
 			break;
 		default:
-			buf << boost::format( "%s%d%03d%04d %s %s" )
+			buf << boost::format( "%s%d%02d%05d %s %s" )
 				% LOGGER_PROCESS_ID
 				% LOG_LV_INFO
 				% cat
@@ -423,7 +423,7 @@ public:
 				% hostname;
 			break;
 		default:
-			buf << boost::format( "%s%d%03d%04d %s %s" )
+			buf << boost::format( "%s%d%02d%05d %s %s" )
 				% LOGGER_PROCESS_ID
 				% LOG_LV_DEBUG
 				% cat
