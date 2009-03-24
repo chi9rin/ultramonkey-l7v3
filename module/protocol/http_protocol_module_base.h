@@ -60,7 +60,34 @@ protected:
 	//! @param size_t&				header length
 	//! @return bool				find is true. not find is false
 	bool	find_http_header( const char*, const size_t, const std::string&, size_t&, size_t& );
-
+	//! serch http header Cookie
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @param size_t&				header offset
+	//! @param size_t&				header length
+	//! @return bool				find is true. not find is false
+	bool	find_http_header_cookie( const char*, const size_t, size_t&, size_t& );
+	//! serch http header Content_Length
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @param size_t&				header offset
+	//! @param size_t&				header length
+	//! @return bool				find is true. not find is false
+	bool	find_http_header_content_length( const char*, const size_t, size_t&, size_t& );
+	//! serch http header X_Forwarded_For
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @param size_t&				header offset
+	//! @param size_t&				header length
+	//! @return bool				find is true. not find is false
+	bool	find_http_header_x_forwarded_for( const char*, const size_t, size_t&, size_t& );
+	//! serch http header all
+	//! @param const char*			buffer
+	//! @param const size_t			buffer_len
+	//! @param size_t&				header offset
+	//! @param size_t&				header length
+	//! @return bool				find is true. not find is false
+	bool	find_http_header_all( const char*, const size_t, size_t&, size_t& );
 public:
 	//! constractor
 	http_protocol_module_base( std::string in_modulename ) : protocol_module_base( in_modulename ){};

@@ -7,6 +7,28 @@
 #include <boost/format.hpp>
 #include "protocol_module_cinsert.h"
 
+using namespace boost::xpressive;
+
+sregex	cookie_name_regex
+				= +( alpha | digit );
+
+sregex	cookie_expire_regex
+				= +digit;
+
+sregex	sorry_uri_regex
+				=	+(	'/' >>
+						*(	alpha |
+							digit |
+							( set = ';', ':', '@', '&', '=' ) |
+							( set = '$', '-', '_', '.', '+' ) |
+							( set = '!', '*', '\'', '\(', ')', ',' ) |
+							'%' >> repeat<2>(xdigit)));
+
+cregex	content_length_regex
+				= icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
+
+cregex	cookie_regex;
+
 namespace l7vs
 {
 //! constractor
@@ -207,8 +229,6 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	}
 	//---------- DEBUG LOG END ------------------------------
 
-	using namespace boost::xpressive;
-
 	check_message_result check_result;
 
 	bool cookie_name_set_flag	= false;
@@ -221,17 +241,6 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	std::vector<std::string>::const_iterator args_itr;
 
 	bool	match_result;
-
-	sregex	cookie_name_regex = +( alpha | digit );
-	sregex	cookie_expire_regex = +digit;
-	sregex	sorry_uri_regex
-				=	+(	'/' >>
-						*(	alpha |
-							digit |
-							( set = ';', ':', '@', '&', '=' ) |
-							( set = '$', '-', '_', '.', '+' ) |
-							( set = '!', '*', '\'', '\(', ')', ',' ) |
-							'%' >> repeat<2>(xdigit)));
 
 	int	cookie_expire_tmp;
 
@@ -572,8 +581,6 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	}
 	//---------- DEBUG LOG END ------------------------------
 
-	using namespace boost::xpressive;
-
 	check_message_result check_result;
 
 	bool cookie_name_set_flag	= false;
@@ -586,17 +593,6 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	std::vector<std::string>::const_iterator args_itr;
 
 	bool	match_result;
-
-	sregex	cookie_name_regex = +( alpha | digit );
-	sregex	cookie_expire_regex = +digit;
-	sregex	sorry_uri_regex
-				=	+(	'/' >>
-						*(	alpha |
-							digit |
-							( set = ';', ':', '@', '&', '=' ) |
-							( set = '$', '-', '_', '.', '+' ) |
-							( set = '!', '*', '\'', '\(', ')', ',' ) |
-							'%' >> repeat<2>(xdigit)));
 
 	try
 	{
@@ -894,6 +890,14 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 			{
 				memcpy( cookie_name.data(), "CookieName\0", 12);
 			}
+
+			std::string	cookie_name_str = cookie_name.data();
+
+			cookie_regex
+					=	icase("Cookie") >> ":" >> *_ >>
+						cookie_name_str >> "=" >>
+						( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
+						":" >> ( s2 = +_d );
 
 			if( cookie_expire_set_flag == false )
 			{
@@ -1376,8 +1380,6 @@ protocol_module_cinsert::handle_client_recv(
 	}
 	//---------- DEBUG LOG END ------------------------------
 
-	using namespace boost::xpressive;
-
 	t_session_thread_data_cinsert	thread_data;
 
 	char*	buffer_1			= NULL;
@@ -1398,7 +1400,6 @@ protocol_module_cinsert::handle_client_recv(
 	std::string			http_header_name_content_length = "Content-Length";
 	std::string			content_length;
 	match_results< const char* >	regex_result;
-	cregex	content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
 
 	t_session_thread_data_map_itr	thread_data_itr;
 	t_recive_data_map_itr			recive_data_itr;
@@ -1625,11 +1626,18 @@ protocol_module_cinsert::handle_client_recv(
 							if( check_result == CHECK_OK )
 							{
 
-								find_result = find_http_header(
+// 								find_result = find_http_header(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												unsend_data_size,
+// 												http_header_name_blank,
+// 												http_header_offset,
+// 												http_header_len );
+
+								find_result = find_http_header_all(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
 												unsend_data_size,
-												http_header_name_blank,
 												http_header_offset,
 												http_header_len );
 
@@ -1647,11 +1655,18 @@ protocol_module_cinsert::handle_client_recv(
 														= http_header_offset + http_header_len + 4;
 									}
 
-									find_result = find_http_header(
+// 									find_result = find_http_header(
+// 													(const char*)recive_data_itr->second.recive_buffer
+// 														+ send_status_itr->send_offset,
+// 													send_status_itr->send_rest_size,
+// 													http_header_name_content_length,
+// 													http_header_offset,
+// 													http_header_len );
+
+									find_result = find_http_header_content_length(
 													(const char*)recive_data_itr->second.recive_buffer
 														+ send_status_itr->send_offset,
 													send_status_itr->send_rest_size,
-													http_header_name_content_length,
 													http_header_offset,
 													http_header_len );
 
@@ -1795,11 +1810,18 @@ protocol_module_cinsert::handle_client_recv(
 						if( check_result == CHECK_OK )
 						{
 
-							find_result = find_http_header(
+// 							find_result = find_http_header(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_add.send_offset,
+// 											rest_request_data_size,
+// 											http_header_name_blank,
+// 											http_header_offset,
+// 											http_header_len );
+
+							find_result = find_http_header_all(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_add.send_offset,
 											rest_request_data_size,
-											http_header_name_blank,
 											http_header_offset,
 											http_header_len );
 
@@ -1817,11 +1839,18 @@ protocol_module_cinsert::handle_client_recv(
 													= http_header_offset + http_header_len + 4;
 								}
 
-								find_result = find_http_header(
+// 								find_result = find_http_header(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_add.send_offset,
+// 												send_status_add.send_rest_size,
+// 												http_header_name_content_length,
+// 												http_header_offset,
+// 												http_header_len );
+
+								find_result = find_http_header_content_length(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_add.send_offset,
 												send_status_add.send_rest_size,
-												http_header_name_content_length,
 												http_header_offset,
 												http_header_len );
 
@@ -2022,7 +2051,7 @@ protocol_module_cinsert::handle_realserver_select(
 	}
 	//---------- DEBUG LOG END ------------------------------
 
-	using namespace boost::xpressive;
+//	cregex	cookie_regex;
 
 	t_session_thread_data_cinsert	thread_data;
 
@@ -2032,16 +2061,11 @@ protocol_module_cinsert::handle_realserver_select(
 	size_t	http_header_offset	= 0;
 	size_t	http_header_len		= 0;
 	std::string		http_header_name_cookie = "Cookie";
-	std::string		cookie_name_str = cookie_name.data();
+//	std::string		cookie_name_str = cookie_name.data();
 	std::string		cookie;
 	std::string		cookie_address;
 	std::string		cookie_port;
 	match_results< const char* >	regex_result;
-	cregex	cookie_regex
-				=	icase("Cookie") >> ":" >> *_ >>
-					cookie_name_str >> "=" >>
-					( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
-					":" >> ( s2 = +_d );
 
 	realserverlist_type::iterator	rs_list_itr;
 	t_session_thread_data_map_itr	thread_data_itr;
@@ -2109,14 +2133,21 @@ protocol_module_cinsert::handle_realserver_select(
 						else
 						{
 
-							find_result = find_http_header(
+// 							find_result = find_http_header(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_itr->send_offset,
+// 											send_status_itr->send_possible_size,
+// 											http_header_name_cookie,
+// 											http_header_offset,
+// 											http_header_len );
+
+							find_result = find_http_header_cookie(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											send_status_itr->send_possible_size,
-											http_header_name_cookie,
 											http_header_offset,
 											http_header_len );
-	
+
 							if( find_result == true )
 							{
 	
@@ -2124,7 +2155,13 @@ protocol_module_cinsert::handle_realserver_select(
 													+ send_status_itr->send_offset
 													+ http_header_offset,
 													http_header_len );
-	
+
+// 								cookie_regex
+// 										=	icase("Cookie") >> ":" >> *_ >>
+// 											cookie_name_str >> "=" >>
+// 											( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
+// 											":" >> ( s2 = +_d );
+
 								find_result = regex_search(	cookie.c_str(),
 															regex_result,
 															cookie_regex );
@@ -2365,15 +2402,21 @@ protocol_module_cinsert::handle_realserver_connect(
 						if( forwarded_for == 1 )
 						{
 
-							find_result
-								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 							find_result
+// 								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 														+ send_status_itr->send_offset,
+// 													send_status_itr->send_possible_size,
+// 													http_header_name_x_forwarded_for,
+// 													http_header_offset,
+// 													http_header_len );
+
+							find_result = find_http_header_x_forwarded_for(
+													(const char*)recive_data_itr->second.recive_buffer
 														+ send_status_itr->send_offset,
 													send_status_itr->send_possible_size,
-													http_header_name_x_forwarded_for,
 													http_header_offset,
 													http_header_len );
-	
-	
+
 							if( find_result == true )
 							{
 
@@ -2395,14 +2438,21 @@ protocol_module_cinsert::handle_realserver_connect(
 							else
 							{
 
-								find_result
-									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-															+ send_status_itr->send_offset,
-														send_status_itr->send_possible_size,
-														http_header_name_blank,
-														http_header_offset,
-														http_header_len );
-	
+// 								find_result
+// 									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 															+ send_status_itr->send_offset,
+// 														send_status_itr->send_possible_size,
+// 														http_header_name_blank,
+// 														http_header_offset,
+// 														http_header_len );
+
+								find_result = find_http_header_all(
+													(const char*)recive_data_itr->second.recive_buffer
+														+ send_status_itr->send_offset,
+													send_status_itr->send_possible_size,
+													http_header_offset,
+													http_header_len );
+
 								if( find_result == true )
 								{
 
@@ -3162,15 +3212,21 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 						if( forwarded_for == 1 )
 						{
-							find_result
-								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 							find_result
+// 								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 														+ send_status_itr->send_offset,
+// 													send_status_itr->send_possible_size,
+// 													http_header_name_x_forwarded_for,
+// 													http_header_offset,
+// 													http_header_len );
+
+							find_result = find_http_header_x_forwarded_for(
+													(const char*)recive_data_itr->second.recive_buffer
 														+ send_status_itr->send_offset,
 													send_status_itr->send_possible_size,
-													http_header_name_x_forwarded_for,
 													http_header_offset,
 													http_header_len );
-	
-	
+
 							if( find_result == true )
 							{
 	
@@ -3192,14 +3248,21 @@ protocol_module_cinsert::handle_sorryserver_connect(
 							else
 							{
 	
-								find_result
-									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-															+ send_status_itr->send_offset,
-														send_status_itr->send_possible_size,
-														http_header_name_blank,
-														http_header_offset,
-														http_header_len );
-	
+// 								find_result
+// 									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 															+ send_status_itr->send_offset,
+// 														send_status_itr->send_possible_size,
+// 														http_header_name_blank,
+// 														http_header_offset,
+// 														http_header_len );
+
+								find_result = find_http_header_all(
+													(const char*)recive_data_itr->second.recive_buffer
+														+ send_status_itr->send_offset,
+													send_status_itr->send_possible_size,
+													http_header_offset,
+													http_header_len );
+
 								if( find_result == true )
 								{
 		
@@ -3737,8 +3800,6 @@ protocol_module_cinsert::handle_realserver_recv(
 	}
 	//---------- DEBUG LOG END ------------------------------
 
-	using namespace boost::xpressive;
-
 	t_session_thread_data_cinsert	thread_data;
 
 	char*	buffer				= NULL;
@@ -3762,7 +3823,6 @@ protocol_module_cinsert::handle_realserver_recv(
 	std::string			http_header_name_content_length	= "Content-Length";
 	std::string			content_length;
 	match_results< const char* >	regex_result;
-	cregex	content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
 
 	t_session_thread_data_map_itr	thread_data_itr;
 	t_recive_data_map_itr			recive_data_itr;
@@ -4003,11 +4063,18 @@ protocol_module_cinsert::handle_realserver_recv(
 						if( check_result == CHECK_OK )
 						{
 
-							find_result = find_http_header(
+// 							find_result = find_http_header(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_itr->send_offset,
+// 											unsend_data_size,
+// 											http_header_name_blank,
+// 											http_header_offset,
+// 											http_header_len );
+
+							find_result = find_http_header_all(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											unsend_data_size,
-											http_header_name_blank,
 											http_header_offset,
 											http_header_len );
 
@@ -4025,11 +4092,18 @@ protocol_module_cinsert::handle_realserver_recv(
 													= http_header_offset + http_header_len + 4;
 								}
 
-								find_result = find_http_header(
+// 								find_result = find_http_header(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												send_status_itr->send_rest_size,
+// 												http_header_name_content_length,
+// 												http_header_offset,
+// 												http_header_len );
+
+								find_result = find_http_header_content_length(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
 												send_status_itr->send_rest_size,
-												http_header_name_content_length,
 												http_header_offset,
 												http_header_len );
 
@@ -4175,11 +4249,18 @@ protocol_module_cinsert::handle_realserver_recv(
 					if( check_result == CHECK_OK )
 					{
 
-						find_result = find_http_header(
+// 						find_result = find_http_header(
+// 										(const char*)recive_data_itr->second.recive_buffer
+// 											+ send_status_add.send_offset,
+// 										rest_response_data_size,
+// 										http_header_name_blank,
+// 										http_header_offset,
+// 										http_header_len );
+
+						find_result = find_http_header_all(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
 										rest_response_data_size,
-										http_header_name_blank,
 										http_header_offset,
 										http_header_len );
 
@@ -4197,11 +4278,18 @@ protocol_module_cinsert::handle_realserver_recv(
 												= http_header_offset + http_header_len + 4;
 							}
 
-							find_result = find_http_header(
+// 							find_result = find_http_header(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_add.send_offset,
+// 											send_status_add.send_rest_size,
+// 											http_header_name_content_length,
+// 											http_header_offset,
+// 											http_header_len );
+
+							find_result = find_http_header_content_length(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_add.send_offset,
 											send_status_add.send_rest_size,
-											http_header_name_content_length,
 											http_header_offset,
 											http_header_len );
 
@@ -4406,8 +4494,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	}
 	//---------- DEBUG LOG END ------------------------------
 
-	using namespace boost::xpressive;
-
 	t_session_thread_data_cinsert	thread_data;
 
 	recive_data		sorryserver_recv_data;
@@ -4431,7 +4517,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	std::string			http_header_name_content_length	= "Content-Length";
 	std::string			content_length;
 	match_results< const char* >	regex_result;
-	cregex	content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
 
 	t_session_thread_data_map_itr	thread_data_itr;
 	t_recive_data_map_itr			recive_data_itr;
@@ -4666,11 +4751,18 @@ protocol_module_cinsert::handle_sorryserver_recv(
 						if( check_result == CHECK_OK )
 						{
 
-							find_result = find_http_header(
+// 							find_result = find_http_header(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_itr->send_offset,
+// 											unsend_data_size,
+// 											http_header_name_blank,
+// 											http_header_offset,
+// 											http_header_len );
+
+							find_result = find_http_header_all(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											unsend_data_size,
-											http_header_name_blank,
 											http_header_offset,
 											http_header_len );
 
@@ -4688,11 +4780,18 @@ protocol_module_cinsert::handle_sorryserver_recv(
 														= http_header_offset + http_header_len + 4;
 								}
 
-								find_result = find_http_header(
+// 								find_result = find_http_header(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												send_status_itr->send_rest_size,
+// 												http_header_name_content_length,
+// 												http_header_offset,
+// 												http_header_len );
+
+								find_result = find_http_header_content_length(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
 												send_status_itr->send_rest_size,
-												http_header_name_content_length,
 												http_header_offset,
 												http_header_len );
 
@@ -4835,11 +4934,18 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					if( check_result == CHECK_OK )
 					{
 
-						find_result = find_http_header(
+// 						find_result = find_http_header(
+// 										(const char*)recive_data_itr->second.recive_buffer
+// 											+ send_status_add.send_offset,
+// 										rest_response_data_size,
+// 										http_header_name_blank,
+// 										http_header_offset,
+// 										http_header_len );
+
+						find_result = find_http_header_all(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
 										rest_response_data_size,
-										http_header_name_blank,
 										http_header_offset,
 										http_header_len );
 
@@ -4857,11 +4963,18 @@ protocol_module_cinsert::handle_sorryserver_recv(
 												= http_header_offset + http_header_len + 4;
 							}
 
-							find_result = find_http_header(
+// 							find_result = find_http_header(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_add.send_offset,
+// 											send_status_add.send_rest_size,
+// 											http_header_name_content_length,
+// 											http_header_offset,
+// 											http_header_len );
+
+							find_result = find_http_header_content_length(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_add.send_offset,
 											send_status_add.send_rest_size,
-											http_header_name_content_length,
 											http_header_offset,
 											http_header_len );
 
@@ -5162,14 +5275,20 @@ protocol_module_cinsert::handle_client_connection_check(
 					if( send_status_itr->edit_data_list.empty() == true )
 					{
 
-						find_result
-							= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 						find_result
+// 							= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												send_status_itr->send_possible_size,
+// 												http_header_name_blank,
+// 												http_header_offset,
+// 												http_header_len );
+
+						find_result = find_http_header_all(
+												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
 												send_status_itr->send_possible_size,
-												http_header_name_blank,
 												http_header_offset,
 												http_header_len );
-
 
 						if( find_result == true )
 						{

@@ -11,6 +11,55 @@
 
 using namespace boost::xpressive;
 
+cregex	method_regex
+		= (	as_xpr("GET")		| as_xpr("HEAD")		| as_xpr("POST")		|
+			as_xpr("PUT")		| as_xpr("PROPFIND")	| as_xpr("PROPPATCH")	|
+			as_xpr("OPTIONS")	| as_xpr("CONNECT")		| as_xpr("COPY")		|
+			as_xpr("TRACE")		| as_xpr("DELETE")		| as_xpr("LOCK")		|
+			as_xpr("UNLOCK")	| as_xpr("MOVE")		| as_xpr("MKCOL")) >> _s >>
+			+~_s >> _s >>
+			"HTTP/" >> _d >> "." >> _d;
+
+cregex	version_regex_request
+		=	+alpha >> _s >>
+			+~_s >> _s >>
+			"HTTP/" >> (as_xpr("1.0")|as_xpr("1.1"));
+
+cregex	version_regex_response
+		=	"HTTP/" >> (as_xpr("1.0")|as_xpr("1.1")) >> _s >>
+			repeat<3>(_d) >> _s >>
+			*_;
+
+cregex	status_code_regex_check
+		=	"HTTP/" >> _d >> "." >> _d >> _s >>
+			range('1', '3') >> repeat<2>(_d) >> _s >>
+			*_;
+
+cregex	uri_regex
+		=	+alpha >> _s >>
+			(s1 = *~_s) >> _s >>
+			"HTTP/" >> _d >> "." >> _d;
+
+cregex	status_code_regex_find
+		=	"HTTP/" >> _d >> "." >> _d >> _s >>
+			(s1 = repeat<3>(_d)) >> _s >>
+			*_;
+
+cregex	http_header_regex_cookie
+		= _ln >> (s1 = icase("cookie") >> ":" >> *~_ln);
+
+cregex	http_header_regex_content_length
+		= _ln >> (s1 = icase("content-length") >> ":" >> *~_ln);
+
+cregex	http_header_regex_x_forwarded_for
+		= _ln >> (s1 = icase("x-forwarded-for") >> ":" >> *~_ln);
+
+cregex	http_header_regex_all
+		= _ln >> (s1 = *_ >> ~_ln) >> repeat<2>(_ln);
+
+cregex	http_header_regex_none
+		= _ln >> (s1 = _ln);
+
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 													const size_t buffer_len ) const {
@@ -34,15 +83,6 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
-
-	cregex	method_regex
-		= (	as_xpr("GET")		| as_xpr("HEAD")		| as_xpr("POST")		|
-			as_xpr("PUT")		| as_xpr("PROPFIND")	| as_xpr("PROPPATCH")	|
-			as_xpr("OPTIONS")	| as_xpr("CONNECT")		| as_xpr("COPY")		|
-			as_xpr("TRACE")		| as_xpr("DELETE")		| as_xpr("LOCK")		|
-			as_xpr("UNLOCK")	| as_xpr("MOVE")		| as_xpr("MKCOL")) >> _s >>
-			+~_s >> _s >>
-			"HTTP/" >> _d >> "." >> _d;
 
 	if( buffer != NULL ){
 
@@ -135,16 +175,6 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
-
-	cregex	version_regex_request
-		=	+alpha >> _s >>
-			+~_s >> _s >>
-			"HTTP/" >> (as_xpr("1.0")|as_xpr("1.1"));
-
-	cregex	version_regex_response
-		=	"HTTP/" >> (as_xpr("1.0")|as_xpr("1.1")) >> _s >>
-			repeat<3>(_d) >> _s >>
-			*_;
 
 	if( buffer != NULL ){
 
@@ -242,11 +272,6 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
-	cregex	status_code_regex
- 		=	"HTTP/" >> _d >> "." >> _d >> _s >>
-			range('1', '3') >> repeat<2>(_d) >> _s >>
-			*_;
-
 	if( buffer != NULL ){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
@@ -269,7 +294,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 	
 				check_string[line_length] = '\0';
 	
-				if( !regex_match( check_string, status_code_regex )){
+				if( !regex_match( check_string, status_code_regex_check )){
 	
 					check_result = CHECK_NG;
 	
@@ -344,11 +369,6 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 	size_t	line_length	= 0;
 
 	match_results< const char* >	result;
-
-	cregex	uri_regex
-		=	+alpha >> _s >>
-			(s1 = *~_s) >> _s >>
-			"HTTP/" >> _d >> "." >> _d;
 
 	if( buffer != NULL ){
 
@@ -454,11 +474,6 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 	match_results< const char* >	result;
 
-	cregex	status_code_regex
-		=	"HTTP/" >> _d >> "." >> _d >> _s >>
-			(s1 = repeat<3>(_d)) >> _s >>
-			*_;
-
 	if( buffer != NULL ){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
@@ -481,7 +496,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 	
 				find_string[line_length] = '\0';
 	
-				find_result = regex_search( find_string, result, status_code_regex );
+				find_result = regex_search( find_string, result, status_code_regex_find );
 	
 				if( find_result == true ){
 	
@@ -558,6 +573,8 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 	}
 	//---------- DEBUG LOG END ------------------------------
 
+	cregex	http_header_regex;
+
 	bool	find_result			= true;
 
 	char*	find_string			= NULL;
@@ -570,8 +587,6 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 	int		header_end_flag		= 0;
 
 	match_results< const char* >	result;
-
-	cregex	http_header_regex;
 
 	if( buffer != NULL ){
 
@@ -623,11 +638,11 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 				memcpy( find_string, buffer + header_begin, header_length );
 	
 				find_string[header_length] = '\0';
-	
+
 				if( http_header_name.length() > 0 ){
-	
+
 					http_header_regex = _ln >> (s1 = icase(http_header_name) >> ":" >> *~_ln);
-	
+
 					find_result = regex_search( find_string, result, http_header_regex );
 	
 					if( find_result == true ){
@@ -640,9 +655,9 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 				else{
 	
 					http_header_regex = _ln >> (s1 = *_ >> ~_ln) >> repeat<2>(_ln);
-	
+
 					find_result = regex_search( find_string, result, http_header_regex );
-	
+
 					if( find_result == true ){
 	
 						http_header_offset	= result.position(1) + header_begin;
@@ -652,9 +667,9 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 					else{
 	
 						http_header_regex = _ln >> (s1 = _ln);
-	
+
 						find_result = regex_search( find_string, result, http_header_regex );
-	
+
 						if( find_result == true ){
 	
 							http_header_offset	= result.position(1) + header_begin;
@@ -690,6 +705,565 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 	if( LOG_LV_DEBUG == getloglevel())
 	{
 		boost::format	outform(	"function out : [find_http_header] : "
+									"find_result = [%d], "
+									"http_header_offset = [%d], "
+									"http_header_len = [%d]" );
+
+		outform % find_result % http_header_offset % http_header_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	return find_result;
+
+}
+
+bool	l7vs::http_protocol_module_base::find_http_header_cookie(
+															const char* buffer,
+															const size_t buffer_len,
+															size_t& http_header_offset,
+															size_t& http_header_len ){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_http_header_cookie] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	bool	find_result			= true;
+
+	char*	find_string			= NULL;
+	size_t	count				= 0;
+	size_t	header_begin		= 0;
+	size_t	header_end			= 0;
+	size_t	header_length		= 0;
+
+	int		header_begin_flag	= 0;
+	int		header_end_flag		= 0;
+
+	match_results< const char* >	result;
+
+	if( buffer != NULL ){
+
+		for( count = 0; count < buffer_len; count++ ){
+
+			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+
+				if( header_begin_flag == 0 ){
+
+					header_begin = count;
+					header_begin_flag = 1;
+
+				}
+
+				if( count > 0 ){
+
+					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+
+				if( count > 2 ){
+
+					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+			}
+		}
+
+		if( header_begin_flag == 1 && header_end_flag == 1 ){
+
+			header_length = header_end - header_begin + 1;
+
+			find_string = (char*)malloc( header_length + 1 );
+
+			if( find_string != NULL ){
+
+				memcpy( find_string, buffer + header_begin, header_length );
+	
+				find_string[header_length] = '\0';
+
+				find_result = regex_search( find_string, result, http_header_regex_cookie );
+
+				if( find_result == true ){
+
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= result.length(1);
+
+				}
+	
+				free( find_string );
+
+			}
+			else{
+
+				find_result	= false;
+
+			}
+
+		}
+		else{
+
+			find_result	= false;
+
+		}
+	}
+	else{
+
+		find_result	= false;
+
+	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_http_header_cookie] : "
+									"find_result = [%d], "
+									"http_header_offset = [%d], "
+									"http_header_len = [%d]" );
+
+		outform % find_result % http_header_offset % http_header_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	return find_result;
+
+}
+
+bool	l7vs::http_protocol_module_base::find_http_header_content_length(
+															const char* buffer,
+															const size_t buffer_len,
+															size_t& http_header_offset,
+															size_t& http_header_len ){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_http_header_content_length] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	bool	find_result			= true;
+
+	char*	find_string			= NULL;
+	size_t	count				= 0;
+	size_t	header_begin		= 0;
+	size_t	header_end			= 0;
+	size_t	header_length		= 0;
+
+	int		header_begin_flag	= 0;
+	int		header_end_flag		= 0;
+
+	match_results< const char* >	result;
+
+	if( buffer != NULL ){
+
+		for( count = 0; count < buffer_len; count++ ){
+
+			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+
+				if( header_begin_flag == 0 ){
+
+					header_begin = count;
+					header_begin_flag = 1;
+
+				}
+
+				if( count > 0 ){
+
+					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+
+				if( count > 2 ){
+
+					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+			}
+		}
+
+		if( header_begin_flag == 1 && header_end_flag == 1 ){
+
+			header_length = header_end - header_begin + 1;
+
+			find_string = (char*)malloc( header_length + 1 );
+
+			if( find_string != NULL ){
+
+				memcpy( find_string, buffer + header_begin, header_length );
+	
+				find_string[header_length] = '\0';
+
+				find_result = regex_search( find_string, result, http_header_regex_content_length );
+
+				if( find_result == true ){
+
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= result.length(1);
+
+				}
+	
+				free( find_string );
+
+			}
+			else{
+
+				find_result	= false;
+
+			}
+
+		}
+		else{
+
+			find_result	= false;
+
+		}
+	}
+	else{
+
+		find_result	= false;
+
+	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_http_header_content_length] : "
+									"find_result = [%d], "
+									"http_header_offset = [%d], "
+									"http_header_len = [%d]" );
+
+		outform % find_result % http_header_offset % http_header_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	return find_result;
+
+}
+
+bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
+															const char* buffer,
+															const size_t buffer_len,
+															size_t& http_header_offset,
+															size_t& http_header_len ){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_http_header_x_forwarded_for] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	bool	find_result			= true;
+
+	char*	find_string			= NULL;
+	size_t	count				= 0;
+	size_t	header_begin		= 0;
+	size_t	header_end			= 0;
+	size_t	header_length		= 0;
+
+	int		header_begin_flag	= 0;
+	int		header_end_flag		= 0;
+
+	match_results< const char* >	result;
+
+	if( buffer != NULL ){
+
+		for( count = 0; count < buffer_len; count++ ){
+
+			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+
+				if( header_begin_flag == 0 ){
+
+					header_begin = count;
+					header_begin_flag = 1;
+
+				}
+
+				if( count > 0 ){
+
+					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+
+				if( count > 2 ){
+
+					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+			}
+		}
+
+		if( header_begin_flag == 1 && header_end_flag == 1 ){
+
+			header_length = header_end - header_begin + 1;
+
+			find_string = (char*)malloc( header_length + 1 );
+
+			if( find_string != NULL ){
+
+				memcpy( find_string, buffer + header_begin, header_length );
+	
+				find_string[header_length] = '\0';
+
+				find_result = regex_search( find_string, result, http_header_regex_x_forwarded_for );
+
+				if( find_result == true ){
+
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= result.length(1);
+
+				}
+	
+				free( find_string );
+
+			}
+			else{
+
+				find_result	= false;
+
+			}
+
+		}
+		else{
+
+			find_result	= false;
+
+		}
+	}
+	else{
+
+		find_result	= false;
+
+	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_http_header_x_forwarded_for] : "
+									"find_result = [%d], "
+									"http_header_offset = [%d], "
+									"http_header_len = [%d]" );
+
+		outform % find_result % http_header_offset % http_header_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	return find_result;
+
+}
+
+bool	l7vs::http_protocol_module_base::find_http_header_all(
+															const char* buffer,
+															const size_t buffer_len,
+															size_t& http_header_offset,
+															size_t& http_header_len ){
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [find_http_header_all] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	bool	find_result			= true;
+
+	char*	find_string			= NULL;
+	size_t	count				= 0;
+	size_t	header_begin		= 0;
+	size_t	header_end			= 0;
+	size_t	header_length		= 0;
+
+	int		header_begin_flag	= 0;
+	int		header_end_flag		= 0;
+
+	match_results< const char* >	result;
+
+	if( buffer != NULL ){
+
+		for( count = 0; count < buffer_len; count++ ){
+
+			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+
+				if( header_begin_flag == 0 ){
+
+					header_begin = count;
+					header_begin_flag = 1;
+
+				}
+
+				if( count > 0 ){
+
+					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+
+				if( count > 2 ){
+
+					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+
+						header_end = count;
+						header_end_flag = 1;
+						break;
+
+					}
+				}
+			}
+		}
+
+		if( header_begin_flag == 1 && header_end_flag == 1 ){
+
+			header_length = header_end - header_begin + 1;
+
+			find_string = (char*)malloc( header_length + 1 );
+
+			if( find_string != NULL ){
+
+				memcpy( find_string, buffer + header_begin, header_length );
+	
+				find_string[header_length] = '\0';
+
+				find_result = regex_search( find_string, result, http_header_regex_all );
+
+				if( find_result == true ){
+
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= result.length(1);
+
+				}
+				else{
+
+					find_result = regex_search( find_string, result, http_header_regex_none );
+
+					if( find_result == true ){
+
+						http_header_offset	= result.position(1) + header_begin;
+						http_header_len		= 0;
+
+					}
+				}
+	
+				free( find_string );
+
+			}
+			else{
+
+				find_result	= false;
+
+			}
+
+		}
+		else{
+
+			find_result	= false;
+
+		}
+	}
+	else{
+
+		find_result	= false;
+
+	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [find_http_header_all] : "
 									"find_result = [%d], "
 									"http_header_offset = [%d], "
 									"http_header_len = [%d]" );

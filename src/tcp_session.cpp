@@ -643,6 +643,7 @@ namespace l7vs{
 			}else{
 				up_thread_next_call_function.second(LOCAL_PROC);
 			}
+			boost::this_thread::yield();
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -833,6 +834,7 @@ namespace l7vs{
 			}else{
 				down_thread_next_call_function.second(LOCAL_PROC);
 			}
+			boost::this_thread::yield();
 		}
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -943,6 +945,7 @@ namespace l7vs{
 	//! up thread receive client side and raise module event of handle_client_recv
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_type){
+		/*
 		if(protocol_module == NULL){
 				//Error protocol_module NULL
 			std::stringstream buf;
@@ -953,6 +956,7 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
+		*/
 		
 		if(0 < parent_service.get_wait_upstream()){
 			//----Debug log----------------------------------------------------------------------
@@ -1012,21 +1016,8 @@ namespace l7vs{
 			if(ec == boost::asio::error::try_again){
 				func_tag = UP_FUNC_CLIENT_RECEIVE;
 				boost::this_thread::yield();
-			}else if(ec == boost::asio::error::eof){
-				func_tag = UP_FUNC_CLIENT_DISCONNECT;
-			}else if(ec == boost::asio::error::connection_reset){
-				func_tag = UP_FUNC_CLIENT_DISCONNECT;
 			}else{
 				func_tag = UP_FUNC_CLIENT_DISCONNECT;
-				if(client_socket.is_open()){
-					//receive socket error
-					std::stringstream buf;
-					buf << "Thread ID[";
-					buf << boost::this_thread::get_id();
-					buf << "] receive socket error :";
-					buf << ec.message();
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
-				}
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
@@ -1259,19 +1250,8 @@ namespace l7vs{
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = UP_FUNC_REALSERVER_SEND;
-			}else if(ec == boost::asio::error::eof){
-				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
-			}else if(ec == boost::asio::error::connection_reset){
-				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
 			}else{
 				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
-				//send socket error
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] send socket error :";
-				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
@@ -1726,19 +1706,8 @@ namespace l7vs{
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = UP_FUNC_SORRYSERVER_SEND;
-			}else if(ec == boost::asio::error::eof){
-				func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
-			}else if(ec == boost::asio::error::connection_reset){
-				func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
 			}else{
 				func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
-				//send socket error
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] send socket error :";
-				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
@@ -2198,6 +2167,7 @@ namespace l7vs{
 	//! down thread receive from realserver and raise module event of handle_realserver_recv
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type){
+		/*
 		if(protocol_module == NULL){
 				//Error protocol_module NULL
 			std::stringstream buf;
@@ -2208,6 +2178,7 @@ namespace l7vs{
 			down_thread_exit(process_type);
 			return;
 		}
+		*/
 		bool is_emp = down_thread_receive_realserver_socket_list.empty();
 		if(is_emp){
 			boost::this_thread::yield();
@@ -2273,21 +2244,8 @@ namespace l7vs{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
 				boost::this_thread::yield();
-			}else if(ec == boost::asio::error::eof){
-				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-			}else if(ec == boost::asio::error::connection_reset){
-				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
 			}else{
 				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-				if(down_thread_current_receive_realserver_socket->second->is_open()){
-					//receive socket error
-					std::stringstream buf;
-					buf << "Thread ID[";
-					buf << boost::this_thread::get_id();
-					buf << "] receive socket error :";
-					buf << ec.message();
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
-				}
 			}
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_tag];
@@ -2638,19 +2596,8 @@ namespace l7vs{
 		}else{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_CLIENT_SEND;
-			}else if(ec == boost::asio::error::eof){
-				func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
-			}else if(ec == boost::asio::error::connection_reset){
-				func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
 			}else{
 				func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
-				//send socket error
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] send socket error :";
-				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_tag];
@@ -2807,21 +2754,8 @@ namespace l7vs{
 			if(ec == boost::asio::error::try_again){
 				func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
 				boost::this_thread::yield();
-			}else if(ec == boost::asio::error::eof){
-				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-			}else if(ec == boost::asio::error::connection_reset){
-				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
 			}else{
 				func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-				if(sorryserver_socket.second->is_open()){
-					//receive socket error
-					std::stringstream buf;
-					buf << "Thread ID[";
-					buf << boost::this_thread::get_id();
-					buf << "] receive socket error :";
-					buf << ec.message();
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
-				}
 			}
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_tag];
