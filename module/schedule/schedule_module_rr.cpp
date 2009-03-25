@@ -24,6 +24,9 @@
 #include "schedule_module_rr.h"
 #include <boost/format.hpp>
 
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 namespace l7vs{
 
 //!	constractor
@@ -36,7 +39,7 @@ schedule_module_round_robin::~schedule_module_round_robin(){}
 //!	initialize function
 void	schedule_module_round_robin::initialize(){
 	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( !putLogDebug.empty() ){
 				putLogDebug( 1, "Function in : schedule_module_round_robin::initialize", __FILE__, __LINE__);
 			}
@@ -49,14 +52,14 @@ void	schedule_module_round_robin::initialize(){
 	tcp_endpoint = tcp_local_endpoint ;
 	udp_endpoint = udp_local_endpoint ;
 
-	if ( !putLogInfo.empty() )
+	if ( likely( !putLogInfo.empty() ) )
 	{
 		putLogInfo( 1, "Saved endpoint was initialized.", __FILE__, __LINE__);
 	}
 
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				putLogDebug( 1, "Function out : schedule_module_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
@@ -85,9 +88,9 @@ void	schedule_module_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&		outendpoint ){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				putLogDebug( 1, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
@@ -101,9 +104,9 @@ void	schedule_module_round_robin::handle_schedule(
 	//! set clear data as NULL
 	outendpoint = tcp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
+	if ( unlikely( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ) ){
 		//! invalid iterator function
-		if ( !putLogFatal.empty() )
+		if ( likely( !putLogFatal.empty() ) )
 		{
 			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
@@ -111,9 +114,9 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
 					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
 														% loop
@@ -134,9 +137,9 @@ void	schedule_module_round_robin::handle_schedule(
 			break;
 		}
 	}
-	if ( itr == inlist_end() ){
+	if ( unlikely( itr == inlist_end() ) ){
 		//! no data
-		if ( !putLogError.empty() )
+		if ( likely( !putLogError.empty() ) )
 		{
 			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
@@ -151,9 +154,9 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" ) 
 													% tcp_endpoint.address()
 													% tcp_endpoint.port() );
@@ -176,9 +179,9 @@ void	schedule_module_round_robin::handle_schedule(
 		if ( itr->weight > 0 ){
 
 			//! Debug log
-			if ( !getloglevel.empty() ){
-				if ( LOG_LV_DEBUG == getloglevel() ){
-					if ( !putLogDebug.empty() ){
+			if ( likely( !getloglevel.empty() ) ){
+				if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+					if ( likely( !putLogDebug.empty() ) ){
 						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d)" )
 															% itr->tcp_endpoint.address()
 															% itr->tcp_endpoint.port()
@@ -199,9 +202,9 @@ void	schedule_module_round_robin::handle_schedule(
 	tcp_endpoint = outendpoint;
 
 END:
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				putLogDebug( 1, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
@@ -221,7 +224,7 @@ void	schedule_module_round_robin::handle_schedule(
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&		outendpoint ){
 	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( !putLogDebug.empty() ){
 				putLogDebug( 1, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
@@ -236,9 +239,9 @@ void	schedule_module_round_robin::handle_schedule(
 	//! set clear data as NULL
 	outendpoint = udp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
+	if ( unlikely( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ) ){
 		//! invalid iterator function
-		if ( !putLogFatal.empty() )
+		if ( likely( !putLogFatal.empty() ))
 		{
 			putLogFatal( 1, "Iterator function is empty.", __FILE__, __LINE__);
 		}
@@ -246,9 +249,9 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
 					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
 														% loop
@@ -269,9 +272,9 @@ void	schedule_module_round_robin::handle_schedule(
 			break;
 		}
 	}
-	if ( itr == inlist_end() ){
+	if ( unlikely( itr == inlist_end() ) ){
 		//! no data
-		if ( !putLogError.empty() )
+		if ( likely( !putLogError.empty() ) )
 		{
 			putLogError( 1, "There is no realserver on list.", __FILE__, __LINE__);
 		}
@@ -286,9 +289,9 @@ void	schedule_module_round_robin::handle_schedule(
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" ) 
 													% udp_endpoint.address()
 													% udp_endpoint.port() );
@@ -311,9 +314,9 @@ void	schedule_module_round_robin::handle_schedule(
 		if ( itr->weight > 0 ){
 
 			//! Debug log
-			if ( !getloglevel.empty() ){
-				if ( LOG_LV_DEBUG == getloglevel() ){
-					if ( !putLogDebug.empty() ){
+			if ( likely( !getloglevel.empty() ) ){
+				if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+					if ( likely( !putLogDebug.empty() ) ){
 						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d)" )
 															% itr->udp_endpoint.address()
 															% itr->udp_endpoint.port()
@@ -334,9 +337,9 @@ void	schedule_module_round_robin::handle_schedule(
 	udp_endpoint = outendpoint;
 
 END:
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely( !getloglevel.empty() ) ){
+		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
+			if ( likely( !putLogDebug.empty() ) ){
 				putLogDebug( 1, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}

@@ -917,7 +917,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 		return;
 	}
 	//lock rs_list_ref_count_inc_mutex
-	boost::mutex::scoped_lock inc_lock( rs_list_ref_count_inc_mutex );
+	rw_scoped_lock	inc_lock( rs_list_ref_count_inc_mutex );
 
 	//waiting, rs_list_ref_count become 0
 	boost::xtime		interval;
@@ -1022,7 +1022,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 	}	
 
 	//lock rs_list_ref_count_inc_mutex
-	boost::mutex::scoped_lock inc_lock( rs_list_ref_count_inc_mutex );
+	rw_scoped_lock	inc_lock( rs_list_ref_count_inc_mutex );
 
 	//waiting, rs_list_ref_count become 0
 	boost::xtime		interval;
@@ -1129,7 +1129,7 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 	}	
 
 	//lock rs_list_ref_count_inc_mutex
-	boost::mutex::scoped_lock inc_lock( rs_list_ref_count_inc_mutex );
+	rw_scoped_lock	inc_lock( rs_list_ref_count_inc_mutex );
 
 	//waiting, rs_list_ref_count become 0
 	boost::xtime		interval;

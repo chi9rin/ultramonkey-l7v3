@@ -377,21 +377,21 @@ cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( boost::asio::ip::address& add
  * @return  void
  */
 void	l7vs::virtualservice_base::rs_list_lock(){
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
 	}
 
 	{
-		boost::mutex::scoped_lock refcnt_inc_lock( rs_list_ref_count_inc_mutex );
+		rw_scoped_lock			refcnt_inc_lock( rs_list_ref_count_inc_mutex );
 	}
-	boost::mutex::scoped_lock refcnt_lock( rs_list_ref_count_mutex );
+	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
 	if( ULLONG_MAX > rs_list_ref_count )
 		++rs_list_ref_count;
 	else
 		rs_list_ref_count = 0;
 
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
 	}
 }
 
@@ -406,7 +406,7 @@ void	l7vs::virtualservice_base::rs_list_unlock(){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
 	}
 
-	boost::mutex::scoped_lock refcnt_lock( rs_list_ref_count_mutex );
+	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
 	if( 0 < rs_list_ref_count )
 		--rs_list_ref_count;
 	else

@@ -148,8 +148,8 @@ protected:
 	std::map< tcp_endpoint_type,mutex_ptr >
 								rs_mutex_list;					//! list of realserver mutex
 	unsigned long long 			rs_list_ref_count;				//! reference count of realserver list
-	boost::mutex				rs_list_ref_count_mutex;		//! mutex for update reference count
-	boost::mutex				rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
+	wr_mutex					rs_list_ref_count_mutex;		//! mutex for update reference count
+	wr_mutex					rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
 
 	unsigned long long			recvsize_up;					//! upstream total receive data size
 	unsigned long long			current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
