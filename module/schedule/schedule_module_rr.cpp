@@ -24,8 +24,7 @@
 #include "schedule_module_rr.h"
 #include <boost/format.hpp>
 
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#include "utility.h"
 
 namespace l7vs{
 

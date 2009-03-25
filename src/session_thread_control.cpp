@@ -12,8 +12,7 @@
 #include <sched.h>
 #include "session_thread_control.h"
 
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#include "utility.h"
 
 namespace l7vs{
 
@@ -55,7 +54,6 @@ void	session_thread_control::upstream_run(){
 	state_tag	state;
 	upthread_running_mutex.lock();
 	{	// get first state from class upstream state.
-// 		boost::mutex::scoped_lock upcond_lock( upthread_condition_mutex );	// upstream state lock
 		rw_scoped_lock	upstate_lock( upthread_state_mutex );
 		state = upthread_state;	//thread local state is update.
 	}
@@ -77,7 +75,6 @@ void	session_thread_control::upstream_run(){
 			session->up_thread_run();	//session upstream thread looping.
 			stopupstream();
 		}
-// 		boost::mutex::scoped_lock	upcond_lock( upthread_condition_mutex );	// upstream state lock
 		rw_scoped_lock	upstate_lock( upthread_state_mutex );
 		state = upthread_state;	//thread local state is update.
 	}
@@ -125,7 +122,6 @@ void	session_thread_control::downstream_run(){
 	state_tag	state;
 	downthread_running_mutex.lock();
 	{
-// 		boost::mutex::scoped_lock downcond_lock( downthread_condition_mutex );	//downstream state is lock
 		rw_scoped_lock	downstate_lock( downthread_state_mutex );
 		state = downthread_state;	//thread local state is update.
 	}
@@ -147,7 +143,6 @@ void	session_thread_control::downstream_run(){
 			session->down_thread_run();//session downstream thread looping.
 			stopdownstream();
 		}
-// 		boost::mutex::scoped_lock	downcond_lock( downthread_condition_mutex );	//downstream state lock
 		rw_scoped_lock	downstate_lock( downthread_state_mutex );
 		state = downthread_state;	// thread local sate is update.
 	}
@@ -165,10 +160,8 @@ void	session_thread_control::downstream_run(){
 void	session_thread_control::startupstream(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("in_function : void session_thread_control::startupstream()");
-//		fmt % upthread->native_handle();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
-// 	boost::mutex::scoped_lock	lock( upthread_condition_mutex );	//upstream state lock
 	rw_scoped_lock	upstate_lock( upthread_state_mutex );
 	if( upthread_state != EXIT ) upthread_state = RUNNING;		// upthread state update.[RUNNING] -> alive mode
 	upthread_condition.notify_all();							// conditionwait upstreamthread is run.
@@ -184,10 +177,8 @@ void	session_thread_control::startupstream(){
 void	session_thread_control::stopupstream(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("in_function : void session_thread_control::stopupstream()");
-// 		fmt % upthread->native_handle();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
-// 	boost::mutex::scoped_lock	lock( upthread_condition_mutex );	// upstream state lock
 	rw_scoped_lock	upstate_lock( upthread_state_mutex );
 	if( upthread_state != EXIT ) upthread_state = WAIT;				// upthread state is update [WAIT] -> pooling mode
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -202,10 +193,8 @@ void	session_thread_control::stopupstream(){
 void	session_thread_control::startdownstream(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("in_function : void session_thread_control::startdownstream()");
-// 		fmt % downthread->native_handle();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
-// 	boost::mutex::scoped_lock	lock( downthread_condition_mutex );		// downstream state lock
 	rw_scoped_lock	downstate_lock( downthread_state_mutex );
 	if( downthread_state != EXIT ) downthread_state = RUNNING;		// downstream state is update [RUNNING] -> alive mode
 	downthread_condition.notify_all();								// condition wait thread is run.
@@ -221,10 +210,8 @@ void	session_thread_control::startdownstream(){
 void	session_thread_control::stopdownstream(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("in_function : void session_thread_control::stopdownstream()");
-// 		fmt % downthread->native_handle();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
-// 	boost::mutex::scoped_lock	lock( downthread_condition_mutex );	// downstream state lock
 	rw_scoped_lock	downstate_lock( downthread_state_mutex );
 	if( downthread_state != EXIT ) downthread_state = WAIT;			// downstream state is update [WAIT] -> pooling mode
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -239,7 +226,6 @@ void	session_thread_control::stopdownstream(){
 void	session_thread_control::join(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("in_function : void session_thread_control::join() :");
-// 		fmt % downthread->native_handle();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
 
@@ -247,7 +233,6 @@ void	session_thread_control::join(){
 	boost::mutex::scoped_lock	down_lk( downthread_joining_mutex );
 
 	{
-// 		boost::mutex::scoped_lock	uplock( upthread_condition_mutex );	//upstream state lock
 		rw_scoped_lock	upstate_lock( upthread_state_mutex );
 		upthread_state = EXIT;	//upstream state update [EXIT] -> thread exit mode
 	}
@@ -257,7 +242,6 @@ void	session_thread_control::join(){
 	}
 
 	{
-// 		boost::mutex::scoped_lock	downlock( downthread_condition_mutex );//downstream state is lock
 		rw_scoped_lock	downstate_lock( downthread_state_mutex );
 		downthread_state = EXIT;	//downstream state update [EXIT] -> thread exit mode
 	}
@@ -275,11 +259,15 @@ void	session_thread_control::join(){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
 }
-
+//
+//!	@brief	get upthread mutex object reference
+//
 boost::mutex&	session_thread_control::get_upthread_mutex(){
 	return	upthread_running_mutex;
 }
-
+//
+//!	@brief	get downthread mutex object reference
+//
 boost::mutex&	session_thread_control::get_downthread_mutex(){
 	return	downthread_running_mutex;
 }

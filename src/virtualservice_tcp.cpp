@@ -21,8 +21,7 @@
 #include "logger.h"
 #include "parameter.h"
 
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#include "utility.h"
 
 // imprementation for virtualservice_tcp
 /*!

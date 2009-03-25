@@ -96,8 +96,11 @@ public:
 	//! downstream-thread id getter
 	//! @return thread_id_type	downstream thread id
 	thread_id_type	get_downthread_id(){ return downthread->get_id(); }
-
+	//! upthread mutex reference getter
+	//! @return reference of boost::mutex
 	boost::mutex&	get_upthread_mutex();
+	//! downthread mutex reference getter
+	//! @return reference of boost::mutex
 	boost::mutex&	get_downthread_mutex();
 };
 

@@ -24,10 +24,9 @@
 #include "logger.h"
 #include "parameter.h"
 
-#define	BPS_DEFAULT_INTERVAL_USEC	500000ULL
+#include "utility.h"
 
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#define	BPS_DEFAULT_INTERVAL_USEC	500000ULL
 
 // imprementation for virtualservice_base
 /*!
