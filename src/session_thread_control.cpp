@@ -21,7 +21,7 @@ namespace l7vs{
 //!	@brief upstream thread bind function.
 //
 void	session_thread_control::upstream_run(){
-	l7vs::Logger	funcLog( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in_function : void session_thread_control::upstream_run()", __FILE__, __LINE__ );
+	Logger	funcLog( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in_function : void session_thread_control::upstream_run()", __FILE__, __LINE__ );
 
 #ifdef	SCHED_SETAFFINITY
 	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
@@ -41,7 +41,7 @@ void	session_thread_control::upstream_run(){
 		sched_policy	= SCHED_BATCH;
 	}
 	ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "upstream_run : parameter of task scheduler algorithm : priority = %d / algorithm : %d" );
 		fmt % scheduler_param.__sched_priority % sched_policy;
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
@@ -89,10 +89,9 @@ void	session_thread_control::upstream_run(){
 //! @brief	downstream thread bind function,
 //
 void	session_thread_control::downstream_run(){
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("in_function : void session_thread_control::downstream_run()");
-//		fmt % downthread->native_handle();
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
 	}
 #ifdef	SCHED_SETAFFINITY
 	sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
