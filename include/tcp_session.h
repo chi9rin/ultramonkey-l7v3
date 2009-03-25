@@ -16,6 +16,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
+#include "wrlock.h"
 #include "protocol_module_base.h"
 #include "session_result_message.h"
 #include "tcp_socket.h"
@@ -137,11 +138,11 @@ namespace l7vs{
 			//! thread main loop exit flag
 			bool exit_flag;
 			//! thread main loop exit flag update mutex
-			boost::mutex exit_flag_update_mutex;
+			wr_mutex exit_flag_update_mutex;
 			//! up and down thread status bit frag
 			std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_state;
 			//! thread_state update mutex
-			boost::mutex thread_state_update_mutex;
+			wr_mutex thread_state_update_mutex;
 			//! up thread id
 			boost::thread::id up_thread_id;
 			//! down thread id
@@ -151,7 +152,7 @@ namespace l7vs{
 			//! up and down thread wait flag
 			bool session_pause_flag;
 			//! wait flag mutex
-			boost::mutex session_pause_flag_mutex;
+			wr_mutex session_pause_flag_mutex;
 			//! client socket
 			tcp_socket client_socket;
 			//! sorryserver socket
