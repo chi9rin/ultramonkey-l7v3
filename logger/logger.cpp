@@ -22,8 +22,9 @@
  *
  **********************************************************************/
 
-#include <logger.h>
-#include <logger_impl.h>
+#include "logger.h"
+#include "logger_impl.h"
+#include "utility.h"
 
 /*!
  * default constructor.
@@ -37,7 +38,7 @@ l7vs::Logger::Logger() :
 	scopedLogMessage("Logger Constructor"),
 	scopedLogFile(__FILE__),
 	scopedLogLine(__LINE__){
-	if (!LoggerImpl::getInstance().init()) {
+	if (unlikely(!LoggerImpl::getInstance().init())) {
 		exit(1);
 	}
 }
@@ -55,7 +56,7 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
 	scopedLogMessage(msg),
 	scopedLogFile(file),
 	scopedLogLine(line){
-	if (LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory)){
+	if (unlikely(LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory))){
 		LoggerImpl::getInstance().putLogDebug(
 			scopedLogCategory,
 			scopedLogId,
@@ -71,7 +72,7 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
  * @return  void
  */
 l7vs::Logger::~Logger(){
-	if (LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory)){
+	if (unlikely(LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory))){
 		LoggerImpl::getInstance().putLogDebug(
 			scopedLogCategory,
 			scopedLogId,
