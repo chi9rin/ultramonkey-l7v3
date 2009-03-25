@@ -45,8 +45,7 @@ namespace l7vs{
 		boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::connect", __FILE__, __LINE__ );
 		
-		boost::mutex::scoped_lock lk(read_mutex);
-		boost::mutex::scoped_lock lk2(write_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
 		
 		if(!open_flag){
 			my_socket.connect(connect_endpoint,ec);
@@ -72,7 +71,8 @@ namespace l7vs{
 	
 	//! accept socket
 	void tcp_socket::accept(){
-		boost::mutex::scoped_lock lk(read_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
+
 		open_flag = true;
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
@@ -95,8 +95,8 @@ namespace l7vs{
 	bool tcp_socket::close(boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::close", __FILE__, __LINE__ );
 		
-		boost::mutex::scoped_lock lk1(write_mutex);
-		boost::mutex::scoped_lock lk2(read_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
+
 		//----Debug log----------------------------------------------------------------------
 		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
 			if(open_flag){
@@ -140,7 +140,7 @@ namespace l7vs{
 		boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::write_some", __FILE__, __LINE__ );
 		
-		boost::mutex::scoped_lock lk(write_mutex);
+        rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
 		res_size = my_socket.write_some(buffers,ec);
 		if(ec){
@@ -161,7 +161,7 @@ namespace l7vs{
 		boost::system::error_code& ec){
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::read_some", __FILE__, __LINE__ );
 
-		boost::mutex::scoped_lock lk(read_mutex);
+        rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
 		res_size = my_socket.read_some(buffers,ec);
 		if(ec){

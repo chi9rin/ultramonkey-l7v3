@@ -24,7 +24,7 @@ namespace l7vs{
 	//! push back list
 	//! @param[in/out]	realserver_socket is realserver list push back element 
 	void tcp_realserver_connect_socket_list::push_back(list_element realserver_socket){		
-		boost::mutex::scoped_lock scope_lock(list_mutex);
+		rw_scoped_lock scope_lock(list_mutex);
 		
 		connect_list.push_back(realserver_socket);
 	}
@@ -32,7 +32,7 @@ namespace l7vs{
 	//! get socket list
 	//! @return			realserver list element
 	tcp_realserver_connect_socket_list::list_element tcp_realserver_connect_socket_list::get_socket(){
-		boost::mutex::scoped_lock scope_lock(list_mutex);
+        rw_scoped_lock scope_lock(list_mutex);
 		
 		list_element sock;
 		if(!connect_list.empty()){
@@ -44,7 +44,7 @@ namespace l7vs{
 	
 	//! check empty list
 	bool tcp_realserver_connect_socket_list::empty(){
-		boost::mutex::scoped_lock scope_lock(list_mutex);
+        rd_scoped_lock scope_lock(list_mutex);
 		
 		bool bres = connect_list.empty();
 		return bres;
@@ -52,7 +52,7 @@ namespace l7vs{
 	
 	//! clear list
 	void tcp_realserver_connect_socket_list::clear(){
-		boost::mutex::scoped_lock scope_lock(list_mutex);
+        rw_scoped_lock scope_lock(list_mutex);
 		connect_list.clear();
 	}
 	

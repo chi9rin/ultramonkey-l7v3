@@ -16,6 +16,8 @@
 #include <queue>
 #include <boost/thread/mutex.hpp>
 
+#include "wrlock.h"
+
 namespace l7vs{
 //!	@class	tcp_thread_message
 //! @brief	tcp_thread_message class name define.
@@ -45,7 +47,7 @@ namespace l7vs{
 			//! message queue
 			std::queue< tcp_thread_message_ptr > message_que;
 			//! queue access mutex
-			boost::mutex que_mutex;
+			wr_mutex que_mutex;
 			
 	};// class tcp_thread_message_que
 }// namespace l7vs

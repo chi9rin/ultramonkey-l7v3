@@ -18,6 +18,8 @@
 
 #include "tcp_socket.h"
 
+#include "wrlock.h"
+
 namespace l7vs{
 
 //!	@class	tcp_realserver_connect_socket_list
@@ -48,7 +50,7 @@ namespace l7vs{
 			//! realserver list
 			std::list< list_element > connect_list;
 			//! list access mutex
-			boost::mutex list_mutex;
+			wr_mutex list_mutex;
 	};// class tcp_realserver_connect_socket_list
 }// namespace l7vs
 

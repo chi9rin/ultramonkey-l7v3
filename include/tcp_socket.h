@@ -15,6 +15,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread/mutex.hpp>
 
+#include "wrlock.h"
+
 namespace l7vs{
 
 //!	@class	tcp_socket
@@ -63,8 +65,7 @@ namespace l7vs{
 			//! control socket
 			boost::asio::ip::tcp::socket my_socket;
 			//! socket close mutex
-			boost::mutex read_mutex;
-			boost::mutex write_mutex;
+            wr_mutex close_mutex;
 			//! socket open flag
 			bool open_flag;
 
