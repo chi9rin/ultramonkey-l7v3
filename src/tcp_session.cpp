@@ -1058,7 +1058,7 @@ namespace l7vs{
 	void tcp_session::up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_response_send_inform_mutex);
+			rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
 			module_event = protocol_module->handle_response_send_inform(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1128,7 +1128,7 @@ namespace l7vs{
 	void tcp_session::up_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_client_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
 			module_event = protocol_module->handle_client_disconnect(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1460,7 +1460,7 @@ namespace l7vs{
 		protocol_module_base::EVENT_TAG module_event;
 		boost::asio::ip::tcp::endpoint server_endpoint = up_thread_message_data.get_endpoint();
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
 			module_event = protocol_module->handle_realserver_disconnect(up_thread_id,server_endpoint);
 		}
 		up_thread_send_realserver_socket_map.erase(server_endpoint);
@@ -1509,7 +1509,7 @@ namespace l7vs{
 				parent_service.connection_inactive(server_endpoint);
 			}
 			{
-				boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+				rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
 				module_event = protocol_module->handle_realserver_disconnect(up_thread_id,server_endpoint);
 			}
 			close_socket++;
@@ -1525,7 +1525,7 @@ namespace l7vs{
 				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
-			boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
 			module_event = protocol_module->handle_realserver_disconnect(up_thread_id,boost::asio::ip::tcp::endpoint());
 		}
 		up_thread_send_realserver_socket_map.clear();
@@ -1817,7 +1817,7 @@ namespace l7vs{
 			sorryserver_socket.first = boost::asio::ip::tcp::endpoint();
 		}
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
 			module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1852,7 +1852,7 @@ namespace l7vs{
 		protocol_module_base::EVENT_TAG module_event;
 		boost::asio::ip::tcp::endpoint sorry_endpoint = up_thread_message_data.get_endpoint();
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
 			module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
@@ -1886,7 +1886,7 @@ namespace l7vs{
 	void tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorry_enable_mutex);
+			rw_scoped_lock scope_lock(module_function_sorry_enable_mutex);
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;
@@ -1929,7 +1929,7 @@ namespace l7vs{
 	void tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorry_disable_mutex);
+			rw_scoped_lock scope_lock(module_function_sorry_disable_mutex);
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;
@@ -2137,7 +2137,7 @@ namespace l7vs{
 		protocol_module_base::EVENT_TAG module_event;
 		boost::asio::ip::tcp::endpoint server_endpoint = down_thread_message_data.get_endpoint();
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
 			module_event = protocol_module->handle_realserver_disconnect(down_thread_id,server_endpoint);
 		}
 		
@@ -2195,7 +2195,7 @@ namespace l7vs{
 			if(bres)
 				parent_service.connection_inactive(server_endpoint);
 			{
-				boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+				rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
 				module_event = protocol_module->handle_realserver_disconnect(down_thread_id,server_endpoint);
 			}
 			
@@ -2212,7 +2212,7 @@ namespace l7vs{
 				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
-			boost::mutex::scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
 			module_event = protocol_module->handle_realserver_disconnect(down_thread_id,boost::asio::ip::tcp::endpoint());
 		}
 		down_thread_receive_realserver_socket_list.clear();
@@ -2282,7 +2282,7 @@ namespace l7vs{
 	void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_response_send_inform_mutex);
+			rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
 			module_event = protocol_module->handle_response_send_inform(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -2421,7 +2421,7 @@ namespace l7vs{
 	void tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_client_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
 			module_event = protocol_module->handle_client_disconnect(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -2567,7 +2567,7 @@ namespace l7vs{
 			sorryserver_socket.first = boost::asio::ip::tcp::endpoint();
 		}
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
 			module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id,sorry_endpoint);
 		}
 
@@ -2603,7 +2603,7 @@ namespace l7vs{
 		protocol_module_base::EVENT_TAG module_event;
 		boost::asio::ip::tcp::endpoint sorry_endpoint = down_thread_message_data.get_endpoint();
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+			rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
 			module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id,sorry_endpoint);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -2637,7 +2637,7 @@ namespace l7vs{
 	void tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorry_enable_mutex);
+			rw_scoped_lock scope_lock(module_function_sorry_enable_mutex);
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;
@@ -2680,7 +2680,7 @@ namespace l7vs{
 	void tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){
 		protocol_module_base::EVENT_TAG module_event;
 		{
-			boost::mutex::scoped_lock scope_lock(module_function_sorry_disable_mutex);
+			rw_scoped_lock scope_lock(module_function_sorry_disable_mutex);
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;

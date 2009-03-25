@@ -166,17 +166,17 @@ namespace l7vs{
 			//! down thread next receive realserver
 			std::list<socket_element>::iterator down_thread_current_receive_realserver_socket;
 			//! module function mutex (handle_response_send_inform) 
-			boost::mutex module_function_response_send_inform_mutex;
+			wr_mutex module_function_response_send_inform_mutex;
 			//! module function mutex (handle_client_disconnect) 
-			boost::mutex module_function_client_disconnect_mutex;
+			wr_mutex module_function_client_disconnect_mutex;
 			//! module function mutex (handle_realserver_disconnect) 
-			boost::mutex module_function_realserver_disconnect_mutex;
+			wr_mutex module_function_realserver_disconnect_mutex;
 			//! module function mutex (handle_sorryserver_disconnect) 
-			boost::mutex module_function_sorryserver_disconnect_mutex;
+			wr_mutex module_function_sorryserver_disconnect_mutex;
 			//! module function mutex (handle_sorry_enable) 
-			boost::mutex module_function_sorry_enable_mutex;
+			wr_mutex module_function_sorry_enable_mutex;
 			//! module function mutex (handle_sorry_disable) 
-			boost::mutex module_function_sorry_disable_mutex;
+			wr_mutex module_function_sorry_disable_mutex;
 			//! up thread call function object array
 			up_thread_function_pair	up_thread_function_array[UP_FUNC_EXIT+1];
 			//! up thread recept module event convert to up thread function type map
