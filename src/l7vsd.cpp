@@ -1042,6 +1042,13 @@ void	l7vsd::sig_exit_handler(){
 };// namespace l7vsd
 
 #ifndef	TEST_CASE
+
+extern "C" int pthread_sigmask_non( int how, const sigset_t* newmask, sigset_t* old_mask ){
+	return 0;
+}
+int pthread_sigmask( int, const sigset_t*, sigset_t*) __attribute__((weak,alias("pthread_sigmask_non" )));
+
+
 //! main function
 int main( int argc, char* argv[] ){
 	int ret = 0;
