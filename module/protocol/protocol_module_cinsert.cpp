@@ -1239,14 +1239,14 @@ protocol_module_cinsert::handle_session_finalize(
 
 		thread_data_itr = session_thread_data_map.find( up_thread_id );
 
-		if( thread_data_itr != session_thread_data_map.end() )
+		if( likely( thread_data_itr != session_thread_data_map.end() ))
 		{
 			session_thread_data_map.erase( thread_data_itr );
 		}
 
 		thread_data_itr = session_thread_data_map.find( down_thread_id );
 
-		if( thread_data_itr != session_thread_data_map.end() )
+		if( likely( thread_data_itr != session_thread_data_map.end() ))
 		{
 			session_thread_data_map.erase( thread_data_itr );
 		}
@@ -1327,13 +1327,13 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			thread_data->accept_end_flag = ACCEPT_END_FLAG_ON;
@@ -1442,12 +1442,12 @@ protocol_module_cinsert::handle_client_recv(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			if( thread_data->end_flag == END_FLAG_ON )
@@ -1458,7 +1458,7 @@ protocol_module_cinsert::handle_client_recv(
 			{
 				recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-				if( recive_data_itr != thread_data->recive_data_map.end() )
+				if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 				{
 
 					send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -2122,17 +2122,17 @@ protocol_module_cinsert::handle_realserver_select(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != thread_data->recive_data_map.end() )
+			if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -2401,7 +2401,7 @@ protocol_module_cinsert::handle_realserver_connect(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
@@ -2409,12 +2409,12 @@ protocol_module_cinsert::handle_realserver_connect(
 
 		datalen = 0;
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != thread_data->recive_data_map.end() )
+			if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -2799,13 +2799,13 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			thread_data->end_flag = END_FLAG_ON;
@@ -2890,17 +2890,17 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != thread_data->recive_data_map.end() )
+			if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -3052,13 +3052,13 @@ protocol_module_cinsert::handle_sorryserver_select(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL )) 
 		{
 
 			if( sorry_endpoint == endpoint_init )
@@ -3073,7 +3073,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 			{
 				recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 	
-				if( recive_data_itr != thread_data->recive_data_map.end() )
+				if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 				{
 	
 					send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -3197,7 +3197,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
@@ -3205,11 +3205,11 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 		datalen = 0;
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != thread_data->recive_data_map.end() )
+			if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -3613,13 +3613,13 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			thread_data->end_flag = END_FLAG_ON;
@@ -3704,17 +3704,17 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-			if( recive_data_itr != thread_data->recive_data_map.end() )
+			if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 			{
 
 				send_status_itr = recive_data_itr->second.send_status_list.begin();
@@ -3889,13 +3889,13 @@ protocol_module_cinsert::handle_realserver_recv(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			recive_data_itr = thread_data->recive_data_map.find( rs_endpoint );
@@ -4594,13 +4594,13 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			recive_data_itr = thread_data->recive_data_map.find( sorry_endpoint );
@@ -5277,7 +5277,7 @@ protocol_module_cinsert::handle_client_connection_check(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
@@ -5285,7 +5285,7 @@ protocol_module_cinsert::handle_client_connection_check(
 
 		datalen = 0;
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->last_endpoint_tcp );
@@ -5692,13 +5692,13 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			recive_data_itr = thread_data->recive_data_map.find( thread_data->last_endpoint_tcp );
 
@@ -5928,13 +5928,13 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			if( thread_data->thread_division == THREAD_DIVISION_UP_STREAM )
 			{
@@ -5953,7 +5953,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-						if( recive_data_itr != thread_data->recive_data_map.end() )
+						if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 						{
 
 							status = CLIENT_RECV;
@@ -5981,7 +5981,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-						if( recive_data_itr != thread_data->recive_data_map.end() )
+						if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 						{
 
 							thread_data->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
@@ -6175,13 +6175,13 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			if( thread_data->thread_division == THREAD_DIVISION_UP_STREAM )
 			{
@@ -6200,7 +6200,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-						if( recive_data_itr != thread_data->recive_data_map.end() )
+						if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 						{
 
 							status = CLIENT_RECV;
@@ -6228,7 +6228,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-						if( recive_data_itr != thread_data->recive_data_map.end() )
+						if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 						{
 
 							thread_data->realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
@@ -6424,13 +6424,13 @@ protocol_module_cinsert::handle_realserver_disconnect(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			if( thread_data->thread_division == THREAD_DIVISION_UP_STREAM )
 			{
@@ -6447,7 +6447,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-						if( recive_data_itr != thread_data->recive_data_map.end() )
+						if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 						{
 
 							status = CLIENT_RECV;
@@ -6618,13 +6618,13 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
-			if( thread_data_itr != session_thread_data_map.end() )
+			if( likely( thread_data_itr != session_thread_data_map.end() ))
 			{
 				thread_data = thread_data_itr->second;
 			}
 		}
 
-		if( thread_data != NULL )
+		if( likely( thread_data != NULL ))
 		{
 			if( thread_data->thread_division == THREAD_DIVISION_UP_STREAM )
 			{
@@ -6642,7 +6642,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 
 						recive_data_itr = thread_data->recive_data_map.find( thread_data->client_endpoint_tcp );
 
-						if( recive_data_itr != thread_data->recive_data_map.end() )
+						if( likely( recive_data_itr != thread_data->recive_data_map.end() ))
 						{
 
 							status = CLIENT_RECV;
