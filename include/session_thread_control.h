@@ -17,6 +17,8 @@
 #include <boost/shared_ptr.hpp>
 #include "tcp_session.h"
 
+#include "wrlock.h"
+
 namespace l7vs{
 
 class	tcp_session;
@@ -36,6 +38,7 @@ public:
  	};
 protected:
 	thread_ptr			upthread;					//! upstream thread
+	wr_mutex			upthread_state_mutex;		//! mutex for upstream thread status
 	state_tag			upthread_state;				//! upstream thread state
 	boost::mutex		upthread_condition_mutex;	//! upthread condition use mutex
 	boost::condition	upthread_condition;			//! upthread condition
@@ -43,6 +46,7 @@ protected:
 	boost::mutex		upthread_joining_mutex;
 	boost::condition	upthread_joining_condition;
 	thread_ptr			downthread;					//! downstream thread
+	wr_mutex			downthread_state_mutex;		//! mutex for downstream thread status
 	state_tag			downthread_state;			//! downstream thread state
 	boost::mutex		downthread_condition_mutex;	//! downstream condition use mutex
 	boost::condition	downthread_condition;		//! downstream condition

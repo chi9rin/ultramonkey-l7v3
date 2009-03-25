@@ -21,6 +21,9 @@
 #include "logger.h"
 #include "parameter.h"
 
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 // imprementation for virtualservice_tcp
 /*!
  * virtualservice_tcp class constructor.
@@ -43,7 +46,7 @@ l7vs::virtualservice_tcp::~virtualservice_tcp(){
  * @return  void
  */
 void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err ){
-	boost::format	fmt("in_function : void virtualservice_tcp::handle_replication_interrupt( "
+	boost::format	fmt("function : void virtualservice_tcp::handle_replication_interrupt( "
 						"const boost::system::error_code& err ) : err = %s, err.message = %s");
 	fmt % ( err ? "true" : "false") % err.message();
 	Logger	functionlog( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
@@ -74,9 +77,6 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( rep_noconst.pay_memory( REP_AREA_NAME, rep_size) );
 	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
 		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
-		}
 		return;
 	}
 
@@ -84,9 +84,6 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 	if( ( rep_size * DATA_SIZE ) <
 		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
 		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
-		}
 		return;
 	}
 
@@ -159,7 +156,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	replication_header*	rep_header_ptr = reinterpret_cast<replication_header*>( rep_noconst.pay_memory( REP_AREA_NAME, rep_size) );
 	if( (rep_header_ptr == NULL) || (0 == rep_size) ){
 		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
 		return;
@@ -169,7 +166,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	if( ( rep_size * DATA_SIZE ) <
 		((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
 		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
 		return;
@@ -182,7 +179,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	//if data_num over MAX_REPLICATION_DATA_NUM, set data_num = 0
 	if( static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt ){
 		l7vs::Logger::putLogWarn( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 		}
 		rep_header_ptr->data_num = 0;
@@ -244,7 +241,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
 	//unlock replication area
 	rep_noconst.unlock( REP_AREA_NAME );
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__ );
 	}
 }
@@ -257,7 +254,7 @@ void	l7vs::virtualservice_tcp::read_replicationdata(){
  * @return  void
  */
 void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control* stc_ptr, const boost::system::error_code& err ){
-	boost::format funclog_fmt("in_function : void virtualservice_tcp::handle_accept( "
+	boost::format funclog_fmt("function : void virtualservice_tcp::handle_accept( "
 							"const boost::shared_ptr<session_thread_control> , "
 							"const boost::system::error_code& err ) : err = %s, err.message = %s");
 	funclog_fmt % ( err ? "true" : "false") % err.message();
@@ -293,7 +290,7 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 			sorry_sessions.insert( std::make_pair( stc_ptr_noconst->get_upthread_id(), stc_ptr_noconst ) );
 			stc_ptr_noconst->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 		}
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format	fmt1( "active session thread id = %d" );
 			fmt1 % stc_ptr_noconst->get_upthread_id();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
@@ -334,7 +331,7 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	boost::mutex::scoped_lock	wait_lk( waiting_sessions_mutex );
 	waiting_sessions.insert( std::make_pair( stc_ptr_register_accept->get_upthread_id(), stc_ptr_register_accept ) );
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt1( "active session thread id = %d" );
 		fmt1 % stc_ptr_register_accept->get_upthread_id();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
@@ -361,14 +358,14 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
  * @return  void
  */
 void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::initialize( "
 								"l7vs::error_code& err )");
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( pool_sessions.size() != 0 ){
 		err.setter( true, "VirtualService already initialized." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -380,7 +377,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	//load parameter value
 	load_parameter( err );
 	if( err ){
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -429,7 +426,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 		//ERROR case
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -464,7 +461,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	pm_result	=	protomod->check_parameter( element.protocol_args );
 	if( !pm_result.flag ){
 		err.setter( true, "Protocol Module argument error." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -475,7 +472,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	pm_result	=	protomod->set_parameter( element.protocol_args );
 	if( !pm_result.flag ){
 		err.setter( true, "Protocol Module argument error." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -490,7 +487,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 		//ERROR case
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
 			formatter % ( err ? "true" : "false") % err.get_message();
@@ -523,7 +520,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 				l7vs::session_result_message	result	= sess->initialize();
 				if( result.flag == true ){
 					err.setter( result.flag, result.message );
-					if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+					if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 						boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 												"l7vs::error_code& err ) : err = %s, err.message = %s");
 						formatter % ( err ? "true" : "false") % err.get_message();
@@ -537,7 +534,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 			catch( std::bad_alloc ex ){
 				Logger::putLogFatal( 
 					l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "error, create session.", __FILE__, __LINE__ );
-				if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 					boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 											"l7vs::error_code& err ) : err = %s, err.message = %s");
 					formatter % ( err ? "true" : "false") % err.get_message();
@@ -546,7 +543,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 				return;
 			}
 		}
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format	fmt1( "pool_session.size   = %d" );
 			fmt1 % pool_sessions.size();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
@@ -558,7 +555,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 
 	err.setter( false, "" );
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("out_function : void virtualservice_tcp::initialize( "
 								"l7vs::error_code& err ) : err = %s, err.message = %s");
 		formatter % ( err ? "true" : "false") % err.get_message();
@@ -573,7 +570,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
  * @return  void
  */
 void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::finalize( "
 								"l7vs::error_code& err )");
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
@@ -617,7 +614,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 		pool_sessions.erase( pool_sessions.begin() );
 		delete	stc;
 		stc = NULL;
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format	fmt( "join pool sessin : pool_sessions.size = %d" );
 			fmt % pool_sessions.size();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
@@ -639,7 +636,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 	}
 
 	active_sessions.clear();
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt1( "pool_session.size   = %d" );
 		fmt1 % pool_sessions.size();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
@@ -682,7 +679,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 
 	err.setter( false, "" );
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("out_function : void virtualservice_tcp::finalize( "
 								"l7vs::error_code& err ) : err = %s, err.message = %s");
 		formatter % ( err ? "true" : "false") % err.get_message();
@@ -697,11 +694,10 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
  * @return  bool ( true = equal )
  */
 bool	l7vs::virtualservice_tcp::operator==( const l7vs::virtualservice_base& in ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-		boost::format formatter("in/out_function : void virtualservice_tcp::operator==( "
-								"const l7vs::virtualservice_base& in )");
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
-	}
+	boost::format formatter("function : void virtualservice_tcp::operator==( "
+							"const l7vs::virtualservice_base& in )");
+	l7vs::Logger	funcLog( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
+
 	l7vs::virtualservice_base&	vs = const_cast<l7vs::virtualservice_base&>( in );
 	return (	( element.tcp_accept_endpoint == vs.get_element().tcp_accept_endpoint )
 			&&	( element.udpmode == vs.get_element().udpmode ) );
@@ -714,7 +710,7 @@ bool	l7vs::virtualservice_tcp::operator==( const l7vs::virtualservice_base& in )
  * @return  bool ( true = not-equal )
  */
 bool	l7vs::virtualservice_tcp::operator!=( const l7vs::virtualservice_base& in ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in/out_function : void virtualservice_tcp::operator!=( "
 								"const l7vs::virtualservice_base& in )");
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, formatter.str(), __FILE__, __LINE__ );
@@ -743,7 +739,7 @@ void	l7vs::virtualservice_tcp::set_virtualservice( const l7vs::virtualservice_el
  * @return  void
  */
 void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::edit_virtualservice( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err ) : dump in ");
@@ -757,7 +753,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		( element.tcp_accept_endpoint != elem.tcp_accept_endpoint ) ||
 		( element.protocol_module_name != elem.protocol_module_name ) ){
 		err.setter( true, "Virtual Service does not exist." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -775,7 +771,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			//ERROR case
 			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 			err.setter( true, SCHEDMOD_LOAD_ERROR_MSG );
-			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+			if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 				boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 										"const l7vs::virtualservice_element& in,"
 										"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -797,7 +793,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 			}
 		}else{
 			err.setter( true, result.message );
-			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+			if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 				boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 										"const l7vs::virtualservice_element& in,"
 										"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -810,7 +806,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		//ERROR case
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
 		err.setter( true, PROTOMOD_LOAD_ERROR_MSG );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::edit_virtualservice( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -873,7 +869,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 
 	err.setter( false, "" );
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("out_function : void virtualservice_tcp::set_virtualservice( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -890,7 +886,7 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
  * @return  void
  */
 void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::add_realserver( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err )");
@@ -902,7 +898,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
 		err.setter( true, "Virtual Service does not exist." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::add_realserver( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -914,7 +910,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 	//check rs num
 	if( in.realserver_vector.size() == 0U ){
 		err.setter( true, "." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::add_realserver( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -945,7 +941,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 			 rs_itr != rs_list.end(); ++rs_itr ){
 			if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
 				err.setter( true, "Real Server already exist." );
-				if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+				if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 					boost::format formatter("out_function : void virtualservice_tcp::add_realserver( "
 											"const l7vs::virtualservice_element& in,"
 											"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -992,7 +988,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
 	}
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("out_function : void virtualservice_tcp::add_realserver( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1009,7 +1005,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
  * @return  void
  */
 void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::edit_realserver( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err )");
@@ -1018,7 +1014,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
 		err.setter( true, "Virtual Service does not exist." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::edit_realserver( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1057,7 +1053,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 		}
 		if( !exist_flag ){
 			err.setter( true, "Real Server does not exist." );
-			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+			if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 				boost::format formatter("out_function : void virtualservice_tcp::edit_realserver( "
 										"const l7vs::virtualservice_element& in,"
 										"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1098,7 +1094,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 	}
 
 	err.setter( false, "" );
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("out_function : void virtualservice_tcp::edit_realserver( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1115,7 +1111,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
  * @return  void
  */
 void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_element& in, l7vs::error_code& err ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::del_realserver( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err )");
@@ -1125,7 +1121,7 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 	//check equal virtualservice
 	if( (element.udpmode != in.udpmode) || (element.tcp_accept_endpoint != in.tcp_accept_endpoint) ){
 		err.setter( true, "Virtual Service is not equal." );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format formatter("out_function : void virtualservice_tcp::del_realserver( "
 									"const l7vs::virtualservice_element& in,"
 									"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1164,7 +1160,7 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 		}
 		if( !exist_flag ){
 			err.setter( true, "Real Server does not exist." );
-			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+			if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 				boost::format formatter("out_function : void virtualservice_tcp::del_realserver( "
 										"const l7vs::virtualservice_element& in,"
 										"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1211,7 +1207,7 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 		itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
 	}
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("out_function : void virtualservice_tcp::del_realserver( "
 								"const l7vs::virtualservice_element& in,"
 								"l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -1227,15 +1223,10 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
  * @return  void
  */
 void	l7vs::virtualservice_tcp::run(){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in_function : void virtualservice_tcp::run()", __FILE__, __LINE__ );
-	}
+	l7vs::Logger	funcLog( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "function : void virtualservice_tcp::run()", __FILE__, __LINE__ );
 
 	if( pool_sessions.size() == 0 ){
 		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialized.", __FILE__, __LINE__ );
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_tcp::run()", __FILE__, __LINE__ );
-		}
 		return;
 	}
 	boost::asio::socket_base::receive_buffer_size option(8192 * 192);
@@ -1249,9 +1240,6 @@ void	l7vs::virtualservice_tcp::run(){
 		boost::mutex::scoped_lock	lk( pool_sessions_mutex );
 		if( pool_sessions.empty() ){
 			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialize.", __FILE__, __LINE__ );
-			if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-				l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_tcp::run()", __FILE__, __LINE__ );
-			}
 			return;
 		}
 		//regist accept event handler
@@ -1293,10 +1281,6 @@ void	l7vs::virtualservice_tcp::run(){
 			itr->second->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_END );
 		}
 	}
-
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_tcp::run()", __FILE__, __LINE__ );
-	}
 }
 
 /*!
@@ -1306,9 +1290,7 @@ void	l7vs::virtualservice_tcp::run(){
  * @return  void
  */
 void	l7vs::virtualservice_tcp::stop(){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in_function : void virtualservice_tcp::stop()", __FILE__, __LINE__ );
-	}
+	l7vs::Logger	funcLog( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "function : void virtualservice_tcp::stop()", __FILE__, __LINE__ );
 
 	boost::system::error_code	err;
 
@@ -1319,12 +1301,6 @@ void	l7vs::virtualservice_tcp::stop(){
 
 	//stop dispatcher
 	dispatcher.stop();
-
-
-
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_tcp::stop()", __FILE__, __LINE__ );
-	}
 }
 
 /*!
@@ -1334,7 +1310,7 @@ void	l7vs::virtualservice_tcp::stop(){
  * @return  void
  */
 void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::endpoint& in ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::connection_active( "
 								"const boost::asio::ip::tcp::endpoint& in ) : in = %s");
 		formatter % in;
@@ -1351,7 +1327,7 @@ void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::en
 	}
 	rs_list_unlock();
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_tcp::connection_active()", __FILE__, __LINE__ );
 	}
 }
@@ -1363,7 +1339,7 @@ void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::en
  * @return  void
  */
 void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format formatter("in_function : void virtualservice_tcp::connection_inactive( "
 								"const boost::asio::ip::tcp::endpoint& in ) : in = %s");
 		formatter % in;
@@ -1381,7 +1357,7 @@ void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::
 	}
 	rs_list_unlock();
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_tcp::connection_inactive()", __FILE__, __LINE__ );
 	}
 }
@@ -1394,7 +1370,7 @@ void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::
  */
 void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_id ){
 	
-	boost::format funclog_fmt("in_function : void virtualservice_tcp::release_session( "
+	boost::format funclog_fmt("function : void virtualservice_tcp::release_session( "
 							"const boost::thread::id thread_id ) : thread_id = %d");
 	funclog_fmt % thread_id;
 	l7vs::Logger	func_log( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, funclog_fmt.str(), __FILE__, __LINE__ );
@@ -1404,7 +1380,7 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 	if( itr != active_sessions.end() ){
 		session_thread_control*	stc_ptr = itr->second;
 
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format	fmt1( "pool_session.size   = %d" );
 			fmt1 % pool_sessions.size();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
@@ -1428,7 +1404,7 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 			}
 		}
 
-		if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 			boost::format	fmt1( "pool_session.size   = %d" );
 			fmt1 % pool_sessions.size();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt1.str(), __FILE__, __LINE__ );
@@ -1439,7 +1415,7 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 			fmt3 % sorry_sessions.size();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt3.str(), __FILE__, __LINE__ );
 		}
-	}else if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	}else if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "session release fail : active_sessions.find( const boost::thread::id thread_id = %d )");
 		fmt % thread_id;
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );

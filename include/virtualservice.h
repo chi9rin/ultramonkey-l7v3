@@ -153,24 +153,32 @@ protected:
 
 	unsigned long long			recvsize_up;					//! upstream total receive data size
 	unsigned long long			current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
-	boost::mutex				recvsize_up_mutex;				//! mutex for update upstream receive data size
+//	boost::mutex				recvsize_up_mutex;				//! mutex for update upstream receive data size
+	wr_mutex					recvsize_up_mutex;				//! mutex for update upstream receive data size
 	unsigned long long			sendsize_up;					//! upstream total send data size
-	boost::mutex				sendsize_up_mutex;				//! mutex for update upstream send data size
+//	boost::mutex				sendsize_up_mutex;				//! mutex for update upstream send data size
+	wr_mutex					sendsize_up_mutex;				//! mutex for update upstream send data size
 	unsigned long long			recvsize_down;					//! downstream total receive data size
 	unsigned long long			current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
-	boost::mutex				recvsize_down_mutex;			//! mutex for update downstream receive data size
+//	boost::mutex				recvsize_down_mutex;			//! mutex for update downstream receive data size
+	wr_mutex					recvsize_down_mutex;			//! mutex for update downstream receive data size
 	unsigned long long			sendsize_down;					//! downstream total send data size
-	boost::mutex				sendsize_down_mutex;			//! mutex for update downstream send data size
+//	boost::mutex				sendsize_down_mutex;			//! mutex for update downstream send data size
+	wr_mutex					sendsize_down_mutex;			//! mutex for update downstream send data size
 
 	unsigned long long			throughput_up;					//! upstream throughput value
-	boost::mutex				throughput_up_mutex;			//! mutex for update upstream throughput value
+//	boost::mutex				throughput_up_mutex;			//! mutex for update upstream throughput value
+	wr_mutex					throughput_up_mutex;			//! mutex for update upstream throughput value
 	unsigned long long			throughput_down;				//! downstream throughput value
-	boost::mutex				throughput_down_mutex;			//! mutex for update downstream throughput value
+//	boost::mutex				throughput_down_mutex;			//! mutex for update downstream throughput value
+	wr_mutex					throughput_down_mutex;			//! mutex for update downstream throughput value
 
 	unsigned long long			wait_count_up;					//! upstream recv wait count
-	boost::mutex				wait_count_up_mutex;			//! mutex for upstream recv wait count
+//	boost::mutex				wait_count_up_mutex;			//! mutex for upstream recv wait count
+	wr_mutex					wait_count_up_mutex;			//! mutex for upstream recv wait count
 	unsigned long long			wait_count_down;				//! downstream recv wait count
-	boost::mutex				wait_count_down_mutex;			//! mutex for downstream recv wait count
+//	boost::mutex				wait_count_down_mutex;			//! mutex for downstream recv wait count
+	wr_mutex					wait_count_down_mutex;			//! mutex for downstream recv wait count
 
 	void						load_parameter( l7vs::error_code& );
 
