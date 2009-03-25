@@ -424,7 +424,7 @@ namespace l7vs{
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
-		if(protocol_module == NULL){
+		if(unlikely( protocol_module == NULL )){
 			//Error!
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -441,8 +441,8 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
-		if(!is_exit){
-			if(!client_socket.get_socket().is_open()){
+		if(likely( !is_exit )){
+			if(unlikely( !client_socket.get_socket().is_open() )){
 				//client socket not open Error!
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -463,9 +463,9 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
-		if(!is_exit){
+		if(likely( !is_exit )){
 			cl_end = client_socket.get_socket().remote_endpoint(ec);
-			if(ec){
+			if(unlikely( ec )){
 				//client endpoint get Error!
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -483,8 +483,8 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
-		if(!is_exit){
-			if(!client_socket.set_non_blocking_mode(ec)){
+		if(likely( !is_exit )){
+			if(unlikely( !client_socket.set_non_blocking_mode(ec) )){
 				// socket set nonblocking mode error
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -503,11 +503,11 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
-		if(!is_exit){
+		if(likely( !is_exit )){
 			//set client_socket options(recieve buffer size)
 			boost::asio::socket_base::receive_buffer_size	opt1( upstream_buffer_size );
 			client_socket.get_socket().set_option( opt1 ,ec);
-			if(ec){
+			if(unlikely( ec )){
 				//client socket Error!
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -526,11 +526,11 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
-		if(!is_exit){
+		if(likely( !is_exit )){
 			//set client_socket options(send buffer size)
 			boost::asio::socket_base::send_buffer_size		opt2( downstream_buffer_size );
 			client_socket.get_socket().set_option( opt2 ,ec);
-			if(ec){
+			if(unlikely( ec )){
 				//client socket Error!
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -554,10 +554,10 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
-		if(!is_exit){
+		if(likely(!is_exit)){
 			module_event = protocol_module->handle_session_initialize(up_thread_id,down_thread_id,cl_end,dumy_end);
 			func_type = up_thread_module_event_map.find(module_event);
-			if(func_type == up_thread_module_event_map.end()){
+			if(unlikely( func_type == up_thread_module_event_map.end() )){
 				//Error unknown protocol_module_base::EVENT_TAG return
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -571,7 +571,7 @@ namespace l7vs{
 				}
 			}else{
 				func = up_thread_function_array[func_type->second];
-				if( !func.second ){
+				if(unlikely( !func.second )){
 					//Error not find function map
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -627,7 +627,7 @@ namespace l7vs{
 				}
 			}
 			bool is_msg_none = up_thread_message_que.empty();
-			if(likely(!is_msg_none)){
+			if(unlikely(!is_msg_none)){
 				if( UP_FUNC_EXIT == up_thread_next_call_function.first ){
 					up_thread_next_call_function.second(LOCAL_PROC);
 				}
@@ -681,7 +681,7 @@ namespace l7vs{
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
-		if(protocol_module != NULL)
+		if(likely( protocol_module != NULL ))
 			protocol_module->handle_session_finalize(up_thread_id,down_thread_id);
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -761,7 +761,7 @@ namespace l7vs{
 		//----Debug log----------------------------------------------------------------------
 		thread_state_update(DOWN_THREAD_ACTIVE,true);
 		down_thread_function_pair	func	= down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -785,7 +785,7 @@ namespace l7vs{
 		}
 		//----Debug log----------------------------------------------------------------------
 
-        if(protocol_module == NULL){
+        if(unlikely( protocol_module == NULL )){
             //Error!
             std::stringstream buf;
             buf << "Thread ID[";
@@ -831,7 +831,7 @@ namespace l7vs{
 				down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
 			}
 			bool is_msg_none = down_thread_message_que.empty();
-			if(likely(!is_msg_none)){
+			if(unlikely(!is_msg_none)){
 				if( DOWN_FUNC_EXIT == down_thread_next_call_function.first ){
 					down_thread_next_call_function.second(LOCAL_PROC);
 				}
@@ -916,7 +916,7 @@ namespace l7vs{
 		protocol_module_base::EVENT_TAG module_event;
 		module_event = protocol_module->handle_accept(up_thread_id);
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely(func_type == up_thread_module_event_map.end())){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -928,7 +928,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -945,7 +945,7 @@ namespace l7vs{
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_type){
 		
-		if(0 < parent_service.get_wait_upstream()){
+		if(unlikely(0 < parent_service.get_wait_upstream())){
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;
@@ -983,7 +983,7 @@ namespace l7vs{
 				parent_service.update_up_recv_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(up_thread_id,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-				if(func_type == up_thread_module_event_map.end()){
+				if(unlikely( func_type == up_thread_module_event_map.end() )){
 					//Error unknown protocol_module_base::EVENT_TAG return
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1008,7 +1008,7 @@ namespace l7vs{
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1027,7 +1027,7 @@ namespace l7vs{
 		boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 		boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 		up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
-		if( !up_func.second ){
+		if(unlikely( !up_func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1039,7 +1039,7 @@ namespace l7vs{
 		}
 		up_msg->message = up_func.second;
 		std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT);
-		if(down_func == up_thread_message_down_thread_function_map.end()){
+		if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1062,7 +1062,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_response_send_inform(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1074,7 +1074,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1096,7 +1096,7 @@ namespace l7vs{
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 			up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
-			if( !up_func.second ){
+			if(unlikely( !up_func.second )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1108,7 +1108,7 @@ namespace l7vs{
 			}
 			up_msg->message = up_func.second;
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
-			if(down_func == up_thread_message_down_thread_function_map.end()){
+			if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1132,7 +1132,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_client_disconnect(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if( unlikely( func_type == up_thread_module_event_map.end() ) ){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1144,7 +1144,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if( unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1168,7 +1168,7 @@ namespace l7vs{
 		std::size_t send_data_size = up_thread_data_dest_side.get_send_size();
 		std::size_t send_size = send_socket->second->write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
-		if(!ec){
+		if( !ec ){
 			send_data_size += send_size;
 			up_thread_data_dest_side.set_send_size(send_data_size);
 			parent_service.update_up_send_size(send_size);
@@ -1191,7 +1191,7 @@ namespace l7vs{
 			}else{
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_send(up_thread_id);
 				std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-				if(func_type == up_thread_module_event_map.end()){
+				if( unlikely( func_type == up_thread_module_event_map.end() )){
 					//Error unknown protocol_module_base::EVENT_TAG return
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1212,7 +1212,7 @@ namespace l7vs{
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
-		if( !func.second ){
+		if( unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1234,7 +1234,7 @@ namespace l7vs{
 		up_thread_data_dest_side.set_endpoint(server_endpoint);
 		
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if( unlikely( func_type == up_thread_module_event_map.end() ) ){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1246,7 +1246,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if( unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1272,9 +1272,9 @@ namespace l7vs{
 			tcp_socket_ptr new_socket(new tcp_socket(io));
 			boost::system::error_code ec;
 			bool bres = new_socket->connect(server_endpoint,ec);
-			if(bres){
+			if(likely( bres )){
 				parent_service.connection_active(server_endpoint);
-				if(!new_socket->set_non_blocking_mode(ec)){
+				if(unlikely( !new_socket->set_non_blocking_mode(ec) )){
 					// socket set nonblocking mode error
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1289,7 +1289,7 @@ namespace l7vs{
 				//set realserver_socket options(recieve buffer size)
 				boost::asio::socket_base::receive_buffer_size	opt1( downstream_buffer_size );
 				new_socket->get_socket().set_option(opt1 , ec);
-				if(ec){
+				if(unlikely( ec )){
 					// socket set nonblocking mode error
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1303,7 +1303,7 @@ namespace l7vs{
 				//set realserver_socket options(send buffer size)
 				boost::asio::socket_base::send_buffer_size		opt2( upstream_buffer_size );
 				new_socket->get_socket().set_option(opt2 , ec);
-				if(ec){
+				if(unlikely( ec )){
 					// socket set nonblocking mode error
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1333,7 +1333,7 @@ namespace l7vs{
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
-		if( !func.second ){
+		if( unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1357,7 +1357,7 @@ namespace l7vs{
 		up_thread_data_dest_side.set_endpoint(server_endpoint);
 		up_thread_data_dest_side.set_size(data_size);
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1369,7 +1369,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1388,7 +1388,7 @@ namespace l7vs{
 		endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
 		protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connection_fail(up_thread_id,server_endpoint);
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely(func_type == up_thread_module_event_map.end())){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1400,7 +1400,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1425,7 +1425,7 @@ namespace l7vs{
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 			up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
-			if( !up_func.second ){
+			if(unlikely( !up_func.second )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1438,7 +1438,7 @@ namespace l7vs{
 			up_msg->endpoint_info = server_endpoint;
 			up_msg->message = up_func.second;
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
-			if(down_func == up_thread_message_down_thread_function_map.end()){
+			if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1466,7 +1466,7 @@ namespace l7vs{
 		up_thread_send_realserver_socket_map.erase(server_endpoint);
 		
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1478,7 +1478,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1530,7 +1530,7 @@ namespace l7vs{
 		}
 		up_thread_send_realserver_socket_map.clear();
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1542,7 +1542,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1587,7 +1587,7 @@ namespace l7vs{
 			}else{
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_send(up_thread_id);
 				std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-				if(func_type == up_thread_module_event_map.end()){
+				if(unlikely( func_type == up_thread_module_event_map.end() )){
 					//Error unknown protocol_module_base::EVENT_TAG return
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -1608,7 +1608,7 @@ namespace l7vs{
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1631,7 +1631,7 @@ namespace l7vs{
 		up_thread_data_dest_side.set_endpoint(server_endpoint);
 		
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely(func_type == up_thread_module_event_map.end())){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1643,7 +1643,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1663,8 +1663,8 @@ namespace l7vs{
 		boost::system::error_code ec;
 		bool bres = sorryserver_socket.second->connect(sorry_endpoint,ec);
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
-		if(bres){
-			if(!sorryserver_socket.second->set_non_blocking_mode(ec)){
+		if(likely( bres )){
+			if(unlikely( !sorryserver_socket.second->set_non_blocking_mode(ec) )){
 					// socket set nonblocking mode error
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1687,7 +1687,7 @@ namespace l7vs{
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1711,7 +1711,7 @@ namespace l7vs{
 		up_thread_data_dest_side.set_endpoint(sorry_endpoint);
 		up_thread_data_dest_side.set_size(data_size);
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1723,7 +1723,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1742,7 +1742,7 @@ namespace l7vs{
 		endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
 		protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connection_fail(up_thread_id,server_endpoint);
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1754,7 +1754,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1776,7 +1776,7 @@ namespace l7vs{
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 			up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
-			if( !up_func.second ){
+			if(unlikely( !up_func.second )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1789,7 +1789,7 @@ namespace l7vs{
 			up_msg->message = up_func.second;
 			up_msg->endpoint_info = sorryserver_socket.first;
 			std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-			if(down_func == up_thread_message_down_thread_function_map.end()){
+			if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -1821,7 +1821,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1833,7 +1833,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1856,7 +1856,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1868,7 +1868,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1899,7 +1899,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorry_enable(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if(unlikely( func_type == up_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1911,7 +1911,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if( unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1942,7 +1942,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorry_disable(up_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-		if(func_type == up_thread_module_event_map.end()){
+		if( unlikely( func_type == up_thread_module_event_map.end() ) ){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -1954,7 +1954,7 @@ namespace l7vs{
 			return;
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
-		if( !func.second ){
+		if( unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2000,7 +2000,7 @@ namespace l7vs{
 			return;
 		}
 
-		if( 0 < parent_service.get_wait_downstream() ){
+		if(unlikely( 0 < parent_service.get_wait_downstream() ) ){
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;
@@ -2039,7 +2039,7 @@ namespace l7vs{
 				parent_service.update_down_recv_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id,server_endpoint,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-				if(func_type == down_thread_module_event_map.end()){
+				if(unlikely( func_type == down_thread_module_event_map.end() )){
 					//Error unknown protocol_module_base::EVENT_TAG return
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -2064,7 +2064,7 @@ namespace l7vs{
 			}
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_tag];
-		if( !func.second ){
+		if(unlikely( !func.second ) ){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2097,7 +2097,7 @@ namespace l7vs{
 					boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 					boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 					down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
-					if( !down_func.second ){
+					if( unlikely( !down_func.second ) ){
 						//Error not find function map
 						std::stringstream buf;
 						buf << "Thread ID[";
@@ -2110,7 +2110,7 @@ namespace l7vs{
 					down_msg->endpoint_info = server_endpoint;
 					down_msg->message = down_func.second;
 					std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT_EVENT);
-					if(up_func == down_thread_message_up_thread_function_map.end()){
+					if( unlikely( up_func == down_thread_message_up_thread_function_map.end() ) ){
 						//Error not find function map
 						std::stringstream buf;
 						buf << "Thread ID[";
@@ -2153,7 +2153,7 @@ namespace l7vs{
 		}
 		
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() ) ){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2165,7 +2165,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2217,7 +2217,7 @@ namespace l7vs{
 		}
 		down_thread_receive_realserver_socket_list.clear();
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2229,7 +2229,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2251,7 +2251,7 @@ namespace l7vs{
 		protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_connection_check(down_thread_id,data_buff,data_size);
 		down_thread_data_client_side.set_size(data_size);
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() ) ){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2263,7 +2263,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2286,7 +2286,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_response_send_inform(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2298,7 +2298,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2345,7 +2345,7 @@ namespace l7vs{
 			}else{
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_send(down_thread_id);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-				if(func_type == down_thread_module_event_map.end()){
+				if(unlikely( func_type == down_thread_module_event_map.end() ) ){
 					//Error unknown protocol_module_base::EVENT_TAG return
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -2366,7 +2366,7 @@ namespace l7vs{
 			}
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_tag];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2388,7 +2388,7 @@ namespace l7vs{
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
-			if( !down_func.second ){
+			if(unlikely( !down_func.second )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -2400,7 +2400,7 @@ namespace l7vs{
 			}
 			down_msg->message = down_func.second;
 			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT_EVENT);
-			if(up_func == down_thread_message_up_thread_function_map.end()){
+			if(unlikely( up_func == down_thread_message_up_thread_function_map.end() )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -2425,7 +2425,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_client_disconnect(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end())){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2437,7 +2437,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2479,7 +2479,7 @@ namespace l7vs{
 				down_thread_data_dest_side.set_size(recv_size);
 				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(down_thread_id,sorry_endpoint,data_buff,recv_size);
 				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-				if(func_type == down_thread_module_event_map.end()){
+				if(unlikely( func_type == down_thread_module_event_map.end() )){
 					//Error unknown protocol_module_base::EVENT_TAG return
 					std::stringstream buf;
 					buf << "Thread ID[";
@@ -2504,7 +2504,7 @@ namespace l7vs{
 			}
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_tag];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2526,7 +2526,7 @@ namespace l7vs{
 			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
 			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
 			down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
-			if( !down_func.second ){
+			if(unlikely( !down_func.second )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -2539,7 +2539,7 @@ namespace l7vs{
 			down_msg->message = down_func.second;
 			down_msg->endpoint_info = sorryserver_socket.first;
 			std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-			if(up_func == down_thread_message_up_thread_function_map.end()){
+			if(unlikely( up_func == down_thread_message_up_thread_function_map.end() )){
 				//Error not find function map
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -2572,7 +2572,7 @@ namespace l7vs{
 		}
 
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2584,7 +2584,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2607,7 +2607,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id,sorry_endpoint);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() ) ){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2619,7 +2619,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2650,7 +2650,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorry_enable(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2662,7 +2662,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2693,7 +2693,7 @@ namespace l7vs{
 			module_event = protocol_module->handle_sorry_disable(down_thread_id);
 		}
 		std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-		if(func_type == down_thread_module_event_map.end()){
+		if(unlikely( func_type == down_thread_module_event_map.end() )){
 			//Error unknown protocol_module_base::EVENT_TAG return
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -2705,7 +2705,7 @@ namespace l7vs{
 			return;
 		}
 		down_thread_function_pair	func	= down_thread_function_array[func_type->second];
-		if( !func.second ){
+		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;
 			buf << "Thread ID[";
