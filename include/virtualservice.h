@@ -288,13 +288,17 @@ protected:
 								acceptor_;
 
 	session_queue_type			pool_sessions;
-	boost::mutex				pool_sessions_mutex;
+// 	boost::mutex				pool_sessions_mutex;
+	wr_mutex					pool_sessions_mutex;
 	session_map_type			waiting_sessions;
-	boost::mutex				waiting_sessions_mutex;
+// 	boost::mutex				waiting_sessions_mutex;
+	wr_mutex					waiting_sessions_mutex;
 	session_map_type			active_sessions;
-	boost::mutex				active_sessions_mutex;
+// 	boost::mutex				active_sessions_mutex;
+	wr_mutex					active_sessions_mutex;
 	session_map_type			sorry_sessions;
-	boost::mutex				sorry_sessions_mutex;
+// 	boost::mutex				sorry_sessions_mutex;
+	wr_mutex					sorry_sessions_mutex;
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();

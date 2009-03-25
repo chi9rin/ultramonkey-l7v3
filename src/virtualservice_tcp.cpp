@@ -283,10 +283,12 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	}
 
 	{
-		boost::mutex::scoped_lock actives_lk( active_sessions_mutex );
+// 		boost::mutex::scoped_lock actives_lk( active_sessions_mutex );
+		rw_scoped_lock	actives_lk( active_sessions_mutex );
 		active_sessions.insert( std::make_pair( stc_ptr_noconst->get_upthread_id(), stc_ptr_noconst ) );
 		if( sorry_status ){
-			boost::mutex::scoped_lock sorrys_lk( sorry_sessions_mutex );
+// 			boost::mutex::scoped_lock sorrys_lk( sorry_sessions_mutex );
+			rw_scoped_lock	sorrys_lk( sorry_sessions_mutex );
 			sorry_sessions.insert( std::make_pair( stc_ptr_noconst->get_upthread_id(), stc_ptr_noconst ) );
 			stc_ptr_noconst->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
 		}
@@ -320,7 +322,8 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	//pick up session from pool
 	session_thread_control*		stc_ptr_register_accept;
 	{
-		boost::mutex::scoped_lock	pool_lk( pool_sessions_mutex );
+// 		boost::mutex::scoped_lock	pool_lk( pool_sessions_mutex );
+		rw_scoped_lock	pool_lk( pool_sessions_mutex );
 		stc_ptr_register_accept = pool_sessions.front();
 		pool_sessions.erase( pool_sessions.begin() );
 	}
@@ -328,7 +331,8 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	//session add wait_sessions
 	boost::mutex::scoped_lock	up_wait_lk( stc_ptr_register_accept->get_upthread_mutex() );
 	boost::mutex::scoped_lock	down_wait_lk( stc_ptr_register_accept->get_downthread_mutex() );
-	boost::mutex::scoped_lock	wait_lk( waiting_sessions_mutex );
+// 	boost::mutex::scoped_lock	wait_lk( waiting_sessions_mutex );
+	rw_scoped_lock				wait_lk( waiting_sessions_mutex );
 	waiting_sessions.insert( std::make_pair( stc_ptr_register_accept->get_upthread_id(), stc_ptr_register_accept ) );
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -513,7 +517,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 
 	//create session pool
 	{
-		boost::mutex::scoped_lock lk( pool_sessions_mutex );
+// 		boost::mutex::scoped_lock lk( pool_sessions_mutex );
+		rw_scoped_lock	lk( pool_sessions_mutex );
 		for( int i = 0; i < param_data.session_pool_size; ++i ){
 			try{
 				tcp_session*	sess	= new tcp_session( *this, dispatcher );
@@ -595,16 +600,19 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 
 	while( !waiting_sessions.empty() ){
 		session_map_type::iterator itr = waiting_sessions.begin();
-		boost::mutex::scoped_lock lk1( waiting_sessions_mutex );
+// 		boost::mutex::scoped_lock	lk1( waiting_sessions_mutex );
+		rw_scoped_lock				lk1( waiting_sessions_mutex );
 		session_thread_control*	stc = itr->second;
 		waiting_sessions.erase( itr );
-		boost::mutex::scoped_lock lk2( pool_sessions_mutex );
+// 		boost::mutex::scoped_lock lk2( pool_sessions_mutex );
+		rw_scoped_lock	lk2( pool_sessions_mutex );
 		pool_sessions.push_back( stc );
 	}
 
 	//release sessions[i]->join();
 	while( !pool_sessions.empty() ){
-		boost::mutex::scoped_lock lk( pool_sessions_mutex );
+// 		boost::mutex::scoped_lock lk( pool_sessions_mutex );
+		rw_scoped_lock	lk( pool_sessions_mutex );
 		pool_sessions.front()->join();
 		{
 			boost::mutex::scoped_lock upthread_wait( pool_sessions.front()->get_upthread_mutex() );
@@ -845,7 +853,8 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 		element.sorry_endpoint			= boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) );
 		element.sorry_maxconnection	= 0LL;
 		element.sorry_flag			= false;
-		boost::mutex::scoped_lock lk( active_sessions_mutex );
+// 		boost::mutex::scoped_lock lk( active_sessions_mutex );
+		rw_scoped_lock	lk( active_sessions_mutex );
 		for( session_map_type::iterator itr = active_sessions.begin();
 			itr != active_sessions.end();
 			++itr ){
@@ -856,7 +865,8 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 				boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string( "0.0.0.0" ), (0) ) )
 			element.sorry_endpoint		= elem.sorry_endpoint;
 
-		boost::mutex::scoped_lock lk( active_sessions_mutex );
+// 		boost::mutex::scoped_lock lk( active_sessions_mutex );
+		rw_scoped_lock	lk( active_sessions_mutex );
 		for( session_map_type::iterator itr = active_sessions.begin();
 			itr != active_sessions.end();
 			++itr ){
@@ -954,7 +964,8 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 	}
 
 	//pause active sessions
-	boost::mutex::scoped_lock session_lk( active_sessions_mutex );
+// 	boost::mutex::scoped_lock session_lk( active_sessions_mutex );
+	rw_scoped_lock	session_lk( active_sessions_mutex );
 
 	for( session_map_type::iterator itr = active_sessions.begin();
 		 itr != active_sessions.end();
@@ -1065,7 +1076,8 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 	}
 
 	//pause active sessions
-	boost::mutex::scoped_lock session_lk( active_sessions_mutex );
+// 	boost::mutex::scoped_lock session_lk( active_sessions_mutex );
+	rw_scoped_lock	session_lk( active_sessions_mutex );
 
 	for( session_map_type::iterator itr = active_sessions.begin();
 		 itr != active_sessions.end();
@@ -1172,7 +1184,8 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 	}
 
 	//pause active sessions
-	boost::mutex::scoped_lock session_lk( active_sessions_mutex );
+// 	boost::mutex::scoped_lock session_lk( active_sessions_mutex );
+	rw_scoped_lock	session_lk( active_sessions_mutex );
 
 	for( session_map_type::iterator itr = active_sessions.begin();
 		 itr != active_sessions.end();
@@ -1237,7 +1250,8 @@ void	l7vs::virtualservice_tcp::run(){
 	//switch active a session
 	session_thread_control*	stc_ptr;
 	{
-		boost::mutex::scoped_lock	lk( pool_sessions_mutex );
+// 		boost::mutex::scoped_lock	lk( pool_sessions_mutex );
+		rw_scoped_lock	lk( pool_sessions_mutex );
 		if( pool_sessions.empty() ){
 			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "VirtualService not initialize.", __FILE__, __LINE__ );
 			return;
@@ -1245,7 +1259,8 @@ void	l7vs::virtualservice_tcp::run(){
 		//regist accept event handler
 		stc_ptr = pool_sessions.front();
 		pool_sessions.erase( pool_sessions.begin() );
-		boost::mutex::scoped_lock	waiting_pool_lock( waiting_sessions_mutex );
+// 		boost::mutex::scoped_lock	waiting_pool_lock( waiting_sessions_mutex );
+		rw_scoped_lock				waiting_pool_lock( waiting_sessions_mutex );
 		waiting_sessions.insert( std::make_pair( stc_ptr->get_upthread_id(), stc_ptr ) );
 	}
 	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
@@ -1273,7 +1288,8 @@ void	l7vs::virtualservice_tcp::run(){
 
 	//stop all active sessions
 	{
-		boost::mutex::scoped_lock lk( active_sessions_mutex );
+// 		boost::mutex::scoped_lock lk( active_sessions_mutex );
+		rw_scoped_lock	lk( active_sessions_mutex );
 		for( session_map_type::iterator itr = active_sessions.begin();
 			itr != active_sessions.end();
 			++itr ){
@@ -1375,7 +1391,8 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 	funclog_fmt % thread_id;
 	l7vs::Logger	func_log( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, funclog_fmt.str(), __FILE__, __LINE__ );
 
-	boost::mutex::scoped_lock actives_lk( active_sessions_mutex );
+// 	boost::mutex::scoped_lock actives_lk( active_sessions_mutex );
+	rw_scoped_lock	actives_lk( active_sessions_mutex );
 	session_map_type::iterator	itr = active_sessions.find( thread_id );
 	if( itr != active_sessions.end() ){
 		session_thread_control*	stc_ptr = itr->second;
@@ -1392,12 +1409,14 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt3.str(), __FILE__, __LINE__ );
 		}
 		active_sessions.erase( itr );
-		boost::mutex::scoped_lock pools_lk( pool_sessions_mutex );
+// 		boost::mutex::scoped_lock pools_lk( pool_sessions_mutex );
+		rw_scoped_lock	pool_lk( pool_sessions_mutex );
 		stc_ptr->get_session()->initialize();
 		pool_sessions.push_back( stc_ptr );
 
 		{
-			boost::mutex::scoped_lock sorrys_lk( sorry_sessions_mutex );
+// 			boost::mutex::scoped_lock sorrys_lk( sorry_sessions_mutex );
+			rw_scoped_lock	sorrys_lk( sorry_sessions_mutex );
 			session_map_type::iterator sorry_itr = sorry_sessions.find( thread_id );
 			if( sorry_itr != sorry_sessions.end() ){
 				sorry_sessions.erase( sorry_itr );
