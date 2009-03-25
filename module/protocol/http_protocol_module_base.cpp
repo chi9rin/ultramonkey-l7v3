@@ -24,6 +24,7 @@
 #include <boost/xpressive/xpressive.hpp>
 
 #include "http_protocol_module_base.h"
+#include "utility.h"
 
 using namespace boost::xpressive;
 
@@ -95,7 +96,7 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 													const size_t buffer_len ) const {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [check_http_method] : "
 									"buffer_len = [%d]" );
@@ -114,7 +115,7 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -126,11 +127,11 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			if( check_string != NULL ){
+			if( likely( check_string != NULL )){
 				memcpy( check_string, buffer, line_length );
 	
 				check_string[line_length] = '\0';
@@ -164,7 +165,7 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [check_http_method] : "
 									"check_result = [%d]" );
@@ -187,7 +188,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 														const size_t buffer_len ) const {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [check_http_version] : "
 									"buffer_len = [%d]" );
@@ -206,7 +207,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -218,11 +219,11 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			if( check_string != NULL ){
+			if( likely( check_string != NULL )){
 
 				memcpy( check_string, buffer, line_length );
 	
@@ -259,7 +260,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [check_http_version] : "
 									"check_result = [%d]" );
@@ -283,7 +284,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 													const size_t buffer_len ) const {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [check_status_code] : "
 									"buffer_len = [%d]" );
@@ -302,7 +303,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -314,11 +315,11 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			if( check_string != NULL ){
+			if( likely( check_string != NULL )){
 
 				memcpy( check_string, buffer, line_length );
 	
@@ -354,7 +355,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [check_status_code] : "
 									"check_result = [%d]" );
@@ -378,7 +379,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 													const size_t buffer_len ) const {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [check_http_method_and_version] : "
 									"buffer_len = [%d]" );
@@ -397,7 +398,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -409,11 +410,11 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			if( check_string != NULL ){
+			if( likely( check_string != NULL )){
 				memcpy( check_string, buffer, line_length );
 	
 				check_string[line_length] = '\0';
@@ -447,7 +448,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [check_http_method_and_version] : "
 									"check_result = [%d]" );
@@ -471,7 +472,7 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 													const size_t buffer_len ) const {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [check_http_version_and_status_code] : "
 									"buffer_len = [%d]" );
@@ -490,7 +491,7 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -502,11 +503,11 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			check_string = (char*)malloc( line_length + 1 );
 
-			if( check_string != NULL ){
+			if( likely( check_string != NULL )){
 				memcpy( check_string, buffer, line_length );
 	
 				check_string[line_length] = '\0';
@@ -540,7 +541,7 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [check_http_version_and_status_code] : "
 									"check_result = [%d]" );
@@ -564,7 +565,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 													size_t& uri_len){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_uri] : "
 									"buffer_len = [%d]" );
@@ -585,7 +586,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -597,11 +598,11 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			find_string = (char*)malloc( line_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer, line_length );
 	
@@ -641,7 +642,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_uri] : "
 									"find_result = [%d], "
@@ -668,7 +669,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 															size_t& status_code_len){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_status_code] : "
 									"buffer_len = [%d]" );
@@ -689,7 +690,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
@@ -701,11 +702,11 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 		}
 
-		if( line_length < buffer_len ){
+		if( likely( line_length < buffer_len )){
 
 			find_string = (char*)malloc( line_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer, line_length );
 	
@@ -745,7 +746,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_status_code] : "
 									"find_result = [%d], "
@@ -773,7 +774,7 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 															size_t& http_header_len ){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_http_header] : "
 									"buffer_len = [%d], "
@@ -803,7 +804,7 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( count = 0; count < buffer_len; count++ ){
 
@@ -842,13 +843,13 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 			}
 		}
 
-		if( header_begin_flag == 1 && header_end_flag == 1 ){
+		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
 
 			find_string = (char*)malloc( header_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer + header_begin, header_length );
 	
@@ -917,7 +918,7 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_http_header] : "
 									"find_result = [%d], "
@@ -944,7 +945,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 															size_t& http_header_len ){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_http_header_cookie] : "
 									"buffer_len = [%d]" );
@@ -971,7 +972,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( count = 0; count < buffer_len; count++ ){
 
@@ -1010,13 +1011,13 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 			}
 		}
 
-		if( header_begin_flag == 1 && header_end_flag == 1 ){
+		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
 
 			find_string = (char*)malloc( header_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer + header_begin, header_length );
 	
@@ -1054,7 +1055,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_http_header_cookie] : "
 									"find_result = [%d], "
@@ -1081,7 +1082,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 															size_t& http_header_len ){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_http_header_content_length] : "
 									"buffer_len = [%d]" );
@@ -1108,7 +1109,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( count = 0; count < buffer_len; count++ ){
 
@@ -1147,13 +1148,13 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 			}
 		}
 
-		if( header_begin_flag == 1 && header_end_flag == 1 ){
+		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
 
 			find_string = (char*)malloc( header_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer + header_begin, header_length );
 	
@@ -1191,7 +1192,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_http_header_content_length] : "
 									"find_result = [%d], "
@@ -1218,7 +1219,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 															size_t& http_header_len ){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_http_header_x_forwarded_for] : "
 									"buffer_len = [%d]" );
@@ -1245,7 +1246,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( count = 0; count < buffer_len; count++ ){
 
@@ -1284,13 +1285,13 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 			}
 		}
 
-		if( header_begin_flag == 1 && header_end_flag == 1 ){
+		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
 
 			find_string = (char*)malloc( header_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer + header_begin, header_length );
 	
@@ -1328,7 +1329,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_http_header_x_forwarded_for] : "
 									"find_result = [%d], "
@@ -1355,7 +1356,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 															size_t& http_header_len ){
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [find_http_header_all] : "
 									"buffer_len = [%d]" );
@@ -1382,7 +1383,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 
 	match_results< const char* >	result;
 
-	if( buffer != NULL ){
+	if( likely( buffer != NULL )){
 
 		for( count = 0; count < buffer_len; count++ ){
 
@@ -1421,13 +1422,13 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 			}
 		}
 
-		if( header_begin_flag == 1 && header_end_flag == 1 ){
+		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
 
 			find_string = (char*)malloc( header_length + 1 );
 
-			if( find_string != NULL ){
+			if( likely( find_string != NULL )){
 
 				memcpy( find_string, buffer + header_begin, header_length );
 	
@@ -1476,7 +1477,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [find_http_header_all] : "
 									"find_result = [%d], "

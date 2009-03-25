@@ -29,6 +29,7 @@
 #include <boost/regex.hpp>
 #include <boost/format.hpp>
 #include "protocol_module_cinsert.h"
+#include "utility.h"
 
 using namespace boost::xpressive;
 
@@ -70,7 +71,7 @@ protocol_module_cinsert::~protocol_module_cinsert()
 bool	protocol_module_cinsert::is_tcp()
 {
 	//---------- DEBUG LOG START ------------------------------ 
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		putLogDebug(	0,
 						"function in  : [is_tcp]",
@@ -88,7 +89,7 @@ bool	protocol_module_cinsert::is_tcp()
 bool	protocol_module_cinsert::is_udp()
 {
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		putLogDebug(	0,
 						"function in  : [is_udp]",
@@ -117,7 +118,7 @@ void	protocol_module_cinsert::initialize(
 				boost::function< void( void ) >	inlist_unlock )
 {
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [initialize] : "
 									"inlist_begin = [%p], "
@@ -142,7 +143,7 @@ void	protocol_module_cinsert::initialize(
 	rs_list_unlock	= inlist_unlock;
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [initialize] : "
 									"rs_list_begin = [%p], "
@@ -165,7 +166,7 @@ void	protocol_module_cinsert::initialize(
 void	protocol_module_cinsert::finalize()
 {
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		putLogDebug(	0,
 						"function in  : [finalize]",
@@ -194,7 +195,7 @@ void	protocol_module_cinsert::finalize()
 	sorry_uri.assign( '\0' );
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		putLogDebug(	0,
 						"function out : [finalize]",
@@ -224,7 +225,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [check_parameter] : "
 									"args.size = [%d], "
@@ -552,7 +553,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [check_parameter] : "
 									"check_result.flag = [%d], "
@@ -576,7 +577,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [set_parameter] : "
 									"args.size = [%d], "
@@ -951,7 +952,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [set_parameter] : "
 									"check_result.flag = [%d], "
@@ -975,7 +976,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [add_parameter] : "
 									"args.size = [%d], "
@@ -1026,7 +1027,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [add_parameter] : "
 									"check_result.flag = [%d], "
@@ -1056,7 +1057,7 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [register_schedule] : "
 									"inschedule = [%p]");
@@ -1073,7 +1074,7 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 	schedule_tcp = inschedule;
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [register_schedule] : "
 									"schedule_tcp = [%p]");
@@ -1105,7 +1106,7 @@ protocol_module_cinsert::handle_session_initialize(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_session_initialize] : "
 									"up_thread_id = [%s], "
@@ -1165,7 +1166,7 @@ protocol_module_cinsert::handle_session_initialize(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_session_initialize] : "
 										"up_thread_id = [%s], "
@@ -1185,7 +1186,7 @@ protocol_module_cinsert::handle_session_initialize(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_session_initialize] : "
 									"up_thread_id = [%s], "
@@ -1213,7 +1214,7 @@ protocol_module_cinsert::handle_session_finalize(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_session_finalize] : "
 									"up_thread_id = [%s], "
@@ -1254,7 +1255,7 @@ protocol_module_cinsert::handle_session_finalize(
 	{
 
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_session_finalize] : "
 										"up_thread_id = [%s], "
@@ -1274,7 +1275,7 @@ protocol_module_cinsert::handle_session_finalize(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_session_finalize] : "
 									"up_thread_id = [%s], "
@@ -1299,7 +1300,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_accept] : "
 									"thread_id = [%s]");
@@ -1344,7 +1345,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	{
 
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_accept] : "
 										"thread_id = [%s], "
@@ -1363,7 +1364,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_accept] : "
 									"thread_id = [%s], "
@@ -1391,7 +1392,7 @@ protocol_module_cinsert::handle_client_recv(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_client_recv] : "
 									"thread_id = [%s], "
@@ -2029,7 +2030,7 @@ protocol_module_cinsert::handle_client_recv(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_client_recv] : "
 										"thread_id = [%s], "
@@ -2048,7 +2049,7 @@ protocol_module_cinsert::handle_client_recv(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_client_recv] : "
 									"thread_id = [%s], "
@@ -2074,7 +2075,7 @@ protocol_module_cinsert::handle_realserver_select(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_realserver_select] : "
 									"thread_id = [%s]");
@@ -2298,7 +2299,7 @@ protocol_module_cinsert::handle_realserver_select(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_realserver_select] : "
 										"thread_id = [%s], "
@@ -2317,7 +2318,7 @@ protocol_module_cinsert::handle_realserver_select(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_realserver_select] : "
 									"thread_id = [%s], "
@@ -2358,7 +2359,7 @@ protocol_module_cinsert::handle_realserver_connect(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_realserver_connect] : "
 									"thread_id = [%s]");
@@ -2723,7 +2724,7 @@ protocol_module_cinsert::handle_realserver_connect(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_realserver_connect] : "
 										"thread_id = [%s], "
@@ -2742,7 +2743,7 @@ protocol_module_cinsert::handle_realserver_connect(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_realserver_connect] : "
 									"thread_id = [%s], "
@@ -2770,7 +2771,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_realserver_connection_fail] : "
 									"thread_id = [%s], "
@@ -2815,7 +2816,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_realserver_connection_fail] : "
 										"thread_id = [%s], "
@@ -2834,7 +2835,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_realserver_connection_fail] : "
 									"thread_id = [%s], "
@@ -2858,7 +2859,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_realserver_send] : "
 									"thread_id = [%s]");
@@ -2973,7 +2974,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_realserver_send] : "
 										"thread_id = [%s], "
@@ -2992,7 +2993,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_realserver_send] : "
 									"thread_id = [%s], "
@@ -3018,7 +3019,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorryserver_select] : "
 									"thread_id = [%s], "
@@ -3104,7 +3105,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorryserver_select] : "
 										"thread_id = [%s], "
@@ -3123,7 +3124,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorryserver_select] : "
 									"thread_id = [%s], "
@@ -3151,7 +3152,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorryserver_connect] : "
 									"thread_id = [%s]");
@@ -3538,7 +3539,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorryserver_connect] : "
 										"thread_id = [%s], "
@@ -3557,7 +3558,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorryserver_connect] : "
 									"thread_id = [%s], "
@@ -3584,7 +3585,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorryserver_connection_fail] : "
 									"thread_id = [%s], "
@@ -3629,7 +3630,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorryserver_connection_fail] : "
 										"thread_id = [%s], "
@@ -3648,7 +3649,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorryserver_connection_fail] : "
 									"thread_id = [%s], "
@@ -3672,7 +3673,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorryserver_send] : "
 									"thread_id = [%s]");
@@ -3787,7 +3788,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorryserver_send] : "
 										"thread_id = [%s], "
@@ -3806,7 +3807,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorryserver_send] : "
 									"thread_id = [%s], "
@@ -3834,7 +3835,7 @@ protocol_module_cinsert::handle_realserver_recv(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_realserver_recv] : "
 									"thread_id = [%s], "
@@ -4481,7 +4482,7 @@ protocol_module_cinsert::handle_realserver_recv(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_realserver_recv] : "
 										"thread_id = [%s], "
@@ -4500,7 +4501,7 @@ protocol_module_cinsert::handle_realserver_recv(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_realserver_recv] : "
 									"thread_id = [%s], "
@@ -4539,7 +4540,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorryserver_recv] : "
 									"thread_id = [%s], "
@@ -5176,7 +5177,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorryserver_recv] : "
 										"thread_id = [%s], "
@@ -5195,7 +5196,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorryserver_recv] : "
 									"thread_id = [%s], "
@@ -5230,7 +5231,7 @@ protocol_module_cinsert::handle_client_connection_check(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_client_connection_check] : "
 									"thread_id = [%s]");
@@ -5603,7 +5604,7 @@ protocol_module_cinsert::handle_client_connection_check(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_client_connection_check] : "
 										"thread_id = [%s], "
@@ -5622,7 +5623,7 @@ protocol_module_cinsert::handle_client_connection_check(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_client_connection_check] : "
 									"thread_id = [%s], "
@@ -5660,7 +5661,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_client_send] : "
 									"thread_id = [%s]");
@@ -5819,7 +5820,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_client_send] : "
 										"thread_id = [%s], "
@@ -5838,7 +5839,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_client_send] : "
 									"thread_id = [%s], "
@@ -5863,7 +5864,7 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform_1(	"function in  : [handle_client_disconnect] : "
 									"thread_id = [%s]");
@@ -5897,7 +5898,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorry_enable] : "
 									"thread_id = [%s]");
@@ -6100,7 +6101,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorry_enable] : "
 										"thread_id = [%s], "
@@ -6119,7 +6120,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorry_enable] : "
 									"thread_id = [%s], "
@@ -6144,7 +6145,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorry_disable] : "
 									"thread_id = [%s]");
@@ -6347,7 +6348,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorry_disable] : "
 										"thread_id = [%s], "
@@ -6366,7 +6367,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorry_disable] : "
 									"thread_id = [%s], "
@@ -6392,7 +6393,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_realserver_disconnect] : "
 									"thread_id = [%s], "
@@ -6541,7 +6542,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_realserver_disconnect] : "
 										"thread_id = [%s], "
@@ -6560,7 +6561,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_realserver_disconnect] : "
 									"thread_id = [%s], "
@@ -6586,7 +6587,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 {
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function in  : [handle_sorryserver_disconnect] : "
 									"thread_id = [%s], "
@@ -6736,7 +6737,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	} catch (...)
 	{
 		//---------- DEBUG LOG START ------------------------------
-		if( LOG_LV_DEBUG == getloglevel())
+		if(unlikely(LOG_LV_DEBUG == getloglevel()))
 		{
 			boost::format	outform(	"function out : [handle_sorryserver_disconnect] : "
 										"thread_id = [%s], "
@@ -6755,7 +6756,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	}
 
 	//---------- DEBUG LOG START ------------------------------
-	if( LOG_LV_DEBUG == getloglevel())
+	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
 		boost::format	outform(	"function out : [handle_sorryserver_disconnect] : "
 									"thread_id = [%s], "
