@@ -1,10 +1,26 @@
-//
-//	@file	http_protocol_module_base.cpp
-//	@brief	shared object http protocol module absctract class
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*
+ *	@file	http_protocol_module_base.cpp
+ *	@brief	shared object protocol module abstract class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include <boost/xpressive/xpressive.hpp>
 
 #include "http_protocol_module_base.h"
@@ -32,6 +48,20 @@ cregex	version_regex_response
 
 cregex	status_code_regex_check
 		=	"HTTP/" >> _d >> "." >> _d >> _s >>
+			range('1', '3') >> repeat<2>(_d) >> _s >>
+			*_;
+
+cregex	method_and_version_regex
+		= (	as_xpr("GET")		| as_xpr("HEAD")		| as_xpr("POST")		|
+			as_xpr("PUT")		| as_xpr("PROPFIND")	| as_xpr("PROPPATCH")	|
+			as_xpr("OPTIONS")	| as_xpr("CONNECT")		| as_xpr("COPY")		|
+			as_xpr("TRACE")		| as_xpr("DELETE")		| as_xpr("LOCK")		|
+			as_xpr("UNLOCK")	| as_xpr("MOVE")		| as_xpr("MKCOL")) >> _s >>
+			+~_s >> _s >>
+			"HTTP/" >> (as_xpr("1.0")|as_xpr("1.1"));
+
+cregex	version_and_status_code_regex
+		=	"HTTP/" >> (as_xpr("1.0")|as_xpr("1.1")) >> _s >>
 			range('1', '3') >> repeat<2>(_d) >> _s >>
 			*_;
 
@@ -342,6 +372,191 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 }
 
+l7vs::http_protocol_module_base::CHECK_RESULT_TAG
+l7vs::http_protocol_module_base::check_http_method_and_version(
+													const char* buffer,
+													const size_t buffer_len ) const {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [check_http_method_and_version] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
+
+	char*	check_string	= NULL;
+	size_t	line_length		= 0;
+
+	if( buffer != NULL ){
+
+		for( line_length = 0; line_length < buffer_len; line_length++ ){
+
+			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+
+				break;
+
+			}
+
+		}
+
+		if( line_length < buffer_len ){
+
+			check_string = (char*)malloc( line_length + 1 );
+
+			if( check_string != NULL ){
+				memcpy( check_string, buffer, line_length );
+	
+				check_string[line_length] = '\0';
+	
+				if( !regex_match( check_string, method_and_version_regex )){
+	
+					check_result = CHECK_NG;
+	
+				}
+	
+				free( check_string );
+			}
+			else{
+
+				check_result = CHECK_NG;
+
+			}
+
+		}
+		else{
+
+			check_result = CHECK_INPOSSIBLE;
+
+		}
+
+	}
+	else{
+
+		check_result = CHECK_NG;
+
+	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [check_http_method_and_version] : "
+									"check_result = [%d]" );
+
+		outform % check_result;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	return check_result;
+
+}
+
+l7vs::http_protocol_module_base::CHECK_RESULT_TAG
+l7vs::http_protocol_module_base::check_http_version_and_status_code(
+													const char* buffer,
+													const size_t buffer_len ) const {
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function in  : [check_http_version_and_status_code] : "
+									"buffer_len = [%d]" );
+
+		outform % buffer_len;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
+
+	char*	check_string	= NULL;
+	size_t	line_length		= 0;
+
+	if( buffer != NULL ){
+
+		for( line_length = 0; line_length < buffer_len; line_length++ ){
+
+			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+
+				break;
+
+			}
+
+		}
+
+		if( line_length < buffer_len ){
+
+			check_string = (char*)malloc( line_length + 1 );
+
+			if( check_string != NULL ){
+				memcpy( check_string, buffer, line_length );
+	
+				check_string[line_length] = '\0';
+	
+				if( !regex_match( check_string, version_and_status_code_regex )){
+	
+					check_result = CHECK_NG;
+	
+				}
+	
+				free( check_string );
+			}
+			else{
+
+				check_result = CHECK_NG;
+
+			}
+
+		}
+		else{
+
+			check_result = CHECK_INPOSSIBLE;
+
+		}
+
+	}
+	else{
+
+		check_result = CHECK_NG;
+
+	}
+
+	//---------- DEBUG LOG START ------------------------------
+	if( LOG_LV_DEBUG == getloglevel())
+	{
+		boost::format	outform(	"function out : [check_http_version_and_status_code] : "
+									"check_result = [%d]" );
+
+		outform % check_result;
+
+		putLogDebug(	0,
+						outform.str(),
+						__FILE__,
+						__LINE__ );
+	}
+	//---------- DEBUG LOG END ------------------------------
+
+	return check_result;
+
+}
 
 bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 													const size_t buffer_len,

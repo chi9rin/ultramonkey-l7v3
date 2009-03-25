@@ -1,3 +1,26 @@
+/*
+ *	@file	protocol_module_cinsert.cpp
+ *	@brief	shared object protocol module class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include <vector>
 #include <list>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -1133,7 +1156,8 @@ protocol_module_cinsert::handle_session_initialize(
 		down_thread_data->client_endpoint_tcp		= client_endpoint_tcp;
 
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rw_scoped_lock	lock( session_thread_data_map_mutex );
 			session_thread_data_map[ up_thread_id ]		= up_thread_data;
 			session_thread_data_map[ down_thread_id ]	= down_thread_data;
 		}
@@ -1209,7 +1233,8 @@ protocol_module_cinsert::handle_session_finalize(
 	try
 	{
 
-		boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//		boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+		rw_scoped_lock	lock( session_thread_data_map_mutex );
 
 		thread_data_itr = session_thread_data_map.find( up_thread_id );
 
@@ -1296,7 +1321,8 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -1410,7 +1436,8 @@ protocol_module_cinsert::handle_client_recv(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -1609,19 +1636,24 @@ protocol_module_cinsert::handle_client_recv(
 						else if( send_status_itr->status == SEND_NG )
 						{
 
-							check_result = check_http_method(
+// 							check_result = check_http_method(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												unsend_data_size );
+// 
+// 							if( check_result == CHECK_OK )
+// 							{
+// 
+// 								check_result = check_http_version(
+// 													(const char*)recive_data_itr->second.recive_buffer
+// 														+ send_status_itr->send_offset,
+// 													unsend_data_size );
+// 							}
+
+							check_result = check_http_method_and_version(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
 												unsend_data_size );
-
-							if( check_result == CHECK_OK )
-							{
-
-								check_result = check_http_version(
-													(const char*)recive_data_itr->second.recive_buffer
-														+ send_status_itr->send_offset,
-													unsend_data_size );
-							}
 
 							if( check_result == CHECK_OK )
 							{
@@ -1793,19 +1825,24 @@ protocol_module_cinsert::handle_client_recv(
 						send_status_add.edit_division		= 0;
 						send_status_add.send_offset			= next_request_offset;
 
-						check_result = check_http_method(
+// 						check_result = check_http_method(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_add.send_offset,
+// 											rest_request_data_size );
+// 
+// 						if( check_result == CHECK_OK )
+// 						{
+// 
+// 							check_result = check_http_version(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_add.send_offset,
+// 												rest_request_data_size );
+// 						}
+
+						check_result = check_http_method_and_version(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_add.send_offset,
 											rest_request_data_size );
-
-						if( check_result == CHECK_OK )
-						{
-
-							check_result = check_http_version(
-												(const char*)recive_data_itr->second.recive_buffer
-													+ send_status_add.send_offset,
-												rest_request_data_size );
-						}
 
 						if( check_result == CHECK_OK )
 						{
@@ -2079,7 +2116,8 @@ protocol_module_cinsert::handle_realserver_select(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -2181,9 +2219,11 @@ protocol_module_cinsert::handle_realserver_select(
 									boost::asio::ip::tcp::endpoint
 										endpoint_tmp(	boost::asio::ip::address::from_string(cookie_address),
 														boost::lexical_cast<unsigned short>(cookie_port));
-		
+
+									rs_list_lock();
+
 									rs_list_itr = rs_list_begin();
-		
+
 									while( rs_list_itr != rs_list_end())
 									{
 		
@@ -2196,6 +2236,9 @@ protocol_module_cinsert::handle_realserver_select(
 		
 										rs_list_itr = rs_list_next( rs_list_itr );
 									}
+
+									rs_list_unlock();
+
 								} catch (...)
 								{
 									boost::format	outform(	"cookie value invalid endpoint : [handle_realserver_select] : "
@@ -2352,7 +2395,8 @@ protocol_module_cinsert::handle_realserver_connect(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -2749,7 +2793,8 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -2839,7 +2884,8 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -3000,7 +3046,8 @@ protocol_module_cinsert::handle_sorryserver_select(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -3144,7 +3191,8 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -3559,7 +3607,8 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -3649,7 +3698,8 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -3833,7 +3883,8 @@ protocol_module_cinsert::handle_realserver_recv(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -4046,19 +4097,24 @@ protocol_module_cinsert::handle_realserver_recv(
 					else if( send_status_itr->status == SEND_NG )
 					{
 
-						check_result = check_status_code(
+// 						check_result = check_status_code(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_itr->send_offset,
+// 											unsend_data_size );
+// 
+// 						if( check_result == CHECK_OK )
+// 						{
+// 
+// 							check_result = check_http_version(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												unsend_data_size );
+// 						}
+
+						check_result = check_http_version_and_status_code(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											unsend_data_size );
-
-						if( check_result == CHECK_OK )
-						{
-
-							check_result = check_http_version(
-												(const char*)recive_data_itr->second.recive_buffer
-													+ send_status_itr->send_offset,
-												unsend_data_size );
-						}
 
 						if( check_result == CHECK_OK )
 						{
@@ -4232,19 +4288,24 @@ protocol_module_cinsert::handle_realserver_recv(
 					send_status_add.edit_division		= 0;
 					send_status_add.send_offset			= next_response_offset;
 
-					check_result = check_status_code(
+// 					check_result = check_status_code(
+// 										(const char*)recive_data_itr->second.recive_buffer
+// 											+ send_status_add.send_offset,
+// 										rest_response_data_size );
+// 
+// 					if( check_result == CHECK_OK )
+// 					{
+// 
+// 						check_result = check_http_version(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_add.send_offset,
+// 											rest_response_data_size );
+// 					}
+
+					check_result = check_http_version_and_status_code(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
 										rest_response_data_size );
-
-					if( check_result == CHECK_OK )
-					{
-
-						check_result = check_http_version(
-											(const char*)recive_data_itr->second.recive_buffer
-												+ send_status_add.send_offset,
-											rest_response_data_size );
-					}
 
 					if( check_result == CHECK_OK )
 					{
@@ -4527,7 +4588,8 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -4735,18 +4797,23 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					else if( send_status_itr->status == SEND_NG )
 					{
 
-						check_result = check_status_code(
+// 						check_result = check_status_code(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_itr->send_offset,
+// 											unsend_data_size );
+// 
+// 						if( check_result == CHECK_OK )
+// 						{
+// 							check_result = check_http_version(
+// 												(const char*)recive_data_itr->second.recive_buffer
+// 													+ send_status_itr->send_offset,
+// 												unsend_data_size );
+// 						}
+
+						check_result = check_http_version_and_status_code(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
 											unsend_data_size );
-
-						if( check_result == CHECK_OK )
-						{
-							check_result = check_http_version(
-												(const char*)recive_data_itr->second.recive_buffer
-													+ send_status_itr->send_offset,
-												unsend_data_size );
-						}
 
 						if( check_result == CHECK_OK )
 						{
@@ -4918,18 +4985,23 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					send_status_add.edit_division		= 0;
 					send_status_add.send_offset			= next_response_offset;
 
-					check_result = check_status_code(
+// 					check_result = check_status_code(
+// 										(const char*)recive_data_itr->second.recive_buffer
+// 											+ send_status_add.send_offset,
+// 										rest_response_data_size );
+// 
+// 					if( check_result == CHECK_OK )
+// 					{
+// 						check_result = check_http_version(
+// 											(const char*)recive_data_itr->second.recive_buffer
+// 												+ send_status_add.send_offset,
+// 											rest_response_data_size );
+// 					}
+
+					check_result = check_http_version_and_status_code(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
 										rest_response_data_size );
-
-					if( check_result == CHECK_OK )
-					{
-						check_result = check_http_version(
-											(const char*)recive_data_itr->second.recive_buffer
-												+ send_status_add.send_offset,
-											rest_response_data_size );
-					}
 
 					if( check_result == CHECK_OK )
 					{
@@ -5199,7 +5271,8 @@ protocol_module_cinsert::handle_client_connection_check(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -5613,7 +5686,8 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -5848,7 +5922,8 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -6094,7 +6169,8 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -6342,7 +6418,8 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 
@@ -6535,7 +6612,8 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	try
 	{
 		{
-			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
+			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
 

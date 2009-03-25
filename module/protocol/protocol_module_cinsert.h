@@ -1,6 +1,30 @@
+/*
+ *	@file	protocol_module_cinsert.h
+ *	@brief	shared object protocol module class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include "http_protocol_module_base.h"
+#include "wrlock.h"
 
 #ifndef PROTOCOL_MODULE_CINSERT_H
 #define PROTOCOL_MODULE_CINSERT_H
@@ -99,8 +123,6 @@ public:
 								( unsend_size == in.unsend_size )				&&
 								( edit_division == in.edit_division )			&&
 								( send_endpoint == in.send_endpoint )	);
-// 								( send_endpoint == in.send_endpoint )			&&
-// 								( edit_data_list == in.edit_data_list )	);
 				}
 
 		bool	operator!=( const send_status& in )
@@ -113,8 +135,6 @@ public:
 								( unsend_size != in.unsend_size )				||
 								( edit_division != in.edit_division )			||
 								( send_endpoint != in.send_endpoint )	);
-// 								( send_endpoint != in.send_endpoint )			||
-// 								( edit_data_list != in.edit_data_list )	);
 				}
 
 		send_status() :
@@ -154,8 +174,6 @@ public:
 								( recive_buffer_2 == in.recive_buffer_2 )					&&
 								( recive_buffer_max_size == in.recive_buffer_max_size )		&&
 								( recive_buffer_rest_size == in.recive_buffer_rest_size ));
-// 								( recive_buffer_rest_size == in.recive_buffer_rest_size )	&&
-// 								( send_status_list == in.send_status_list )	);
 				}
 
 		bool	operator!=( const recive_data& in )
@@ -165,8 +183,6 @@ public:
 								( recive_buffer_2 != in.recive_buffer_2 )					||
 								( recive_buffer_max_size != in.recive_buffer_max_size )		||
 								( recive_buffer_rest_size != in.recive_buffer_rest_size )	);
-// 								( recive_buffer_rest_size != in.recive_buffer_rest_size )	||
-// 								( send_status_list != in.send_status_list )	);
 				}
 
 		recive_data() :
@@ -217,7 +233,6 @@ public:
 				{	return	(	( thread_id == in.thread_id )								&&
 								( thread_division == in.thread_division )					&&
 								( pair_thread_id == in.pair_thread_id )						&&
-// 								( recive_data_map == in.recive_data_map )					&&
 								( end_flag == in.end_flag )									&&
 								( accept_end_flag == in.accept_end_flag )					&&
 								( sorry_flag == in.sorry_flag )								&&
@@ -232,7 +247,6 @@ public:
 					return	(	( thread_id != in.thread_id )								||
 								( thread_division != in.thread_division )					||
 								( pair_thread_id != in.pair_thread_id )						||
-// 								( recive_data_map != in.recive_data_map )					||
 								( end_flag != in.end_flag )									||
 								( accept_end_flag != in.accept_end_flag )					||
 								( sorry_flag != in.sorry_flag )								||
@@ -300,7 +314,8 @@ protected:
 	boost::array< char, MAX_OPTION_SIZE >	cookie_name;
 	boost::array< char, MAX_OPTION_SIZE >	sorry_uri;
 	t_session_thread_data_map	session_thread_data_map;
-	boost::mutex	session_thread_data_map_mutex;
+//	boost::mutex	session_thread_data_map_mutex;
+	wr_mutex	session_thread_data_map_mutex;
 
 public:
 	protocol_module_cinsert();
