@@ -13,6 +13,7 @@
 
 #include "tcp_socket.h"
 #include "logger.h"
+#include "utility.h"
 
 namespace l7vs{
 
@@ -47,12 +48,12 @@ namespace l7vs{
 		
         rw_scoped_lock scope_lock(close_mutex);
 		
-		if(!open_flag){
+		if(likely(!open_flag)){
 			my_socket.connect(connect_endpoint,ec);
-			if(!ec){
+			if(unlikely(!ec)){
 				open_flag = true;
 				//----Debug log----------------------------------------------------------------------
-				if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 					std::stringstream buf;
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
@@ -75,7 +76,7 @@ namespace l7vs{
 
 		open_flag = true;
 		//----Debug log----------------------------------------------------------------------
-		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 			boost::system::error_code ec;
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -98,7 +99,7 @@ namespace l7vs{
         rw_scoped_lock scope_lock(close_mutex);
 
 		//----Debug log----------------------------------------------------------------------
-		if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)){
+		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 			if(open_flag){
 				boost::system::error_code ec;
 				std::stringstream buf;
@@ -112,7 +113,7 @@ namespace l7vs{
 		}
 		//----Debug log----------------------------------------------------------------------
 		bool bres = false;
-		if(open_flag){
+		if(likely(open_flag)){
 			open_flag = false;
 			bres = true;
 		}
@@ -143,8 +144,8 @@ namespace l7vs{
         rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
 		res_size = my_socket.write_some(buffers,ec);
-		if(ec){
-			if (!open_flag) {
+		if(unlikely(ec)){
+			if (likely(!open_flag)) {
 				res_size = 0;
 				ec.clear();
 			}
@@ -164,8 +165,8 @@ namespace l7vs{
         rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
 		res_size = my_socket.read_some(buffers,ec);
-		if(ec){
-			if (!open_flag) {
+		if(unlikely(ec)){
+			if (likely(!open_flag)) {
 				res_size = 0;
 				ec.clear();
 			}
