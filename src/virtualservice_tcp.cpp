@@ -454,8 +454,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					boost::bind( &l7vs::virtualservice_tcp::rs_list_unlock, this ) );
 	protomod->init_replication_functions(
 					boost::bind( &l7vs::virtualservice_tcp::replication_pay_memory, this, _1, _2 ),
-					boost::bind( &l7vs::virtualservice_tcp::rs_list_lock, this ),
-					boost::bind( &l7vs::virtualservice_tcp::rs_list_unlock, this ),
+					boost::bind( &l7vs::virtualservice_tcp::replication_area_lock, this, element.protocol_module_name ),
+					boost::bind( &l7vs::virtualservice_tcp::replication_area_unlock, this, element.protocol_module_name ),
 					element.tcp_accept_endpoint,
 					element.udp_recv_endpoint );
 	tcp_schedule_func_type	sched_rs_func	= boost::bind( &l7vs::virtualservice_tcp::schedule_rs, this, _1, _2, _3, _4, _5 );
