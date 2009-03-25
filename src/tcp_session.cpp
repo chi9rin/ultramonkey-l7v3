@@ -22,11 +22,6 @@
 #define UP_THREAD_LOCK 		std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0010)
 #define DOWN_THREAD_LOCK 	std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020)
 
-#define CLIENT_RECEIVE_WAIT_DEFAULT 5
-#define SORRYSERVER_RECEIVE_WAIT_DEFAULT 5
-#define REALSERVER_RECEIVE_WAIT_DEFAULT 5
-#define REALSERVER_RECEIVE_EMPTY_WAIT_DEFAULT 5
-
 namespace l7vs{
 	//! construcor
 	//! @param[in/out]	vs is parent virtualservice object
@@ -283,7 +278,7 @@ namespace l7vs{
 	//! @return 		false is not wait
 	bool tcp_session::is_thread_wait(){
 		bool res = false;
-		boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+		rd_scoped_lock scope_lock(thread_state_update_mutex);
 		if(thread_state.test(4) & thread_state.test(5))
 			res = true;
 		return res;
@@ -294,7 +289,7 @@ namespace l7vs{
 		switch(message){
 			case SESSION_PAUSE_ON:
 				{
-					boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+                    rw_scoped_lock scope_lock(session_pause_flag_mutex);
 					session_pause_flag = true;
 				}
 				//----Debug log----------------------------------------------------------------------
@@ -309,7 +304,7 @@ namespace l7vs{
 				return;
 			case SESSION_PAUSE_OFF:
 				{
-					boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+					rw_scoped_lock scope_lock(session_pause_flag_mutex);
 					session_pause_flag = false;
 				}
 				//----Debug log----------------------------------------------------------------------
@@ -413,7 +408,7 @@ namespace l7vs{
 		while(true){ 
 			//wait down thread get id
 			{
-				boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+				rd_scoped_lock scope_lock(thread_state_update_mutex);
 				if(thread_state.test(1)){// DOWN_THREAD_ALIVE
 					break;
 				}
@@ -437,13 +432,13 @@ namespace l7vs{
 			buf << "] protocol_module is NULL!";
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 				exit_flag = true;
 			}
 		}
 		bool is_exit;
 		{
-			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(!is_exit){
@@ -455,7 +450,7 @@ namespace l7vs{
 				buf << "] client socket not open!";
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
@@ -465,7 +460,7 @@ namespace l7vs{
 		client_socket.accept();
 		endpoint cl_end;
 		{
-			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(!is_exit){
@@ -479,13 +474,13 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
 		}
 		{
-			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(!is_exit){
@@ -498,14 +493,14 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
 		}
 
 		{
-			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(!is_exit){
@@ -521,14 +516,14 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
 		}
 
 		{
-			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(!is_exit){
@@ -544,7 +539,7 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
@@ -556,7 +551,7 @@ namespace l7vs{
 // 		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func;
 		up_thread_function_pair	func;
 		{
-			boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(!is_exit){
@@ -571,7 +566,7 @@ namespace l7vs{
 				buf << module_event;	
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}else{
@@ -585,7 +580,7 @@ namespace l7vs{
 					buf << func_type->second;
 					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 					{
-						boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 						exit_flag = true;
 					}
 				}else{
@@ -605,29 +600,29 @@ namespace l7vs{
 		//----Debug log----------------------------------------------------------------------
 		while(true){
 			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 				if(unlikely(exit_flag)) break;
 			}
 			bool is_pause;
 			{
-				boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+				rd_scoped_lock scope_lock(session_pause_flag_mutex);
 				is_pause = session_pause_flag;
 			}
 			if(unlikely(is_pause)){
 				thread_state_update(UP_THREAD_LOCK,true);
 				while(true){
 					{
-						boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+						rd_scoped_lock scope_lock(session_pause_flag_mutex);
 						if(!session_pause_flag) break;
 					}
 					{
-						boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                        rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 						if(exit_flag) break;
 					}
 				}
 				thread_state_update(UP_THREAD_LOCK,false);
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 					if(exit_flag) break;
 				}
 			}
@@ -670,7 +665,7 @@ namespace l7vs{
 		while(true){ 
 			// wait down thread alive
 			{
-				boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+				rd_scoped_lock scope_lock(thread_state_update_mutex);
 				if(!thread_state.test(1)){// DOWN_THREAD_ALIVE
 					break;
 				}
@@ -744,13 +739,13 @@ namespace l7vs{
 		while(true){ // UP_THREAD_ACTIVE
 			// wait up thread active
 			{
-				boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+				rd_scoped_lock scope_lock(thread_state_update_mutex);
 				if(thread_state.test(2)){
 					break;
 				}
 			}
 			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 				if(exit_flag) break;
 			}
 			boost::this_thread::yield();
@@ -774,7 +769,7 @@ namespace l7vs{
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_RECV";
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
 			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 				exit_flag = true;
 			}
 		}else{
@@ -798,35 +793,35 @@ namespace l7vs{
             buf << "] protocol_module is NULL!";
             Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
             {
-                boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
                 exit_flag = true;
             }
         }
 		while(true){
 			{
-				boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 				if(unlikely(exit_flag)) break;
 			}
 			bool is_pause;
 			{
-				boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+				rd_scoped_lock scope_lock(session_pause_flag_mutex);
 				is_pause = session_pause_flag;
 			}
 			if(unlikely(is_pause)){
 				thread_state_update(DOWN_THREAD_LOCK,true);
 				while(true){
 					{
-						boost::mutex::scoped_lock scope_lock(session_pause_flag_mutex);
+						rd_scoped_lock scope_lock(session_pause_flag_mutex);
 						if(!session_pause_flag) break;
 					}
 					{
-						boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                        rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 						if(exit_flag) break;
 					}
 				}
 				thread_state_update(DOWN_THREAD_LOCK,false);
 				{
-					boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+                    rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 					if(exit_flag) break;
 				}
 			}
@@ -877,7 +872,7 @@ namespace l7vs{
 	//! @param[in]		thread_flag is regist or unregist bitset
 	//! @param[in]		regist is regist or unregist flag
 	void tcp_session::thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist){
-		boost::mutex::scoped_lock scope_lock(thread_state_update_mutex);
+		rw_scoped_lock scope_lock(thread_state_update_mutex);
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 			std::stringstream buf;
@@ -1976,7 +1971,7 @@ namespace l7vs{
 	//! up thread exit main loop
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
-		boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 		exit_flag = true;
 	}
 	//! up thread close all socket
@@ -2726,7 +2721,7 @@ namespace l7vs{
 	//! down thread exit main loop
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
-		boost::mutex::scoped_lock scope_lock(exit_flag_update_mutex);
+        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 		exit_flag = true;
 	}
 	//! down thread close all socket
