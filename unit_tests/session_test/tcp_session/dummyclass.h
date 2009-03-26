@@ -639,6 +639,7 @@ namespace l7vs{
 			static bool connect_call_check;
 			static bool set_non_blocking_mode_res;
 			static boost::system::error_code set_non_blocking_mode_ec;
+			static bool is_connect;
 			
 			tcp_socket(boost::asio::io_service& io) : 
 				my_socket(io){
@@ -660,9 +661,14 @@ namespace l7vs{
 				tcp_socket::connect_call_check = true;
 				tcp_socket::connect_connect_endpoint = connect_endpoint;
 				tcp_socket::connect_ec = &ec;
+				if(tcp_socket::is_connect){
+					my_socket.connect(connect_endpoint,ec);
+				}
 				return tcp_socket::connect_res;
 			};
 			
+
+
 			//! close socket
 			//! @param[out]		ec is reference error code object
 			//! @return 		true is socket close
@@ -736,4 +742,5 @@ namespace l7vs{
 	bool tcp_socket::connect_call_check;
 	bool tcp_socket::set_non_blocking_mode_res = true;;
 	boost::system::error_code tcp_socket::set_non_blocking_mode_ec;
+	bool tcp_socket::is_connect = false;
 }

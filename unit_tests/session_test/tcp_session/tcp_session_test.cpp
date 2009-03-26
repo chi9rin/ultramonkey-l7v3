@@ -26,7 +26,7 @@ class mutex_lock_test : public l7vs::tcp_session{
 	public:
 		boost::thread::id befor_thread_id;
 		boost::thread::id after_thread_id;
-		boost::mutex* pTest_mutex;
+		l7vs::wr_mutex* pTest_mutex;
 		boost::function< void(void) > test_func;
 		
 		mutex_lock_test(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
@@ -44,7 +44,7 @@ class mutex_lock_test : public l7vs::tcp_session{
 			if(pTest_mutex == NULL){
 				std::cout << "Test code Error!! pTest_mutex = NULL" << std::endl;
 			}else{
-				pTest_mutex->lock();
+				pTest_mutex->wrlock();
 			}
 		};
 		
@@ -55,10 +55,15 @@ class mutex_lock_test : public l7vs::tcp_session{
 				pTest_mutex->unlock();
 			}
 		};
-		
-		bool mutex_trylock(){
-			return pTest_mutex->try_lock();
+
+		void set_protocol_module(l7vs::protocol_module_base* test_protocol_module){
+			protocol_module = test_protocol_module;
 		};
+
+		
+/*		bool mutex_trylock(){
+			return pTest_mutex->try_lock();
+		};*/
 		
 		boost::mutex test_thread_wait;
 		
@@ -1761,24 +1766,15 @@ class initialize_test_class : public l7vs::tcp_session{
 		l7vs::tcp_thread_message_que& get_down_thread_message_que(){
 			return down_thread_message_que;
 		};
-		/*
-		//! client receive wait of not data or try again
-		unsigned long get_client_receive_wait(){
-			return client_receive_wait;
-		};
-		//! sorryserver receive wait of not data or try again
-		unsigned long get_sorryserver_receive_wait(){
-			return sorryserver_receive_wait;
-		};
-		//! realserver receive wait of not data or try again
-		unsigned long get_realserver_receive_wait(){
-			return realserver_receive_wait;
-		};
-		//! realserver receive wait of not conection
-		unsigned long get_realserver_receive_empty_wait(){
-			return realserver_receive_empty_wait;
-		};
-		*/
+
+		int get_upstream_buffer_size(){
+			return upstream_buffer_size;
+		}
+
+		int get_downstream_buffer_size(){
+			return downstream_buffer_size;
+		}
+
 };
 void initialize_test(){
 	BOOST_MESSAGE( "----- initialize test start -----" );
@@ -1806,31 +1802,31 @@ void initialize_test(){
 	l7vs::session_result_message res_msg = test_obj.initialize();
 	
 	// unit_test [1] initialize exit flag check
-	std::cout << "[1] initialize get protocol module pointer check" << std::endl;
+	std::cout << "[1] initialize exit flag check" << std::endl;
 	BOOST_CHECK(!test_obj.get_exit_flag());
 	
 	// unit_test [2] initialize up thread id check
-	std::cout << "[2] initialize get protocol module pointer check" << std::endl;
+	std::cout << "[2] initialize up thread id check" << std::endl;
 	BOOST_CHECK(test_obj.get_up_thread_id() == boost::thread::id());
 	
 	// unit_test [3] initialize down thread id check
-	std::cout << "[3] initialize get protocol module pointer check" << std::endl;
+	std::cout << "[3] initialize down thread id check" << std::endl;
 	BOOST_CHECK(test_obj.get_down_thread_id() == boost::thread::id());
 	
 	// unit_test [4] initialize thread state check
-	std::cout << "[4] initialize get protocol module pointer check" << std::endl;
-	//	BOOST_CHECK(test_obj.get_thread_state().none);
+	std::cout << "[4] initialize thread state check" << std::endl;
+	BOOST_CHECK(test_obj.get_thread_state().none());
 	
 	// unit_test [5] initialize session pause flag check
-	std::cout << "[5] initialize get protocol module pointer check" << std::endl;
-	//	BOOST_CHECK(!test_obj.get_session_pause_flag());
+	std::cout << "[5] initialize session pause flag check" << std::endl;
+	BOOST_CHECK(!test_obj.get_session_pause_flag());
 	
 	// unit_test [6] initialize up thread message que check
-	std::cout << "[6] initialize get protocol module pointer check" << std::endl;
+	std::cout << "[6] initialize up thread message que check" << std::endl;
 	BOOST_CHECK(test_obj.get_up_thread_message_que().empty());
 	
 	// unit_test [7] initialize down thread message que check
-	std::cout << "[7] initialize get protocol module pointer check" << std::endl;
+	std::cout << "[7] initialize down thread message que check" << std::endl;
 	BOOST_CHECK(test_obj.get_down_thread_message_que().empty());
 	
 	// unit_test [8] initialize get protocol module pointer check
@@ -1840,25 +1836,17 @@ void initialize_test(){
 	// unit_test [9] initialize session_result_message flag check
 	std::cout << "[9] initialize session_result_message flag check" << std::endl;
 	BOOST_CHECK(!res_msg.flag);
-	/*
-	// unit_test [10] initialize client_receive_wait load cf check
-	std::cout << "[10] initialize client_receive_wait load cf check" << std::endl;
-	BOOST_CHECK_EQUAL(test_obj.get_client_receive_wait() , 1ul);
+	
+	// unit_test [10] initialize upstream_buffer_size load cf check
+	std::cout << "[10] initialize upstream_buffer_size load cf check" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_upstream_buffer_size() , 7777);
 
-	// unit_test [11] initialize realserver_receive_wait load cf check
-	std::cout << "[11] initialize realserver_receive_wait load cf check" << std::endl;
-	BOOST_CHECK_EQUAL(test_obj.get_realserver_receive_wait() , 2ul);
+	// unit_test [11] initialize downstream_buffer_size load cf check
+	std::cout << "[11] initialize downstream_buffer_size load cf check" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_downstream_buffer_size() , 8888);
 
-	// unit_test [12] initialize sorryserver_receive_wait load cf check
-	std::cout << "[12] initialize sorryserver_receive_wait load cf check" << std::endl;
-	BOOST_CHECK_EQUAL(test_obj.get_sorryserver_receive_wait() , 3ul);
-
-	// unit_test [13] initialize realserver_receive_empty_wait load cf check
-	std::cout << "[13] initialize realserver_receive_empty_wait load cf check" << std::endl;
-	BOOST_CHECK_EQUAL(test_obj.get_realserver_receive_empty_wait() , 4ul);
-	*/
-	// unit_test [10] initialize protocol_module NULL error check
-	std::cout << "[10] initialize protocol_module NULL error check" << std::endl;
+	// unit_test [12] initialize protocol_module NULL error check
+	std::cout << "[12] initialize protocol_module NULL error check" << std::endl;
 	vs.get_protocol_module_res = NULL;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -2049,10 +2037,10 @@ void is_thread_wait_test(){
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
 	
 	
-	// unit_test [4] is_thread_wait thread run after mutex unlock test
+/*	// unit_test [4] is_thread_wait thread run after mutex unlock test
 	std::cout << "[4] is_thread_wait thread run after mutex unlock test" << std::endl;
 	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
+	test_lock_obj.mutex_unlock();*/
 	
 	BOOST_MESSAGE( "----- is_thread_wait test end -----" );	
 }
@@ -3126,10 +3114,10 @@ void thread_state_update_test(){
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
 	
-	// unit_test [5] thread_state_update thread run after mutex unlock test
+/*	// unit_test [5] thread_state_update thread run after mutex unlock test
 	std::cout << "[5] thread_state_update thread run after mutex unlock test" << std::endl;
 	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
+	test_lock_obj.mutex_unlock();*/
 	
 	BOOST_MESSAGE( "----- thread_state_update test end -----" );
 	
@@ -3209,10 +3197,10 @@ void up_thread_exit_test(){
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
 	
 	
-	// unit_test [4] up_thread_exit thread run after mutex unlock test
+/*	// unit_test [4] up_thread_exit thread run after mutex unlock test
 	std::cout << "[4] up_thread_exit thread run after mutex unlock test" << std::endl;
 	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
+	test_lock_obj.mutex_unlock();*/
 	
 	BOOST_MESSAGE( "----- up_thread_exit test end -----" );
 }
@@ -3289,10 +3277,10 @@ void down_thread_exit_test(){
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
 	
 	
-	// unit_test [4] down_thread_exit thread run after mutex unlock test
+/*	// unit_test [4] down_thread_exit thread run after mutex unlock test
 	std::cout << "[4] down_thread_exit thread run after mutex unlock test" << std::endl;
 	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
+	test_lock_obj.mutex_unlock();*/
 	
 	
 		
@@ -3384,19 +3372,9 @@ void up_thread_client_disconnect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_client_disconnect_event protocol_module NULL error check
-	std::cout << "[5] up_thread_client_disconnect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_client_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_client_disconnect_event_test();
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	
 	test_lock_obj.test_thread_wait.lock();
@@ -3417,24 +3395,18 @@ void up_thread_client_disconnect_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] up_thread_client_disconnect_event thread block test (mutex lock)
-	std::cout << "[6] up_thread_client_disconnect_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] up_thread_client_disconnect_event thread block test (mutex lock)
+	std::cout << "[5] up_thread_client_disconnect_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] up_thread_client_disconnect_event thread run test (mutex unlock)
-	std::cout << "[7] up_thread_client_disconnect_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] up_thread_client_disconnect_event thread run test (mutex unlock)
+	std::cout << "[6] up_thread_client_disconnect_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	
-	// unit_test [8] up_thread_client_disconnect_event thread run after mutex unlock test
-	std::cout << "[8] up_thread_client_disconnect_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_client_disconnect_event test end -----" );
 	
@@ -3518,20 +3490,9 @@ void down_thread_client_disconnect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] down_thread_client_disconnect_event protocol_module NULL error check
-	std::cout << "[5] down_thread_client_disconnect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_client_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_client_disconnect_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);	
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -3551,23 +3512,18 @@ void down_thread_client_disconnect_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] down_thread_client_disconnect_event thread block test (mutex lock)
-	std::cout << "[6] down_thread_client_disconnect_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] down_thread_client_disconnect_event thread block test (mutex lock)
+	std::cout << "[5] down_thread_client_disconnect_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] down_thread_client_disconnect_event thread run test (mutex unlock)
-	std::cout << "[7] down_thread_client_disconnect_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] down_thread_client_disconnect_event thread run test (mutex unlock)
+	std::cout << "[6] down_thread_client_disconnect_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [8] down_thread_client_disconnect_event thread run after mutex unlock test
-	std::cout << "[8] down_thread_client_disconnect_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_client_disconnect_event test end -----" );
 }
@@ -3667,18 +3623,6 @@ void up_thread_realserver_get_detination_event_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	// unit_test [5] up_thread_realserver_get_detination_event protocol_module NULL error check
-	std::cout << "[5] up_thread_realserver_get_detination_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	
 	BOOST_MESSAGE( "----- up_thread_realserver_get_detination_event test end -----" );
 }
@@ -3780,18 +3724,6 @@ void up_thread_sorryserver_get_detination_event_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	// unit_test [5] up_thread_sorryserver_get_detination_event protocol_module NULL error check
-	std::cout << "[5] up_thread_sorryserver_get_detination_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_get_detination_event test end -----" );
 }
@@ -3949,20 +3881,9 @@ void up_thread_realserver_disconnect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [7] up_thread_realserver_disconnect_event protocol_module NULL error check
-	std::cout << "[7] up_thread_realserver_disconnect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_realserver_disconnect_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);	
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -3982,24 +3903,18 @@ void up_thread_realserver_disconnect_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [8] up_thread_realserver_disconnect_event thread block test (mutex lock)
-	std::cout << "[8] up_thread_realserver_disconnect_event thread block test (mutex lock)" << std::endl;
+	// unit_test [7] up_thread_realserver_disconnect_event thread block test (mutex lock)
+	std::cout << "[7] up_thread_realserver_disconnect_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [9] up_thread_realserver_disconnect_event thread run test (mutex unlock)
-	std::cout << "[9] up_thread_realserver_disconnect_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [8] up_thread_realserver_disconnect_event thread run test (mutex unlock)
+	std::cout << "[8] up_thread_realserver_disconnect_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	
-	// unit_test [10] up_thread_realserver_disconnect_event thread run after mutex unlock test
-	std::cout << "[10] up_thread_realserver_disconnect_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_realserver_disconnect_event test end -----" );
 	
@@ -4167,20 +4082,9 @@ void down_thread_realserver_disconnect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [7] down_thread_realserver_disconnect_event protocol_module NULL error check
-	std::cout << "[7] down_thread_realserver_disconnect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_realserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_realserver_disconnect_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -4200,23 +4104,18 @@ void down_thread_realserver_disconnect_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [8] down_thread_realserver_disconnect_event thread block test (mutex lock)
-	std::cout << "[8] down_thread_realserver_disconnect_event thread block test (mutex lock)" << std::endl;
+	// unit_test [7] down_thread_realserver_disconnect_event thread block test (mutex lock)
+	std::cout << "[7] down_thread_realserver_disconnect_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [9] down_thread_realserver_disconnect_event thread run test (mutex unlock)
-	std::cout << "[9] down_thread_realserver_disconnect_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [8] down_thread_realserver_disconnect_event thread run test (mutex unlock)
+	std::cout << "[8] down_thread_realserver_disconnect_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [10] down_thread_realserver_disconnect_event thread run after mutex unlock test
-	std::cout << "[10] down_thread_realserver_disconnect_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_realserver_disconnect_event test end -----" );
 }
@@ -4317,19 +4216,9 @@ void up_thread_sorryserver_disconnect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [6] up_thread_sorryserver_disconnect_event protocol_module NULL error check
-	std::cout << "[6] up_thread_sorryserver_disconnect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_sorryserver_disconnect_event_test();
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -4349,23 +4238,18 @@ void up_thread_sorryserver_disconnect_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [7] up_thread_sorryserver_disconnect_event thread block test (mutex lock)
-	std::cout << "[7] up_thread_sorryserver_disconnect_event thread block test (mutex lock)" << std::endl;
+	// unit_test [6] up_thread_sorryserver_disconnect_event thread block test (mutex lock)
+	std::cout << "[6] up_thread_sorryserver_disconnect_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [8] up_thread_sorryserver_disconnect_event thread run test (mutex unlock)
-	std::cout << "[8] up_thread_sorryserver_disconnect_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [7] up_thread_sorryserver_disconnect_event thread run test (mutex unlock)
+	std::cout << "[7] up_thread_sorryserver_disconnect_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [9] up_thread_sorryserver_disconnect_event thread run after mutex unlock test
-	std::cout << "[9] up_thread_sorryserver_disconnect_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_disconnect_event_test test end -----" );
 }
@@ -4534,19 +4418,9 @@ void up_thread_sorryserver_mod_disconnect_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [16] up_thread_sorryserver_mod_disconnect protocol_module NULL error check
-	std::cout << "[16] up_thread_sorryserver_mod_disconnect protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_sorryserver_disconnect_event_test();
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -4566,23 +4440,18 @@ void up_thread_sorryserver_mod_disconnect_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [17] up_thread_sorryserver_mod_disconnect thread block test (mutex lock)
-	std::cout << "[17] up_thread_sorryserver_mod_disconnect thread block test (mutex lock)" << std::endl;
+	// unit_test [16] up_thread_sorryserver_mod_disconnect thread block test (mutex lock)
+	std::cout << "[16] up_thread_sorryserver_mod_disconnect thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [18] up_thread_sorryserver_mod_disconnect thread run test (mutex unlock)
-	std::cout << "[18] up_thread_sorryserver_mod_disconnect thread run test (mutex unlock)" << std::endl;
+	// unit_test [17] up_thread_sorryserver_mod_disconnect thread run test (mutex unlock)
+	std::cout << "[17] up_thread_sorryserver_mod_disconnect thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [19] up_thread_sorryserver_mod_disconnect thread run after mutex unlock test
-	std::cout << "[19] up_thread_sorryserver_mod_disconnect thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_mod_disconnect test end -----" );
 }
@@ -4744,19 +4613,9 @@ void down_thread_sorryserver_mod_disconnect_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [16] down_thread_sorryserver_mod_disconnect protocol_module NULL error check
-	std::cout << "[16] down_thread_sorryserver_mod_disconnect protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_sorryserver_disconnect_event_test();
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -4776,23 +4635,18 @@ void down_thread_sorryserver_mod_disconnect_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [17] down_thread_sorryserver_mod_disconnect thread block test (mutex lock)
-	std::cout << "[17] down_thread_sorryserver_mod_disconnect thread block test (mutex lock)" << std::endl;
+	// unit_test [16] down_thread_sorryserver_mod_disconnect thread block test (mutex lock)
+	std::cout << "[16] down_thread_sorryserver_mod_disconnect thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [18] down_thread_sorryserver_mod_disconnect thread run test (mutex unlock)
-	std::cout << "[18] down_thread_sorryserver_mod_disconnect thread run test (mutex unlock)" << std::endl;
+	// unit_test [17] down_thread_sorryserver_mod_disconnect thread run test (mutex unlock)
+	std::cout << "[17] down_thread_sorryserver_mod_disconnect thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [19] down_thread_sorryserver_mod_disconnect thread run after mutex unlock test
-	std::cout << "[19] down_thread_sorryserver_mod_disconnect thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_sorryserver_mod_disconnect test end -----" );
 }
@@ -4889,20 +4743,9 @@ void down_thread_sorryserver_disconnect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [6] down_thread_sorryserver_disconnect_event protocol_module NULL error check
-	std::cout << "[6] down_thread_sorryserver_disconnect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorryserver_disconnect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_sorryserver_disconnect_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -4922,23 +4765,18 @@ void down_thread_sorryserver_disconnect_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [7] down_thread_sorryserver_disconnect_event thread block test (mutex lock)
-	std::cout << "[7] down_thread_sorryserver_disconnect_event thread block test (mutex lock)" << std::endl;
+	// unit_test [6] down_thread_sorryserver_disconnect_event thread block test (mutex lock)
+	std::cout << "[6] down_thread_sorryserver_disconnect_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [8] down_thread_sorryserver_disconnect_event thread run test (mutex unlock)
-	std::cout << "[8] down_thread_sorryserver_disconnect_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [7] down_thread_sorryserver_disconnect_event thread run test (mutex unlock)
+	std::cout << "[7] down_thread_sorryserver_disconnect_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [9] down_thread_sorryserver_disconnect_event thread run after mutex unlock test
-	std::cout << "[9] down_thread_sorryserver_disconnect_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_sorryserver_disconnect_event test end -----" );
 }
@@ -5028,20 +4866,9 @@ void up_thread_sorry_enable_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_sorry_enable_event protocol_module NULL error check
-	std::cout << "[5] up_thread_sorry_enable_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorry_enable_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_sorry_enable_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -5061,24 +4888,18 @@ void up_thread_sorry_enable_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] up_thread_sorry_enable_event thread block test (mutex lock)
-	std::cout << "[6] up_thread_sorry_enable_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] up_thread_sorry_enable_event thread block test (mutex lock)
+	std::cout << "[5] up_thread_sorry_enable_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] up_thread_sorry_enable_event thread run test (mutex unlock)
-	std::cout << "[7] up_thread_sorry_enable_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] up_thread_sorry_enable_event thread run test (mutex unlock)
+	std::cout << "[6] up_thread_sorry_enable_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	
-	// unit_test [8] up_thread_sorry_enable_event thread run after mutex unlock test
-	std::cout << "[8] up_thread_sorry_enable_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_sorry_enable_event test end -----" );
 	
@@ -5168,20 +4989,9 @@ void up_thread_sorry_disable_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_sorry_disable_event protocol_module NULL error check
-	std::cout << "[5] up_thread_sorry_disable_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorry_disable_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_sorry_disable_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -5201,24 +5011,18 @@ void up_thread_sorry_disable_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] up_thread_sorry_disable_event thread block test (mutex lock)
-	std::cout << "[6] up_thread_sorry_disable_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] up_thread_sorry_disable_event thread block test (mutex lock)
+	std::cout << "[5] up_thread_sorry_disable_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] up_thread_sorry_disable_event thread run test (mutex unlock)
-	std::cout << "[7] up_thread_sorry_disable_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] up_thread_sorry_disable_event thread run test (mutex unlock)
+	std::cout << "[6] up_thread_sorry_disable_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	
-	// unit_test [8] up_thread_sorry_disable_event thread run after mutex unlock test
-	std::cout << "[8] up_thread_sorry_disable_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_sorry_disable_event test end -----" );
 	
@@ -5303,19 +5107,9 @@ void down_thread_sorry_enable_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] down_thread_sorry_enable_event protocol_module NULL error check
-	std::cout << "[5] down_thread_sorry_enable_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorry_enable_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_sorry_enable_event_test();
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	
 	test_lock_obj.test_thread_wait.lock();
@@ -5336,23 +5130,18 @@ void down_thread_sorry_enable_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] down_thread_sorry_enable_event thread block test (mutex lock)
-	std::cout << "[6] down_thread_sorry_enable_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] down_thread_sorry_enable_event thread block test (mutex lock)
+	std::cout << "[5] down_thread_sorry_enable_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] down_thread_sorry_enable_event thread run test (mutex unlock)
-	std::cout << "[7] down_thread_sorry_enable_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] down_thread_sorry_enable_event thread run test (mutex unlock)
+	std::cout << "[6] down_thread_sorry_enable_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [8] down_thread_sorry_enable_event thread run after mutex unlock test
-	std::cout << "[8] down_thread_sorry_enable_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_sorry_enable_event test end -----" );
 }
@@ -5435,20 +5224,9 @@ void down_thread_sorry_disable_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] down_thread_sorry_disable_event protocol_module NULL error check
-	std::cout << "[5] down_thread_sorry_disable_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorry_disable_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_sorry_disable_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -5468,23 +5246,18 @@ void down_thread_sorry_disable_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] down_thread_sorry_disable_event thread block test (mutex lock)
-	std::cout << "[6] down_thread_sorry_disable_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] down_thread_sorry_disable_event thread block test (mutex lock)
+	std::cout << "[5] down_thread_sorry_disable_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] down_thread_sorry_disable_event thread run test (mutex unlock)
-	std::cout << "[7] down_thread_sorry_disable_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] down_thread_sorry_disable_event thread run test (mutex unlock)
+	std::cout << "[6] down_thread_sorry_disable_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [8] down_thread_sorry_disable_event thread run after mutex unlock test
-	std::cout << "[8] down_thread_sorry_disable_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_sorry_disable_event test end -----" );
 }
@@ -5573,18 +5346,6 @@ void up_thread_client_accept_event_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	// unit_test [5] up_thread_client_accept_event protocol_module NULL error check
-	std::cout << "[5] up_thread_client_accept_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_accept_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	
 	BOOST_MESSAGE( "----- up_thread_client_accept_event test end -----" );
 	
@@ -5778,20 +5539,9 @@ void up_thread_client_respond_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_client_respond_event protocol_module NULL error check
-	std::cout << "[5] up_thread_client_respond_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_response_send_inform_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_up_thread_client_respond_event_test();
-	
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -5811,24 +5561,18 @@ void up_thread_client_respond_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] up_thread_client_respond_event thread block test (mutex lock)
-	std::cout << "[6] up_thread_client_respond_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] up_thread_client_respond_event thread block test (mutex lock)
+	std::cout << "[5] up_thread_client_respond_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] up_thread_client_respond_event thread run test (mutex unlock)
-	std::cout << "[7] up_thread_client_respond_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] up_thread_client_respond_event thread run test (mutex unlock)
+	std::cout << "[6] up_thread_client_respond_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	
-	// unit_test [8] up_thread_client_respond_event thread run after mutex unlock test
-	std::cout << "[8] up_thread_client_respond_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- up_thread_client_respond_event test end -----" );
 	
@@ -5912,19 +5656,9 @@ void down_thread_client_respond_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] down_thread_client_respond_event protocol_module NULL error check
-	std::cout << "[5] down_thread_client_respond_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_response_send_inform_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	mutex_lock_test test_lock_obj(vs,io);
 	test_lock_obj.set_down_thread_client_respond_event_test();
+	test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	
 	test_lock_obj.test_thread_wait.lock();
 	test_lock_obj.befor_thread_id = proc_id;
@@ -5944,23 +5678,18 @@ void down_thread_client_respond_event_test(){
 	test_lock_obj.test_thread_wait.unlock();
 	sleep(1);
 	
-	// unit_test [6] down_thread_client_respond_event thread block test (mutex lock)
-	std::cout << "[6] down_thread_client_respond_event thread block test (mutex lock)" << std::endl;
+	// unit_test [5] down_thread_client_respond_event thread block test (mutex lock)
+	std::cout << "[5] down_thread_client_respond_event thread block test (mutex lock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
 	
 	test_lock_obj.mutex_unlock();
 	sleep(1);
 	
-	// unit_test [7] down_thread_client_respond_event thread run test (mutex unlock)
-	std::cout << "[7] down_thread_client_respond_event thread run test (mutex unlock)" << std::endl;
+	// unit_test [6] down_thread_client_respond_event thread run test (mutex unlock)
+	std::cout << "[6] down_thread_client_respond_event thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-	
-	// unit_test [8] down_thread_client_respond_event thread run after mutex unlock test
-	std::cout << "[8] down_thread_client_respond_event thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_lock_obj.mutex_trylock());
-	test_lock_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- down_thread_client_respond_event test end -----" );
 }
@@ -6796,18 +6525,6 @@ void up_thread_realserver_connect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_realserver_connect_event protocol_module NULL error check
-	std::cout << "[5] up_thread_realserver_connect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_realserver_connect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	
 	BOOST_MESSAGE( "----- up_thread_realserver_connect_event test end -----" );
 }
 
@@ -6910,17 +6627,6 @@ void up_thread_sorryserver_connect_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_sorryserver_connect_event protocol_module NULL error check
-	std::cout << "[5] up_thread_sorryserver_connect_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorryserver_connect_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_connect_event test end -----" );
 }
 // down_thread_client_connection_chk_event test
@@ -7005,17 +6711,6 @@ void down_thread_client_connection_chk_event_test(){
 	// unit_test [4] down_thread_client_connection_chk_event returnd illegal EVENT_TAG error check
 	std::cout << "[4] down_thread_client_connection_chk_event returnd illegal EVENT_TAG error check" << std::endl;
 	test_obj.down_thread_module_event_map_clear();
-	proto_test.handle_client_connection_check_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	// unit_test [5] down_thread_client_connection_chk_event protocol_module NULL error check
-	std::cout << "[5] down_thread_client_connection_chk_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
 	proto_test.handle_client_connection_check_res_tag = l7vs::protocol_module_base::FINALIZE;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -7112,18 +6807,6 @@ void up_thread_realserver_connection_fail_event_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
-	// unit_test [5] up_thread_realserver_connection_fail_event protocol_module NULL error check
-	std::cout << "[5] up_thread_realserver_connection_fail_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_realserver_connection_fail_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	
 	BOOST_MESSAGE( "----- up_thread_realserver_connection_fail_event test end -----" );
 }
 
@@ -7212,18 +6895,6 @@ void up_thread_sorryserver_connection_fail_event_test(){
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
-	// unit_test [5] up_thread_sorryserver_connection_fail_event protocol_module NULL error check
-	std::cout << "[5] up_thread_sorryserver_connection_fail_event protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	proto_test.handle_sorryserver_connection_fail_res_tag = l7vs::protocol_module_base::FINALIZE;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_connection_fail_event test end -----" );
 }
@@ -7559,109 +7230,7 @@ void up_thread_client_receive_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-
-// 	// qos = 0 wait = 0 qos < throughput		>> receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = 0;
-// 	vs.get_throughput_upstream_res = 2;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 	
-// 	// qos = 0 wait > 0 qos < throughput		 >> receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = 0;
-// 	vs.get_throughput_upstream_res = 2;
-// 	vs.get_wait_upstream_res = 1;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 	
-// 	// qos != 0 wait = 0 qos < throughput				>> not receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = 104857600;
-// 	vs.get_throughput_upstream_res = 104857601;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-// 	
-// 	// qos != 0 wait = 0 qos = throughput				>> receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = 104857600;
-// 	vs.get_throughput_upstream_res = 104857600;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 	
-// 	// qos = ULLONG_MAX - 1 wait = 0 qos < throughput	>> not receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = ULLONG_MAX - 1;
-// 	vs.get_throughput_upstream_res = ULLONG_MAX;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-// 	
-// 	// qos = ULLONG_MAX wait = 0 qos = throughput 		>> receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = ULLONG_MAX;
-// 	vs.get_throughput_upstream_res = ULLONG_MAX;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 	
-// 	// qos = 1 wait = 0 qos < throughput		>> not receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = 1;
-// 	vs.get_throughput_upstream_res = 2;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-// 
-// 	// qos = ULLONG_MAX wait > 1 qos > throughput >> not receive
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_upstream_res = ULLONG_MAX;
-// 	vs.get_throughput_upstream_res = 0;
-// 	vs.get_wait_upstream_res = 1;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_client_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-
 	socket.read_some_res = MAX_BUFFER_SIZE;
-//	vs.get_qos_upstream_res = 104857600;
 	vs.get_throughput_upstream_res = 0;
 	vs.get_wait_upstream_res = 0;
 	
@@ -7712,9 +7281,8 @@ void up_thread_client_receive_test(){
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_client_receive();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogError_id);
 	test_obj.up_thread_client_disconnect_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
@@ -7750,18 +7318,6 @@ void up_thread_client_receive_test(){
 	// unit_test [14] up_thread_client_receive returnd illegal EVENT_TAG error check
 	std::cout << "[14] up_thread_client_receive returnd illegal EVENT_TAG error check" << std::endl;
 	test_obj.up_thread_module_event_map_clear();
-	test_obj.up_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call_client_receive();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.up_thread_exit_call_check);
-	
-	// unit_test [15] up_thread_client_receive protocol_module NULL error check
-	std::cout << "[15] up_thread_client_receive protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -7922,117 +7478,7 @@ void down_thread_realserver_receive_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-
-// 	// qos = 0 wait = 0 qos < throughput		>> receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = 0;
-// 	vs.get_throughput_downstream_res = 2;
-// 	vs.get_wait_downstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 
-// 	// qos = 0 wait > 0 qos < throughput		 >> receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = 0;
-// 	vs.get_throughput_downstream_res = 2;
-// 	vs.get_wait_downstream_res = 1;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 
-// 	// qos != 0 wait = 0 qos < throughput				>> not receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = 104857600;
-// 	vs.get_throughput_downstream_res = 104857601;
-// 	vs.get_wait_downstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-// 
-// 	// qos != 0 wait = 0 qos = throughput				>> receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = 104857600;
-// 	vs.get_throughput_downstream_res = 104857600;
-// 	vs.get_wait_downstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 	
-// 	// qos = ULLONG_MAX - 1 wait = 0 qos < throughput	>> not receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = ULLONG_MAX - 1;
-// 	vs.get_throughput_downstream_res = ULLONG_MAX;
-// 	vs.get_wait_upstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-// 	
-// 	// qos = ULLONG_MAX wait = 0 qos = throughput 		>> receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = ULLONG_MAX;
-// 	vs.get_throughput_downstream_res = ULLONG_MAX;
-// 	vs.get_wait_downstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
-// 	
-// 	// qos = 1 wait = 0 qos < throughput		>> not receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = 1;
-// 	vs.get_throughput_downstream_res = 2;
-// 	vs.get_wait_downstream_res = 0;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-// 	
-// 	// qos = ULLONG_MAX wait > 1 qos > throughput >> not receive
-// 	rs_cur = rs_list.begin();
-// 	socket.read_some_call_check = false;
-// 	vs.get_qos_downstream_res = ULLONG_MAX;
-// 	vs.get_throughput_downstream_res = 1;
-// 	vs.get_wait_downstream_res = 1;
-// 	l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-// 	l7vs::Logger::putLogDebug_id = 0;
-// 	test_obj.test_call_realserver_receive();
-// 	BOOST_CHECK(!socket.read_some_call_check);
-// 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-// 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
-// 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-	
 	socket.read_some_res = MAX_BUFFER_SIZE;
-//	vs.get_qos_downstream_res = 104857600;
 	vs.get_throughput_downstream_res = 0;
 	vs.get_wait_downstream_res = 0;
 	
@@ -8088,8 +7534,8 @@ void down_thread_realserver_receive_test(){
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_realserver_receive();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	test_obj.down_thread_realserver_disconnect_call_check = false;
 	test_obj.next_down_function_call();
@@ -8145,18 +7591,6 @@ void down_thread_realserver_receive_test(){
 	socket.read_some_call_check = false;
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK(!socket.read_some_call_check);
-	
-	// unit_test [17] down_thread_realserver_receive protocol_module NULL error check
-	std::cout << "[17] down_thread_realserver_receive protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
-	test_obj.down_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call_realserver_receive();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
 	BOOST_MESSAGE( "----- down_thread_realserver_receive test end -----" );
 }
@@ -8294,8 +7728,8 @@ void down_thread_sorryserver_receive_test(){
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_sorryserver_receive();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	test_obj.down_thread_sorryserver_disconnect_call_check = false;
 	test_obj.next_down_function_call();
@@ -8332,18 +7766,6 @@ void down_thread_sorryserver_receive_test(){
 	// unit_test [12] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check
 	std::cout << "[12] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check" << std::endl;
 	test_obj.down_thread_module_event_map_clear();
-	test_obj.down_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call_sorryserver_receive();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.down_thread_exit_call_check);
-
-	// unit_test [13] down_thread_sorryserver_receive protocol_module NULL error check
-	std::cout << "[13] down_thread_sorryserver_receive protocol_module NULL error check" << std::endl;
-	test_obj.set_protocol_module(NULL);
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -8525,9 +7947,8 @@ void up_thread_realserver_send_test(){
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_realserver_send();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogError_id);
 	test_obj.up_thread_realserver_disconnect_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
@@ -8731,8 +8152,8 @@ void up_thread_sorryserver_send_test(){
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_sorryserver_send();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	test_obj.up_thread_sorryserver_disconnect_call_check = false;
 	test_obj.next_up_function_call();
@@ -8765,19 +8186,6 @@ void up_thread_sorryserver_send_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [12] up_thread_sorryserver_send protocol_module NULL error check
-	std::cout << "[12] up_thread_sorryserver_send protocol_module NULL error check" << std::endl;
-	send_data.set_send_size(0);
-	test_obj.set_protocol_module(NULL);
-	test_obj.up_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call_sorryserver_send();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.up_thread_exit_call_check);
-
 	BOOST_MESSAGE( "----- up_thread_sorryserver_send test end -----" );
 }
 
@@ -8960,8 +8368,8 @@ void down_thread_client_send_test(){
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_client_send();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogError_category);
+	BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	test_obj.down_thread_client_disconnect_call_check = false;
 	test_obj.next_down_function_call();
@@ -9014,6 +8422,7 @@ void down_thread_client_send_test(){
 
 	BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
 }
+
 //up_thread_realserver_connect test
 //up_thread_realserver_connect test class 
 class up_thread_realserver_connect_test_class : public l7vs::tcp_session{
@@ -9139,7 +8548,7 @@ void up_thread_realserver_connect_test(){
 	boost::thread::id proc_id = boost::this_thread::get_id();
 	
 	l7vs::tcp_data& con_data = test_obj.get_up_thread_data_dest_side();
-	boost::asio::ip::tcp::endpoint con_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP),7000);
+	boost::asio::ip::tcp::endpoint con_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP),DUMMI_SERVER_PORT);
 	
 	//up_thread_data_dest_side set
 	con_data.initialize();
@@ -9152,6 +8561,7 @@ void up_thread_realserver_connect_test(){
 	l7vs::tcp_socket::connect_connect_endpoint = boost::asio::ip::tcp::endpoint();
 	l7vs::tcp_socket::connect_ec = NULL;
 	l7vs::tcp_socket::connect_call_check = false;
+    l7vs::tcp_socket::is_connect = true;
 	// vs set
 	vs.connection_active_list.clear();
 	// map set
@@ -9164,6 +8574,19 @@ void up_thread_realserver_connect_test(){
 	test_obj.set_up_thread_next_function_call_exit();
 	test_obj.up_thread_realserver_connect_event_call_check = false;
 	
+    // dummy server 
+    test_mirror_server test_server;
+    // accept req
+    test_server.breq_acc_flag = true;
+    // close wait req
+    test_server.breq_close_wait_flag = true;
+    // recv cont
+    test_server.req_recv_cnt = 0;
+    // test server start
+    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+    while( !test_server.brun_flag ){
+        sleep(1);
+    }
 	
 	test_obj.test_call();
 	
@@ -9183,6 +8606,7 @@ void up_thread_realserver_connect_test(){
 	BOOST_CHECK(!rs_map.empty());
 	BOOST_CHECK(rs_map.begin()->first == con_end);
 	BOOST_CHECK(rs_map.begin()->second != NULL);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_realserver_connect down_thread_connect_socket_list push check
 	std::cout << "[4] up_thread_realserver_connect down_thread_connect_socket_list push check" << std::endl;
@@ -9195,6 +8619,8 @@ void up_thread_realserver_connect_test(){
 	std::cout << "[5] up_thread_realserver_connect up_thread_next_call_function update check" << std::endl;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_connect_event_call_check);
+
+    l7vs::tcp_socket::is_connect = false;
 	
 	// unit_test [6] up_thread_realserver_connect duplication check
 	std::cout << "[6] up_thread_realserver_connect duplication check" << std::endl;
@@ -9254,9 +8680,18 @@ void up_thread_realserver_connect_test(){
 	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
+    
+    
+    set_socket.second->get_socket().close();
 	
+    // dummy server stop
+    test_server.breq_close_wait_flag = false;   
+    test_server.bstop_flag = true;
+    server_thread.join();
+
 	BOOST_MESSAGE( "----- up_thread_realserver_connect test end -----" );
 }
+
 
 //up_thread_sorryserver_connect test
 //up_thread_sorryserver_connect test class 
@@ -9481,14 +8916,14 @@ class realserver_disconnect_test_class : public l7vs::tcp_session{
 			l7vs::tcp_session::down_thread_all_realserver_disconnect(LOCAL_PROC);
 		};
 		void mutex_lock(){
-			module_function_realserver_disconnect_mutex.lock();
+			module_function_realserver_disconnect_mutex.wrlock();
 		};
 		void mutex_unlock(){
 			module_function_realserver_disconnect_mutex.unlock();
 		};
-		bool mutex_trylock(){
+/*		bool mutex_trylock(){
 			return module_function_realserver_disconnect_mutex.try_lock();
-		};
+		};*/
 		
 		void set_protocol_module(l7vs::protocol_module_base* set_prot){
 			protocol_module = set_prot;
@@ -9995,13 +9430,8 @@ void up_thread_all_realserver_disconnect_test(){
 	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == test_id);
 	test_thread.join();
 	
-	// unit_test [8] up_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check
-	std::cout << "[8] up_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-
-	// unit_test [9] up_thread_all_realserver_disconnect not fond function error check
-	std::cout << "[9] up_thread_all_realserver_disconnect not fond function error check" << std::endl;
+	// unit_test [8] up_thread_all_realserver_disconnect not fond function error check
+	std::cout << "[8] up_thread_all_realserver_disconnect not fond function error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_map.insert(*ref_rs_it);
@@ -10017,8 +9447,8 @@ void up_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [10] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
-	std::cout << "[10] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [9] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
+	std::cout << "[9] up_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_map.insert(*ref_rs_it);
@@ -10034,25 +9464,8 @@ void up_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
-	// unit_test [11] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check
-	std::cout << "[11] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check" << std::endl;
-	test_obj.up_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_up_all_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.up_thread_exit_call_check);
-	
-	// unit_test [12] up_thread_all_realserver_disconnect protocol_module NULL error check
-	std::cout << "[12] up_thread_all_realserver_disconnect protocol_module NULL error check" << std::endl;
-	ref_rs_it = ref_rs_list.begin();
-	while(ref_rs_it != ref_rs_list.end()){
-		rs_map.insert(*ref_rs_it);
-		ref_rs_it++;
-	}
-	test_obj.set_protocol_module(NULL);
+	// unit_test [10] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check
+	std::cout << "[10] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check" << std::endl;
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -10203,13 +9616,8 @@ void down_thread_all_realserver_disconnect_test(){
 	BOOST_CHECK(proto_test.handle_realserver_disconnect_thread_id == test_id);
 	test_thread.join();
 	
-	// unit_test [8] down_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check
-	std::cout << "[8] down_thread_all_realserver_disconnect handle_realserver_disconnect run after mutex unlock check" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
-	// unit_test [9] down_thread_all_realserver_disconnect not fond function error check
-	std::cout << "[9] down_thread_all_realserver_disconnect not fond function error check" << std::endl;
+	// unit_test [8] down_thread_all_realserver_disconnect not fond function error check
+	std::cout << "[8] down_thread_all_realserver_disconnect not fond function error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_list.push_back(*ref_rs_it);
@@ -10225,31 +9633,14 @@ void down_thread_all_realserver_disconnect_test(){
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [10] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
-	std::cout << "[10] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
+	// unit_test [9] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check
+	std::cout << "[9] down_thread_all_realserver_disconnect returnd illegal EVENT_TAG error check" << std::endl;
 	ref_rs_it = ref_rs_list.begin();
 	while(ref_rs_it != ref_rs_list.end()){
 		rs_list.push_back(*ref_rs_it);
 		ref_rs_it++;
 	}
 	test_obj.down_thread_module_event_map_clear();
-	test_obj.down_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_down_all_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.down_thread_exit_call_check);
-		
-	// unit_test [11] down_thread_all_realserver_disconnect protocol_module NULL error check
-	std::cout << "[11] down_thread_all_realserver_disconnect protocol_module NULL error check" << std::endl;
-	ref_rs_it = ref_rs_list.begin();
-	while(ref_rs_it != ref_rs_list.end()){
-		rs_list.push_back(*ref_rs_it);
-		ref_rs_it++;
-	}
-	test_obj.set_protocol_module(NULL);
 	test_obj.down_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
@@ -10268,13 +9659,13 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 
- 	ts->add( BOOST_TEST_CASE( &constructer_test ) );
- 	ts->add( BOOST_TEST_CASE( &initialize_test ) );
- 	ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
- 	ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
- 	ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
- 	ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
- 	ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
+	ts->add( BOOST_TEST_CASE( &constructer_test ) );
+	ts->add( BOOST_TEST_CASE( &initialize_test ) );
+	ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+	ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
+	ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
+	ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
+	ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
 	ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
