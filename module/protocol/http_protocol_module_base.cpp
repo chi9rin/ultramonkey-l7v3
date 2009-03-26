@@ -119,7 +119,7 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -211,7 +211,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -307,7 +307,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -402,7 +402,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -495,7 +495,7 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -590,7 +590,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -694,7 +694,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
 
-			if( buffer[line_length] == '\r' || buffer[line_length] == '\n' ){
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
 
 				break;
 
@@ -808,19 +808,19 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 		for( count = 0; count < buffer_len; count++ ){
 
-			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
 
-				if( header_begin_flag == 0 ){
+				if( unlikely( header_begin_flag == 0 )){
 
 					header_begin = count;
 					header_begin_flag = 1;
 
 				}
 
-				if( count > 0 ){
+				if( likely( count > 0 )){
 
-					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
-						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -829,10 +829,10 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 					}
 				}
 
-				if( count > 2 ){
+				if( likely( count > 2 )){
 
-					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
-						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -976,19 +976,19 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 
 		for( count = 0; count < buffer_len; count++ ){
 
-			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
 
-				if( header_begin_flag == 0 ){
+				if( unlikely( header_begin_flag == 0 )){
 
 					header_begin = count;
 					header_begin_flag = 1;
 
 				}
 
-				if( count > 0 ){
+				if( likely( count > 0 )){
 
-					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
-						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -997,10 +997,10 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 					}
 				}
 
-				if( count > 2 ){
+				if( likely( count > 2 )){
 
-					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
-						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -1113,19 +1113,19 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 
 		for( count = 0; count < buffer_len; count++ ){
 
-			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
 
-				if( header_begin_flag == 0 ){
+				if( unlikely( header_begin_flag == 0 )){
 
 					header_begin = count;
 					header_begin_flag = 1;
 
 				}
 
-				if( count > 0 ){
+				if( likely( count > 0 )){
 
-					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
-						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -1134,10 +1134,10 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 					}
 				}
 
-				if( count > 2 ){
+				if( likely( count > 2 )){
 
-					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
-						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -1250,19 +1250,19 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 
 		for( count = 0; count < buffer_len; count++ ){
 
-			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
 
-				if( header_begin_flag == 0 ){
+				if( unlikely( header_begin_flag == 0 )){
 
 					header_begin = count;
 					header_begin_flag = 1;
 
 				}
 
-				if( count > 0 ){
+				if( likely( count > 0 )){
 
-					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
-						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -1271,10 +1271,10 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 					}
 				}
 
-				if( count > 2 ){
+				if( likely( count > 2 )){
 
-					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
-						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -1387,19 +1387,19 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 
 		for( count = 0; count < buffer_len; count++ ){
 
-			if( buffer[count] == '\r' || buffer[count] == '\n' ){
+			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
 
-				if( header_begin_flag == 0 ){
+				if( unlikely( header_begin_flag == 0 )){
 
 					header_begin = count;
 					header_begin_flag = 1;
 
 				}
 
-				if( count > 0 ){
+				if( likely( count > 0 )){
 
-					if(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
-						( buffer[count-1] == '\n' && buffer[count] == '\n' )	){
+					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
+									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
 
 						header_end = count;
 						header_end_flag = 1;
@@ -1408,10 +1408,10 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 					}
 				}
 
-				if( count > 2 ){
+				if( likely( count > 2 )){
 
-					if(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
-						buffer[count-1] == '\r' && buffer[count] == '\n'	){
+					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
+									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
 
 						header_end = count;
 						header_end_flag = 1;

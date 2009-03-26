@@ -1656,7 +1656,7 @@ protocol_module_cinsert::handle_client_recv(
 													+ send_status_itr->send_offset,
 												unsend_data_size );
 
-							if( check_result == CHECK_OK )
+							if( likely( check_result == CHECK_OK ))
 							{
 
 // 								find_result = find_http_header(
@@ -1845,7 +1845,7 @@ protocol_module_cinsert::handle_client_recv(
 												+ send_status_add.send_offset,
 											rest_request_data_size );
 
-						if( check_result == CHECK_OK )
+						if( likely( check_result == CHECK_OK ))
 						{
 
 // 							find_result = find_http_header(
@@ -4117,7 +4117,7 @@ protocol_module_cinsert::handle_realserver_recv(
 												+ send_status_itr->send_offset,
 											unsend_data_size );
 
-						if( check_result == CHECK_OK )
+						if( likely( check_result == CHECK_OK ))
 						{
 
 // 							find_result = find_http_header(
@@ -4308,7 +4308,7 @@ protocol_module_cinsert::handle_realserver_recv(
 											+ send_status_add.send_offset,
 										rest_response_data_size );
 
-					if( check_result == CHECK_OK )
+					if( likely( check_result == CHECK_OK ))
 					{
 
 // 						find_result = find_http_header(
@@ -4816,7 +4816,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 												+ send_status_itr->send_offset,
 											unsend_data_size );
 
-						if( check_result == CHECK_OK )
+						if( likely( check_result == CHECK_OK ))
 						{
 
 // 							find_result = find_http_header(
@@ -5004,7 +5004,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 											+ send_status_add.send_offset,
 										rest_response_data_size );
 
-					if( check_result == CHECK_OK )
+					if( likely( check_result == CHECK_OK ))
 					{
 
 // 						find_result = find_http_header(
