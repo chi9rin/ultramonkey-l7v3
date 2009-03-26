@@ -131,7 +131,7 @@ void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system
 		formatter % ( err ? "true" : "false") % err.message();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
-	if( !err ){
+	if( likely( !err ) ){
 		if( NULL != protomod ){
 			protomod->replication_interrupt();
 			//register handle_protomod_replication
@@ -163,7 +163,7 @@ void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system
 		formatter % ( err ? "true" : "false") % err.message();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
-	if( !err ){
+	if( likely( !err ) ){
 		if( NULL != schedmod ){
 			schedmod->replication_interrupt();
 			//register handle_schedmod_replication
@@ -195,7 +195,7 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		formatter % ( err ? "true" : "false") % err.message();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
 	}
-	if( !err ){
+	if( likely( !err ) ){
 		// decrease wait count
 		{
 			rw_scoped_lock				wait_up_lock( wait_count_up_mutex );
