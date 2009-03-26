@@ -44,10 +44,7 @@ namespace l7vs{
 	
 	//! check empty list
 	bool tcp_realserver_connect_socket_list::empty(){
-        rd_scoped_lock scope_lock(list_mutex);
-		
-		bool bres = connect_list.empty();
-		return bres;
+		return connect_list.empty();
 	}
 	
 	//! clear list

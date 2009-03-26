@@ -46,11 +46,7 @@ namespace l7vs{
 
 	//! queue check empty
 	bool tcp_thread_message_que::empty(){
-		rd_scoped_lock scope_lock(que_mutex);
-		
-		bool bres = message_que.empty();
-		
-		return bres;
+		return message_que.empty();
 	}
 
 	//! clear queue
