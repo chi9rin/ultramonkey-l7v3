@@ -333,10 +333,13 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	}
 
 	//session add wait_sessions
-	boost::mutex::scoped_lock	up_wait_lk( stc_ptr_register_accept->get_upthread_mutex() );
-	boost::mutex::scoped_lock	down_wait_lk( stc_ptr_register_accept->get_downthread_mutex() );
-	rw_scoped_lock				wait_lk( waiting_sessions_mutex );
-	waiting_sessions.insert( std::make_pair( stc_ptr_register_accept->get_upthread_id(), stc_ptr_register_accept ) );
+	{
+		boost::mutex::scoped_lock	up_wait_lk( stc_ptr_register_accept->get_upthread_mutex() );
+		boost::mutex::scoped_lock	down_wait_lk( stc_ptr_register_accept->get_downthread_mutex() );
+	
+		rw_scoped_lock				wait_lk( waiting_sessions_mutex );
+		waiting_sessions.insert( std::make_pair( stc_ptr_register_accept->get_upthread_id(), stc_ptr_register_accept ) );
+	}
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt1( "active session thread id = %d" );
