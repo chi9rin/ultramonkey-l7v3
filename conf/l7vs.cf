@@ -188,7 +188,7 @@ maxfileno = 65535
 #
 [virtualservice]
 nic_realserver_side			= "eth0"
-session_thread_pool_size	= 256
+session_thread_pool_size	= 512
 throughput_calc_interval	= 500
 task_scheduler_algorithm	= 0
 
