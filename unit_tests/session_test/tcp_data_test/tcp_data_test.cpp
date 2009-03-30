@@ -177,7 +177,7 @@ void	data_size_function_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.set_size(set_size);
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(0001,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	get_size = test_obj.get_size();
 	BOOST_CHECK( MAX_BUFFER_SIZE == get_size );
@@ -221,7 +221,7 @@ void	send_size_function_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.set_send_size(set_size);
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(0002,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	get_size = test_obj.get_send_size();
 	BOOST_CHECK( MAX_BUFFER_SIZE == get_size );

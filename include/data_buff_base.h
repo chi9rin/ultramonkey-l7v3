@@ -114,7 +114,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] set_size over MAX_BUFFER_SIZE size : ";
 			buf << set_size;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 0001, buf.str(), __FILE__, __LINE__ );
 		}
 	}
 
@@ -138,7 +138,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] set_send_size over MAX_BUFFER_SIZE size : ";
 			buf << set_size;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 0002, buf.str(), __FILE__, __LINE__ );
 		}
 	}
 
