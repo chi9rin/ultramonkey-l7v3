@@ -1,9 +1,9 @@
-/*
+/*!
  * @file  snmpbridge.cpp
  * @brief snmpagent connection module.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
- * Copyright (C) 2005  NTT COMWARE Corporation.
+ * Copyright (C) 2009  NTT COMWARE Corporation.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -88,7 +88,7 @@ int l7vs::snmpbridge::initialize(){
  * @return
  */
 void l7vs::snmpbridge::finalize(){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "finalize", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 2, "finalize", __FILE__, __LINE__ );
 
 	connection_state = false;
 	snmp_acceptor.close();
@@ -106,7 +106,7 @@ void l7vs::snmpbridge::finalize(){
  * @return      int
  */
 int l7vs::snmpbridge::send_trap( const std::string& message ){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "send_trap", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 3, "send_trap", __FILE__, __LINE__ );
 
 	if( connection_state == false ){
 		std::string msg( "snmpbridge is disconnect" );
@@ -124,7 +124,7 @@ int l7vs::snmpbridge::send_trap( const std::string& message ){
 	if( !send_buffer ){
 		//malloc error!
 		std::string msg( "send buffer malloc error" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 2, msg, __FILE__, __LINE__ );
 		return -1;
 	}
 	struct l7ag_message_header* header        = (struct l7ag_message_header*) send_buffer;
@@ -168,7 +168,7 @@ int l7vs::snmpbridge::send_trap( const std::string& message ){
  * Reload config command to subagent
  */
 void l7vs::snmpbridge::reload_config(){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "reload_config", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 4, "reload_config", __FILE__, __LINE__ );
 
 	boost::mutex::scoped_lock lock( send_buffer_mutex );
 
@@ -181,7 +181,7 @@ void l7vs::snmpbridge::reload_config(){
 	if( !send_buffer ){
 		//malloc error!
 		std::string msg( "send buffer malloc error" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 3, msg, __FILE__, __LINE__ );
 		return;
 	}
 	struct l7ag_message_header* header             = (struct l7ag_message_header*) send_buffer;
@@ -222,7 +222,7 @@ void l7vs::snmpbridge::reload_config(){
  * Set log level command to subagent
  */
 int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_category, const l7vs::LOG_LEVEL_TAG loglevel ){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "change_loglevel", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 5, "change_loglevel", __FILE__, __LINE__ );
 
 	int retval = 0;
 	if( snmp_param.loglevel.end() != snmp_param.loglevel.find( snmp_log_category ) ){
@@ -237,7 +237,7 @@ int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_cat
 		if( !send_buffer ){
 			//malloc error!
 			std::string msg( "send buffer malloc error" );
-			Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+			Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 4, msg, __FILE__, __LINE__ );
 			return -1;
 		}
 		struct l7ag_message_header* header             = (struct l7ag_message_header*) send_buffer;
@@ -287,7 +287,7 @@ int l7vs::snmpbridge::change_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_cat
  * Set all log level command to subagent
  */
 int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG loglevel ){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "change_loglevel_allcategory", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 6, "change_loglevel_allcategory", __FILE__, __LINE__ );
 
 	int retval = 0;
 	std::vector<struct l7ag_settingcommand_message> settingcmd_vec;
@@ -311,7 +311,7 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
 	if( !send_buffer ){
 		//malloc error!
 		std::string msg( "send buffer malloc error" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 5, msg, __FILE__, __LINE__ );
 		return -1;
 	}
 	struct l7ag_message_header* header = (struct l7ag_message_header*) send_buffer;
@@ -363,11 +363,11 @@ int l7vs::snmpbridge::change_loglevel_allcategory( const l7vs::LOG_LEVEL_TAG log
  * Send all MIB data
  */
 int l7vs::snmpbridge::send_mibcollection(struct l7ag_mibrequest_message* payload){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "send_mibcollection", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 7, "send_mibcollection", __FILE__, __LINE__ );
 
 	if( connection_state == false ){
 		std::string msg( "snmpbridge is disconnect" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 6, msg, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -409,7 +409,7 @@ int l7vs::snmpbridge::send_mibcollection(struct l7ag_mibrequest_message* payload
 	if( !send_buffer ){
 		//malloc error!
 		std::string msg( "send buffer malloc error" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 7, msg, __FILE__, __LINE__ );
 		return -1;
 	}
 	struct l7ag_message_header* header = (struct l7ag_message_header*) send_buffer;
@@ -569,7 +569,7 @@ int l7vs::snmpbridge::send_mibcollection(struct l7ag_mibrequest_message* payload
  * Get connection status
  */
 bool l7vs::snmpbridge::get_connectionstate(){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "get_connectionstate", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 8, "get_connectionstate", __FILE__, __LINE__ );
 	return connection_state;
 }
 
@@ -577,7 +577,7 @@ bool l7vs::snmpbridge::get_connectionstate(){
  * Get log level
  */
 l7vs::LOG_LEVEL_TAG l7vs::snmpbridge::get_loglevel( const l7vs::LOG_CATEGORY_TAG snmp_log_category ){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "get_loglevel", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 9, "get_loglevel", __FILE__, __LINE__ );
 
 	l7vs::LOG_LEVEL_TAG level = LOG_LV_NONE;
 	if( snmp_param.loglevel.end() != snmp_param.loglevel.find( snmp_log_category ) ){
@@ -590,7 +590,7 @@ l7vs::LOG_LEVEL_TAG l7vs::snmpbridge::get_loglevel( const l7vs::LOG_CATEGORY_TAG
  * Get log level allcategory
  */
 void l7vs::snmpbridge::get_loglevel_allcategory( std::map<l7vs::LOG_CATEGORY_TAG, l7vs::LOG_LEVEL_TAG>&	loglevelmap ){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "get_loglevel_allcategory", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 10, "get_loglevel_allcategory", __FILE__, __LINE__ );
 
 	for( std::map<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>::iterator it = snmp_param.loglevel.begin();
 		it != snmp_param.loglevel.end(); ++it ){
@@ -603,7 +603,7 @@ void l7vs::snmpbridge::get_loglevel_allcategory( std::map<l7vs::LOG_CATEGORY_TAG
  *
  */
 void l7vs::snmpbridge::handle_accept(const boost::system::error_code& error){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "handle_accept", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 11, "handle_accept", __FILE__, __LINE__ );
 
 	connection_state = true;
 	snmp_socket.async_receive( boost::asio::buffer( recv_buffer, READBUF_SIZE ), 
@@ -617,7 +617,7 @@ void l7vs::snmpbridge::handle_accept(const boost::system::error_code& error){
  *
  */
 void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, size_t bytes_transferred){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "handle_receive", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 12, "handle_receive", __FILE__, __LINE__ );
 
 	struct l7ag_message_header* message_header = NULL;
 	struct l7ag_payload_header* payload_header = NULL;
@@ -630,7 +630,7 @@ void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, si
 								boost::asio::placeholders::bytes_transferred ) );
 
 		std::string msg( "receive data is short" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 8, msg, __FILE__, __LINE__ );
 		return;
 	}
 	message_header = (struct l7ag_message_header*)recv_buffer.data();
@@ -642,7 +642,7 @@ void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, si
 								boost::asio::placeholders::bytes_transferred ) );
 
 		std::string msg( "message header version error" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 9, msg, __FILE__, __LINE__ );
 		return;
 	}
 	if ( message_header->magic[0] != 0x4d || message_header->magic[1] != 0x47 ){
@@ -653,7 +653,7 @@ void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, si
 								boost::asio::placeholders::bytes_transferred ) );
 
 		std::string msg( "message header magic number error" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 10, msg, __FILE__, __LINE__ );
 		return;
 	}
 	for ( unsigned long long i = 0; i < message_header->payload_count; ++i ) {
@@ -673,7 +673,7 @@ void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, si
 								boost::asio::placeholders::bytes_transferred ) );
 
 				std::string msg( "payload magic number error" );
-				Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+				Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 11, msg, __FILE__, __LINE__ );
 				return;
 			}
 			send_mibcollection(payload);
@@ -691,7 +691,7 @@ void l7vs::snmpbridge::handle_receive(const boost::system::error_code& error, si
  *
  */
 void l7vs::snmpbridge::handle_send(const boost::system::error_code& error, size_t bytes_transferred){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "handle_send", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 13, "handle_send", __FILE__, __LINE__ );
 
 	snmp_socket.async_receive( boost::asio::buffer( recv_buffer, READBUF_SIZE ), 
 								boost::bind(&snmpbridge::handle_receive,
@@ -704,17 +704,17 @@ void l7vs::snmpbridge::handle_send(const boost::system::error_code& error, size_
  *
  */
 int l7vs::snmpbridge::send_message(){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "send_message", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 14, "send_message", __FILE__, __LINE__ );
 
 	if( connection_state == false ){
 		std::string msg( "snmpbridge is disconnect" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 12, msg, __FILE__, __LINE__ );
 		return -1;
 	}
 
 	if (send_buffer == NULL || send_buffer_size == 0){
 		std::string msg( "send data is none" );
-		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, msg, __FILE__, __LINE__ );
+		Logger::putLogError( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 13, msg, __FILE__, __LINE__ );
 		return -1;
 	}
 	snmp_socket.async_send( boost::asio::buffer( send_buffer, send_buffer_size ), 
@@ -729,7 +729,7 @@ int l7vs::snmpbridge::send_message(){
  *
  */
 int l7vs::snmpbridge::load_config(){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "load_config", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 15, "load_config", __FILE__, __LINE__ );
 
 	l7vs::Parameter param;
 	l7vs::error_code err;
@@ -783,7 +783,7 @@ int l7vs::snmpbridge::load_config(){
 }
 
 void l7vs::snmpbridge::load_loglevel(){
-	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 1, "load_loglevel", __FILE__, __LINE__ );
+	Logger logger( l7vs::LOG_CAT_L7VSD_SNMPBRIDGE, 16, "load_loglevel", __FILE__, __LINE__ );
 
 	//log level 取得
 	l7vs::Parameter param;
