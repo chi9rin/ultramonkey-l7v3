@@ -245,14 +245,14 @@ namespace l7vs{
 		if( !vs_err ){
 			upstream_buffer_size	= int_val;
 		}else{
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, "up buffer param error set default 8192" , __FILE__, __LINE__ );	
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 3, "up buffer param error set default 8192" , __FILE__, __LINE__ );	
 		}
 
 		int_val	= param.get_int( PARAM_COMP_SESSION, PARAM_DOWN_BUFFER_SIZE, vs_err );
 		if( !vs_err ){
 			downstream_buffer_size	= int_val;
 		}else{
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, "down buffer param error set default 8192" , __FILE__, __LINE__ );	
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 4, "down buffer param error set default 8192" , __FILE__, __LINE__ );	
 		}
 		
 		if(protocol_module == NULL){
@@ -261,7 +261,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module is NULL!";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 5, buf.str(), __FILE__, __LINE__ );
 			msg.flag = true;
 			msg.message = "Not fond protocol module";
 		}
@@ -298,7 +298,7 @@ namespace l7vs{
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
 					buf << "] set_virtual_service_message message:[SESSION_PAUSE_ON]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				return;
@@ -313,7 +313,7 @@ namespace l7vs{
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
 					buf << "] set_virtual_service_message message:[SESSION_PAUSE_OFF]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				return;
@@ -324,7 +324,7 @@ namespace l7vs{
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
 					buf << "] set_virtual_service_message message:[SORRY_STATE_ENABLE]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 14, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				break;
@@ -335,7 +335,7 @@ namespace l7vs{
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
 					buf << "] set_virtual_service_message message:[SORRY_STATE_DISABLE]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 15, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				break;
@@ -346,7 +346,7 @@ namespace l7vs{
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
 					buf << "] set_virtual_service_message message:[SESSION_END]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 16, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				break;
@@ -365,7 +365,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] up thread illegal virtualservice message type : ";
 			buf << message;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 6, buf.str(), __FILE__, __LINE__ );
 		}
 		boost::shared_ptr< tcp_thread_message > down_msg(new tcp_thread_message);
 		std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator down_func;
@@ -380,7 +380,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] down thread illegal virtualservice message type : ";
 			buf << message;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 7, buf.str(), __FILE__, __LINE__ );
 		}
 	}
 	//! up stream thread main function
@@ -391,7 +391,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up_thread_run start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 17, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		up_thread_id = boost::this_thread::get_id(); 
@@ -402,7 +402,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread down thread alive wait start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 18, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		while(true){ 
@@ -421,7 +421,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread down thread alive wait end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 19, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		if(unlikely( protocol_module == NULL )){
@@ -430,7 +430,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module is NULL!";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 8, buf.str(), __FILE__, __LINE__ );
 			{
                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 				exit_flag = true;
@@ -448,7 +448,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] client socket not open!";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9, buf.str(), __FILE__, __LINE__ );
 				{
                     rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
@@ -472,7 +472,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] client endpoint get false : ";
 				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 10, buf.str(), __FILE__, __LINE__ );
 				{
                     rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
@@ -491,7 +491,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] set non blocking socket error :";
 				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 11, buf.str(), __FILE__, __LINE__ );
 				{
                     rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
@@ -514,7 +514,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] client socket recieve buffer size error : ";
 				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__ );
 				{
                     rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
@@ -537,7 +537,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] client socket send buffer size error : ";
 				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__ );
 				{
                     rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
@@ -564,7 +564,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] protocol_module returnd illegal EVENT_TAG : ";
 				buf << module_event;	
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 14, buf.str(), __FILE__, __LINE__ );
 				{
                     rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
@@ -578,7 +578,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 					buf << func_type->second;
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 15, buf.str(), __FILE__, __LINE__ );
 					{
                         rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 						exit_flag = true;
@@ -595,7 +595,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread loop start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		while(true){
@@ -647,7 +647,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread loop end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 21, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		
@@ -659,7 +659,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread down thread dead wait start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 22, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		while(true){ 
@@ -678,7 +678,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread down thread dead wait end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 23, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		if(likely( protocol_module != NULL ))
@@ -689,7 +689,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread call protocol_module_base handle_session_finalize() return";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 24, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		thread_state_update(UP_THREAD_ALIVE,false);
@@ -700,7 +700,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up thread call parent service release_session() return";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 25, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		//----Debug log----------------------------------------------------------------------
@@ -709,7 +709,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] up_thread_run end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 26, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 	}
@@ -722,7 +722,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] down_thread_run start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 27, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		down_thread_id = boost::this_thread::get_id(); 
@@ -733,7 +733,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] down_thread_run up thread active wait start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 28, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		while(true){ // UP_THREAD_ACTIVE
@@ -756,7 +756,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] down_thread_run up thread active wait end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 29, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		thread_state_update(DOWN_THREAD_ACTIVE,true);
@@ -767,7 +767,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_RECV";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 16, buf.str(), __FILE__, __LINE__ );
 			{
                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 				exit_flag = true;
@@ -781,7 +781,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] down thread loop start";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 30, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 
@@ -791,7 +791,7 @@ namespace l7vs{
             buf << "Thread ID[";
             buf << boost::this_thread::get_id();
             buf << "] protocol_module is NULL!";
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 17, buf.str(), __FILE__, __LINE__ );
             {
                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
                 exit_flag = true;
@@ -851,7 +851,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] down thread loop end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 31, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		down_thread_all_socket_close();
@@ -863,7 +863,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] down_thread_run end";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 32, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 	}
@@ -886,7 +886,7 @@ namespace l7vs{
 			buf << "] thread_state[";
 			buf << thread_state;
 			buf << "]";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 33, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 		if(regist){
@@ -905,7 +905,7 @@ namespace l7vs{
 			buf << " update thread_state[";
 			buf << thread_state;
 			buf << "]";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 	}
@@ -923,7 +923,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 18, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -935,7 +935,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 19, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -952,7 +952,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] up_thread_client_receive qos wait active";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			return; // try again
@@ -976,7 +976,7 @@ namespace l7vs{
 					buf << "] from [";
 					buf << client_endpoint;
 					buf << "]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				up_thread_data_client_side.set_size(recv_size);
@@ -990,7 +990,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
 					buf << module_event;
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
 				}
@@ -1015,7 +1015,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 21, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1033,7 +1033,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_CLIENT_RESPOND_SEND_EVENT";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 22, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1045,7 +1045,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT";
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 23, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1069,7 +1069,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 24, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1081,7 +1081,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 25, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1102,7 +1102,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_CLIENT_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 26, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 				return;
 			}
@@ -1114,7 +1114,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_CLIENT_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 27, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 				return;
 			}
@@ -1139,7 +1139,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 28, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1151,7 +1151,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 29, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1183,7 +1183,7 @@ namespace l7vs{
 				buf << "] for [";
 				buf << server_endpoint;
 				buf << "]";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 37, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			if(data_size > send_data_size){
@@ -1198,7 +1198,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
 					buf << module_event;	
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 30, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
 				}
@@ -1219,7 +1219,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 31, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1241,7 +1241,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 32, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1253,7 +1253,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 33, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1281,7 +1281,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] set non blocking socket error :";
 					buf << ec.message();
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
 				}
@@ -1296,7 +1296,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] realserver socket recieve buffer size error : ";
 					buf << ec.message();
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
 				}
@@ -1310,7 +1310,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] realserver socket send buffer size error : ";
 					buf << ec.message();
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
 				}
@@ -1329,7 +1329,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] connect socket error :";
 				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 37, buf.str(), __FILE__, __LINE__ );
 			}
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
@@ -1340,7 +1340,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 38, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1364,7 +1364,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 39, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1376,7 +1376,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 40, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1395,7 +1395,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 41, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1407,7 +1407,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 42, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1431,7 +1431,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_REALSERVER_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 43, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 				return;
 			}
@@ -1444,7 +1444,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 44, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 				return;
 			}
@@ -1473,7 +1473,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 45, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1485,7 +1485,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 46, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1522,7 +1522,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] close realserver not fond";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 38, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
@@ -1537,7 +1537,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 47, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1549,7 +1549,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 48, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1579,7 +1579,7 @@ namespace l7vs{
 				buf << "] for [";
 				buf << sorry_endpoint;
 				buf << "]";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 39, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			if(data_size > send_data_size){
@@ -1594,7 +1594,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
 					buf << module_event;
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 49, buf.str(), __FILE__, __LINE__ );
 					up_thread_exit(process_type);
 					return;
 				}
@@ -1615,7 +1615,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 50, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1638,7 +1638,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 51, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1650,7 +1650,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 52, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1671,7 +1671,7 @@ namespace l7vs{
 				buf << boost::this_thread::get_id();
 				buf << "] set non blocking socket error :";
 				buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 53, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 			}
 			sorryserver_socket.first = sorry_endpoint;
@@ -1684,7 +1684,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] connect socket error :";
 			buf << ec.message();
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 54, buf.str(), __FILE__, __LINE__ );
 		}
 		up_thread_function_pair	func	= up_thread_function_array[func_tag];
 		if(unlikely( !func.second )){
@@ -1694,7 +1694,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 55, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1718,7 +1718,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 56, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1730,7 +1730,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 57, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1749,7 +1749,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 58, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1761,7 +1761,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 59, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1782,7 +1782,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 60, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 				return;
 			}
@@ -1795,7 +1795,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 61, buf.str(), __FILE__, __LINE__ );
 				up_thread_exit(process_type);
 				return;
 			}
@@ -1828,7 +1828,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 62, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1840,7 +1840,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 63, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1863,7 +1863,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 64, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1875,7 +1875,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 65, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1893,7 +1893,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] handle_sorry_enable call";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 40, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_enable(up_thread_id);
@@ -1906,7 +1906,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 66, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1918,7 +1918,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 67, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1936,7 +1936,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] handle_sorry_disable call";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 41, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_disable(up_thread_id);
@@ -1949,7 +1949,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 68, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -1961,7 +1961,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 69, buf.str(), __FILE__, __LINE__ );
 			up_thread_exit(process_type);
 			return;
 		}
@@ -2007,7 +2007,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] down_thread_realserver_receive qos wait active";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 42, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 		 	return;
@@ -2032,7 +2032,7 @@ namespace l7vs{
 					buf << "] from [";
 					buf << server_endpoint;
 					buf << "]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 43, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				down_thread_data_dest_side.set_size(recv_size);
@@ -2046,7 +2046,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
 					buf << module_event;	
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 70, buf.str(), __FILE__, __LINE__ );
 					down_thread_exit(process_type);
 					return;
 				}
@@ -2071,7 +2071,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 71, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2103,7 +2103,7 @@ namespace l7vs{
 						buf << "Thread ID[";
 						buf << boost::this_thread::get_id();
 						buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_DISCONNECT_EVENT";
-						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 72, buf.str(), __FILE__, __LINE__ );
 						down_thread_exit(process_type);
 						return;
 					}
@@ -2116,7 +2116,7 @@ namespace l7vs{
 						buf << "Thread ID[";
 						buf << boost::this_thread::get_id();
 						buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : UP_FUNC_REALSERVER_DISCONNECT_EVENT";
-						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 73, buf.str(), __FILE__, __LINE__ );
 						down_thread_exit(process_type);
 						return;
 					}
@@ -2160,7 +2160,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 74, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2172,7 +2172,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 75, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2209,7 +2209,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] close realserver not fond";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 44, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
@@ -2224,7 +2224,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 76, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2236,7 +2236,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 77, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2258,7 +2258,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 78, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2270,7 +2270,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 79, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2293,7 +2293,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 80, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2305,7 +2305,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 81, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2337,7 +2337,7 @@ namespace l7vs{
 				buf << "] for [";
 				buf << client_endpoint;
 				buf << "]";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 45, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			if(data_size > send_data_size){
@@ -2352,7 +2352,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
 					buf << module_event;
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 82, buf.str(), __FILE__, __LINE__ );
 					down_thread_exit(process_type);
 					return;
 				}
@@ -2373,7 +2373,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 83, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2394,7 +2394,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_CLIENT_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 84, buf.str(), __FILE__, __LINE__ );
 				down_thread_exit(process_type);
 				return;
 			}
@@ -2406,7 +2406,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_CLIENT_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 85, buf.str(), __FILE__, __LINE__ );
 				down_thread_exit(process_type);
 				return;
 			}
@@ -2432,7 +2432,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 86, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2444,7 +2444,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 87, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2473,7 +2473,7 @@ namespace l7vs{
 					buf << "] from [";
 					buf << sorry_endpoint;
 					buf << "]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 46, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 				down_thread_data_dest_side.set_size(recv_size);
@@ -2486,7 +2486,7 @@ namespace l7vs{
 					buf << boost::this_thread::get_id();
 					buf << "] protocol_module returnd illegal EVENT_TAG : ";
 					buf << module_event;	
-					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 88, buf.str(), __FILE__, __LINE__ );
 					down_thread_exit(process_type);
 					return;
 				}
@@ -2511,7 +2511,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_tag;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 89, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2532,7 +2532,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 90, buf.str(), __FILE__, __LINE__ );
 				down_thread_exit(process_type);
 				return;
 			}
@@ -2545,7 +2545,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 91, buf.str(), __FILE__, __LINE__ );
 				down_thread_exit(process_type);
 				return;
 			}
@@ -2579,7 +2579,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 92, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2591,7 +2591,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 93, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2614,7 +2614,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 94, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2626,7 +2626,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 95, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2644,7 +2644,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] handle_sorry_enable call";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 47, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_enable(down_thread_id);
@@ -2657,7 +2657,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 96, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2669,7 +2669,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 97, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2687,7 +2687,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] handle_sorry_disable call";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 48, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
 			module_event = protocol_module->handle_sorry_disable(down_thread_id);
@@ -2700,7 +2700,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] protocol_module returnd illegal EVENT_TAG : ";
 			buf << module_event;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 98, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}
@@ -2712,7 +2712,7 @@ namespace l7vs{
 			buf << boost::this_thread::get_id();
 			buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
 			buf << func_type->second;
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 99, buf.str(), __FILE__, __LINE__ );
 			down_thread_exit(process_type);
 			return;
 		}

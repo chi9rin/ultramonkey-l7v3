@@ -1852,7 +1852,7 @@ void initialize_test(){
 	l7vs::Logger::putLogError_id = 0;
 	res_msg = test_obj.initialize();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(5,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(res_msg.flag);
 	std::cout << res_msg.message << std::endl;
@@ -2217,7 +2217,7 @@ void set_virtual_service_message_test(){
 	BOOST_CHECK(!ref_dw_msg_que.empty());
 	
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(6,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [7] set_virtual_service_message up thread map find not message error
@@ -2236,7 +2236,7 @@ void set_virtual_service_message_test(){
 	BOOST_CHECK(ref_dw_msg_que.empty());
 	
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(7,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- set_virtual_service_message test end -----" );
@@ -2554,7 +2554,7 @@ void up_thread_run_test(){
 	// unit_test [15] up_thread_run not find function map error test
 	std::cout << "[15] up_thread_run not find function map error test" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(15,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 
 	thread_state[1] = 0;
@@ -2575,7 +2575,7 @@ void up_thread_run_test(){
 	// unit_test [16] up_thread_run protocol_module returnd illegal EVENT_TAG error test
 	std::cout << "[16] up_thread_run protocol_module returnd illegal EVENT_TAG error test" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(14,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	thread_state[1] = 0;
@@ -2597,7 +2597,7 @@ void up_thread_run_test(){
 	sleep(1);
 	
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(11,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	l7vs::tcp_socket::set_non_blocking_mode_res = true;
 	l7vs::tcp_socket::set_non_blocking_mode_ec.clear();
@@ -2620,7 +2620,7 @@ void up_thread_run_test(){
 	// unit_test [18] up_thread_run client endpoint get error test
 	std::cout << "[18] up_thread_run client endpoint get error test" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(9,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	thread_state[1] = 0;
@@ -2641,7 +2641,7 @@ void up_thread_run_test(){
 	// unit_test [19] up_thread_run protocol module null error test
 	std::cout << "[19] up_thread_run protocol module null error test" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(8,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	thread_state[1] = 0;
@@ -2930,7 +2930,7 @@ void down_thread_run_test(){
 	// unit_test [12] down_thread_run not find function map error test
 	std::cout << "[12] down_thread_run not find function map error test" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(16,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	
@@ -3358,7 +3358,7 @@ void up_thread_client_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(29,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_client_disconnect_event returnd illegal EVENT_TAG error check
@@ -3369,7 +3369,7 @@ void up_thread_client_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(28,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -3476,7 +3476,7 @@ void down_thread_client_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(87,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] down_thread_client_disconnect_event returnd illegal EVENT_TAG error check
@@ -3487,7 +3487,7 @@ void down_thread_client_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(86,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -3610,7 +3610,7 @@ void up_thread_realserver_get_detination_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(33,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_realserver_get_detination_event returnd illegal EVENT_TAG error check
@@ -3621,7 +3621,7 @@ void up_thread_realserver_get_detination_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(32,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_realserver_get_detination_event test end -----" );
@@ -3711,7 +3711,7 @@ void up_thread_sorryserver_get_detination_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(52,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_sorryserver_get_detination_event returnd illegal EVENT_TAG error check
@@ -3722,7 +3722,7 @@ void up_thread_sorryserver_get_detination_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(51,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_get_detination_event test end -----" );
@@ -3867,7 +3867,7 @@ void up_thread_realserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(46,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [6] up_thread_realserver_disconnect_event returnd illegal EVENT_TAG error check
@@ -3878,7 +3878,7 @@ void up_thread_realserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(45,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4068,7 +4068,7 @@ void down_thread_realserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(75,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [6] down_thread_realserver_disconnect_event returnd illegal EVENT_TAG error check
@@ -4079,7 +4079,7 @@ void down_thread_realserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(74,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4202,7 +4202,7 @@ void up_thread_sorryserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(65,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [5] up_thread_sorryserver_disconnect_event returnd illegal EVENT_TAG error check
@@ -4213,7 +4213,7 @@ void up_thread_sorryserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(64,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4404,7 +4404,7 @@ void up_thread_sorryserver_mod_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(63,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [15] up_thread_sorryserver_mod_disconnect returnd illegal EVENT_TAG error check
@@ -4415,7 +4415,7 @@ void up_thread_sorryserver_mod_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(62,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4599,7 +4599,7 @@ void down_thread_sorryserver_mod_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(93,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [15] down_thread_sorryserver_mod_disconnect returnd illegal EVENT_TAG error check
@@ -4610,7 +4610,7 @@ void down_thread_sorryserver_mod_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(92,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4729,7 +4729,7 @@ void down_thread_sorryserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(95,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [5] down_thread_sorryserver_disconnect_event returnd illegal EVENT_TAG error check
@@ -4740,7 +4740,7 @@ void down_thread_sorryserver_disconnect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(94,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4852,7 +4852,7 @@ void up_thread_sorry_enable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(67,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_sorry_enable_event returnd illegal EVENT_TAG error check
@@ -4863,7 +4863,7 @@ void up_thread_sorry_enable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(66,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -4975,7 +4975,7 @@ void up_thread_sorry_disable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(69,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_sorry_disable_event returnd illegal EVENT_TAG error check
@@ -4986,7 +4986,7 @@ void up_thread_sorry_disable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(68,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -5093,7 +5093,7 @@ void down_thread_sorry_enable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(97,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] down_thread_sorry_enable_event returnd illegal EVENT_TAG error check
@@ -5104,7 +5104,7 @@ void down_thread_sorry_enable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(96,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -5210,7 +5210,7 @@ void down_thread_sorry_disable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(99,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] down_thread_sorry_disable_event returnd illegal EVENT_TAG error check
@@ -5221,7 +5221,7 @@ void down_thread_sorry_disable_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(98,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -5333,7 +5333,7 @@ void up_thread_client_accept_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(19,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_client_accept_event returnd illegal EVENT_TAG error check
@@ -5344,7 +5344,7 @@ void up_thread_client_accept_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(18,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_client_accept_event test end -----" );
@@ -5435,7 +5435,7 @@ void up_thread_client_respond_test(){
 	test_obj.up_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(23,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_chek);
 	
@@ -5447,7 +5447,7 @@ void up_thread_client_respond_test(){
 	test_obj.up_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(22,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_chek);
 	
@@ -5525,7 +5525,7 @@ void up_thread_client_respond_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(25,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_client_respond_event returnd illegal EVENT_TAG error check
@@ -5536,7 +5536,7 @@ void up_thread_client_respond_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(24,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -5642,7 +5642,7 @@ void down_thread_client_respond_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(81,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] down_thread_client_respond_event returnd illegal EVENT_TAG error check
@@ -5653,7 +5653,7 @@ void down_thread_client_respond_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(80,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	mutex_lock_test test_lock_obj(vs,io);
@@ -6025,7 +6025,7 @@ void up_thread_client_disconnect_test(){
 	test_obj.up_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(27,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_chek);
 	
@@ -6037,7 +6037,7 @@ void up_thread_client_disconnect_test(){
 	test_obj.up_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(26,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_chek);
 	
@@ -6148,7 +6148,7 @@ void down_thread_client_disconnect_test(){
 	test_obj.down_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(85,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_chek);
 	
@@ -6160,7 +6160,7 @@ void down_thread_client_disconnect_test(){
 	test_obj.down_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(84,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_chek);
 	
@@ -6278,7 +6278,7 @@ void up_thread_sorryserver_disconnect_test(){
 	test_obj.up_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(61,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_chek);
 	
@@ -6290,7 +6290,7 @@ void up_thread_sorryserver_disconnect_test(){
 	test_obj.up_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(60,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_chek);
 	
@@ -6407,7 +6407,7 @@ void down_thread_sorryserver_disconnect_test(){
 	test_obj.down_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(91,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_chek);
 	
@@ -6419,7 +6419,7 @@ void down_thread_sorryserver_disconnect_test(){
 	test_obj.down_thread_exit_call_chek = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(90,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_chek);
 	
@@ -6511,7 +6511,7 @@ void up_thread_realserver_connect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(40,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_realserver_connect_event returnd illegal EVENT_TAG error check
@@ -6522,7 +6522,7 @@ void up_thread_realserver_connect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(39,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_realserver_connect_event test end -----" );
@@ -6613,7 +6613,7 @@ void up_thread_sorryserver_connect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(57,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_sorryserver_connect_event returnd illegal EVENT_TAG error check
@@ -6624,7 +6624,7 @@ void up_thread_sorryserver_connect_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(56,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_connect_event test end -----" );
@@ -6705,7 +6705,7 @@ void down_thread_client_connection_chk_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(79,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] down_thread_client_connection_chk_event returnd illegal EVENT_TAG error check
@@ -6716,7 +6716,7 @@ void down_thread_client_connection_chk_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(78,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- down_thread_client_connection_chk_event test end -----" );
@@ -6793,7 +6793,7 @@ void up_thread_realserver_connection_fail_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(42,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_realserver_connection_fail_event returnd illegal EVENT_TAG error check
@@ -6804,7 +6804,7 @@ void up_thread_realserver_connection_fail_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(41,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_realserver_connection_fail_event test end -----" );
@@ -6882,7 +6882,7 @@ void up_thread_sorryserver_connection_fail_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(59,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	// unit_test [4] up_thread_sorryserver_connection_fail_event returnd illegal EVENT_TAG error check
@@ -6893,7 +6893,7 @@ void up_thread_sorryserver_connection_fail_event_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(58,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	
 	BOOST_MESSAGE( "----- up_thread_sorryserver_connection_fail_event test end -----" );
@@ -7201,7 +7201,7 @@ void up_thread_client_receive_test(){
 	// unit_test [5] up_thread_client_receive receive debug log check
 	std::cout << "[5] up_thread_client_receive receive debug log check" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(36,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	// unit_test [6] up_thread_client_receive qos check
@@ -7227,7 +7227,7 @@ void up_thread_client_receive_test(){
 	test_obj.test_call_client_receive();
 	BOOST_CHECK(!socket.read_some_call_check);
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(35,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	socket.read_some_res = MAX_BUFFER_SIZE;
@@ -7311,7 +7311,7 @@ void up_thread_client_receive_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_client_receive();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(21,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -7323,7 +7323,7 @@ void up_thread_client_receive_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_client_receive();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(20,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -7433,7 +7433,7 @@ void down_thread_realserver_receive_test(){
 	// unit_test [5] down_thread_realserver_receive debug log check
 	std::cout << "[5] down_thread_realserver_receive debug log check" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(43,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	// unit_test [6] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check
@@ -7475,7 +7475,7 @@ void down_thread_realserver_receive_test(){
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK(!socket.read_some_call_check);
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(42,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	socket.read_some_res = MAX_BUFFER_SIZE;
@@ -7566,7 +7566,7 @@ void down_thread_realserver_receive_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(71,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -7578,7 +7578,7 @@ void down_thread_realserver_receive_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(70,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -7678,7 +7678,7 @@ void down_thread_sorryserver_receive_test(){
 	// unit_test [4] down_thread_sorryserver_receive debug log check
 	std::cout << "[4] down_thread_sorryserver_receive debug log check" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(46,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	// unit_test [5] down_thread_sorryserver_receive receive size 0 check
@@ -7759,7 +7759,7 @@ void down_thread_sorryserver_receive_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_sorryserver_receive();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(89,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 
@@ -7771,7 +7771,7 @@ void down_thread_sorryserver_receive_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_sorryserver_receive();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(88,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 
@@ -7858,7 +7858,7 @@ void up_thread_realserver_send_test(){
 	// unit_test [5] up_thread_realserver_send debug log check
 	std::cout << "[5] up_thread_realserver_send debug log check" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(37,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	// unit_test [6] up_thread_realserver_send send size check
@@ -7963,33 +7963,22 @@ void up_thread_realserver_send_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_realserver_send();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(31,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
 	// unit_test [12] up_thread_realserver_send returnd illegal EVENT_TAG error check
 	std::cout << "[12] up_thread_realserver_send returnd illegal EVENT_TAG error check" << std::endl;
 	send_data.set_send_size(0);
+	send_data.set_size(MAX_BUFFER_SIZE);
+	socket.write_some_ec.clear();
 	test_obj.up_thread_module_event_map_clear();
 	test_obj.up_thread_exit_call_check = false;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_realserver_send();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.up_thread_exit_call_check);
-	
-	// unit_test [13] up_thread_realserver_send protocol_module NULL error check
-	std::cout << "[13] up_thread_realserver_send protocol_module NULL error check" << std::endl;
-	send_data.set_send_size(0);
-	test_obj.set_protocol_module(NULL);
-	test_obj.up_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call_realserver_send();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(30,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -8063,7 +8052,7 @@ void up_thread_sorryserver_send_test(){
 	// unit_test [4] up_thread_sorryserver_send debug log check
 	std::cout << "[4] up_thread_sorryserver_send debug log check" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(35,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
 	// unit_test [5] up_thread_sorryserver_send send size check
@@ -8158,7 +8147,7 @@ void up_thread_sorryserver_send_test(){
 	test_obj.up_thread_sorryserver_disconnect_call_check = false;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
-	socket.read_some_ec.clear();
+	socket.write_some_ec.clear();
 	
 	// unit_test [10] up_thread_sorryserver_send not fond function error check
 	std::cout << "[10] up_thread_sorryserver_send not fond function error check" << std::endl;
@@ -8169,12 +8158,13 @@ void up_thread_sorryserver_send_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_sorryserver_send();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(50,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
 	// unit_test [11] up_thread_sorryserver_send returnd illegal EVENT_TAG error check
 	std::cout << "[11] up_thread_sorryserver_send returnd illegal EVENT_TAG error check" << std::endl;
+	send_data.set_size(MAX_BUFFER_SIZE);
 	send_data.set_send_size(0);
 	test_obj.up_thread_module_event_map_clear();
 	test_obj.up_thread_exit_call_check = false;
@@ -8182,7 +8172,7 @@ void up_thread_sorryserver_send_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_sorryserver_send();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(49,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -8279,7 +8269,7 @@ void down_thread_client_send_test(){
 	// unit_test [4] down_thread_client_send send debug log check
 	std::cout << "[4] down_thread_client_send  send debug log check" << std::endl;
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogDebug_id);
+	BOOST_CHECK_EQUAL(45,l7vs::Logger::putLogDebug_id);
 	std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 	
 	// unit_test [5] down_thread_client_send send size check
@@ -8374,7 +8364,7 @@ void down_thread_client_send_test(){
 	test_obj.down_thread_client_disconnect_call_check = false;
 	test_obj.next_down_function_call();
 	BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
-	socket.read_some_ec.clear();
+	socket.write_some_ec.clear();
 	
 	// unit_test [10] down_thread_client_send not fond function error check
 	std::cout << "[10] down_thread_client_send not fond function error check" << std::endl;
@@ -8385,7 +8375,7 @@ void down_thread_client_send_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_client_send();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(83,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -8398,23 +8388,10 @@ void down_thread_client_send_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call_client_send();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(82,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
-	// unit_test [12] down_thread_client_send protocol_module NULL error check
-	std::cout << "[12] down_thread_client_send protocol_module NULL error check" << std::endl;
-	send_data.set_send_size(0);
-	test_obj.set_protocol_module(NULL);
-	test_obj.down_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_call_client_send();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.down_thread_exit_call_check);
-
 	// dummy server stop
 	test_server.breq_close_wait_flag = false;	
 	test_server.bstop_flag = true;
@@ -8640,7 +8617,7 @@ void up_thread_realserver_connect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(37,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(rs_map.empty());
 	BOOST_CHECK(con_list.empty());
@@ -8661,7 +8638,7 @@ void up_thread_realserver_connect_test(){
 	test_obj.up_thread_exit_call_check = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(34,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	l7vs::tcp_socket::set_non_blocking_mode_res = true;
@@ -8677,7 +8654,7 @@ void up_thread_realserver_connect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(35,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
     
@@ -8856,7 +8833,7 @@ void up_thread_sorryserver_connect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(54,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	test_obj.up_thread_sorryserver_connection_fail_event_check = false;
 	test_obj.next_up_function_call();
@@ -8873,7 +8850,7 @@ void up_thread_sorryserver_connect_test(){
 	test_obj.up_thread_exit_call_check = false;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(53,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	l7vs::tcp_socket::set_non_blocking_mode_res = true;
@@ -8887,7 +8864,7 @@ void up_thread_sorryserver_connect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(55,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -9148,7 +9125,7 @@ void up_thread_realserver_disconnect_test(){
 	test_obj.up_thread_exit_call_check = false;
 	test_obj.test_up_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(44,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -9160,7 +9137,7 @@ void up_thread_realserver_disconnect_test(){
 	test_obj.up_thread_exit_call_check = false;
 	test_obj.test_up_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(43,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -9272,7 +9249,7 @@ void down_thread_realserver_disconnect_test(){
 	test_obj.down_thread_exit_call_check = false;
 	test_obj.test_down_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(73,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -9284,7 +9261,7 @@ void down_thread_realserver_disconnect_test(){
 	test_obj.down_thread_exit_call_check = false;
 	test_obj.test_down_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(72,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -9443,7 +9420,7 @@ void up_thread_all_realserver_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_up_all_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(48,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -9460,18 +9437,7 @@ void up_thread_all_realserver_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_up_all_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
-	std::cout << l7vs::Logger::putLogError_message << std::endl;
-	BOOST_CHECK(test_obj.up_thread_exit_call_check);
-	
-	// unit_test [10] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check
-	std::cout << "[10] up_thread_all_realserver_disconnect up_thread_send_realserver_socket_map empty call eroor check" << std::endl;
-	test_obj.up_thread_exit_call_check = false;
-	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-	l7vs::Logger::putLogError_id = 0;
-	test_obj.test_up_all_call();
-	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(47,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.up_thread_exit_call_check);
 	
@@ -9629,7 +9595,7 @@ void down_thread_all_realserver_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_down_all_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(77,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -9646,7 +9612,7 @@ void down_thread_all_realserver_disconnect_test(){
 	l7vs::Logger::putLogError_id = 0;
 	test_obj.test_down_all_call();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-	BOOST_CHECK_EQUAL(9999,l7vs::Logger::putLogError_id);
+	BOOST_CHECK_EQUAL(76,l7vs::Logger::putLogError_id);
 	std::cout << l7vs::Logger::putLogError_message << std::endl;
 	BOOST_CHECK(test_obj.down_thread_exit_call_check);
 	
@@ -9670,6 +9636,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
+
 	ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
 	ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
@@ -9681,6 +9648,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &down_thread_client_connection_chk_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
+
 	ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
 	ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
@@ -9693,6 +9661,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
 	ts->add( BOOST_TEST_CASE( &up_thread_all_realserver_disconnect_test) );
 	ts->add( BOOST_TEST_CASE( &down_thread_all_realserver_disconnect_test) );
+
 	ts->add( BOOST_TEST_CASE( &up_thread_exit_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_exit_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_event_test ) );
@@ -9703,13 +9672,12 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_event_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_mod_disconnect_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_mod_disconnect_test ) );
+
 	ts->add( BOOST_TEST_CASE( &up_thread_sorry_enable_event_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
-	ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
-	ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
 	ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
 	ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
 	
