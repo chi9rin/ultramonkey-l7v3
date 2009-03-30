@@ -42,7 +42,7 @@ command_receiver::command_receiver( boost::asio::io_service& io_service, const s
 		std::stringstream	debugstr;
 		debugstr << "command_receiver::command_receiver arguments:";
 		debugstr << boost::format( "file=%s" ) % file;
-		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 1, debugstr.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 2, debugstr.str(), __FILE__, __LINE__ );
 	}
 	/*------ DEBUG LOG END ------*/
 
@@ -60,7 +60,7 @@ command_receiver::command_receiver( boost::asio::io_service& io_service, const s
 
 //!	@brief		destructor
 command_receiver::~command_receiver(){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_receiver::~command_receiver", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 3, "command_receiver::~command_receiver", __FILE__, __LINE__ );
 
 	unlink(sockfile.c_str());
 }
@@ -69,7 +69,7 @@ command_receiver::~command_receiver(){
 //!	@param[in]	command session
 //!	@param[in]	error code
 void	command_receiver::handle_accept( command_session::command_session_ptr session, const boost::system::error_code& err ){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_receiver::handle_accept", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 4, "command_receiver::handle_accept", __FILE__, __LINE__ );
 
 	// check async_accept() result.
 	if ( !err ) {

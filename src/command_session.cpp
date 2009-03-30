@@ -35,7 +35,7 @@ namespace	l7vs{
 command_session::command_session(	boost::asio::io_service& io_service, l7vsd& parent )
 								:	unixsocket( io_service ),
 									vsd( parent ){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::command_session", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 5, "command_session::command_session", __FILE__, __LINE__ );
 
 	// buffer initialize
 	request_buffer.assign( 0x00 );
@@ -99,7 +99,7 @@ command_session::command_session(	boost::asio::io_service& io_service, l7vsd& pa
 //!	@param[in]	error code
 //!	@param[in]	read size
 void	command_session::handle_read( const boost::system::error_code& err, size_t size){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::handle_read", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 6, "command_session::handle_read", __FILE__, __LINE__ );
 
 	if( !err ){
 		// execute received command
@@ -124,18 +124,18 @@ void	command_session::handle_read( const boost::system::error_code& err, size_t 
 //!	@brief		write handler
 //!	@param[in]	error code
 void	command_session::handle_write( const boost::system::error_code& err ){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::handle_write", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 7, "command_session::handle_write", __FILE__, __LINE__ );
 
 	if( err ){
 		std::stringstream buf;
 		buf << "handle_write error:" << err;
-		Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, buf.str(), __FILE__, __LINE__);
+		Logger::putLogError( LOG_CAT_L7VSD_COMMAND, 1, buf.str(), __FILE__, __LINE__ );
 	}
 }
 
 //!	@brief		execute request command
 void	command_session::execute_command(){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::execute_command", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 8, "command_session::execute_command", __FILE__, __LINE__ );
 
 	// deserialize requestdata
 	std::stringstream	ss;
@@ -147,7 +147,7 @@ void	command_session::execute_command(){
 	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_COMMAND ) ){
 		std::stringstream	debugstr;
 		debugstr << boost::format( "command_session_recv_request:%s" ) % request_data;
-		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 1, debugstr.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 9, debugstr.str(), __FILE__, __LINE__ );
 	}
 	/*------ DEBUG LOG END ------*/
 
@@ -174,7 +174,7 @@ void	command_session::execute_command(){
 	if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_COMMAND ) ){
 		std::stringstream	debugstr;
 		debugstr << boost::format( "command_session_send_response:%s" ) % response_data;
-		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 1, debugstr.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_COMMAND, 10, debugstr.str(), __FILE__, __LINE__ );
 	}
 	/*------ DEBUG LOG END ------*/
 
@@ -185,7 +185,7 @@ void	command_session::execute_command(){
 
 //!	@brief		session start
 void	command_session::start(){
-	Logger	logger( LOG_CAT_L7VSD_COMMAND, 1, "command_session::start", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_COMMAND, 11, "command_session::start", __FILE__, __LINE__ );
 
 	// start async read requestdata from unixsocket.
 	unixsocket.async_read_some( boost::asio::buffer( request_buffer ),
