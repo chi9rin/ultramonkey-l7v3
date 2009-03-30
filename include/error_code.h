@@ -1,14 +1,30 @@
+/*!
+ *	@file	error_code.h
+ *	@brief	error code and error messege impliment class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+
 #ifndef	ERROR_CODE_H
 #define	ERROR_CODE_H
-//
-//!	@file	error_code.h
-//!	@brief	error code and error messege impliment class
-//	coipyright (C) NTTComware corporation. 2008 - 2009
-//	mail: n.nakai at sdy.co.jp
-//
-//	Distributed under the Boost Software License, Version 1.0. (See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+
 #include <string>
 
 namespace l7vs{
