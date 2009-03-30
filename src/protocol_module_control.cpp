@@ -1,13 +1,26 @@
-//
-//	@file	protocol_module_control.cpp
-//	@brief	control load/unload shared object protocol module
-//
-//	copyright (c) sdy corporation. 2008
-//	mail: h dot okada at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*!
+ * @file  protocol_module_control.cpp
+ * @brief control load/unload shared object protocol module.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include	<dlfcn.h>
 #include	"protocol_module_control.h"
 #include	"logger.h"
@@ -47,7 +60,7 @@ protocol_module_control::getInstance(){
  */
 void
 protocol_module_control::initialize( const std::string& infile_path ){
-	Logger logger( loggerCategory, 1, "protocol_module_control::initialize", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 2, "protocol_module_control::initialize", __FILE__, __LINE__ );
 	if( &infile_path != NULL ){
 		module_control_base::modulefile_path	= infile_path;
 	}
@@ -61,7 +74,7 @@ protocol_module_control::initialize( const std::string& infile_path ){
  */
 void
 protocol_module_control::finalize(){
-	Logger logger( loggerCategory, 1, "protocol_module_control::finalize", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 3, "protocol_module_control::finalize", __FILE__, __LINE__ );
 }
 
 /*!
@@ -73,7 +86,7 @@ protocol_module_control::finalize(){
  */
 protocol_module_base*
 protocol_module_control::load_module( const	std::string& modulename ){
-	Logger logger( loggerCategory, 1, "protocol_module_control::load_module", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 4, "protocol_module_control::load_module", __FILE__, __LINE__ );
 	protocol_module_base* return_value = NULL;
 	boost::mutex::scoped_lock lock( loadmodule_map_mutex );
 	name_module_info_map::iterator it = loadmodule_map.find( modulename );
@@ -133,7 +146,7 @@ protocol_module_control::load_module( const	std::string& modulename ){
  */
 void
 protocol_module_control::unload_module( protocol_module_base* module_ptr ){
-	Logger logger( loggerCategory, 1, "protocol_module_control::unload_module", __FILE__, __LINE__ );
+	Logger logger( loggerCategory, 5, "protocol_module_control::unload_module", __FILE__, __LINE__ );
 	if( module_ptr == NULL ){
 		std::string msg = "Arg(module_ptr) is NULL pointer.";
 		Logger::putLogError(loggerCategory, 5, msg, __FILE__, __LINE__);
