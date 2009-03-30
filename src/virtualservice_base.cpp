@@ -1,13 +1,26 @@
-//
-//!	@file	virtualservice_base.cpp
-//!	@brief	VirtualService base class implementations
-//
-//	copyright (c) sdy corporation. 2008
-//	mail: h dot okada at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*!
+ *	@file	virtualservice_base.cpp
+ *	@brief	VirtualService base class implementations
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 
 // #include <new>
 #include <vector>
@@ -79,7 +92,7 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
  */
 void	l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 1, "in_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );
 	}
 
 	l7vs::error_code	vs_err;
@@ -114,7 +127,7 @@ void	l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
 		param_data.rep_interval = int_val;
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, "out_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );
 	}
 }
 
@@ -129,7 +142,7 @@ void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system
 		boost::format formatter("in_function : void virtualservice_base::handle_protomod_replication( "
 								"const boost::system::error_code& err ) : err = %s, err.message = %s");
 		formatter % ( err ? "true" : "false") % err.message();
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 3, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( likely( !err ) ){
 		if( NULL != protomod ){
@@ -139,14 +152,14 @@ void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system
 			protomod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_protomod_replication, 
 													this, boost::asio::placeholders::error ) );
 		}else{
-			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, PROTOMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 1, PROTOMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
 		}
 	}else
 		//ERROR case
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, err.message(), __FILE__, __LINE__ );
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::handle_protomod_replication( const boost::system::error_code& err )", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 4, "out_function : void virtualservice_base::handle_protomod_replication( const boost::system::error_code& err )", __FILE__, __LINE__ );
 	}
 }
 
@@ -161,7 +174,7 @@ void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system
 		boost::format formatter("in_function : void virtualservice_base::handle_schedmod_replication( "
 								"const boost::system::error_code& err ) : err = %s, err.message = %s");
 		formatter % ( err ? "true" : "false") % err.message();
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( likely( !err ) ){
 		if( NULL != schedmod ){
@@ -171,14 +184,14 @@ void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system
 			schedmod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_schedmod_replication, 
 													this, boost::asio::placeholders::error ) );
 		}else{
-			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, SCHEDMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
+			l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 3, SCHEDMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
 		}
 	}else
 		//ERROR case
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 4, err.message(), __FILE__, __LINE__ );
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::handle_schedmod_replication( const boost::system::error_code& err )", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 6, "out_function : void virtualservice_base::handle_schedmod_replication( const boost::system::error_code& err )", __FILE__, __LINE__ );
 	}
 }
 
@@ -193,7 +206,7 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		boost::format formatter("in_function : void virtualservice_base::handle_throughput_update( "
 								"const boost::system::error_code& err ) : err = %s, err.message = %s");
 		formatter % ( err ? "true" : "false") % err.message();
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 7, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( likely( !err ) ){
 		// decrease wait count
@@ -243,19 +256,19 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 			boost::format formatter1("throughput(upstream) dump   : %d");
 			formatter1 % throughput_up;
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter1.str(), __FILE__, __LINE__ );
+			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 8, formatter1.str(), __FILE__, __LINE__ );
 			boost::format formatter2("throughput(downstream) dump : %d");
 			formatter2 % throughput_down;
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter2.str(), __FILE__, __LINE__ );
+			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 9, formatter2.str(), __FILE__, __LINE__ );
 		}
 	}else
 		//ERROR case
-		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, err.message(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, err.message(), __FILE__, __LINE__ );
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		boost::format formatter("out_function : void virtualservice_base::handle_throughput_update( "
 								"const boost::system::error_code& err )");
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, formatter.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 10, formatter.str(), __FILE__, __LINE__ );
 	}
 }
 
@@ -377,7 +390,7 @@ cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( boost::asio::ip::address& add
  */
 void	l7vs::virtualservice_base::rs_list_lock(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 11, "in_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
 	}
 
 	{
@@ -390,7 +403,7 @@ void	l7vs::virtualservice_base::rs_list_lock(){
 		rs_list_ref_count = 0;
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 12, "out_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
 	}
 }
 
@@ -402,7 +415,7 @@ void	l7vs::virtualservice_base::rs_list_lock(){
  */
 void	l7vs::virtualservice_base::rs_list_unlock(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "in_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 13, "in_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
 	}
 
 	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
@@ -412,7 +425,7 @@ void	l7vs::virtualservice_base::rs_list_unlock(){
 		rs_list_ref_count = ULLONG_MAX;
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, "out_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 14, "out_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
 	}
 }
 
@@ -424,7 +437,7 @@ void	l7vs::virtualservice_base::rs_list_unlock(){
  */
 l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 16, "in_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
 	}
 
 	boost::mutex::scoped_lock lk( element_mutex );
@@ -461,10 +474,8 @@ l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 						% element.schedule_module_name % element.protocol_args.size() % element.sorry_maxconnection \
 						% element.sorry_endpoint % element.sorry_flag % element.qos_upstream % element.qos_downstream \
 						% element.throughput_upstream % element.throughput_downstream;
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, element_dump.str(), __FILE__, __LINE__ );
-	}
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 17, element_dump.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 18, "out_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
 	}
 	return element;
 }
@@ -480,14 +491,14 @@ unsigned long long	l7vs::virtualservice_base::get_qos_upstream(){
 		if( boost::this_thread::get_id() == this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_qos_upstream() : ret = %d" );
 			fmt % element.qos_upstream;
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 19, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		if( boost::this_thread::get_id() != this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_qos_upstream() : ret = %d" );
 			fmt % element.qos_upstream;
-			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 15, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	return element.qos_upstream;
@@ -504,14 +515,14 @@ unsigned long long	l7vs::virtualservice_base::get_qos_downstream(){
 		if( boost::this_thread::get_id() == this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_qos_downstream() : ret = %d" );
 			fmt % element.qos_downstream;
-			Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 20, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		if( boost::this_thread::get_id() != this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_qos_downstream() : ret = %d" );
 			fmt % element.qos_downstream;
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 16, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	return element.qos_downstream;
@@ -530,14 +541,14 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_upstream(){
 		if( boost::this_thread::get_id() == this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_upstream() : ret = %d" );
 			fmt % throughput_up;
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 21, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		if( boost::this_thread::get_id() != this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_upstream() : ret = %d" );
 			fmt % throughput_up;
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 17, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 
@@ -557,14 +568,14 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_downstream(){
 		if( boost::this_thread::get_id() == this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_downstream() : ret = %d" );
 			fmt % throughput_down;
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 22, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		if( boost::this_thread::get_id() != this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_downstream() : ret = %d" );
 			fmt % throughput_down;
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 18, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 
@@ -582,7 +593,7 @@ unsigned long long	l7vs::virtualservice_base::get_wait_upstream(){
 	if(	unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_upstream() : ret = %d" );
 		fmt % wait_count_up;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 19, fmt.str(), __FILE__, __LINE__ );
 	}
 	return wait_count_up;
 }
@@ -598,7 +609,7 @@ unsigned long long	l7vs::virtualservice_base::get_wait_downstream(){
 	if(	unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_downstream() : ret = %d" );
 		fmt % wait_count_down;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 20, fmt.str(), __FILE__, __LINE__ );
 	}
 	return wait_count_down;
 }
@@ -614,7 +625,7 @@ unsigned long long	l7vs::virtualservice_base::get_up_recv_size(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_up_recv_size() : ret = %d" );
 		fmt % recvsize_up;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 23, fmt.str(), __FILE__, __LINE__ );
 	}
 	return recvsize_up;
 }
@@ -630,7 +641,7 @@ unsigned long long	l7vs::virtualservice_base::get_up_send_size(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_up_send_size() : ret = %d" );
 		fmt % sendsize_up;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 24, fmt.str(), __FILE__, __LINE__ );
 	}
 	return sendsize_up;
 }
@@ -646,7 +657,7 @@ unsigned long long	l7vs::virtualservice_base::get_down_recv_size(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_down_recv_size() : ret = %d" );
 		fmt % recvsize_down;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 25, fmt.str(), __FILE__, __LINE__ );
 	}
 	return recvsize_down;
 }
@@ -662,7 +673,7 @@ unsigned long long	l7vs::virtualservice_base::get_down_send_size(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_down_send_size() : ret = %d" );
 		fmt % sendsize_down;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 26, fmt.str(), __FILE__, __LINE__ );
 	}
 	return sendsize_down;
 }
@@ -680,7 +691,7 @@ void	l7vs::virtualservice_base::update_up_recv_size( unsigned long long	datasize
 		boost::format	fmt( "in_function : void virtualservice_base::update_up_recv_size("
 							 "unsigned long long datasize) : datasize = %d" );
 		fmt % datasize;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 27, fmt.str(), __FILE__, __LINE__ );
 	}
 
 	if( (ULLONG_MAX - current_up_recvsize) < datasize )
@@ -696,8 +707,8 @@ void	l7vs::virtualservice_base::update_up_recv_size( unsigned long long	datasize
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : current_up_recvsize = %d, recvsize_up = %d" );
 		fmt % current_up_recvsize % recvsize_up;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_base::update_up_recv_size(unsigned long long datasize)", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 28, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 29, "out_function : void virtualservice_base::update_up_recv_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
 }
 
@@ -713,7 +724,7 @@ void	l7vs::virtualservice_base::update_up_send_size( unsigned long long	datasize
 		boost::format	fmt( "in_function : void virtualservice_base::update_up_send_size("
 							 "unsigned long long datasize) : datasize = %d" );
 		fmt % datasize;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 30, fmt.str(), __FILE__, __LINE__ );
 	}
 
 	if( (ULLONG_MAX - sendsize_up) < datasize )
@@ -724,8 +735,8 @@ void	l7vs::virtualservice_base::update_up_send_size( unsigned long long	datasize
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 		boost::format	fmt( "update members : sendsize_up = %d" );
 		fmt % sendsize_up;
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_base::update_up_send_size(unsigned long long datasize)", __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt.str(), __FILE__, __LINE__ );
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 32, "out_function : void virtualservice_base::update_up_send_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
 }
 
@@ -741,7 +752,7 @@ void	l7vs::virtualservice_base::update_down_recv_size( unsigned long long	datasi
 		boost::format	fmt( "in_function : void virtualservice_base::update_down_recv_size("
 							 "unsigned long long datasize) : datasize = %d" );
 		fmt % datasize;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 33, fmt.str(), __FILE__, __LINE__ );
 	}
 
 	if( (ULLONG_MAX - current_down_recvsize) < datasize )
@@ -757,8 +768,8 @@ void	l7vs::virtualservice_base::update_down_recv_size( unsigned long long	datasi
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : current_down_recvsize = %d, recvsize_down = %d" );
 		fmt % current_down_recvsize % recvsize_down;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_base::update_down_recv_size(unsigned long long datasize)", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 34, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 35, "out_function : void virtualservice_base::update_down_recv_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
 }
 
@@ -774,7 +785,7 @@ void	l7vs::virtualservice_base::update_down_send_size( unsigned long long	datasi
 		boost::format	fmt( "in_function : void virtualservice_base::update_down_send_size("
 							 "unsigned long long datasize) : datasize = %d" );
 		fmt % datasize;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 36, fmt.str(), __FILE__, __LINE__ );
 	}
 
 	if( (ULLONG_MAX - sendsize_down) < datasize )
@@ -785,8 +796,8 @@ void	l7vs::virtualservice_base::update_down_send_size( unsigned long long	datasi
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : sendsize_down = %d" );
 		fmt % sendsize_down;
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "out_function : void virtualservice_base::update_down_send_size(unsigned long long datasize)", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 37, fmt.str(), __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 38, "out_function : void virtualservice_base::update_down_send_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
 }
 	
@@ -798,7 +809,7 @@ void	l7vs::virtualservice_base::update_down_send_size( unsigned long long	datasi
  */
 l7vs::protocol_module_base*		l7vs::virtualservice_base::get_protocol_module(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in/out_function : l7vs::protocol_module_base* virtualservice_base::get_schedule_module()", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 39, "in/out_function : l7vs::protocol_module_base* virtualservice_base::get_schedule_module()", __FILE__, __LINE__ );
 	}
 	return protomod;
 }
@@ -811,7 +822,7 @@ l7vs::protocol_module_base*		l7vs::virtualservice_base::get_protocol_module(){
  */
 l7vs::schedule_module_base*		l7vs::virtualservice_base::get_schedule_module(){
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, "in/out_function : l7vs::schedule_module_base* virtualservice_base::get_schedule_module()", __FILE__, __LINE__ );
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 40, "in/out_function : l7vs::schedule_module_base* virtualservice_base::get_schedule_module()", __FILE__, __LINE__ );
 	}
 	return schedmod;
 }
