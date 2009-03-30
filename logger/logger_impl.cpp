@@ -1,9 +1,9 @@
-/*
+/*!
  * @file  logger_impl.cpp
  * @brief logger module implementation class.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
- * Copyright (C) 2008  NTT COMWARE Corporation.
+ * Copyright (C) 2009  NTT COMWARE Corporation.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -471,7 +471,7 @@ bool l7vs::LoggerImpl::init(){
 	catch (const std::exception& e) {
 		std::ostringstream oss;
 		oss <<  "Logger Initialization Failed : " << e.what();
-		errorConf(6, oss.str(), __FILE__, __LINE__);
+		errorConf( 1, oss.str(), __FILE__, __LINE__);
 		return false;
 	}
 
@@ -600,7 +600,7 @@ void l7vs::LoggerImpl::loadConf(){
 		if( ec ){
 			std::stringstream	ss;
 			ss << "Not exist logfilename_key : " << property->log_filename_key;
-			logic_error( 7, ss.str(), __FILE__, __LINE__ );
+			logic_error( 1, ss.str(), __FILE__, __LINE__ );
 		}
 	
 		// get rotation
@@ -616,7 +616,7 @@ void l7vs::LoggerImpl::loadConf(){
 			}
 		}
 		else{
-			logic_error(6, "Not Exist Log Rotation Setting.", __FILE__, __LINE__ );
+			logic_error( 2, "Not Exist Log Rotation Setting.", __FILE__, __LINE__ );
 		}
 
 		// get max backup index
@@ -642,7 +642,7 @@ void l7vs::LoggerImpl::loadConf(){
 			}
 		}
 		else {
-			logic_error(7, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__ );
+			logic_error( 3, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__ );
 		}
 
 		// get max filesize check
@@ -650,7 +650,7 @@ void l7vs::LoggerImpl::loadConf(){
 			// get max file size
 			std::string maxFileSizeStr;
 			maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property->max_file_size_key, ec);
-			if( ec )	logic_error( 8, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
+			if( ec )	logic_error( 4, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
 			
 			std::string size_val;
 			std::string last_str = maxFileSizeStr.substr(maxFileSizeStr.length() - 1, 1);
@@ -664,30 +664,30 @@ void l7vs::LoggerImpl::loadConf(){
 				property->max_file_size_value = boost::lexical_cast<size_t>(size_val);
 			}
 			catch (const boost::bad_lexical_cast& bc){
-				logic_error( 9, "Invalid FileSize Value.", __FILE__, __LINE__ );
+				logic_error( 5, "Invalid FileSize Value.", __FILE__, __LINE__ );
 			}
 	
 			if ("K" == last_str) {
 				if ((ULLONG_MAX / 1024) < property->max_file_size_value){
-						logic_error( 10, "Invalid FileSize Value.", __FILE__, __LINE__);
+						logic_error( 6, "Invalid FileSize Value.", __FILE__, __LINE__);
 				}
 				property->max_file_size_value = property->max_file_size_value * 1024;
 			}
 			else if ("M" == last_str) {
 				if ((ULLONG_MAX / 1024 / 1024) < property->max_file_size_value)
-					logic_error( 11, "Invalid FileSize Value.", __FILE__, __LINE__);
+					logic_error( 7, "Invalid FileSize Value.", __FILE__, __LINE__);
 				property->max_file_size_value = property->max_file_size_value * 1024 * 1024;
 			}
 			else if ("G" == last_str) {
 				if ((ULLONG_MAX / 1024 / 1024 / 1024) < property->max_file_size_value)
-					logic_error( 12, "Invalid FileSize Value.", __FILE__, __LINE__);
+					logic_error( 8, "Invalid FileSize Value.", __FILE__, __LINE__);
 				property->max_file_size_value = property->max_file_size_value * 1024 * 1024 * 1024;
 			}
 			if (LOGGER_FILESIZE_LOWER_LIMIT > property->max_file_size_value){
 				int limit = LOGGER_FILESIZE_LOWER_LIMIT;
 				std::ostringstream oss;
 				oss << "FileSize must at least " << limit << " bytes.";
-				logic_error( 13, oss.str(), __FILE__, __LINE__);
+				logic_error( 9, oss.str(), __FILE__, __LINE__);
 			}
 		}
 
@@ -701,9 +701,9 @@ void l7vs::LoggerImpl::loadConf(){
 				else if ("week" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_WEEK;
 				else if ("date" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_DATE;
 				else if ("hour" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_HOUR;
-				else logic_error(14, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
+				else logic_error( 10, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
 			}
-			else{	logic_error( 15, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);}
+			else{	logic_error( 11, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);}
 
 			if(LOG_TIM_YEAR == property->rotation_timing_value ){
 				std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
@@ -722,10 +722,10 @@ void l7vs::LoggerImpl::loadConf(){
 							month = boost::lexical_cast<int>(monthStr);
 						}
 						catch (const boost::bad_lexical_cast& bc) {
-								logic_error( 16, "Parse Timing Year Error.", __FILE__, __LINE__);
+								logic_error( 12, "Parse Timing Year Error.", __FILE__, __LINE__);
 						}
 						if (1 > month || month > 12) {
-							logic_error(17, "Parse Timing Year Error.", __FILE__, __LINE__);
+							logic_error( 13, "Parse Timing Year Error.", __FILE__, __LINE__);
 						}
 						fpos = rpos + 1;
 						// find date
@@ -736,13 +736,13 @@ void l7vs::LoggerImpl::loadConf(){
 								date = boost::lexical_cast<int>(dateStr);
 							}
 							catch (const boost::bad_lexical_cast& bc) {
-								logic_error(18, "Parse Timing Year Error.", __FILE__, __LINE__);
+								logic_error( 14, "Parse Timing Year Error.", __FILE__, __LINE__);
 							}
 						}
-						if (1 > date || date > 31)  logic_error( 19, "Parse Timing Year Error.", __FILE__, __LINE__);
+						if (1 > date || date > 31)  logic_error( 15, "Parse Timing Year Error.", __FILE__, __LINE__);
 
 						int dates[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-						if (date > dates[month - 1]) logic_error( 20, "Parse Timing Year Error.", __FILE__, __LINE__);
+						if (date > dates[month - 1]) logic_error( 16, "Parse Timing Year Error.", __FILE__, __LINE__);
 
 						fpos = rpos + 1;
 						// find hour 
@@ -753,9 +753,9 @@ void l7vs::LoggerImpl::loadConf(){
 								hour = boost::lexical_cast<int>(hourStr);
 							}
 							catch(const boost::bad_lexical_cast& bc){
-								logic_error( 21, "Parse Timing Year Error.", __FILE__, __LINE__);
+								logic_error( 17, "Parse Timing Year Error.", __FILE__, __LINE__);
 							}
-							if(0 > hour || hour > 23) logic_error( 22, "Parse Timing Year Error.", __FILE__, __LINE__);
+							if(0 > hour || hour > 23) logic_error( 18, "Parse Timing Year Error.", __FILE__, __LINE__);
 
 							// minute
 							std::string minuteStr = ret.substr(rpos + 1);
@@ -763,16 +763,16 @@ void l7vs::LoggerImpl::loadConf(){
 								minute = boost::lexical_cast<int>(minuteStr);
 							}
 							catch(const boost::bad_lexical_cast& bc){
-								logic_error( 23, "Parse Timing Year Error.", __FILE__, __LINE__);
+								logic_error( 19, "Parse Timing Year Error.", __FILE__, __LINE__);
 							}
-							if (0 > minute || minute > 59) logic_error( 24, "Parse Timing Year Error.", __FILE__, __LINE__);
+							if (0 > minute || minute > 59) logic_error( 20, "Parse Timing Year Error.", __FILE__, __LINE__);
 						}
 						else{
-							logic_error( 25, "Parse Timing Year Error.", __FILE__, __LINE__);
+							logic_error( 21, "Parse Timing Year Error.", __FILE__, __LINE__);
 						}
 					}
 					else{
-						logic_error( 26, "Parse Timing Year Error.", __FILE__, __LINE__);
+						logic_error( 22, "Parse Timing Year Error.", __FILE__, __LINE__);
 					}
 
 					// format to internal rotation timing value expresson
@@ -786,7 +786,7 @@ void l7vs::LoggerImpl::loadConf(){
 
 				}
 				else {
-					logic_error(28, "Not Exist Log RotaionTiming Year Setting.", __FILE__, __LINE__);
+					logic_error( 23, "Not Exist Log RotaionTiming Year Setting.", __FILE__, __LINE__);
 				}
 			}
 		
@@ -807,10 +807,10 @@ void l7vs::LoggerImpl::loadConf(){
 							date = boost::lexical_cast<int>(dateStr);
 						}
 						catch(const boost::bad_lexical_cast& bc) {
-							logic_error(29, "Parse Timing Month Error.", __FILE__, __LINE__);
+							logic_error( 24, "Parse Timing Month Error.", __FILE__, __LINE__);
 						}
 						if(1 > date || date > 31) {
-							logic_error( 30, "Parse Timing Month Error.", __FILE__, __LINE__);
+							logic_error( 25, "Parse Timing Month Error.", __FILE__, __LINE__);
 						}
 						fpos = rpos + 1;
 						// find hour
@@ -821,10 +821,10 @@ void l7vs::LoggerImpl::loadConf(){
 								hour = boost::lexical_cast<int>(hourStr);
 							}
 							catch(const boost::bad_lexical_cast& bc) {
-								logic_error(31, "Parse Timing Month Error.", __FILE__, __LINE__);
+								logic_error( 26, "Parse Timing Month Error.", __FILE__, __LINE__);
 							}
 							if(0 > hour || hour > 23) {
-								logic_error( 32, "Parse Timing Month Error.", __FILE__, __LINE__);
+								logic_error( 27, "Parse Timing Month Error.", __FILE__, __LINE__);
 							}
 							// minute
 							std::string minuteStr = ret.substr(rpos + 1);
@@ -832,18 +832,18 @@ void l7vs::LoggerImpl::loadConf(){
 								minute = boost::lexical_cast<int>(minuteStr);
 							}
 							catch(const boost::bad_lexical_cast& bc) {
-								logic_error( 33, "Parse Timing Month Error.", __FILE__, __LINE__);
+								logic_error( 28, "Parse Timing Month Error.", __FILE__, __LINE__);
 							}
 							if(0 > minute || minute > 59) {
-								logic_error( 34, "Parse Timing Month Error.", __FILE__, __LINE__);
+								logic_error( 29, "Parse Timing Month Error.", __FILE__, __LINE__);
 							}
 						}
 						else{
-							logic_error( 35, "Parse Timing Month Error.", __FILE__, __LINE__);
+							logic_error( 30, "Parse Timing Month Error.", __FILE__, __LINE__);
 						}
 					}
 					else{
-						logic_error(36, "Parse Timing Month Error.", __FILE__, __LINE__);
+						logic_error( 31, "Parse Timing Month Error.", __FILE__, __LINE__);
 					}
 	
 					// format to internal rotation timing value expresson
@@ -856,7 +856,7 @@ void l7vs::LoggerImpl::loadConf(){
 	
 				}
 				else{
-					logic_error( 37, "Not Exist Log RotaionTiming Month Setting.", __FILE__, __LINE__);
+					logic_error( 32, "Not Exist Log RotaionTiming Month Setting.", __FILE__, __LINE__);
 				}
 			}
 
@@ -881,7 +881,7 @@ void l7vs::LoggerImpl::loadConf(){
 						else if("fri" == weekStr) week = 5;
 						else if("sat" == weekStr) week = 6;
 						else{
-							logic_error(38, "Parse Timing Week Error.", __FILE__, __LINE__);
+							logic_error( 33, "Parse Timing Week Error.", __FILE__, __LINE__);
 						}
 						fpos = rpos + 1;
 						// find hour
@@ -892,10 +892,10 @@ void l7vs::LoggerImpl::loadConf(){
 								hour = boost::lexical_cast<int>(hourStr);
 							}
 							catch (const boost::bad_lexical_cast& bc) {
-								logic_error( 39, "Parse Timing Week Error.", __FILE__, __LINE__);
+								logic_error( 34, "Parse Timing Week Error.", __FILE__, __LINE__);
 							}
 							if(0 > hour || hour > 23) {
-								logic_error( 40, "Parse Timing Week Error.", __FILE__, __LINE__);
+								logic_error( 35, "Parse Timing Week Error.", __FILE__, __LINE__);
 							}
 							// minute
 							std::string minuteStr = ret.substr(rpos + 1);
@@ -903,18 +903,18 @@ void l7vs::LoggerImpl::loadConf(){
 								minute = boost::lexical_cast<int>(minuteStr);
 							}
 							catch(const boost::bad_lexical_cast& bc) {
-								logic_error( 41, "Parse Timing Week Error.", __FILE__, __LINE__);
+								logic_error( 36, "Parse Timing Week Error.", __FILE__, __LINE__);
 							}
 							if(0 > minute || minute > 59) {
-								logic_error( 42, "Parse Timing Week Error.", __FILE__, __LINE__);
+								logic_error( 37, "Parse Timing Week Error.", __FILE__, __LINE__);
 							}
 						}
 						else{
-							logic_error( 43, "Parse Timing Week Error.", __FILE__, __LINE__);
+							logic_error( 38, "Parse Timing Week Error.", __FILE__, __LINE__);
 						}
 					}
 					else{
-						logic_error( 44, "Parse Timing Week Error.", __FILE__, __LINE__);
+						logic_error( 39, "Parse Timing Week Error.", __FILE__, __LINE__);
 					}
 	
 					// format to internal rotation timing value expresson
@@ -926,7 +926,7 @@ void l7vs::LoggerImpl::loadConf(){
 					property->rotation_timing_value_value = oss.str();
 				}
 				else{
-					logic_error( 45, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
+					logic_error( 40, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
 				}
 			}
 
@@ -945,10 +945,10 @@ void l7vs::LoggerImpl::loadConf(){
 							hour = boost::lexical_cast<int>(hourStr);
 						}
 						catch(const boost::bad_lexical_cast& bc) {
-							logic_error( 46, "Parse Timing Date Error.", __FILE__, __LINE__);
+							logic_error( 41, "Parse Timing Date Error.", __FILE__, __LINE__);
 						}
 						if(0 > hour || hour > 23) {
-							logic_error( 47, "Parse Timing Date Error.", __FILE__, __LINE__);
+							logic_error( 42, "Parse Timing Date Error.", __FILE__, __LINE__);
 						}
 						// minute
 						std::string minuteStr = ret.substr(rpos + 1);
@@ -956,14 +956,14 @@ void l7vs::LoggerImpl::loadConf(){
 							minute = boost::lexical_cast<int>(minuteStr);
 						}
 						catch(const boost::bad_lexical_cast& bc) {
-							logic_error( 48, "Parse Timing Date Error.", __FILE__, __LINE__);
+							logic_error( 43, "Parse Timing Date Error.", __FILE__, __LINE__);
 						}
 						if(0 > minute || minute > 59) {
-							logic_error( 49, "Parse Timing Date Error.", __FILE__, __LINE__);
+							logic_error( 44, "Parse Timing Date Error.", __FILE__, __LINE__);
 						}
 					}
 					else{
-						logic_error( 50, "Parse Timing Date Error.", __FILE__, __LINE__);
+						logic_error( 45, "Parse Timing Date Error.", __FILE__, __LINE__);
 					}
 	
 					// format to internal rotation timing value expresson
@@ -974,7 +974,7 @@ void l7vs::LoggerImpl::loadConf(){
 					property->rotation_timing_value_value = oss.str();
 				}
 				else{
-					logic_error( 51, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
+					logic_error( 46, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
 				}
 			}
 
@@ -987,10 +987,10 @@ void l7vs::LoggerImpl::loadConf(){
 						minute = boost::lexical_cast<int>(ret);
 					}
 					catch(const boost::bad_lexical_cast& bc){
-						logic_error( 52, "Parse Timing Hour Error.", __FILE__, __LINE__);
+						logic_error( 47, "Parse Timing Hour Error.", __FILE__, __LINE__);
 					}
 					if (0 > minute || minute > 59) {
-						logic_error( 53, "Parse Timing Hour Error.", __FILE__, __LINE__);
+						logic_error( 48, "Parse Timing Hour Error.", __FILE__, __LINE__);
 					}
 	
 					// format to internal rotation timing value expresson
@@ -1000,7 +1000,7 @@ void l7vs::LoggerImpl::loadConf(){
 					property->rotation_timing_value_value = oss.str();
 				}
 				else {
-					logic_error( 54, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
+					logic_error( 49, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
 				}
 			}
 		}
@@ -1296,7 +1296,7 @@ void l7vs::LoggerImpl::loadConf(){
 					oss << "Invalid Log Category Setting : " << name_itr->second;
 
 					if (LOG_LV_WARN >= this->getLogLevel(log_category)) {
-						this->putLogWarn(log_category,2, oss.str(), __FILE__, __LINE__);
+						this->putLogWarn(log_category,1, oss.str(), __FILE__, __LINE__);
 					}
 					cat_itr.second = LOG_LV_INFO;
 				}
@@ -1306,7 +1306,7 @@ void l7vs::LoggerImpl::loadConf(){
 				std::ostringstream oss;
 				oss << "Not Exist Log Category Setting : " << name_itr->second;
 				if (LOG_LV_WARN >= this->getLogLevel(log_category)) {
-					this->putLogWarn(log_category,3, oss.str(), __FILE__, __LINE__);
+					this->putLogWarn(log_category,2, oss.str(), __FILE__, __LINE__);
 				}
 				cat_itr.second = LOG_LV_INFO;
 				cat_logger->setLevel( log4cxx::Level::getInfo() );
@@ -1318,6 +1318,6 @@ void l7vs::LoggerImpl::loadConf(){
 	catch (const std::exception& e) {
 		std::ostringstream oss;
 		oss <<  "Logger Reload Config Failed : " << e.what();
-		errorConf(7, oss.str(), __FILE__, __LINE__);
+		errorConf( 2, oss.str(), __FILE__, __LINE__);
 	}
 }

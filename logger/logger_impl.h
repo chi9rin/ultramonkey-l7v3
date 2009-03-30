@@ -1,9 +1,9 @@
-/*
+/*!
  * @file  logger_impl.h
  * @brief logger module implementation class.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
- * Copyright (C) 2008  NTT COMWARE Corporation.
+ * Copyright (C) 2009  NTT COMWARE Corporation.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -220,7 +220,7 @@ public:
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
 			oss << "Logging Error (Fatal Log) : " << ex.what();
-			errorConf(1, oss.str(), __FILE__, __LINE__);
+			errorConf( 3, oss.str(), __FILE__, __LINE__);
 		}
 	}
 	/*!
@@ -278,7 +278,7 @@ public:
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
 			oss << "Logging Error (Error Log) : " << ex.what();
-			errorConf(2, oss.str(), __FILE__, __LINE__);
+			errorConf( 4, oss.str(), __FILE__, __LINE__);
 		}
 	}
 	/*!
@@ -332,7 +332,7 @@ public:
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
 			oss << "Logging Error (Warn Log) : " << ex.what();
-			errorConf(3, oss.str(), __FILE__, __LINE__);
+			errorConf( 5, oss.str(), __FILE__, __LINE__);
 		}
 	}
 	/*!
@@ -386,7 +386,7 @@ public:
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
 			oss << "Logging Error (Info Log) : " << ex.what();
-			errorConf(4, oss.str(), __FILE__, __LINE__);
+			errorConf( 6, oss.str(), __FILE__, __LINE__);
 		}
 	}
 	/*!
@@ -439,7 +439,7 @@ public:
 		catch (const std::exception& ex) {
 			std::ostringstream oss;
 			oss << "Logging Error (Debug Log) : " << ex.what();
-			errorConf(5, oss.str(), __FILE__, __LINE__);
+			errorConf( 7, oss.str(), __FILE__, __LINE__);
 		}
 	}
 

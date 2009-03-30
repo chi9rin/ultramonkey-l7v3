@@ -3,7 +3,7 @@
  * @brief logger module c wrapper.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
- * Copyright (C) 2008  NTT COMWARE Corporation.
+ * Copyright (C) 2009  NTT COMWARE Corporation.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
