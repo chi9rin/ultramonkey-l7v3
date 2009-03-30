@@ -1,13 +1,26 @@
-//
-//!	@file	paramter_impl.cpp
-//!	@brief	paramater impliment file.
-//	coipyright (C) NTTComware corporation. 2008 - 2009
-//	mail: n.nakai at sdy.co.jp
-//
-//	Distributed under the Boost Software License, Version 1.0. (See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-
+/*!
+ * @file  paramter_impl.cpp
+ * @brief paramater impliment file.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #include <vector>
 #include <fstream>
 #include "parameter_impl.h"
@@ -81,7 +94,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 	int_map_type	int_map;
 
 	if( !ifs ){
-		Logger::putLogFatal( logcat, 0, "CONFIG FILE NOT OPEN : " PARAMETER_FILE , __FILE__, __LINE__ );
+		Logger::putLogFatal( logcat, 2, "CONFIG FILE NOT OPEN : " PARAMETER_FILE , __FILE__, __LINE__ );
 		return false;	// don't open config files.
 	}
 
@@ -101,7 +114,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 			else{
 				boost::format	formatter( "section tag false : %1%" );
 				formatter % split_vec[0];
-				Logger::putLogFatal( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+				Logger::putLogFatal( logcat, 3, formatter.str(), __FILE__, __LINE__ );
 				return false;
 			}
 		}
@@ -109,7 +122,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 			if( section_string.size() == 0 ){
 				boost::format	formatter("don't match first section. key = %1%, value = %2%" );
 				formatter % split_vec[0] % split_vec[1];
-				Logger::putLogFatal( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+				Logger::putLogFatal( logcat, 4, formatter.str(), __FILE__, __LINE__ );
 				return false;
 			}
 			boost::algorithm::trim( split_vec[0] ); //trim keys
@@ -124,7 +137,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 				if( !ret.second ){	//insert error
 					boost::format	formatter( "section.key is duplicate. section.key = %1%, value = %2%" );
 					formatter % key % strvalue;
-					Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+					Logger::putLogError( logcat, 1, formatter.str(), __FILE__, __LINE__ );
 				}
 			}
 			else{	// int value
@@ -135,20 +148,20 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 					if( !ret.second ){
 						boost::format	formatter( "section.key is duplicate. section.key = %1%, value = %2%" );
 						formatter % key % intvalue;
-						Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+						Logger::putLogError( logcat, 2, formatter.str(), __FILE__, __LINE__ );
 					}
 				}
 				catch( boost::bad_lexical_cast& cast ){
 					boost::format	formatter( "value is not numeric : %1%" );
 					formatter % split_vec[1];
-					Logger::putLogFatal( logcat, 0, formatter.str() , __FILE__, __LINE__ );
+					Logger::putLogFatal( logcat, 5, formatter.str() , __FILE__, __LINE__ );
 				}
 			}
 		}
 		else{
 			boost::format	formatter( "line is not support line = %1%" );
 			formatter % line;
-			Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+			Logger::putLogError( logcat, 3, formatter.str(), __FILE__, __LINE__ );
 		}
 	}
 
@@ -164,7 +177,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 		}
 	}
 	else if( comp == PARAM_COMP_NOCAT ){	// comp error!
-		Logger::putLogError( logcat, 0, "parameter_component_none is not suport", __FILE__, __LINE__ );
+		Logger::putLogError( logcat, 4, "parameter_component_none is not suport", __FILE__, __LINE__ );
 	}
 	else{
 		std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator section_itr = tag_section_table_map.find( comp );
@@ -187,7 +200,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 				if( !ret.second ){
 					boost::format	formatter( "not insert key = %1%, value = %2% " );
 					formatter % p.first % p.second;
-					Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+					Logger::putLogError( logcat, 5, formatter.str(), __FILE__, __LINE__ );
 				}
 			}
 		}
@@ -210,7 +223,7 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 				if( !ret.second ){
 					boost::format	formatter( "not insert key = %1%, value = %2% " );
 					formatter % p.first % p.second;
-					Logger::putLogError( logcat, 0, formatter.str(), __FILE__, __LINE__ );
+					Logger::putLogError( logcat, 6, formatter.str(), __FILE__, __LINE__ );
 				}
 			}
 		}
