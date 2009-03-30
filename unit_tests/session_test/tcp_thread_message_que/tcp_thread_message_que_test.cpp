@@ -192,14 +192,10 @@ class que_push_test : public l7vs::tcp_thread_message_que{
 			
 		};
 		void mutex_lock(){
-			que_mutex.lock();
+			que_mutex.wrlock();
 		};
 		void mutex_unlock(){
 			que_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return que_mutex.try_lock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -250,11 +246,6 @@ void push_lock_test(){
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
 	
 	
-	// ## push lock test [3] thread run after mutex unlock test
-	std::cout << "push lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
 	BOOST_MESSAGE( "----- push lock test end -----" );
 }
 
@@ -275,14 +266,10 @@ class que_front_test : public l7vs::tcp_thread_message_que{
 			return res;
 		};
 		void mutex_lock(){
-			que_mutex.lock();
+			que_mutex.wrlock();
 		};
 		void mutex_unlock(){
 			que_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return que_mutex.try_lock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -330,94 +317,9 @@ void front_lock_test(){
 	BOOST_CHECK(test_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
 	
-	
-	// ## front lock test [3] thread run after mutex unlock test
-	std::cout << "front lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
 	BOOST_MESSAGE( "----- front lock test end -----" );
 }
 
-// empty_lock_test
-class que_empty_test : public l7vs::tcp_thread_message_que{
-	public:
-		boost::thread::id befor_thread_id;
-		boost::thread::id after_thread_id;
-		que_empty_test(){
-		};
-		~que_empty_test(){
-		};
-		bool empty(){
-			befor_thread_id = boost::this_thread::get_id();
-			bool bres = l7vs::tcp_thread_message_que::empty();
-			after_thread_id = boost::this_thread::get_id();
-			return bres;
-		};
-		void mutex_lock(){
-			que_mutex.lock();
-		};
-		void mutex_unlock(){
-			que_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return que_mutex.try_lock();
-		};
-		
-		boost::mutex test_thread_wait;
-		
-		void test_run(){
-			boost::mutex::scoped_lock scope_lock(test_thread_wait);
-			empty();
-		};
-	
-};
-void empty_lock_test(){
-	BOOST_MESSAGE( "----- empty lock test start -----" );
-	
-	que_empty_test test_obj;
-	
-	test_obj.test_thread_wait.lock();
-	boost::thread::id proc_id = boost::this_thread::get_id();
-	test_obj.befor_thread_id = proc_id;
-	test_obj.after_thread_id = proc_id;
-	test_obj.mutex_lock();
-	
-	boost::thread test_thread(boost::bind(&que_empty_test::test_run,&test_obj));
-	
-	BOOST_CHECK(test_obj.befor_thread_id == proc_id);
-	BOOST_CHECK(test_obj.after_thread_id == proc_id);
-	
-	boost::thread::id test_id = test_thread.get_id();
-	
-	BOOST_CHECK(test_id != proc_id);
-	
-	// test start
-	test_obj.test_thread_wait.unlock();
-	sleep(1);
-	
-	// ## empty lock test [1] thread block test (mutex lock)
-	std::cout << "empty lock test [1] thread block test (mutex lock)" << std::endl;
-	BOOST_CHECK(test_obj.befor_thread_id == test_id);
-	BOOST_CHECK(test_obj.after_thread_id == proc_id);
-	
-	test_obj.mutex_unlock();
-	sleep(1);
-	
-	// ## empty lock test [2] thread run test (mutex unlock)
-	std::cout << "empty lock test [2] thread run test (mutex unlock)" << std::endl;
-	BOOST_CHECK(test_obj.befor_thread_id == test_id);
-	BOOST_CHECK(test_obj.after_thread_id == test_id);
-	
-	
-	// ## empty lock test [3] thread run after mutex unlock test
-	std::cout << "empty lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
-	BOOST_MESSAGE( "----- empty lock test end -----" );
-}
 // clear_lock_test
 class que_clear_test : public l7vs::tcp_thread_message_que{
 	public:
@@ -433,14 +335,10 @@ class que_clear_test : public l7vs::tcp_thread_message_que{
 			after_thread_id = boost::this_thread::get_id();
 		};
 		void mutex_lock(){
-			que_mutex.lock();
+			que_mutex.wrlock();
 		};
 		void mutex_unlock(){
 			que_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return que_mutex.try_lock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -489,11 +387,6 @@ void clear_lock_test(){
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
 	
 	
-	// ## clear lock test [3] thread run after mutex unlock test
-	std::cout << "clear lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
 	BOOST_MESSAGE( "----- clear lock test end -----" );
 }
 
@@ -510,7 +403,6 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	
 	ts->add( BOOST_TEST_CASE( &push_lock_test ) );
 	ts->add( BOOST_TEST_CASE( &front_lock_test ) );
-	ts->add( BOOST_TEST_CASE( &empty_lock_test ) );
 	ts->add( BOOST_TEST_CASE( &clear_lock_test ) );
 
 	framework::master_test_suite().add( ts );

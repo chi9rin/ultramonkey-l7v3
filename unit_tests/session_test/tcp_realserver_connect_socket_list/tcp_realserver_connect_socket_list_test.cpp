@@ -177,14 +177,10 @@ class push_back_lock_test_class : public l7vs::tcp_realserver_connect_socket_lis
 			after_thread_id = boost::this_thread::get_id();
 		};
 		void mutex_lock(){
-			list_mutex.lock();
+			list_mutex.wrlock();
 		};
 		void mutex_unlock(){
 			list_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return list_mutex.try_lock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -235,11 +231,6 @@ void push_back_lock_test(){
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
 	
 	
-	// ## push back lock test [3] thread run after mutex unlock test
-	std::cout << "push back lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
 	BOOST_MESSAGE( "----- push back lock test end -----" );
 }
 
@@ -258,14 +249,10 @@ class get_socket_lock_test_class : public l7vs::tcp_realserver_connect_socket_li
 			after_thread_id = boost::this_thread::get_id();
 		};
 		void mutex_lock(){
-			list_mutex.lock();
+			list_mutex.wrlock();
 		};
 		void mutex_unlock(){
 			list_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return list_mutex.try_lock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -314,92 +301,8 @@ void get_socket_lock_test(){
 	BOOST_CHECK(test_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
 	
-	// ## get socket lock test [3] thread run after mutex unlock test
-	std::cout << "get socket lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
 	BOOST_MESSAGE( "----- get socket lock test end -----" );
 }
-// empty_lock_test
-class empty_lock_test_class : public l7vs::tcp_realserver_connect_socket_list{
-	public:
-		boost::thread::id befor_thread_id;
-		boost::thread::id after_thread_id;
-		empty_lock_test_class(){
-		};
-		~empty_lock_test_class(){
-		};
-		void empty(){
-			befor_thread_id = boost::this_thread::get_id();
-			l7vs::tcp_realserver_connect_socket_list::empty();
-			after_thread_id = boost::this_thread::get_id();
-		};
-		void mutex_lock(){
-			list_mutex.lock();
-		};
-		void mutex_unlock(){
-			list_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return list_mutex.try_lock();
-		};
-		
-		boost::mutex test_thread_wait;
-		
-		void test_run(){
-			boost::mutex::scoped_lock scope_lock(test_thread_wait);
-			empty();
-		};
-	
-};
-void empty_lock_test(){
-
-	BOOST_MESSAGE( "----- empty lock test start -----" );
-		
-	empty_lock_test_class test_obj;
-	
-	test_obj.test_thread_wait.lock();
-	boost::thread::id proc_id = boost::this_thread::get_id();
-	test_obj.befor_thread_id = proc_id;
-	test_obj.after_thread_id = proc_id;
-	test_obj.mutex_lock();
-	
-	boost::thread test_thread(boost::bind(&empty_lock_test_class::test_run,&test_obj));
-	
-	BOOST_CHECK(test_obj.befor_thread_id == proc_id);
-	BOOST_CHECK(test_obj.after_thread_id == proc_id);
-	
-	boost::thread::id test_id = test_thread.get_id();
-	
-	BOOST_CHECK(test_id != proc_id);
-	
-	// test start
-	test_obj.test_thread_wait.unlock();
-	sleep(1);
-	
-	// ## empty lock test [1] thread block test (mutex lock)
-	std::cout << "empty lock test [1] thread block test (mutex lock)" << std::endl;
-	BOOST_CHECK(test_obj.befor_thread_id == test_id);
-	BOOST_CHECK(test_obj.after_thread_id == proc_id);
-	
-	test_obj.mutex_unlock();
-	sleep(1);
-	
-	// ## empty lock test [2] thread run test (mutex unlock)
-	std::cout << "empty lock test [2] thread run test (mutex unlock)" << std::endl;
-	BOOST_CHECK(test_obj.befor_thread_id == test_id);
-	BOOST_CHECK(test_obj.after_thread_id == test_id);
-	
-	// ## empty lock test [3] thread run after mutex unlock test
-	std::cout << "empty lock test [3] thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
-	BOOST_MESSAGE( "----- empty lock test end -----" );
-}
-
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
@@ -411,7 +314,6 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &get_socket_test ) );
 	ts->add( BOOST_TEST_CASE( &get_socket_lock_test ) );
 	ts->add( BOOST_TEST_CASE( &empty_test ) );
-	ts->add( BOOST_TEST_CASE( &empty_lock_test ) );
 	
 	framework::master_test_suite().add( ts );
 
