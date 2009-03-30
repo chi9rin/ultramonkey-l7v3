@@ -1,6 +1,6 @@
 /*!
  *	@file	udp_request.h
- *	@brief	
+ *	@brief	udp request class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.

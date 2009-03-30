@@ -1,6 +1,6 @@
 /*!
  *	@file	udp_session.h
- *	@brief	
+ *	@brief	udp session class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
