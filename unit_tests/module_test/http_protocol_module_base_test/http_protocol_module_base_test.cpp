@@ -1500,6 +1500,354 @@ void	find_http_header_test_thread( int thread_no, bool* ret ){
 
 }
 
+void	check_http_method_and_version_test(){
+
+	int		count	= 1;
+
+	char	buffer_ok[30][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"HEAD /abc/def/ HTTP/1.0",
+						"POST /abc/def/ HTTP/1.0",
+						"PUT /abc/def/ HTTP/1.0",
+						"PROPFIND /abc/def/ HTTP/1.0",
+						"PROPPATCH /abc/def/ HTTP/1.0",
+						"OPTIONS /abc/def/ HTTP/1.0",
+						"CONNECT /abc/def/ HTTP/1.0",
+						"COPY /abc/def/ HTTP/1.0",
+						"TRACE /abc/def/ HTTP/1.0",
+						"DELETE /abc/def/ HTTP/1.0",
+						"LOCK /abc/def/ HTTP/1.0",
+						"UNLOCK /abc/def/ HTTP/1.0",
+						"MOVE /abc/def/ HTTP/1.0",
+						"MKCOL /abc/def/ HTTP/1.0",
+						"GET /abc/def/ HTTP/1.1",
+						"HEAD /abc/def/ HTTP/1.1",
+						"POST /abc/def/ HTTP/1.1",
+						"PUT /abc/def/ HTTP/1.1",
+						"PROPFIND /abc/def/ HTTP/1.1",
+						"PROPPATCH /abc/def/ HTTP/1.1",
+						"OPTIONS /abc/def/ HTTP/1.1",
+						"CONNECT /abc/def/ HTTP/1.1",
+						"COPY /abc/def/ HTTP/1.1",
+						"TRACE /abc/def/ HTTP/1.1",
+						"DELETE /abc/def/ HTTP/1.1",
+						"LOCK /abc/def/ HTTP/1.1",
+						"UNLOCK /abc/def/ HTTP/1.1",
+						"MOVE /abc/def/ HTTP/1.1",
+						"MKCOL /abc/def/ HTTP/1.1",
+					};
+	char	buffer_ng[16][256]
+				=	{
+						"get /abc/def/ HTTP/1.0",
+						"Get /abc/def/ HTTP/1.0",
+						"GET/abc/def/ HTTP/1.0",
+						"GGET /abc/def/ HTTP/1.0",
+						" GET /abc/def/ HTTP/1.0",
+						"get GET /abc/def/ HTTP/1.0",
+						"get /abc/GET /abc/def/ HTTP/1.0",
+						"GET /abc/def/ HTTP/1.0 GET /abc/def/ HTTP/1.0",
+						"GET /abc/def/ HTTP/0.0",
+						"GET /abc/def/ HTTP/0.9",
+						"GET /abc/def/ HTTP/1.2",
+						"GET /abc/def/ HTTP/2.0",
+						"GET /abc/def/ghiHTTP/1.0",
+						"GET/abc/def/ghi HTTP/1.1",
+						"/abc/def/ghi HTTP/1.0",
+						"GET /abc/def/ http/1.0",
+					};
+	char	buffer_inpossible[5][256]
+				=	{
+						"GET / HTTP/1.0",
+						"GET / HTTP/1.1",
+						"Get / HTTP/1.0",
+						"GET / HTTP/1.2",
+						"",
+					};
+	size_t	buffer_len	= 0;
+
+	for( int i = 0; i < 30; i++, count++ ){
+		std::cout.width(2);
+		std::cout.fill('0');
+		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( check_http_method_and_version(
+			(const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+	}
+
+	for( int i = 0; i < 16; i++, count++ ){
+		std::cout.width(2);
+		std::cout.fill('0');
+		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( check_http_method_and_version(
+			(const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+	}
+
+	for( int i = 0; i < 5; i++, count++ ){
+		std::cout.width(2);
+		std::cout.fill('0');
+		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		buffer_len = strlen( buffer_inpossible[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( check_http_method_and_version(
+			(const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+	}
+
+	std::cout.width(2);
+	std::cout.fill('0');
+	std::cout << count << "---------------------------------------" << std::endl;
+	buffer_len = 0;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( check_http_method_and_version( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	std::cout.width(2);
+	std::cout.fill('0');
+	std::cout << count << "---------------------------------------" << std::endl;
+	buffer_len = 100;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( check_http_method_and_version( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+}
+
+void	check_http_version_and_status_code_test(){
+
+	int		count	= 1;
+
+	char	buffer_ok[4][256]
+				=	{
+						"HTTP/1.0 100 abcdff",
+						"HTTP/1.1 100 abcdff",
+						"HTTP/1.0 399 abcdff",
+						"HTTP/1.1 399 abcdff",
+					};
+	char	buffer_ng[10][256]
+				=	{
+						"HTTP/0.0 100 abcdff",
+						"HTTP/0.9 100 abcdff",
+						"HTTP/1.2 100 abcdff",
+						"HTTP/2.0 100 abcdff",
+						"HTTP/1.0 100abcdff",
+						"HTTP/1.1100 abcdff",
+						"HTTP/1.1100abcdff",
+						"http/1.0 100 abcdff",
+						"HTTP/1.0 099 abcdff",
+						"HTTP/1.0 400 abcdff",
+					};
+	char	buffer_inpossible[2][256]
+				=	{
+						"HTTP/1.0 100 abcdff",
+						"",
+					};
+	size_t	buffer_len	= 0;
+
+	for( int i = 0; i < 4; i++, count++ ){
+		std::cout.width(2);
+		std::cout.fill('0');
+		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "String = [" << buffer_ok[i] << "] + [CR]" << std::endl;
+		buffer_ok[i][strlen( buffer_ok[i] )] = '\r';
+		buffer_len = strlen( buffer_ok[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( check_http_version_and_status_code(
+			(const char*)buffer_ok[i], buffer_len ) == CHECK_OK );
+	}
+
+	for( int i = 0; i < 10; i++, count++ ){
+		std::cout.width(2);
+		std::cout.fill('0');
+		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "String = [" << buffer_ng[i] << "] + [CR]" << std::endl;
+		buffer_ng[i][strlen( buffer_ng[i] )] = '\r';
+		buffer_len = strlen( buffer_ng[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( check_http_version_and_status_code(
+			(const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
+	}
+
+	for( int i = 0; i < 2; i++, count++ ){
+		std::cout.width(2);
+		std::cout.fill('0');
+		std::cout << count << "---------------------------------------" << std::endl;
+		std::cout << "String = [" << buffer_inpossible[i] << "]" << std::endl;
+		buffer_len = strlen( buffer_inpossible[i] );
+		std::cout << "Length = [" << buffer_len << "]" << std::endl;
+		BOOST_CHECK( check_http_version_and_status_code(
+			(const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
+	}
+
+	std::cout.width(2);
+	std::cout.fill('0');
+	std::cout << count << "---------------------------------------" << std::endl;
+	buffer_len = 0;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( check_http_version_and_status_code( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+	std::cout.width(2);
+	std::cout.fill('0');
+	std::cout << count << "---------------------------------------" << std::endl;
+	buffer_len = 100;
+	std::cout << "String = [NULL]" << std::endl;
+	std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	BOOST_CHECK( check_http_version_and_status_code( NULL, buffer_len ) == CHECK_NG );
+	count++;
+
+}
+
+void	find_http_header_others_test(){
+
+	int		count	= 1;
+	int		i		= 0;
+	int		j		= 0;
+
+	char	disp_http_header[4096];
+
+	char	buffer_all_1[3][4096];
+	char	buffer_all_2[3][4096];
+
+	char	buffer_line_1[8][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"Cookie: 10.10.10.10:11111",
+						"X-Forwarded-For: 20.20.20.20",
+						"CONTENT-LENGTH: 1000",
+						"",
+						"GET /abc/def/ HTTP/1.0",
+						"Cookie2: 30.30.30.30:33333",
+						"X-Forwarded-For2: 40.40.40.40",
+					};
+
+
+	char	buffer_line_2[8][256]
+				=	{
+						"GET /abc/def/ HTTP/1.0",
+						"",
+						"Cookie: 10.10.10.10:11111",
+						"X-Forwarded-For: 20.20.20.20",
+						"CONTENT-LENGTH: 1000",
+						"GET /abc/def/ HTTP/1.0",
+						"Cookie2: 30.30.30.30:33333",
+						"X-Forwarded-For2: 40.40.40.40",
+					};
+
+	size_t	buffer_len			= 0;
+	size_t	http_header_offset	= 0;
+	size_t	http_header_len		= 0;
+
+	memset( buffer_all_1, '\0', sizeof(buffer_all_1));
+	memset( buffer_all_2, '\0', sizeof(buffer_all_2));
+	for( i = 0; i < 8; i++ ){
+		for( j = 0; j < 3; j++ ){
+			memcpy( buffer_all_1[j] + strlen( buffer_all_1[j] ), buffer_line_1[i], strlen( buffer_line_1[i] ));
+			if( j == 0 || j == 2 ){
+				buffer_all_1[j][strlen( buffer_all_1[j] )] = '\r';
+			}
+			if( j == 1 || j == 2 ){
+				buffer_all_1[j][strlen( buffer_all_1[j] )] = '\n';
+			}
+			
+		}
+	}
+
+	for( i = 0; i < 8; i++ ){
+		for( j = 0; j < 3; j++ ){
+			memcpy( buffer_all_2[j] + strlen( buffer_all_2[j] ), buffer_line_2[i], strlen( buffer_line_1[i] ));
+			if( j == 0 || j == 2 ){
+				buffer_all_2[j][strlen( buffer_all_2[j] )] = '\r';
+			}
+			if( j == 1 || j == 2 ){
+				buffer_all_2[j][strlen( buffer_all_2[j] )] = '\n';
+			}
+			
+		}
+	}
+
+	for( i = 0; i < 3; i++ ){
+		buffer_len = strlen( buffer_all_1[i] );
+		for( j = 0; j < 4; j++ ){
+			std::cout.width(2);
+			std::cout.fill('0');
+			std::cout << count << "---------------------------------------" << std::endl;
+			count++;
+			http_header_offset	= 0;
+			http_header_len		= 0;
+			std::cout << "Length = [" << buffer_len << "]" << std::endl;
+	
+			if( j == 0 ){
+				std::cout << "MethodName = [find_http_header_cookie]" << std::endl;
+				BOOST_CHECK( find_http_header_cookie( (const char*)buffer_all_1[i], buffer_len, http_header_offset, http_header_len ) == true );
+			}
+			else if( j == 1 ){
+				std::cout << "MethodName = [find_http_header_content_length]" << std::endl;
+				BOOST_CHECK( find_http_header_content_length( (const char*)buffer_all_1[i], buffer_len, http_header_offset, http_header_len ) == true );
+			}
+			else if( j == 2 ){
+				std::cout << "MethodName = [find_http_header_x_forwarded_for]" << std::endl;
+				BOOST_CHECK( find_http_header_x_forwarded_for( (const char*)buffer_all_1[i], buffer_len, http_header_offset, http_header_len ) == true );
+			}
+			else{
+				std::cout << "MethodName = [find_http_header_all]" << std::endl;
+				BOOST_CHECK( find_http_header_all( (const char*)buffer_all_1[i], buffer_len, http_header_offset, http_header_len ) == true );
+			}
+	
+			memset( disp_http_header, '\0', sizeof(disp_http_header));
+			memcpy( disp_http_header, buffer_all_1[i] + http_header_offset, http_header_len );
+			std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
+			std::cout << "Http Header Length = [" << http_header_len << "]" << std::endl;
+			std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
+		}
+	}
+
+	for( i = 0; i < 3; i++ ){
+		buffer_len = strlen( buffer_all_2[i] );
+		for( j = 0; j < 4; j++ ){
+			std::cout.width(2);
+			std::cout.fill('0');
+			std::cout << count << "---------------------------------------" << std::endl;
+			count++;
+			http_header_offset	= 0;
+			http_header_len		= 0;
+			std::cout << "Length = [" << buffer_len << "]" << std::endl;
+
+			if( j == 0 ){
+				std::cout << "MethodName = [find_http_header_cookie]" << std::endl;
+				BOOST_CHECK( find_http_header_cookie( (const char*)buffer_all_2[i], buffer_len, http_header_offset, http_header_len ) == false );
+			}
+			else if( j == 1 ){
+				std::cout << "MethodName = [find_http_header_content_length]" << std::endl;
+				BOOST_CHECK( find_http_header_content_length( (const char*)buffer_all_2[i], buffer_len, http_header_offset, http_header_len ) == false );
+			}
+			else if( j == 2 ){
+				std::cout << "MethodName = [find_http_header_x_forwarded_for]" << std::endl;
+				BOOST_CHECK( find_http_header_x_forwarded_for( (const char*)buffer_all_2[i], buffer_len, http_header_offset, http_header_len ) == false );
+			}
+			else{
+				std::cout << "MethodName = [find_http_header_all]" << std::endl;
+				BOOST_CHECK( find_http_header_all( (const char*)buffer_all_2[i], buffer_len, http_header_offset, http_header_len ) == true );
+			}
+
+			memset( disp_http_header, '\0', sizeof(disp_http_header));
+			memcpy( disp_http_header, buffer_all_2[i] + http_header_offset, http_header_len );
+			std::cout << "Http Header Offset = [" << http_header_offset << "]" << std::endl;
+			std::cout << "Http Header Length = [" << http_header_len << "]" << std::endl;
+			std::cout << "Http Header String = [" << disp_http_header << "]" << std::endl;
+		}
+	}
+}
+
 };
 
 //--test functions--
@@ -1814,6 +2162,36 @@ void	find_http_header_test(){
 
 	BOOST_MESSAGE( "----- find_http_header test multi thread end -----" );
 }
+
+void	check_http_method_and_version_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	BOOST_MESSAGE( "----- check_http_method_and_version test start -----" );
+	http_protocol_module_base_test_1.check_http_method_and_version_test();
+	BOOST_MESSAGE( "----- check_http_method_and_version test end -----" );
+
+}
+
+void	check_http_version_and_status_code_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	BOOST_MESSAGE( "----- check_http_version_and_status_code test start -----" );
+	http_protocol_module_base_test_1.check_http_version_and_status_code_test();
+	BOOST_MESSAGE( "----- check_http_version_and_status_code test end -----" );
+
+}
+
+void	find_http_header_others_test(){
+
+	http_protocol_module_base_test	http_protocol_module_base_test_1( "cinsert" );
+
+	BOOST_MESSAGE( "----- find_http_header others test start -----" );
+	http_protocol_module_base_test_1.find_http_header_others_test();
+	BOOST_MESSAGE( "----- find_http_header others test end -----" );
+
+}
 //-------------------------------------------------------------------
 // void	multi_thread_test_t1(){
 // 
@@ -1851,7 +2229,10 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &find_uri_test ) );
 	ts->add( BOOST_TEST_CASE( &find_status_code_test ) );
 	ts->add( BOOST_TEST_CASE( &find_http_header_test ) );
-	
+	ts->add( BOOST_TEST_CASE( &check_http_method_and_version_test ) );
+	ts->add( BOOST_TEST_CASE( &check_http_version_and_status_code_test ) );
+	ts->add( BOOST_TEST_CASE( &find_http_header_others_test ) );
+
 // 	ts->add( BOOST_TEST_CASE( &multi_thread_test ) );
 
 	framework::master_test_suite().add( ts );
