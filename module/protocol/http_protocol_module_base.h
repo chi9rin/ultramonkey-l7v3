@@ -1,6 +1,6 @@
 /*
  *	@file	http_protocol_module_base.h
- *	@brief	shared object protocol module abstract class
+ *	@brief	shared object http protocol module abstract class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.

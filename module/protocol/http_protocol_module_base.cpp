@@ -1,6 +1,6 @@
 /*
  *	@file	http_protocol_module_base.cpp
- *	@brief	shared object protocol module abstract class
+ *	@brief	shared object http protocol module abstract class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -91,6 +91,10 @@ cregex	http_header_regex_all
 cregex	http_header_regex_none
 		= _ln >> (s1 = _ln);
 
+//! check http method function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @return CHECK_RESULT_TAG	http method is valid
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 													const size_t buffer_len ) const {
@@ -172,7 +176,7 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 
 		outform % check_result;
 
-		putLogDebug(	0,
+		putLogDebug(	1,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -183,6 +187,10 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 
 }
 
+//! check http version function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @return	CHECK_RESULT_TAG 	http version 1.0 or 1.1
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 														const size_t buffer_len ) const {
@@ -195,7 +203,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	2,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -267,7 +275,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 		outform % check_result;
 
-		putLogDebug(	0,
+		putLogDebug(	3,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -278,7 +286,10 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 }
 
-
+//! check http status code function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @return	CHECK_RESULT_TAG	status code is nomal or error
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 													const size_t buffer_len ) const {
@@ -291,7 +302,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	4,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -362,7 +373,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 		outform % check_result;
 
-		putLogDebug(	0,
+		putLogDebug(	5,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -373,6 +384,10 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 }
 
+//! check http method and version function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @return CHECK_RESULT_TAG	http method and version is valid
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_method_and_version(
 													const char* buffer,
@@ -386,7 +401,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	6,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -455,7 +470,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 
 		outform % check_result;
 
-		putLogDebug(	0,
+		putLogDebug(	7,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -466,6 +481,10 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 
 }
 
+//! check http version and status code function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @return CHECK_RESULT_TAG	http version and status code is valid
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_version_and_status_code(
 													const char* buffer,
@@ -479,7 +498,7 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	8,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -548,7 +567,7 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 
 		outform % check_result;
 
-		putLogDebug(	0,
+		putLogDebug(	9,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -559,6 +578,12 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 
 }
 
+//! serch uri function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param size_t&				uri offset
+//! @param size_t&				uri length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 													const size_t buffer_len,
 													size_t& uri_offset,
@@ -572,7 +597,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	10,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -651,7 +676,7 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 		outform % find_result % uri_offset % uri_len;
 
-		putLogDebug(	0,
+		putLogDebug(	11,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -662,7 +687,12 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 }
 
-
+//! serch status function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param size_t&				status offset
+//! @param size_t&				status length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 															const size_t buffer_len,
 															size_t& status_code_offset,
@@ -676,7 +706,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	12,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -755,7 +785,7 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 		outform % find_result % status_code_offset % status_code_len;
 
-		putLogDebug(	0,
+		putLogDebug(	13,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -766,7 +796,13 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 }
 
-
+//! serch http header function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param const string&		header name
+//! @param size_t&				header offset
+//! @param size_t&				header length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 															const size_t buffer_len,
 															const std::string& http_header_name,
@@ -782,7 +818,7 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 		outform % buffer_len % http_header_name;
 
-		putLogDebug(	0,
+		putLogDebug(	14,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -927,7 +963,7 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 		outform % find_result % http_header_offset % http_header_len;
 
-		putLogDebug(	0,
+		putLogDebug(	15,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -938,6 +974,12 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 }
 
+//! serch http header Cookie function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param size_t&				header offset
+//! @param size_t&				header length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 															const char* buffer,
 															const size_t buffer_len,
@@ -952,7 +994,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	16,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1064,7 +1106,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 
 		outform % find_result % http_header_offset % http_header_len;
 
-		putLogDebug(	0,
+		putLogDebug(	17,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1075,6 +1117,12 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 
 }
 
+//! serch http header Content_Length function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param size_t&				header offset
+//! @param size_t&				header length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 															const char* buffer,
 															const size_t buffer_len,
@@ -1089,7 +1137,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	18,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1201,7 +1249,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 
 		outform % find_result % http_header_offset % http_header_len;
 
-		putLogDebug(	0,
+		putLogDebug(	19,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1212,6 +1260,12 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 
 }
 
+//! serch http header X_Forwarded_For function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param size_t&				header offset
+//! @param size_t&				header length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 															const char* buffer,
 															const size_t buffer_len,
@@ -1226,7 +1280,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	20,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1338,7 +1392,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 
 		outform % find_result % http_header_offset % http_header_len;
 
-		putLogDebug(	0,
+		putLogDebug(	21,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1349,6 +1403,12 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 
 }
 
+//! serch http header all function
+//! @param const char*			buffer
+//! @param const size_t			buffer_len
+//! @param size_t&				header offset
+//! @param size_t&				header length
+//! @return bool				find is true. not find is false
 bool	l7vs::http_protocol_module_base::find_http_header_all(
 															const char* buffer,
 															const size_t buffer_len,
@@ -1363,7 +1423,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 
 		outform % buffer_len;
 
-		putLogDebug(	0,
+		putLogDebug(	22,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1486,7 +1546,7 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 
 		outform % find_result % http_header_offset % http_header_len;
 
-		putLogDebug(	0,
+		putLogDebug(	23,
 						outform.str(),
 						__FILE__,
 						__LINE__ );

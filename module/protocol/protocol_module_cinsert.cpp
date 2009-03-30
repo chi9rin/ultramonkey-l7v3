@@ -1,6 +1,6 @@
 /*
  *	@file	protocol_module_cinsert.cpp
- *	@brief	shared object protocol module class
+ *	@brief	shared object protocol module cinsert class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -73,11 +73,11 @@ bool	protocol_module_cinsert::is_tcp()
 	//---------- DEBUG LOG START ------------------------------ 
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
-		putLogDebug(	0,
+		putLogDebug(	50000,
 						"function in  : [is_tcp]",
 						__FILE__,
 						__LINE__ );
-		putLogDebug(	0,
+		putLogDebug(	50001,
 						"function out : [is_tcp] : return = [true]",
 						__FILE__,
 						__LINE__ );
@@ -86,16 +86,19 @@ bool	protocol_module_cinsert::is_tcp()
 	return	true;
 }
 
+//! udp protocol support check
+//! @return udp support is true
+//! @return udp not-support is false
 bool	protocol_module_cinsert::is_udp()
 {
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
-		putLogDebug(	0,
+		putLogDebug(	50002,
 						"function in  : [is_udp]",
 						__FILE__,
 						__LINE__ );
-		putLogDebug(	0,
+		putLogDebug(	50003,
 						"function out : [is_udp] : return = [false]",
 						__FILE__,
 						__LINE__ );
@@ -104,12 +107,20 @@ bool	protocol_module_cinsert::is_udp()
 	return	false;
 }
 
+//! replication interval interrrupt
+//! timer thread call this function. from virtualservice.
 void	protocol_module_cinsert::replication_interrupt()
 {
 	// NOP
 	return;
 }
 
+//! initialize function. called from module control. module loaded call
+//! @param[in]	realserver list iterator begin function object type
+//!	@param[in]	realserver list iterator end function object type
+//! @param[in]	realserver list iterator next function object type
+//! @param[in]	realserver list mutex lock function object type.
+//! @param[in]	realserver list mutex unlock function object type
 void	protocol_module_cinsert::initialize(
 				rs_list_itr_func_type			inlist_begin,
 				rs_list_itr_func_type			inlist_end,
@@ -129,7 +140,7 @@ void	protocol_module_cinsert::initialize(
 
 		outform % &inlist_begin % &inlist_end % &inlist_next % &inlist_lock % &inlist_unlock;
 
-		putLogDebug(	0,
+		putLogDebug(	50004,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -154,7 +165,7 @@ void	protocol_module_cinsert::initialize(
 
 		outform % &rs_list_begin % &rs_list_end % &rs_list_next % &rs_list_lock % &rs_list_unlock;
 
-		putLogDebug(	0,
+		putLogDebug(	50005,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -163,12 +174,13 @@ void	protocol_module_cinsert::initialize(
 
 }
 
+//! finalize called from module control. module unloaded call.
 void	protocol_module_cinsert::finalize()
 {
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
-		putLogDebug(	0,
+		putLogDebug(	50006,
 						"function in  : [finalize]",
 						__FILE__,
 						__LINE__ );
@@ -197,7 +209,7 @@ void	protocol_module_cinsert::finalize()
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
 	{
-		putLogDebug(	0,
+		putLogDebug(	50007,
 						"function out : [finalize]",
 						__FILE__,
 						__LINE__ );
@@ -213,13 +225,18 @@ void	protocol_module_cinsert::finalize()
 
 }
 
-//---------------------------------------------------------------------------------
+//! sorry support check
+//! @return true sorry mode is supported.
+//! @return false sorry mode is unsupported.
 bool	protocol_module_cinsert::is_use_sorry()
 {
 	return	true;
 }
 
-//---------------------------------------------------------------------------------
+//! module parameter check.used by l7vsadm
+//! @param[in]	module paramter string list
+//! @return	result.flag true is parameter is noproblem.
+//! @return result.flag false is paramter is problem.
 protocol_module_cinsert::check_message_result
 protocol_module_cinsert::check_parameter( const std::vector< std::string >& args )
 {
@@ -246,7 +263,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 
 		outform % args.size() % str;
 
-		putLogDebug(	0,
+		putLogDebug(	50008,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -561,7 +578,7 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 
 		outform % check_result.flag % check_result.message;
 
-		putLogDebug(	0,
+		putLogDebug(	50009,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -571,7 +588,10 @@ protocol_module_cinsert::check_parameter( const std::vector< std::string >& args
 	return	check_result;
 }
 
-//---------------------------------------------------------------------------------
+//! parameter set
+//! @param[in] module paramter string list
+//! @return	result.flag true is parameter is noproblem.
+//! @return result.flag false is paramter is problem.
 protocol_module_cinsert::check_message_result
 protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 {
@@ -598,7 +618,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 
 		outform % args.size() % str;
 
-		putLogDebug(	0,
+		putLogDebug(	50010,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -960,7 +980,7 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 
 		outform % check_result.flag % check_result.message;
 
-		putLogDebug(	0,
+		putLogDebug(	50011,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -970,7 +990,10 @@ protocol_module_cinsert::set_parameter( const std::vector< std::string >& args )
 	return check_result;
 }
 
-//---------------------------------------------------------------------------------
+//! parameter add
+//! @param[in] module paramter string list
+//! @return	result.flag true is parameter is noproblem.
+//! @return result.flag false is paramter is problem.
 protocol_module_cinsert::check_message_result
 protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 {
@@ -997,7 +1020,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 
 		outform % args.size() % str;
 
-		putLogDebug(	0,
+		putLogDebug(	50012,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1035,7 +1058,7 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 
 		outform % check_result.flag % check_result.message;
 
-		putLogDebug(	0,
+		putLogDebug(	50013,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1045,14 +1068,15 @@ protocol_module_cinsert::add_parameter( const std::vector< std::string >& args )
 	return check_result;
 }
 
-//---------------------------------------------------------------------------------
+//! realserver list update event
 void	protocol_module_cinsert::handle_rslist_update()
 {
 	// NOP
 	return;
 }
 
-//---------------------------------------------------------------------------------
+//! TCP/IP scheduled function registation.
+//! @param[in] schedule module TCP/IP scheduled function object type
 void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedule )
 {
 
@@ -1064,7 +1088,7 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 
 		outform % &inschedule;
 
-		putLogDebug(	0,
+		putLogDebug(	50014,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1081,7 +1105,7 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 
 		outform % &schedule_tcp;
 
-		putLogDebug(	0,
+		putLogDebug(	50015,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1089,14 +1113,18 @@ void	protocol_module_cinsert::register_schedule( tcp_schedule_func_type inschedu
 	//---------- DEBUG LOG END ------------------------------
 }
 
-//---------------------------------------------------------------------------------
+//! UDP scheduled function registation
+//! @param[in] schedule module UDP scheduled funtion object type
 void	protocol_module_cinsert::register_schedule( udp_schedule_func_type inschedule )
 {
 	// NOP
 	return;
 }
 
-//---------------------------------------------------------------------------------
+//! called from session initialzie use in upstream_thread
+//! @param[in]	upstream thread id.
+//! @param[in]	downstream thread id
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_session_initialize(
 				const boost::thread::id up_thread_id,
@@ -1116,7 +1144,7 @@ protocol_module_cinsert::handle_session_initialize(
 
 		outform % up_thread_id % down_thread_id % client_endpoint_tcp % client_endpoint_udp;
 
-		putLogDebug(	0,
+		putLogDebug(	50016,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1157,7 +1185,6 @@ protocol_module_cinsert::handle_session_initialize(
 		down_thread_data->client_endpoint_tcp		= client_endpoint_tcp;
 
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rw_scoped_lock	lock( session_thread_data_map_mutex );
 			session_thread_data_map[ up_thread_id ]		= up_thread_data;
 			session_thread_data_map[ down_thread_id ]	= down_thread_data;
@@ -1175,7 +1202,7 @@ protocol_module_cinsert::handle_session_initialize(
 	
 			outform % up_thread_id % down_thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50017,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -1195,7 +1222,7 @@ protocol_module_cinsert::handle_session_initialize(
 
 		outform % up_thread_id % down_thread_id % ACCEPT;
 
-		putLogDebug(	0,
+		putLogDebug(	50018,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1206,7 +1233,10 @@ protocol_module_cinsert::handle_session_initialize(
 
 }
 
-//---------------------------------------------------------------------------------
+//! called from session finalize use in upstream thread.
+//! @param[in]	upstream thread id.
+//! @param[in]	downstream thread id
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_session_finalize(
 				const boost::thread::id up_thread_id,
@@ -1222,7 +1252,7 @@ protocol_module_cinsert::handle_session_finalize(
 
 		outform % up_thread_id % down_thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50019,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1234,7 +1264,6 @@ protocol_module_cinsert::handle_session_finalize(
 	try
 	{
 
-//		boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 		rw_scoped_lock	lock( session_thread_data_map_mutex );
 
 		thread_data_itr = session_thread_data_map.find( up_thread_id );
@@ -1264,7 +1293,7 @@ protocol_module_cinsert::handle_session_finalize(
 	
 			outform % up_thread_id % down_thread_id % STOP;
 	
-			putLogDebug(	0,
+			putLogDebug(	50020,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -1284,7 +1313,7 @@ protocol_module_cinsert::handle_session_finalize(
 
 		outform % up_thread_id % down_thread_id % STOP;
 
-		putLogDebug(	0,
+		putLogDebug(	50021,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1294,7 +1323,9 @@ protocol_module_cinsert::handle_session_finalize(
 	return	STOP;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after session accept.in client socket use in upstream thread.
+//! @param[in]	upstream thread id.
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 {
@@ -1307,7 +1338,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50022,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1322,7 +1353,6 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -1353,7 +1383,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50023,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -1372,7 +1402,7 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50024,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1383,7 +1413,11 @@ protocol_module_cinsert::handle_accept( const boost::thread::id thread_id )
 
 }
 
-//---------------------------------------------------------------------------------
+//! called from after session recv in client socket. use in upstream thread.
+//! @param[in]	upstream thread id
+//! @param[in]	recive buffer refarence.
+//! @param[in]	recive length
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_recv(
 				const boost::thread::id thread_id,
@@ -1400,7 +1434,7 @@ protocol_module_cinsert::handle_client_recv(
 
 		outform % thread_id % recvlen;
 
-		putLogDebug(	0,
+		putLogDebug(	50025,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -1437,7 +1471,6 @@ protocol_module_cinsert::handle_client_recv(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -1637,20 +1670,6 @@ protocol_module_cinsert::handle_client_recv(
 						else if( send_status_itr->status == SEND_NG )
 						{
 
-// 							check_result = check_http_method(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												unsend_data_size );
-// 
-// 							if( check_result == CHECK_OK )
-// 							{
-// 
-// 								check_result = check_http_version(
-// 													(const char*)recive_data_itr->second.recive_buffer
-// 														+ send_status_itr->send_offset,
-// 													unsend_data_size );
-// 							}
-
 							check_result = check_http_method_and_version(
 												(const char*)recive_data_itr->second.recive_buffer
 													+ send_status_itr->send_offset,
@@ -1658,14 +1677,6 @@ protocol_module_cinsert::handle_client_recv(
 
 							if( likely( check_result == CHECK_OK ))
 							{
-
-// 								find_result = find_http_header(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												unsend_data_size,
-// 												http_header_name_blank,
-// 												http_header_offset,
-// 												http_header_len );
 
 								find_result = find_http_header_all(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -1687,14 +1698,6 @@ protocol_module_cinsert::handle_client_recv(
 										send_status_itr->send_rest_size
 														= http_header_offset + http_header_len + 4;
 									}
-
-// 									find_result = find_http_header(
-// 													(const char*)recive_data_itr->second.recive_buffer
-// 														+ send_status_itr->send_offset,
-// 													send_status_itr->send_rest_size,
-// 													http_header_name_content_length,
-// 													http_header_offset,
-// 													http_header_len );
 
 									find_result = find_http_header_content_length(
 													(const char*)recive_data_itr->second.recive_buffer
@@ -1826,20 +1829,6 @@ protocol_module_cinsert::handle_client_recv(
 						send_status_add.edit_division		= 0;
 						send_status_add.send_offset			= next_request_offset;
 
-// 						check_result = check_http_method(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_add.send_offset,
-// 											rest_request_data_size );
-// 
-// 						if( check_result == CHECK_OK )
-// 						{
-// 
-// 							check_result = check_http_version(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_add.send_offset,
-// 												rest_request_data_size );
-// 						}
-
 						check_result = check_http_method_and_version(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_add.send_offset,
@@ -1847,14 +1836,6 @@ protocol_module_cinsert::handle_client_recv(
 
 						if( likely( check_result == CHECK_OK ))
 						{
-
-// 							find_result = find_http_header(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_add.send_offset,
-// 											rest_request_data_size,
-// 											http_header_name_blank,
-// 											http_header_offset,
-// 											http_header_len );
 
 							find_result = find_http_header_all(
 											(const char*)recive_data_itr->second.recive_buffer
@@ -1876,14 +1857,6 @@ protocol_module_cinsert::handle_client_recv(
 									send_status_add.send_rest_size
 													= http_header_offset + http_header_len + 4;
 								}
-
-// 								find_result = find_http_header(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_add.send_offset,
-// 												send_status_add.send_rest_size,
-// 												http_header_name_content_length,
-// 												http_header_offset,
-// 												http_header_len );
 
 								find_result = find_http_header_content_length(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -2038,7 +2011,7 @@ protocol_module_cinsert::handle_client_recv(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50026,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -2057,7 +2030,7 @@ protocol_module_cinsert::handle_client_recv(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50027,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2067,7 +2040,10 @@ protocol_module_cinsert::handle_client_recv(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver select.use in upstream thread.
+//! @param[in]	upstream thread id
+//! @param[out]	realserver TCP endpoint
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_select(
 				const boost::thread::id thread_id,
@@ -2082,14 +2058,12 @@ protocol_module_cinsert::handle_realserver_select(
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50028,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
 	}
 	//---------- DEBUG LOG END ------------------------------
-
-//	cregex	cookie_regex;
 
 	t_session_thread_data_cinsert	thread_data;
 
@@ -2099,7 +2073,6 @@ protocol_module_cinsert::handle_realserver_select(
 	size_t	http_header_offset	= 0;
 	size_t	http_header_len		= 0;
 	std::string		http_header_name_cookie = "Cookie";
-//	std::string		cookie_name_str = cookie_name.data();
 	std::string		cookie;
 	std::string		cookie_address;
 	std::string		cookie_port;
@@ -2117,7 +2090,6 @@ protocol_module_cinsert::handle_realserver_select(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -2172,14 +2144,6 @@ protocol_module_cinsert::handle_realserver_select(
 						else
 						{
 
-// 							find_result = find_http_header(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_itr->send_offset,
-// 											send_status_itr->send_possible_size,
-// 											http_header_name_cookie,
-// 											http_header_offset,
-// 											http_header_len );
-
 							find_result = find_http_header_cookie(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
@@ -2194,12 +2158,6 @@ protocol_module_cinsert::handle_realserver_select(
 													+ send_status_itr->send_offset
 													+ http_header_offset,
 													http_header_len );
-
-// 								cookie_regex
-// 										=	icase("Cookie") >> ":" >> *_ >>
-// 											cookie_name_str >> "=" >>
-// 											( s1 = +_d >> "." >> +_d >> "." >> +_d >> "." >> +_d ) >>
-// 											":" >> ( s2 = +_d );
 
 								find_result = regex_search(	cookie.c_str(),
 															regex_result,
@@ -2248,7 +2206,7 @@ protocol_module_cinsert::handle_realserver_select(
 
 									outform % cookie_address % cookie_port;
 
-									putLogError(	0,
+									putLogError(	57000,
 													outform.str(),
 													__FILE__,
 													__LINE__ );
@@ -2307,7 +2265,7 @@ protocol_module_cinsert::handle_realserver_select(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50029,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -2327,7 +2285,7 @@ protocol_module_cinsert::handle_realserver_select(
 
 		outform % thread_id % status % rs_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50030,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2338,7 +2296,12 @@ protocol_module_cinsert::handle_realserver_select(
 
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver select
+//! @param[in]	upstream thread id
+//! @param[out]	realserver UDP endpoint
+//! @param[out]	sendbudffer reference
+//! @param[out]	send data length
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_select(
 				const boost::thread::id thread_id,
@@ -2350,7 +2313,11 @@ protocol_module_cinsert::handle_realserver_select(
 	return	STOP;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver connect
+//! @param[in]	upstream thread id
+//! @param[out]	sendbuffer reference
+//! @param[out]	send data length
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_connect(
 				const boost::thread::id thread_id,
@@ -2366,7 +2333,7 @@ protocol_module_cinsert::handle_realserver_connect(
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50031,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2396,7 +2363,6 @@ protocol_module_cinsert::handle_realserver_connect(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -2447,14 +2413,6 @@ protocol_module_cinsert::handle_realserver_connect(
 						if( forwarded_for == 1 )
 						{
 
-// 							find_result
-// 								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-// 														+ send_status_itr->send_offset,
-// 													send_status_itr->send_possible_size,
-// 													http_header_name_x_forwarded_for,
-// 													http_header_offset,
-// 													http_header_len );
-
 							find_result = find_http_header_x_forwarded_for(
 													(const char*)recive_data_itr->second.recive_buffer
 														+ send_status_itr->send_offset,
@@ -2482,14 +2440,6 @@ protocol_module_cinsert::handle_realserver_connect(
 							}
 							else
 							{
-
-// 								find_result
-// 									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-// 															+ send_status_itr->send_offset,
-// 														send_status_itr->send_possible_size,
-// 														http_header_name_blank,
-// 														http_header_offset,
-// 														http_header_len );
 
 								find_result = find_http_header_all(
 													(const char*)recive_data_itr->second.recive_buffer
@@ -2732,7 +2682,7 @@ protocol_module_cinsert::handle_realserver_connect(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50032,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -2752,7 +2702,7 @@ protocol_module_cinsert::handle_realserver_connect(
 
 		outform % thread_id % status % datalen;
 
-		putLogDebug(	0,
+		putLogDebug(	50033,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2763,7 +2713,10 @@ protocol_module_cinsert::handle_realserver_connect(
 
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver connection fail
+//! @param[in]	upstream thread id
+//! @param[in]	fail realserver endpoint reference
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_connection_fail(
 				const boost::thread::id thread_id,
@@ -2779,7 +2732,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 
 		outform % thread_id % rs_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50034,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2794,7 +2747,6 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -2824,7 +2776,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50035,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -2843,7 +2795,7 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50036,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2853,7 +2805,9 @@ protocol_module_cinsert::handle_realserver_connection_fail(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver send.
+//! @param[in]	upstream thread id
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_id )
 {
@@ -2866,7 +2820,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50037,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -2885,7 +2839,6 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -2982,7 +2935,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50038,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -3001,7 +2954,7 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50039,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3011,7 +2964,10 @@ protocol_module_cinsert::handle_realserver_send( const boost::thread::id thread_
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after sorryserver select
+//! @param[in]	upstream thread id
+//! @param[in]	sorryserver endppiont reference
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_select(
 				const boost::thread::id thread_id,
@@ -3027,7 +2983,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 
 		outform % thread_id % sorry_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50040,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3047,7 +3003,6 @@ protocol_module_cinsert::handle_sorryserver_select(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -3113,7 +3068,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50041,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -3133,7 +3088,7 @@ protocol_module_cinsert::handle_sorryserver_select(
 
 		outform % thread_id % status % sorry_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50042,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3143,7 +3098,11 @@ protocol_module_cinsert::handle_sorryserver_select(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after sorryserver connect
+//!	@param[in]	upstream thread id
+//! @param[out]	send buffer reference.
+//! @param[out]	send length
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_connect(
 				const boost::thread::id thread_id,
@@ -3159,7 +3118,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50043,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3192,7 +3151,6 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -3261,13 +3219,6 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 						if( forwarded_for == 1 )
 						{
-// 							find_result
-// 								= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-// 														+ send_status_itr->send_offset,
-// 													send_status_itr->send_possible_size,
-// 													http_header_name_x_forwarded_for,
-// 													http_header_offset,
-// 													http_header_len );
 
 							find_result = find_http_header_x_forwarded_for(
 													(const char*)recive_data_itr->second.recive_buffer
@@ -3297,14 +3248,6 @@ protocol_module_cinsert::handle_sorryserver_connect(
 							else
 							{
 	
-// 								find_result
-// 									= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-// 															+ send_status_itr->send_offset,
-// 														send_status_itr->send_possible_size,
-// 														http_header_name_blank,
-// 														http_header_offset,
-// 														http_header_len );
-
 								find_result = find_http_header_all(
 													(const char*)recive_data_itr->second.recive_buffer
 														+ send_status_itr->send_offset,
@@ -3547,7 +3490,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50044,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -3567,7 +3510,7 @@ protocol_module_cinsert::handle_sorryserver_connect(
 
 		outform % thread_id % status % datalen;
 
-		putLogDebug(	0,
+		putLogDebug(	50045,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3577,7 +3520,10 @@ protocol_module_cinsert::handle_sorryserver_connect(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after sorryserver connection fail
+//! @param[in]	upstream thread id
+//! @param[in]	sorryserver endpoint reference.
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_connection_fail(
 				const boost::thread::id thread_id,
@@ -3593,7 +3539,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 
 		outform % thread_id % sorry_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50046,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3608,7 +3554,6 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -3638,7 +3583,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50047,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -3657,7 +3602,7 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50048,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3667,7 +3612,9 @@ protocol_module_cinsert::handle_sorryserver_connection_fail(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after sorryserver send
+//! @param[in]	upstream thread id
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread_id )
 {
@@ -3680,7 +3627,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50049,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3699,7 +3646,6 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -3796,7 +3742,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50050,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -3815,7 +3761,7 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50051,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3825,7 +3771,12 @@ protocol_module_cinsert::handle_sorryserver_send( const boost::thread::id thread
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver recvive for TCP/IP
+//! @param[in]	downstream thread id
+//! @param[in]	realserver TCP/IP endpoint reference
+//! @param[in]	realserver recive buffer reference.
+//! @param[in]	recv data length
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_recv(
 				const boost::thread::id thread_id,
@@ -3844,7 +3795,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 		outform % thread_id % rs_endpoint % recvlen;
 
-		putLogDebug(	0,
+		putLogDebug(	50052,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -3884,7 +3835,6 @@ protocol_module_cinsert::handle_realserver_recv(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -4098,20 +4048,6 @@ protocol_module_cinsert::handle_realserver_recv(
 					else if( send_status_itr->status == SEND_NG )
 					{
 
-// 						check_result = check_status_code(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_itr->send_offset,
-// 											unsend_data_size );
-// 
-// 						if( check_result == CHECK_OK )
-// 						{
-// 
-// 							check_result = check_http_version(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												unsend_data_size );
-// 						}
-
 						check_result = check_http_version_and_status_code(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
@@ -4119,14 +4055,6 @@ protocol_module_cinsert::handle_realserver_recv(
 
 						if( likely( check_result == CHECK_OK ))
 						{
-
-// 							find_result = find_http_header(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_itr->send_offset,
-// 											unsend_data_size,
-// 											http_header_name_blank,
-// 											http_header_offset,
-// 											http_header_len );
 
 							find_result = find_http_header_all(
 											(const char*)recive_data_itr->second.recive_buffer
@@ -4148,14 +4076,6 @@ protocol_module_cinsert::handle_realserver_recv(
 									send_status_itr->send_rest_size
 													= http_header_offset + http_header_len + 4;
 								}
-
-// 								find_result = find_http_header(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												send_status_itr->send_rest_size,
-// 												http_header_name_content_length,
-// 												http_header_offset,
-// 												http_header_len );
 
 								find_result = find_http_header_content_length(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -4289,20 +4209,6 @@ protocol_module_cinsert::handle_realserver_recv(
 					send_status_add.edit_division		= 0;
 					send_status_add.send_offset			= next_response_offset;
 
-// 					check_result = check_status_code(
-// 										(const char*)recive_data_itr->second.recive_buffer
-// 											+ send_status_add.send_offset,
-// 										rest_response_data_size );
-// 
-// 					if( check_result == CHECK_OK )
-// 					{
-// 
-// 						check_result = check_http_version(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_add.send_offset,
-// 											rest_response_data_size );
-// 					}
-
 					check_result = check_http_version_and_status_code(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
@@ -4310,14 +4216,6 @@ protocol_module_cinsert::handle_realserver_recv(
 
 					if( likely( check_result == CHECK_OK ))
 					{
-
-// 						find_result = find_http_header(
-// 										(const char*)recive_data_itr->second.recive_buffer
-// 											+ send_status_add.send_offset,
-// 										rest_response_data_size,
-// 										http_header_name_blank,
-// 										http_header_offset,
-// 										http_header_len );
 
 						find_result = find_http_header_all(
 										(const char*)recive_data_itr->second.recive_buffer
@@ -4339,14 +4237,6 @@ protocol_module_cinsert::handle_realserver_recv(
 								send_status_add.send_rest_size
 												= http_header_offset + http_header_len + 4;
 							}
-
-// 							find_result = find_http_header(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_add.send_offset,
-// 											send_status_add.send_rest_size,
-// 											http_header_name_content_length,
-// 											http_header_offset,
-// 											http_header_len );
 
 							find_result = find_http_header_content_length(
 											(const char*)recive_data_itr->second.recive_buffer
@@ -4490,7 +4380,7 @@ protocol_module_cinsert::handle_realserver_recv(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50053,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -4509,7 +4399,7 @@ protocol_module_cinsert::handle_realserver_recv(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50054,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -4519,7 +4409,12 @@ protocol_module_cinsert::handle_realserver_recv(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after realserver recive.for UDP
+//! @param[in]	downstream thread id
+//! @param[in]	realserver UDP endpoint reference
+//! @param[in]	recive from realserver buffer reference
+//! @param[in]	recv data length
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_recv(
 				const boost::thread::id thread_id,
@@ -4530,7 +4425,12 @@ protocol_module_cinsert::handle_realserver_recv(
 	return	STOP;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after sorryserver recive
+//! @param[in]	downstream thread id
+//! @param[in]	sorryserver endpoint reference
+//! @param[in]	recive from realserver buffer reference.
+//! @param[in]	recv data length
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_recv(
 				const boost::thread::id thread_id,
@@ -4549,7 +4449,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 		outform % thread_id % sorry_endpoint % recvlen;
 
-		putLogDebug(	0,
+		putLogDebug(	50055,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -4589,7 +4489,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -4798,19 +4697,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					else if( send_status_itr->status == SEND_NG )
 					{
 
-// 						check_result = check_status_code(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_itr->send_offset,
-// 											unsend_data_size );
-// 
-// 						if( check_result == CHECK_OK )
-// 						{
-// 							check_result = check_http_version(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												unsend_data_size );
-// 						}
-
 						check_result = check_http_version_and_status_code(
 											(const char*)recive_data_itr->second.recive_buffer
 												+ send_status_itr->send_offset,
@@ -4818,14 +4704,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 						if( likely( check_result == CHECK_OK ))
 						{
-
-// 							find_result = find_http_header(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_itr->send_offset,
-// 											unsend_data_size,
-// 											http_header_name_blank,
-// 											http_header_offset,
-// 											http_header_len );
 
 							find_result = find_http_header_all(
 											(const char*)recive_data_itr->second.recive_buffer
@@ -4847,14 +4725,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 									send_status_itr->send_rest_size
 														= http_header_offset + http_header_len + 4;
 								}
-
-// 								find_result = find_http_header(
-// 												(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												send_status_itr->send_rest_size,
-// 												http_header_name_content_length,
-// 												http_header_offset,
-// 												http_header_len );
 
 								find_result = find_http_header_content_length(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -4986,19 +4856,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 					send_status_add.edit_division		= 0;
 					send_status_add.send_offset			= next_response_offset;
 
-// 					check_result = check_status_code(
-// 										(const char*)recive_data_itr->second.recive_buffer
-// 											+ send_status_add.send_offset,
-// 										rest_response_data_size );
-// 
-// 					if( check_result == CHECK_OK )
-// 					{
-// 						check_result = check_http_version(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_add.send_offset,
-// 											rest_response_data_size );
-// 					}
-
 					check_result = check_http_version_and_status_code(
 										(const char*)recive_data_itr->second.recive_buffer
 											+ send_status_add.send_offset,
@@ -5006,14 +4863,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 					if( likely( check_result == CHECK_OK ))
 					{
-
-// 						find_result = find_http_header(
-// 										(const char*)recive_data_itr->second.recive_buffer
-// 											+ send_status_add.send_offset,
-// 										rest_response_data_size,
-// 										http_header_name_blank,
-// 										http_header_offset,
-// 										http_header_len );
 
 						find_result = find_http_header_all(
 										(const char*)recive_data_itr->second.recive_buffer
@@ -5035,14 +4884,6 @@ protocol_module_cinsert::handle_sorryserver_recv(
 								send_status_add.send_rest_size
 												= http_header_offset + http_header_len + 4;
 							}
-
-// 							find_result = find_http_header(
-// 											(const char*)recive_data_itr->second.recive_buffer
-// 												+ send_status_add.send_offset,
-// 											send_status_add.send_rest_size,
-// 											http_header_name_content_length,
-// 											http_header_offset,
-// 											http_header_len );
 
 							find_result = find_http_header_content_length(
 											(const char*)recive_data_itr->second.recive_buffer
@@ -5185,7 +5026,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50056,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -5204,7 +5045,7 @@ protocol_module_cinsert::handle_sorryserver_recv(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50057,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -5214,7 +5055,9 @@ protocol_module_cinsert::handle_sorryserver_recv(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! called from UPSTEEARM thread. make module original message.
+//! @param[in]	downstream thread id.
+//! @return 		session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_response_send_inform( const boost::thread::id thread_id )
 {
@@ -5222,7 +5065,11 @@ protocol_module_cinsert::handle_response_send_inform( const boost::thread::id th
 	return	STOP;
 }
 
-//---------------------------------------------------------------------------------
+//! called from after client connection check. use TCP/IP only. create client send message.
+//! @param[in]	downstream thread id
+//! @param[out]	send budffer reference
+//! @param[out]	send data length
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_connection_check(
 				const boost::thread::id thread_id,
@@ -5238,7 +5085,7 @@ protocol_module_cinsert::handle_client_connection_check(
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50058,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -5272,7 +5119,6 @@ protocol_module_cinsert::handle_client_connection_check(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -5348,14 +5194,6 @@ protocol_module_cinsert::handle_client_connection_check(
 	
 					if( send_status_itr->edit_data_list.empty() == true )
 					{
-
-// 						find_result
-// 							= find_http_header(	(const char*)recive_data_itr->second.recive_buffer
-// 													+ send_status_itr->send_offset,
-// 												send_status_itr->send_possible_size,
-// 												http_header_name_blank,
-// 												http_header_offset,
-// 												http_header_len );
 
 						find_result = find_http_header_all(
 												(const char*)recive_data_itr->second.recive_buffer
@@ -5612,7 +5450,7 @@ protocol_module_cinsert::handle_client_connection_check(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50059,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -5632,7 +5470,7 @@ protocol_module_cinsert::handle_client_connection_check(
 
 		outform % thread_id % status % datalen;
 
-		putLogDebug(	0,
+		putLogDebug(	50060,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -5643,7 +5481,12 @@ protocol_module_cinsert::handle_client_connection_check(
 
 }
 
-//---------------------------------------------------------------------------------
+//! called from after client select. use UDP only
+//! @param[in]	downstream thread id
+//!	@param[in]	client udp endpoint
+//! @param[out]	send buffer reference
+//! @param[out]	send data length
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_select(
 				const boost::thread::id thread_id,
@@ -5655,7 +5498,9 @@ protocol_module_cinsert::handle_client_select(
 	return	STOP;
 }
 
-//---------------------------------------------------------------------------------
+//!	called from after client send
+//!	@param[in]	downstream thread id
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 {
@@ -5668,7 +5513,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50061,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -5687,7 +5532,6 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -5828,7 +5672,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50062,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -5847,7 +5691,7 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50063,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -5858,7 +5702,9 @@ protocol_module_cinsert::handle_client_send( const boost::thread::id thread_id )
 
 }
 
-//---------------------------------------------------------------------------------
+//! call from client disconnect event. use upstream thread and downstream thread.
+//! @param[in]	upstream and downstream thread id( check! one thread one event! )
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_client_disconnect( const boost::thread::id thread_id )
 {
@@ -5871,7 +5717,7 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 
 		outform_1 % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50064,
 						outform_1.str(),
 						__FILE__,
 						__LINE__ );
@@ -5882,7 +5728,7 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 
 		outform_2 % thread_id % FINALIZE;
 
-		putLogDebug(	0,
+		putLogDebug(	50065,
 						outform_2.str(),
 						__FILE__,
 						__LINE__ );
@@ -5892,7 +5738,9 @@ protocol_module_cinsert::handle_client_disconnect( const boost::thread::id threa
 	return	FINALIZE;
 }
 
-//---------------------------------------------------------------------------------
+//! call from sorry mode event. use upstream thread and downstream thread
+//! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id )
 {
@@ -5905,7 +5753,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50066,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -5923,7 +5771,6 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -6109,7 +5956,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50067,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -6128,7 +5975,7 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50068,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6139,7 +5986,9 @@ protocol_module_cinsert::handle_sorry_enable( const boost::thread::id thread_id 
 
 }
 
-//---------------------------------------------------------------------------------
+//! call from sorry mode disable. use upstream thread and downstream thread.
+//! @param[in]	upstream and downstream thread id( check! one thread one event )
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id )
 {
@@ -6152,7 +6001,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 
 		outform % thread_id;
 
-		putLogDebug(	0,
+		putLogDebug(	50069,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6170,7 +6019,6 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -6356,7 +6204,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50070,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -6375,7 +6223,7 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50071,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6385,7 +6233,10 @@ protocol_module_cinsert::handle_sorry_disable( const boost::thread::id thread_id
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! call from realserver disconnect. use upstream thread and downstream thread
+//! @param[in]	upstream and downstream thread id( check! one thread one event )
+//! @param[in]	disconnected realserver endpoint.
+//! @return 	session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_disconnect(
 				const boost::thread::id thread_id,
@@ -6401,7 +6252,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 
 		outform % thread_id % rs_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50072,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6419,7 +6270,6 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -6550,7 +6400,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50073,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -6569,7 +6419,7 @@ protocol_module_cinsert::handle_realserver_disconnect(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50074,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6579,7 +6429,10 @@ protocol_module_cinsert::handle_realserver_disconnect(
 	return	status;
 }
 
-//---------------------------------------------------------------------------------
+//! call from sorry server disconnect. use upstraem thread and downstream thread
+//! @param[in]	upstream and downstream thread id( check! one thread one event )
+//! @param[in]	disconnect sorryserver endpoint
+//! @return		session use EVENT mode
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_sorryserver_disconnect(
 				const boost::thread::id thread_id,
@@ -6595,7 +6448,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 
 		outform % thread_id % sorry_endpoint;
 
-		putLogDebug(	0,
+		putLogDebug(	50075,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6613,7 +6466,6 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	try
 	{
 		{
-//			boost::mutex::scoped_lock	lock( session_thread_data_map_mutex );
 			rd_scoped_lock	lock( session_thread_data_map_mutex );
 
 			thread_data_itr = session_thread_data_map.find( thread_id );
@@ -6745,7 +6597,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 	
 			outform % thread_id % FINALIZE;
 	
-			putLogDebug(	0,
+			putLogDebug(	50076,
 							outform.str(),
 							__FILE__,
 							__LINE__ );
@@ -6764,7 +6616,7 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 
 		outform % thread_id % status;
 
-		putLogDebug(	0,
+		putLogDebug(	50077,
 						outform.str(),
 						__FILE__,
 						__LINE__ );
@@ -6775,7 +6627,10 @@ protocol_module_cinsert::handle_sorryserver_disconnect(
 
 }
 
-//---------------------------------------------------------------------------------
+//! call from realserver disconnect. use upstream thread and downstream thread.
+//! @param[in]	upstream and downstream thread id( check! one thread one event )
+//! @param[in]	disconnect realserver endpoint
+//! @return		session use EVENT mode.
 protocol_module_cinsert::EVENT_TAG
 protocol_module_cinsert::handle_realserver_close(
 				const boost::thread::id thread_id,
@@ -6786,7 +6641,7 @@ protocol_module_cinsert::handle_realserver_close(
 }
 
 }
-//---------------------------------------------------------------------------------
+
 extern "C" l7vs::protocol_module_base*
 create_module(){
 	return dynamic_cast<l7vs::protocol_module_base*>(new l7vs::protocol_module_cinsert());

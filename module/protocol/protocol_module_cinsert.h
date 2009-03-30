@@ -1,6 +1,6 @@
 /*
  *	@file	protocol_module_cinsert.h
- *	@brief	shared object protocol module class
+ *	@brief	shared object protocol module cinsert class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -314,19 +314,35 @@ protected:
 	boost::array< char, MAX_OPTION_SIZE >	cookie_name;
 	boost::array< char, MAX_OPTION_SIZE >	sorry_uri;
 	t_session_thread_data_map	session_thread_data_map;
-//	boost::mutex	session_thread_data_map_mutex;
 	wr_mutex	session_thread_data_map_mutex;
 
 public:
+	//! constractor
 	protocol_module_cinsert();
+
+	//! destractor
 	~protocol_module_cinsert();
 
+	//! tcp protocol support check
+	//! @return tcp support is true
+	//! @return tcp not-support is false
 	bool	is_tcp();
 
+	//! udp protocol support check
+	//! @return udp support is true
+	//! @return udp not-support is false
 	bool	is_udp();
 
+	//! replication interval interrrupt
+	//! timer thread call this function. from virtualservice.
 	void	replication_interrupt();
 
+	//! initialize function. called from module control. module loaded call
+	//! @param[in]	realserver list iterator begin function object type
+	//!	@param[in]	realserver list iterator end function object type
+	//! @param[in]	realserver list iterator next function object type
+	//! @param[in]	realserver list mutex lock function object type.
+	//! @param[in]	realserver list mutex unlock function object type
 	void	initialize(
 							rs_list_itr_func_type inlist_begin,
 							rs_list_itr_func_type inlist_end,
@@ -334,122 +350,253 @@ public:
 							boost::function< void( void ) > inlist_lock,
 							boost::function< void( void ) > inlist_unlock );
 
+	//! finalize called from module control. module unloaded call.
 	void	finalize();
 
+	//! sorry support check
+	//! @return true sorry mode is supported.
+	//! @return false sorry mode is unsupported.
 	bool	is_use_sorry();
 
+	//! module parameter check.used by l7vsadm
+	//! @param[in]	module paramter string list
+	//! @return	result.flag true is parameter is noproblem.
+	//! @return result.flag false is paramter is problem.
 	check_message_result	check_parameter( const std::vector< std::string >& args);
 
+	//! parameter set
+	//! @param[in] module paramter string list
+	//! @return	result.flag true is parameter is noproblem.
+	//! @return result.flag false is paramter is problem.
 	check_message_result	set_parameter( const std::vector< std::string >& args);
 
+	//! parameter add
+	//! @param[in] module paramter string list
+	//! @return	result.flag true is parameter is noproblem.
+	//! @return result.flag false is paramter is problem.
 	check_message_result	add_parameter( const std::vector< std::string >& args);
 
+	//! realserver list update event
 	void	handle_rslist_update();
 
+	//! TCP/IP scheduled function registation.
+	//! @param[in] schedule module TCP/IP scheduled function object type
 	void	register_schedule( tcp_schedule_func_type inschedule );
 
+	//! UDP scheduled function registation
+	//! @param[in] schedule module UDP scheduled funtion object type
 	void	register_schedule( udp_schedule_func_type inschedule );
 
+	//! called from session initialzie use in upstream_thread
+	//! @param[in]	upstream thread id.
+	//! @param[in]	downstream thread id
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_session_initialize(
 								const boost::thread::id up_thread_id,
 								const boost::thread::id down_thread_id,
 								const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
 								const boost::asio::ip::udp::endpoint& client_endpoint_udp );
 
+	//! called from session finalize use in upstream thread.
+	//! @param[in]	upstream thread id.
+	//! @param[in]	downstream thread id
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_session_finalize(
 								const boost::thread::id up_thread_id,
 								const boost::thread::id down_thread_id );
 
+	//! called from after session accept.in client socket use in upstream thread.
+	//! @param[in]	upstream thread id.
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_accept( const boost::thread::id thread_id );
 
+	//! called from after session recv in client socket. use in upstream thread.
+	//! @param[in]	upstream thread id
+	//! @param[in]	recive buffer refarence.
+	//! @param[in]	recive length
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_client_recv(
 								const boost::thread::id thread_id,
 								const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 								const size_t recvlen );
 
+	//! called from after realserver select.use in upstream thread.
+	//! @param[in]	upstream thread id
+	//! @param[out]	realserver TCP endpoint
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_select(
 								const boost::thread::id thread_id,
 								boost::asio::ip::tcp::endpoint& rs_endpoint );
 
+	//! called from after realserver select
+	//! @param[in]	upstream thread id
+	//! @param[out]	realserver UDP endpoint
+	//! @param[out]	sendbudffer reference
+	//! @param[out]	send data length
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_select(
 								const boost::thread::id thread_id,
 								boost::asio::ip::udp::endpoint& rs_endpoint,
 								boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 								size_t& datalen );
 
+	//! called from after realserver connect
+	//! @param[in]	upstream thread id
+	//! @param[out]	sendbuffer reference
+	//! @param[out]	send data length
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_connect(
 								const boost::thread::id thread_id,
 								boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 								size_t& datalen );
 
+	//! called from after realserver connection fail
+	//! @param[in]	upstream thread id
+	//! @param[in]	fail realserver endpoint reference
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_connection_fail(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::tcp::endpoint& rs_endpoint );
 
+	//! called from after realserver send.
+	//! @param[in]	upstream thread id
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_send( const boost::thread::id thread_id );
 
+	//! called from after sorryserver select
+	//! @param[in]	upstream thread id
+	//! @param[in]	sorryserver endppiont reference
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_sorryserver_select(
 								const boost::thread::id thread_id,
 								boost::asio::ip::tcp::endpoint& sorry_endpoint );
 
+	//! called from after sorryserver connect
+	//!	@param[in]	upstream thread id
+	//! @param[out]	send buffer reference.
+	//! @param[out]	send length
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_sorryserver_connect(
 								const boost::thread::id thread_id,
 								boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 								size_t& datalen );
 
+	//! called from after sorryserver connection fail
+	//! @param[in]	upstream thread id
+	//! @param[in]	sorryserver endpoint reference.
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_sorryserver_connection_fail(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::tcp::endpoint& sorry_endpoint );
 
+	//! called from after sorryserver send
+	//! @param[in]	upstream thread id
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_sorryserver_send( const boost::thread::id thread_id );
 
+	//! called from after realserver recvive for TCP/IP
+	//! @param[in]	downstream thread id
+	//! @param[in]	realserver TCP/IP endpoint reference
+	//! @param[in]	realserver recive buffer reference.
+	//! @param[in]	recv data length
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_recv(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::tcp::endpoint& rs_endpoint,
 								const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 								const size_t recvlen );
 
+	//! called from after realserver recive.for UDP
+	//! @param[in]	downstream thread id
+	//! @param[in]	realserver UDP endpoint reference
+	//! @param[in]	recive from realserver buffer reference
+	//! @param[in]	recv data length
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_recv(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::udp::endpoint& rs_endpoint,
 								const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 								const size_t recvlen );
 
+	//! called from after sorryserver recive
+	//! @param[in]	downstream thread id
+	//! @param[in]	sorryserver endpoint reference
+	//! @param[in]	recive from realserver buffer reference.
+	//! @param[in]	recv data length
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_sorryserver_recv(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::tcp::endpoint& sorry_endpoint,
 								const boost::array< char, MAX_BUFFER_SIZE >& recvbuffer,
 								const size_t recvlen );
 
+	//! called from UPSTEEARM thread. make module original message.
+	//! @param[in]	downstream thread id.
+	//! @return 		session use EVENT mode
 	EVENT_TAG	handle_response_send_inform( const boost::thread::id thread_id );
 
+	//! called from after client connection check. use TCP/IP only. create client send message.
+	//! @param[in]	downstream thread id
+	//! @param[out]	send budffer reference
+	//! @param[out]	send data length
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_client_connection_check(
 								const boost::thread::id thread_id,
 								boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 								size_t& datalen );
 
+	//! called from after client select. use UDP only
+	//! @param[in]	downstream thread id
+	//!	@param[in]	client udp endpoint
+	//! @param[out]	send buffer reference
+	//! @param[out]	send data length
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_client_select(
 								const boost::thread::id thread_id,
 								boost::asio::ip::udp::endpoint& cl_endpoint,
 								boost::array< char, MAX_BUFFER_SIZE >& sendbuffer,
 								size_t& datalen );
 
+	//!	called from after client send
+	//!	@param[in]	downstream thread id
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_client_send( const boost::thread::id thread_id );
 
+	//! call from client disconnect event. use upstream thread and downstream thread.
+	//! @param[in]	upstream and downstream thread id( check! one thread one event! )
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_client_disconnect( const boost::thread::id thread_id );
 
+	//! call from sorry mode event. use upstream thread and downstream thread
+	//! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_sorry_enable( const boost::thread::id thread_id );
 
+	//! call from sorry mode disable. use upstream thread and downstream thread.
+	//! @param[in]	upstream and downstream thread id( check! one thread one event )
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_sorry_disable( const boost::thread::id thread_id );
 
+	//! call from realserver disconnect. use upstream thread and downstream thread
+	//! @param[in]	upstream and downstream thread id( check! one thread one event )
+	//! @param[in]	disconnected realserver endpoint.
+	//! @return 	session use EVENT mode
 	EVENT_TAG	handle_realserver_disconnect(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::tcp::endpoint& rs_endpoint );
 
+	//! call from sorry server disconnect. use upstraem thread and downstream thread
+	//! @param[in]	upstream and downstream thread id( check! one thread one event )
+	//! @param[in]	disconnect sorryserver endpoint
+	//! @return		session use EVENT mode
 	EVENT_TAG	handle_sorryserver_disconnect(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::tcp::endpoint& sorry_endpoint );
 
+	//! call from realserver disconnect. use upstream thread and downstream thread.
+	//! @param[in]	upstream and downstream thread id( check! one thread one event )
+	//! @param[in]	disconnect realserver endpoint
+	//! @return		session use EVENT mode.
 	EVENT_TAG	handle_realserver_close(
 								const boost::thread::id thread_id,
 								const boost::asio::ip::udp::endpoint& rs_endpoint );
