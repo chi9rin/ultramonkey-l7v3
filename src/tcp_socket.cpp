@@ -21,19 +21,19 @@ namespace l7vs{
 	tcp_socket::tcp_socket(boost::asio::io_service& io):
 		my_socket(io),
 		open_flag(false){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
 
 	}
 
 	//! destructor
 	tcp_socket::~tcp_socket(){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::~tcp_socket", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 2, "tcp_socket::~tcp_socket", __FILE__, __LINE__ );
 	}
 
 	//! get reference control socket
 	//! @return			reference control socket
 	boost::asio::ip::tcp::socket& tcp_socket::get_socket(){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::get_socket", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 3, "tcp_socket::get_socket", __FILE__, __LINE__ );
 		return my_socket;
 	}
 
@@ -44,7 +44,7 @@ namespace l7vs{
 	//! @return 		false is connect failure 
 	bool tcp_socket::connect(boost::asio::ip::tcp::endpoint connect_endpoint,
 		boost::system::error_code& ec){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::connect", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 4, "tcp_socket::connect", __FILE__, __LINE__ );
 		
         rw_scoped_lock scope_lock(close_mutex);
 		
@@ -60,7 +60,7 @@ namespace l7vs{
 					buf << "] tcp_socket::connect [";
 					buf << connect_endpoint;
 					buf << "]";
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 5, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
 			}else{
@@ -84,7 +84,7 @@ namespace l7vs{
 			buf << "] tcp_socket::accept [";
 			buf << my_socket.remote_endpoint(ec);
 			buf << "]";
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 6, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
 	}
@@ -94,7 +94,7 @@ namespace l7vs{
 	//! @return 		true is socket close
 	//! @return 		false is not open socket
 	bool tcp_socket::close(boost::system::error_code& ec){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::close", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 7, "tcp_socket::close", __FILE__, __LINE__ );
 		
         rw_scoped_lock scope_lock(close_mutex);
 
@@ -108,7 +108,7 @@ namespace l7vs{
 				buf << "] tcp_socket::close [";
 				buf << my_socket.remote_endpoint(ec);
 				buf << "]";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9999, buf.str(), __FILE__, __LINE__ );
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 8, buf.str(), __FILE__, __LINE__ );
 			}
 		}
 		//----Debug log----------------------------------------------------------------------
@@ -125,7 +125,7 @@ namespace l7vs{
 	//! set non blocking mode of the socket 
 	//! @return			ec is reference error code object
 	bool tcp_socket::set_non_blocking_mode(boost::system::error_code& ec){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::set_non_blocking_mode", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 9, "tcp_socket::set_non_blocking_mode", __FILE__, __LINE__ );
 		
 		boost::asio::socket_base::non_blocking_io cmd(true);
 		my_socket.io_control(cmd,ec);
@@ -139,7 +139,7 @@ namespace l7vs{
 	//! @return			write data size	
 	std::size_t tcp_socket::write_some(boost::asio::mutable_buffers_1 buffers,
 		boost::system::error_code& ec){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::write_some", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 10, "tcp_socket::write_some", __FILE__, __LINE__ );
 		
         rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
@@ -160,7 +160,7 @@ namespace l7vs{
 	//! @return			read data size
 	std::size_t tcp_socket::read_some(boost::asio::mutable_buffers_1 buffers,
 		boost::system::error_code& ec){
-		Logger	logger( LOG_CAT_L7VSD_SESSION, 9999, "tcp_socket::read_some", __FILE__, __LINE__ );
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 0011, "tcp_socket::read_some", __FILE__, __LINE__ );
 
         rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;

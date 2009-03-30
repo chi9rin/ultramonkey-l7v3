@@ -646,14 +646,10 @@ class connect_lock_test_class : public l7vs::tcp_socket{
 			
 		};
 		void mutex_lock(){
-			socket_mutex.lock();
+			close_mutex.wrlock();
 		};
 		void mutex_unlock(){
-			socket_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return socket_mutex.try_lock();
+			close_mutex.unlock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -708,11 +704,6 @@ void connect_lock_test(){
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
 	
 	
-	// unit_test [3] connect lock test thread run after mutex unlock test
-	std::cout << "[3] connect lock test thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
-	
 	BOOST_MESSAGE( "----- connetc lock test end -----" );
 	
 }
@@ -736,14 +727,10 @@ class close_lock_test_class : public l7vs::tcp_socket{
 			
 		};
 		void mutex_lock(){
-			socket_mutex.lock();
+			close_mutex.wrlock();
 		};
 		void mutex_unlock(){
-			socket_mutex.unlock();
-		};
-		
-		bool mutex_trylock(){
-			return socket_mutex.try_lock();
+			close_mutex.unlock();
 		};
 		
 		boost::mutex test_thread_wait;
@@ -794,12 +781,6 @@ void close_lock_test(){
 	std::cout << "[2] close lock test  thread run test (mutex unlock)" << std::endl;
 	BOOST_CHECK(test_obj.befor_thread_id == test_id);
 	BOOST_CHECK(test_obj.after_thread_id == test_id);
-	
-	
-	// unit_test [3] close lock test thread run after mutex unlock test
-	std::cout << "[3] close lock test thread run after mutex unlock test" << std::endl;
-	BOOST_CHECK(test_obj.mutex_trylock());
-	test_obj.mutex_unlock();
 	
 	BOOST_MESSAGE( "----- close lock test end -----" );
 	
