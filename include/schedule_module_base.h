@@ -1,13 +1,26 @@
-//
-//!	@file	schedule_module_base.h
-//!	@brief	shared object schedule module abstract class
-//
-//	copyright (c) sdy corporation. 2008
-//	mail: h dot okada at sdy dot co dot jp
-//
-//	Distributed under the Boost Software License, Version 1.0.(See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-//
+/*
+ *	@file	schedule_module_base.h
+ *	@brief	shared object schedule module abstract class
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
 #ifndef	SCHEDULE_MODULE_BASE_H
 #define	SCHEDULE_MODULE_BASE_H
 
@@ -25,12 +38,6 @@ namespace l7vs{
 //! @brief	all schedule module is extened this class.
 class schedule_module_base : public module_base{
 public:
-	//! logger function type
-	typedef	boost::function< void ( const LOG_LEVEL_TAG, const unsigned int, const std::string) >
-									logger_func_type;
-	//! replication_pay_memory function type
-	typedef	boost::function< void ( const std::string&, unsigned int* ) >
-									replicationpaymemory_func_type;
 	//! realserver list iterator type
 	typedef	std::list<l7vs::realserver>
 									rslist_type;

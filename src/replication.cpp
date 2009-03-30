@@ -54,7 +54,7 @@ int			replication::initialize(){
 	if ( REPLICATION_OUT != replication_state.service_status ){
 		// Initialization has already been done.
 		buf = boost::io::str( boost::format( "Initialization is a failure, because initialization has already been done. mode : %s" ) 
-											% replication_mode[(int)replication_state.service_status] );
+											% replication_mode[( int )replication_state.service_status] );
 		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 		return -1;
 	}
@@ -75,28 +75,28 @@ int			replication::initialize(){
 
 	// IP Address exists
 	if ( ip_addr_ret  ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "IP Address is not set.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 2, "IP Address is not set.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
 	}
 	// Port exists
 	if ( service_name_ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Port is not set.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 3, "Port is not set.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
 	}
 	// NIC exists
 	if ( nic_ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "NIC is not set.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 4, "NIC is not set.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
 	}
 	// Interval exists
 	if ( interval_ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Interval is not set.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 5, "Interval is not set.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -104,7 +104,7 @@ int			replication::initialize(){
 
 	// Failed in the acquisition of IP
 	if ( replication_info.ip_addr == "" ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Could not get IP Address.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 6, "Could not get IP Address.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -112,7 +112,7 @@ int			replication::initialize(){
 
 	// Failed in the acquisition of Port
 	if ( replication_info.service_name == "" ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Could not get Port.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 7, "Could not get Port.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -120,7 +120,7 @@ int			replication::initialize(){
 
 	// Failed in the acquisition of NIC
 	if ( replication_info.nic == "" ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Could not get NIC.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 8, "Could not get NIC.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -135,8 +135,7 @@ int			replication::initialize(){
 	replication_mutex.clear();
 	// Conponent exists
 	// Get Component infomation
-	for ( int i=0; i<CMP_MAX; i++)
-	{
+	for ( int i=0; i<CMP_MAX; i++){
 		key_id = boost::io::str( boost::format( "cmponent_id_%02d" ) % i );
 		key_size = boost::io::str( boost::format( "cmponent_size_%02d" ) % i );
 
@@ -148,7 +147,7 @@ int			replication::initialize(){
 		}
 		if ( replication_info.component_info[i].id == "" ){
 			buf = boost::io::str( boost::format( "Could not get %s." ) % key_id );
-			Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 9, buf, __FILE__, __LINE__ );
 			// Status Set
 			replication_state.service_status = REPLICATION_SINGLE;
 			return -1;
@@ -168,7 +167,7 @@ int			replication::initialize(){
 
 	// Check the Parameters value
 	if ( 0 != check_parameter() ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Failed in parameter check.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 10, "Failed in parameter check.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -187,7 +186,7 @@ int			replication::initialize(){
 	replication_state.replication_memory = getrpl();
 	// Confirmation of Replication memory 
 	if ( NULL == replication_state.replication_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 11, "Replication memory is NULL.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -198,7 +197,7 @@ int			replication::initialize(){
 	if ( NULL == replication_state.component_memory ){
 		// free memory
 		releaserpl();
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Components memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 12, "Components memory is NULL.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -210,7 +209,7 @@ int			replication::initialize(){
 		// free memory
 		releaserpl();
 		releasecmp();
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Surface infomation memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 13, "Surface infomation memory is NULL.", __FILE__, __LINE__ );
 		// Status Set
 		replication_state.service_status = REPLICATION_SINGLE;
 		return -1;
@@ -243,15 +242,15 @@ int			replication::initialize(){
 	}
 	service_thread_ptr = thread_ptr( new boost::thread( boost::bind ( &replication::service_thread, this ) ) );
 
-	buf = boost::io::str( boost::format( "Initialized in %s mode." ) % replication_mode[(int)replication_state.service_status] );
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+	buf = boost::io::str( boost::format( "Initialized in %s mode." ) % replication_mode[( int )replication_state.service_status] );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 2, buf, __FILE__, __LINE__ );
 
 	return 0;
 }
 
 //! Finalize Replication
 void		replication::finalize(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::finalize", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 2, "replication::finalize", __FILE__, __LINE__ );
 
 	{
 		boost::mutex::scoped_lock	lock( replication_thread_mutex );
@@ -317,12 +316,12 @@ void		replication::finalize(){
 
 //! Switch Slave to Master
 void		replication::switch_to_master(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::switch_to_master", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 3, "replication::switch_to_master", __FILE__, __LINE__ );
 
 	std::string buf;
 	int ret;
 
-	switch (replication_state.service_status){
+	switch ( replication_state.service_status ){
 		case REPLICATION_SLAVE:
 		case REPLICATION_SLAVE_STOP:
 			// Set Mastre Mode
@@ -334,11 +333,11 @@ void		replication::switch_to_master(){
 				releasecmp();
 				releasesrf();
 
-				buf = boost::io::str( boost::format( "Switch to master NG. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
-			}else{
+				buf = boost::io::str( boost::format( "Switch to master NG. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 14, buf, __FILE__, __LINE__ );
+			} else {
 				// Copy from compornent area to replication area.
-				memcpy(replication_state.replication_memory, replication_state.component_memory, replication_state.total_block*DATA_SIZE);
+				memcpy( replication_state.replication_memory, replication_state.component_memory, replication_state.total_block*DATA_SIZE );
 
 				if ( REPLICATION_SLAVE == replication_state.service_status ){
 					// Set mode.
@@ -356,16 +355,16 @@ void		replication::switch_to_master(){
 					replication_state.service_status = REPLICATION_MASTER_STOP;
 				}
 
-				buf = boost::io::str( boost::format( "Switch to master OK. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-				Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+				buf = boost::io::str( boost::format( "Switch to master OK. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+				Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 3, buf, __FILE__, __LINE__ );
 			}
 			break;
 		case REPLICATION_SINGLE:
-			buf = boost::io::str( boost::format( "Starting by %s, doesn't shift to MASTER." ) % replication_mode[(int)replication_state.service_status] ); 
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Starting by %s, doesn't shift to MASTER." ) % replication_mode[( int )replication_state.service_status] ); 
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 4, buf, __FILE__, __LINE__ );
 			break;
 		default:
-			buf = boost::io::str( boost::format( "Can not switch to master. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
+			buf = boost::io::str( boost::format( "Can not switch to master. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
 			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 			break;
 	}
@@ -410,14 +409,7 @@ int		replication::set_master()
 		}
 	}
 
-	// make send socket
-//	replication_send_socket.connect( replication_endpoint, err );
-//	if ( err ){
-//		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
-//		return -1;
-//	}
-
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Initialization of send socket is success.", __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 5, "Initialization of send socket is success.", __FILE__, __LINE__ );
 
 	return 0;
 
@@ -425,12 +417,12 @@ int		replication::set_master()
 
 //! Switch Master to Slave
 void		replication::switch_to_slave(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::switch_to_slave", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 4, "replication::switch_to_slave", __FILE__, __LINE__ );
 
 	std::string buf;
 	int ret;
 
-	switch (replication_state.service_status){
+	switch ( replication_state.service_status ){
 		case REPLICATION_MASTER:
 		case REPLICATION_MASTER_STOP:
 
@@ -450,9 +442,9 @@ void		replication::switch_to_slave(){
 				releasecmp();
 				releasesrf();
 
-				buf = boost::io::str( boost::format( "Switch to slave NG. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
-			}else{
+				buf = boost::io::str( boost::format( "Switch to slave NG. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 15, buf, __FILE__, __LINE__ );
+			} else {
 				// initialize to replication area.
 				memset( replication_state.replication_memory, '\0', replication_state.total_block * DATA_SIZE );
 
@@ -464,17 +456,17 @@ void		replication::switch_to_slave(){
 					replication_state.service_status = REPLICATION_SLAVE_STOP;
 				}
 
-				buf = boost::io::str( boost::format( "Switch to slave OK. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-				Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+				buf = boost::io::str( boost::format( "Switch to slave OK. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+				Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 6, buf, __FILE__, __LINE__ );
 			}
 			break;
 		case REPLICATION_SINGLE:
-			buf = boost::io::str( boost::format( "Starting by %s, doesn't shift to SLAVE." ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Starting by %s, doesn't shift to SLAVE." ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 7, buf, __FILE__, __LINE__ );
 			break;
 		default:
-			buf = boost::io::str( boost::format( "Can not switch to slave. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Can not switch to slave. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 2, buf, __FILE__, __LINE__ );
 			break;
 	}
 }
@@ -510,13 +502,13 @@ int		replication::set_slave()
 //std::cout << "slave " << bind_endpoint.address() << ":" << bind_endpoint.port() << "\n";
 	replication_receive_socket.open( bind_endpoint.protocol(), err );
 	if ( err ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 16, err.message(), __FILE__, __LINE__ );
 		return -1;
 	}
 	replication_receive_socket.bind( bind_endpoint, err );
 	if ( err ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
-			return -1;
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 17, err.message(), __FILE__, __LINE__ );
+		return -1;
 	}
 
 //std::cout << "slave " << bind_endpoint.address() << ":" << bind_endpoint.port() << "\n";
@@ -534,7 +526,7 @@ int		replication::set_slave()
 			service_thread_condition.notify_all();
 		}
 	}
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Initialization of receive socket is success.", __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 8, "Initialization of receive socket is success.", __FILE__, __LINE__ );
 
 	return 0;
 }
@@ -546,7 +538,7 @@ int		replication::set_slave()
 //! @retval nonnull Replication memory address
 //! @retval NULL Error
 void*		replication::pay_memory( const std::string& inid, unsigned int& outsize ){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::pay_memory", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 5, "replication::pay_memory", __FILE__, __LINE__ );
 
 	void *ret = NULL;
 	std::string buf;
@@ -555,13 +547,13 @@ void*		replication::pay_memory( const std::string& inid, unsigned int& outsize )
 	// Check replication mode.
 	if ( REPLICATION_OUT == replication_state.service_status || REPLICATION_SINGLE == replication_state.service_status){
 		// Check mode that can use the replication.
-		buf = boost::io::str( boost::format( "Improper mode for Replication. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		buf = boost::io::str( boost::format( "Improper mode for Replication. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 9, buf, __FILE__, __LINE__ );
 		return NULL;
 	}
 
 	if ( NULL == replication_state.component_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "You can't get memory. Component memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 18, "You can't get memory. Component memory is NULL.", __FILE__, __LINE__ );
 		return NULL;
 	}
 
@@ -571,14 +563,14 @@ void*		replication::pay_memory( const std::string& inid, unsigned int& outsize )
 		if ( inid == replication_info.component_info[i].id ){
 			// size check
 			if ( 0 == replication_info.component_info[i].block_size ){
-				Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, "Component block size is 0.", __FILE__, __LINE__ );
+				Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 3, "Component block size is 0.", __FILE__, __LINE__ );
 				return NULL;
 			}
 
 			// block_head check
 			if ( replication_info.component_info[i].block_head < 0 || replication_info.component_info[i].block_head > replication_state.total_block ){
 				buf = boost::io::str( boost::format( "Too many component block. Max is %d." ) % replication_state.total_block );
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 19, buf, __FILE__, __LINE__ );
 				return NULL;
 			}
 			// Pay memory address
@@ -587,32 +579,26 @@ void*		replication::pay_memory( const std::string& inid, unsigned int& outsize )
 			outsize = replication_info.component_info[i].block_size;
 
 			// LOG INFO
-//			buf = boost::io::str( boost::format( "Component Info ID : \"%s\". Block size : %d . Head Block No : %d/  Pay memory : %p " )
-//												% replication_info.component_info[i].id.c_str()
-//												% replication_info.component_info[i].block_size
-//												% replication_info.component_info[i].block_head
-//												% ( char* )ret );
-//			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
 			char	str[256];
 			sprintf( str, "Component Info ID : \"%s\". Block size : %d . Head Block No : %d/  Pay memory : %p ",
 												replication_info.component_info[i].id.c_str(),
 												replication_info.component_info[i].block_size,
 												replication_info.component_info[i].block_head,
 												( char* )ret );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, str, __FILE__, __LINE__ );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 10, str, __FILE__, __LINE__ );
 			return ret;
 		}
 	}
 
 	buf = boost::io::str( boost::format( "Unknown component ID. Component ID : %s" ) % inid );
-	Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+	Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 20, buf, __FILE__, __LINE__ );
 
 	return NULL;
 }
 
 //! Replication Dump
 void		replication::dump_memory(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::dump_memory", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 6, "replication::dump_memory", __FILE__, __LINE__ );
 
 	int size;
 	unsigned char* p;
@@ -623,20 +609,20 @@ void		replication::dump_memory(){
 
 	// Check replication mode.
 	if ( REPLICATION_OUT == replication_state.service_status || REPLICATION_SINGLE == replication_state.service_status){
-		buf = boost::io::str( boost::format( "Replication memory dump failure. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-		Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		buf = boost::io::str( boost::format( "Replication memory dump failure. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+		Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 4, buf, __FILE__, __LINE__ );
 		return;
 	}
 
 	if ( NULL == replication_state.replication_memory ){
-		Logger::putLogWarn( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogWarn( LOG_CAT_L7VSD_SYSTEM_MEMORY, 5, "Replication memory is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
 	// Dump size
 	size = DATA_SIZE * replication_state.total_block;
 	if ( 0 == size ){
-		Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, "Can not get Replication memory", __FILE__, __LINE__ );
+		Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 6, "Can not get Replication memory", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -644,16 +630,16 @@ void		replication::dump_memory(){
 	p = ( unsigned char* )replication_state.replication_memory;
 
 	// Output mode
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Replication Dump Start ----------------------------", __FILE__, __LINE__ );
-	buf = boost::io::str( boost::format( "Mode is [ %s ]." ) % replication_mode[(int)replication_state.service_status] );
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 11, "Replication Dump Start ----------------------------", __FILE__, __LINE__ );
+	buf = boost::io::str( boost::format( "Mode is [ %s ]." ) % replication_mode[( int )replication_state.service_status] );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 12, buf, __FILE__, __LINE__ );
 	buf = boost::io::str( boost::format( "Total Block is [ %u ]" ) % replication_state.total_block );
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 13, buf, __FILE__, __LINE__ );
 
 	// Converts into the binary, and writes it to the file. 
 	for ( h = 0; h < size / DATA_SIZE; h++ ){
 		buf = boost::io::str( boost::format( "Block Number [ %d ]" ) % h );
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 14, buf, __FILE__, __LINE__ );
 
 		for ( i = 0; i < DATA_SIZE / LOG_DATA_WIDTH; i++ ){
 			head = p + h * DATA_SIZE + i * LOG_DATA_WIDTH;
@@ -665,19 +651,19 @@ void		replication::dump_memory(){
 													% ( int )*(head+4) % ( int )*(head+5) % ( int )*(head+6)% ( int )*(head+7)
 													% ( int )*(head+8) % ( int )*(head+9) % ( int )*(head+10) % ( int )*(head+11)
 													% ( int )*(head+12) % ( int )*(head+13) % ( int )*(head+14) % ( int )*(head+15) );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 15, buf, __FILE__, __LINE__ );
 		}
 	}
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Replication Dump End ------------------------------", __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 16, "Replication Dump End ------------------------------", __FILE__, __LINE__ );
 }
 
 //! Chenge Status isActive
 void		replication::start(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::start", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 7, "replication::start", __FILE__, __LINE__ );
 
 	std::string buf;
 
-	switch (replication_state.service_status){
+	switch ( replication_state.service_status ){
 		case REPLICATION_MASTER_STOP:
 			replication_state.service_status = REPLICATION_MASTER;
 
@@ -689,64 +675,72 @@ void		replication::start(){
 				replication_thread_condition.notify_all();
 			}
 
-			buf = boost::io::str( boost::format( "Replication start. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Replication start. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 17, buf, __FILE__, __LINE__ );
 			break;
 		case REPLICATION_SLAVE_STOP:
 			replication_state.service_status = REPLICATION_SLAVE;
-			buf = boost::io::str( boost::format( "Replication start. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Replication start. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 18, buf, __FILE__, __LINE__ );
 			break;
 		case REPLICATION_MASTER:
-			buf = boost::io::str( boost::format( "Could not MASTER start, because already start. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Could not MASTER start, because already start. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 7, buf, __FILE__, __LINE__ );
 			break;
 		case REPLICATION_SLAVE:
-			buf = boost::io::str( boost::format( "Could not SALVE start, because already start. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Could not SALVE start, because already start. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 8, buf, __FILE__, __LINE__ );
 			break;
 		default:
-			buf = boost::io::str( boost::format( "Could not start, because mode is %s." ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Could not start, because mode is %s." ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 9, buf, __FILE__, __LINE__ );
 			break;
 	}
 }
 
 //! Chenge Status isStop
 void		replication::stop(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::stop", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 8, "replication::stop", __FILE__, __LINE__ );
 
 	std::string buf;
 
-	switch (replication_state.service_status){
+	switch ( replication_state.service_status ){
 		case REPLICATION_MASTER:
+
+			{
+				boost::mutex::scoped_lock	lock( replication_thread_mutex );
+				if	( replication_flag != EXIT ){
+					 replication_flag = WAIT;
+				}
+			}
+
 			replication_state.service_status = REPLICATION_MASTER_STOP;
-			buf = boost::io::str( boost::format( "Replication stop. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Replication stop. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 19, buf, __FILE__, __LINE__ );
 			break;
 		case REPLICATION_SLAVE:
 			replication_state.service_status = REPLICATION_SLAVE_STOP;
-			buf = boost::io::str( boost::format( "Replication stop. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Replication stop. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 20, buf, __FILE__, __LINE__ );
 			break;
 		case REPLICATION_MASTER_STOP:
-			buf = boost::io::str( boost::format( "Could not MASTER stop, because already stop. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Could not MASTER stop, because already stop. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 10, buf, __FILE__, __LINE__ );
 			break;
 		case REPLICATION_SLAVE_STOP:
-			buf = boost::io::str( boost::format( "Could not SALVE stop, because already stop. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Could not SALVE stop, because already stop. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 11, buf, __FILE__, __LINE__ );
 			break;
 		default:
-			buf = boost::io::str( boost::format( "Could not start, because mode is %s." ) % replication_mode[(int)replication_state.service_status] );
-			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+			buf = boost::io::str( boost::format( "Could not start, because mode is %s." ) % replication_mode[( int )replication_state.service_status] );
+			Logger::putLogWarn( LOG_CAT_L7VSD_REPLICATION, 12, buf, __FILE__, __LINE__ );
 			break;
 	}
 }
 
 //! Compulsion reproduction execution
 void		replication::force_replicate(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::force_replicate", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 9, "replication::force_replicate", __FILE__, __LINE__ );
 
 	int					send_ret = -1;
 	error_code			interval_ret;
@@ -759,24 +753,24 @@ void		replication::force_replicate(){
 	// Check by continuous initialize.
 	if ( REPLICATION_MASTER != replication_state.service_status && REPLICATION_MASTER_STOP != replication_state.service_status ){
 		// Initialization has already been done.
-					buf = boost::io::str( boost::format( "Could not compulsion replication. Mode is different. mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+					buf = boost::io::str( boost::format( "Could not compulsion replication. Mode is different. mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 21, buf, __FILE__, __LINE__ );
 		return;
-	}else if ( REPLICATION_MASTER_STOP == replication_state.service_status ){
-					buf = boost::io::str( boost::format( "Can not replication compulsorily, because mode is %s." ) % replication_mode[(int)replication_state.service_status] );
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+	} else if ( REPLICATION_MASTER_STOP == replication_state.service_status ){
+					buf = boost::io::str( boost::format( "Can not replication compulsorily, because mode is %s." ) % replication_mode[( int )replication_state.service_status] );
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 21, buf, __FILE__, __LINE__ );
 		return;
 	}
 
 	// Replication memory is NULL
 	if ( NULL == replication_state.replication_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 22, "Replication memory is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
 	// Component memory is NULL
 	if ( NULL == replication_state.component_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Component memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 23, "Component memory is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -786,12 +780,12 @@ void		replication::force_replicate(){
 	ms_time = param.get_int( PARAM_COMP_REPLICATION, "compulsorily_interval", interval_ret );
 
 	if ( interval_ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Could not get interval value for replication compulsorily.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 24, "Could not get interval value for replication compulsorily.", __FILE__, __LINE__ );
 		return;
 	}
 
 	if ( ms_time < MIN_COMPULSORILRY_INTERVAL || MAX_COMPULSORILRY_INTERVAL < ms_time ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Invalid compulsorily interval.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 25, "Invalid compulsorily interval.", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -803,49 +797,49 @@ void		replication::force_replicate(){
 		}
 	}
 
-	time.tv_nsec =  (long)( ms_time * 1000000 );
+	time.tv_nsec =  ( long )( ms_time * 1000000 );
 
 	// set last send block is c maximum block
 	replication_state.last_send_block = replication_state.total_block-1;
 
-	for(unsigned int i = 0; i < replication_state.total_block; i++){
+	for ( unsigned int i = 0; i < replication_state.total_block; i++ ){
 		// set compulsorily interval.
 		nanosleep( &time, NULL );
 
 		send_ret = send_data();
 
 		if ( 0 != send_ret ){
-			Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Send data is Failed.", __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 26, "Send data is Failed.", __FILE__, __LINE__ );
 			goto END;
 		}
 
 		// set last send block number
 		if ( replication_state.last_send_block < replication_state.total_block-1 ){
 			replication_state.last_send_block += 1;
-		}else if(replication_state.last_send_block == replication_state.total_block-1){
+		} else if ( replication_state.last_send_block == replication_state.total_block-1 ){
 			replication_state.last_send_block = 0;
-		}else{
-			Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Last send block number is illegal.", __FILE__, __LINE__ );
+		} else {
+			Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 27, "Last send block number is illegal.", __FILE__, __LINE__ );
 			goto END;
 		}
 		buf = boost::io::str( boost::format( "Data sending succeeded. Send block number : %u Version : %llu" ) % replication_state.last_send_block % (unsigned long long)replication_state.surface_block_no );
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 22, buf, __FILE__, __LINE__ );
 
 		// surface block number is change
-		if(replication_state.total_block == replication_state.last_send_block + 1 ){
+		if ( replication_state.total_block == replication_state.last_send_block + 1 ){
 			// Synchronization is executed. 
 			memcpy( replication_state.replication_memory, replication_state.component_memory, replication_state.total_block*DATA_SIZE );
 
 			// make new serial
 			replication_state.surface_block_no = (uint64_t)make_serial();
 			if ( 0 == replication_state.surface_block_no ){
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Could not get serial number.", __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 28, "Could not get serial number.", __FILE__, __LINE__ );
 				goto END;
 			}
 		}
 	}
 
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Replication compulsorily is success.", __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 23, "Replication compulsorily is success.", __FILE__, __LINE__ );
 
 END:
 	// Thread rusume
@@ -860,7 +854,7 @@ END:
 
 //! Interval Re-setting
 void		replication::reset(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::reset", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 10, "replication::reset", __FILE__, __LINE__ );
 
 	error_code 			ret;
 	unsigned short		value;
@@ -870,14 +864,14 @@ void		replication::reset(){
 	// Check Parameter exists
 	value = param.get_int( PARAM_COMP_REPLICATION, "interval", ret );
 	if ( ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Not change re-setting value.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 29, "Not change re-setting value.", __FILE__, __LINE__ );
 		return;
 	}
 
 	// Check interval
 	if ( value < MIN_INTERVAL || MAX_INTERVAL < value ){
-		buf = boost::io::str( boost::format( "Invalid Interval value. value : %d" ) % (int)value );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		buf = boost::io::str( boost::format( "Invalid Interval value. value : %d" ) % ( int )value );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 30, buf, __FILE__, __LINE__ );
 		return;
 	}
 	//set interval
@@ -887,14 +881,14 @@ void		replication::reset(){
 //! Get Status
 //! @return REPLICATION_MODE_TAG enumration
 replication::REPLICATION_MODE_TAG	replication::get_status(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::get_status", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 11, "replication::get_status", __FILE__, __LINE__ );
 
 	return replication_state.service_status;
 }
 
 //! Send function
 int			replication::handle_send(){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::handle_send", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 12, "replication::handle_send", __FILE__, __LINE__ );
 
 	int send_ret = -1;
 	std::string buf;
@@ -903,51 +897,51 @@ int			replication::handle_send(){
 	// Check by continuous initialize.
 	if ( REPLICATION_MASTER != replication_state.service_status && REPLICATION_MASTER_STOP != replication_state.service_status ){
 		// Initialization has already been done.
-		buf = boost::io::str( boost::format( "Can not send_callback. Mode is different.  mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		buf = boost::io::str( boost::format( "Can not send_callback. Mode is different.  mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 31, buf, __FILE__, __LINE__ );
 		return -1;
-	}else if ( REPLICATION_MASTER_STOP == replication_state.service_status ){ 
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Can not send Replication data, because mode is MASTER_STOP.", __FILE__, __LINE__ );
+	} else if ( REPLICATION_MASTER_STOP == replication_state.service_status ){ 
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 24, "Can not send Replication data, because mode is MASTER_STOP.", __FILE__, __LINE__ );
 		return 0;
 	}
 
 	// Replication memory is NULL
 	if ( NULL == replication_state.replication_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 32, "Replication memory is NULL.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// Component memory is NULL
 	if ( NULL == replication_state.component_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Component memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 33, "Component memory is NULL.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	send_ret = send_data();
 	if ( 0 != send_ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Send data is Failed.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 34, "Send data is Failed.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// set last send block number
 	if ( replication_state.last_send_block < replication_state.total_block-1 )	{
 		replication_state.last_send_block += 1;
-	}else if(replication_state.last_send_block == replication_state.total_block-1){
+	} else if ( replication_state.last_send_block == replication_state.total_block-1 ){
 		replication_state.last_send_block = 0;
-	}else{
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Last send block number is illegal.", __FILE__, __LINE__ );
+	} else {
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 35, "Last send block number is illegal.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// surface block number is change
-	if(replication_state.total_block == replication_state.last_send_block + 1 ){
+	if ( replication_state.total_block == replication_state.last_send_block + 1 ){
 		// Synchronization is executed. 
 		memcpy( replication_state.replication_memory, replication_state.component_memory, replication_state.total_block*DATA_SIZE );
 
 		// make new serial
 		replication_state.surface_block_no = (uint64_t)make_serial();
 		if ( 0 == replication_state.surface_block_no ){
-			Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Could not get serial number .", __FILE__, __LINE__ );
+			Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 36, "Could not get serial number .", __FILE__, __LINE__ );
 			return -1;
 		}
 	}
@@ -957,14 +951,12 @@ int			replication::handle_send(){
 
 //! Callback function
 void		replication::handle_receive( const boost::system::error_code& err, size_t size ){
-//	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::handle_receive", __FILE__, __LINE__ );
-
 	int recv_ret;
 	std::string buf;
 
 	if ( err ){
 		if ( boost::system::errc::operation_canceled != err.value() ){
-			Logger::putLogInfo( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
+			Logger::putLogInfo( LOG_CAT_L7VSD_SYSTEM, 25, err.message(), __FILE__, __LINE__ );
 		}
 		return;
 	}
@@ -972,40 +964,40 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	// Check by continuous initialize.
 	if ( REPLICATION_SLAVE != replication_state.service_status && REPLICATION_SLAVE_STOP != replication_state.service_status ){
 		// Initialization has already been done.
-		buf = boost::io::str( boost::format( "Can not receive_callback. Mode is different.  mode : %s" ) % replication_mode[(int)replication_state.service_status] );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		buf = boost::io::str( boost::format( "Can not receive_callback. Mode is different.  mode : %s" ) % replication_mode[( int )replication_state.service_status] );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 37, buf, __FILE__, __LINE__ );
 		return;
-	}else if ( REPLICATION_SLAVE_STOP == replication_state.service_status ) {
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Can not receive Replication data, because mode is SLAVE_STOP.", __FILE__, __LINE__ );
+	} else if ( REPLICATION_SLAVE_STOP == replication_state.service_status ){
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 26, "Can not receive Replication data, because mode is SLAVE_STOP.", __FILE__, __LINE__ );
 		return;
 	}
 
 	// Replication memory is NULL
-	if ( NULL == replication_state.replication_memory )	{
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is NULL.", __FILE__, __LINE__ );
+	if ( NULL == replication_state.replication_memory ){
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 38, "Replication memory is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
 	// Component memory is NULL
 	if ( NULL == replication_state.component_memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Component memory is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 39, "Component memory is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
 	// Surface block array memory is NULL
-	if ( NULL == replication_state.surface_block_array_ptr)	{
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Surface block array pointer is NULL.", __FILE__, __LINE__ );
+	if ( NULL == replication_state.surface_block_array_ptr){
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 40, "Surface block array pointer is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
 	if ( size != sizeof ( struct replication_data_struct ) ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Failed in the reception processing of data because of illegal receive size.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 41, "Failed in the reception processing of data because of illegal receive size.", __FILE__, __LINE__ );
 		return;
 	}
 
 	recv_ret = recv_data();
 	if ( 0 != recv_ret ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Failed in the reception processing of data because of illegal receive data.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 42, "Failed in the reception processing of data because of illegal receive data.", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -1015,10 +1007,10 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	// set last recv block number
 	if ( replication_state.last_recv_block < replication_state.total_block-1 ){
 		replication_state.last_recv_block += 1;
-	}else if(replication_state.last_recv_block == replication_state.total_block-1){
+	} else if ( replication_state.last_recv_block == replication_state.total_block-1 ){
 		replication_state.last_recv_block = 0;
-	}else{
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Last receive block number is illegal.", __FILE__, __LINE__ );
+	} else {
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 43, "Last receive block number is illegal.", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -1035,15 +1027,15 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 //! @retval 0 Success
 //! @retval -1 Error
 int			replication::lock( const std::string& inid ){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::lock", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 13, "replication::lock", __FILE__, __LINE__ );
 
 	std::map<std::string, mutex_ptr>::iterator	itr;
 	std::string buf;
 
 	itr = replication_mutex.find( inid );
-	if( itr == replication_mutex.end() ){
+	if ( itr == replication_mutex.end() ){
 		buf = boost::io::str( boost::format( "Could not find %s." ) % inid );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 44, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1057,15 +1049,15 @@ int			replication::lock( const std::string& inid ){
 //! @retval 0 Success
 //! @retval -1 Error
 int			replication::unlock( const std::string& inid ){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::unlock", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 14, "replication::unlock", __FILE__, __LINE__ );
 
 	std::map<std::string, mutex_ptr>::iterator	itr;
 	std::string buf;
 
 	itr = replication_mutex.find( inid );
-	if( itr == replication_mutex.end() ){
+	if ( itr == replication_mutex.end() ){
 		buf = boost::io::str( boost::format( "Could not find %s." ) % inid );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 45, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1081,15 +1073,15 @@ int			replication::unlock( const std::string& inid ){
 //! @retval 0 Success
 //! @retval -1 Error
 int			replication::refer_lock_mutex( const std::string& inid, mutex_ptr& outmutex ){
-	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::refer_lock_mutex", __FILE__, __LINE__ );
+	Logger	logger( LOG_CAT_L7VSD_REPLICATION, 15, "replication::refer_lock_mutex", __FILE__, __LINE__ );
 
 	std::map<std::string, mutex_ptr>::iterator	itr;
 	std::string buf;
 
 	itr = replication_mutex.find( inid );
-	if( itr == replication_mutex.end() ){
+	if ( itr == replication_mutex.end() ){
 		buf = boost::io::str( boost::format( "Could not find %s." ) % inid );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 46, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1119,7 +1111,7 @@ int			replication::check_parameter(){
 	}
 	catch(...){
 		buf = boost::io::str( boost::format( "Failed to get IP or Service Name.(%s:%s)" ) % replication_info.ip_addr % replication_info.service_name );
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 47, buf, __FILE__, __LINE__ );
 		goto END;
 	}
 //std::cout << "check2 " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
@@ -1134,12 +1126,12 @@ int			replication::check_parameter(){
 
 		//create socket
 		int fd  = socket( AF_INET, SOCK_DGRAM, 0 );
-		if( fd >= 0 ){
+		if ( fd >= 0 ){
 			//get networkdevice struct for IPv4
 			strncpy( ifr.ifr_name, replication_info.nic.c_str(), IFNAMSIZ-1 );
 			ifr.ifr_addr.sa_family = AF_INET;
 
-			if( ioctl( fd, SIOCGIFADDR, &ifr ) >= 0 ){
+			if ( ioctl( fd, SIOCGIFADDR, &ifr ) >= 0 ){
 				memcpy( &addr, &(ifr.ifr_addr), sizeof( struct sockaddr_in ) );
 			}
 
@@ -1149,41 +1141,41 @@ int			replication::check_parameter(){
 		bind_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( inet_ntoa( addr.sin_addr ) ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
 	}
 	catch(...){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 1, "You can not get IP address from nic.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 48, "You can not get IP address from nic.", __FILE__, __LINE__ );
 		goto END;
 	}
 //std::cout << "check3 " << bind_endpoint.address() << ":" << bind_endpoint.port() << "\n";
 
 	// Interval check
-	if ((MIN_INTERVAL>replication_info.interval) || (MAX_INTERVAL<replication_info.interval)){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Invalid Interval value", __FILE__, __LINE__ );
+	if ( ( MIN_INTERVAL>replication_info.interval ) || ( MAX_INTERVAL<replication_info.interval ) ){
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 49, "Invalid Interval value", __FILE__, __LINE__ );
 		goto END;
 	}
 	// Components ID check
 	// Components Size check
-	if (0 == replication_info.component_num){
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Can not get component, because component is 0.", __FILE__, __LINE__ );
+	if ( 0 == replication_info.component_num ){
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 27, "Can not get component, because component is 0.", __FILE__, __LINE__ );
 		ret = 0;
 		goto END;
 	}
 	for ( int i=0; i < replication_info.component_num; i++ ){
 		sum += replication_info.component_info[i].block_size ;
-		for ( int j=i+1; j<replication_info.component_num; j++)	{
+		for ( int j=i+1; j<replication_info.component_num; j++ ){
 			if ( replication_info.component_info[j].id == replication_info.component_info[i].id ){
 				buf = boost::io::str( boost::format( "Component ID was repeated.(%s)" ) % replication_info.component_info[i].id );
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, buf, __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 50, buf, __FILE__, __LINE__ );
 				goto END;
 			}
 		}
 	}
 	if ( sum > CMP_BLOCK_MAX ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Total component size is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 51, "Total component size is too large.", __FILE__, __LINE__ );
 		goto END;
 	}
 	ret = 0;
 END:
 
-	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, ( ( 0 == ret ) ? "Parameter Check OK." :  "Parameter Check NG." ), __FILE__, __LINE__ );
+	Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 28, ( ( 0 == ret ) ? "Parameter Check OK." :  "Parameter Check NG." ), __FILE__, __LINE__ );
 	return ret;
 }
 
@@ -1195,14 +1187,14 @@ END:
 //! @retval NULL Error
 void*		replication::getrpl(){
 	unsigned int total_block = replication_state.total_block;
-	void *memory = NULL;
+	void*	memory = NULL;
 
 	// Get replication memory
 	memory = malloc( total_block*DATA_SIZE );
 
 	// malloc Error
-	if ( (void *)NULL == memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Replication memory is Malloc Error.", __FILE__, __LINE__ );
+	if ( ( void* )NULL == memory ){
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 52, "Replication memory is Malloc Error.", __FILE__, __LINE__ );
 		return NULL;
 	}
 	memset(memory,0,total_block*DATA_SIZE);
@@ -1216,14 +1208,14 @@ void*		replication::getrpl(){
 //! @retval NULL Error
 void*		replication::getcmp(){
 	unsigned int total_block = replication_state.total_block;
-	void *memory = NULL ;
+	void*	memory = NULL ;
 
 	// Get component memory
 	memory = malloc( total_block*DATA_SIZE );
 
 	// malloc Error
-	if ( (void *)NULL == memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Component memory is Malloc Error.", __FILE__, __LINE__ );
+	if ( ( void* )NULL == memory ){
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 53, "Component memory is Malloc Error.", __FILE__, __LINE__ );
 		return NULL;
 	}
 	memset(memory,0,total_block*DATA_SIZE);
@@ -1237,17 +1229,17 @@ void*		replication::getcmp(){
 //! @retval NULL Error
 uint64_t*	replication::getsrf(){
 	unsigned int total_block = replication_state.total_block;
-	uint64_t *memory = NULL;
+	uint64_t*	memory = NULL;
 
 	// Get memory
-	memory = (uint64_t*)malloc( total_block*sizeof(uint64_t) );
+	memory = ( uint64_t* )malloc( total_block*sizeof(uint64_t) );
 
 	// malloc Error
-	if ( (uint64_t *)NULL == memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 1, "Surface info address is Malloc Error.", __FILE__, __LINE__ );
+	if ( ( uint64_t* )NULL == memory ){
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 54, "Surface info address is Malloc Error.", __FILE__, __LINE__ );
 		return NULL;
 	}
-	memset(memory,0,total_block*sizeof(uint64_t));
+	memset( memory, 0, total_block*sizeof(uint64_t) );
 
 	return memory;
 }
@@ -1263,11 +1255,11 @@ unsigned long long		replication::make_serial(){
 	// get time by clock_gettime
 	if ( clock_gettime(CLOCK_REALTIME, &current_time) == -1 ){
 		// failre.
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "You failed to get of time.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 55, "You failed to get of time.", __FILE__, __LINE__ );
 		serial_num = 0;
 	} else {
 		// make a serial succeeds.
-		serial_num = (unsigned long long int) current_time.tv_sec * 1000000 + (unsigned long long int) current_time.tv_nsec / 1000;
+		serial_num = ( unsigned long long int )current_time.tv_sec * 1000000 + ( unsigned long long int ) current_time.tv_nsec / 1000;
 	}
 
 	return serial_num;
@@ -1278,7 +1270,7 @@ unsigned long long		replication::make_serial(){
 //! @retval 0 Success
 //! @retval -1 Error
 int			replication::send_data(){
-	char *send_memory;
+	char*	send_memory;
 	size_t send_byte;
 
 	// make replication data struct
@@ -1292,26 +1284,26 @@ int			replication::send_data(){
 	} else if ( replication_state.last_send_block == replication_state.total_block - 1 ){
 		replication_data.block_num = 0;
 	} else {
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Send block number is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 56, "Send block number is too large.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// set serial
 	replication_data.serial = replication_state.surface_block_no;
 	if ( 1 == replication_data.serial &&  0 == replication_data.block_num ){
-		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Serial number is 1, first send processing.", __FILE__, __LINE__ );
+		Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 29, "Serial number is 1, first send processing.", __FILE__, __LINE__ );
 	}
 
 	// set data size (sizeof(replication_data))
 	replication_data.size = sizeof( struct replication_data_struct );
 
 	if ( replication_data.size > SEND_DATA_SIZE ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Send block data size is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 57, "Send block data size is too large.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// set replication data (1 block)
-	send_memory = (char *)replication_state.replication_memory + DATA_SIZE*replication_data.block_num;
+	send_memory = ( char* )replication_state.replication_memory + DATA_SIZE*replication_data.block_num;
 	memcpy( replication_data.data, send_memory, DATA_SIZE );
 
 #if	0
@@ -1332,14 +1324,14 @@ int			replication::send_data(){
 	}
 	catch(...){
 		buf = boost::io::str( boost::format( "Failed to get IP or Service Name.(%s:%s)" ) % replication_info.ip_addr % replication_info.service_name );
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 1, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 58, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
 //std::cout << "master " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
 	replication_send_socket.connect( replication_endpoint, err );
 	if ( err ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, err.message(), __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 59, err.message(), __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1348,7 +1340,7 @@ int			replication::send_data(){
 	replication_send_socket.close();
 #endif
 	if ( sizeof( struct replication_data_struct ) != send_byte ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 1, "Data send error.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM, 60, "Data send error.", __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1365,19 +1357,19 @@ int			replication::recv_data(){
 
 	// Check replication ID
 	if ( replication_data.id != REPLICATION_ID ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Get invalid data.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 61, "Get invalid data.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// block number is over
 	if ( replication_data.block_num > replication_state.total_block ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Recv block number is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 62, "Recv block number is too large.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// Comparison of serial numbers
 	if ( replication_data.serial < replication_state.surface_block_array_ptr[replication_data.block_num] ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 1, "Recv replication data is too old.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 63, "Recv replication data is too old.", __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1385,7 +1377,7 @@ int			replication::recv_data(){
 	replication_state.surface_block_array_ptr[replication_data.block_num] = replication_data.serial;
 
 	// set recv data
-	recv_memory = ( char * )replication_state.replication_memory + DATA_SIZE * replication_data.block_num;
+	recv_memory = ( char* )replication_state.replication_memory + DATA_SIZE * replication_data.block_num;
 
 	// received data.
 	memcpy( recv_memory, &replication_data.data, DATA_SIZE );
