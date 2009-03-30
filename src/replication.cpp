@@ -986,7 +986,7 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 
 	// Surface block array memory is NULL
 	if ( NULL == replication_state.surface_block_array_ptr){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 26, "Surface block array pointer is NULL.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 11, "Surface block array pointer is NULL.", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -1010,7 +1010,7 @@ void		replication::handle_receive( const boost::system::error_code& err, size_t 
 	} else if ( replication_state.last_recv_block == replication_state.total_block-1 ){
 		replication_state.last_recv_block = 0;
 	} else {
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 27, "Last receive block number is illegal.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 26, "Last receive block number is illegal.", __FILE__, __LINE__ );
 		return;
 	}
 
@@ -1035,7 +1035,7 @@ int			replication::lock( const std::string& inid ){
 	itr = replication_mutex.find( inid );
 	if ( itr == replication_mutex.end() ){
 		buf = boost::io::str( boost::format( "Could not find %s." ) % inid );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 28, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 27, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1057,7 +1057,7 @@ int			replication::unlock( const std::string& inid ){
 	itr = replication_mutex.find( inid );
 	if ( itr == replication_mutex.end() ){
 		buf = boost::io::str( boost::format( "Could not find %s." ) % inid );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 29, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 28, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1081,7 +1081,7 @@ int			replication::refer_lock_mutex( const std::string& inid, mutex_ptr& outmute
 	itr = replication_mutex.find( inid );
 	if ( itr == replication_mutex.end() ){
 		buf = boost::io::str( boost::format( "Could not find %s." ) % inid );
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 30, buf, __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 29, buf, __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1148,7 +1148,7 @@ int			replication::check_parameter(){
 
 	// Interval check
 	if ( ( MIN_INTERVAL>replication_info.interval ) || ( MAX_INTERVAL<replication_info.interval ) ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 31, "Invalid Interval value", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 30, "Invalid Interval value", __FILE__, __LINE__ );
 		goto END;
 	}
 	// Components ID check
@@ -1163,13 +1163,13 @@ int			replication::check_parameter(){
 		for ( int j=i+1; j<replication_info.component_num; j++ ){
 			if ( replication_info.component_info[j].id == replication_info.component_info[i].id ){
 				buf = boost::io::str( boost::format( "Component ID was repeated.(%s)" ) % replication_info.component_info[i].id );
-				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 32, buf, __FILE__, __LINE__ );
+				Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 31, buf, __FILE__, __LINE__ );
 				goto END;
 			}
 		}
 	}
 	if ( sum > CMP_BLOCK_MAX ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 33, "Total component size is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 32, "Total component size is too large.", __FILE__, __LINE__ );
 		goto END;
 	}
 	ret = 0;
@@ -1194,7 +1194,7 @@ void*		replication::getrpl(){
 
 	// malloc Error
 	if ( ( void* )NULL == memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 11, "Replication memory is Malloc Error.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 12, "Replication memory is Malloc Error.", __FILE__, __LINE__ );
 		return NULL;
 	}
 	memset(memory,0,total_block*DATA_SIZE);
@@ -1215,7 +1215,7 @@ void*		replication::getcmp(){
 
 	// malloc Error
 	if ( ( void* )NULL == memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 12, "Component memory is Malloc Error.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 13, "Component memory is Malloc Error.", __FILE__, __LINE__ );
 		return NULL;
 	}
 	memset(memory,0,total_block*DATA_SIZE);
@@ -1236,7 +1236,7 @@ uint64_t*	replication::getsrf(){
 
 	// malloc Error
 	if ( ( uint64_t* )NULL == memory ){
-		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 13, "Surface info address is Malloc Error.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_MEMORY, 14, "Surface info address is Malloc Error.", __FILE__, __LINE__ );
 		return NULL;
 	}
 	memset( memory, 0, total_block*sizeof(uint64_t) );
@@ -1284,7 +1284,7 @@ int			replication::send_data(){
 	} else if ( replication_state.last_send_block == replication_state.total_block - 1 ){
 		replication_data.block_num = 0;
 	} else {
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 34, "Send block number is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 33, "Send block number is too large.", __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1298,7 +1298,7 @@ int			replication::send_data(){
 	replication_data.size = sizeof( struct replication_data_struct );
 
 	if ( replication_data.size > SEND_DATA_SIZE ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 35, "Send block data size is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 34, "Send block data size is too large.", __FILE__, __LINE__ );
 		return -1;
 	}
 
@@ -1357,19 +1357,19 @@ int			replication::recv_data(){
 
 	// Check replication ID
 	if ( replication_data.id != REPLICATION_ID ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 36, "Get invalid data.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 35, "Get invalid data.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// block number is over
 	if ( replication_data.block_num > replication_state.total_block ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 37, "Recv block number is too large.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 36, "Recv block number is too large.", __FILE__, __LINE__ );
 		return -1;
 	}
 
 	// Comparison of serial numbers
 	if ( replication_data.serial < replication_state.surface_block_array_ptr[replication_data.block_num] ){
-		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 38, "Recv replication data is too old.", __FILE__, __LINE__ );
+		Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 37, "Recv replication data is too old.", __FILE__, __LINE__ );
 		return -1;
 	}
 
