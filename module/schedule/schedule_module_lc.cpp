@@ -38,20 +38,20 @@ void	schedule_module_least_connection::initialize(){
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 25, "Function in : schedule_module_least_connection::initialize", __FILE__, __LINE__);
+				putLogDebug( 1, "Function in : schedule_module_least_connection::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
 
 	if ( !putLogInfo.empty() )
 	{
-		putLogInfo( 3, "Function was initialized.", __FILE__, __LINE__);
+		putLogInfo( 5001, "Function was initialized.", __FILE__, __LINE__);
 	}
 
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 26, "Function out : schedule_module_least_connection::initialize", __FILE__, __LINE__);
+				putLogDebug( 2, "Function out : schedule_module_least_connection::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -82,7 +82,7 @@ void	schedule_module_least_connection::handle_schedule(
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 27, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 3, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -100,7 +100,7 @@ void	schedule_module_least_connection::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			putLogFatal( 5, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 8001, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -115,7 +115,7 @@ void	schedule_module_least_connection::handle_schedule(
 														% itr->tcp_endpoint.address()
 														% itr->tcp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 28, buf, __FILE__, __LINE__);
+					putLogDebug( 4, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -134,7 +134,7 @@ void	schedule_module_least_connection::handle_schedule(
 		//! no data
 		if ( !putLogError.empty() )
 		{
-			putLogError( 5, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 7001, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -143,7 +143,7 @@ END:
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 29, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 5, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -164,20 +164,20 @@ void	schedule_module_least_connection::handle_schedule(
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 30, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 6, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
 
 	if ( !putLogWarn.empty() )
 	{
-		putLogWarn( 1, "UDP function was not supported.", __FILE__, __LINE__);
+		putLogWarn( 6001, "UDP function was not supported.", __FILE__, __LINE__);
 	}
 
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 31, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 7, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}

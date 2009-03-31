@@ -38,7 +38,7 @@ void	schedule_module_weighted_round_robin::initialize(){
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 13, "Function in : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
+				putLogDebug( 20001, "Function in : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -54,13 +54,13 @@ void	schedule_module_weighted_round_robin::initialize(){
 	vs_weights.gcd = 0;
 
 	if ( !putLogInfo.empty() ){
-		putLogInfo( 2, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
+		putLogInfo( 25001, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
 	}
 
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 14, "Function out : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
+				putLogDebug( 20002, "Function out : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -91,7 +91,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 15, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 20003, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -108,7 +108,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			putLogFatal( 3, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 28001, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -123,7 +123,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 														% itr->tcp_endpoint.address()
 														% itr->tcp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 16, buf, __FILE__, __LINE__);
+					putLogDebug( 20004, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -134,7 +134,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! init error( no data )
 		if ( !putLogError.empty() )
 		{
-			putLogError( 3, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 27001, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -157,7 +157,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 														% tcp_endpoint.address()
 														% tcp_endpoint.port()
 														% vs_weights.currentWeight );
-					putLogDebug( 17, buf, __FILE__, __LINE__);
+					putLogDebug( 20005, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -196,7 +196,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 															% itr->tcp_endpoint.port()
 															% itr->weight
 															% vs_weights.currentWeight );
-						putLogDebug( 18, buf, __FILE__, __LINE__);
+						putLogDebug( 20006, buf, __FILE__, __LINE__);
 					}
 				}
 			}
@@ -221,7 +221,7 @@ END:
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 19, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 20007, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -242,7 +242,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 20, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 20008, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -259,7 +259,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( !putLogFatal.empty() )
 		{
-			putLogFatal( 4, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 28002, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -274,7 +274,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 														% itr->udp_endpoint.address()
 														% itr->udp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 21, buf, __FILE__, __LINE__);
+					putLogDebug( 20009, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -285,7 +285,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		//! init error( no data )
 		if ( !putLogError.empty() )
 		{
-			putLogError( 4, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 27002, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -308,7 +308,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 														% udp_endpoint.address()
 														% udp_endpoint.port()
 														% vs_weights.currentWeight );
-					putLogDebug( 22, buf, __FILE__, __LINE__);
+					putLogDebug( 20010, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -347,7 +347,7 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 															% itr->udp_endpoint.port()
 															% itr->weight
 															% vs_weights.currentWeight );
-						putLogDebug( 23, buf, __FILE__, __LINE__);
+						putLogDebug( 20011, buf, __FILE__, __LINE__);
 					}
 				}
 			}
@@ -372,7 +372,7 @@ END:
 	if ( !getloglevel.empty() ){
 		if ( LOG_LV_DEBUG == getloglevel() ){
 			if ( !putLogDebug.empty() ){
-				putLogDebug( 24, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 20012, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
