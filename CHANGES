@@ -1,0 +1,73 @@
+[Xxx.xx 2009] 3.0.0 Norihisa Nakai
+  - MultiThread version First Release.
+
+[Apr.20 2009] 2.1.2-1 Shinya TAKEBAYASHI
+  - Removed cookie modules
+
+[Mar. 9 2009] 2.1.2-0 Shinya TAKEBAYASHI
+  - Added protocol modules(recently supported):
+    * cpassive(Cookie passive)
+    * crewrite(Cookie rewrite)
+    * ip(Source IP)
+    * pfilter(Packet filter)
+  - Implemented replication spec to sslid module.
+
+[Jan. 27 2009] 2.1.1-0 Shinya TAKEBAYASHI
+  - Added option for FAST SCHEDULE to sessionless module.
+    Establishing connection when clinent connection was established.
+  - Updated l7directord man file.
+  - Changed methods for sslid module.(liner list -> hash list)
+
+[Dec. 17 2008] 2.1.0-0 Shinya TAKEBAYASHI
+  - Implemented access logger (CLIENT - DESTINATION mapping).
+  - Optimized event listener.
+  - Fixed algorithms for some check type.
+  - "Checkcount" has been enabled.
+  - Created "man" page.(Japanese(UTF-8) only ;))
+  - Implemented flow control logic(server).
+  - Eliminated flow control logic(client).
+
+[May. 26 2008] 2.0.0-0 Shinya TAKEBAYASHI
+  - Changed logger library(vanessa_logger -> log4cxx)
+  - Implemented configuration function(using configuration file: /etc/l7vs/l7vs.cf)
+  - Implemented replication system(for HA clustering)
+  - Added new protocol module(sessionless - Layer-4 LB like module)
+
+[Dec. 11 2007] 1.0.0-1 Shinya TAKEBAYASHI
+  - Implemented blocking mode switching function
+
+[Oct. 11 2007] 1.0.0-0 Shinya TAKEBAYASHI
+  - Change liblary from GLib1.2 to GLib2.0 (memory leak fix)
+  - Change from select() to epoll ET.
+  - Change bloking mode to non-blocking mode(recv() and send()).
+  - Change from service conn list to service conn hash.
+  - Change from iomux-list to hash-map and available list.
+  - Add QoS Control.
+  - Add Weighted Round-Robin scheduler.
+  - Add real server weight.
+  - Fixed some bugs.
+
+    * Following members helped us. Thanks!
+
+      Hideaki KONDO
+      Shunji FUKUSHIMA
+      Norihisa NAKAI
+      Hajime OKADA
+      Akira TAKAMARU
+      Hiroyuki BAN
+      Toru MORISHITA
+      Kouhei TANUMA
+      Tetsuya TAKATSURU
+      Masahiro SAKAMOTO
+      Yumi KITANI
+
+[May. 9 2007] 0.6.0-0 Shinya TAKEBAYASHI
+  - Extended maximum client connections.
+  - Fixed some bugs.
+
+[Feb. 19, 2007] 0.5.0-3 Shinya TAKEBAYASHI
+  - Fixed syntax errors.(umagent/umagent.c, umagent/Makefile)
+
+[Dec. 26, 2006] 0.5.0-2 Takahiro Kurosawa / Hideaki Kondo
+  - Rewrote to fix bug about Segmentation Fault.(conn.c)
+
