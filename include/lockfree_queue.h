@@ -7,7 +7,7 @@
 #define add(a) __sync_add_and_fetch(a,1)
 #define sub(a) __sync_sub_and_fetch(a,1)
 
-namespace l7vsd{
+namespace l7vs{
 
 template<class Tvalue>
 class lockfree_queue : protected boost::noncopyable {
@@ -37,7 +37,7 @@ public:
 
 	volatile void push(const Tvalue& _v){
 		node_type *_new_node,*_tail,*_next;
-		_new_node = new node_type*();
+		_new_node = new node_type();
 		_new_node->value = new Tvalue;
 		*_new_node->value = _v;
 
@@ -83,7 +83,7 @@ public:
 				}else{
 					_next_node = _head_node->next;
 					if(cas(&mng_queue->headloc,_head_node,_next_node)){
-						_value = _next_node->value;
+						_value = *_next_node->value;
 						break;
 
 					}
@@ -111,7 +111,7 @@ public:
 	}
 };
 
-} // namespace l7vsd
+} // namespace l7vs
 
 #endif	// LOCKFREE_QUEUE_H
 
