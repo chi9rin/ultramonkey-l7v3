@@ -3,7 +3,7 @@
 #include <boost/utility.hpp>
 #include <iostream>
 
-namespace l7vsd{
+namespace l7vs{
 
 template<class T> class atomic_ptr :boost::noncopyable{
 protected:
