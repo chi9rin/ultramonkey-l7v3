@@ -1,52 +1,45 @@
-#ifndef LF_QUEUE_H
-#define LF_QUEUE_H
+#ifndef LOCKFREE_QUEUE_H
+#define LOCFFREE_QUEUE_H
+
+#include <boost/noncopyable.hpp>
 
 #define cas(a,b,c) __sync_bool_compare_and_swap(a,b,c)
 #define add(a) __sync_add_and_fetch(a,1)
 #define sub(a) __sync_sub_and_fetch(a,1)
 
+namespace l7vsd{
+
 template<class Tvalue>
-class lf_queue
-{
+class lockfree_queue : protected boost::noncopyable {
 protected:
-
+	struct node_type {
+		Tvalue*				value;
+		struct node_type*	next;
+		node_type() : value( NULL ) , next( NULL ){}
+	};
+	struct mng_queue_type {
+		int 			counter;
+		node_type*		headloc;
+		node_type*		tailloc;
+		mng_queue_type() : counter(0), headloc( NULL ), tailloc( NULL ) {}
+	};
 public:
-
-	typedef struct node_t
-	{
-		Tvalue *value;
-		struct node_t *next;
-	} node_t;
-
-	typedef struct mng_queue_t
-	{
-		int counter;
-		node_t *headloc;
-		node_t *tailloc;
-	} mng_queue_t;
-
-	mng_queue_t *mng_queue;
+	mng_queue_type*		mng_queue;
 
 	// constractor
-	lf_queue(){
-		node_t *new_node;
-		new_node = new node_t;
-		new_node->value = new Tvalue;
-		mng_queue = new mng_queue_t;
-
-		new_node->next = NULL;
-		new_node->value = NULL;
+	lockfree_queue(){
+		node_type*	new_node = new node_type();
+		new_node->value = new Tvalue();
+		mng_queue = new mng_queue_type();
 		mng_queue->headloc = new_node;
 		mng_queue->tailloc = new_node;
-		mng_queue->counter = 0;
 	}
 
 	volatile void push(const Tvalue& _v){
-		node_t *_new_node,*_tail,*_next;
-		_new_node = new node_t;
+		node_type *_new_node,*_tail,*_next;
+		_new_node = new node_type*();
 		_new_node->value = new Tvalue;
 		*_new_node->value = _v;
-		_new_node->next = NULL;
 
 		// tracsaction st
 		while(1){
@@ -71,10 +64,8 @@ public:
 		return;
 	}
 
-	Tvalue pop(){
-		node_t *_head_node,*_tail_node,*_next_node;
-		Tvalue *_tvalue;
-		_tvalue = new Tvalue;
+	void pop(Tvalue& _value){
+		node_type *_head_node,*_tail_node,*_next_node;
 
 		//transaction st
 		while(1){
@@ -85,14 +76,14 @@ public:
 				if(_head_node ==_tail_node){
 					if(_head_node->next == NULL){
 						//false
-						return *_tvalue;
+						return;
 					}
 					_next_node = _head_node->next;
 					cas(&mng_queue->tailloc,_tail_node,_next_node);
 				}else{
 					_next_node = _head_node->next;
 					if(cas(&mng_queue->headloc,_head_node,_next_node)){
-						*_tvalue = *_next_node->value;
+						_value = _next_node->value;
 						break;
 
 					}
@@ -105,7 +96,7 @@ public:
 		delete _head_node->value;
 		delete _head_node;
 		sub(&mng_queue->counter);
-		return *_tvalue;
+		return;
 	}
 
 	bool empty(){
@@ -119,5 +110,8 @@ public:
 		return mng_queue->counter;
 	}
 };
-#endif
+
+} // namespace l7vsd
+
+#endif	// LOCKFREE_QUEUE_H
 

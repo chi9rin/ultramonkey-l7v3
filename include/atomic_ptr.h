@@ -2,23 +2,23 @@
 #define ATOMIC_PTR_H
 #include <boost/utility.hpp>
 #include <iostream>
-template<class T> class atomic_ptr :boost::noncopyable
-{
+
+namespace l7vsd{
+
+template<class T> class atomic_ptr :boost::noncopyable{
 protected:
 	T _p;
 public:
-	T get(){
-		return _p;
-	}
-	atomic_ptr& operator=(T _q) {
+	T get(){ return _p; }
+	atomic_ptr& operator=(const T& _q) {
 		__sync_lock_test_and_set(&_p,_q);
 		return *this;
 	}
-	atomic_ptr& operator++(int){
+	atomic_ptr& operator++(){
 		_p++;
 		return *this;
 	}
-	atomic_ptr& operator--(int){
+	atomic_ptr& operator--(){
 		_p--;
 		return *this;
 	}
@@ -44,8 +44,7 @@ public:
 
 
 template <>
-class atomic_ptr<int>
-{
+class atomic_ptr<int>{
 protected:
 	int _p;
 public:
@@ -85,4 +84,5 @@ public:
 
 };
 
+} //namespace l7vsd
 #endif
