@@ -39,8 +39,7 @@ void	l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::system
 void	l7vs::virtualservice_tcp::read_replicationdata(){
 }
 
-void	l7vs::virtualservice_tcp::handle_accept(	const l7vs::virtualservice_tcp::session_thread_control_ptr in_session,
-													const boost::system::error_code& in_error ){
+void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control* stc_ptr, const boost::system::error_code& err ){
 }
 
 void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){

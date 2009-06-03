@@ -26,10 +26,10 @@ public:
 		read_replicationdata();
 	}
 
-	void	call_handle_accept(	const session_thread_control_ptr,
-								const boost::system::error_code& );
+//	void	call_handle_accept(	const session_thread_control_ptr,
+//								const boost::system::error_code& );
 
-	session_map_type&	get_pool_sessions(){
+	session_queue_type&	get_pool_sessions(){
 		return	pool_sessions;
 	}
 	session_map_type&	get_active_sessions(){
@@ -43,7 +43,7 @@ public:
 		virtualservice_tcp::release_session( in_id );
 	}
 	unsigned long long	get_ref_count(){
-		return rs_list_ref_count;
+		return rs_list_ref_count.get();
 	}
 };
 

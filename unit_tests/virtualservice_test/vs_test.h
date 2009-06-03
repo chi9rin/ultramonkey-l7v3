@@ -73,17 +73,17 @@ public:
 	}
 
 	unsigned long long	get_refcount(){
-		return rs_list_ref_count;
+		return rs_list_ref_count.get();
 	}
 	void				set_refcount( unsigned long long in ){
 		rs_list_ref_count = in;
 	}
 
 	unsigned long long	get_curr_up_recv_size(){
-		return current_up_recvsize;
+		return current_up_recvsize.get();
 	}
 	unsigned long long	get_curr_down_recv_size(){
-		return current_down_recvsize;
+		return current_down_recvsize.get();
 	}
 	void	call_handle_throughput_update( const boost::system::error_code& err ){
 		boost::xtime_get( &diffelencial_time, boost::TIME_UTC );
@@ -132,7 +132,8 @@ public:
 		return param_data;
 	}
 	void	call_load_parameter(){
-		load_parameter();
+		l7vs::error_code	err;
+		load_parameter( err );
 	}
 };
 

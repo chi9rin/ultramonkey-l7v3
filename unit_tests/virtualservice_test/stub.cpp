@@ -123,7 +123,7 @@ void	l7vs::session_thread_control::upstream_run(){
 		boost::mutex::scoped_lock upcond_lock( upthread_condition_mutex );	// upstream state lock
 		state = upthread_state;	//thread local state is update.
 	}
-	boost::mutex::scoped_lock up_exit_lock( upthread_exit_mutex );
+//	boost::mutex::scoped_lock up_exit_lock( upthread_exit_mutex );
 	for(;;){	// thread loop
 		if( state == WAIT ){	// after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( upthread_condition_mutex );
@@ -147,7 +147,7 @@ void	l7vs::session_thread_control::downstream_run(){
 		boost::mutex::scoped_lock downcond_lock( downthread_condition_mutex );	//downstream state is lock
 		state = downthread_state;	//thread local state is update.
 	}
-	boost::mutex::scoped_lock down_exit_lock( downthread_exit_mutex );
+//	boost::mutex::scoped_lock down_exit_lock( downthread_exit_mutex );
 	for(;;){	//thread loop
 		if( state == WAIT ){	//after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( downthread_condition_mutex );
@@ -198,6 +198,13 @@ void	l7vs::session_thread_control::join(){
 	boost::mutex::scoped_lock( downthread_exit_mutex );
 }
 
+boost::mutex&	l7vs::session_thread_control::get_upthread_mutex(){
+	return	upthread_running_mutex;
+}
+
+boost::mutex&	l7vs::session_thread_control::get_downthread_mutex(){
+	return	downthread_running_mutex;
+}
 
 l7vs::Logger::Logger() :
 	scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
@@ -256,6 +263,7 @@ l7vs::l7vsd::vslist_type::iterator	l7vs::l7vsd::search_vslist( const virtualserv
 void	l7vs::l7vsd::release_virtual_service( const virtualservice_element& ) const {}
 
 
+/*
 l7vs::data_buff_base::data_buff_base(){}
 l7vs::data_buff_base::~data_buff_base(){}
 void	l7vs::data_buff_base::initialize(){}
@@ -271,6 +279,7 @@ void	l7vs::data_buff_base::set_send_size(const std::size_t set_size){}
 std::size_t	l7vs::data_buff_base::get_send_size(){
 	return send_size;
 }
+*/
 
 l7vs::tcp_realserver_connect_socket_list::tcp_realserver_connect_socket_list(){}
 l7vs::tcp_realserver_connect_socket_list::~tcp_realserver_connect_socket_list(){}
@@ -297,7 +306,7 @@ bool	l7vs::tcp_thread_message_que::empty(){
 }
 void 	l7vs::tcp_thread_message_que::clear(){}
 
-
+/*
 l7vs::tcp_data::tcp_data(){}
 l7vs::tcp_data::~tcp_data(){}
 void	l7vs::tcp_data::initialize(){}
@@ -305,7 +314,7 @@ void	l7vs::tcp_data::set_endpoint(const boost::asio::ip::tcp::endpoint set_endpo
 boost::asio::ip::tcp::endpoint	l7vs::tcp_data::get_endpoint(){
 	return endpoint_info;
 }
-
+*/
 l7vs::tcp_socket::tcp_socket(boost::asio::io_service& io) : my_socket( io ){}
 l7vs::tcp_socket::~tcp_socket(){}
 boost::asio::ip::tcp::socket&	l7vs::tcp_socket::get_socket(){
