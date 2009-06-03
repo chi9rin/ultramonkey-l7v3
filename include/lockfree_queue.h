@@ -14,13 +14,13 @@ class lockfree_queue : protected boost::noncopyable {
 protected:
 	struct node_type {
 		Tvalue*				value;
-		struct node_type*	next;
+		struct node_type*  volatile	next;
 		node_type() : value( NULL ) , next( NULL ){}
 	};
 	struct mng_queue_type {
-		int 			counter;
-		node_type*		headloc;
-		node_type*		tailloc;
+		int volatile		counter;
+		node_type* volatile 	headloc;
+		node_type* volatile	tailloc;
 		mng_queue_type() : counter(0), headloc( NULL ), tailloc( NULL ) {}
 	};
 public:
@@ -29,35 +29,30 @@ public:
 	// constractor
 	lockfree_queue(){
 		node_type*	new_node = new node_type();
-		new_node->value = new Tvalue();
 		mng_queue = new mng_queue_type();
 		mng_queue->headloc = new_node;
 		mng_queue->tailloc = new_node;
 	}
 
-	volatile void push(const Tvalue& _v){
+	void push(const Tvalue* inptr){
 		node_type *_new_node,*_tail,*_next;
 		_new_node = new node_type();
-		_new_node->value = new Tvalue;
-		*_new_node->value = _v;
+		_new_node->value = const_cast<Tvalue*>( inptr );
 
-		// tracsaction st
-		while(1){
+		// transaction st
+		while(true){
 			_tail = mng_queue->tailloc;
 			_next = _tail->next;
-
-			if(_tail == mng_queue->tailloc){
-				if(_next == NULL){
-					if(cas(&_tail->next,_next,_new_node)){
-						break;
-					}
+			if (_tail == mng_queue->tailloc){
+				if(!_next){
+					if(cas(&_tail->next,_next,_new_node)) break;
 				}
 			}else{
 				cas(&mng_queue->tailloc,_tail,_next);
 			}
 
 		}
-		// tracsaction ed
+		// transaction ed
 
 		cas(&mng_queue->tailloc,_tail,_new_node);
 		add(&mng_queue->counter);
@@ -93,7 +88,6 @@ public:
 		}
 		//transaction ed
 
-		delete _head_node->value;
 		delete _head_node;
 		sub(&mng_queue->counter);
 		return;
@@ -114,4 +108,3 @@ public:
 } // namespace l7vs
 
 #endif	// LOCKFREE_QUEUE_H
-

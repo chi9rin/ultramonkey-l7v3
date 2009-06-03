@@ -1,24 +1,24 @@
-#ifndef ATOMIC_PTR_H
-#define ATOMIC_PTR_H
+#ifndef ATOMIC_H
+#define ATOMIC_H
 #include <boost/utility.hpp>
 #include <iostream>
 
 namespace l7vs{
 
-template<class T> class atomic_ptr :boost::noncopyable{
+template<class T> class atomic :boost::noncopyable{
 protected:
-	T _p;
+	T volatile _p;
 public:
 	T get(){ return _p; }
-	atomic_ptr& operator=(const T& _q) {
+	atomic& operator=(const T& _q) {
 		__sync_lock_test_and_set(&_p,_q);
 		return *this;
 	}
-	atomic_ptr& operator++(){
+	atomic& operator++(){
 		_p++;
 		return *this;
 	}
-	atomic_ptr& operator--(){
+	atomic& operator--(){
 		_p--;
 		return *this;
 	}
@@ -43,15 +43,16 @@ public:
 };
 
 
+//int
 template <>
-class atomic_ptr<int>{
+class atomic<int>{
 protected:
-	int _p;
+	int volatile _p;
 public:
 	int get(){
 		return _p;
 	}
-	atomic_ptr& operator=(const int _q) {
+	atomic& operator=(const int _q) {
 		__sync_lock_test_and_set(&_p,_q);
 		return *this;
 	}
@@ -79,6 +80,48 @@ public:
 		return (_p == _q);
 	}
 	bool operator!=(const int _q) const{
+		return (_p != _q);
+	}
+
+};
+
+//unsigned longlong
+template <>
+class atomic<unsigned long long>{
+protected:
+	unsigned long long volatile _p;
+public:
+	unsigned long long get(){
+		return _p;
+	}
+	atomic& operator=(const unsigned long long _q) {
+		__sync_lock_test_and_set(&_p,_q);
+		return *this;
+	}
+	unsigned long long operator++(int){
+		__sync_add_and_fetch(&_p,1);
+		return _p;
+	}
+	unsigned long long operator--(int){
+		__sync_sub_and_fetch(&_p,1);
+		return _p;
+	}
+	bool operator<(const unsigned long long _q) const{
+		return (_p < _q);
+	}
+	bool operator<=(const unsigned long long _q) const{
+		return (_p <= _q);
+	}
+	bool operator>(const unsigned long long _q) const{
+		return (_p > _q);
+	}
+	bool operator>=(const unsigned long long _q) const{
+		return (_p >= _q);
+	}
+	bool operator==(const unsigned long long _q) const{
+		return (_p == _q);
+	}
+	bool operator!=(const unsigned long long _q) const{
 		return (_p != _q);
 	}
 
