@@ -37,8 +37,8 @@ OBJS		= $(SRCS:.cpp=.o)
 
 all:	$(TARGET)
 
-$(TARGET):	$(OBJS)
-	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
+stc_ut: $(OBJS)
+	$(CPP) $(INCLUDES) -o stc_ut $(OBJS) $(LDFLAGS) $(LIBS)
 
 clean:
 	rm -f $(TARGET) $(OBJS)

@@ -167,7 +167,7 @@ int		l7vs::replication::refer_lock_mutex( const std::string& inid, mutex_ptr& ou
 	return 0;
 }
 
-
+/*
 l7vs::data_buff_base::data_buff_base(){}
 l7vs::data_buff_base::~data_buff_base(){}
 void	l7vs::data_buff_base::initialize(){}
@@ -183,7 +183,7 @@ void	l7vs::data_buff_base::set_send_size(const std::size_t set_size){}
 std::size_t	l7vs::data_buff_base::get_send_size(){
 	return send_size;
 }
-
+*/
 l7vs::tcp_realserver_connect_socket_list::tcp_realserver_connect_socket_list(){}
 
 l7vs::tcp_realserver_connect_socket_list::~tcp_realserver_connect_socket_list(){}
@@ -214,7 +214,7 @@ bool	l7vs::tcp_thread_message_que::empty(){
 }
 void 	l7vs::tcp_thread_message_que::clear(){}
 
-
+/*
 l7vs::tcp_data::tcp_data(){}
 l7vs::tcp_data::~tcp_data(){}
 void	l7vs::tcp_data::initialize(){}
@@ -222,7 +222,7 @@ void	l7vs::tcp_data::set_endpoint(const boost::asio::ip::tcp::endpoint set_endpo
 boost::asio::ip::tcp::endpoint	l7vs::tcp_data::get_endpoint(){
 	return endpoint_info;
 }
-
+*/
 l7vs::tcp_socket::tcp_socket(boost::asio::io_service& io) : my_socket( io ){}
 l7vs::tcp_socket::~tcp_socket(){}
 boost::asio::ip::tcp::socket&	l7vs::tcp_socket::get_socket(){
@@ -357,6 +357,7 @@ void	l7vs::tcp_session::up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_
 void	l7vs::tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){}
+void	l7vs::tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::up_thread_all_socket_close(void){}
 
@@ -373,6 +374,7 @@ void	l7vs::tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_T
 void	l7vs::tcp_session::down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){}
+void	l7vs::tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){}
 void	l7vs::tcp_session::down_thread_all_socket_close(){}
