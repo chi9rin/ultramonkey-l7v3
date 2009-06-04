@@ -101,10 +101,12 @@ void	virtualservice_tcp_test1(){
 	// unit_test[5]  release_session method test(stopすると、sessionスレッドからrelease_sessionが呼ばれる)
 	BOOST_MESSAGE( "-------5" );
 	BOOST_CHECK( vs->get_pool_sessions().size() == (l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-1) );
-	BOOST_CHECK( vs->get_active_sessions().size() == 1 );
-	vs->release_session( vs->get_active_sessions().begin()->second->get_upthread_id() );
+	BOOST_CHECK( vs->get_waiting_sessions().size() == 1 );
+	BOOST_CHECK( vs->get_active_sessions().size() == 0 );
+	vs->release_session( vs->get_waiting_sessions().begin()->second->get_upthread_id() );
 	BOOST_CHECK( vs->get_pool_sessions().size() == static_cast<size_t>( l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT) );
 	BOOST_CHECK( vs->get_active_sessions().size() == 0 );
+	BOOST_CHECK( vs->get_waiting_sessions().size() == 0 );
 
 	// unit_test[6]  stop method test(call twice)
 	BOOST_MESSAGE( "-------6" );
@@ -1232,10 +1234,10 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "virtualservice_base_test" );
 
 	// add test case to test suite
-/*	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
+	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );*/
+	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test5 ) );
 
 	framework::master_test_suite().add( ts );

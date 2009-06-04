@@ -35,6 +35,12 @@ public:
 	session_map_type&	get_active_sessions(){
 		return	active_sessions;
 	}
+	session_map_type&	get_waiting_sessions(){
+		return	waiting_sessions;
+	}
+	session_map_type&	get_sorry_sessions(){
+		return	sorry_sessions;
+	}
 	std::list<realserver>&	get_rs_list(){
 		return rs_list;
 	}
@@ -43,7 +49,8 @@ public:
 		virtualservice_tcp::release_session( in_id );
 	}
 	unsigned long long	get_ref_count(){
-		return rs_list_ref_count.get();
+//		return rs_list_ref_count.get();
+		return rs_list_ref_count;
 	}
 };
 

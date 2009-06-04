@@ -73,17 +73,20 @@ public:
 	}
 
 	unsigned long long	get_refcount(){
-		return rs_list_ref_count.get();
+//		return rs_list_ref_count.get();
+		return rs_list_ref_count;
 	}
 	void				set_refcount( unsigned long long in ){
 		rs_list_ref_count = in;
 	}
 
 	unsigned long long	get_curr_up_recv_size(){
-		return current_up_recvsize.get();
+//		return current_up_recvsize.get();
+		return current_up_recvsize;
 	}
 	unsigned long long	get_curr_down_recv_size(){
-		return current_down_recvsize.get();
+//		return current_down_recvsize.get();
+		return current_down_recvsize;
 	}
 	void	call_handle_throughput_update( const boost::system::error_code& err ){
 		boost::xtime_get( &diffelencial_time, boost::TIME_UTC );

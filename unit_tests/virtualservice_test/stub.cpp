@@ -119,15 +119,21 @@ std::string		l7vs::Parameter::get_string(const PARAMETER_COMPONENT_TAG in_tag,
 
 void	l7vs::session_thread_control::upstream_run(){
 	state_tag	state;
+	upthread_running_mutex.lock();
 	{	// get first state from class upstream state.
-		boost::mutex::scoped_lock upcond_lock( upthread_condition_mutex );	// upstream state lock
+		rw_scoped_lock	upstate_lock( upthread_state_mutex );
 		state = upthread_state;	//thread local state is update.
 	}
-//	boost::mutex::scoped_lock up_exit_lock( upthread_exit_mutex );
 	for(;;){	// thread loop
 		if( state == WAIT ){	// after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( upthread_condition_mutex );
-			upthread_condition.wait( lock );	// thread is condition wait.( start at notify_all() )
+// 			upthread_condition.wait( lock );	// thread is condition wait.( start at notify_all() )
+			boost::xtime	wait;
+			boost::xtime_get( &wait, boost::TIME_UTC );
+			wait.sec += 1;
+			upthread_running_mutex.unlock();
+			upthread_condition.timed_wait( lock, wait ); // thread is condition wait( start at notify_all() )
+			upthread_running_mutex.lock();
 		}
 		else if( state == EXIT ){ // this state is vitrualservice end. thread is finishing.
 			break;
@@ -136,22 +142,31 @@ void	l7vs::session_thread_control::upstream_run(){
 			session->up_thread_run();	//session upstream thread looping.
 			stopupstream();
 		}
-		boost::mutex::scoped_lock	upcond_lock( upthread_condition_mutex );	// upstream state lock
+		rw_scoped_lock	upstate_lock( upthread_state_mutex );
 		state = upthread_state;	//thread local state is update.
 	}
+	upthread_running_mutex.unlock();
+	boost::mutex::scoped_lock up_lk( upthread_joining_mutex );
+	upthread_joining_condition.notify_all();
 }
 
 void	l7vs::session_thread_control::downstream_run(){
 	state_tag	state;
+	downthread_running_mutex.lock();
 	{
-		boost::mutex::scoped_lock downcond_lock( downthread_condition_mutex );	//downstream state is lock
+		rw_scoped_lock	downstate_lock( downthread_state_mutex );
 		state = downthread_state;	//thread local state is update.
 	}
-//	boost::mutex::scoped_lock down_exit_lock( downthread_exit_mutex );
 	for(;;){	//thread loop
 		if( state == WAIT ){	//after create or session end. this thread is pooling mode
 			boost::mutex::scoped_lock	lock( downthread_condition_mutex );
-			downthread_condition.wait( lock ); // thread is condition wait( start at notify_all() )
+// 			downthread_condition.wait( lock ); // thread is condition wait( start at notify_all() )
+			boost::xtime	wait;
+			boost::xtime_get( &wait, boost::TIME_UTC );
+			wait.sec += 1;
+			downthread_running_mutex.unlock();
+			downthread_condition.timed_wait( lock, wait ); // thread is condition wait( start at notify_all() )
+			downthread_running_mutex.lock();
 		}
 		else if( state == EXIT ){// this state is vitrualservice end. thread is finishing.
 			break;
@@ -160,9 +175,12 @@ void	l7vs::session_thread_control::downstream_run(){
 			session->down_thread_run();//session downstream thread looping.
 			stopdownstream();
 		}
-		boost::mutex::scoped_lock	downcond_lock( downthread_condition_mutex );	//downstream state lock
+		rw_scoped_lock	downstate_lock( downthread_state_mutex );
 		state = downthread_state;	// thread local sate is update.
 	}
+	downthread_running_mutex.unlock();
+	boost::mutex::scoped_lock down_lk( downthread_joining_mutex );
+	downthread_joining_condition.notify_all();
 }
 
 void	l7vs::session_thread_control::startupstream(){
