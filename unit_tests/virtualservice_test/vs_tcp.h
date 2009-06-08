@@ -49,8 +49,8 @@ public:
 		virtualservice_tcp::release_session( in_id );
 	}
 	unsigned long long	get_ref_count(){
-//		return rs_list_ref_count.get();
-		return rs_list_ref_count;
+		return rs_list_ref_count.get();
+// 		return rs_list_ref_count;
 	}
 };
 

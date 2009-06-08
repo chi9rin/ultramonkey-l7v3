@@ -33,7 +33,10 @@ namespace l7vs{
 //!	@brief upstream thread bind function.
 //
 void	session_thread_control::upstream_run(){
-	Logger	funcLog( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, "in_function : void session_thread_control::upstream_run()", __FILE__, __LINE__ );
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+		boost::format fmt("in_function : void session_thread_control::upstream_run()");
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, fmt.str(), __FILE__, __LINE__ );
+	}
 
 #ifdef	SCHED_SETAFFINITY
 	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
@@ -94,6 +97,10 @@ void	session_thread_control::upstream_run(){
 	upthread_running_mutex.unlock();
 	boost::mutex::scoped_lock up_lk( upthread_joining_mutex );
 	upthread_joining_condition.notify_all();
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+		boost::format fmt("out_function : void session_thread_control::upstream_run()");
+		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 3, fmt.str(), __FILE__, __LINE__ );
+	}
 }
 //
 //! @brief	downstream thread bind function,
@@ -263,8 +270,8 @@ void	session_thread_control::join(){
 		downthread_condition.notify_all(); //condition wait thread is run.
 	}
 
-	upthread_joining_condition.wait( up_lk );
-	downthread_joining_condition.wait( down_lk );
+//	upthread_joining_condition.wait( up_lk );
+//	downthread_joining_condition.wait( down_lk );
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("out_function : void session_thread_control::stopdownstream() : up_status = %d / down_status = %d");

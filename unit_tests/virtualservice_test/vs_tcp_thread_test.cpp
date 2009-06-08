@@ -18,6 +18,8 @@ using namespace boost::unit_test;
 typedef	boost::asio::ip::tcp::endpoint	tcp_ep_type;
 typedef	boost::asio::ip::udp::endpoint	udp_ep_type;
 
+int	counter;
+
 //Acceptテスト用Client
 void	client(){
 	boost::system::error_code	b_err;
@@ -99,7 +101,7 @@ public:
 		cond.wait( lk );
 
 		vs->rs_list_lock();
-		std::cout << "" << std::endl;
+//		std::cout << "" << std::endl;
 	}
 	void		rs_list_unlock(){
 		boost::mutex	mtx;
@@ -358,6 +360,8 @@ public:
 
 //test case1  create,initialize,run,stop,finalize,destroy(normal case)
 void	virtualservice_tcp_test1(){
+	counter	= 1;
+
 	//replicationエリアを作成しておく
 	debugg_flug_struct::getInstance().create_rep_area();
 
@@ -383,7 +387,7 @@ void	virtualservice_tcp_test1(){
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
 			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
-	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
 	elem1.schedule_module_name		= "SMtest1";
@@ -398,11 +402,13 @@ void	virtualservice_tcp_test1(){
 	vs_access	vst;
 
 	vst.initialize( elem1 );
+	vst.get_vs()->initialize( vs_err );
 
 	//同一メソッドの多重アクセス
 
 
 	// unit_test[1]  operator==に２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	//比較用のVSを2個作成
 	l7vs::virtualservice_element	elem2;
 	elem2.udpmode					= false;
@@ -444,6 +450,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( !retbool2 );
 
 	// unit_test[2]  operator!=に２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	ne1( &vs_access::vs_ne, &vst, vs1, &retbool1 );
 		boost::thread	ne2( &vs_access::vs_ne, &vst, vs2, &retbool2 );
@@ -459,6 +466,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( retbool2 );
 
 	// unit_test[3]  rs_list_lockに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	lk1( &vs_access::rs_list_lock, &vst );
 		boost::thread	lk2( &vs_access::rs_list_lock, &vst );
@@ -472,6 +480,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 2ULL );
 
 	// unit_test[4]  rs_list_unlockに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	ulk1( &vs_access::rs_list_unlock, &vst );
 		boost::thread	ulk2( &vs_access::rs_list_unlock, &vst );
@@ -487,6 +496,7 @@ void	virtualservice_tcp_test1(){
 	// unit_test[5]  get_elementに２スレッドから同時アクセス
 	l7vs::virtualservice_element	test_elem1;
 	l7vs::virtualservice_element	test_elem2;
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	get_elem1( &vs_access::get_element, &vst, &test_elem1 );
 		boost::thread	get_elem2( &vs_access::get_element, &vst, &test_elem2 );
@@ -500,6 +510,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( test_elem1 == test_elem2 );
 
 	// unit_test[6]  connection_activeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	//RSを２つ追加しておく
 	l7vs::virtualservice_element	elem3;
 	//set element value
@@ -539,6 +550,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[1].get_active() == 1 );
 
 	// unit_test[7]  connection_inactiveに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	con_inact1( &vs_access::connection_inactive, &vst, ep2 );
 		boost::thread	con_inact2( &vs_access::connection_inactive, &vst, ep1 );
@@ -555,15 +567,17 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( vst.get_vs()->get_element().realserver_vector[1].get_inact() == 1 );
 
 
-	vst.get_vs()->initialize( vs_err );
+//	vst.get_vs()->initialize( vs_err );
 	boost::thread	vs_run( &vs_access::run, &vst );
 	usleep( 1000 );
 	BOOST_MESSAGE( vst.get_vs()->get_pool_sessions().size() );
-	BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-1 );
+	BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == (l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT - 1) );
 
 	// unit_test[8]  release_sessionに２スレッドから同時アクセス
 	// unit_test[9]  stopに２スレッドから同時アクセス
 	//あらかじめclientからconnectして、ActiveSessionを２つ以上にしておく
+	std::cout << counter++ << std::endl;
+	std::cout << counter++ << std::endl;
 	{
 		usleep( 1000 );
 		boost::thread	cl1( &client );
@@ -571,7 +585,8 @@ void	virtualservice_tcp_test1(){
 		usleep( 1000000 );
 
 		BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-3 );
-		BOOST_CHECK( vst.get_vs()->get_active_sessions().size() == 3 );
+		BOOST_CHECK( vst.get_vs()->get_waiting_sessions().size() == 1 );
+		BOOST_CHECK( vst.get_vs()->get_active_sessions().size() == 2 );
 
 		cl1.join();
 		cl2.join();
@@ -589,11 +604,12 @@ void	virtualservice_tcp_test1(){
 	}
 	std::cout << vst.get_vs()->get_pool_sessions().size() << std::endl;
 	BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-1 );
-	std::cout << vst.get_vs()->get_active_sessions().size() << std::endl;
-	BOOST_CHECK( vst.get_vs()->get_active_sessions().size() == 1 );
+	std::cout << vst.get_vs()->get_waiting_sessions().size() << std::endl;
+	BOOST_CHECK( vst.get_vs()->get_waiting_sessions().size() == 1 );
 	vs_run.join();
 
 	// unit_test[10]  get_qos_upstreamに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	unsigned long long	qos1 = 0;
 	unsigned long long	qos2 = 0;
 	{
@@ -610,6 +626,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( qos2 == elem1.qos_upstream );
 
 	// unit_test[11]  get_qos_downstreamに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	qosdown1( &vs_access::get_qos_downstream, &vst, &qos1 );
 		boost::thread	qosdown2( &vs_access::get_qos_downstream, &vst, &qos2 );
@@ -624,6 +641,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( qos2 == elem1.qos_downstream );
 
 	// unit_test[12]  get_throughput_upstreamに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	unsigned long long	throughput1 = 65535ULL;
 	unsigned long long	throughput2 = 65535ULL;
 	{
@@ -640,6 +658,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( throughput1 == 0ULL );
 
 	// unit_test[13]  get_throughput_downstreamに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	throughput1 = 65535ULL;
 	throughput2 = 65535ULL;
 	{
@@ -656,6 +675,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( throughput1 == 0ULL );
 
 	// unit_test[14]  get_up_recv_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	unsigned long long	recv_size1	= 65535ULL;
 	unsigned long long	recv_size2	= 65535ULL;
 	{
@@ -672,6 +692,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size2 == 0ULL );
 
 	// unit_test[15]  get_up_send_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	recv_size1	= 65535ULL;
 	recv_size2	= 65535ULL;
 	{
@@ -688,6 +709,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size2 == 0ULL );
 
 	// unit_test[16]  get_down_recv_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	recv_size1	= 65535ULL;
 	recv_size2	= 65535ULL;
 	{
@@ -704,6 +726,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size2 == 0ULL );
 
 	// unit_test[17]  get_down_send_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	recv_size1	= 65535ULL;
 	recv_size2	= 65535ULL;
 	{
@@ -720,6 +743,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size2 == 0ULL );
 
 	// unit_test[18]  update_up_recv_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::update_up_recv_size, &vst, 1000ULL );
 		boost::thread	thread2( &vs_access::update_up_recv_size, &vst, 200ULL );
@@ -734,6 +758,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size1 == 1200ULL );
 
 	// unit_test[19]  update_up_send_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::update_up_send_size, &vst, 100ULL );
 		boost::thread	thread2( &vs_access::update_up_send_size, &vst, 300ULL );
@@ -748,6 +773,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size1 == 400ULL );
 
 	// unit_test[20]  update_down_recv_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::update_down_recv_size, &vst, 10ULL );
 		boost::thread	thread2( &vs_access::update_down_recv_size, &vst, 500ULL );
@@ -762,6 +788,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size1 == 510ULL );
 
 	// unit_test[21]  update_down_send_sizeに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::update_down_send_size, &vst, 8000ULL );
 		boost::thread	thread2( &vs_access::update_down_send_size, &vst, 5000ULL );
@@ -776,6 +803,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( recv_size1 == 13000ULL );
 
 	// unit_test[22]  get_protocol_moduleに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	l7vs::protocol_module_base*	pmb1 = NULL;
 	l7vs::protocol_module_base*	pmb2 = NULL;
 	{
@@ -791,6 +819,7 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( pmb1 == pmb2 );
 
 	// unit_test[23]  get_schedule_moduleに２スレッドから同時アクセス
+	std::cout << counter++ << std::endl;
 	l7vs::schedule_module_base*	smb1 = NULL;
 	l7vs::schedule_module_base*	smb2 = NULL;
 	{
@@ -861,6 +890,9 @@ void	virtualservice_tcp_test2(){
 	// unit_test[24]  sessionがActiveになるときに、release_sessionされるケース
 	// unit_test[25]  sessionがActiveになるときにfinalize
 	// unit_test[26]  release_sessionされるときにfinalize
+	std::cout << counter++ << std::endl;
+	std::cout << counter++ << std::endl;
+	std::cout << counter++ << std::endl;
 	// finalizeを呼べば、stopされてrelease_sessionされる。
 	{
 		boost::thread	thread1( &vs_access::client, &vst );
@@ -878,6 +910,7 @@ void	virtualservice_tcp_test2(){
 	vs_run.join();
 
 	vst.finalize();
+	usleep( 1000 );
 
 	//replicationエリアを開放する
 	debugg_flug_struct::getInstance().destroy_rep_area();
@@ -887,7 +920,7 @@ void	virtualservice_tcp_test3(){
 	//replicationエリアを作成しておく
 	debugg_flug_struct::getInstance().create_rep_area();
 
-	boost::asio::io_service		dispatcher;
+//	boost::asio::io_service		dispatcher;
 
 	l7vs::l7vsd					vsd;
 	l7vs::replication			rep();
@@ -926,6 +959,7 @@ void	virtualservice_tcp_test3(){
 
 	//rs追加
 	// unit_test[27]  add_rsとrs_list_lock
+	std::cout << counter++ << std::endl;
 	//RS追加用のelement準備
 	l7vs::virtualservice_element	elem2;
 	//set element value
@@ -949,8 +983,8 @@ void	virtualservice_tcp_test3(){
 		elem2.realserver_vector.push_back( rs_elem );
 	}
 	{
-		boost::thread	thread1( &vs_access::add_realserver, &vst, elem2 );
-		boost::thread	thread2( &vs_access::rs_list_lock, &vst );
+		boost::thread	thread1( &vs_access::rs_list_lock, &vst );
+		boost::thread	thread2( &vs_access::add_realserver, &vst, elem2 );
 
 		usleep( 100000 );
 		vst.start();
@@ -959,8 +993,8 @@ void	virtualservice_tcp_test3(){
 		//ref_countが1のままだとadd_realserverができないのでunlockする
 		vst.get_vs()->rs_list_unlock();
 		usleep( 100000 );
-		thread1.join();
-		thread2.join();
+ 		thread1.join();
+ 		thread2.join();
 	}
 	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 2 );
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
@@ -969,6 +1003,7 @@ void	virtualservice_tcp_test3(){
 	vst.get_vs()->del_realserver( elem2, vs_err );
 
 	// unit_test[28]  add_rsとrs_list_unlock(ref_countが1でスタートした場合)
+	std::cout << counter++ << std::endl;
 	{
 		//あらかじめlockしておいてref_countを1にしておく
 		vst.get_vs()->rs_list_lock();
@@ -987,6 +1022,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
 	// unit_test[29]  add_rsとconnection_active
+	std::cout << counter++ << std::endl;
 	//RS追加用のelement準備
 	l7vs::virtualservice_element	elem3;
 	//set element value
@@ -1035,6 +1071,7 @@ void	virtualservice_tcp_test3(){
 	vst.get_vs()->del_realserver( elem3, vs_err );
 
 	// unit_test[30]  add_rsとconnection_inactive
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::add_realserver, &vst, elem3 );
 		boost::thread	thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
@@ -1059,6 +1096,7 @@ void	virtualservice_tcp_test3(){
 
 	//rs変更
 	// unit_test[31]  edit_rsとrs_list_lock
+	std::cout << counter++ << std::endl;
 	//RS編集用のelement準備
 	l7vs::virtualservice_element	elem4;
 	//set element value
@@ -1099,6 +1137,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
 
 	// unit_test[32]  edit_rsとrs_list_unlock
+	std::cout << counter++ << std::endl;
 	{
 		//あらかじめlockしておいてref_countを1にしておく
 		vst.get_vs()->rs_list_lock();
@@ -1116,6 +1155,7 @@ void	virtualservice_tcp_test3(){
 	BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
 	// unit_test[33]  edit_rsとconnection_active
+	std::cout << counter++ << std::endl;
 	elem4.realserver_vector.clear();
 	for( size_t i = 0; i < 2; ++i ){
 		l7vs::realserver_element	rs_elem;
@@ -1145,6 +1185,7 @@ void	virtualservice_tcp_test3(){
 		}
 	}
 	// unit_test[34]  edit_rsとconnection_inactive
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::edit_realserver, &vst, elem4 );
 		boost::thread	thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
@@ -1169,6 +1210,7 @@ void	virtualservice_tcp_test3(){
 
 	//rs削除
 	// unit_test[35]  del_rsとrs_list_lock
+	std::cout << counter++ << std::endl;
 	{
 		boost::thread	thread1( &vs_access::del_realserver, &vst, elem4 );
 		boost::thread	thread2( &vs_access::rs_list_lock, &vst );
@@ -1190,6 +1232,7 @@ void	virtualservice_tcp_test3(){
 	vst.get_vs()->add_realserver( elem4, vs_err );
 
 	// unit_test[36]  del_rsとrs_list_unlock
+	std::cout << counter++ << std::endl;
 	{
 		//あらかじめlockしておいてref_countを1にしておく
 		vst.get_vs()->rs_list_lock();
@@ -1262,18 +1305,6 @@ void	virtualservice_tcp_test3(){
 	debugg_flug_struct::getInstance().destroy_rep_area();
 }
 
-void	element_access_test(){
-	//get_qos_upとget_qos_downを複数スレッドから同時に呼ぶ
-}
-
-void	datasize_access_test(){
-	//update_throughputとupdate_up_recvを複数スレッドから同時に呼ぶ
-	//update_throughputとupdate_up_sendを複数スレッドから同時に呼ぶ
-	//update_throughputとupdate_down_recvを複数スレッドから同時に呼ぶ
-	//update_throughputとupdate_down_sendを複数スレッドから同時に呼ぶ
-	//update_throughputとget_throughput_upを複数スレッドから同時に呼ぶ
-	//update_throughputとget_throughput_downを複数スレッドから同時に呼ぶ
-}
 
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
@@ -1283,7 +1314,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	// add test case to test suite
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
+//	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
 
 	framework::master_test_suite().add( ts );
 

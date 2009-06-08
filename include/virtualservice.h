@@ -50,6 +50,8 @@
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
 
+#include "atomic.h"
+
 #define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
@@ -161,30 +163,41 @@ protected:
 	std::list<realserver>		rs_list;						//! realserver list
 	std::map< tcp_endpoint_type,mutex_ptr >
 								rs_mutex_list;					//! list of realserver mutex
-	unsigned long long 			rs_list_ref_count;				//! reference count of realserver list
-	wr_mutex					rs_list_ref_count_mutex;		//! mutex for update reference count
+	l7vs::atomic<unsigned long long>
+								rs_list_ref_count;				//! reference count of realserver list
+//	wr_mutex					rs_list_ref_count_mutex;		//! mutex for update reference count
 	wr_mutex					rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
 
-	unsigned long long			recvsize_up;					//! upstream total receive data size
-	unsigned long long			current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
-	wr_mutex					recvsize_up_mutex;				//! mutex for update upstream receive data size
-	unsigned long long			sendsize_up;					//! upstream total send data size
-	wr_mutex					sendsize_up_mutex;				//! mutex for update upstream send data size
-	unsigned long long			recvsize_down;					//! downstream total receive data size
-	unsigned long long			current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
-	wr_mutex					recvsize_down_mutex;			//! mutex for update downstream receive data size
-	unsigned long long			sendsize_down;					//! downstream total send data size
-	wr_mutex					sendsize_down_mutex;			//! mutex for update downstream send data size
+	l7vs::atomic<unsigned long long>
+								recvsize_up;					//! upstream total receive data size
+	l7vs::atomic<unsigned long long>
+								current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
+//	wr_mutex					recvsize_up_mutex;				//! mutex for update upstream receive data size
+	l7vs::atomic<unsigned long long>
+								sendsize_up;					//! upstream total send data size
+//	wr_mutex					sendsize_up_mutex;				//! mutex for update upstream send data size
+	l7vs::atomic<unsigned long long>
+								recvsize_down;					//! downstream total receive data size
+	l7vs::atomic<unsigned long long>
+								current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
+//	wr_mutex					recvsize_down_mutex;			//! mutex for update downstream receive data size
+	l7vs::atomic<unsigned long long>
+								sendsize_down;					//! downstream total send data size
+//	wr_mutex					sendsize_down_mutex;			//! mutex for update downstream send data size
 
-	unsigned long long			throughput_up;					//! upstream throughput value
-	wr_mutex					throughput_up_mutex;			//! mutex for update upstream throughput value
-	unsigned long long			throughput_down;				//! downstream throughput value
-	wr_mutex					throughput_down_mutex;			//! mutex for update downstream throughput value
+	l7vs::atomic<unsigned long long>
+								throughput_up;					//! upstream throughput value
+//	wr_mutex					throughput_up_mutex;			//! mutex for update upstream throughput value
+	l7vs::atomic<unsigned long long>
+								throughput_down;				//! downstream throughput value
+//	wr_mutex					throughput_down_mutex;			//! mutex for update downstream throughput value
 
-	unsigned long long			wait_count_up;					//! upstream recv wait count
-	wr_mutex					wait_count_up_mutex;			//! mutex for upstream recv wait count
-	unsigned long long			wait_count_down;				//! downstream recv wait count
-	wr_mutex					wait_count_down_mutex;			//! mutex for downstream recv wait count
+	l7vs::atomic<unsigned long long>
+								wait_count_up;					//! upstream recv wait count
+//	wr_mutex					wait_count_up_mutex;			//! mutex for upstream recv wait count
+	l7vs::atomic<unsigned long long>
+								wait_count_down;				//! downstream recv wait count
+//	wr_mutex					wait_count_down_mutex;			//! mutex for downstream recv wait count
 
 	void						load_parameter( l7vs::error_code& );
 

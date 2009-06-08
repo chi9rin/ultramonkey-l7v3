@@ -3,7 +3,7 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_it
+TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_thread_ut2 vs_tcp_it
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 # CPPFLAGS	= -O2 -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
@@ -44,6 +44,14 @@ TCPTSRCS		=	\
 				virtualservice.cpp \
 				vs_tcp_thread_test.cpp
 
+TCPT2SRCS		=	\
+				stub.cpp \
+				../../src/virtualservice_base.cpp \
+				../../src/virtualservice_tcp.cpp \
+				virtualservice_udp.cpp \
+				virtualservice.cpp \
+				vs_tcp_thread_test2.cpp
+
 ITSRCS		=	\
 				stub.cpp \
 				../../src/virtualservice_base.cpp \
@@ -62,6 +70,8 @@ TCPOBJS		= $(TCPSRCS:.cpp=.o)
 
 TPCTOBJS	= $(TCPTSRCS:.cpp=.o)
 
+TPCT2OBJS	= $(TCPT2SRCS:.cpp=.o)
+
 ITOBJS		= $(ITSRCS:.cpp=.o)
 
 all:	$(TARGET)
@@ -75,6 +85,9 @@ vs_tcp_ut:	$(TCPOBJS)
 vs_tcp_thread_ut: $(TPCTOBJS)
 	$(CPP) $(INCLUDES) -o vs_tcp_thread_ut $(TPCTOBJS) $(LDFLAGS) $(LIBS)
 
+vs_tcp_thread_ut2: $(TPCT2OBJS)
+	$(CPP) $(INCLUDES) -o vs_tcp_thread_ut2 $(TPCT2OBJS) $(LDFLAGS) $(LIBS)
+
 vs_tcp_it: $(ITOBJS)
 	$(CPP) $(INCLUDES) -o vs_tcp_it $(ITOBJS) $(LDFLAGS) $(LIBS)
 
@@ -83,4 +96,4 @@ vs_tcp_it: $(ITOBJS)
 # 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS) $(ITOBJS)
+	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS) $(TPCT2OBJS) $(ITOBJS)

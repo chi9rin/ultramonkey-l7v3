@@ -49,18 +49,20 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
 							const l7vs::replication& inrep,
 							const l7vs::virtualservice_element& inelement)
 												 :	vsd( invsd ),
-													rep( inrep ),
-													rs_list_ref_count( 0 ),
-													recvsize_up( 0 ),
-													current_up_recvsize( 0 ),
-													sendsize_up( 0 ),
-													recvsize_down( 0 ),
-													current_down_recvsize( 0 ),
-													sendsize_down( 0 ),
-													throughput_up( 0 ),
-													throughput_down( 0 ),
-													wait_count_up( 0 ),
-													wait_count_down( 0 ) {
+													rep( inrep ) {
+	rs_list_ref_count = 0;
+
+	recvsize_up	= 0;
+	current_up_recvsize	= 0;
+	sendsize_up	= 0;
+	recvsize_down	= 0;
+	current_down_recvsize	= 0;
+	sendsize_down	= 0;
+	throughput_up	= 0;
+	throughput_down	= 0;
+	wait_count_up	= 0;
+	wait_count_down	= 0;
+
 	calc_bps_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	replication_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	protomod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
@@ -211,41 +213,41 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 	if( likely( !err ) ){
 		// decrease wait count
 		{
-			rw_scoped_lock				wait_up_lock( wait_count_up_mutex );
-			if( 0 != wait_count_up )	wait_count_up -= 1;
+//			rw_scoped_lock				wait_up_lock( wait_count_up_mutex );
+			if( wait_count_up != 0 )	wait_count_up--;
 		}
 		{
-			rw_scoped_lock				wait_down_lock( wait_count_down_mutex );
-			if( 0 != wait_count_down )	wait_count_down -= 1;
+//			rw_scoped_lock				wait_down_lock( wait_count_down_mutex );
+			if( wait_count_down != 0 )	wait_count_down--;
 		}
 
-		if( 0 != current_up_recvsize ){
-			rw_scoped_lock				throughput_up_lock( throughput_up_mutex );
-			rd_scoped_lock				recvsize_up_lock( recvsize_up_mutex );
-			rw_scoped_lock				wait_up_lock( wait_count_up_mutex );
+		if( current_up_recvsize != 0 ){
+//			rw_scoped_lock				throughput_up_lock( throughput_up_mutex );
+//			rd_scoped_lock				recvsize_up_lock( recvsize_up_mutex );
+//			rw_scoped_lock				wait_up_lock( wait_count_up_mutex );
 
 			if( 0 != element.qos_upstream ){
 				// wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
-				wait_count_up = ( ( ( current_up_recvsize / param_data.bps_interval ) * 1000 ) / element.qos_upstream );
-				if( wait_count_up > 0 )	wait_count_up -= 1;
+				wait_count_up = ( ( ( current_up_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_upstream );
+				if( wait_count_up > 0 )	wait_count_up--;
 			}
 			// throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
-			throughput_up = ( current_up_recvsize / ( param_data.bps_interval * ( wait_count_up + 1 ) ) ) * 1000;
+			throughput_up = ( current_up_recvsize.get() / ( param_data.bps_interval * ( wait_count_up.get() + 1 ) ) ) * 1000;
 			current_up_recvsize = 0ULL;
 		}
 
-		if( 0 != current_down_recvsize ){
-			rw_scoped_lock				throughput_down_lock( throughput_down_mutex );
-			rd_scoped_lock				recvsize_down_lock( recvsize_down_mutex );
-			rw_scoped_lock				wait_down_lock( wait_count_down_mutex );
+		if( current_down_recvsize != 0 ){
+//			rw_scoped_lock				throughput_down_lock( throughput_down_mutex );
+//			rd_scoped_lock				recvsize_down_lock( recvsize_down_mutex );
+//			rw_scoped_lock				wait_down_lock( wait_count_down_mutex );
 
 			if( 0 != element.qos_downstream ){
 				// wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
-				wait_count_down = ( ( ( current_down_recvsize / param_data.bps_interval ) * 1000 ) / element.qos_downstream );
-				if( wait_count_down > 0 )	wait_count_down -= 1;
+				wait_count_down = ( ( ( current_down_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_downstream );
+				if( wait_count_down > 0 )	wait_count_down--;
 			}
 			// throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
-			throughput_down = ( current_down_recvsize / ( param_data.bps_interval * ( wait_count_down + 1 ) ) ) * 1000;
+			throughput_down = ( current_down_recvsize.get() / ( param_data.bps_interval * ( wait_count_down.get() + 1 ) ) ) * 1000;
 			current_down_recvsize = 0ULL;
 		}
 
@@ -255,10 +257,10 @@ void	l7vs::virtualservice_base::handle_throughput_update( const boost::system::e
 												this, boost::asio::placeholders::error ) );
 		if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 			boost::format formatter1("throughput(upstream) dump   : %d");
-			formatter1 % throughput_up;
+			formatter1 % throughput_up.get();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 8, formatter1.str(), __FILE__, __LINE__ );
 			boost::format formatter2("throughput(downstream) dump : %d");
-			formatter2 % throughput_down;
+			formatter2 % throughput_down.get();
 			l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 9, formatter2.str(), __FILE__, __LINE__ );
 		}
 	}else
@@ -396,9 +398,9 @@ void	l7vs::virtualservice_base::rs_list_lock(){
 	{
 		rw_scoped_lock			refcnt_inc_lock( rs_list_ref_count_inc_mutex );
 	}
-	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
-	if( ULLONG_MAX > rs_list_ref_count )
-		++rs_list_ref_count;
+//	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
+	if( rs_list_ref_count < ULLONG_MAX )
+		rs_list_ref_count++;
 	else
 		rs_list_ref_count = 0;
 
@@ -418,9 +420,9 @@ void	l7vs::virtualservice_base::rs_list_unlock(){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 13, "in_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
 	}
 
-	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
-	if( 0 < rs_list_ref_count )
-		--rs_list_ref_count;
+//	rw_scoped_lock	refcnt_lock( rs_list_ref_count_mutex );
+	if( rs_list_ref_count > 0 )
+		rs_list_ref_count--;
 	else
 		rs_list_ref_count = ULLONG_MAX;
 
@@ -455,10 +457,10 @@ l7vs::virtualservice_element&		l7vs::virtualservice_base::get_element(){
 		element.realserver_vector.push_back( rs_element );
 	}
 	rs_list_unlock();
-	rd_scoped_lock				up_lock( throughput_up_mutex );
-	element.throughput_upstream		= throughput_up;
-	rd_scoped_lock				down_lock( throughput_down_mutex );
-	element.throughput_downstream	= throughput_down;
+//	rd_scoped_lock				up_lock( throughput_up_mutex );
+	element.throughput_upstream		= throughput_up.get();
+//	rd_scoped_lock				down_lock( throughput_down_mutex );
+	element.throughput_downstream	= throughput_down.get();
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format element_dump( "element struct data, "
@@ -535,24 +537,24 @@ unsigned long long	l7vs::virtualservice_base::get_qos_downstream(){
  * @return  upstream throughput[bit/sec] value
  */
 unsigned long long	l7vs::virtualservice_base::get_throughput_upstream(){
-	rd_scoped_lock	lock( throughput_up_mutex );
+//	rd_scoped_lock	lock( throughput_up_mutex );
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		if( boost::this_thread::get_id() == this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_upstream() : ret = %d" );
-			fmt % throughput_up;
+			fmt % throughput_up.get();
 			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 21, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		if( boost::this_thread::get_id() != this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_upstream() : ret = %d" );
-			fmt % throughput_up;
+			fmt % throughput_up.get();
 			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 17, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 
-	return throughput_up;
+	return throughput_up.get();
 }
 
 /*!
@@ -562,24 +564,24 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_upstream(){
  * @return  downstream throughput[bit/sec] value
  */
 unsigned long long	l7vs::virtualservice_base::get_throughput_downstream(){
-	rd_scoped_lock	lock( throughput_down_mutex );
+//	rd_scoped_lock	lock( throughput_down_mutex );
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		if( boost::this_thread::get_id() == this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_downstream() : ret = %d" );
-			fmt % throughput_down;
+			fmt % throughput_down.get();
 			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 22, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		if( boost::this_thread::get_id() != this_id ){
 			boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_throughput_downstream() : ret = %d" );
-			fmt % throughput_down;
+			fmt % throughput_down.get();
 			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 18, fmt.str(), __FILE__, __LINE__ );
 		}
 	}
 
-	return throughput_down;
+	return throughput_down.get();
 }
 
 /*!
@@ -589,13 +591,13 @@ unsigned long long	l7vs::virtualservice_base::get_throughput_downstream(){
  * @return  upstream wait_count value
  */
 unsigned long long	l7vs::virtualservice_base::get_wait_upstream(){
-	rd_scoped_lock	lock( wait_count_up_mutex );
+//	rd_scoped_lock	lock( wait_count_up_mutex );
 	if(	unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_upstream() : ret = %d" );
-		fmt % wait_count_up;
+		fmt % wait_count_up.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 19, fmt.str(), __FILE__, __LINE__ );
 	}
-	return wait_count_up;
+	return wait_count_up.get();
 }
 
 /*!
@@ -605,13 +607,13 @@ unsigned long long	l7vs::virtualservice_base::get_wait_upstream(){
  * @return  downstream wait_count value
  */
 unsigned long long	l7vs::virtualservice_base::get_wait_downstream(){
-	rd_scoped_lock	lock( wait_count_down_mutex );
+//	rd_scoped_lock	lock( wait_count_down_mutex );
 	if(	unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_wait_downstream() : ret = %d" );
-		fmt % wait_count_down;
+		fmt % wait_count_down.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 20, fmt.str(), __FILE__, __LINE__ );
 	}
-	return wait_count_down;
+	return wait_count_down.get();
 }
 
 /*!
@@ -621,13 +623,13 @@ unsigned long long	l7vs::virtualservice_base::get_wait_downstream(){
  * @return  upstream receive size[bit/sec] value
  */
 unsigned long long	l7vs::virtualservice_base::get_up_recv_size(){
-	rd_scoped_lock	lock( recvsize_up_mutex );
+//	rd_scoped_lock	lock( recvsize_up_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_up_recv_size() : ret = %d" );
-		fmt % recvsize_up;
+		fmt % recvsize_up.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 23, fmt.str(), __FILE__, __LINE__ );
 	}
-	return recvsize_up;
+	return recvsize_up.get();
 }
 
 /*!
@@ -637,13 +639,13 @@ unsigned long long	l7vs::virtualservice_base::get_up_recv_size(){
  * @return  upstream send size[bit/sec] value
  */
 unsigned long long	l7vs::virtualservice_base::get_up_send_size(){
-	rd_scoped_lock	lock( sendsize_up_mutex );
+//	rd_scoped_lock	lock( sendsize_up_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_up_send_size() : ret = %d" );
-		fmt % sendsize_up;
+		fmt % sendsize_up.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 24, fmt.str(), __FILE__, __LINE__ );
 	}
-	return sendsize_up;
+	return sendsize_up.get();
 }
 
 /*!
@@ -653,13 +655,13 @@ unsigned long long	l7vs::virtualservice_base::get_up_send_size(){
  * @return  downstream receive size[bit/sec] value
  */
 unsigned long long	l7vs::virtualservice_base::get_down_recv_size(){
-	rd_scoped_lock	lock( recvsize_down_mutex );
+//	rd_scoped_lock	lock( recvsize_down_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_down_recv_size() : ret = %d" );
-		fmt % recvsize_down;
+		fmt % recvsize_down.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 25, fmt.str(), __FILE__, __LINE__ );
 	}
-	return recvsize_down;
+	return recvsize_down.get();
 }
 
 /*!
@@ -669,13 +671,13 @@ unsigned long long	l7vs::virtualservice_base::get_down_recv_size(){
  * @return  downstream send size[bit/sec] value
  */
 unsigned long long	l7vs::virtualservice_base::get_down_send_size(){
-	rd_scoped_lock	lock( sendsize_down_mutex );
+//	rd_scoped_lock	lock( sendsize_down_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in/out_function : unsigned long long virtualservice_base::get_down_send_size() : ret = %d" );
-		fmt % sendsize_down;
+		fmt % sendsize_down.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 26, fmt.str(), __FILE__, __LINE__ );
 	}
-	return sendsize_down;
+	return sendsize_down.get();
 }
 
 
@@ -686,7 +688,7 @@ unsigned long long	l7vs::virtualservice_base::get_down_send_size(){
  * @return  void
  */
 void	l7vs::virtualservice_base::update_up_recv_size( unsigned long long	datasize ){
-	rw_scoped_lock	lock( recvsize_up_mutex );
+//	rw_scoped_lock	lock( recvsize_up_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in_function : void virtualservice_base::update_up_recv_size("
 							 "unsigned long long datasize) : datasize = %d" );
@@ -694,19 +696,19 @@ void	l7vs::virtualservice_base::update_up_recv_size( unsigned long long	datasize
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 27, fmt.str(), __FILE__, __LINE__ );
 	}
 
-	if( (ULLONG_MAX - current_up_recvsize) < datasize )
+	if( (ULLONG_MAX - current_up_recvsize.get()) < datasize )
 		current_up_recvsize	= ULLONG_MAX;
 	else
-		current_up_recvsize	= current_up_recvsize + datasize;
+		current_up_recvsize	+= datasize;
 
-	if( (ULLONG_MAX - recvsize_up) < datasize )
-		recvsize_up = datasize - (ULLONG_MAX - recvsize_up);
+	if( (ULLONG_MAX - recvsize_up.get()) < datasize )
+		recvsize_up = datasize - (ULLONG_MAX - recvsize_up.get());
 	else
-		recvsize_up = recvsize_up + datasize;
+		recvsize_up += datasize;
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : current_up_recvsize = %d, recvsize_up = %d" );
-		fmt % current_up_recvsize % recvsize_up;
+		fmt % current_up_recvsize.get() % recvsize_up.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 28, fmt.str(), __FILE__, __LINE__ );
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 29, "out_function : void virtualservice_base::update_up_recv_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
@@ -719,7 +721,7 @@ void	l7vs::virtualservice_base::update_up_recv_size( unsigned long long	datasize
  * @return  void
  */
 void	l7vs::virtualservice_base::update_up_send_size( unsigned long long	datasize ){
-	rw_scoped_lock	lock( sendsize_up_mutex );
+//	rw_scoped_lock	lock( sendsize_up_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in_function : void virtualservice_base::update_up_send_size("
 							 "unsigned long long datasize) : datasize = %d" );
@@ -727,14 +729,14 @@ void	l7vs::virtualservice_base::update_up_send_size( unsigned long long	datasize
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 30, fmt.str(), __FILE__, __LINE__ );
 	}
 
-	if( (ULLONG_MAX - sendsize_up) < datasize )
-		sendsize_up = datasize - ( ULLONG_MAX - sendsize_up );
+	if( (ULLONG_MAX - sendsize_up.get()) < datasize )
+		sendsize_up = datasize - ( ULLONG_MAX - sendsize_up.get() );
 	else
-		sendsize_up = sendsize_up + datasize;
+		sendsize_up += datasize;
 
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 		boost::format	fmt( "update members : sendsize_up = %d" );
-		fmt % sendsize_up;
+		fmt % sendsize_up.get();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt.str(), __FILE__, __LINE__ );
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 32, "out_function : void virtualservice_base::update_up_send_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
@@ -747,7 +749,7 @@ void	l7vs::virtualservice_base::update_up_send_size( unsigned long long	datasize
  * @return  void
  */
 void	l7vs::virtualservice_base::update_down_recv_size( unsigned long long	datasize ){
-	rw_scoped_lock	lock( recvsize_down_mutex );
+//	rw_scoped_lock	lock( recvsize_down_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in_function : void virtualservice_base::update_down_recv_size("
 							 "unsigned long long datasize) : datasize = %d" );
@@ -755,19 +757,19 @@ void	l7vs::virtualservice_base::update_down_recv_size( unsigned long long	datasi
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 33, fmt.str(), __FILE__, __LINE__ );
 	}
 
-	if( (ULLONG_MAX - current_down_recvsize) < datasize )
+	if( (ULLONG_MAX - current_down_recvsize.get()) < datasize )
 		current_down_recvsize = ULLONG_MAX;
 	else
-		current_down_recvsize = current_down_recvsize + datasize;
+		current_down_recvsize += datasize;
 
-	if( (ULLONG_MAX - recvsize_down) < datasize )
-		recvsize_down = datasize - ( ULLONG_MAX - recvsize_down );
+	if( (ULLONG_MAX - recvsize_down.get()) < datasize )
+		recvsize_down = datasize - ( ULLONG_MAX - recvsize_down.get() );
 	else
-		recvsize_down = recvsize_down + datasize;
+		recvsize_down += datasize;
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : current_down_recvsize = %d, recvsize_down = %d" );
-		fmt % current_down_recvsize % recvsize_down;
+		fmt % current_down_recvsize.get() % recvsize_down.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 34, fmt.str(), __FILE__, __LINE__ );
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 35, "out_function : void virtualservice_base::update_down_recv_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}
@@ -780,7 +782,7 @@ void	l7vs::virtualservice_base::update_down_recv_size( unsigned long long	datasi
  * @return  void
  */
 void	l7vs::virtualservice_base::update_down_send_size( unsigned long long	datasize ){
-	rw_scoped_lock	lock( sendsize_down_mutex );
+//	rw_scoped_lock	lock( sendsize_down_mutex );
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "in_function : void virtualservice_base::update_down_send_size("
 							 "unsigned long long datasize) : datasize = %d" );
@@ -788,14 +790,15 @@ void	l7vs::virtualservice_base::update_down_send_size( unsigned long long	datasi
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 36, fmt.str(), __FILE__, __LINE__ );
 	}
 
-	if( (ULLONG_MAX - sendsize_down) < datasize )
-		sendsize_down = datasize - ( ULLONG_MAX - sendsize_down );
+	if( (ULLONG_MAX - sendsize_down.get()) < datasize )
+		sendsize_down = datasize - ( ULLONG_MAX - sendsize_down.get() );
 	else
-		sendsize_down = sendsize_down + datasize;
+//		sendsize_down = sendsize_down.get() + datasize;
+		sendsize_down += datasize;
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : sendsize_down = %d" );
-		fmt % sendsize_down;
+		fmt % sendsize_down.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 37, fmt.str(), __FILE__, __LINE__ );
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 38, "out_function : void virtualservice_base::update_down_send_size(unsigned long long datasize)", __FILE__, __LINE__ );
 	}

@@ -951,7 +951,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 
 	interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
 	boost::mutex::scoped_lock lk( mtx );
-	while( 0ULL != rs_list_ref_count ){
+	while( rs_list_ref_count != 0ULL ){
 		cond.timed_wait( lk, interval );
 	}
 
@@ -1056,7 +1056,7 @@ void	l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_eleme
 
 	interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
 	boost::mutex::scoped_lock lk( mtx );
-	while( 0ULL != rs_list_ref_count ){
+	while( rs_list_ref_count != 0ULL ){
 		cond.timed_wait( lk, interval );
 	}
 
@@ -1163,7 +1163,7 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 
 	interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
 	boost::mutex::scoped_lock lk( mtx );
-	while( 0ULL != rs_list_ref_count ){
+	while( rs_list_ref_count != 0ULL ){
 		cond.timed_wait( lk, interval );
 	}
 

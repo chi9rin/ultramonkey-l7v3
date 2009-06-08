@@ -45,7 +45,7 @@ public:
 	}
 	check_message_result	add_parameter( const std::vector<std::string>& args ){
 		protocol_module_base::check_message_result	result;
-		result.flag = false;
+		result.flag = true;
 		std::cout << "ProtocolModule add parameter called." << std::endl;
 		return result;
 	}
