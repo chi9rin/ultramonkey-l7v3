@@ -17,23 +17,30 @@ protected:
 		struct node_type*  volatile	next;
 		node_type() : value( NULL ) , next( NULL ){}
 	};
-	struct mng_queue_type {
-		int volatile		counter;
-		node_type* volatile 	headloc;
-		node_type* volatile	tailloc;
-		mng_queue_type() : counter(0), headloc( NULL ), tailloc( NULL ) {}
-	};
+	
+	unsigned int volatile	counter;
+	node_type* volatile 	headloc;
+	node_type* volatile		tailloc;
+	node_type*				new_node;
 public:
-	mng_queue_type*		mng_queue;
-
 	// constractor
 	lockfree_queue(){
-		node_type*	new_node = new node_type();
-		mng_queue = new mng_queue_type();
-		mng_queue->headloc = new_node;
-		mng_queue->tailloc = new_node;
+		new_node = new node_type();
+		headloc = new_node;
+		tailloc = new_node;
+		counter = 0;
 	}
 
+	// destractor
+	~lockfree_queue(){
+		Tvalue popval;
+		const unsigned int delcnt = counter;
+		for(int i=1;i<=delcnt;i++){
+			pop(popval);
+		}
+		delete new_node;
+	}
+	
 	void push(const Tvalue* inptr){
 		node_type *_new_node,*_tail,*_next;
 		_new_node = new node_type();
@@ -41,21 +48,21 @@ public:
 
 		// transaction st
 		while(true){
-			_tail = mng_queue->tailloc;
+			_tail = tailloc;
 			_next = _tail->next;
-			if (_tail == mng_queue->tailloc){
+			if (_tail == tailloc){
 				if(!_next){
 					if(cas(&_tail->next,_next,_new_node)) break;
 				}
 			}else{
-				cas(&mng_queue->tailloc,_tail,_next);
+				cas(&tailloc,_tail,_next);
 			}
 
 		}
 		// transaction ed
 
-		cas(&mng_queue->tailloc,_tail,_new_node);
-		add(&mng_queue->counter);
+		cas(&tailloc,_tail,_new_node);
+		add(&counter);
 		return;
 	}
 
@@ -64,20 +71,20 @@ public:
 
 		//transaction st
 		while(1){
-			_head_node = mng_queue->headloc;
-			_tail_node = mng_queue->tailloc;
+			_head_node = headloc;
+			_tail_node = tailloc;
 
-			if (_head_node == mng_queue->headloc){
+			if (_head_node == headloc){
 				if(_head_node ==_tail_node){
 					if(_head_node->next == NULL){
 						//false
 						return;
 					}
 					_next_node = _head_node->next;
-					cas(&mng_queue->tailloc,_tail_node,_next_node);
+					cas(&tailloc,_tail_node,_next_node);
 				}else{
 					_next_node = _head_node->next;
-					if(cas(&mng_queue->headloc,_head_node,_next_node)){
+					if(cas(&headloc,_head_node,_next_node)){
 						_value = *_next_node->value;
 						break;
 
@@ -89,19 +96,19 @@ public:
 		//transaction ed
 
 		delete _head_node;
-		sub(&mng_queue->counter);
+		sub(&counter);
 		return;
 	}
 
 	bool empty(){
-		if (mng_queue->tailloc == mng_queue->headloc){
+		if (tailloc == headloc){
 			return true;
 		}else{
 			return false;
 		}
 	}
-	int size(){
-		return mng_queue->counter;
+	unsigned int size(){
+		return counter;
 	}
 };
 
