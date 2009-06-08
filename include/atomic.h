@@ -6,39 +6,35 @@ namespace l7vs{
 
 template<class T> class atomic :boost::noncopyable{
 protected:
-	T volatile _p;
+	T volatile p;
 public:
-	T get(){ return _p; }
-	atomic& operator=(const T& _q) {
-		__sync_lock_test_and_set(&_p,_q);
+	T get(){ return p; }
+	atomic& operator=(const T& q) {
+		__sync_lock_test_and_set(&p,q);
 		return *this;
 	}
-	atomic& operator++(){
-		_p++;
+	atomic& operator++(const int){
+		p++;
 		return *this;
 	}
-	atomic& operator--(){
-		_p--;
+	atomic& operator--(const int){
+		p--;
 		return *this;
 	}
-	bool operator<(T _q) const{
-		return (_p < _q);
+	atomic& operator+=(const T& q){
+		p += q;
+		return *this;
 	}
-	bool operator<=(T _q) const{
-		return (_p <= _q);
+	atomic& operator-=(const T& q){
+		p -= q;
+		return *this;
 	}
-	bool operator>(T _q) const{
-		return (_p > _q);
-	}
-	bool operator>=(T _q) const{
-		return (_p >= _q);
-	}
-	bool operator==(T _q) const{
-		return (_p == _q);
-	}
-	bool operator!=(T _q) const{
-		return (_p != _q);
-	}
+	bool operator<(  T& q ) const{ return p < q; }
+	bool operator<=( T& q ) const{ return p <= q; }
+	bool operator>(  T& q ) const{ return p > q; }
+	bool operator>=( T& q ) const{ return p >= q; }
+	bool operator==( T& q ) const{ return p == q; }
+	bool operator!=( T& q ) const{ return p != q; }
 };
 
 
@@ -46,83 +42,112 @@ public:
 template <>
 class atomic<int>{
 protected:
-	int volatile _p;
+	int volatile p;
 public:
 	int get(){
-		return _p;
+		return p;
 	}
-	atomic& operator=(const int _q) {
-		__sync_lock_test_and_set(&_p,_q);
+	atomic& operator=(const int& q) {
+		__sync_lock_test_and_set(&p,q);
 		return *this;
 	}
-	int operator++(int){
-		__sync_add_and_fetch(&_p,1);
-		return _p;
+	atomic& operator++(const int){
+		__sync_add_and_fetch(&p,1);
+		return *this;
 	}
-	int operator--(int){
-		__sync_sub_and_fetch(&_p,1);
-		return _p;
+	atomic& operator--(const int){
+		__sync_sub_and_fetch(&p,1);
+		return *this;
 	}
-	bool operator<(const int _q) const{
-		return (_p < _q);
+	atomic& operator+=(const int& q){
+		__sync_add_and_fetch(&p,q);
+		return *this;
 	}
-	bool operator<=(const int _q) const{
-		return (_p <= _q);
+	atomic& operator-=(const int& q){
+		__sync_sub_and_fetch(&p,q);
+		return *this;
 	}
-	bool operator>(const int _q) const{
-		return (_p > _q);
-	}
-	bool operator>=(const int _q) const{
-		return (_p >= _q);
-	}
-	bool operator==(const int _q) const{
-		return (_p == _q);
-	}
-	bool operator!=(const int _q) const{
-		return (_p != _q);
-	}
+	bool operator<(  const int& q ) const{ return p < q; }
+	bool operator<=( const int& q ) const{ return p <= q; }
+	bool operator>(  const int& q ) const{ return p > q; }
+	bool operator>=( const int& q ) const{ return p >= q; }
+	bool operator==( const int& q ) const{ return p == q; }
+	bool operator!=( const int& q ) const{ return p != q; }
+};
 
+
+//longlong
+template <>
+class atomic<long long>{
+protected:
+	long long volatile p;
+public:
+	long long get(){
+		return p;
+	}
+	atomic& operator=(const long long& q) {
+		__sync_lock_test_and_set(&p,q);
+		return *this;
+	}
+	atomic& operator++(const int){
+		__sync_add_and_fetch(&p,1);
+		return *this;
+	}
+	atomic& operator--(const int){
+		__sync_sub_and_fetch(&p,1);
+		return *this;
+	}
+	atomic& operator+=(const long long& q){
+		__sync_add_and_fetch(&p,q);
+		return *this;
+	}
+	atomic& operator-=(const long long& q){
+		__sync_sub_and_fetch(&p,q);
+		return *this;
+	}
+	bool operator<(  const long long& q ) const{ return p < q; }
+	bool operator<=( const long long& q ) const{ return p <= q; }
+	bool operator>(  const long long& q ) const{ return p > q; }
+	bool operator>=( const long long& q ) const{ return p >= q; }
+	bool operator==( const long long& q ) const{ return p == q; }
+	bool operator!=( const long long& q ) const{ return p != q; }
 };
 
 //unsigned longlong
 template <>
 class atomic<unsigned long long>{
-protected:
-	unsigned long long volatile _p;
-public:
-	unsigned long long get(){
-		return _p;
-	}
-	atomic& operator=(const unsigned long long _q) {
-		__sync_lock_test_and_set(&_p,_q);
-		return *this;
-	}
-	unsigned long long operator++(int){
-		__sync_add_and_fetch(&_p,1);
-		return _p;
-	}
-	unsigned long long operator--(int){
-		__sync_sub_and_fetch(&_p,1);
-		return _p;
-	}
-	bool operator<(const unsigned long long _q) const{
-		return (_p < _q);
-	}
-	bool operator<=(const unsigned long long _q) const{
-		return (_p <= _q);
-	}
-	bool operator>(const unsigned long long _q) const{
-		return (_p > _q);
-	}
-	bool operator>=(const unsigned long long _q) const{
-		return (_p >= _q);
-	}
-	bool operator==(const unsigned long long _q) const{
-		return (_p == _q);
-	}
-	bool operator!=(const unsigned long long _q) const{
-		return (_p != _q);
-	}
+	protected:
+		unsigned long long volatile p;
+	public:
+		unsigned long long get(){
+			return p;
+		}
+		atomic& operator=(const unsigned long long& q) {
+			__sync_lock_test_and_set(&p,q);
+			return *this;
+		}
+		atomic& operator++(const int){
+			__sync_add_and_fetch(&p,1);
+			return *this;
+		}
+		atomic& operator--(const int){
+			__sync_sub_and_fetch(&p,1);
+			return *this;
+		}
+		atomic& operator+=(const unsigned long long& q){
+			__sync_add_and_fetch(&p,q);
+			return *this;
+		}
+		atomic& operator-=(const unsigned long long& q){
+			__sync_sub_and_fetch(&p,q);
+			return *this;
+		}
+		bool operator<(  const unsigned long long& q ) const{ return p < q; }
+		bool operator<=( const unsigned long long& q ) const{ return p <= q; }
+		bool operator>(  const unsigned long long& q ) const{ return p > q; }
+		bool operator>=( const unsigned long long& q ) const{ return p >= q; }
+		bool operator==( const unsigned long long& q ) const{ return p == q; }
+		bool operator!=( const unsigned long long& q ) const{ return p != q; }
 };
 
 } //namespace l7vsd
