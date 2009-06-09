@@ -6,7 +6,7 @@ namespace l7vs{
 
 template<class T> class atomic :boost::noncopyable{
 protected:
-	T volatile p;
+	volatile T p;
 public:
 	T get(){ return p; }
 	atomic& operator=(const T& q) {
@@ -42,7 +42,7 @@ public:
 template <>
 class atomic<int>{
 protected:
-	int volatile p;
+	volatile int p;
 public:
 	int get(){
 		return p;
@@ -80,7 +80,7 @@ public:
 template <>
 class atomic<long long>{
 protected:
-	long long volatile p;
+	volatile long long p;
 public:
 	long long get(){
 		return p;
@@ -117,7 +117,7 @@ public:
 template <>
 class atomic<unsigned long long>{
 	protected:
-		unsigned long long volatile p;
+		volatile unsigned long long  p;
 	public:
 		unsigned long long get(){
 			return p;
