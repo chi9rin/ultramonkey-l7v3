@@ -16,11 +16,10 @@ void*	thread_func_atomic( void* param ){
 	unsigned long long starttime, endtime;
 	RDTSC64( starttime );
 	for( long long i = 0 ; i < 100; ++i ){
-		lockfree_queue_long.push( i );	
+		lockfree_queue_long.push( &i );	
 	}
 	for( long long i = 0 ; i < 100; ++i ){
-		long long value;
-		lockfree_queue_long.pop( value );
+		long long* value = lockfree_queue_long.pop();
 	}
 	RDTSC64( endtime );
 	std::cout << endtime - starttime << " , " << std::endl;
@@ -70,6 +69,7 @@ int main( int argc, char* argv[] ){
 	}
 	thread_vec.clear();
 
+/*
 	//mutex version
 	std::cout << "mutex func time start" << std::endl;
 	for( int i = 0; i < count; ++i ){
@@ -83,6 +83,6 @@ int main( int argc, char* argv[] ){
 	}
 
 	pthread_mutex_destroy( &mutex );
-
+*/
 	return 0;
 }

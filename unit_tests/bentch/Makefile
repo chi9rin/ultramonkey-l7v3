@@ -5,7 +5,7 @@ CPPFLAGS	= -O2 -g -Werror -pthread
 INCLUDES	=	-I../../include
 LIBS		=
 
-LDFLAGS		= -lrt -ldl
+LDFLAGS		= -lrt -ldl -pthread
 
 
 SRCS		= atomic_test.cpp
