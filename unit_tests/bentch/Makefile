@@ -1,6 +1,7 @@
 TARGET		= atomic_bench
+TARGET2		= queue_bench
 CPP		= g++
-CPPFLAGS	= -Wall -O2 -g -Werror -pthread 
+CPPFLAGS	= -O2 -g -Werror -pthread 
 INCLUDES	=	-I../../include
 LIBS		=
 
@@ -8,6 +9,7 @@ LDFLAGS		= -lrt -ldl
 
 
 SRCS		= atomic_test.cpp
+SRCS2		= queue_test.cpp
 
 
 .SUFFIXES:	.o .cpp
@@ -15,14 +17,18 @@ SRCS		= atomic_test.cpp
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 OBJS		= $(SRCS:.cpp=.o)
+OBJS2		= $(SRCS2:.cpp=.o)
 
-all:	$(TARGET)
+all:	$(TARGET) $(TARGET2)
 
 $(TARGET):	$(OBJS)
 	$(CPP) $(INCLUDES) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
 
+$(TARGET2):	$(OBJS2)
+	$(CPP) $(INCLUDES) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
+
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS) $(TARGET2) $(OBJS2)
 
 
