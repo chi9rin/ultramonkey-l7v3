@@ -41,10 +41,10 @@ public:
 		delete new_node;
 	}
 	
-	void push(const Tvalue* inptr){
+	void push(const Tvalue& value){
 		node_type *_new_node,*_tail,*_next;
 		_new_node = new node_type();
-		_new_node->value = const_cast<Tvalue*>( inptr );
+		_new_node->value = const_cast<Tvalue*>(&value);
 
 		// transaction st
 		while(true){
@@ -57,7 +57,6 @@ public:
 			}else{
 				cas(&tailloc,_tail,_next);
 			}
-
 		}
 		// transaction ed
 
