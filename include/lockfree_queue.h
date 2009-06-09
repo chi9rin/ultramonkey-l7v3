@@ -28,18 +28,18 @@ public:
 	// destractor
 	~lockfree_queue(){
 		while( counter-- ){
-			Tvalue popval;
+			Tvalue* popval;
 			pop(popval);
 		}
 		delete new_node;
 	}
 	
-	void push(const Tvalue& value){
+	void push(const Tvalue* value){
 		volatile	node_type* _new_node	= new node_type();
 		volatile	node_type* _tail;
 		volatile	node_type* _next;
 
-		_new_node->value = const_cast<Tvalue*>( &value );
+		_new_node->value = const_cast<Tvalue*>( value );
 
 		// transaction st
 		while(true){
@@ -57,7 +57,7 @@ public:
 		__sync_add_and_fetch( &counter, 1 );
 	}
 
-	void pop(Tvalue& _value){
+	void pop(Tvalue*& (_value) ){
 		volatile	node_type*	_head_node;
 		volatile	node_type*	_tail_node;
 		volatile	node_type*	_next_node;
@@ -78,7 +78,7 @@ public:
 				else{
 					_next_node = _head_node->next;
 					if( __sync_bool_compare_and_swap(&headloc,_head_node,_next_node )){
-						_value = *_next_node->value;
+						_value = _next_node->value;
 						break;
 					}
 				}
