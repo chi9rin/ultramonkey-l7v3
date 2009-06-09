@@ -25,7 +25,7 @@ $(TARGET):	$(OBJS)
 	$(CPP) $(INCLUDES) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
 
 $(TARGET2):	$(OBJS2)
-	$(CPP) $(INCLUDES) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CPP) $(INCLUDES) -o $@ $(LDFLAGS) $(OBJS2) $(LIBS)
 
 
 clean:
