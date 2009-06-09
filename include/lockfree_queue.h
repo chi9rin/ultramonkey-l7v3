@@ -28,7 +28,7 @@ public:
 	// destractor
 	~lockfree_queue(){
 		while( counter-- ){
-			Tvalue* popval = pop();
+			pop();
 		}
 		delete new_node;
 	}
