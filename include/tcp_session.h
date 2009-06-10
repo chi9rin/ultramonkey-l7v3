@@ -71,6 +71,13 @@ namespace l7vs{
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
 			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io);
+						
+			//! construcor
+			//! @param[in/out]	vs is parent virtualservice object
+			//! @param[in/out]	io is session use io service object
+			//! @param[in]		set socket option info 
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,const tcp_socket::tcp_socket_option_info set_option);
+			
 			//! destructor
 			virtual ~tcp_session();
 			//! initialize
@@ -233,6 +240,9 @@ namespace l7vs{
 			std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_up_thread_function_map;
 			//! virtual service message convert to down thread function object map
 			std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_down_thread_function_map;
+			
+			//! socket option 
+			tcp_socket::tcp_socket_option_info socket_opt_info;
 			
 			//! up and down thread state update
 			//! @param[in]		thread_flag is regist or unregist bitset

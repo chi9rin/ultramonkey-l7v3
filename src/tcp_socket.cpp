@@ -34,8 +34,18 @@ namespace l7vs{
 	tcp_socket::tcp_socket(boost::asio::io_service& io):
 		my_socket(io),
 		open_flag(false){
+			opt_info.nodelay_opt = false;
+			opt_info.cork_opt = false;
+			opt_info.quickack_opt = false;
 		Logger	logger( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
+	}
 
+	//! construcor
+	tcp_socket::tcp_socket(boost::asio::io_service& io,tcp_socket_option_info set_option):
+		my_socket(io),
+		open_flag(false),
+		opt_info(set_option){
+		Logger	logger( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
 	}
 
 	//! destructor
@@ -76,6 +86,27 @@ namespace l7vs{
 					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 5, buf.str(), __FILE__, __LINE__ );
 				}
 				//----Debug log----------------------------------------------------------------------
+				
+				//set TCP_NODELAY
+				if(opt_info.nodelay_opt){
+					boost::asio::ip::tcp::no_delay set_option(opt_info.nodelay_val);
+					my_socket.set_option(set_option,ec);
+					if(unlikely(ec)){
+						//ERROR
+						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 100, "socket option(TCP_NODELAY) set failed" , __FILE__, __LINE__ );
+					}
+				}
+				
+				//set TCP_CORK
+				if(opt_info.cork_opt){
+					int val = opt_info.cork_val;
+					size_t len = sizeof(val);
+					boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+					if(unlikely(ec)){
+						//ERROR
+						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 101, "socket option(TCP_CORK) set failed" , __FILE__, __LINE__ );
+					}
+				}
 			}else{
 				open_flag = false;
 			}
@@ -100,6 +131,29 @@ namespace l7vs{
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 6, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
+		
+		//set TCP_NODELAY
+		if(opt_info.nodelay_opt){
+			boost::system::error_code ec;
+			boost::asio::ip::tcp::no_delay set_option(opt_info.nodelay_val);
+			my_socket.set_option(set_option,ec);
+			if(unlikely(ec)){
+						//ERROR
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 102, "socket option(TCP_NODELAY) set failed" , __FILE__, __LINE__ );
+			}
+		}
+				
+		//set TCP_CORK
+		if(opt_info.cork_opt){
+			boost::system::error_code ec;
+			int val = opt_info.cork_val;
+			size_t len = sizeof(val);
+			boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+			if(unlikely(ec)){
+						//ERROR
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 103, "socket option(TCP_CORK) set failed" , __FILE__, __LINE__ );
+			}
+		}
 	}
 
 	//! close socket
@@ -177,6 +231,18 @@ namespace l7vs{
 
         rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
+		
+		//set TCP_QUICKACK
+		if(opt_info.quickack_opt){
+			int val = opt_info.quickack_val;
+			size_t len = sizeof(val);
+			boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
+			if(unlikely(ec)){
+				//ERROR
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 104, "socket option(TCP_QUICKACK) set failed" , __FILE__, __LINE__ );
+			}
+		}
+		
 		res_size = my_socket.read_some(buffers,ec);
 		if(unlikely(ec)){
 			if (likely(!open_flag)) {
