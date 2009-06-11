@@ -25,8 +25,15 @@ void	client(){
 
 	boost::asio::io_service	dispatcher;
 	boost::asio::ip::tcp::socket	sock( dispatcher );
-	std::cout << "connect" << std::endl;
-	sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ) );
+//	std::cout << "connect" << std::endl;
+	sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback() , (60000) ) ,b_err);
+	if(b_err){
+		//ERROR
+		std::cout << "connection error [" << b_err.message() << "]" << std::endl;
+		return;
+	}else{
+		std::cout << "connect" << std::endl;
+	}
 
 	sock.close( b_err );
 }
@@ -278,7 +285,7 @@ void	virtualservice_tcp_test2(){
 	std::cout << counter++ << std::endl;
 	BOOST_MESSAGE( "-------16" );
 	l7vs::virtualservice_element	add_err_element;
-	add_err_element.tcp_accept_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (80) );
+	add_err_element.tcp_accept_endpoint = tcp_ep_type( boost::asio::ip::address_v4::loopback(), (80) );
 	l7vs::realserver_element		rs_adderr_elem;
 	rs_adderr_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.100.10" ), (8080) );
 	add_err_element.realserver_vector.push_back( rs_adderr_elem );
@@ -308,7 +315,7 @@ void	virtualservice_tcp_test2(){
 	BOOST_MESSAGE( "-------18" );
 	l7vs::virtualservice_element	del_err_element;
 	l7vs::realserver_element		rs_delerr_elem;
-	del_err_element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (80) );
+	del_err_element.tcp_accept_endpoint	= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (80) );
 	rs_delerr_elem.tcp_endpoint = tcp_ep_type( boost::asio::ip::address::from_string( "192.168.10.10" ), (8080) );
 	del_err_element.realserver_vector.clear();
 	del_err_element.realserver_vector.push_back( rs_delerr_elem );
@@ -1264,6 +1271,7 @@ void	virtualservice_tcp_test5(){
 	vs->initialize( vs_err );
 
 	boost::thread	vs_main( &l7vs::vs_tcp::run, vs );
+	usleep( 2000000 );
 	boost::thread	cl_thread( &client );
 
 	//2秒待ってsessionプールのサイズをチェック

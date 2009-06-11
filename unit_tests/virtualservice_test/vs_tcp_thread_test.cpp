@@ -26,7 +26,7 @@ void	client(){
 
 	boost::asio::io_service	dispatcher;
 	boost::asio::ip::tcp::socket	sock( dispatcher );
-	sock.connect( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ), b_err );
+	sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ), b_err );
 	std::cout << "connect" << std::endl;
 
 	usleep( 10000 );
@@ -87,7 +87,7 @@ public:
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		sock.connect( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ), b_err );
+		sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ), b_err );
 		std::cout << "connect" << std::endl;
 	
 		usleep( 10000 );
@@ -386,7 +386,7 @@ void	virtualservice_tcp_test1(){
 	//set element value
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
@@ -516,7 +516,7 @@ void	virtualservice_tcp_test1(){
 	//set element value
 	elem3.udpmode					= false;
 	elem3.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem3.realserver_vector.clear();
 	elem3.protocol_module_name		= "PMtest1";
@@ -867,7 +867,7 @@ void	virtualservice_tcp_test2(){
 	//set element value
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
@@ -941,7 +941,7 @@ void	virtualservice_tcp_test3(){
 	//set element value
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
@@ -965,7 +965,7 @@ void	virtualservice_tcp_test3(){
 	//set element value
 	elem2.udpmode					= false;
 	elem2.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem2.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem2.realserver_vector.clear();
 	elem2.protocol_module_name		= "PMtest1";
@@ -1028,7 +1028,7 @@ void	virtualservice_tcp_test3(){
 	//set element value
 	elem3.udpmode					= false;
 	elem3.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem3.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem3.realserver_vector.clear();
 	elem3.protocol_module_name		= "PMtest1";
@@ -1102,7 +1102,7 @@ void	virtualservice_tcp_test3(){
 	//set element value
 	elem4.udpmode					= false;
 	elem4.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem4.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem4.realserver_vector.clear();
 	elem4.protocol_module_name		= "PMtest1";

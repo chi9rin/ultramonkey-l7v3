@@ -146,6 +146,8 @@ void	l7vs::session_thread_control::upstream_run(){
 		state = upthread_state;	//thread local state is update.
 	}
 	upthread_running_mutex.unlock();
+	boost::mutex::scoped_lock up_lk( upthread_joining_mutex );
+	upthread_joining_condition.notify_all();
 }
 
 void	l7vs::session_thread_control::downstream_run(){
@@ -177,6 +179,8 @@ void	l7vs::session_thread_control::downstream_run(){
 		state = downthread_state;	// thread local sate is update.
 	}
 	downthread_running_mutex.unlock();
+	boost::mutex::scoped_lock down_lk( downthread_joining_mutex );
+	downthread_joining_condition.notify_all();
 }
 
 void	l7vs::session_thread_control::startupstream(){
@@ -223,7 +227,8 @@ void	l7vs::session_thread_control::join(){
 		boost::mutex::scoped_lock downthread_running_wait( downthread_running_mutex );
 		downthread_condition.notify_all(); //condition wait thread is run.
 	}
-	usleep(1000);
+	upthread_joining_condition.wait( up_lk );
+	downthread_joining_condition.wait( down_lk );
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 	boost::format fmt("out_function : void session_thread_control::stopd ownstream() : up_status = %d / down_status = %d");
 		fmt % upthread_state % downthread_state;
@@ -381,6 +386,7 @@ l7vs::tcp_session::tcp_session(l7vs::virtualservice_tcp& vs, boost::asio::io_ser
 l7vs::tcp_session::~tcp_session(void){}
 l7vs::session_result_message l7vs::tcp_session::initialize(void){
 	l7vs::session_result_message	result;
+	result.flag = false;
 	return result;
 }
 
