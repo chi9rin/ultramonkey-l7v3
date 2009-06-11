@@ -52,6 +52,20 @@ public:
 		return rs_list_ref_count.get();
 // 		return rs_list_ref_count;
 	}
+
+	bool& get_defer_accept_opt(){
+		return defer_accept_opt;
+	};
+	int& get_defer_accept_val(){
+		return defer_accept_val;
+	};
+	l7vs::tcp_socket::tcp_socket_option_info& get_set_sock_opt(){
+		return set_sock_opt;
+	};
+	boost::asio::ip::tcp::acceptor& get_acceptor(){
+		return acceptor_;
+	};
+	
 };
 
 }

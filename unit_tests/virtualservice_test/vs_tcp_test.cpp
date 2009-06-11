@@ -93,6 +93,12 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( static_cast<unsigned int>(l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT)
 				 == vs->get_pool_sessions().size() );
 
+	// set option
+	bool& defer_accept_opt = vs->get_defer_accept_opt();
+	defer_accept_opt = true;
+	int& defer_accept_val = vs->get_defer_accept_val();
+	defer_accept_val = 1;
+
 	// unit_test[3]  run method test
 	std::cout << counter++ << std::endl;
 	BOOST_MESSAGE( "-------3" );
@@ -106,6 +112,14 @@ void	virtualservice_tcp_test1(){
 	BOOST_CHECK( 2 == debugg_flug_struct::getInstance().get_pm_rep_count() );
 	BOOST_CHECK( 2 == debugg_flug_struct::getInstance().get_sm_rep_count() );
 
+	// unit_test[54]  set TCP_DEFER_ACCEPT test
+	int val = 0;
+	size_t len = sizeof(val);
+	boost::system::error_code ec;
+	boost::asio::detail::socket_ops::getsockopt(vs->get_acceptor().native(),IPPROTO_TCP,TCP_DEFER_ACCEPT,&val,&len,ec);
+	BOOST_CHECK(!ec);
+	BOOST_CHECK(val);
+	
 	// unit_test[4]  stop method test
 	std::cout << counter++ << std::endl;
 	BOOST_MESSAGE( "-------4" );

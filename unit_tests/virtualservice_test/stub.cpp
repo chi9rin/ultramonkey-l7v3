@@ -383,6 +383,12 @@ std::size_t		l7vs::tcp_socket::read_some(boost::asio::mutable_buffers_1 buffers,
 l7vs::tcp_session::tcp_session(l7vs::virtualservice_tcp& vs, boost::asio::io_service& session_io) : io( session_io ),
 																									parent_service( vs ),
 																									client_socket( io ) {}
+l7vs::tcp_session::tcp_session(l7vs::virtualservice_tcp& vs, 
+								boost::asio::io_service& session_io,
+								const tcp_socket::tcp_socket_option_info set_option) : io( session_io ),
+																						parent_service( vs ),
+																						client_socket( io ),
+																						socket_opt_info(set_option){}
 l7vs::tcp_session::~tcp_session(void){}
 l7vs::session_result_message l7vs::tcp_session::initialize(void){
 	l7vs::session_result_message	result;

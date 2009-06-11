@@ -327,6 +327,11 @@ protected:
 // 	boost::mutex				sorry_sessions_mutex;
 	wr_mutex					sorry_sessions_mutex;
 
+	bool 						defer_accept_opt;				//! is set option TCP_DEFER_ACCEPT
+	int 						defer_accept_val;				//! TCP_DEFER_ACCEPT option value
+	l7vs::tcp_socket::tcp_socket_option_info set_sock_opt;		//! socket option for tcp_session class
+
+	
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
 
@@ -357,6 +362,9 @@ public:
 	void						connection_active( const tcp_endpoint_type& );
 	void						connection_inactive( const tcp_endpoint_type& );
 	void						release_session( const boost::thread::id );
+	
+	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
+	
 };
 
 //!

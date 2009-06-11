@@ -480,6 +480,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	protomod->register_schedule( sched_rs_func );
 
 	protocol_module_base::check_message_result pm_result;
+	pm_result = parse_socket_option(element.protocol_args);
+	
 	pm_result	=	protomod->check_parameter( element.protocol_args );
 	if( !pm_result.flag ){
 		err.setter( true, "Protocol Module argument error." );
@@ -538,7 +540,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 		rw_scoped_lock	lk( pool_sessions_mutex );
 		for( int i = 0; i < param_data.session_pool_size; ++i ){
 			try{
-				tcp_session*	sess	= new tcp_session( *this, dispatcher );
+				tcp_session*	sess	= new tcp_session( *this, dispatcher, set_sock_opt);
 				session_result_message	result	= sess->initialize();
 				if( result.flag == true ){
 					err.setter( result.flag, result.message );
@@ -1253,6 +1255,16 @@ void	l7vs::virtualservice_tcp::run(){
 	}
 	boost::asio::socket_base::receive_buffer_size option(8192 * 192);
 	acceptor_.set_option(option);
+	//set socket option TCP_DEFER_ACCEPT
+	if(defer_accept_opt){
+		boost::system::error_code ec;
+		size_t len = sizeof(defer_accept_val);
+		boost::asio::detail::socket_ops::setsockopt(acceptor_.native(),IPPROTO_TCP,TCP_DEFER_ACCEPT,&defer_accept_val,len,ec);
+		if(unlikely(ec)){
+			//ERROR
+			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 100, "socket option(TCP_DEFER_ACCEPT) set failed" , __FILE__, __LINE__ );
+		}
+	}
 	//start listen
 	acceptor_.listen();
 
@@ -1453,3 +1465,36 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 114, funclog_fmt.str(), __FILE__, __LINE__ );
 	}
 }
+
+/*!
+ * parse_socket_option
+ *
+ * @param   module option
+ * @return  void
+ */
+l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse_socket_option(std::vector<std::string>& args){
+		
+	l7vs::protocol_module_base::check_message_result result;
+	
+	// socket option check & set
+	//! is set option TCP_DEFER_ACCEPT
+	defer_accept_opt = false;
+		//! TCP_DEFER_ACCEPT option value
+	defer_accept_val = 0;
+		
+		//! TCP_NODELAY   (false:not set,true:set option)
+	set_sock_opt.nodelay_opt = false;
+		//! TCP_NODELAY option value  (false:off,true:on)
+	set_sock_opt.nodelay_val = false;
+		//! TCP_CORK      (false:not set,true:set option)
+	set_sock_opt.cork_opt = false;
+		//! TCP_CORK option value     (false:off,true:on)
+	set_sock_opt.cork_val = false;
+		//! TCP_QUICKACK  (false:not set,true:set option)
+	set_sock_opt.quickack_opt = false;
+		//! TCP_QUICKACK option value (false:off,true:on)
+	set_sock_opt.quickack_val = false;
+	
+	return result;
+}
+
