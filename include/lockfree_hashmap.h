@@ -4,33 +4,36 @@
 #include <boost/functional/hash.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 namespace l7vs{
 
-template < class Tkey, class Tvalue, class Hash >
+template < class Tkey, class Tvalue, class Hash = boost::hash< Tkey > >
 class lockfree_hashmap : boost::noncopyable{
 protected:
 
 	volatile mutable size_t	element_num;
 	struct container{
-		boost::shared_ptr< typename Tkey >		key;
-		boost::shared_ptr< typename Tvalue >	value;
+		boost::shared_ptr< Tkey >		key;
+		boost::shared_ptr< Tvalue >	value;
 		bool	rehash;
-		explicit contenor() : rehash( false ) {}
+		explicit container() : rehash( false ) {}
 	};
 
 	volatile mutable size_t	all_ctr;
 	container*	hashmap;
 
 public:
-	typedef	Hash	hasher;
+	typedef	Hash	hasher_type;
+	hasher_type		hasher;
 
 	// constractor
-	lockfree_hashmap( size_t	num = 65535, inhasher = boost::hash< typename Tkey >() ) : 
+	lockfree_hashmap( size_t num = 65535, Hash inhasher = boost::hash< Tkey >() ) : 
 		element_num( num ) {
 		hashmap = new container[num];
 		hasher = inhasher;
-		__sync_lock_test_and_fetch( &all_ctr, 0 );
+		__sync_lock_test_and_set( &all_ctr, 0 );
 	}
 
 	// destractor
@@ -55,7 +58,7 @@ public:
 	}
 
 	//finder
-	boost::shared_ptr< typename Tvalue >	find( const Tkey& key ){
+	boost::shared_ptr< Tvalue >	find( const Tkey& key ){
 		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
 		do{
@@ -82,31 +85,34 @@ public:
 	//bucket finder
 	bool	find_bucket( size_t& hash_value, const Tkey& key, Tkey*& pre_key, bool insert ){
 		for(;;){
-			if( hashmap[hashvalue].key.get() == NULL ){
+			if( hashmap[hash_value].key.get() == NULL ){
 				if( insert ) return true;
-				( hashmap[hashvalue].rehash ) ? hashvalue = rehash_value( hashvalue ) : return false;
+				if( hashmap[hash_value].rehash )
+					hash_value = re_hashvalue( key );
+				else
+					return( false );
 			}
-			else if( *(hashmap[hashvalue].key.get()) == key ) {
-				pre_key = hashmap[hashvalue].key.get();
+			else if( *(hashmap[hash_value].key.get()) == key ) {
+				pre_key = hashmap[hash_value].key.get();
 				return true;
 			}
 			else{
 				if( insert ){
-					hashmap[hashvalue].rehash = true;
-					hashvalue = re_hashvalue( hashvalue );
+					hashmap[hash_value].rehash = true;
+					hash_value = re_hashvalue( hash_value );
 				}
 				else{
-					if( !hashmap[hashvalue].rehash ) return false;
-					hashvalue = re_hashvalue( hashvalue );
+					if( !hashmap[hash_value].rehash ) return false;
+					hash_value = re_hashvalue( hash_value );
 				}
 			}
 		}
 	}
 
 	//poper
-	void	pop( boost::shared_ptr< typename Tkey >& key, boost::shared_ptr< typename Tvalue >& value ){
+	void	pop( boost::shared_ptr< Tkey >& key, boost::shared_ptr< Tvalue >& value ){
 		for( size_t i = 0 ; i < element_num; ++i ){
-			if( hashmap[i].key.get() )
+			if( hashmap[i].key.get() ){
 				key.reset( hashmap[i].key.get() );
 				value.reset( hashmap[i].value.get() );
 				hashmap[i].key.reset( NULL );
@@ -130,7 +136,7 @@ public:
 	bool	empty(){ return !all_ctr; }
 
 	// functor
-	void	do_all( boost::function< void, typename Tvalue* >	func ){
+	void	do_all( boost::function< void( Tvalue* ) >	func ){
 		for( size_t	i = 0; i < element_num; ++i ){
 			if( hashmap[i].key.get() != NULL ){
 				func( hashmap[i].value.get() );
