@@ -26,7 +26,7 @@ void	client(){
 	boost::asio::io_service	dispatcher;
 	boost::asio::ip::tcp::socket	sock( dispatcher );
 	std::cout << "connect" << std::endl;
-	sock.connect( tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) ) );
+	sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ) );
 
 	sock.close( b_err );
 }
@@ -1246,7 +1246,7 @@ void	virtualservice_tcp_test5(){
 	//set element value
 	elem1.udpmode					= false;
 	elem1.tcp_accept_endpoint		= 
-			tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (60000) );
+			tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
 	elem1.udp_recv_endpoint			= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
 	elem1.realserver_vector.clear();
 	elem1.protocol_module_name		= "PMtest1";
@@ -1292,10 +1292,10 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "virtualservice_base_test" );
 
 	// add test case to test suite
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
+//	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test1 ) );
+//	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test2 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
-	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );
+//	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test5 ) );
 
 	framework::master_test_suite().add( ts );

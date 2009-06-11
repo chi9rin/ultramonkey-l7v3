@@ -51,6 +51,8 @@
 #include "schedule_module_base.h"
 
 #include "atomic.h"
+#include "lockfree_queue.h"
+#include "lockfree_hashmap.h"
 
 #define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
@@ -314,7 +316,9 @@ protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
 
-	session_queue_type			pool_sessions;
+//	session_queue_type			pool_sessions;
+	lockfree_queue<session_thread_control>
+						pool_sessions;
 // 	boost::mutex				pool_sessions_mutex;
 	wr_mutex					pool_sessions_mutex;
 	session_map_type			waiting_sessions;
