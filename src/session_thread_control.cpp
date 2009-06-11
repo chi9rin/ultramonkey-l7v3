@@ -270,8 +270,8 @@ void	session_thread_control::join(){
 		downthread_condition.notify_all(); //condition wait thread is run.
 	}
 
-//	upthread_joining_condition.wait( up_lk );
-//	downthread_joining_condition.wait( down_lk );
+	upthread_joining_condition.wait( up_lk );
+	downthread_joining_condition.wait( down_lk );
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format fmt("out_function : void session_thread_control::stopdownstream() : up_status = %d / down_status = %d");
