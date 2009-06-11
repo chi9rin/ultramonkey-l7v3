@@ -341,7 +341,8 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	session_thread_control*		stc_ptr_register_accept;
 	{
 		rw_scoped_lock	pool_lk( pool_sessions_mutex );
-		stc_ptr_register_accept = pool_sessions.pop();
+		stc_ptr_register_accept = pool_sessions.front();
+		pool_sessions.erase( pool_sessions.begin() );
 	}
 
 	//session add wait_sessions
@@ -550,7 +551,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					return;
 				}
 				session_thread_control*	p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, param_data.schedule_algorithm );
-				pool_sessions.push( p_stc );
+				pool_sessions.push_back( p_stc );
 			}
 			catch( std::bad_alloc ex ){
 				Logger::putLogFatal( 
@@ -620,18 +621,19 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 		session_thread_control*	stc = itr->second;
 		waiting_sessions.erase( itr );
 		rw_scoped_lock	lk2( pool_sessions_mutex );
-		pool_sessions.push( stc );
+		pool_sessions.push_back( stc );
 	}
 
 	//release sessions[i]->join();
 	while( !pool_sessions.empty() ){
 		rw_scoped_lock	lk( pool_sessions_mutex );
-		session_thread_control*	stc = pool_sessions.pop();
-		stc->join();
+		pool_sessions.front()->join();
 		{
-			boost::mutex::scoped_lock upthread_wait( stc->get_upthread_mutex() );
-			boost::mutex::scoped_lock downthread_wait( stc->get_downthread_mutex() );
+			boost::mutex::scoped_lock upthread_wait( pool_sessions.front()->get_upthread_mutex() );
+			boost::mutex::scoped_lock downthread_wait( pool_sessions.front()->get_downthread_mutex() );
 		}
+		session_thread_control*	stc = pool_sessions.front();
+		pool_sessions.erase( pool_sessions.begin() );
 		delete	stc;
 		stc = NULL;
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -1263,7 +1265,8 @@ void	l7vs::virtualservice_tcp::run(){
 			return;
 		}
 		//regist accept event handler
-		stc_ptr = pool_sessions.pop();
+		stc_ptr = pool_sessions.front();
+		pool_sessions.erase( pool_sessions.begin() );
 		rw_scoped_lock				waiting_pool_lock( waiting_sessions_mutex );
 		waiting_sessions.insert( std::make_pair( stc_ptr->get_upthread_id(), stc_ptr ) );
 	}
@@ -1423,7 +1426,7 @@ void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_i
 	active_sessions.erase( itr );
 	rw_scoped_lock	pool_lk( pool_sessions_mutex );
 	stc_ptr->get_session()->initialize();
-	pool_sessions.push( stc_ptr );
+	pool_sessions.push_back( stc_ptr );
 
 	{
 		rw_scoped_lock	sorrys_lk( sorry_sessions_mutex );
