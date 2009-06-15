@@ -11,18 +11,20 @@ protected:
 	struct node_type {
 		Tvalue*					value;
 		volatile node_type*  	next;
-		node_type() : value( NULL ) , next( NULL ){}
+		volatile bool			dummy;
+		node_type() : value( NULL ) , next( NULL ) , dummy ( false ) {}
 	};
-	
 	mutable volatile size_t	counter;
-	volatile node_type*  	headloc;
-	volatile node_type* 	tailloc;
+	volatile node_type*	headloc;
+	volatile node_type*	tailloc;
+
 	node_type*		new_node;
 public:
 	// constractor
 	explicit lockfree_queue() : counter(0){ 
 		new_node = new node_type();
 		headloc = tailloc = new_node;
+		new_node->dummy = true;
 	}
 
 	// destractor
@@ -30,7 +32,7 @@ public:
 		while( counter-- ){
 			pop();
 		}
-		delete new_node;
+		delete headloc;
 	}
 	
 	void push(const Tvalue* value){
@@ -53,41 +55,37 @@ public:
 			}
 		}
 		// tracsaction ed
-
-		__sync_bool_compare_and_swap( &tailloc,_tail,_new_node );
+		__sync_bool_compare_and_swap( &tailloc,tailloc,_new_node );
 		__sync_add_and_fetch( &counter, 1 );
 	}
 
 	Tvalue* pop() {
-		volatile	node_type*	_head_node;
-		volatile	node_type*	_tail_node;
-		volatile	node_type*	_next_node;
+		volatile node_type*		_head_node;
+		volatile node_type*		_next_node;
+		Tvalue*					rtn_value;
 
 		//transaction st
 		while(1){
 			_head_node = headloc;
-			_tail_node = tailloc;
-			
-			if (_head_node == headloc){
-				if(_head_node ==_tail_node){
-					//false
-					return NULL;
-				}else{
-					_next_node = headloc->next;
-					if( &headloc->next != NULL ){
-						if(__sync_bool_compare_and_swap(&headloc->next,_next_node,NULL)){
-							if(__sync_bool_compare_and_swap(&headloc,_head_node,_next_node)){
-								delete _head_node;
-								__sync_sub_and_fetch( &counter, 1 );
-								return _next_node->value;
-							}
-						}
-					}
+			_next_node = headloc->next;
+
+			if(headloc ==tailloc){
+				//false
+				return NULL;
+			}else{
+				if(__sync_bool_compare_and_swap(&headloc,_head_node,_next_node)){
+					rtn_value = _next_node->value;
+					__sync_lock_test_and_set(&_next_node->dummy,true);
+					break;
 				}
 			}
-		
 		}
 		//transaction ed
+		while(!_head_node->dummy){
+		}
+		delete _head_node;
+		__sync_sub_and_fetch( &counter, 1 );
+		return rtn_value;
 	}
 
 	bool empty() const{
