@@ -105,8 +105,8 @@ void		l7vs::virtual_service::connection_active( const boost::asio::ip::tcp::endp
 void		l7vs::virtual_service::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){
 	vs->connection_inactive( in );
 }
-void		l7vs::virtual_service::release_session( const boost::thread::id thread_id ){
-	vs->release_session( thread_id );
+void		l7vs::virtual_service::release_session( const tcp_session* session_ptr ){
+	vs->release_session( session_ptr );
 }
 
 unsigned long long		l7vs::virtual_service::get_qos_upstream(){

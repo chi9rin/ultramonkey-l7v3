@@ -51,6 +51,8 @@
 #include "schedule_module_base.h"
 
 #include "atomic.h"
+#include "lockfree_queue.h"
+#include "lockfree_hashmap.h"
 
 #define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
@@ -278,7 +280,7 @@ public:
 
 	virtual	void				connection_active( const tcp_endpoint_type& ) = 0;
 	virtual	void				connection_inactive( const tcp_endpoint_type& ) = 0;
-	virtual	void				release_session( const boost::thread::id ) = 0;
+	virtual	void				release_session( const tcp_session* session_ptr ) = 0;
 
 	unsigned long long			get_qos_upstream();
 	unsigned long long			get_qos_downstream();
@@ -305,27 +307,30 @@ public:
 //! @class	virtualservice_tcp is class of virtual service for TCP transfer.
 class	virtualservice_tcp : public virtualservice_base{
 public:
-	typedef	std::vector<session_thread_control*>			session_queue_type;
-	typedef	std::map< boost::thread::id, session_thread_control* >
+//	typedef	std::vector<session_thread_control*>			session_queue_type;
+	typedef	lockfree_queue< session_thread_control >
+								session_queue_type;
+//	typedef	std::map< boost::thread::id, session_thread_control* >
+	typedef	lockfree_hashmap< tcp_session, session_thread_control >
 								session_map_type;
-	typedef	std::pair< boost::thread::id, session_thread_control* >
-								session_map_pair_type;
+// 	typedef	std::pair< boost::thread::id, session_thread_control* >
+// 								session_map_pair_type;
 protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
 
 	session_queue_type			pool_sessions;
 // 	boost::mutex				pool_sessions_mutex;
-	wr_mutex					pool_sessions_mutex;
+// 	wr_mutex					pool_sessions_mutex;
 	session_map_type			waiting_sessions;
 // 	boost::mutex				waiting_sessions_mutex;
-	wr_mutex					waiting_sessions_mutex;
+// 	wr_mutex					waiting_sessions_mutex;
 	session_map_type			active_sessions;
 // 	boost::mutex				active_sessions_mutex;
-	wr_mutex					active_sessions_mutex;
+// 	wr_mutex					active_sessions_mutex;
 	session_map_type			sorry_sessions;
 // 	boost::mutex				sorry_sessions_mutex;
-	wr_mutex					sorry_sessions_mutex;
+// 	wr_mutex					sorry_sessions_mutex;
 
 	bool 						defer_accept_opt;				//! is set option TCP_DEFER_ACCEPT
 	int 						defer_accept_val;				//! TCP_DEFER_ACCEPT option value
@@ -361,7 +366,7 @@ public:
 
 	void						connection_active( const tcp_endpoint_type& );
 	void						connection_inactive( const tcp_endpoint_type& );
-	void						release_session( const boost::thread::id );
+	void						release_session( const tcp_session* session_ptr );
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
 	
@@ -403,7 +408,7 @@ public:
 
 	void						connection_active( const boost::asio::ip::tcp::endpoint& ){}
 	void						connection_inactive( const boost::asio::ip::tcp::endpoint& ){}
-	void						release_session( const boost::thread::id );
+	void						release_session( const tcp_session* session_ptr );
 };
 
 //!
@@ -438,7 +443,7 @@ public:
 
 	void						connection_active( const boost::asio::ip::tcp::endpoint&  );
 	void						connection_inactive( const boost::asio::ip::tcp::endpoint&  );
-	void						release_session( const boost::thread::id );
+	void						release_session( const tcp_session* session_ptr );
 
 	unsigned long long			get_qos_upstream();
 	unsigned long long			get_qos_downstream();

@@ -56,7 +56,6 @@ namespace l7vs{
 		socket_opt_info.quickack_opt = false;
 		
 		// sorryserver socket
-//		tcp_socket_ptr sorry_socket(new tcp_socket(session_io));
 		tcp_socket_ptr sorry_socket(new tcp_socket(session_io,socket_opt_info));
 		sorryserver_socket.second = sorry_socket;
 		
@@ -420,10 +419,15 @@ namespace l7vs{
 		// virtual_service_message_down_thread_function_map
 		virtual_service_message_down_thread_function_map.clear();
 		// up_thread_message_que
-		up_thread_message_que.clear();
+		while( !up_thread_message_que.empty() ){
+			tcp_thread_message*	tmp_ptr	= up_thread_message_que.pop();
+			delete	tmp_ptr;
+		}
 		// down_thread_message_que
-		down_thread_message_que.clear();
-		
+		while( !down_thread_message_que.empty() ){
+			tcp_thread_message*	tmp_ptr	= down_thread_message_que.pop();
+			delete	tmp_ptr;
+		}
 	}
 	//! initialize
 	session_result_message tcp_session::initialize(){
@@ -436,8 +440,14 @@ namespace l7vs{
 		thread_state.reset();
 		protocol_module = NULL;
 		session_pause_flag = false;
-		up_thread_message_que.clear();
-		down_thread_message_que.clear();
+		while( !up_thread_message_que.empty() ){
+			tcp_thread_message*	tmp_ptr	= up_thread_message_que.pop();
+			delete	tmp_ptr;
+		}
+		while( !down_thread_message_que.empty() ){
+			tcp_thread_message*	tmp_ptr	= down_thread_message_que.pop();
+			delete	tmp_ptr;
+		}
 		protocol_module = parent_service.get_protocol_module();
 		
 		//load parameter
@@ -556,7 +566,7 @@ namespace l7vs{
 				break;
 		}
 		// set message
-		boost::shared_ptr< tcp_thread_message > up_msg(new tcp_thread_message);
+		tcp_thread_message*	up_msg	= new tcp_thread_message;
 		std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator up_func;
 		up_func = virtual_service_message_up_thread_function_map.find(message);
 		if(up_func != virtual_service_message_up_thread_function_map.end()){
@@ -571,7 +581,7 @@ namespace l7vs{
 			buf << message;	
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 6, buf.str(), __FILE__, __LINE__ );
 		}
-		boost::shared_ptr< tcp_thread_message > down_msg(new tcp_thread_message);
+		tcp_thread_message*	down_msg	= new tcp_thread_message;
 		std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator down_func;
 		down_func = virtual_service_message_down_thread_function_map.find(message);
 		if(down_func != virtual_service_message_down_thread_function_map.end()){
@@ -752,7 +762,6 @@ namespace l7vs{
 		boost::asio::ip::udp::endpoint dumy_end;
 		protocol_module_base::EVENT_TAG module_event;
 		std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type;
-// 		std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator func;
 		up_thread_function_pair	func;
 		{
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
@@ -836,9 +845,10 @@ namespace l7vs{
 					up_thread_next_call_function.second(LOCAL_PROC);
 				}
 				else{
-					boost::shared_ptr<tcp_thread_message> msg = up_thread_message_que.front();
+					tcp_thread_message*	msg	= up_thread_message_que.pop();
 					up_thread_message_data.set_endpoint(msg->endpoint_info);
 					msg->message(MESSAGE_PROC);
+					delete	msg;
 				}
 			}else{
 				up_thread_next_call_function.second(LOCAL_PROC);
@@ -897,7 +907,7 @@ namespace l7vs{
 		}
 		//----Debug log----------------------------------------------------------------------
 		thread_state_update(UP_THREAD_ALIVE,false);
-		parent_service.release_session(up_thread_id);
+		parent_service.release_session(this);
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 			std::stringstream buf;
@@ -1040,9 +1050,10 @@ namespace l7vs{
 					down_thread_next_call_function.second(LOCAL_PROC);
 				}
 				else{
-					boost::shared_ptr<tcp_thread_message> msg = down_thread_message_que.front();
+					tcp_thread_message*	msg	= down_thread_message_que.pop();
 					down_thread_message_data.set_endpoint(msg->endpoint_info);
 					msg->message(MESSAGE_PROC);
+					delete	msg;
 				}
 			}else{
 				down_thread_next_call_function.second(LOCAL_PROC);
@@ -1228,8 +1239,8 @@ namespace l7vs{
 	//! up thread raise client respond send event message for up and down thread
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_type){
-		boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-		boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
+		tcp_thread_message*		up_msg		= new tcp_thread_message;
+		tcp_thread_message*		down_msg	= new tcp_thread_message;
 		up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
 		if(unlikely( !up_func.second )){
 			//Error not find function map
@@ -1297,8 +1308,8 @@ namespace l7vs{
 		boost::system::error_code ec;
 		bool bres = client_socket.close(ec);
 		if(bres){
-			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
+			tcp_thread_message*		up_msg		= new tcp_thread_message;
+			tcp_thread_message*		down_msg	= new tcp_thread_message;
 			up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
 			if(unlikely( !up_func.second )){
 				//Error not find function map
@@ -1473,7 +1484,6 @@ namespace l7vs{
 		if(get_socket != map_end){
 			func_tag = UP_FUNC_REALSERVER_CONNECT_EVENT;
 		}else{
-//			tcp_socket_ptr new_socket(new tcp_socket(io));
 			tcp_socket_ptr new_socket(new tcp_socket(io,socket_opt_info));
 			boost::system::error_code ec;
 			bool bres = new_socket->connect(server_endpoint,ec);
@@ -1627,8 +1637,8 @@ namespace l7vs{
 		bool bres = close_socket->second->close(ec);
 		if(bres){
 			parent_service.connection_inactive(server_endpoint);
-			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
+			tcp_thread_message*		up_msg		= new tcp_thread_message;
+			tcp_thread_message*		down_msg	= new tcp_thread_message;
 			up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
 			if(unlikely( !up_func.second )){
 				//Error not find function map
@@ -1978,8 +1988,8 @@ namespace l7vs{
 		boost::system::error_code ec;
 		bool bres = sorryserver_socket.second->close(ec);
 		if(bres){
-			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
+			tcp_thread_message*		up_msg		= new tcp_thread_message;
+			tcp_thread_message*		down_msg	= new tcp_thread_message;
 			up_thread_function_pair	up_func	= up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
 			if(unlikely( !up_func.second )){
 				//Error not find function map
@@ -2299,8 +2309,8 @@ namespace l7vs{
 				bool bres = close_socket->second->close(ec);
 				if(bres){
 					parent_service.connection_inactive(server_endpoint);
-					boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-					boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
+					tcp_thread_message*		up_msg		= new tcp_thread_message;
+					tcp_thread_message*		down_msg	= new tcp_thread_message;
 					down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
 					if( unlikely( !down_func.second ) ){
 						//Error not find function map
@@ -2590,8 +2600,8 @@ namespace l7vs{
 		boost::system::error_code ec;
 		bool bres = client_socket.close(ec);
 		if(bres){
-			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
-			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
+			tcp_thread_message*		up_msg		= new tcp_thread_message;
+			tcp_thread_message*		down_msg	= new tcp_thread_message;
 			down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
 			if(unlikely( !down_func.second )){
 				//Error not find function map
@@ -2728,8 +2738,8 @@ namespace l7vs{
 		boost::system::error_code ec;
 		bool bres = sorryserver_socket.second->close(ec);
 		if(bres){
-			boost::shared_ptr<tcp_thread_message> up_msg(new tcp_thread_message);
-			boost::shared_ptr<tcp_thread_message> down_msg(new tcp_thread_message);
+			tcp_thread_message*		up_msg		= new tcp_thread_message;
+			tcp_thread_message*		down_msg	= new tcp_thread_message;
 			down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
 			if(unlikely( !down_func.second )){
 				//Error not find function map

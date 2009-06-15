@@ -75,4 +75,4 @@ void	l7vs::virtualservice_udp::del_realserver( const l7vs::virtualservice_elemen
 void	l7vs::virtualservice_udp::run(){}
 void	l7vs::virtualservice_udp::stop(){}
 
-void	l7vs::virtualservice_udp::release_session( const boost::thread::id thread_id ){}
+void	l7vs::virtualservice_udp::release_session( const tcp_session* session_ptr ){}
