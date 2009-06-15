@@ -641,8 +641,34 @@ namespace l7vs{
 			static boost::system::error_code set_non_blocking_mode_ec;
 			static bool is_connect;
 			
+			
+			//! tcp_socket_option
+			struct tcp_socket_option_info{
+				//! TCP_NODELAY   (false:not set,true:set option)
+				bool nodelay_opt;
+				//! TCP_NODELAY option value  (false:off,true:on)
+				bool nodelay_val;
+				//! TCP_CORK      (false:not set,true:set option)
+				bool cork_opt;
+				//! TCP_CORK option value     (false:off,true:on)
+				bool cork_val;
+				//! TCP_QUICKACK  (false:not set,true:set option)
+				bool quickack_opt;
+				//! TCP_QUICKACK option value (false:off,true:on)
+				bool quickack_val;
+			};
+			
 			tcp_socket(boost::asio::io_service& io) : 
-				my_socket(io){
+					my_socket(io){
+				opt_info.nodelay_opt = false;
+				opt_info.cork_opt = false;
+				opt_info.quickack_opt = false;
+			};
+			
+			
+			tcp_socket(boost::asio::io_service& io,const tcp_socket_option_info set_option) : 
+				my_socket(io),
+				opt_info(set_option){
 			};
 			~tcp_socket(){};
 			
@@ -651,6 +677,7 @@ namespace l7vs{
 			};
 			
 			boost::asio::ip::tcp::socket my_socket;
+			tcp_socket_option_info opt_info;
 			
 			//! accept
 			void accept(){};

@@ -835,7 +835,7 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 // constructer test class
 class constructer_test_class : public l7vs::tcp_session{
 	public:
-		constructer_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+		constructer_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){};
 		~constructer_test_class(){};
 		boost::asio::io_service& get_io(){
 			return io;
@@ -862,6 +862,10 @@ class constructer_test_class : public l7vs::tcp_session{
 		boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
 			return sorryserver_socket.second;
 		};
+		
+		l7vs::tcp_socket::tcp_socket_option_info* get_socket_opt_info(){
+			return &socket_opt_info;
+		}
 		
 		//! up thread raise module event of handle_accept
 		//! @param[in]		process_type is prosecess type
@@ -1694,7 +1698,23 @@ void constructer_test(){
 	
 	boost::asio::io_service io;
 	l7vs::virtualservice_tcp vs;
-	constructer_test_class test_obj(vs,io);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = true;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = true;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = true;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = true;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = true;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = true;
+	
+//	constructer_test_class test_obj(vs,io);
+	constructer_test_class test_obj(vs,io,set_option);
 	
 	// unit_test [1] constructer initialize member check
 	std::cout << "[1] constructer initialize member check" << std::endl;
@@ -1732,6 +1752,48 @@ void constructer_test(){
 	// unit_test [9] constructer set virtual_service_message_down_thread_function_map check
 	std::cout << "[9] constructer set virtual_service_message_down_thread_function_map check" << std::endl;
 	test_obj.check_virtual_service_message_down_thread_function_map();
+	
+	// unit_test [10] constructer set socket option check
+	std::cout << "[10] constructer set socket option check" << std::endl;
+	//! TCP_NODELAY
+	BOOST_CHECK_EQUAL(test_obj.get_socket_opt_info()->nodelay_opt , set_option.nodelay_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_socket_opt_info()->nodelay_val , set_option.nodelay_val);
+	// unit_test [11] constructer set socket option check
+	std::cout << "[11] constructer set socket option check" << std::endl;
+	//! TCP_CORK
+	BOOST_CHECK_EQUAL(test_obj.get_socket_opt_info()->cork_opt , set_option.cork_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_socket_opt_info()->cork_val , set_option.cork_val);
+	// unit_test [12] constructer set socket option check
+	std::cout << "[12] constructer set socket option check" << std::endl;
+	//! TCP_QUICKACK
+	BOOST_CHECK_EQUAL(test_obj.get_socket_opt_info()->quickack_opt , set_option.quickack_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_socket_opt_info()->quickack_val , set_option.quickack_val);
+	
+	// unit_test [13] constructer client socket set socket option check
+	std::cout << "[13] constructer client socket set socket option check" << std::endl;
+	//! TCP_NODELAY
+	BOOST_CHECK_EQUAL(test_obj.get_client_socket().opt_info.nodelay_opt , set_option.nodelay_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_client_socket().opt_info.nodelay_val , set_option.nodelay_val);
+	//! TCP_CORK
+	BOOST_CHECK_EQUAL(test_obj.get_client_socket().opt_info.cork_opt , set_option.cork_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_client_socket().opt_info.cork_val , set_option.cork_val);
+	//! TCP_QUICKACK
+	BOOST_CHECK_EQUAL(test_obj.get_client_socket().opt_info.quickack_opt , set_option.quickack_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_client_socket().opt_info.quickack_val , set_option.quickack_val);
+	
+	// unit_test [14] constructer sorry socket set socket option check
+	std::cout << "[14] constructer sorry socket set socket option check" << std::endl;
+	//! TCP_NODELAY
+	BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.nodelay_opt , set_option.nodelay_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.nodelay_val , set_option.nodelay_val);
+	//! TCP_CORK
+	BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.cork_opt , set_option.cork_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.cork_val , set_option.cork_val);
+	//! TCP_QUICKACK
+	BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.quickack_opt , set_option.quickack_opt);
+	BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.quickack_val , set_option.quickack_val);
+	
+	
 	BOOST_MESSAGE( "----- constructer test end -----" );
 }
 
@@ -8404,7 +8466,7 @@ void down_thread_client_send_test(){
 //up_thread_realserver_connect test class 
 class up_thread_realserver_connect_test_class : public l7vs::tcp_session{
 	public:
-		up_thread_realserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+		up_thread_realserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){
 		};
 		~up_thread_realserver_connect_test_class(){};
 		
@@ -8519,8 +8581,24 @@ void up_thread_realserver_connect_test(){
 	l7vs::virtualservice_tcp vs;
 	std::string test_protocol_name("test protocol");
 	l7vs::test_protocol_module proto_test(test_protocol_name);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = true;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = true;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = true;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = true;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = true;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = true;
+	
 	// up_thread_sorryserver_send
-	up_thread_realserver_connect_test_class test_obj(vs,io);
+//	up_thread_realserver_connect_test_class test_obj(vs,io);
+	up_thread_realserver_connect_test_class test_obj(vs,io,set_option);
 	test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
 	boost::thread::id proc_id = boost::this_thread::get_id();
 	
@@ -8592,15 +8670,30 @@ void up_thread_realserver_connect_test(){
 	BOOST_CHECK(set_socket.first == con_end);
 	BOOST_CHECK(set_socket.second == rs_map.begin()->second);
 	
-	// unit_test [5] up_thread_realserver_connect up_thread_next_call_function update check
-	std::cout << "[5] up_thread_realserver_connect up_thread_next_call_function update check" << std::endl;
+	
+	// unit_test [5] constructer realserver socket set socket option check
+	std::cout << "[5] constructer realserver socket set socket option check" << std::endl;
+	//! TCP_NODELAY
+	BOOST_CHECK_EQUAL(rs_map.begin()->second->opt_info.nodelay_opt , set_option.nodelay_opt);
+	BOOST_CHECK_EQUAL(rs_map.begin()->second->opt_info.nodelay_val , set_option.nodelay_val);
+	//! TCP_CORK
+	BOOST_CHECK_EQUAL(rs_map.begin()->second->opt_info.cork_opt , set_option.cork_opt);
+	BOOST_CHECK_EQUAL(rs_map.begin()->second->opt_info.cork_val , set_option.cork_val);
+	//! TCP_QUICKACK
+	BOOST_CHECK_EQUAL(rs_map.begin()->second->opt_info.quickack_opt , set_option.quickack_opt);
+	BOOST_CHECK_EQUAL(rs_map.begin()->second->opt_info.quickack_val , set_option.quickack_val);
+	
+	
+	
+	// unit_test [6] up_thread_realserver_connect up_thread_next_call_function update check
+	std::cout << "[6] up_thread_realserver_connect up_thread_next_call_function update check" << std::endl;
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_connect_event_call_check);
 
     l7vs::tcp_socket::is_connect = false;
 	
-	// unit_test [6] up_thread_realserver_connect duplication check
-	std::cout << "[6] up_thread_realserver_connect duplication check" << std::endl;
+	// unit_test [7] up_thread_realserver_connect duplication check
+	std::cout << "[7] up_thread_realserver_connect duplication check" << std::endl;
 	l7vs::tcp_socket::connect_call_check = false;
 	test_obj.test_call();
 	BOOST_CHECK(!l7vs::tcp_socket::connect_call_check);
@@ -8608,8 +8701,8 @@ void up_thread_realserver_connect_test(){
 	test_obj.next_up_function_call();
 	BOOST_CHECK(test_obj.up_thread_realserver_connect_event_call_check);
 	
-	// unit_test [7] up_thread_realserver_connect connect fail check
-	std::cout << "[7] up_thread_realserver_connect connect fail check" << std::endl;
+	// unit_test [8] up_thread_realserver_connect connect fail check
+	std::cout << "[8] up_thread_realserver_connect connect fail check" << std::endl;
 	rs_map.clear();
 	con_list.clear();
 	l7vs::tcp_socket::connect_res = false;
@@ -8627,8 +8720,8 @@ void up_thread_realserver_connect_test(){
 	
 	l7vs::tcp_socket::connect_res = true;
 	
-	// unit_test [8] up_thread_realserver_connect set non blocking fail check
-	std::cout << "[8] up_thread_realserver_connect set non blocking fail check" << std::endl;
+	// unit_test [9] up_thread_realserver_connect set non blocking fail check
+	std::cout << "[9] up_thread_realserver_connect set non blocking fail check" << std::endl;
 	rs_map.clear();
 	con_list.clear();
 	l7vs::tcp_socket::set_non_blocking_mode_res = false;
@@ -8644,8 +8737,8 @@ void up_thread_realserver_connect_test(){
 	l7vs::tcp_socket::set_non_blocking_mode_res = true;
 	l7vs::tcp_socket::set_non_blocking_mode_ec.clear();
 
-	// unit_test [9] up_thread_realserver_connect not fond function error check
-	std::cout << "[9] up_thread_realserver_connect not fond function error check" << std::endl;
+	// unit_test [10] up_thread_realserver_connect not fond function error check
+	std::cout << "[10] up_thread_realserver_connect not fond function error check" << std::endl;
 	rs_map.clear();
 	con_list.clear();
 	test_obj.up_thread_function_array_clear();

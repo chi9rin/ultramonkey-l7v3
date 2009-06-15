@@ -156,7 +156,9 @@ class test_mirror_server{
 class test_socket_class : public l7vs::tcp_socket{
 	public:
 		
-	test_socket_class(boost::asio::io_service& io) : l7vs::tcp_socket(io){
+//	test_socket_class(boost::asio::io_service& io) : l7vs::tcp_socket(io){
+//	};
+	test_socket_class(boost::asio::io_service& io,const tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
 	};
 	~test_socket_class(){};
 	
@@ -181,6 +183,10 @@ class test_socket_class : public l7vs::tcp_socket{
 	boost::asio::ip::tcp::socket* get_socket_pointer(){
 		return &my_socket;
 	}
+	
+	l7vs::tcp_socket::tcp_socket_option_info* get_opt_info(){
+		return &opt_info;
+	}
 		
 };
 
@@ -194,7 +200,21 @@ void construcor_test(){
 	
 	boost::asio::io_service io;
 	
-	test_socket_class test_obj(io);
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = true;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = true;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = true;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = true;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = true;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = true;
+			
+	test_socket_class test_obj(io,set_option);
 	
 	// unit_test [1] construcor test set io object
 	std::cout << "[1] construcor test set io object" << std::endl;
@@ -205,6 +225,29 @@ void construcor_test(){
 	std::cout << "[2] construcor test init open_flag" << std::endl;
 	BOOST_CHECK(!test_obj.get_open_flag());
 
+	// unit_test [3] construcor test set socket option nodelay_opt
+	std::cout << "[3] construcor test set socket option nodelay_opt" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_opt_info()->nodelay_opt , set_option.nodelay_opt);
+	
+	// unit_test [4] construcor test set socket option nodelay_val
+	std::cout << "[4] construcor test set socket option nodelay_val" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_opt_info()->nodelay_val , set_option.nodelay_val);
+	
+	// unit_test [5] construcor test set socket option cork_opt
+	std::cout << "[5] construcor test set socket option cork_opt" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_opt_info()->cork_opt , set_option.cork_opt);
+	
+	// unit_test [6] construcor test set socket option cork_val
+	std::cout << "[6] construcor test set socket option cork_val" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_opt_info()->cork_val , set_option.cork_val);
+	
+	// unit_test [7] construcor test set socket option quickack_opt
+	std::cout << "[7] construcor test set socket option quickack_opt" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_opt_info()->quickack_opt , set_option.quickack_opt);
+	
+	// unit_test [8] construcor test set socket option quickack_val
+	std::cout << "[8] construcor test set socket option quickack_val" << std::endl;
+	BOOST_CHECK_EQUAL(test_obj.get_opt_info()->quickack_val , set_option.quickack_val);
 	
 	BOOST_MESSAGE( "----- construcor test end -----" );
 }
@@ -235,13 +278,46 @@ void connect_test(){
 	boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
 	boost::asio::io_service io;
 	boost::system::error_code ec;
-	test_socket_class test_obj(io);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = true;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = true;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = true;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = true;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = true;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = true;
+	
+	test_socket_class test_obj(io,set_option);
 	test_obj.connect(connect_end,ec);
 	BOOST_CHECK(!ec);
 	
 	// unit_test [2] connect test connection success open_flag
 	std::cout << "[2] connect test connection success open_flag" << std::endl;
 	BOOST_CHECK(test_obj.get_open_flag());
+	
+	// TCP_NODELAY check!!
+	// unit_test [3] connect test set socket option TCP_NODELAY
+	std::cout << "[3] connect test set socket option TCP_NODELAY" << std::endl;
+	boost::asio::ip::tcp::no_delay get_option;
+	test_obj.get_socket_pointer()->get_option(get_option,ec);
+	BOOST_CHECK(!ec);
+	BOOST_CHECK(get_option == set_option.nodelay_val);
+	
+	// TCP_CORK check!!
+	// unit_test [4] connect test set socket option TCP_CORK
+	std::cout << "[4] connect test set socket option TCP_CORK" << std::endl;
+	int val;
+	size_t len = sizeof(val);
+	boost::asio::detail::socket_ops::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
+	BOOST_CHECK(!ec);
+	BOOST_CHECK((bool)val == set_option.cork_val);
+	
 	
 	while(!test_server.bconnect_flag){
 		sleep(1);
@@ -250,21 +326,21 @@ void connect_test(){
 	boost::asio::ip::tcp::endpoint chk_end;
 	boost::asio::ip::tcp::endpoint ref_end;
 	
-	// unit_test [3] connect test connect local endpoint
-	std::cout << "[3] connect test connect local endpoint" << std::endl;	
+	// unit_test [5] connect test connect local endpoint
+	std::cout << "[5] connect test connect local endpoint" << std::endl;	
 	chk_end = test_obj.get_local_end();
 	ref_end = test_server.connect_end;
 	BOOST_CHECK_EQUAL(chk_end , ref_end);
 	
 	
-	// unit_test [4] connect test connect remote endpoint
-	std::cout << "[4] connect test connect remote endpoint" << std::endl;
+	// unit_test [6] connect test connect remote endpoint
+	std::cout << "[6] connect test connect remote endpoint" << std::endl;
 	chk_end = test_obj.get_remote_end();
 	ref_end = connect_end;
 	BOOST_CHECK_EQUAL(chk_end , ref_end);
 
-	// unit_test [5] connect test connect recall check
-	std::cout << "[5] connect test connect recall check" << std::endl;
+	// unit_test [7] connect test connect recall check
+	std::cout << "[7] connect test connect recall check" << std::endl;
 	test_obj.connect(connect_end,ec);
 	BOOST_CHECK(!ec);
 	BOOST_CHECK(test_obj.get_open_flag());
@@ -276,13 +352,13 @@ void connect_test(){
 	test_server.bstop_flag = true;
 	server_thread.join();
 		
-	// unit_test [6] connect test connection faile error_code object
-	std::cout << "[6] connect test connection faile error_code object" << std::endl;
+	// unit_test [8] connect test connection faile error_code object
+	std::cout << "[8] connect test connection faile error_code object" << std::endl;
 	test_obj.connect(connect_end,ec);
 	BOOST_CHECK(ec);
 		
-	// unit_test [7] connect test connection faile open_flag
-	std::cout << "[7] connect test connection faile open_flag" << std::endl;
+	// unit_test [9] connect test connection faile open_flag
+	std::cout << "[9] connect test connection faile open_flag" << std::endl;
 	BOOST_CHECK(!test_obj.get_open_flag());
 	
 	BOOST_MESSAGE( "----- connect test end -----" );
@@ -313,7 +389,22 @@ void set_non_blocking_mode_test(){
 	boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
 	boost::asio::io_service io;
 	boost::system::error_code ec;
-	test_socket_class test_obj(io);	
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = false;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = false;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = false;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = false;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = false;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = false;
+	
+	test_socket_class test_obj(io,set_option);
 	test_obj.connect(connect_end,ec);
 	BOOST_CHECK(!ec);
 	
@@ -367,7 +458,22 @@ void write_some_read_some_test(){
 	boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
 	boost::asio::io_service io;
 	boost::system::error_code ec;
-	test_socket_class test_obj(io);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = true;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = true;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = true;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = true;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = true;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = true;
+	
+	test_socket_class test_obj(io,set_option);
 	test_obj.connect(connect_end,ec);
 	BOOST_CHECK(!ec);
 	
@@ -385,7 +491,6 @@ void write_some_read_some_test(){
 	size_t send_data_size;
 	size_t receve_data_size;
 	
-		
 	//size 0
 	// ## write some read some test [1] size 0 
 	send_size = 0;
@@ -575,7 +680,22 @@ void close_test(){
 	boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
 	boost::asio::io_service io;
 	boost::system::error_code ec;
-	test_socket_class test_obj(io);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = false;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = false;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = false;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = false;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = false;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = false;
+	
+	test_socket_class test_obj(io,set_option);
 	test_obj.connect(connect_end,ec);
 	BOOST_CHECK(!ec);
 	
@@ -613,7 +733,21 @@ void get_socket_test(){
 	BOOST_MESSAGE( "----- get_socket test start -----" );
 	
 	boost::asio::io_service io;
-	test_socket_class test_obj(io);
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = false;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = false;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = false;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = false;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = false;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = false;
+	
+	test_socket_class test_obj(io,set_option);
 	
 	// unit_test [1] get_socket socket check
 	std::cout << "[1] get_socket socket check" << std::endl;
@@ -632,8 +766,7 @@ class connect_lock_test_class : public l7vs::tcp_socket{
 		boost::thread::id befor_thread_id;
 		boost::thread::id after_thread_id;
 		
-		connect_lock_test_class(boost::asio::io_service& io) : l7vs::tcp_socket(io){
-			
+		connect_lock_test_class(boost::asio::io_service& io,const tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
 		};
 		
 		~connect_lock_test_class(){
@@ -669,7 +802,22 @@ void connect_lock_test(){
 	BOOST_MESSAGE( "----- connetc lock test start -----" );
 		
 	boost::asio::io_service io;
-	connect_lock_test_class test_obj(io);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = false;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = false;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = false;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = false;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = false;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = false;
+	
+	connect_lock_test_class test_obj(io,set_option);
 	
 	test_obj.test_thread_wait.lock();
 	boost::thread::id proc_id = boost::this_thread::get_id();
@@ -713,8 +861,7 @@ class close_lock_test_class : public l7vs::tcp_socket{
 		boost::thread::id befor_thread_id;
 		boost::thread::id after_thread_id;
 		
-		close_lock_test_class(boost::asio::io_service& io) : l7vs::tcp_socket(io){
-			
+		close_lock_test_class(boost::asio::io_service& io,const tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
 		};
 		
 		~close_lock_test_class(){
@@ -748,7 +895,21 @@ void close_lock_test(){
 	BOOST_MESSAGE( "----- close lock test start -----" );
 		
 	boost::asio::io_service io;
-	close_lock_test_class test_obj(io);
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = false;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = false;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = false;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = false;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = false;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = false;
+		
+	close_lock_test_class test_obj(io,set_option);
 	
 	test_obj.test_thread_wait.lock();
 	boost::thread::id proc_id = boost::this_thread::get_id();
@@ -815,7 +976,22 @@ void is_open_test(){
 	boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
 	boost::asio::io_service io;
 	boost::system::error_code ec;
-	test_socket_class test_obj(io);
+	
+	l7vs::tcp_socket::tcp_socket_option_info set_option;
+	//! TCP_NODELAY   (false:not set,true:set option)
+	set_option.nodelay_opt = false;
+	//! TCP_NODELAY option value  (false:off,true:on)
+	set_option.nodelay_val = false;
+	//! TCP_CORK      (false:not set,true:set option)
+	set_option.cork_opt = false;
+	//! TCP_CORK option value     (false:off,true:on)
+	set_option.cork_val = false;
+	//! TCP_QUICKACK  (false:not set,true:set option)
+	set_option.quickack_opt = false;
+	//! TCP_QUICKACK option value (false:off,true:on)
+	set_option.quickack_val = false;
+	
+	test_socket_class test_obj(io,set_option);
 
 	// unit_test [1] is_open before connect check
 	std::cout << "[1] is_open before connect check" << std::endl;
