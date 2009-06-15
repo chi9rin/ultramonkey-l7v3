@@ -1,14 +1,12 @@
 #ifndef	LOCKFREE_HASHMAP_H
 #define	LOCKFREE_HASHMAP_H
-
 #include <boost/functional/hash.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
 
 namespace l7vs{
 
 //Argument Tkey, its size must be 64bit or less.
-template < class Tkey, class Tvalue, class Hash = boost::hash< Tkey > >
+template < class Tkey, class Tvalue, class Hash = boost::hash< Tkey* > >
 class lockfree_hashmap : boost::noncopyable{
 protected:
 
@@ -28,7 +26,7 @@ public:
 	hasher_type		hasher;
 
 	// constractor
-	lockfree_hashmap( size_t num = 65535, Hash inhasher = boost::hash< Tkey >() ) : 
+	lockfree_hashmap( size_t num = 65535, Hash inhasher = boost::hash< Tkey* >() ) : 
 		element_num( num ) {
 		hashmap = new container[num];
 		hasher = inhasher;
@@ -42,7 +40,7 @@ public:
 
 	//inserter
 	void	insert( const Tkey* key, const Tvalue* value ){
-		size_t	hashvalue = get_hashvalue( *key );
+		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
 		do{
 			if( !find_bucket( hashvalue, key, pre_key, true ) ) return;
@@ -54,7 +52,7 @@ public:
 
 	//finder
 	Tvalue*	find( const Tkey* key ){
-		size_t	hashvalue = get_hashvalue( *key );
+		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
 		if( find_bucket( hashvalue, key, pre_key, false ) )
 			return hashmap[hashvalue].value;
@@ -64,7 +62,7 @@ public:
 
 	//eracer
 	void	erase( const Tkey*	key ){
-		size_t	hashvalue = get_hashvalue( *key );
+		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
 		do{
 			if( !find_bucket( hashvalue, key, pre_key, false ) ) return;
@@ -137,8 +135,8 @@ private:
 			}
 		}
 	}
-	size_t	get_hashvalue(const Tkey& key ){
-		return hasher( key ) % element_num;
+	size_t	get_hashvalue(const Tkey* key ){
+		return hasher( const_cast<Tkey*>(key) ) % element_num;
 	}
 	size_t	re_hashvalue( size_t& key ){
 		return ((key+1) % element_num);
