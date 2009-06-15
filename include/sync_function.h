@@ -3,12 +3,15 @@
 
 #include <stdint.h>
 
+
+//	dcasで格納できる最大の値をふたつパッキングした構造体
+//	intptr_tはx86時には32bit長=4byte, x86_64時には8byteとなり、
+//	この構造体のサイズはそれぞれ8byteと16byとなる。
+
 struct	dcas_t{
 	intptr_t	val;
 	intptr_t	ver;
 };
-
-
 
 extern "C" bool	__sync_bool_double_compare_and_swap(
 		volatile dcas_t*	addr,		// ターゲットのdcas_tが存在するアドレス
@@ -27,6 +30,7 @@ extern "C" bool	__sync_bool_double_compare_and_swap(
 				: "m"(*addr), "d"(old_val1), "a"(old_val2), "c"(old_val1), "b"(old_val2)
 				: "memory"
 	);
+	return static_cast<bool><( result );
 }
 
 #endif	//SYNC_FUNCTION
