@@ -75,7 +75,8 @@ public:
 			}else{
 				if(__sync_bool_compare_and_swap(&headloc,_head_node,_next_node)){
 					rtn_value = _next_node->value;
-					__sync_lock_test_and_set(&_next_node->dummy,true);
+					if( __sync_lock_test_and_set(&_next_node->dummy,true) )
+						break;
 					break;
 				}
 			}

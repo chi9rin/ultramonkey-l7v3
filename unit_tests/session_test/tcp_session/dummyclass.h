@@ -24,6 +24,8 @@ namespace l7vs{
 #include "protocol_module_base.h"
 
 namespace l7vs{
+	class	tcp_session;
+
 	// test protocol module class
 	class test_protocol_module : public protocol_module_base{
 		public:
@@ -602,11 +604,10 @@ namespace l7vs{
 			};
 			protocol_module_base* get_protocol_module_res;
 			
-			void	release_session( const boost::thread::id id){
-				release_session_id = id;
+			void	release_session( const tcp_session* session_ptr ){
+				release_session_ptr = const_cast<tcp_session*>(session_ptr);
 			};
-			
-			boost::thread::id release_session_id;
+			tcp_session*		release_session_ptr;
 			
 			void connection_active( const boost::asio::ip::tcp::endpoint& active_endpoint){
 				connection_active_list.push_back(active_endpoint);
