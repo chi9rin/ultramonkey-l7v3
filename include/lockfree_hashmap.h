@@ -2,6 +2,7 @@
 #define	LOCKFREE_HASHMAP_H
 #include <boost/functional/hash.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
 
 namespace l7vs{
 
