@@ -116,6 +116,19 @@ public:
 	//! downthread mutex reference getter
 	//! @return reference of boost::mutex
 	boost::mutex&	get_downthread_mutex();
+
+	void			session_stop(){ session->set_virtual_service_message( tcp_session::SESSION_END ); }
+	void			session_sorry_mode_change( int sorry_flag ){
+		if( INT_MAX == sorry_flag )
+			session->set_virtual_service_message( tcp_session::SORRY_STATE_DISABLE );
+		else if( 0 != sorry_flag )
+			session->set_virtual_service_message( tcp_session::SORRY_STATE_ENABLE );
+	}
+	void			session_sorry_enable(){ session->set_virtual_service_message( tcp_session::SORRY_STATE_ENABLE ); }
+	void			session_sorry_disable(){ session->set_virtual_service_message( tcp_session::SORRY_STATE_DISABLE ); }
+	void			session_pause_on(){ session->set_virtual_service_message( tcp_session::SESSION_PAUSE_ON ); }
+	void			session_pause_off(){ session->set_virtual_service_message( tcp_session::SESSION_PAUSE_OFF ); }
+
 };
 
 }//	namespace l7vs

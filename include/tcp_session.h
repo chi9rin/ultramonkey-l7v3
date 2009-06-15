@@ -36,7 +36,8 @@
 #include "tcp_socket.h"
 #include "tcp_realserver_connect_socket_list.h"
 #include "tcp_data.h"
-#include "tcp_thread_message_que.h"
+//#include "tcp_thread_message_que.h"
+#include "lockfree_queue.h"
 
 #define TCP_SESSION_THREAD_STATE_BIT 8
 
@@ -48,6 +49,10 @@ namespace l7vs{
 //!	@class	virtualservice_tcp
 //! @brief	this class is parent virtualservice class.
 	class virtualservice_tcp;
+
+//!	@class	tcp_thread_message
+//! @brief	tcp_thread_message class name define.
+	class tcp_thread_message;
 
 //!	@class	tcp_session
 //! @brief	this class is tcp session class.
@@ -211,7 +216,8 @@ namespace l7vs{
 			//! up thread use destination side buffer
 			tcp_data up_thread_data_dest_side;
 			//! message data queue for up thread
-			tcp_thread_message_que up_thread_message_que;
+//			tcp_thread_message_que up_thread_message_que;
+			lockfree_queue< tcp_thread_message >		up_thread_message_que;
 			//! up thread use message data
 			tcp_data up_thread_message_data;
 			//! down thread call function object array
@@ -227,7 +233,8 @@ namespace l7vs{
 			//! down thread use destination side buffer
 			tcp_data down_thread_data_dest_side;
 			//! message data queue for down thread
-			tcp_thread_message_que down_thread_message_que;
+//			tcp_thread_message_que down_thread_message_que;
+			lockfree_queue< tcp_thread_message >		down_thread_message_que;
 			//! up thread use message data
 			tcp_data down_thread_message_data;
 
