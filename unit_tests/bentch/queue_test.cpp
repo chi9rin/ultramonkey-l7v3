@@ -15,10 +15,10 @@ pthread_mutex_t				mutex;
 void*	thread_func_atomic( void* param ){
 	unsigned long long starttime, endtime;
 	RDTSC64( starttime );
-	for( long long i = 0 ; i < 100; ++i ){
+	for( long long i = 0 ; i < 10000; ++i ){
 		lockfree_queue_long.push( &i );	
 	}
-	for( long long i = 0 ; i < 100; ++i ){
+	for( long long i = 0 ; i < 10000; ++i ){
 		long long* value = lockfree_queue_long.pop();
 	}
 	RDTSC64( endtime );
@@ -69,9 +69,8 @@ int main( int argc, char* argv[] ){
 	}
 	thread_vec.clear();
 
-/*
 	//mutex version
-	std::cout << "mutex func time start" << std::endl;
+/*	std::cout << "mutex func time start" << std::endl;
 	for( int i = 0; i < count; ++i ){
 		pthread_create( &thd, NULL, thread_func_mutex, NULL );
 		thread_vec.push_back( thd );
@@ -81,8 +80,7 @@ int main( int argc, char* argv[] ){
 	     ++itr ){
 		pthread_join( *itr, NULL );
 	}
-
-	pthread_mutex_destroy( &mutex );
 */
+	pthread_mutex_destroy( &mutex );
 	return 0;
 }
