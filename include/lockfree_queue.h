@@ -1,5 +1,5 @@
 #ifndef LOCKFREE_QUEUE_H
-#define LOCFFREE_QUEUE_H
+#define LOCKFREE_QUEUE_H
 
 #include <boost/noncopyable.hpp>
 #include <queue>

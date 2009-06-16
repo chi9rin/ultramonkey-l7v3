@@ -27,7 +27,7 @@ extern "C" bool	__sync_bool_double_compare_and_swap(
 	__asm__ __volatile__( "lock; cmpxchg8b %0; setz %1"
 #endif
 				: "=m"(*addr), "=q"(result)
-				: "m"(*addr), "d"(old_val1), "a"(old_val2), "c"(old_val1), "b"(old_val2)
+				: "m"(*addr), "d"(old_val1), "a"(old_val2), "c"(new_val1), "b"(new_val2)
 				: "memory"
 	);
 	return static_cast<bool><( result );
