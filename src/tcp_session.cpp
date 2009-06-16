@@ -569,7 +569,7 @@ namespace l7vs{
 		up_func = virtual_service_message_up_thread_function_map.find(message);
 		if(up_func != virtual_service_message_up_thread_function_map.end()){
 			up_msg->message = up_func->second;
-			up_thread_message_que.push(up_msg);
+			while(!up_thread_message_que.push(up_msg)){}
 		}else{
 			//Error illegal virtualservice message type
 			std::stringstream buf;
@@ -584,7 +584,7 @@ namespace l7vs{
 		down_func = virtual_service_message_down_thread_function_map.find(message);
 		if(down_func != virtual_service_message_down_thread_function_map.end()){
 			down_msg->message = down_func->second;
-			down_thread_message_que.push(down_msg);
+			while(!down_thread_message_que.push(down_msg)){}
 		}else{
 			//Error illegal virtualservice message type
 			std::stringstream buf;
@@ -1263,8 +1263,8 @@ namespace l7vs{
 			return;
 		}
 		down_msg->message = down_func->second;
-		up_thread_message_que.push(up_msg);
-		down_thread_message_que.push(down_msg);
+		while(!up_thread_message_que.push(up_msg)){}
+		while(!down_thread_message_que.push(down_msg)){}
 	}
 	//! up thread raise module event of handle_response_send_inform
 	//! @param[in]		process_type is prosecess type
@@ -1332,8 +1332,8 @@ namespace l7vs{
 				return;
 			}
 			down_msg->message = down_func->second;
-			up_thread_message_que.push(up_msg);
-			down_thread_message_que.push(down_msg);
+			while(!up_thread_message_que.push(up_msg)){}
+			while(!down_thread_message_que.push(down_msg)){}
 		}
 	}
 	//! up thread raise module event of handle_client_disconnect
@@ -1663,8 +1663,8 @@ namespace l7vs{
 			}
 			down_msg->endpoint_info = server_endpoint;
 			down_msg->message = down_func->second;
-			up_thread_message_que.push(up_msg);
-			down_thread_message_que.push(down_msg);
+			while(!up_thread_message_que.push(up_msg)){}
+			while(!down_thread_message_que.push(down_msg)){}
 		}
 	}
 	//! up thread raise module event of handle_client_disconnect
@@ -2014,8 +2014,8 @@ namespace l7vs{
 			}
 			down_msg->message = down_func->second;
 			down_msg->endpoint_info = sorryserver_socket.first;
-			up_thread_message_que.push(up_msg);
-			down_thread_message_que.push(down_msg);
+			while(!up_thread_message_que.push(up_msg)){}
+			while(!down_thread_message_que.push(down_msg)){}
 		}
 	}
 	//! up thread close sorryserver socket and raise module sorryserver disconnect event
@@ -2335,8 +2335,8 @@ namespace l7vs{
 					}
 					up_msg->endpoint_info = server_endpoint;
 					up_msg->message = up_func->second;
-					up_thread_message_que.push(up_msg);
-					down_thread_message_que.push(down_msg);
+					while(!up_thread_message_que.push(up_msg)){}
+					while(!down_thread_message_que.push(down_msg)){}
 				}
 				break;
 			}
@@ -2624,8 +2624,8 @@ namespace l7vs{
 				return;
 			}
 			up_msg->message = up_func->second;
-			down_thread_message_que.push(down_msg);
-			up_thread_message_que.push(up_msg);
+			while(!down_thread_message_que.push(down_msg)){}
+			while(!up_thread_message_que.push(up_msg)){}
 		}
 	}
 	
@@ -2764,8 +2764,8 @@ namespace l7vs{
 			}
 			up_msg->message = up_func->second;
 			up_msg->endpoint_info = sorryserver_socket.first;
-			up_thread_message_que.push(up_msg);
-			down_thread_message_que.push(down_msg);
+			while(!up_thread_message_que.push(up_msg)){}
+			while(!down_thread_message_que.push(down_msg)){}
 		}
 	}
 	//! down thread close sorryserver socket and raise module sorryserver disconnect event

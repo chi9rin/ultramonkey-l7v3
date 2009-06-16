@@ -555,7 +555,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					return;
 				}
 				session_thread_control*	p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, param_data.schedule_algorithm );
-				pool_sessions.push( p_stc );
+				while( !pool_sessions.push( p_stc ) ){}
 			}
 			catch( std::bad_alloc ex ){
 				Logger::putLogFatal( 
@@ -623,7 +623,7 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 		tcp_session*				tmp_session	= NULL;
 		session_thread_control*		tmp_stc		= NULL;
 		waiting_sessions.pop( tmp_session, tmp_stc );
-		pool_sessions.push( tmp_stc );
+		while(!pool_sessions.push( tmp_stc )){}
 	}
 
 	//release sessions[i]->join();
@@ -1380,7 +1380,7 @@ void	l7vs::virtualservice_tcp::release_session( const tcp_session* session_ptr )
 	}
 	active_sessions.erase( session_ptr );
 	stc_ptr->get_session()->initialize();
-	pool_sessions.push( stc_ptr );
+	while(!pool_sessions.push( stc_ptr )){}
 
 	{
 		tcp_session*				tmp_session	= NULL;
