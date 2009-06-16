@@ -44,9 +44,9 @@ public:
 	std::list<realserver>&	get_rs_list(){
 		return rs_list;
 	}
-	void	release_session( const boost::thread::id in_id ){
+	void	release_session( const tcp_session* session_ptr ){
 		std::cout << "release_session called." << std::endl;
-		virtualservice_tcp::release_session( in_id );
+		virtualservice_tcp::release_session( session_ptr );
 	}
 	unsigned long long	get_ref_count(){
 		return rs_list_ref_count.get();

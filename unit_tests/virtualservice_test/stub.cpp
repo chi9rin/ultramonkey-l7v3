@@ -441,7 +441,7 @@ void	l7vs::tcp_session::up_thread_run(void){
 			break;
 	}
 	std::cout << "release session";
-	parent_service.release_session( boost::this_thread::get_id() );
+	parent_service.release_session( this );
 }
 
 void	l7vs::tcp_session::down_thread_run(void){}

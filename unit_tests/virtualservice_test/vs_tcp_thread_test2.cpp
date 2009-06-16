@@ -348,13 +348,12 @@ public:
 		vs->connection_inactive( ep );
 
 	}
-	void		release_session( const boost::thread::id id ){
+	void		release_session( const l7vs::tcp_session* session_ptr ){
 		boost::mutex	mtx;
 		boost::mutex::scoped_lock	lk( mtx );
 		cond.wait( lk );
 
-		vs->release_session( id );
-
+		vs->release_session( session_ptr );
 	}
 };
 

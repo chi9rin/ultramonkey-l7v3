@@ -58,7 +58,7 @@ public:
 	}
 	void	connection_inactive( const boost::asio::ip::tcp::endpoint& ep ){
 	}
-	void	release_session( const boost::thread::id in_id ){
+	void	release_session( const tcp_session* session_ptr ){
 	}
 
 	//imprement for unit_test

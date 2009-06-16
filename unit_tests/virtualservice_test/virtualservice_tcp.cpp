@@ -90,6 +90,6 @@ void	l7vs::virtualservice_tcp::connection_active( const boost::asio::ip::tcp::en
 void	l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tcp::endpoint& in ){
 }
 
-void	l7vs::virtualservice_tcp::release_session( const boost::thread::id thread_id ){
+void	l7vs::virtualservice_tcp::release_session( const tcp_session* session_ptr ){
 }
 
