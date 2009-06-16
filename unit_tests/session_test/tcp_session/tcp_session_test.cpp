@@ -7699,7 +7699,7 @@ void down_thread_realserver_receive_test(){
 	rs_cur = rs_list.begin();
 	std::pair< boost::asio::ip::tcp::endpoint, boost::shared_ptr< l7vs::tcp_socket > > sock_pair = *rs_cur;
 	rs_list.clear();
-	BOOST_CHECK(*rs_cur == sock_pair);
+//	BOOST_CHECK(*rs_cur == sock_pair);
 	socket.read_some_call_check = false;
 	test_obj.test_call_realserver_receive();
 	BOOST_CHECK(!socket.read_some_call_check);
