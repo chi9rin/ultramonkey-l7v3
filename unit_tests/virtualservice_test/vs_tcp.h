@@ -65,7 +65,9 @@ public:
 	boost::asio::ip::tcp::acceptor& get_acceptor(){
 		return acceptor_;
 	};
-	
+	l7vs::protocol_module_base::check_message_result parse_socket_option_test(std::vector<std::string>& args){
+		return l7vs::virtualservice_tcp::parse_socket_option(args);
+	};
 };
 
 }

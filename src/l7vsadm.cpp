@@ -300,7 +300,238 @@ bool	l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] )
 		}
 		module_args.push_back( argv[pos] );
 	}
-	protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
+	//>> socket option 
+	std::vector< std::string > chk_module_args;
+	
+	BOOST_FOREACH( std::string str,	module_args ){
+		chk_module_args.push_back( str );
+	}
+	
+	protocol_module_base::check_message_result socket_option_message;
+	socket_option_message.flag = true;
+	std::vector<std::string>::iterator args_itr = chk_module_args.begin();
+	bool is_fond = false;
+	
+	while( args_itr != chk_module_args.end()){
+		
+		if(  *args_itr == "-C" || *args_itr == "--cookie-name" ){
+			args_itr++;
+			// next value
+			if(args_itr != chk_module_args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-E" || *args_itr == "--cookie-expire" ){
+			args_itr++;
+			// next value
+			if(args_itr != chk_module_args.end()){
+				args_itr++;
+			}
+//		}else if( *args_itr == "-F" || *args_itr == "--forwarded-for" ){
+//		}else if( *args_itr == "-R" || *args_itr == "--reschedule" ){
+//		}else if( *args_itr == "-N" || *args_itr == "--no-reschedule" ){
+		}else if( *args_itr == "-S" || *args_itr == "--sorry-uri" ){
+			args_itr++;
+			// next value
+			if(args_itr != chk_module_args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-T" || *args_itr == "--timeout" ){
+			args_itr++;
+			// next value
+			if(args_itr != chk_module_args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-M" || *args_itr == "--maxlist" ){
+			args_itr++;
+			// next value
+			if(args_itr != chk_module_args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-O" || *args_itr == "--sockopt" ){
+			if(is_fond){
+				// duplication
+				socket_option_message.flag = false;
+				socket_option_message.message =	"'-O/--sock-opt' option value '";
+				socket_option_message.message +=	*args_itr;
+				socket_option_message.message +=	"' is not numeric character.";
+				break;
+			}
+			is_fond = true;
+			args_itr = chk_module_args.erase(args_itr);
+			if(args_itr == chk_module_args.end()){
+				// not socket opution value
+				socket_option_message.flag = false;
+				socket_option_message.message =	"'-O/--sock-opt' option value not socket opution value error.";
+				break;
+			}
+			
+			std::string sock_option_val = *args_itr;
+			args_itr = chk_module_args.erase(args_itr);
+			
+			unsigned int hed_pos = 0;
+			bool is_fond_da = false;
+			bool is_fond_nd = false;
+			bool is_fond_ck = false;
+			bool is_fond_qa = false;
+			
+			while((hed_pos + 2) < sock_option_val.length()){
+				
+				if(sock_option_val.substr(hed_pos,2) == "da"){
+					if(is_fond_da){
+						// da(defer_accept option) duplication error
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value da(defer_accept option) duplication error.";
+						break;
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_da = true;
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								socket_option_message.flag = false;
+								socket_option_message.message =	"'-O/--sock-opt' option value '";
+								socket_option_message.message +=	*args_itr;
+								socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value '";
+						socket_option_message.message +=	*args_itr;
+						socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+				}else if(sock_option_val.substr(hed_pos,2) == "nd"){
+					if(is_fond_nd){
+						// nd(nodelay option) duplication error
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value nd(nodelay option) duplication error.";
+						break;
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_nd = true;
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								socket_option_message.flag = false;
+								socket_option_message.message =	"'-O/--sock-opt' option value '";
+								socket_option_message.message +=	*args_itr;
+								socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value '";
+						socket_option_message.message +=	*args_itr;
+						socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+				}else if(sock_option_val.substr(hed_pos,2) == "ck"){
+					if(is_fond_ck){
+						// ck(cork option) duplication error
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value ck(cork option) duplication error.";
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_ck = true;
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								socket_option_message.flag = false;
+								socket_option_message.message =	"'-O/--sock-opt' option value '";
+								socket_option_message.message +=	*args_itr;
+								socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value '";
+						socket_option_message.message +=	*args_itr;
+						socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+					
+				}else if(sock_option_val.substr(hed_pos,2) == "qa"){
+					if(is_fond_qa){
+						// qa(quickack option) duplication error
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value qa(quickack option) duplication error.";
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_qa = true;
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								socket_option_message.flag = false;
+								socket_option_message.message =	"'-O/--sock-opt' option value '";
+								socket_option_message.message +=	*args_itr;
+								socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else if(sock_option_val.substr(hed_pos,4) == ":off"){
+						is_fond_qa = true;
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								socket_option_message.flag = false;
+								socket_option_message.message =	"'-O/--sock-opt' option value '";
+								socket_option_message.message +=	*args_itr;
+								socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						socket_option_message.flag = false;
+						socket_option_message.message =	"'-O/--sock-opt' option value '";
+						socket_option_message.message +=	*args_itr;
+						socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+				}else{
+					socket_option_message.flag = false;
+					socket_option_message.message =	"'-O/--sock-opt' option value '";
+					socket_option_message.message +=	*args_itr;
+					socket_option_message.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+					break;
+				}
+			}
+			if(!socket_option_message.flag){
+				break;
+			}
+		}else{
+			args_itr++;
+		}
+	}
+	
+	if( !socket_option_message.flag ){
+		// args is not supported.
+		std::stringstream	buf;
+		buf << "protocol module argument error: " << socket_option_message.message;
+		l7vsadm_err.setter( true, buf.str() );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 100, buf.str(), __FILE__, __LINE__ );
+		return false;
+	}
+//	protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
+	protocol_module_base::check_message_result module_message = module->check_parameter( chk_module_args );
+	//<< socket option
 	if( !module_message.flag ){
 		// args is not supported.
 		std::stringstream	buf;

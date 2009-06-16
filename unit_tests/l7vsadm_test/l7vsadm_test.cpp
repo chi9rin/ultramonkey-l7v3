@@ -3744,6 +3744,991 @@ void	l7vsadm_test::file_lock_class_test(){
 }
 
 
+void	parse_opt_vs_module_func_socket_option_test(){
+	BOOST_MESSAGE( "----- parse_opt_vs_module_func_socket_option_test start -----" );
+	
+	
+	std::cout << "parse_opt_vs_module_func normal case 01 (da socket option on)" << std::endl;
+	// parse_opt_vs_module_func normal case 01 (da socket option on)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "da:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[400] parse_opt_vs_module_func normal case 01 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[401] parse_opt_vs_module_func normal case 01 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[402] parse_opt_vs_module_func normal case 01 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[403] parse_opt_vs_module_func normal case 01 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[404] parse_opt_vs_module_func normal case 01 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 02 (nd socket option on)" << std::endl;
+	// parse_opt_vs_module_func normal case 02 (nd socket option on)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "nd:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[405] parse_opt_vs_module_func normal case 02 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[406] parse_opt_vs_module_func normal case 02 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[407] parse_opt_vs_module_func normal case 02 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[408] parse_opt_vs_module_func normal case 02 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[409] parse_opt_vs_module_func normal case 02 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "nd:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 03 (ck socket option on)" << std::endl;
+	// parse_opt_vs_module_func normal case 03 (ck socket option on)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "ck:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[410] parse_opt_vs_module_func normal case 03 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[411] parse_opt_vs_module_func normal case 03 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[412] parse_opt_vs_module_func normal case 03 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[413] parse_opt_vs_module_func normal case 03 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[414] parse_opt_vs_module_func normal case 03 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ck:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 04 (qa socket option on)" << std::endl;
+	// parse_opt_vs_module_func normal case 04 (qa socket option on)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[415] parse_opt_vs_module_func normal case 04 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[416] parse_opt_vs_module_func normal case 04 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[417] parse_opt_vs_module_func normal case 04 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[418] parse_opt_vs_module_func normal case 04 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[419] parse_opt_vs_module_func normal case 04 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 05 (qa socket option off)" << std::endl;
+	// parse_opt_vs_module_func normal case 05 (qa socket option off)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "qa:off" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[420] parse_opt_vs_module_func normal case 05 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[421] parse_opt_vs_module_func normal case 05 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[422] parse_opt_vs_module_func normal case 05 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[423] parse_opt_vs_module_func normal case 05 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[424] parse_opt_vs_module_func normal case 05 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "qa:off" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 06 (all socket option on)" << std::endl;
+	// parse_opt_vs_module_func normal case 06 (all socket option on)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[425] parse_opt_vs_module_func normal case 06 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[426] parse_opt_vs_module_func normal case 06 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[427] parse_opt_vs_module_func normal case 06 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[428] parse_opt_vs_module_func normal case 06 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[429] parse_opt_vs_module_func normal case 06 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+
+	std::cout << "parse_opt_vs_module_func normal case 07 (all socket option on reverse)" << std::endl;
+	// parse_opt_vs_module_func normal case 07 (all socket option on reverse)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--sockopt" , "qa:on,ck:on,nd:on,da:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[430] parse_opt_vs_module_func normal case 07 (end with next vs option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[431] parse_opt_vs_module_func normal case 07 (end with next vs option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[432] parse_opt_vs_module_func normal case 07 (end with next vs option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		// unit_test[433] parse_opt_vs_module_func normal case 07 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--sockopt" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[434] parse_opt_vs_module_func normal case 07 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "qa:on,ck:on,nd:on,da:on" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 08 (-C(cookie-name) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 08 (-C(cookie-name) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-C" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[435] parse_opt_vs_module_func normal case 08 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[436] parse_opt_vs_module_func normal case 08 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[437] parse_opt_vs_module_func normal case 08 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[438] parse_opt_vs_module_func normal case 08 (cookie-name) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-C" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[439] parse_opt_vs_module_func normal case 08 (cookie-name value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[440] parse_opt_vs_module_func normal case 08 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[441] parse_opt_vs_module_func normal case 08 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 09 (--cookie-name option)" << std::endl;
+	// parse_opt_vs_module_func normal case 09 (--cookie-name option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--cookie-name" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[442] parse_opt_vs_module_func normal case 09 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[443] parse_opt_vs_module_func normal case 09 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[444] parse_opt_vs_module_func normal case 09 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[445] parse_opt_vs_module_func normal case 09 (cookie-name) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--cookie-name" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[446] parse_opt_vs_module_func normal case 09 (cookie-name value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		
+		// unit_test[447] parse_opt_vs_module_func normal case 09 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[448] parse_opt_vs_module_func normal case 09 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 10 (-E(cookie-expire) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 10 (-E(cookie-expire) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-E" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[449] parse_opt_vs_module_func normal case 10 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[450] parse_opt_vs_module_func normal case 10 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[451] parse_opt_vs_module_func normal case 10 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[452] parse_opt_vs_module_func normal case 10 (cookie-expire) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-E" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[453] parse_opt_vs_module_func normal case 10 (cookie-name value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[454] parse_opt_vs_module_func normal case 10 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[455] parse_opt_vs_module_func normal case 10 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 11 (--cookie-expire option)" << std::endl;
+	// parse_opt_vs_module_func normal case 11 (--cookie-expire option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--cookie-expire" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[456] parse_opt_vs_module_func normal case 11 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[457] parse_opt_vs_module_func normal case 11 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[458] parse_opt_vs_module_func normal case 11 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[459] parse_opt_vs_module_func normal case 11 (cookie-expire) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--cookie-expire" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[460] parse_opt_vs_module_func normal case 11 (cookie-name value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		
+		// unit_test[461] parse_opt_vs_module_func normal case 11 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[462] parse_opt_vs_module_func normal case 11 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 12 (-F(forwarded-for) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 12 (-F(forwarded-for) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 7;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-F" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[463] parse_opt_vs_module_func normal case 12 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[464] parse_opt_vs_module_func normal case 12 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[465] parse_opt_vs_module_func normal case 12 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[466] parse_opt_vs_module_func normal case 12 (cookie-expire) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-F" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[467] parse_opt_vs_module_func normal case 12 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[468] parse_opt_vs_module_func normal case 12 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 13 (--forwarded-for option)" << std::endl;
+	// parse_opt_vs_module_func normal case 13 (--forwarded-for option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 7;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--forwarded-for" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[469] parse_opt_vs_module_func normal case 1 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[470] parse_opt_vs_module_func normal case 13 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[471] parse_opt_vs_module_func normal case 13 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[472] parse_opt_vs_module_func normal case 13 (cookie-expire) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--forwarded-for" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[473] parse_opt_vs_module_func normal case 13 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[474] parse_opt_vs_module_func normal case 13 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	
+	std::cout << "parse_opt_vs_module_func normal case 14 (-R(reschedule) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 14 (-R(reschedule) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 7;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-R" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[475] parse_opt_vs_module_func normal case 14 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[476] parse_opt_vs_module_func normal case 14 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[477] parse_opt_vs_module_func normal case 14 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[478] parse_opt_vs_module_func normal case 14 (cookie-expire) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-R" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[479] parse_opt_vs_module_func normal case 14 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[480] parse_opt_vs_module_func normal case 14 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 15 (--reschedule option)" << std::endl;
+	// parse_opt_vs_module_func normal case 15 (--reschedule option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 7;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--reschedule" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[481] parse_opt_vs_module_func normal case 15 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[482] parse_opt_vs_module_func normal case 15 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[483] parse_opt_vs_module_func normal case 15 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[484] parse_opt_vs_module_func normal case 15 (reschedule) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--reschedule" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[485] parse_opt_vs_module_func normal case 15 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[486] parse_opt_vs_module_func normal case 15 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 16 (-N(no-reschedule) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 16 (-N(no-reschedule) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 7;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-N" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[487] parse_opt_vs_module_func normal case 16 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[488] parse_opt_vs_module_func normal case 16 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[489] parse_opt_vs_module_func normal case 16 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[450] parse_opt_vs_module_func normal case 16 (no-reschedule) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-N" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[451] parse_opt_vs_module_func normal case 16 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[452] parse_opt_vs_module_func normal case 16 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 17 (--no-reschedule option)" << std::endl;
+	// parse_opt_vs_module_func normal case 17 (--no-reschedule option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 7;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--no-reschedule" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[453] parse_opt_vs_module_func normal case 17 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[454] parse_opt_vs_module_func normal case 17 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[455] parse_opt_vs_module_func normal case 17 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[456] parse_opt_vs_module_func normal case 17 (no-reschedule) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--no-reschedule" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[457] parse_opt_vs_module_func normal case 17 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[458] parse_opt_vs_module_func normal case 17 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 18 (-S(sorry-uri) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 18 (-S(sorry-uri) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-S" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[459] parse_opt_vs_module_func normal case 18 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[460] parse_opt_vs_module_func normal case 18 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[461] parse_opt_vs_module_func normal case 18 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[462] parse_opt_vs_module_func normal case 18 (sorry-uri) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-S" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[463] parse_opt_vs_module_func normal case 18 (sorry-uri value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[464] parse_opt_vs_module_func normal case 18 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[465] parse_opt_vs_module_func normal case 18 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 19 (--sorry-uri option)" << std::endl;
+	// parse_opt_vs_module_func normal case 19 (--sorry-uri option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--sorry-uri" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[466] parse_opt_vs_module_func normal case 19 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );
+		// unit_test[467] parse_opt_vs_module_func normal case 19 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[468] parse_opt_vs_module_func normal case 19 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[469] parse_opt_vs_module_func normal case 19 (sorry-uri) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--sorry-uri" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[470] parse_opt_vs_module_func normal case 19 (sorry-uri value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		
+		// unit_test[471] parse_opt_vs_module_func normal case 19 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[472] parse_opt_vs_module_func normal case 19 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 20 (-T(time-out) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 20 (-T(time-out) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-T" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[473] parse_opt_vs_module_func normal case 20 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[474] parse_opt_vs_module_func normal case 20 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[475] parse_opt_vs_module_func normal case 20 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[476] parse_opt_vs_module_func normal case 20 (time-out) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-T" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[477] parse_opt_vs_module_func normal case 20 (time-out value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[478] parse_opt_vs_module_func normal case 20 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[479] parse_opt_vs_module_func normal case 20 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 21 (--time-out option)" << std::endl;
+	// parse_opt_vs_module_func normal case 21 (--time-out option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--time-out" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[480] parse_opt_vs_module_func normal case 21 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[481] parse_opt_vs_module_func normal case 21 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[482] parse_opt_vs_module_func normal case 21 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[483] parse_opt_vs_module_func normal case 21 (time-out) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--time-out" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[484] parse_opt_vs_module_func normal case 21 (time-out value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		
+		// unit_test[485] parse_opt_vs_module_func normal case 21 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[486] parse_opt_vs_module_func normal case 21 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 22 (-M(maxlist) option)" << std::endl;
+	// parse_opt_vs_module_func normal case 22 (-M(maxlist) option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-M" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[487] parse_opt_vs_module_func normal case 22 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[488] parse_opt_vs_module_func normal case 22 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[489] parse_opt_vs_module_func normal case 22 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[490] parse_opt_vs_module_func normal case 22 (maxlist) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-M" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[491] parse_opt_vs_module_func normal case 22 (maxlist value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[492] parse_opt_vs_module_func normal case 22 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[493] parse_opt_vs_module_func normal case 22 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 23 (--maxlist option)" << std::endl;
+	// parse_opt_vs_module_func normal case 23 (--maxlist option before)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "--maxlist" , "ABCDEFG" , "-O" , "da:on,nd:on,ck:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[494] parse_opt_vs_module_func normal case 23 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[495] parse_opt_vs_module_func normal case 23 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[496] parse_opt_vs_module_func normal case 23 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		// unit_test[497] parse_opt_vs_module_func normal case 23 (maxlist) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "--maxlist" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[498] parse_opt_vs_module_func normal case 23 (maxlist value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		
+		// unit_test[499] parse_opt_vs_module_func normal case 23 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[500] parse_opt_vs_module_func normal case 23 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func normal case 24 (other option suffix)" << std::endl;
+	// parse_opt_vs_module_func normal case 24 (other option suffix)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "da:on,nd:on,ck:on,qa:on", "-C" , "ABCDEFG" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[501] parse_opt_vs_module_func normal case 24 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, true );	
+		// unit_test[502] parse_opt_vs_module_func normal case 24 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, true );
+		// unit_test[503] parse_opt_vs_module_func normal case 24 (end with module option) module name check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+		
+		
+		// unit_test[504] parse_opt_vs_module_func normal case 24 (socket option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[505] parse_opt_vs_module_func normal case 24 (socket option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+		// unit_test[506] parse_opt_vs_module_func normal case 24 (other option) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-C" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		// unit_test[507] parse_opt_vs_module_func normal case 24 (other option value) module arg check
+		BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+		adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 01 (illegal socket option)" << std::endl;
+	// parse_opt_vs_module_func error case 01 (illegal socket option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "dd:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[508] parse_opt_vs_module_func error case 01 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+		// unit_test[509] parse_opt_vs_module_func error case 01 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 02 (da socket option illegal value)" << std::endl;
+	// parse_opt_vs_module_func error case 02 (da socket option illegal value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "da:off" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[510] parse_opt_vs_module_func error case 02 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[511] parse_opt_vs_module_func error case 02 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 03 (nd socket option illegal value)" << std::endl;
+	// parse_opt_vs_module_func error case 03 (nd socket option illegal value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "nd:off" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[511] parse_opt_vs_module_func error case 03 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[512] parse_opt_vs_module_func error case 03 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 04 (ck socket option illegal value)" << std::endl;
+	// parse_opt_vs_module_func error case 04 (ck socket option illegal value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "ck:off" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[513] parse_opt_vs_module_func error case 04 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[514] parse_opt_vs_module_func error case 04 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 05 (qa socket option illegal value)" << std::endl;
+	// parse_opt_vs_module_func error case 05 (qa socket option illegal value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "qa:ok" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[515] parse_opt_vs_module_func error case 05 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[516] parse_opt_vs_module_func error case 05 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 06 (duplication socket option)" << std::endl;
+	// parse_opt_vs_module_func error case 06 (duplication socket option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 8;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "da:on" , "--sockopt" , "nd:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[517] parse_opt_vs_module_func error case 06 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );
+		// unit_test[518] parse_opt_vs_module_func error case 06 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 07 (duplication da socket option)" << std::endl;
+	// parse_opt_vs_module_func error case 07 (duplication da socket option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "da:on,da:on" ,  };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[519] parse_opt_vs_module_func error case 07 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[520] parse_opt_vs_module_func error case 07 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 08 (duplication nd socket option)" << std::endl;
+	// parse_opt_vs_module_func error case 08 (duplication nd socket option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "nd:on,nd:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[521] parse_opt_vs_module_func error case 08 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[522] parse_opt_vs_module_func error case 08 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 09 (duplication ck socket option)" << std::endl;
+	// parse_opt_vs_module_func error case 09 (duplication ck socket option)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "ck:on,ck:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[523] parse_opt_vs_module_func error case 09 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[524] parse_opt_vs_module_func error case 09 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	std::cout << "parse_opt_vs_module_func error case 10 (duplication qa socket option)" << std::endl;
+	// parse_opt_vs_module_func error case 10 (qa socket option illegal value)
+	{
+		l7vsadm_test	adm;
+		int		pos		= 2;
+		int		argc	= 6;
+		char*	argv[]	= { "l7vsadm_test", "-A", "-m", "cinsert", "-O" , "qa:on,qa:on" };
+		l7vs::protocol_module_control::load_module_fail = false;
+		l7vs::protocol_module_stub::check_parameter_called = false;
+		l7vs::protocol_module_stub::check_parameter_fail = false;
+	
+		bool ret = adm.parse_opt_vs_module_func_wp( pos, argc, argv );
+
+		// unit_test[525] parse_opt_vs_module_func error case 10 (end with module option) return value check
+		BOOST_CHECK_EQUAL( ret, false );	
+		// unit_test[526] parse_opt_vs_module_func error case 10 (end with module option) check_parameter call check
+		BOOST_CHECK_EQUAL( l7vs::protocol_module_stub::check_parameter_called, false );
+		
+	}
+	
+	l7vs::protocol_module_control::load_module_fail = false;
+	l7vs::protocol_module_stub::check_parameter_called = false;
+	l7vs::protocol_module_stub::check_parameter_fail = false;
+
+	BOOST_MESSAGE( "----- parse_opt_vs_module_func_socket_option_test end -----" );
+
+}
+
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	test_suite* ts = BOOST_TEST_SUITE( "l7vsd class test" );
 
@@ -3786,6 +4771,8 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &execute_test ) );
 
 	ts->add( BOOST_TEST_CASE( &l7vsadm_test::file_lock_class_test ) );
+	
+	ts->add( BOOST_TEST_CASE( &parse_opt_vs_module_func_socket_option_test ) );
 
 	framework::master_test_suite().add( ts );
 

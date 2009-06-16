@@ -1308,6 +1308,1372 @@ std::cout << "!" << std::endl;
 	delete vs;
 }
 
+//test case6  parse_socket_option test
+void	virtualservice_tcp_test6(){
+	counter = 1;
+
+	debugg_flug_struct::getInstance().pmcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().smcontrol_err_flag()	= false;
+	debugg_flug_struct::getInstance().param_exist_flag() = false;
+
+	l7vs::l7vsd					vsd;
+	boost::asio::io_service		dispatcher;
+	l7vs::replication			rep;
+	l7vs::virtualservice_element	element;
+	//set element value
+	element.udpmode					= false;
+	element.tcp_accept_endpoint		= tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
+	element.udp_recv_endpoint		= udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+	element.realserver_vector.clear();
+	element.protocol_module_name	= "PMtest1";
+	element.schedule_module_name	= "SMtest1";
+	element.protocol_args.clear();
+	element.protocol_args.push_back( "testarg" );
+	element.protocol_args.push_back( "testarg2" );
+	element.sorry_maxconnection		= 1234LL;
+	element.sorry_endpoint			= tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
+	element.sorry_flag				= false;
+	element.qos_upstream			= 65535ULL;
+	element.qos_downstream			= 32767ULL;
+	
+//	std::cout << counter++ << std::endl;
+	l7vs::vs_tcp*	vs = new l7vs::vs_tcp( vsd, rep, element );
+
+	BOOST_CHECK_EQUAL( &vsd, &(vs->get_vsd()) );
+	BOOST_CHECK_EQUAL( &rep, &(vs->get_rep()) );
+	BOOST_CHECK( element == vs->get_element() );
+	l7vs::error_code	vs_err;
+	
+	
+	std::cout << "parse_socket_option normal case 01 (da socket option on)" << std::endl;
+	// parse_socket_option normal case 01 (da socket option on)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[55] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[56] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[57] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[58] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, false );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[59] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, false );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[60] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, false );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[61] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, false );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[62] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, false );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[63] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, false );
+		
+		// unit_test[64] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 02 (nd socket option on)" << std::endl;
+	// parse_socket_option normal case 02 (nd socket option on)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "nd:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[65] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[66] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), false );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[67] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 0 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[68] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[69] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[70] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, false );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[71] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, false );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[72] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, false );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[73] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, false );
+		
+		// unit_test[74] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 03 (ck socket option on)" << std::endl;
+	// parse_socket_option normal case 03 (ck socket option on)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "ck:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[75] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[76] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), false );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[77] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 0 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[78] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, false );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[79] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, false );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[80] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[81] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[82] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, false );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[83] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, false );
+		
+		// unit_test[84] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+		
+	}
+	
+	std::cout << "parse_socket_option normal case 04 (qa socket option on)" << std::endl;
+	// parse_socket_option normal case 04 (qa socket option on)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[85] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[86] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), false );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[87] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 0 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[88] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, false );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[89] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, false );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[90] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, false );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[91] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, false );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[92] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[93] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[94] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+		
+	}
+	
+	std::cout << "parse_socket_option normal case 05 (qa socket option off)" << std::endl;
+	// parse_socket_option normal case 05 (qa socket option off)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:off" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[95] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[96] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), false );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[97] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 0 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[98] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, false );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[99] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, false );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[100] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, false );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[101] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, false );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[102] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[103] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, false );
+		
+		// unit_test[104] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	
+	std::cout << "parse_socket_option normal case 06 (all socket option on)" << std::endl;
+	// parse_socket_option normal case 06 (all socket option on)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "da:on,nd:on,ck:on,qa:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[105] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[106] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[107] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[108] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[109] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[110] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[111] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[112] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[113] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[114] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+
+	std::cout << "parse_socket_option normal case 07 (all socket option on reverse)" << std::endl;
+	// parse_socket_option normal case 07 (all socket option on reverse)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--sockopt" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[115] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[116] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[117] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[118] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[119] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[120] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[121] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[123] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[124] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[125] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 08 (-C(cookie-name) option)" << std::endl;
+	// parse_socket_option normal case 08 (-C(cookie-name) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-C" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[126] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[127] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[128 parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[129] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[130] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[131] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[132] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[133] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[134] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[135] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-C" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	
+	std::cout << "parse_socket_option normal case 09 (--cookie-name option)" << std::endl;
+	// parse_socket_option normal case 09 (--cookie-name option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--cookie-name" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[136] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[137] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[138] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[139] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[140] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[141] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[142] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[143] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[145] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[146] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--cookie-name" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 10 (-E(cookie-expire) option)" << std::endl;
+	// parse_socket_option normal case 10 (-E(cookie-expire) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-E" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[147] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[148] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[149] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[150] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[151] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[152] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[153] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[154] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[155] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[156] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-E" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 11 (--cookie-expire option)" << std::endl;
+	// parse_socket_option normal case 11 (--cookie-expire option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--cookie-expire" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[157] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[158] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[159] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[160] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[161] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[162] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[163] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[164] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[165] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[166] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--cookie-expire" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 12 (-F(forwarded-for) option)" << std::endl;
+	// parse_socket_option normal case 12 (-F(forwarded-for) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-F" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[167] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[168] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[169] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[170] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[171] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[172] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[173] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[174] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[175] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[176] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-F" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+		
+	}
+	
+	std::cout << "parse_socket_option normal case 13 (--forwarded-for option)" << std::endl;
+	// parse_socket_option normal case 13 (--forwarded-for option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-forwarded-for" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[177] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[178] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[179] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[180] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[181] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[182] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[183] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[184] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[185] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[186] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-forwarded-for" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 14 (-R(reschedule) option)" << std::endl;
+	// parse_socket_option normal case 14 (-R(reschedule) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-R" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[187] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[188] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[189] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[190] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[191] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[192] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[193] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[194] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[195] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[196] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-R" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+		
+	}
+	
+	
+	std::cout << "parse_socket_option normal case 15 (--reschedule option)" << std::endl;
+	// parse_socket_option normal case 15 (--reschedule option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--reschedule" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[197] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[198] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[199] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[200] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[201] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[202] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[203] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[204] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[205] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[206] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--reschedule" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+		
+	}
+	
+	std::cout << "parse_socket_option normal case 16 (-N(no-reschedule) option)" << std::endl;
+	// parse_socket_option normal case 16 (-N(no-reschedule) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-N" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[207] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[208] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[209] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[210] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[211] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[212] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[213] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[214] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[215] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[216] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-N" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 17 (--no-reschedule option)" << std::endl;
+	// parse_socket_option normal case 17 (--no-reschedule option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--no-reschedule" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[217] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[218] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[219] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[220] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[221] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[222] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[223] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[224] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[225] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[226] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--no-reschedule" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 18 (-S(sorry-uri) option)" << std::endl;
+	// parse_socket_option normal case 18 (-S(sorry-uri) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-S" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[227] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[228] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[229] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[230] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[231] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[232] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[233] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[234] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[235] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[236] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-S" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 19 (--sorry-uri option)" << std::endl;
+	// parse_socket_option normal case 19 (--sorry-uri option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--sorry-uri" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[237] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[238] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[239] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[240] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[241] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[242] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[243] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[244] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[245] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[246] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--sorry-uri" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 20 (-T(time-out) option)" << std::endl;
+	// parse_socket_option normal case 20 (-T(time-out) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-T" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[247] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[248] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[249] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[230] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[231] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[232] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[233] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[234] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[235] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[236] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-T" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 21 (--time-out option)" << std::endl;
+	// parse_socket_option normal case 21 (--time-out option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--time-out" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[237] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[238] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[239] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[240] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[241] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[242] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[243] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[244] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[245] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[246] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--time-out" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 22 (-M(maxlist) option)" << std::endl;
+	// parse_socket_option normal case 22 (-M(maxlist) option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-M" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[247] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[248] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[249] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[250] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[251] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[252] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[253] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[254] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[255] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[256] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-M" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 23 (--maxlist option)" << std::endl;
+	// parse_socket_option normal case 23 (--maxlist option before)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "--maxlist" );
+		module_args.push_back( "ABCDEFG" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[257] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[258] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[259] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[260] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[261] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[262] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[263] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[264] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[265] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[266] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "--maxlist" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+	}
+	
+	std::cout << "parse_socket_option normal case 24 (other option suffix)" << std::endl;
+	// parse_socket_option normal case 24 (other option suffix)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,ck:on,nd:on,da:on" );
+		module_args.push_back( "-C" );
+		module_args.push_back( "ABCDEFG" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[267] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, true );
+		
+		//! TCP_DEFER_ACCEPT option
+		// unit_test[268] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_opt(), true );
+		//! TCP_DEFER_ACCEPT option value
+		// unit_test[269] parse_socket_option normal case 01 (set option TCP_DEFER_ACCEPT value) check
+		BOOST_CHECK_EQUAL( vs->get_defer_accept_val(), 1 );
+		//! TCP_NODELAY   (false:not set,true:set option)
+		// unit_test[270] parse_socket_option normal case 01 (set option TCP_NODELAY) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_opt, true );
+		//! TCP_NODELAY option value  (false:off,true:on)
+		// unit_test[271] parse_socket_option normal case 01 (set option TCP_NODELAY value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().nodelay_val, true );
+		//! TCP_CORK      (false:not set,true:set option)
+		// unit_test[272] parse_socket_option normal case 01 (set option TCP_CORK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_opt, true );
+		//! TCP_CORK option value     (false:off,true:on)
+		// unit_test[273] parse_socket_option normal case 01 (set option TCP_CORK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().cork_val, true );
+		//! TCP_QUICKACK  (false:not set,true:set option)
+		// unit_test[274] parse_socket_option normal case 01 (set option TCP_QUICKACK) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_opt, true );
+		//! TCP_QUICKACK option value (false:off,true:on)
+		// unit_test[275] parse_socket_option normal case 01 (set option TCP_QUICKACK value) check
+		BOOST_CHECK_EQUAL( vs->get_set_sock_opt().quickack_val, true );
+		
+		// unit_test[276] parse_socket_option normal case 01 module arg check
+		BOOST_CHECK_EQUAL( module_args.front(), "cinsert" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "-C" );
+		module_args.erase(module_args.begin());
+		BOOST_CHECK_EQUAL( module_args.front(), "ABCDEFG" );
+		module_args.erase(module_args.begin());
+		
+		BOOST_CHECK_EQUAL( module_args.empty(), true );
+		
+		
+	}
+	
+	std::cout << "parse_socket_option error case 01 (illegal socket option)" << std::endl;
+	// parse_socket_option error case 01 (illegal socket option)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "dd:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[277] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 02 (da socket option illegal value)" << std::endl;
+	// parse_socket_option error case 02 (da socket option illegal value)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "da:off" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[278] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+		
+	}
+	
+	std::cout << "parse_socket_option error case 03 (nd socket option illegal value)" << std::endl;
+	// parse_socket_option error case 03 (nd socket option illegal value)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "nd:off" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[279] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 04 (ck socket option illegal value)" << std::endl;
+	// parse_socket_option error case 04 (ck socket option illegal value)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "ck:off" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[280] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 05 (qa socket option illegal value)" << std::endl;
+	// parse_socket_option error case 05 (qa socket option illegal value)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:ok" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[281] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 06 (duplication socket option)" << std::endl;
+	// parse_socket_option error case 06 (duplication socket option)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "da:on" );
+		module_args.push_back( "--sockopt" );
+		module_args.push_back( "nd:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[282] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+		
+		
+	}
+	
+	std::cout << "parse_socket_option error case 07 (duplication da socket option)" << std::endl;
+	// parse_socket_option error case 07 (duplication da socket option)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "da:on,da:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[283] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 08 (duplication nd socket option)" << std::endl;
+	// parse_socket_option error case 08 (duplication nd socket option)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "nd:on,nd:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[284] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 09 (duplication ck socket option)" << std::endl;
+	// parse_socket_option error case 09 (duplication ck socket option)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "ck:on,ck:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[285] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+	}
+	
+	std::cout << "parse_socket_option error case 10 (duplication qa socket option)" << std::endl;
+	// parse_socket_option error case 10 (qa socket option illegal value)
+	{
+		std::vector< std::string > module_args;
+		module_args.push_back( "cinsert" );
+		module_args.push_back( "-O" );
+		module_args.push_back( "qa:on,qa:on" );
+		
+		l7vs::protocol_module_base::check_message_result res = vs->parse_socket_option_test( module_args );
+
+		// unit_test[286] parse_socket_option normal case 01 return value check
+		BOOST_CHECK_EQUAL( res.flag, false );
+		
+	}
+	
+	// unit_test[9]  object destroy
+	BOOST_MESSAGE( "-------9" );
+	delete vs;
+}
+
+
+
+
 test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 
 	// create unit test suite
@@ -1319,6 +2685,7 @@ test_suite*	init_unit_test_suite( int argc, char* argv[] ){
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test3 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test4 ) );
 	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test5 ) );
+	ts->add( BOOST_TEST_CASE( &virtualservice_tcp_test6 ) );
 
 	framework::master_test_suite().add( ts );
 

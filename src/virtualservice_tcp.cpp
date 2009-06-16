@@ -474,6 +474,16 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 
 	protocol_module_base::check_message_result pm_result;
 	pm_result = parse_socket_option(element.protocol_args);
+	if( !pm_result.flag ){
+		err.setter( true, "Protocol Module argument error." );
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+			boost::format formatter("out_function : void virtualservice_tcp::initialize( "
+					"l7vs::error_code& err ) : err = %s, err.message = %s");
+			formatter % ( err ? "true" : "false") % err.get_message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 115, formatter.str(), __FILE__, __LINE__ );
+		}
+		return;
+	}
 	
 	pm_result	=	protomod->check_parameter( element.protocol_args );
 	if( !pm_result.flag ){
@@ -1403,7 +1413,7 @@ void	l7vs::virtualservice_tcp::release_session( const tcp_session* session_ptr )
  * @return  void
  */
 l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse_socket_option(std::vector<std::string>& args){
-		
+	
 	l7vs::protocol_module_base::check_message_result result;
 	
 	// socket option check & set
@@ -1425,6 +1435,270 @@ l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse
 		//! TCP_QUICKACK option value (false:off,true:on)
 	set_sock_opt.quickack_val = false;
 	
+	result.flag = true;
+	std::vector<std::string>::iterator args_itr = args.begin();
+	bool is_fond = false;
+	
+	while( args_itr != args.end()){
+		
+		if(  *args_itr == "-C" || *args_itr == "--cookie-name" ){
+			args_itr++;
+			// next value
+			if(args_itr != args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-E" || *args_itr == "--cookie-expire" ){
+			args_itr++;
+			// next value
+			if(args_itr != args.end()){
+				args_itr++;
+			}
+//		}else if( *args_itr == "-F" || *args_itr == "--forwarded-for" ){
+//		}else if( *args_itr == "-R" || *args_itr == "--reschedule" ){
+//		}else if( *args_itr == "-N" || *args_itr == "--no-reschedule" ){
+		}else if( *args_itr == "-S" || *args_itr == "--sorry-uri" ){
+			args_itr++;
+			// next value
+			if(args_itr != args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-T" || *args_itr == "--timeout" ){
+			args_itr++;
+			// next value
+			if(args_itr != args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-M" || *args_itr == "--maxlist" ){
+			args_itr++;
+			// next value
+			if(args_itr != args.end()){
+				args_itr++;
+			}
+		}else if( *args_itr == "-O" || *args_itr == "--sockopt" ){
+			if(is_fond){
+				// duplication
+				result.flag = false;
+				result.message =	"'-O/--sock-opt' option value '";
+				result.message +=	*args_itr;
+				result.message +=	"' is not numeric character.";
+				break;
+			}
+			is_fond = true;
+			args_itr = args.erase(args_itr);
+			if(args_itr == args.end()){
+				// not socket opution value
+				result.flag = false;
+				result.message =	"'-O/--sock-opt' option value not socket opution value error.";
+				break;
+			}
+			
+			std::string sock_option_val = *args_itr;
+			args_itr = args.erase(args_itr);
+			
+			unsigned int hed_pos = 0;
+			bool is_fond_da = false;
+			bool is_fond_nd = false;
+			bool is_fond_ck = false;
+			bool is_fond_qa = false;
+			
+			while((hed_pos + 2) < sock_option_val.length()){
+				
+				if(sock_option_val.substr(hed_pos,2) == "da"){
+					if(is_fond_da){
+						// da(defer_accept option) duplication error
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value da(defer_accept option) duplication error.";
+						break;
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_da = true;
+						
+						//! is set option TCP_DEFER_ACCEPT
+						defer_accept_opt = true;
+						//! TCP_DEFER_ACCEPT option value
+						defer_accept_val = 1;
+						
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								result.flag = false;
+								result.message =	"'-O/--sock-opt' option value '";
+								result.message +=	*args_itr;
+								result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value '";
+						result.message +=	*args_itr;
+						result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+				}else if(sock_option_val.substr(hed_pos,2) == "nd"){
+					if(is_fond_nd){
+						// nd(nodelay option) duplication error
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value nd(nodelay option) duplication error.";
+						break;
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_nd = true;
+						
+						//! TCP_NODELAY   (false:not set,true:set option)
+						set_sock_opt.nodelay_opt = true;
+						//! TCP_NODELAY option value  (false:off,true:on)
+						set_sock_opt.nodelay_val = true;
+						
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								result.flag = false;
+								result.message =	"'-O/--sock-opt' option value '";
+								result.message +=	*args_itr;
+								result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value '";
+						result.message +=	*args_itr;
+						result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+				}else if(sock_option_val.substr(hed_pos,2) == "ck"){
+					if(is_fond_ck){
+						// ck(cork option) duplication error
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value ck(cork option) duplication error.";
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_ck = true;
+						
+						//! TCP_CORK      (false:not set,true:set option)
+						set_sock_opt.cork_opt = true;
+						//! TCP_CORK option value     (false:off,true:on)
+						set_sock_opt.cork_val = true;
+						
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								result.flag = false;
+								result.message =	"'-O/--sock-opt' option value '";
+								result.message +=	*args_itr;
+								result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value '";
+						result.message +=	*args_itr;
+						result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+					
+				}else if(sock_option_val.substr(hed_pos,2) == "qa"){
+					if(is_fond_qa){
+						// qa(quickack option) duplication error
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value qa(quickack option) duplication error.";
+					}
+					hed_pos += 2;
+					if(sock_option_val.substr(hed_pos,3) == ":on"){
+						is_fond_qa = true;
+						
+						//! TCP_QUICKACK  (false:not set,true:set option)
+						set_sock_opt.quickack_opt = true;
+						//! TCP_QUICKACK option value (false:off,true:on)
+						set_sock_opt.quickack_val = true;
+						
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								result.flag = false;
+								result.message =	"'-O/--sock-opt' option value '";
+								result.message +=	*args_itr;
+								result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else if(sock_option_val.substr(hed_pos,4) == ":off"){
+						is_fond_qa = true;
+						
+						//! TCP_QUICKACK  (false:not set,true:set option)
+						set_sock_opt.quickack_opt = true;
+						//! TCP_QUICKACK option value (false:off,true:on)
+						set_sock_opt.quickack_val = false;
+						
+						hed_pos += 3;
+						if((hed_pos + 1) < sock_option_val.length()){
+							if( sock_option_val.substr(hed_pos,1) == ",") {
+								hed_pos += 1;
+							}else{
+								result.flag = false;
+								result.message =	"'-O/--sock-opt' option value '";
+								result.message +=	*args_itr;
+								result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+								break;
+							}
+						}
+					}else{
+						result.flag = false;
+						result.message =	"'-O/--sock-opt' option value '";
+						result.message +=	*args_itr;
+						result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+						break;
+					}
+				}else{
+					result.flag = false;
+					result.message =	"'-O/--sock-opt' option value '";
+					result.message +=	*args_itr;
+					result.message +=	"' wrong value ex. da:on,nd:on,ck:on,qa:on";
+					break;
+				}
+			}
+			if(!result.flag){
+				break;
+			}
+		}else{
+			args_itr++;
+		}
+	}
+	
+	//----Debug log----------------------------------------------------------------------
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+		if(result.flag){
+			boost::format formatter("parse_socket_option"
+					" defer_accept_opt[%s] defer_accept_val[%d]"
+					" nodelay_opt[%s] nodelay_val[%s]"
+					" cork_opt[%s] cork_val[%s]"
+					" quickack_opt[%s]" "quickack_val[%s]");
+			formatter %(defer_accept_opt ? "true" : "false") %defer_accept_val 
+						%(set_sock_opt.nodelay_opt ? "true" : "false") %(set_sock_opt.nodelay_val ? "true" : "false") 
+						%(set_sock_opt.cork_opt ? "true" : "false") %(set_sock_opt.cork_val ? "true" : "false") 
+						%(set_sock_opt.quickack_opt ? "true" : "false") %(set_sock_opt.quickack_val ? "true" : "false");
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 120, formatter.str(), __FILE__, __LINE__ );
+		}else{
+			boost::format formatter("parse_socket_option error %s");
+			formatter %result.message;
+			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 121, formatter.str(), __FILE__, __LINE__ );
+		}
+	}
+	//----Debug log----------------------------------------------------------------------
+
 	return result;
 }
 
