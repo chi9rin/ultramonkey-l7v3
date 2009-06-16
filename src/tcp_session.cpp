@@ -441,12 +441,10 @@ namespace l7vs{
 		protocol_module = NULL;
 		session_pause_flag = false;
 		while( !up_thread_message_que.empty() ){
-			tcp_thread_message*	tmp_ptr	= up_thread_message_que.pop();
-			delete	tmp_ptr;
+			up_thread_message_que.pop();
 		}
 		while( !down_thread_message_que.empty() ){
-			tcp_thread_message*	tmp_ptr	= down_thread_message_que.pop();
-			delete	tmp_ptr;
+			down_thread_message_que.pop();
 		}
 		protocol_module = parent_service.get_protocol_module();
 		
