@@ -4,6 +4,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
+#include "utility.h"
+
 namespace l7vs{
 
 //Argument Tkey, its size must be 64bit or less.
@@ -44,7 +46,7 @@ public:
 		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
 		do{
-			if( !find_bucket( hashvalue, key, pre_key, true ) ) return;
+			if( likely( !find_bucket( hashvalue, key, pre_key, true ) ) ) return;
 		}
 		while( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, key ) );
 		hashmap[hashvalue].value	= const_cast< Tvalue* >( value );
@@ -55,7 +57,7 @@ public:
 	Tvalue*	find( const Tkey* key ){
 		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
-		if( find_bucket( hashvalue, key, pre_key, false ) )
+		if( likely( find_bucket( hashvalue, key, pre_key, false ) ) )
 			return hashmap[hashvalue].value;
 		else
 			return NULL;
@@ -66,7 +68,7 @@ public:
 		size_t	hashvalue = get_hashvalue( key );
 		Tkey*	pre_key = NULL;
 		do{
-			if( !find_bucket( hashvalue, key, pre_key, false ) ) return;
+			if( unlikely( !find_bucket( hashvalue, key, pre_key, false ) ) ) return;
 		}
 		while( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, NULL ) );
 		hashmap[hashvalue].value	= NULL;
@@ -115,7 +117,7 @@ private:
 		for(;;){
 			if( hashmap[hash_value].key == NULL ){
 				if( insert ) return true;
-				if( hashmap[hash_value].rehash )
+				if( unlikely( hashmap[hash_value].rehash ) )
 					hash_value = re_hashvalue( hash_value );
 				else
 					return( false );
@@ -130,7 +132,7 @@ private:
 					hash_value = re_hashvalue( hash_value );
 				}
 				else{
-					if( !hashmap[hash_value].rehash ) return false;
+					if( unlikely( !hashmap[hash_value].rehash ) ) return false;
 					hash_value = re_hashvalue( hash_value );
 				}
 			}

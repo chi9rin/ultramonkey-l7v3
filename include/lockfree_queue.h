@@ -3,6 +3,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "utility.h"
+
 namespace l7vs{
 
 template<class Tvalue>
@@ -34,12 +36,14 @@ public:
 		size_t tail,nexttail;
 		//transaction st
 		while(true){
+			start:
 			tail = tailloc;
 			nexttail = get_num_next(tail);
-			if ( node[tail].value) {
-				return false;
+			if ( unlikely( node[tail].value ) ) {
+				//return false;
+				goto start;
 			}
-			if ( __sync_bool_compare_and_swap(&tailloc,tail,nexttail) ) break;
+			if ( likely( __sync_bool_compare_and_swap(&tailloc,tail,nexttail) ) ) break;
 		}
 		//transaction ed
 		node[tail].value = const_cast<Tvalue*>( value );
@@ -54,13 +58,13 @@ public:
 		while(true){
 			head = headloc;
 			nexthead = get_num_next(head);
-			if(!(node[head].value)){
-				if(headloc==tailloc){
+			if( unlikely( !(node[head].value) ) ) {
+				if( unlikely( headloc==tailloc ) ) {
 					//false
 					return NULL;
 				}
 			}else{
-				if( __sync_bool_compare_and_swap(&headloc,head,nexthead) ) {
+				if( likely( __sync_bool_compare_and_swap(&headloc,head,nexthead) ) ) {
 					rtnvalue = node[head].value;
 					break;
 				}
@@ -82,7 +86,7 @@ public:
 
 private:
 	size_t get_num_next( const size_t num ){
-		if( num >= element_num ){
+		if( unlikely( num >= element_num ) ){
 			return 0;
 		}else{
 			return num + 1;
