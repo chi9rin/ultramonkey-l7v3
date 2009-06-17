@@ -1,33 +1,42 @@
 #ifndef ATOMIC_H
 #define ATOMIC_H
 #include <boost/utility.hpp>
+#include "wrlock.h"
 
 namespace l7vs{
 
 template<class T> class atomic :boost::noncopyable{
 protected:
 	mutable volatile T p;
+	wr_mutex	 mutex;
 public:
 	explicit atomic() : p( 0 ) {} 
 
-	T get(){ return p; }
+	T get(){
+		rd_scoped_lock( mutex );
+		return p;
+	}
 	atomic& operator=(const T& q) {
-		__sync_lock_test_and_set(&p,q);
+		wr_scoped_lock( mutex );
 		return *this;
 	}
 	atomic& operator++(const int){
+		wr_scoped_lock( mutex );
 		p++;
 		return *this;
 	}
 	atomic& operator--(const int){
+		wr_scoped_lock( mutex );
 		p--;
 		return *this;
 	}
 	atomic& operator+=(const T& q){
+		wr_scoped_lock( mutex );
 		p += q;
 		return *this;
 	}
 	atomic& operator-=(const T& q){
+		wr_scoped_lock( mutex );
 		p -= q;
 		return *this;
 	}
