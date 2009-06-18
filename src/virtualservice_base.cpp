@@ -179,7 +179,7 @@ void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( likely( !err ) ){
-		if( NULL != schedmod ) ){
+		if( likely( NULL != schedmod ) ){
 			schedmod->replication_interrupt();
 			//register handle_schedmod_replication
 			schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
