@@ -285,10 +285,20 @@ public:
 	unsigned long long			get_wait_upstream(){ return wait_count_up.get(); }
 	unsigned long long			get_wait_downstream(){ return wait_count_down.get(); }
 
-	void						update_up_recv_size( unsigned long long );
-	void						update_up_send_size( unsigned long long );
-	void						update_down_recv_size( unsigned long long );
-	void						update_down_send_size( unsigned long long );
+	void						update_up_recv_size( unsigned long long datasize ){
+		current_up_recvsize	+= datasize;
+		recvsize_up		+= datasize;
+	}
+	void						update_up_send_size( unsigned long long datasize ){
+		sendsize_up += datasize;
+	}
+	void						update_down_recv_size( unsigned long long datasize ){
+		current_down_recvsize += datasize;
+		recvsize_down += datasize;
+	}
+	void						update_down_send_size( unsigned long long datasize ){
+		sendsize_down += datasize;
+	}
 
 	protocol_module_base*		get_protocol_module(){ return protomod; }
 	schedule_module_base*		get_schedule_module(){ return schedmod; }
