@@ -1222,12 +1222,11 @@ void	l7vs::virtualservice_tcp::run(){
 	//switch active a session
 	session_thread_control*	stc_ptr;
 	{
-		if( pool_sessions.empty() ){
-			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 13, "VirtualService not initialize.", __FILE__, __LINE__ );
+		stc_ptr = pool_sessions.pop();
+		if( !stc_ptr ){
 			return;
 		}
 		//regist accept event handler
-		stc_ptr = pool_sessions.pop();
 		waiting_sessions.insert( stc_ptr->get_session().get(), stc_ptr );
 	}
 	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
