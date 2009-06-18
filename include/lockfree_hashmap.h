@@ -32,7 +32,7 @@ public:
 	lockfree_hashmap( size_t num = 65535, Hash inhasher = boost::hash< Tkey* >() ) : 
 		element_num( num ) {
 		hashmap = new container[num];
-		hasher = inhasher;
+		hasher = inhasher;	
 		__sync_lock_test_and_set( &all_ctr, 0 );
 	}
 
@@ -48,7 +48,7 @@ public:
 		do{
 			if( likely( !find_bucket( hashvalue, key, pre_key, true ) ) ) return;
 		}
-		while( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, key ) );
+		while( unlikely( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, key ) ) );
 		hashmap[hashvalue].value	= const_cast< Tvalue* >( value );
 		__sync_add_and_fetch( &all_ctr, 1 );
 	}
@@ -70,15 +70,15 @@ public:
 		do{
 			if( unlikely( !find_bucket( hashvalue, key, pre_key, false ) ) ) return;
 		}
-		while( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, NULL ) );
+		while( unlikely( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, NULL ) ) );
 		hashmap[hashvalue].value	= NULL;
 		__sync_sub_and_fetch( &all_ctr, 1 );
 	}
 
 	//poper
 	void	pop( Tkey*& key, Tvalue*& value ){
-		for( size_t i = 0 ; i < element_num; ++i ){
-			if( hashmap[i].key ){
+		for( size_t i = 0 ; likely( i < element_num ) ; ++i ){
+			if( unlikely( hashmap[i].key ) ){
 				key	= hashmap[i].key;
 				value	= hashmap[i].value;
 				hashmap[i].key		= NULL;
@@ -104,8 +104,8 @@ public:
 
 	// functor
 	void	do_all( boost::function< void( Tvalue* ) >	func ){
-		for( size_t	i = 0; i < element_num; ++i ){
-			if( hashmap[i].key != NULL ){
+		for( size_t	i = 0; likely( i < element_num ) ; ++i ){
+			if( unlikely( hashmap[i].key ) ){
 				func( hashmap[i].value );
 			}
 		}
@@ -115,19 +115,19 @@ private:
 	//bucket finder
 	bool	find_bucket( size_t& hash_value, const Tkey*& key, Tkey*& pre_key, bool insert ){
 		for(;;){
-			if( hashmap[hash_value].key == NULL ){
+			if( unlikely (hashmap[hash_value].key == NULL ) ){
 				if( insert ) return true;
 				if( unlikely( hashmap[hash_value].rehash ) )
 					hash_value = re_hashvalue( hash_value );
 				else
 					return( false );
 			}
-			else if( hashmap[hash_value].key == key ) {
+			else if( likely( hashmap[hash_value].key == key ) ){
 				pre_key = hashmap[hash_value].key;
 				return true;
 			}
 			else{
-				if( insert ){
+				if( unlikely( insert ) ){
 					hashmap[hash_value].rehash = true;
 					hash_value = re_hashvalue( hash_value );
 				}
@@ -138,9 +138,11 @@ private:
 			}
 		}
 	}
+	//get array number by hasher
 	size_t	get_hashvalue(const Tkey* key ){
 		return hasher( const_cast<Tkey*>(key) ) % element_num;
 	}
+	//reget array number case of collision(method chain)
 	size_t	re_hashvalue( size_t& key ){
 		return ((key+1) % element_num);
 	}

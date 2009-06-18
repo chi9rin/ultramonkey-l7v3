@@ -32,6 +32,7 @@ public:
 		delete [] node;
 	}
 
+	//pusher
 	bool push(const Tvalue* value){
 		size_t tail,nexttail;
 		//transaction st
@@ -39,8 +40,9 @@ public:
 			start:
 			tail = tailloc;
 			nexttail = get_num_next(tail);
-			if ( unlikely( node[tail].value ) ) {
+			if ( unlikely( node[tail].value ) ){
 				//return false;
+				//do spin case of full queue
 				goto start;
 			}
 			if ( likely( __sync_bool_compare_and_swap(&tailloc,tail,nexttail) ) ) break;
@@ -51,6 +53,7 @@ public:
 		return true;
 	}
 
+	//poper
 	Tvalue* pop() {
 		size_t head,nexthead;
 		Tvalue* rtnvalue;
@@ -58,13 +61,13 @@ public:
 		while(true){
 			head = headloc;
 			nexthead = get_num_next(head);
-			if( unlikely( !(node[head].value) ) ) {
-				if( unlikely( headloc==tailloc ) ) {
+			if( unlikely( !(node[head].value) ) ){
+				if( unlikely( headloc==tailloc ) ){
 					//false
 					return NULL;
 				}
 			}else{
-				if( likely( __sync_bool_compare_and_swap(&headloc,head,nexthead) ) ) {
+				if( likely( __sync_bool_compare_and_swap(&headloc,head,nexthead) ) ){
 					rtnvalue = node[head].value;
 					break;
 				}
@@ -76,15 +79,14 @@ public:
 		return rtnvalue;
 	}
 
-	bool empty() const{
-		if( counter ) return false;
-		return true;
-	}
-	size_t size() const{
-		return counter;
-	}
+	//size
+	size_t size() const{ return counter; }
+
+	//empty
+	bool empty() const{ return !counter; }
 
 private:
+	//get next value head and tail cyclic over elemental number
 	size_t get_num_next( const size_t num ){
 		if( unlikely( num >= element_num ) ){
 			return 0;
