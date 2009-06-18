@@ -621,7 +621,7 @@ namespace l7vs{
 			//wait down thread get id
 			{
 				rd_scoped_lock scope_lock(thread_state_update_mutex);
-				if(thread_state.test(1)){// DOWN_THREAD_ALIVE
+				if(unlikely( thread_state.test(1) )){// DOWN_THREAD_ALIVE
 					break;
 				}
 			}
@@ -809,12 +809,14 @@ namespace l7vs{
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__ );
 		}
 		//----Debug log----------------------------------------------------------------------
+		bool is_pause;
+                bool is_msg_none;
 		while(true){
 			{
                 rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 				if(unlikely(exit_flag)) break;
 			}
-			bool is_pause;
+
 			{
 				rd_scoped_lock scope_lock(session_pause_flag_mutex);
 				is_pause = session_pause_flag;
@@ -837,7 +839,7 @@ namespace l7vs{
 					if(exit_flag) break;
 				}
 			}
-			bool is_msg_none = up_thread_message_que.empty();
+			is_msg_none = up_thread_message_que.empty();
 			if(unlikely(!is_msg_none)){
 				if( UP_FUNC_EXIT == up_thread_next_call_function.first ){
 					up_thread_next_call_function.second(LOCAL_PROC);
@@ -952,13 +954,13 @@ namespace l7vs{
 			// wait up thread active
 			{
 				rd_scoped_lock scope_lock(thread_state_update_mutex);
-				if(thread_state.test(2)){
+				if(unlikely( thread_state.test(2) )){
 					break;
 				}
 			}
 			{
                 rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-				if(exit_flag) break;
+				if(unlikely(  exit_flag )) break;
 			}
 			boost::this_thread::yield();
 		}
@@ -1009,12 +1011,14 @@ namespace l7vs{
                 exit_flag = true;
             }
         }
+        bool is_pause;
+        bool is_msg_none;
 		while(true){
 			{
                 rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 				if(unlikely(exit_flag)) break;
 			}
-			bool is_pause;
+
 			{
 				rd_scoped_lock scope_lock(session_pause_flag_mutex);
 				is_pause = session_pause_flag;
@@ -1042,7 +1046,7 @@ namespace l7vs{
 				down_thread_receive_realserver_socket_list.push_back(push_rs_socket);
 				down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
 			}
-			bool is_msg_none = down_thread_message_que.empty();
+			is_msg_none = down_thread_message_que.empty();
 			if(unlikely(!is_msg_none)){
 				if( DOWN_FUNC_EXIT == down_thread_next_call_function.first ){
 					down_thread_next_call_function.second(LOCAL_PROC);

@@ -231,35 +231,35 @@ namespace l7vs{
 
         rd_scoped_lock scope_lock(close_mutex);
 		std::size_t res_size = 0;
-		
-		//set TCP_QUICKACK
-		if(opt_info.quickack_opt){
-			int val = opt_info.quickack_val;
-			size_t len = sizeof(val);
-			boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
-			if (likely(!open_flag)) {
-				ec.clear();
-			}
-			if(unlikely(ec)){
-				//ERROR
-//				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 104, "socket option(TCP_QUICKACK) set failed" , __FILE__, __LINE__ );
-                                std::stringstream buf;
-                                buf << "Thread ID[";
-                                buf << boost::this_thread::get_id();
-                                buf << "] socket option(TCP_QUICKACK) set failed : ";
-                                buf << ec.message();
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 104, buf.str() , __FILE__, __LINE__ );
-			}
-		}
-		
-		res_size = my_socket.read_some(buffers,ec);
-		if(unlikely(ec)){
-			if (likely(!open_flag)) {
-				res_size = 0;
-				ec.clear();
-			}
-		}
-		
+                if(unlikely(open_flag)){
+                    //set TCP_QUICKACK
+                    if(opt_info.quickack_opt){
+                            int val = opt_info.quickack_val;
+                            size_t len = sizeof(val);
+                            boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
+                            if (unlikely(!open_flag)) {
+                                    ec.clear();
+                            }
+                            if(unlikely(ec)){
+                                    //ERROR
+                                    //				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 104, "socket option(TCP_QUICKACK) set failed" , __FILE__, __LINE__ );
+                                    std::stringstream buf;
+                                    buf << "Thread ID[";
+                                    buf << boost::this_thread::get_id();
+                                    buf << "] socket option(TCP_QUICKACK) set failed : ";
+                                    buf << ec.message();
+                                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 104, buf.str() , __FILE__, __LINE__ );
+                            }
+                    }
+                    res_size = my_socket.read_some(buffers,ec);
+                    if(unlikely(ec)){
+                            if (unlikely(!open_flag)) {
+                                    res_size = 0;
+                                    ec.clear();
+                            }
+                    }
+
+                }
 		return res_size;
 	}
 
