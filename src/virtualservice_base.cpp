@@ -147,7 +147,7 @@ void	l7vs::virtualservice_base::handle_protomod_replication( const boost::system
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 3, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( likely( !err ) ){
-		if( NULL != protomod ){
+		if( likely( NULL != protomod ) ){
 			protomod->replication_interrupt();
 			//register handle_protomod_replication
 			protomod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
@@ -179,7 +179,7 @@ void	l7vs::virtualservice_base::handle_schedmod_replication( const boost::system
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, formatter.str(), __FILE__, __LINE__ );
 	}
 	if( likely( !err ) ){
-		if( NULL != schedmod ){
+		if( NULL != schedmod ) ){
 			schedmod->replication_interrupt();
 			//register handle_schedmod_replication
 			schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
@@ -734,7 +734,7 @@ void	l7vs::virtualservice_base::update_up_send_size( unsigned long long	datasize
 	else
 		sendsize_up += datasize;
 
-	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
+	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		boost::format	fmt( "update members : sendsize_up = %d" );
 		fmt % sendsize_up.get();
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt.str(), __FILE__, __LINE__ );

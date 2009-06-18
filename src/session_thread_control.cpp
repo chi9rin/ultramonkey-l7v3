@@ -61,7 +61,7 @@ void	session_thread_control::upstream_run(){
 		fmt % scheduler_param.__sched_priority % sched_policy;
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 2, fmt.str(), __FILE__, __LINE__ );
 	}
-	if( 0 > ret_val ){
+	if( unlikely( 0 > ret_val ) ){
 		boost::format	errlog_fmt( "error at upstream_run, set task scheduler algorithm. : %d" );
 		errlog_fmt % errno;
 		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, errlog_fmt.str(), __FILE__, __LINE__ );
@@ -133,7 +133,7 @@ void	session_thread_control::downstream_run(){
 		fmt % scheduler_param.__sched_priority % sched_policy;
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 4, fmt.str(), __FILE__, __LINE__ );
 	}
-	if( 0 > ret_val ){
+	if( unlikely( 0 > ret_val ) ){
 		boost::format	errlog_fmt( "error at upstream_run, set task scheduler algorithm. : %d" );
 		errlog_fmt % errno;
 		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 2, errlog_fmt.str(), __FILE__, __LINE__ );

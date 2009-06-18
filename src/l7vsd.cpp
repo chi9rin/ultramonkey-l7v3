@@ -910,7 +910,7 @@ int	l7vsd::run( int argc, char* argv[] ) {
 	
 		// main loop
 		for(;;){
-			if( exit_requested ){
+			if( unlikely( exit_requested ) ){
 				std::stringstream buf;
 				buf << boost::format( "l7vsd signal(%d) received. exitting..." ) % received_sig;
 				logger.putLogInfo( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
