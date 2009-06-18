@@ -288,41 +288,35 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 		return;
 	}
 
-	bool	sorry_status = false;
+	tcp_session*	tmp_session	= stc_ptr_noconst->get_session().get();
+	active_sessions.insert( tmp_session, stc_ptr_noconst );
 	//check sorry status
-	if( ( 0 < element.sorry_maxconnection ) && 
-		( ( active_sessions.size() - sorry_sessions.size() ) >= static_cast<size_t>( element.sorry_maxconnection ) ) ||
-		( ( 0 != element.sorry_flag ) && ( INT_MAX != element.sorry_flag ) ) ||
-		( ( 0 == rs_list.size() ) && ( boost::asio::ip::tcp::endpoint() != element.sorry_endpoint ) ) ){
-		sorry_status = true;
-		if( unlikely( LOG_LV_ERROR == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-			boost::format	fmt( "Connection switch Sorry mode. : active_session.size = %d / sorry_session.size = %d" );
-			fmt % active_sessions.size() % pool_sessions.size();
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 49, fmt.str(), __FILE__, __LINE__ );
-		}
-	}
-
-	{
-		tcp_session*	tmp_session	= stc_ptr_noconst->get_session().get();
-		active_sessions.insert( tmp_session, stc_ptr_noconst );
-		if( sorry_status ){
-			sorry_sessions.insert( tmp_session, stc_ptr_noconst );
+	if( unlikely( 0 < element.sorry_maxconnection ) ){
+		if( ( ( active_sessions.size() - sorry_count.get() ) >= static_cast<size_t>( element.sorry_maxconnection ) ) ||
+			( ( 0 != element.sorry_flag ) && ( INT_MAX != element.sorry_flag ) ) ||
+			( ( 0 == rs_list.size() ) && ( boost::asio::ip::tcp::endpoint() != element.sorry_endpoint ) ) ){
+			if( unlikely( LOG_LV_ERROR == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+				boost::format	fmt( "Connection switch Sorry mode. : active_session.size = %d / sorry_count.get = %d" );
+				fmt % active_sessions.size() % pool_sessions.size();
+				Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 49, fmt.str(), __FILE__, __LINE__ );
+			}
+			sorry_count++;
 			stc_ptr_noconst->get_session()->set_virtual_service_message( tcp_session::SORRY_STATE_ENABLE );
 		}
-		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-			boost::format	fmt1( "active session thread id = %d" );
-			fmt1 % stc_ptr_noconst->get_upthread_id();
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 50, fmt1.str(), __FILE__, __LINE__ );
-			boost::format	fmt2( "pool_session.size   = %d" );
-			fmt2 % pool_sessions.size();
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 51, fmt2.str(), __FILE__, __LINE__ );
-			boost::format	fmt3( "active_session.size = %d" );
-			fmt3 % active_sessions.size();
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 52, fmt3.str(), __FILE__, __LINE__ );
-			boost::format	fmt4( "sorry_session.size = %d" );
-			fmt4 % sorry_sessions.size();
-			Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 53, fmt4.str(), __FILE__, __LINE__ );
-		}
+	}
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+		boost::format	fmt1( "active session thread id = %d" );
+		fmt1 % stc_ptr_noconst->get_upthread_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 50, fmt1.str(), __FILE__, __LINE__ );
+		boost::format	fmt2( "pool_session.size   = %d" );
+		fmt2 % pool_sessions.size();
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 51, fmt2.str(), __FILE__, __LINE__ );
+		boost::format	fmt3( "active_session.size = %d" );
+		fmt3 % active_sessions.size();
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 52, fmt3.str(), __FILE__, __LINE__ );
+		boost::format	fmt4( "sorry_count = %d" );
+		fmt4 % sorry_count.get();
+		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 53, fmt4.str(), __FILE__, __LINE__ );
 	}
 
 	session_thread_control* tmp_stc_ptr = waiting_sessions.find( stc_ptr_noconst->get_session().get() );
@@ -332,12 +326,12 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	stc_ptr_noconst->startdownstream();
 
 	//waiting, pool_sessions.size become over 1
-	while( pool_sessions.empty() ){
-		boost::this_thread::yield();
-	}
-
 	//pick up session from pool
-	session_thread_control*		stc_ptr_register_accept = pool_sessions.pop();
+	session_thread_control*		stc_ptr_register_accept;
+	do{
+		stc_ptr_register_accept = pool_sessions.pop();
+	}
+	while( unlikely( !stc_ptr_register_accept ) );
 
 	//session add wait_sessions
 	boost::mutex::scoped_lock	up_wait_lk( stc_ptr_register_accept->get_upthread_mutex() );
@@ -355,8 +349,8 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 		boost::format	fmt3( "active_session.size = %d" );
 		fmt3 % active_sessions.size();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 56, fmt3.str(), __FILE__, __LINE__ );
-		boost::format	fmt4( "sorry_session.size = %d" );
-		fmt4 % sorry_sessions.size();
+		boost::format	fmt4( "sorry_count = %d" );
+		fmt4 % sorry_count.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 57, fmt4.str(), __FILE__, __LINE__ );
 	}
 
@@ -612,18 +606,20 @@ void		l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 	//stop main loop
 	stop();
 
-	while(1){
-		{
-			if( 0 == active_sessions.size() )
-				break;
-		}
+	while(active_sessions.size()){
+		boost::this_thread::yield();
 	}
 
-	while( !waiting_sessions.empty() ){
+	for(;;){
 		tcp_session*				tmp_session	= NULL;
 		session_thread_control*		tmp_stc		= NULL;
 		waiting_sessions.pop( tmp_session, tmp_stc );
-		while(!pool_sessions.push( tmp_stc )){}
+		if( !tmp_stc ){
+			break;
+		}
+		for(;;){
+			if( likely( pool_sessions.push( tmp_stc ) ) )break;
+		}
 	}
 
 	//release sessions[i]->join();
@@ -1374,18 +1370,16 @@ void	l7vs::virtualservice_tcp::release_session( const tcp_session* session_ptr )
 		boost::format	fmt2( "active_session.size = %d" );
 		fmt2 % active_sessions.size();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 109, fmt2.str(), __FILE__, __LINE__ );
-		boost::format	fmt3( "sorry_session.size = %d" );
-		fmt3 % sorry_sessions.size();
+		boost::format	fmt3( "sorry_count = %d" );
+		fmt3 % sorry_count.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 110, fmt3.str(), __FILE__, __LINE__ );
 	}
 	active_sessions.erase( session_ptr );
 	stc_ptr->get_session()->initialize();
-	while(!pool_sessions.push( stc_ptr )){}
-
-	{
-		tcp_session*				tmp_session	= NULL;
-		session_thread_control*		tmp_stc		= NULL;
-		sorry_sessions.pop( tmp_session, tmp_stc );
+	for(;;){
+		if( likely( pool_sessions.push( stc_ptr ) ) ){
+			break;
+		}
 	}
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -1395,8 +1389,8 @@ void	l7vs::virtualservice_tcp::release_session( const tcp_session* session_ptr )
 		boost::format	fmt2( "active_session.size = %d" );
 		fmt2 % active_sessions.size();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 112, fmt2.str(), __FILE__, __LINE__ );
-		boost::format	fmt3( "sorry_session.size = %d" );
-		fmt3 % sorry_sessions.size();
+		boost::format	fmt3( "sorry_count = %d" );
+		fmt3 % sorry_count.get();
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 113, fmt3.str(), __FILE__, __LINE__ );
 
 		boost::format funclog_fmt("out_function : void virtualservice_tcp::release_session( "

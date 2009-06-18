@@ -917,6 +917,10 @@ int	l7vsd::run( int argc, char* argv[] ) {
 				break;
 			}
 			dispatcher.poll();
+			timespec	wait_val;
+			wait_val.tv_sec		= 0;
+			wait_val.tv_nsec	= 10;
+			nanosleep( &wait_val, NULL );
 			boost::this_thread::yield();
 		}
 	

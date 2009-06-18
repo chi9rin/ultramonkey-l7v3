@@ -38,8 +38,8 @@ public:
 	session_map_type&	get_waiting_sessions(){
 		return	waiting_sessions;
 	}
-	session_map_type&	get_sorry_sessions(){
-		return	sorry_sessions;
+	unsigned long long	get_sorry_sessions(){
+		return	sorry_count.get();
 	}
 	std::list<realserver>&	get_rs_list(){
 		return rs_list;

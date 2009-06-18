@@ -167,39 +167,30 @@ protected:
 								rs_mutex_list;					//! list of realserver mutex
 	l7vs::atomic<unsigned long long>
 								rs_list_ref_count;				//! reference count of realserver list
-//	wr_mutex					rs_list_ref_count_mutex;		//! mutex for update reference count
 	wr_mutex					rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
 
 	l7vs::atomic<unsigned long long>
 								recvsize_up;					//! upstream total receive data size
 	l7vs::atomic<unsigned long long>
 								current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
-//	wr_mutex					recvsize_up_mutex;				//! mutex for update upstream receive data size
 	l7vs::atomic<unsigned long long>
 								sendsize_up;					//! upstream total send data size
-//	wr_mutex					sendsize_up_mutex;				//! mutex for update upstream send data size
 	l7vs::atomic<unsigned long long>
 								recvsize_down;					//! downstream total receive data size
 	l7vs::atomic<unsigned long long>
 								current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
-//	wr_mutex					recvsize_down_mutex;			//! mutex for update downstream receive data size
 	l7vs::atomic<unsigned long long>
 								sendsize_down;					//! downstream total send data size
-//	wr_mutex					sendsize_down_mutex;			//! mutex for update downstream send data size
 
 	l7vs::atomic<unsigned long long>
 								throughput_up;					//! upstream throughput value
-//	wr_mutex					throughput_up_mutex;			//! mutex for update upstream throughput value
 	l7vs::atomic<unsigned long long>
 								throughput_down;				//! downstream throughput value
-//	wr_mutex					throughput_down_mutex;			//! mutex for update downstream throughput value
 
 	l7vs::atomic<unsigned long long>
 								wait_count_up;					//! upstream recv wait count
-//	wr_mutex					wait_count_up_mutex;			//! mutex for upstream recv wait count
 	l7vs::atomic<unsigned long long>
 								wait_count_down;				//! downstream recv wait count
-//	wr_mutex					wait_count_down_mutex;			//! mutex for downstream recv wait count
 
 	void						load_parameter( l7vs::error_code& );
 
@@ -252,7 +243,7 @@ protected:
 	cpu_set_t					get_cpu_mask( std::string );
 
 public:
-	virtualservice_base(	const l7vsd&,
+	explicit virtualservice_base(	const l7vsd&,
 							const replication&,
 							const virtualservice_element& );
 	virtual	~virtualservice_base(){};
@@ -282,24 +273,26 @@ public:
 	virtual	void				connection_inactive( const tcp_endpoint_type& ) = 0;
 	virtual	void				release_session( const tcp_session* session_ptr ) = 0;
 
-	unsigned long long			get_qos_upstream();
-	unsigned long long			get_qos_downstream();
-	unsigned long long			get_throughput_upstream();
-	unsigned long long			get_throughput_downstream();
-	unsigned long long			get_up_recv_size();
-	unsigned long long			get_up_send_size();
-	unsigned long long			get_down_recv_size();
-	unsigned long long			get_down_send_size();
-	unsigned long long			get_wait_upstream();
-	unsigned long long			get_wait_downstream();
+	unsigned long long			get_qos_upstream(){ return element.qos_upstream; }
+	unsigned long long			get_qos_downstream(){ return element.qos_downstream; }
+	unsigned long long			get_throughput_upstream(){ return throughput_up.get(); }
+	unsigned long long			get_throughput_downstream(){ return throughput_down.get(); }
+	unsigned long long			get_up_recv_size(){ return recvsize_up.get(); }
+	unsigned long long			get_up_send_size(){ return sendsize_up.get(); }
+	unsigned long long			get_down_recv_size(){ return recvsize_down.get(); }
+	unsigned long long			get_down_send_size(){ return sendsize_down.get(); }
+
+	unsigned long long			get_wait_upstream(){ return wait_count_up.get(); }
+	unsigned long long			get_wait_downstream(){ return wait_count_down.get(); }
 
 	void						update_up_recv_size( unsigned long long );
 	void						update_up_send_size( unsigned long long );
 	void						update_down_recv_size( unsigned long long );
 	void						update_down_send_size( unsigned long long );
 
-	protocol_module_base*		get_protocol_module();
-	schedule_module_base*		get_schedule_module();
+	protocol_module_base*		get_protocol_module(){ return protomod; }
+	schedule_module_base*		get_schedule_module(){ return schedmod; }
+
 };
 
 //!
@@ -307,30 +300,18 @@ public:
 //! @class	virtualservice_tcp is class of virtual service for TCP transfer.
 class	virtualservice_tcp : public virtualservice_base{
 public:
-//	typedef	std::vector<session_thread_control*>			session_queue_type;
 	typedef	lockfree_queue< session_thread_control >
 								session_queue_type;
-//	typedef	std::map< boost::thread::id, session_thread_control* >
 	typedef	lockfree_hashmap< tcp_session, session_thread_control >
 								session_map_type;
-// 	typedef	std::pair< boost::thread::id, session_thread_control* >
-// 								session_map_pair_type;
 protected:
 	boost::asio::ip::tcp::acceptor
 								acceptor_;
 
 	session_queue_type			pool_sessions;
-// 	boost::mutex				pool_sessions_mutex;
-// 	wr_mutex					pool_sessions_mutex;
 	session_map_type			waiting_sessions;
-// 	boost::mutex				waiting_sessions_mutex;
-// 	wr_mutex					waiting_sessions_mutex;
 	session_map_type			active_sessions;
-// 	boost::mutex				active_sessions_mutex;
-// 	wr_mutex					active_sessions_mutex;
-	session_map_type			sorry_sessions;
-// 	boost::mutex				sorry_sessions_mutex;
-// 	wr_mutex					sorry_sessions_mutex;
+	l7vs::atomic<unsigned long long>	sorry_count;
 
 	bool 						defer_accept_opt;				//! is set option TCP_DEFER_ACCEPT
 	int 						defer_accept_val;				//! TCP_DEFER_ACCEPT option value
@@ -466,3 +447,4 @@ public:
 }	//namespace l7vs
 
 #endif//VIRTUALSERVICE_H
+
