@@ -88,7 +88,7 @@ public:
 				if( likely( !hashmap[hashvalue].rehash ) ) break;
 				hashvalue = get_rehashvalue( hashvalue );
 			}else if( likely( hashmap[hashvalue].key == key ) ){
-				__sync_lock_test_and_set(&hashmap[hashvalue].key,NULL);
+				if( __sync_lock_test_and_set(&hashmap[hashvalue].key,NULL) ){};
 				hashmap[hashvalue].value	= NULL;
 				__sync_sub_and_fetch( &all_ctr, 1 );
 				break;
