@@ -970,15 +970,7 @@ void	l7vs::virtualservice_tcp::add_realserver( const l7vs::virtualservice_elemen
 		rs.udp_endpoint		= itr->udp_endpoint;
 		rs.weight			= itr->weight;
 		rs_list.push_back( rs );
-		rs_mutex_list.insert( std::pair<tcp_endpoint_type,mutex_ptr>( rs.tcp_endpoint,
-																		mutex_ptr( new boost::mutex ) ) );
 	}
-	if( rs_list.size() != rs_mutex_list.size() ){
-		//fatal case
-		Logger::putLogFatal( LOG_CAT_L7VSD_VIRTUALSERVICE, 2, "RealServer information data error", __FILE__, __LINE__ );
-		err.setter( true, "RealServer information data error" );
-	}else
-		err.setter( false, "" );
 
 	//run active sessions
 	active_sessions.do_all( boost::bind( &session_thread_control::session_pause_off, _1) );
@@ -1167,17 +1159,10 @@ void	l7vs::virtualservice_tcp::del_realserver( const l7vs::virtualservice_elemen
 			 rs_itr != rs_list.end(); ++rs_itr ){
 			if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
 				rs_list.erase( rs_itr );
-				rs_mutex_list.erase( rs_mutex_list.find( itr->tcp_endpoint ) );
 				break;
 			}
 		}
 	}
-	if( rs_list.size() != rs_mutex_list.size() ){
-		//fatal case
-		Logger::putLogFatal( LOG_CAT_L7VSD_VIRTUALSERVICE, 3, "RealServer information data error", __FILE__, __LINE__ );
-		err.setter( true, "RealServer information data error" );
-	}else
-		err.setter( false, "" );
 
 	//run active sessions
 	active_sessions.do_all( boost::bind( &session_thread_control::session_pause_off, _1) );

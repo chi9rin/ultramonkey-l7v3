@@ -68,7 +68,6 @@ l7vs::virtualservice_base::virtualservice_base(	const l7vs::l7vsd& invsd,
 	protomod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	schedmod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
 	rs_list.clear();
-	rs_mutex_list.clear();
 	protomod = NULL;
 	schedmod = NULL;
 	this_id = boost::this_thread::get_id();
@@ -369,51 +368,6 @@ cpu_set_t	l7vs::virtualservice_base::get_cpu_mask( boost::asio::ip::address& add
 		close( fd );
 	}
 	return mask;
-}
-
-/*!
- * method of rs_list reference count increase.
- *
- * @param   void
- * @return  void
- */
-void	l7vs::virtualservice_base::rs_list_lock(){
-	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 11, "in_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
-	}
-
-	{
-		rw_scoped_lock			refcnt_inc_lock( rs_list_ref_count_inc_mutex );
-	}
-	if( rs_list_ref_count < ULLONG_MAX )
-		rs_list_ref_count++;
-	else
-		rs_list_ref_count = 0;
-
-	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 12, "out_function : void virtualservice_base::rs_list_lock()", __FILE__, __LINE__ );
-	}
-}
-
-/*!
- * method of rs_list reference count decrease.
- *
- * @param   void
- * @return  void
- */
-void	l7vs::virtualservice_base::rs_list_unlock(){
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 13, "in_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
-	}
-
-	if( rs_list_ref_count > 0 )
-		rs_list_ref_count--;
-	else
-		rs_list_ref_count = ULLONG_MAX;
-
-	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 14, "out_function : void virtualservice_base::rs_list_unlock()", __FILE__, __LINE__ );
-	}
 }
 
 /*!

@@ -87,8 +87,6 @@ public:
 	//! udp endpoint typedef
 	typedef	boost::asio::ip::udp::endpoint					udp_endpoint_type;
 
-	typedef	boost::shared_ptr<boost::mutex>					mutex_ptr;
-
 	typedef	std::list<l7vs::realserver>
 									rslist_type;
 	typedef	boost::function< rslist_type::iterator (void)>
@@ -103,6 +101,8 @@ public:
 										rslist_iterator_next_func_type,
 										boost::asio::ip::tcp::endpoint& ) >
 								tcp_schedule_func_type;
+
+	typedef	l7vs::atomic<unsigned long long>	AUUL;
 
 	//!	@struct	replication_header replication header structure
 	struct	replication_header{
@@ -163,34 +163,21 @@ protected:
 	schedule_module_base*		schedmod;			//! schedule module smart pointer
 
 	std::list<realserver>		rs_list;						//! realserver list
-	std::map< tcp_endpoint_type,mutex_ptr >
-								rs_mutex_list;					//! list of realserver mutex
-	l7vs::atomic<unsigned long long>
-								rs_list_ref_count;				//! reference count of realserver list
+	AUUL						rs_list_ref_count;				//! reference count of realserver list
 	wr_mutex					rs_list_ref_count_inc_mutex;	//! mutex for increase reference count
 
-	l7vs::atomic<unsigned long long>
-								recvsize_up;					//! upstream total receive data size
-	l7vs::atomic<unsigned long long>
-								current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
-	l7vs::atomic<unsigned long long>
-								sendsize_up;					//! upstream total send data size
-	l7vs::atomic<unsigned long long>
-								recvsize_down;					//! downstream total receive data size
-	l7vs::atomic<unsigned long long>
-								current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
-	l7vs::atomic<unsigned long long>
-								sendsize_down;					//! downstream total send data size
+	AUUL						recvsize_up;					//! upstream total receive data size
+	AUUL						current_up_recvsize;			//! current upstream receive data size for calcurate upstream throughput
+	AUUL						sendsize_up;					//! upstream total send data size
+	AUUL						recvsize_down;					//! downstream total receive data size
+	AUUL						current_down_recvsize;			//! current downstream receive data size for calcurate upstream throughput
+	AUUL						sendsize_down;					//! downstream total send data size
 
-	l7vs::atomic<unsigned long long>
-								throughput_up;					//! upstream throughput value
-	l7vs::atomic<unsigned long long>
-								throughput_down;				//! downstream throughput value
+	AUUL						throughput_up;					//! upstream throughput value
+	AUUL						throughput_down;				//! downstream throughput value
 
-	l7vs::atomic<unsigned long long>
-								wait_count_up;					//! upstream recv wait count
-	l7vs::atomic<unsigned long long>
-								wait_count_down;				//! downstream recv wait count
+	AUUL						wait_count_up;					//! upstream recv wait count
+	AUUL						wait_count_down;				//! downstream recv wait count
 
 	void						load_parameter( l7vs::error_code& );
 
@@ -254,8 +241,11 @@ public:
 	virtual	bool				operator==( const virtualservice_base& ) = 0;
 	virtual	bool				operator!=( const virtualservice_base& ) = 0;
 
-	void						rs_list_lock();
-	void						rs_list_unlock();
+	void						rs_list_lock(){
+									rd_scoped_lock	lock( rs_list_ref_count_inc_mutex );
+									rs_list_ref_count++;
+								}
+	void						rs_list_unlock() { rs_list_ref_count--; };
 
 	virtual	void				set_virtualservice( const virtualservice_element&, error_code& ) = 0;
 	virtual	void				edit_virtualservice( const virtualservice_element&, error_code& ) = 0;
