@@ -1556,14 +1556,14 @@ void	check_http_method_and_version_test(){
 						"/abc/def/ghi HTTP/1.0",
 						"GET /abc/def/ http/1.0",
 					};
-	char	buffer_inpossible[5][256]
+/*	char	buffer_inpossible[5][256]
 				=	{
 						"GET / HTTP/1.0",
 						"GET / HTTP/1.1",
 						"Get / HTTP/1.0",
 						"GET / HTTP/1.2",
 						"",
-					};
+					};	メモリ確保用のエラーがなくなったため不要*/
 	size_t	buffer_len	= 0;
 
 	for( int i = 0; i < 30; i++, count++ ){
@@ -1590,6 +1590,7 @@ void	check_http_method_and_version_test(){
 			(const char*)buffer_ng[i], buffer_len ) == CHECK_NG );
 	}
 
+/*malloc errorがなくなったため、テスト不要
 	for( int i = 0; i < 5; i++, count++ ){
 		std::cout.width(2);
 		std::cout.fill('0');
@@ -1600,7 +1601,7 @@ void	check_http_method_and_version_test(){
 		BOOST_CHECK( check_http_method_and_version(
 			(const char*)buffer_inpossible[i], buffer_len ) == CHECK_INPOSSIBLE );
 	}
-
+*/
 	std::cout.width(2);
 	std::cout.fill('0');
 	std::cout << count << "---------------------------------------" << std::endl;

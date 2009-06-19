@@ -42,31 +42,31 @@ protected:
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
 	//! @return CHECK_RESULT_TAG	http method is valid
-	CHECK_RESULT_TAG	check_http_method( const char*, const size_t ) const;
+	CHECK_RESULT_TAG	check_http_method( const char*, const size_t );
 
 	//! check http version function
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
 	//! @return	CHECK_RESULT_TAG 	http version 1.0 or 1.1
-	CHECK_RESULT_TAG	check_http_version( const char*, const size_t ) const;
+	CHECK_RESULT_TAG	check_http_version( const char*, const size_t );
 
 	//! check http status code function
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
 	//! @return	CHECK_RESULT_TAG	status code is nomal or error
-	CHECK_RESULT_TAG	check_status_code( const char*, const size_t ) const;
+	CHECK_RESULT_TAG	check_status_code( const char*, const size_t );
 
 	//! check http method and version function
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
 	//! @return CHECK_RESULT_TAG	http method and version is valid
-	CHECK_RESULT_TAG	check_http_method_and_version( const char*, const size_t ) const;
+	CHECK_RESULT_TAG	check_http_method_and_version( const char*, const size_t );
 
 	//! check http version and status code function
 	//! @param const char*			buffer
 	//! @param const size_t			buffer_len
 	//! @return CHECK_RESULT_TAG	http version and status code is valid
-	CHECK_RESULT_TAG	check_http_version_and_status_code( const char*, const size_t ) const;
+	CHECK_RESULT_TAG	check_http_version_and_status_code( const char*, const size_t );
 
 	//! serch uri function
 	//! @param const char*			buffer

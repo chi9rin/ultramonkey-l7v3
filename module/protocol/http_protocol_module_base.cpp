@@ -97,7 +97,7 @@ cregex	http_header_regex_none
 //! @return CHECK_RESULT_TAG	http method is valid
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
-													const size_t buffer_len ) const {
+													const size_t buffer_len ){
 
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -116,51 +116,27 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
-	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
 	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
-
-			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
-
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' ))
 				break;
-
-			}
-
 		}
 
 		if( likely( line_length < buffer_len )){
-
-			check_string = (char*)malloc( line_length + 1 );
-
-			if( likely( check_string != NULL )){
-				memcpy( check_string, buffer, line_length );
-	
-				check_string[line_length] = '\0';
-	
-				if( !regex_match( check_string, method_regex )){
-	
-					check_result = CHECK_NG;
-	
-				}
-	
-				free( check_string );
-			}
-			else{
-
-				check_result = CHECK_NG;
-
-			}
-
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c = target[line_length];
+			target[line_length] = '\0';
+			( regex_match( target, method_regex ) )
+				? check_result = CHECK_OK
+				: check_result = CHECK_NG;
+			target[line_length] = backup_c;
 		}
 		else{
-
 			check_result = CHECK_INPOSSIBLE;
-
 		}
-
 	}
 	else{
 
@@ -193,7 +169,7 @@ l7vs::http_protocol_module_base::check_http_method(	const char* buffer,
 //! @return	CHECK_RESULT_TAG 	http version 1.0 or 1.1
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
-														const size_t buffer_len ) const {
+														const size_t buffer_len ){
 
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -212,59 +188,31 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
-	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
 	if( likely( buffer != NULL )){
-
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
-
-			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
-
+			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' ))
 				break;
-
-			}
-
 		}
 
 		if( likely( line_length < buffer_len )){
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c = target[line_length];
+			target[line_length] = '\0';
 
-			check_string = (char*)malloc( line_length + 1 );
+			if( !regex_match( target, version_regex_request ) &&
+				!regex_match( target, version_regex_response ) ) check_result = CHECK_NG;
 
-			if( likely( check_string != NULL )){
-
-				memcpy( check_string, buffer, line_length );
-	
-				check_string[line_length] = '\0';
-	
-				if( !regex_match( check_string, version_regex_request ) &&
-					!regex_match( check_string, version_regex_response ) ){
-	
-					check_result = CHECK_NG;
-	
-				}
-	
-				free( check_string );
-
-			}
-			else{
-
-				check_result = CHECK_NG;
-
-			}
+			target[line_length] = backup_c;
 
 		}
 		else{
-
 			check_result = CHECK_INPOSSIBLE;
-
 		}
-
 	}
 	else{
-
 		check_result = CHECK_NG;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -292,7 +240,7 @@ l7vs::http_protocol_module_base::check_http_version(	const char* buffer,
 //! @return	CHECK_RESULT_TAG	status code is nomal or error
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
-													const size_t buffer_len ) const {
+													const size_t buffer_len ){
 
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -311,58 +259,28 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
-	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
 	if( likely( buffer != NULL )){
-
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
-
 			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
-
 				break;
-
 			}
-
 		}
 
 		if( likely( line_length < buffer_len )){
-
-			check_string = (char*)malloc( line_length + 1 );
-
-			if( likely( check_string != NULL )){
-
-				memcpy( check_string, buffer, line_length );
-	
-				check_string[line_length] = '\0';
-	
-				if( !regex_match( check_string, status_code_regex_check )){
-	
-					check_result = CHECK_NG;
-	
-				}
-	
-				free( check_string );
-
-			}
-			else{
-
-				check_result = CHECK_NG;
-
-			}
-
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c = target[line_length];
+			target[line_length] = '\0';
+			if( !regex_match( target, status_code_regex_check ) ) check_result = CHECK_NG;
+			target[line_length] = backup_c;
 		}
 		else{
-
 			check_result = CHECK_INPOSSIBLE;
-
 		}
-
 	}
 	else{
-
 		check_result = CHECK_NG;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -391,7 +309,7 @@ l7vs::http_protocol_module_base::check_status_code(	const char* buffer,
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_method_and_version(
 													const char* buffer,
-													const size_t buffer_len ) const {
+													const size_t buffer_len ){
 
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -410,56 +328,30 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
-	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
 	if( likely( buffer != NULL )){
-
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
-
 			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
-
 				break;
-
 			}
-
 		}
-
 		if( likely( line_length < buffer_len )){
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c = target[line_length];
+			target[line_length] = '\0';
 
-			check_string = (char*)malloc( line_length + 1 );
-
-			if( likely( check_string != NULL )){
-				memcpy( check_string, buffer, line_length );
-	
-				check_string[line_length] = '\0';
-	
-				if( !regex_match( check_string, method_and_version_regex )){
-	
-					check_result = CHECK_NG;
-	
-				}
-	
-				free( check_string );
-			}
-			else{
-
+			if( !regex_match( target, method_and_version_regex ) )
 				check_result = CHECK_NG;
 
-			}
-
+			target[line_length] = backup_c;
 		}
 		else{
-
-			check_result = CHECK_INPOSSIBLE;
-
+			check_result = CHECK_NG;
 		}
-
 	}
 	else{
-
 		check_result = CHECK_NG;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -488,7 +380,7 @@ l7vs::http_protocol_module_base::check_http_method_and_version(
 l7vs::http_protocol_module_base::CHECK_RESULT_TAG
 l7vs::http_protocol_module_base::check_http_version_and_status_code(
 													const char* buffer,
-													const size_t buffer_len ) const {
+													const size_t buffer_len ){
 
 	//---------- DEBUG LOG START ------------------------------
 	if(unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -507,56 +399,28 @@ l7vs::http_protocol_module_base::check_http_version_and_status_code(
 
 	l7vs::http_protocol_module_base::CHECK_RESULT_TAG	check_result = CHECK_OK;
 
-	char*	check_string	= NULL;
 	size_t	line_length		= 0;
 
 	if( likely( buffer != NULL )){
-
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
-
 			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
-
 				break;
-
 			}
-
 		}
 
 		if( likely( line_length < buffer_len )){
-
-			check_string = (char*)malloc( line_length + 1 );
-
-			if( likely( check_string != NULL )){
-				memcpy( check_string, buffer, line_length );
-	
-				check_string[line_length] = '\0';
-	
-				if( !regex_match( check_string, version_and_status_code_regex )){
-	
-					check_result = CHECK_NG;
-	
-				}
-	
-				free( check_string );
-			}
-			else{
-
-				check_result = CHECK_NG;
-
-			}
-
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c = target[line_length];
+			target[line_length] = '\0';
+			if( !regex_match( target, version_and_status_code_regex ) ) check_result = CHECK_NG;
+			target[line_length] = backup_c;
 		}
 		else{
-
 			check_result = CHECK_INPOSSIBLE;
-
 		}
-
 	}
 	else{
-
 		check_result = CHECK_NG;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -606,7 +470,6 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 
 	bool	find_result	= true;
 
-	char*	find_string	= NULL;
 	size_t	line_length	= 0;
 
 	match_results< const char* >	result;
@@ -624,46 +487,21 @@ bool	l7vs::http_protocol_module_base::find_uri(	const char* buffer,
 		}
 
 		if( likely( line_length < buffer_len )){
-
-			find_string = (char*)malloc( line_length + 1 );
-
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer, line_length );
-	
-				find_string[line_length] = '\0';
-	
-				find_result = regex_search( find_string, result, uri_regex );
-	
-				if( find_result == true ){
-	
-					uri_offset	= result.position(1);
-	
-					uri_len		= result.length(1);
-	
-				}
-	
-				free( find_string );
-
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c = target[line_length];
+			find_result = regex_search( target, result, uri_regex );
+			if( find_result ){
+				uri_offset	= result.position(1);
+				uri_len		= result.length(1);
 			}
-			else{
-
-				find_result = false;
-
-			}
-
+			target[line_length] = backup_c;
 		}
 		else{
-
 			find_result = false;
-
 		}
-
 	}
 	else{
-
 		find_result = false;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -715,7 +553,6 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 
 	bool	find_result	= true;
 
-	char*	find_string	= NULL;
 	size_t	line_length	= 0;
 
 	match_results< const char* >	result;
@@ -723,56 +560,28 @@ bool	l7vs::http_protocol_module_base::find_status_code(	const char* buffer,
 	if( likely( buffer != NULL )){
 
 		for( line_length = 0; line_length < buffer_len; line_length++ ){
-
 			if( unlikely( buffer[line_length] == '\r' || buffer[line_length] == '\n' )){
-
 				break;
-
 			}
-
 		}
 
 		if( likely( line_length < buffer_len )){
-
-			find_string = (char*)malloc( line_length + 1 );
-
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer, line_length );
-	
-				find_string[line_length] = '\0';
-	
-				find_result = regex_search( find_string, result, status_code_regex_find );
-	
-				if( find_result == true ){
-	
-					status_code_offset	= result.position(1);
-	
-					status_code_len		= result.length(1);
-	
-				}
-	
-				free( find_string );
-
+			char*	target = const_cast<char*>( buffer );
+			char	backup_c	= target[line_length];
+			target[line_length] = '\0';
+			find_result = regex_search( target, result, status_code_regex_find );
+			if( find_result ){
+				status_code_offset	= result.position(1);
+				status_code_len		= result.length(1);
 			}
-			else{
-
-				find_result = false;
-
-			}
-
+			target[line_length] = backup_c;	
 		}
 		else{
-
 			find_result = false;
-
 		}
-
 	}
 	else{
-
 		find_result = false;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -829,7 +638,6 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 
 	bool	find_result			= true;
 
-	char*	find_string			= NULL;
 	size_t	count				= 0;
 	size_t	header_begin		= 0;
 	size_t	header_end			= 0;
@@ -882,75 +690,42 @@ bool	l7vs::http_protocol_module_base::find_http_header(	const char* buffer,
 		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
+			char*	ptr = const_cast<char*>( buffer ) + header_begin;
+			char	backup_c = *( ptr + header_length );
+			*( ptr + header_length ) = '\0';
 
-			find_string = (char*)malloc( header_length + 1 );
-
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer + header_begin, header_length );
-	
-				find_string[header_length] = '\0';
-
-				if( http_header_name.length() > 0 ){
-
-					http_header_regex = _ln >> (s1 = icase(http_header_name) >> ":" >> *~_ln);
-
-					find_result = regex_search( find_string, result, http_header_regex );
-	
-					if( find_result == true ){
-	
-						http_header_offset	= result.position(1) + header_begin;
-						http_header_len		= result.length(1);
-	
-					}
+			if( http_header_name.length() > 0 ){
+				http_header_regex = _ln >> (s1 = icase(http_header_name) >> ":" >> *~_ln);
+				find_result = regex_search( ptr , result, http_header_regex );
+				if( find_result){
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= result.length(1);
 				}
-				else{
-	
-					http_header_regex = _ln >> (s1 = *_ >> ~_ln) >> repeat<2>(_ln);
-
-					find_result = regex_search( find_string, result, http_header_regex );
-
-					if( find_result == true ){
-	
-						http_header_offset	= result.position(1) + header_begin;
-						http_header_len		= result.length(1);
-	
-					}
-					else{
-	
-						http_header_regex = _ln >> (s1 = _ln);
-
-						find_result = regex_search( find_string, result, http_header_regex );
-
-						if( find_result == true ){
-	
-							http_header_offset	= result.position(1) + header_begin;
-							http_header_len		= 0;
-	
-						}
-					}
-				}
-	
-				free( find_string );
-
 			}
 			else{
-
-				find_result	= false;
-
+				http_header_regex = _ln >> (s1 = *_ >> ~_ln) >> repeat<2>(_ln);
+				find_result = regex_search( ptr, result, http_header_regex );
+				if( find_result  ){
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= result.length(1);
+				}
+				else{
+					http_header_regex = _ln >> (s1 = _ln);
+					find_result = regex_search( ptr, result, http_header_regex );
+					if( find_result ){
+						http_header_offset	= result.position(1) + header_begin;
+						http_header_len		= 0;
+					}
+				}
 			}
-
+			*( ptr + header_length ) = backup_c;
 		}
 		else{
-
 			find_result	= false;
-
 		}
 	}
 	else{
-
 		find_result	= false;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -1003,7 +778,6 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 
 	bool	find_result			= true;
 
-	char*	find_string			= NULL;
 	size_t	count				= 0;
 	size_t	header_begin		= 0;
 	size_t	header_end			= 0;
@@ -1015,35 +789,23 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 	match_results< const char* >	result;
 
 	if( likely( buffer != NULL )){
-
 		for( count = 0; count < buffer_len; count++ ){
-
 			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
-
 				if( unlikely( header_begin_flag == 0 )){
-
 					header_begin = count;
 					header_begin_flag = 1;
-
 				}
-
 				if( likely( count > 0 )){
-
 					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
 									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
-
 					}
 				}
-
 				if( likely( count > 2 )){
-
 					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
 									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
@@ -1054,46 +816,24 @@ bool	l7vs::http_protocol_module_base::find_http_header_cookie(
 		}
 
 		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
-
 			header_length = header_end - header_begin + 1;
+			char*	ptr = const_cast<char*>( buffer ) + header_begin;
+			char	backup_c = *( ptr + header_length );
+			*( ptr + header_length ) = '\0';
 
-			find_string = (char*)malloc( header_length + 1 );
-
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer + header_begin, header_length );
-	
-				find_string[header_length] = '\0';
-
-				find_result = regex_search( find_string, result, http_header_regex_cookie );
-
-				if( find_result == true ){
-
-					http_header_offset	= result.position(1) + header_begin;
-					http_header_len		= result.length(1);
-
-				}
-	
-				free( find_string );
-
+			find_result = regex_search( ptr, result, http_header_regex_cookie );
+			if( find_result ){
+				http_header_offset	= result.position(1) + header_begin;
+				http_header_len		= result.length(1);
 			}
-			else{
-
-				find_result	= false;
-
-			}
-
+			*( ptr + header_length ) = backup_c;
 		}
 		else{
-
 			find_result	= false;
-
 		}
 	}
 	else{
-
 		find_result	= false;
-
 	}
 
 	//---------- DEBUG LOG START ------------------------------
@@ -1146,7 +886,6 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 
 	bool	find_result			= true;
 
-	char*	find_string			= NULL;
 	size_t	count				= 0;
 	size_t	header_begin		= 0;
 	size_t	header_end			= 0;
@@ -1158,74 +897,45 @@ bool	l7vs::http_protocol_module_base::find_http_header_content_length(
 	match_results< const char* >	result;
 
 	if( likely( buffer != NULL )){
-
 		for( count = 0; count < buffer_len; count++ ){
-
 			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
-
 				if( unlikely( header_begin_flag == 0 )){
-
 					header_begin = count;
 					header_begin_flag = 1;
-
 				}
-
 				if( likely( count > 0 )){
-
 					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
 									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
-
 					}
 				}
-
 				if( likely( count > 2 )){
-
 					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
 									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
-
 					}
 				}
 			}
 		}
 
 		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
-
 			header_length = header_end - header_begin + 1;
 
-			find_string = (char*)malloc( header_length + 1 );
+			char*	ptr = const_cast<char*>( buffer ) + header_begin;
+			char	backup_c = *( ptr + header_length );
+			*( ptr + header_length ) = '\0';
 
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer + header_begin, header_length );
-	
-				find_string[header_length] = '\0';
-
-				find_result = regex_search( find_string, result, http_header_regex_content_length );
-
-				if( find_result == true ){
-
-					http_header_offset	= result.position(1) + header_begin;
-					http_header_len		= result.length(1);
-
-				}
-	
-				free( find_string );
-
+			find_result = regex_search( ptr, result, http_header_regex_content_length );
+			if( find_result ){
+				http_header_offset	= result.position(1) + header_begin;
+				http_header_len		= result.length(1);
 			}
-			else{
-
-				find_result	= false;
-
-			}
-
+	
+			*( ptr + header_length ) = backup_c;
 		}
 		else{
 
@@ -1289,7 +999,6 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 
 	bool	find_result			= true;
 
-	char*	find_string			= NULL;
 	size_t	count				= 0;
 	size_t	header_begin		= 0;
 	size_t	header_end			= 0;
@@ -1301,35 +1010,24 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 	match_results< const char* >	result;
 
 	if( likely( buffer != NULL )){
-
 		for( count = 0; count < buffer_len; count++ ){
-
 			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
-
 				if( unlikely( header_begin_flag == 0 )){
-
 					header_begin = count;
 					header_begin_flag = 1;
-
 				}
-
 				if( likely( count > 0 )){
-
 					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
 									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
-
 					}
 				}
 
 				if( likely( count > 2 )){
-
 					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
 									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
@@ -1342,33 +1040,17 @@ bool	l7vs::http_protocol_module_base::find_http_header_x_forwarded_for(
 		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
 
 			header_length = header_end - header_begin + 1;
-
-			find_string = (char*)malloc( header_length + 1 );
-
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer + header_begin, header_length );
-	
-				find_string[header_length] = '\0';
-
-				find_result = regex_search( find_string, result, http_header_regex_x_forwarded_for );
-
-				if( find_result == true ){
-
-					http_header_offset	= result.position(1) + header_begin;
-					http_header_len		= result.length(1);
-
+			char*	ptr = const_cast<char*>( buffer ) + header_begin;
+			char	backup_c = *( ptr + header_length );
+			*( ptr + header_length ) = '\0';
+			
+			find_result = regex_search( ptr, result, http_header_regex_x_forwarded_for );
+			if( find_result == true ){
+				http_header_offset	= result.position(1) + header_begin;
+				http_header_len		= result.length(1);
 				}
-	
-				free( find_string );
 
-			}
-			else{
-
-				find_result	= false;
-
-			}
-
+			*( ptr + header_length ) = backup_c;
 		}
 		else{
 
@@ -1432,7 +1114,6 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 
 	bool	find_result			= true;
 
-	char*	find_string			= NULL;
 	size_t	count				= 0;
 	size_t	header_begin		= 0;
 	size_t	header_end			= 0;
@@ -1444,85 +1125,53 @@ bool	l7vs::http_protocol_module_base::find_http_header_all(
 	match_results< const char* >	result;
 
 	if( likely( buffer != NULL )){
-
 		for( count = 0; count < buffer_len; count++ ){
-
 			if( unlikely( buffer[count] == '\r' || buffer[count] == '\n' )){
-
 				if( unlikely( header_begin_flag == 0 )){
-
 					header_begin = count;
 					header_begin_flag = 1;
-
 				}
 
 				if( likely( count > 0 )){
-
 					if(	unlikely(	( buffer[count-1] == '\r' && buffer[count] == '\r' ) ||
 									( buffer[count-1] == '\n' && buffer[count] == '\n' )	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
-
 					}
 				}
 
 				if( likely( count > 2 )){
-
 					if(	unlikely(	buffer[count-3] == '\r' && buffer[count-2] == '\n' &&
 									buffer[count-1] == '\r' && buffer[count] == '\n'	)){
-
 						header_end = count;
 						header_end_flag = 1;
 						break;
-
 					}
 				}
 			}
 		}
 
 		if( likely( header_begin_flag == 1 && header_end_flag == 1 )){
-
 			header_length = header_end - header_begin + 1;
+			char*	ptr = const_cast<char*>( buffer ) + header_begin;
+			char	backup_c = *( ptr + header_length );
+			*( ptr + header_length ) = '\0';
 
-			find_string = (char*)malloc( header_length + 1 );
+			find_result = regex_search( ptr, result, http_header_regex_all );
 
-			if( likely( find_string != NULL )){
-
-				memcpy( find_string, buffer + header_begin, header_length );
-	
-				find_string[header_length] = '\0';
-
-				find_result = regex_search( find_string, result, http_header_regex_all );
-
-				if( find_result == true ){
-
-					http_header_offset	= result.position(1) + header_begin;
-					http_header_len		= result.length(1);
-
-				}
-				else{
-
-					find_result = regex_search( find_string, result, http_header_regex_none );
-
-					if( find_result == true ){
-
-						http_header_offset	= result.position(1) + header_begin;
-						http_header_len		= 0;
-
-					}
-				}
-	
-				free( find_string );
-
+			if( find_result ){
+				http_header_offset	= result.position(1) + header_begin;
+				http_header_len		= result.length(1);
 			}
 			else{
-
-				find_result	= false;
-
+				find_result = regex_search( ptr, result, http_header_regex_none );
+				if( find_result == true ){
+					http_header_offset	= result.position(1) + header_begin;
+					http_header_len		= 0;
+				}
 			}
-
+			*( ptr + header_length ) = backup_c;
 		}
 		else{
 
