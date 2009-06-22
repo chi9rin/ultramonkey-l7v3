@@ -48,7 +48,7 @@ public:
 			if ( likely( __sync_bool_compare_and_swap(&tailloc,tail,nexttail) ) ) break;
 		}
 		//transaction ed
-		__sync_lock_test_and_set(&node[tail].value,value);
+		if( __sync_lock_test_and_set(&node[tail].value,value) ){};
 		__sync_add_and_fetch( &counter, 1 );
 		return true;
 	}

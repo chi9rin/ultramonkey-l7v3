@@ -61,8 +61,8 @@ public:
 		}
 		while( unlikely( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, key ) ) );
 		//transaction ed
-		__sync_lock_test_and_set(&hashmap[hashvalue].value,value);
-		__sync_add_and_fetch( &counter, 1 );
+		if( __sync_lock_test_and_set(&hashmap[hashvalue].value,value) ){};
+		if( __sync_add_and_fetch( &counter, 1 ) ){};
 	}
 
 	//finder
@@ -84,7 +84,7 @@ public:
 		for(;;){
 			if( likely( hashmap[hashvalue].key == key ) ){
 				if( __sync_lock_test_and_set(&hashmap[hashvalue].key,NULL) ){};
-				__sync_lock_test_and_set(&hashmap[hashvalue].value,NULL);
+				if( __sync_lock_test_and_set(&hashmap[hashvalue].value,NULL) ){};
 				__sync_sub_and_fetch( &counter, 1 );
 				return;
 			}else{
