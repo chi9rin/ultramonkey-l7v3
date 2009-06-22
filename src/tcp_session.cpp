@@ -419,14 +419,21 @@ namespace l7vs{
 		// virtual_service_message_down_thread_function_map
 		virtual_service_message_down_thread_function_map.clear();
 		// up_thread_message_que
-		while( !up_thread_message_que.empty() ){
-			tcp_thread_message*	tmp_ptr	= up_thread_message_que.pop();
-			delete	tmp_ptr;
+		tcp_thread_message*	msg;
+		while(1){
+			msg = up_thread_message_que.pop();
+			if( msg )
+				delete msg;
+			else
+				break;
 		}
 		// down_thread_message_que
-		while( !down_thread_message_que.empty() ){
-			tcp_thread_message*	tmp_ptr	= down_thread_message_que.pop();
-			delete	tmp_ptr;
+		while(1){
+			msg = down_thread_message_que.pop();
+			if( msg )
+				delete msg;
+			else
+				break;
 		}
 	}
 	//! initialize
@@ -440,11 +447,20 @@ namespace l7vs{
 		thread_state.reset();
 		protocol_module = NULL;
 		session_pause_flag = false;
-		while( !up_thread_message_que.empty() ){
-			up_thread_message_que.pop();
+		tcp_thread_message* tmp_msg;
+		while(1){
+			tmp_msg = up_thread_message_que.pop();
+			if( tmp_msg )
+				delete tmp_msg;
+			else
+				break;
 		}
-		while( !down_thread_message_que.empty() ){
-			down_thread_message_que.pop();
+		while(1){
+			tmp_msg = down_thread_message_que.pop();
+			if( tmp_msg )
+				delete tmp_msg;
+			else
+				break;
 		}
 		protocol_module = parent_service.get_protocol_module();
 		
@@ -810,7 +826,6 @@ namespace l7vs{
 		}
 		//----Debug log----------------------------------------------------------------------
 		bool is_pause;
-                bool is_msg_none;
 		while(true){
 			{
                 rd_scoped_lock scoped_lock(exit_flag_update_mutex);
@@ -839,20 +854,21 @@ namespace l7vs{
 					if(exit_flag) break;
 				}
 			}
-			is_msg_none = up_thread_message_que.empty();
-			if(unlikely(!is_msg_none)){
+
+			tcp_thread_message*	msg	= up_thread_message_que.pop();
+			if( msg ){
 				if( UP_FUNC_EXIT == up_thread_next_call_function.first ){
 					up_thread_next_call_function.second(LOCAL_PROC);
-				}
-				else{
-					tcp_thread_message*	msg	= up_thread_message_que.pop();
+				}else{
 					up_thread_message_data.set_endpoint(msg->endpoint_info);
 					msg->message(MESSAGE_PROC);
-					delete	msg;
 				}
+				delete  msg;
+				msg = NULL;
 			}else{
 				up_thread_next_call_function.second(LOCAL_PROC);
 			}
+
 			boost::this_thread::yield();
 		}
 		//----Debug log----------------------------------------------------------------------
