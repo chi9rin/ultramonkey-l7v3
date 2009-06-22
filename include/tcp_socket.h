@@ -30,6 +30,8 @@
 #include <boost/thread/mutex.hpp>
 
 #include "wrlock.h"
+#include "utility.h"
+#include "logger.h"
 
 namespace l7vs{
 
@@ -56,17 +58,38 @@ namespace l7vs{
 			//! construcor
 			//! @param[in/out]	socket use io service object
 			//! @param[in]		set socket option info 
-			tcp_socket(boost::asio::io_service& io);
+			tcp_socket(boost::asio::io_service& io): my_socket(io), open_flag(false){
+				opt_info.nodelay_opt = false;
+				opt_info.cork_opt = false;
+				opt_info.quickack_opt = false;
+				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
+				}
+			}
 			//! construcor
 			//! @param[in/out]	socket use io service object
 			//! @param[in]		set socket option info 
-			tcp_socket(boost::asio::io_service& io,const tcp_socket_option_info set_option);
+			tcp_socket(boost::asio::io_service& io, const tcp_socket_option_info set_option): my_socket(io), open_flag(false), opt_info(set_option){
+				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
+				}
+			}
 			//! destructor
-			~tcp_socket();
+			~tcp_socket(){
+				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 2, "tcp_socket::~tcp_socket", __FILE__, __LINE__ );
+				}
+			}
 			
 			//! get reference control socket
 			//! @return			reference control socket
-			boost::asio::ip::tcp::socket& get_socket();
+			boost::asio::ip::tcp::socket& get_socket(){
+				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 3, "tcp_socket::get_socket", __FILE__, __LINE__ );
+				}
+				return my_socket;
+			}
+
 			//! connect socket
 			//! @param[in]		connect_endpoint is connection endpoint
 			//! @param[out]		ec is reference error code object
@@ -94,7 +117,9 @@ namespace l7vs{
 			//! is open
 			//! @return 		true is open
 			//! @return 		false is close
-			bool is_open();
+			bool is_open(){
+				return open_flag;
+			}
 
 		protected:
 			//! control socket
