@@ -9,31 +9,32 @@
 namespace l7vs{
 
 //Argument Tkey, its size must be 64bit or less.
-template < class Tkey, class Tvalue, class Hash = boost::hash< Tkey* > >
+template < class Tkey, class Tvalue, class Hash = boost::hash< const Tkey* > >
 class lockfree_hashmap : boost::noncopyable{
 protected:
 
-	volatile mutable size_t	element_num;
+	const 				size_t	element_num;
+	volatile mutable 	size_t	counter;
+
 	struct container{
-		Tkey*		key;
-		Tvalue*		value;
-		bool		rehash;
-		explicit container() : key ( NULL ), value( NULL ) , rehash( false ) {}
+		Tkey*			key;
+		Tvalue*			value;
+		bool			rehash;
+		container() : key ( NULL ), value( NULL ) , rehash( false ) {}
 	};
 
-	volatile mutable size_t	all_ctr;
-	container*	hashmap;
+	volatile container*	hashmap;
 
 public:
 	typedef	Hash	hasher_type;
 	hasher_type		hasher;
 
 	// constractor
-	lockfree_hashmap( size_t num = 65535, Hash inhasher = boost::hash< Tkey* >() ) :
+	lockfree_hashmap( size_t num = 65535, Hash inhasher = boost::hash< const Tkey* >() ) :
 		element_num( num ) {
-		hashmap = new container[num];
+		hashmap = new container[element_num];
 		hasher = inhasher;
-		__sync_lock_test_and_set( &all_ctr, 0 );
+		__sync_lock_test_and_set( &counter, 0 );
 	}
 
 	// destractor
@@ -49,7 +50,7 @@ public:
 		do{
 			for(;;){
 				if( likely ( !hashmap[hashvalue].key ) ) break;
-				else if( unlikely( hashmap[hashvalue].key == key ) ){
+				if( unlikely( hashmap[hashvalue].key == key ) ){
 					pre_key = hashmap[hashvalue].key;
 					break;
 				}else{
@@ -60,18 +61,15 @@ public:
 		}
 		while( unlikely( !__sync_bool_compare_and_swap( &hashmap[hashvalue].key, pre_key, key ) ) );
 		//transaction ed
-		hashmap[hashvalue].value	= const_cast< Tvalue* >( value );
-		__sync_add_and_fetch( &all_ctr, 1 );
+		__sync_lock_test_and_set(&hashmap[hashvalue].value,value);
+		__sync_add_and_fetch( &counter, 1 );
 	}
 
 	//finder
 	Tvalue*	find( const Tkey* key ){
 		size_t	hashvalue = get_hashvalue( key );
 		for(;;){
-			if( unlikely ( !hashmap[hashvalue].key ) ){
-				if( likely( !hashmap[hashvalue].rehash ) ) return NULL;
-				hashvalue = get_rehashvalue( hashvalue );
-			}else if( likely( hashmap[hashvalue].key == key ) ){
+			if( likely( hashmap[hashvalue].key == key ) ){
 				return hashmap[hashvalue].value;
 			}else{
 				if( likely( !hashmap[hashvalue].rehash ) ) return NULL;
@@ -84,16 +82,13 @@ public:
 	void	erase( const Tkey*	key ){
 		size_t	hashvalue = get_hashvalue( key );
 		for(;;){
-			if( unlikely ( !hashmap[hashvalue].key ) ){
-				if( likely( !hashmap[hashvalue].rehash ) ) break;
-				hashvalue = get_rehashvalue( hashvalue );
-			}else if( likely( hashmap[hashvalue].key == key ) ){
+			if( likely( hashmap[hashvalue].key == key ) ){
 				if( __sync_lock_test_and_set(&hashmap[hashvalue].key,NULL) ){};
-				hashmap[hashvalue].value	= NULL;
-				__sync_sub_and_fetch( &all_ctr, 1 );
-				break;
+				__sync_lock_test_and_set(&hashmap[hashvalue].value,NULL);
+				__sync_sub_and_fetch( &counter, 1 );
+				return;
 			}else{
-				if( likely( !hashmap[hashvalue].rehash ) ) break;
+				if( likely( !hashmap[hashvalue].rehash ) ) return;
 				hashvalue = get_rehashvalue( hashvalue );
 			}
 		}
@@ -103,7 +98,7 @@ public:
 	void	clear(){
 		delete [] hashmap;
 		hashmap = new container[element_num];
-		__sync_lock_test_and_set( &all_ctr, 0 );
+		__sync_lock_test_and_set( &counter, 0 );
 	}
 
 	//poper
@@ -114,17 +109,17 @@ public:
 				value	= hashmap[i].value;
 				hashmap[i].key		= NULL;
 				hashmap[i].value	= NULL;
-				__sync_sub_and_fetch( &all_ctr, 1 );
+				__sync_sub_and_fetch( &counter, 1 );
 				return;
 			}
 		}
 	}
 
 	// size
-	size_t	size(){ return all_ctr; }
+	size_t	size(){ return counter; }
 
 	// empty
-	bool	empty(){ return !all_ctr; }
+	bool	empty(){ return !counter; }
 
 	// functor
 	void	do_all( boost::function< void( Tvalue* ) >	func ){
@@ -138,7 +133,7 @@ public:
 private:
 	//get array number by hasher
 	size_t	get_hashvalue(const Tkey* key ){
-		return hasher( const_cast<Tkey*>(key) ) % element_num;
+		return hasher( key ) % element_num;
 	}
 	//reget array number case of collision(method chain)
 	size_t	get_rehashvalue( size_t& key ){

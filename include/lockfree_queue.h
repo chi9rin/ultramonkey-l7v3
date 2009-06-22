@@ -11,7 +11,7 @@ template<class Tvalue>
 class lockfree_queue : protected boost::noncopyable {
 protected:
 	struct node_type {
-		Tvalue*			value;
+		Tvalue*	volatile	value;
 		node_type() : value( NULL ) {}
 	};
 	mutable volatile size_t	counter;
@@ -19,7 +19,7 @@ protected:
 	volatile size_t			tailloc;
 
 	volatile node_type*		node;
-	size_t					element_num;
+	const size_t			element_num;
 public:
 	// constractor
 	explicit lockfree_queue(size_t num = 65535) : counter(0),element_num( num ){
@@ -38,17 +38,17 @@ public:
 		//transaction st
 		while(true){
 			start:
-			tail = tailloc;
-			nexttail = get_num_next(tail);
-			if ( unlikely( node[tail].value ) ){
+ 			if ( unlikely( counter >= element_num ) ){
 				//return false;
 				//do spin case of full queue
 				goto start;
 			}
+			tail = tailloc;
+			nexttail = get_num_next(tail);
 			if ( likely( __sync_bool_compare_and_swap(&tailloc,tail,nexttail) ) ) break;
 		}
 		//transaction ed
-		node[tail].value = const_cast<Tvalue*>( value );
+		__sync_lock_test_and_set(&node[tail].value,value);
 		__sync_add_and_fetch( &counter, 1 );
 		return true;
 	}
@@ -56,27 +56,20 @@ public:
 	//poper
 	Tvalue* pop() {
 		size_t head,nexthead;
-		Tvalue* rtnvalue;
 		//transaction st
 		while(true){
+			if( unlikely( !counter ) ){
+				//false
+				return NULL;
+			}
 			head = headloc;
 			nexthead = get_num_next(head);
-			if( unlikely( !(node[head].value) ) ){
-				if( unlikely( headloc==tailloc ) ){
-					//false
-					return NULL;
-				}
-			}else{
-				if( likely( __sync_bool_compare_and_swap(&headloc,head,nexthead) ) ){
-					rtnvalue = node[head].value;
-					break;
-				}
+			if( likely( __sync_bool_compare_and_swap(&headloc,head,nexthead) ) ){
+				__sync_sub_and_fetch( &counter, 1 );
+				return node[head].value;
 			}
 		}
 		//transaction ed
-		__sync_sub_and_fetch( &counter, 1 );
-		node[head].value = NULL;
-		return rtnvalue;
 	}
 
 	//size
