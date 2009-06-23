@@ -1856,10 +1856,11 @@ void initialize_test(){
 	test_obj.get_thread_state().set();
 	BOOST_CHECK(test_obj.get_protocol_module() != &proto_test);	
 	test_obj.get_session_pause_flag() = true;
-	l7vs::tcp_thread_message*	test_msg	= new l7vs::tcp_thread_message;
-	test_obj.get_up_thread_message_que().push(test_msg);
+	l7vs::tcp_thread_message*	test_msg_up	= new l7vs::tcp_thread_message;
+	l7vs::tcp_thread_message*	test_msg_dw	= new l7vs::tcp_thread_message;
+	test_obj.get_up_thread_message_que().push(test_msg_up);
 	BOOST_CHECK(!test_obj.get_up_thread_message_que().empty());
-	test_obj.get_down_thread_message_que().push(test_msg);
+	test_obj.get_down_thread_message_que().push(test_msg_dw);
 	BOOST_CHECK(!test_obj.get_down_thread_message_que().empty());
 	
 	l7vs::session_result_message res_msg = test_obj.initialize();
@@ -1887,10 +1888,12 @@ void initialize_test(){
 	// unit_test [6] initialize up thread message que check
 	std::cout << "[6] initialize up thread message que check" << std::endl;
 	BOOST_CHECK(test_obj.get_up_thread_message_que().empty());
+        test_msg_up = NULL;
 	
 	// unit_test [7] initialize down thread message que check
 	std::cout << "[7] initialize down thread message que check" << std::endl;
 	BOOST_CHECK(test_obj.get_down_thread_message_que().empty());
+        test_msg_dw = NULL;
 	
 	// unit_test [8] initialize get protocol module pointer check
 	std::cout << "[8] initialize get protocol module pointer check" << std::endl;
@@ -1913,12 +1916,6 @@ void initialize_test(){
 	vs.get_protocol_module_res = NULL;
 	l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
 	l7vs::Logger::putLogError_id = 0;
-
-	while( !test_obj.get_up_thread_message_que().empty() ){
-		test_msg	= test_obj.get_up_thread_message_que().pop();
-		delete	test_msg;
-	}
-
 	res_msg = test_obj.initialize();
 	BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
 	BOOST_CHECK_EQUAL(5,l7vs::Logger::putLogError_id);

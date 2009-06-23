@@ -470,20 +470,20 @@ namespace l7vs{
 		int					int_val;
 
 		int_val	= param.get_int( PARAM_COMP_SESSION, PARAM_UP_BUFFER_SIZE, vs_err );
-		if( !vs_err ){
+		if(likely( !vs_err )){
 			upstream_buffer_size	= int_val;
 		}else{
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 3, "up buffer param error set default 8192" , __FILE__, __LINE__ );	
 		}
 
 		int_val	= param.get_int( PARAM_COMP_SESSION, PARAM_DOWN_BUFFER_SIZE, vs_err );
-		if( !vs_err ){
+		if(likely( !vs_err )){
 			downstream_buffer_size	= int_val;
 		}else{
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 4, "down buffer param error set default 8192" , __FILE__, __LINE__ );	
 		}
 		
-		if(protocol_module == NULL){
+		if(unlikely( protocol_module == NULL )){
 			//Error protocol_module NULL
 			std::stringstream buf;
 			buf << "Thread ID[";
@@ -856,8 +856,8 @@ namespace l7vs{
 			}
 
 			tcp_thread_message*	msg	= up_thread_message_que.pop();
-			if( msg ){
-				if( UP_FUNC_EXIT == up_thread_next_call_function.first ){
+			if(unlikely( msg )){
+				if(unlikely( UP_FUNC_EXIT == up_thread_next_call_function.first )){
 					up_thread_next_call_function.second(LOCAL_PROC);
 				}else{
 					up_thread_message_data.set_endpoint(msg->endpoint_info);
@@ -896,7 +896,7 @@ namespace l7vs{
 			// wait down thread alive
 			{
 				rd_scoped_lock scope_lock(thread_state_update_mutex);
-				if(!thread_state.test(1)){// DOWN_THREAD_ALIVE
+				if(unlikely( !thread_state.test(1) )){// DOWN_THREAD_ALIVE
 					break;
 				}
 			}
@@ -1028,7 +1028,6 @@ namespace l7vs{
             }
         }
         bool is_pause;
-        bool is_msg_none;
 		while(true){
 			{
                 rd_scoped_lock scoped_lock(exit_flag_update_mutex);
@@ -1057,22 +1056,22 @@ namespace l7vs{
 					if(exit_flag) break;
 				}
 			}
-			while(!down_thread_connect_socket_list.empty()){
+			while(unlikely( !down_thread_connect_socket_list.empty() )){
 				std::pair<endpoint,tcp_socket_ptr > push_rs_socket = down_thread_connect_socket_list.get_socket();
 				down_thread_receive_realserver_socket_list.push_back(push_rs_socket);
 				down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
 			}
-			is_msg_none = down_thread_message_que.empty();
-			if(unlikely(!is_msg_none)){
-				if( DOWN_FUNC_EXIT == down_thread_next_call_function.first ){
+
+			tcp_thread_message*	msg	= down_thread_message_que.pop();
+			if(unlikely( msg )){
+				if(unlikely( DOWN_FUNC_EXIT == down_thread_next_call_function.first )){
 					down_thread_next_call_function.second(LOCAL_PROC);
-				}
-				else{
-					tcp_thread_message*	msg	= down_thread_message_que.pop();
+				}else{
 					down_thread_message_data.set_endpoint(msg->endpoint_info);
 					msg->message(MESSAGE_PROC);
-					delete	msg;
 				}
+				delete  msg;
+				msg = NULL;
 			}else{
 				down_thread_next_call_function.second(LOCAL_PROC);
 			}
@@ -2376,7 +2375,7 @@ namespace l7vs{
 		
 		std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
 		std::list<socket_element>::iterator erase_socket = down_thread_receive_realserver_socket_list.begin();
-		while(erase_socket != list_end){
+		while(likely( erase_socket != list_end )){
 			if(erase_socket->first == server_endpoint){
 				down_thread_receive_realserver_socket_list.erase(erase_socket);
 				down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
