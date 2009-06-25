@@ -68,7 +68,6 @@ l7vsd_SOURCES	=	\
 			tcp_data.cpp \
 			tcp_socket.cpp \
 			tcp_realserver_connect_socket_list.cpp \
-			tcp_thread_message.cpp \
 			tcp_thread_message_que.cpp \
 			udp_data.cpp \
 			udp_request_thread_control.cpp \

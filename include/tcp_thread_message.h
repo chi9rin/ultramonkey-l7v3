@@ -37,9 +37,9 @@ namespace l7vs{
 	class tcp_thread_message : private boost::noncopyable{
 		public:
 			//! construcor 
-			tcp_thread_message();
+			tcp_thread_message(){}
 			//! destructor
-			~tcp_thread_message();
+			~tcp_thread_message(){}
 			
 			//! request call function object
 			boost::function<void(tcp_session::TCP_PROCESS_TYPE_TAG)> message;
