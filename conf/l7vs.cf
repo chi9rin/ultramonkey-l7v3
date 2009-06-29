@@ -188,9 +188,11 @@ maxfileno = 65535
 #
 [virtualservice]
 nic_realserver_side			= "eth0"
-session_thread_pool_size	= 512
+session_thread_pool_size	= 16
 throughput_calc_interval	= 500
-task_scheduler_algorithm	= 0
+task_scheduler_algorithm	= 2
+task_scheduler_priority		= 99
+mun_of_core_uses		= 8
 
 #
 # l7vsd replication setting

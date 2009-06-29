@@ -59,6 +59,7 @@
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
 #define	PARAM_SCHED_ALGORITHM	"task_scheduler_algorithm"
 #define	PARAM_REP_INTERVAL		"interval"
+#define PARAM_SCHED_PRIORITY	"task_scheduler_priority"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
 #define	SCHEDMOD_NOTLOAD_ERROR_MSG	"Schedule Module not loaded"
@@ -127,6 +128,7 @@ public:
 	const static int	MAX_REPLICATION_DATA_NUM	= 64;		//! Maximum count value of replication data array
 	const static int	OPERATION_TIMEOUT			= 1;		//! Operation timed out value
 	const static int	REFCOUNT_WAIT_INTERVAL		= 10000;	//! wait interval for rs_ref_count check
+	const static int	SCHEDULER_PRIORITY		= 20;
 protected:
 
 	struct	parameter_data{
@@ -136,10 +138,12 @@ protected:
 		long	bps_interval;
 		int		schedule_algorithm;
 		long	rep_interval;
+		int		schedule_priority;
 		parameter_data() :	session_pool_size( SESSION_POOL_NUM_DEFAULT ),
 							bps_interval( BPS_INTERVAL_DEFAULT ),
 							schedule_algorithm( SCHED_OTHER ),
-							rep_interval( REP_INTERVAL_DEFAULT ) {}
+							rep_interval( REP_INTERVAL_DEFAULT ),
+							schedule_priority( SCHEDULER_PRIORITY ) {}
 	};
 
 	boost::thread::id			this_id;

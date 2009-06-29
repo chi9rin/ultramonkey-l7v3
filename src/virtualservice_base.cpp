@@ -126,6 +126,10 @@ void	l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
 	int_val	= param.get_int( l7vs::PARAM_COMP_REPLICATION, PARAM_REP_INTERVAL, vs_err );
 	if( !vs_err )
 		param_data.rep_interval = int_val;
+	//get schedule priority
+	int_val = param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SCHED_PRIORITY, vs_err );
+	if( !vs_err )
+		param_data.schedule_priority = int_val;
 
 	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
 		l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, "out_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );

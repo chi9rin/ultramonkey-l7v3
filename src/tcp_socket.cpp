@@ -239,6 +239,7 @@ namespace l7vs{
 						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 104, buf.str() , __FILE__, __LINE__ );
 					}
 				}
+				boost::this_thread::yield();
 				res_size = my_socket.read_some(buffers,ec);
 				if(unlikely(ec)){
 					if (unlikely(!open_flag)) {
@@ -251,6 +252,7 @@ namespace l7vs{
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "out_function : tcp_socket::read_some", __FILE__, __LINE__ );
 		}
+//		boost::this_thread::yield();
 		return res_size;
 	}
 

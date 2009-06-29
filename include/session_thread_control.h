@@ -32,6 +32,10 @@
 #include "tcp_session.h"
 
 #include "wrlock.h"
+#include "parameter.h"
+#include "error_code.h"
+
+#define PARAM_SCHED_PRIORITY	"task_scheduler_priority"
 
 namespace l7vs{
 
@@ -75,6 +79,7 @@ protected:
 	cpu_set_t			rsnic_cpumask;
 
 	int					sched_algorithm;
+	int					sched_priority;
 public:
 	//! constractor.
 	//! @param session_ptr	session class shared ptr
@@ -84,9 +89,37 @@ public:
 			vsnic_cpumask( in_upcpu ),
 			rsnic_cpumask( in_downcpu ),
 			sched_algorithm( in_sched_algorithm ){
+		int			int_val;
+		l7vs::error_code	err;
+		Parameter		param;
+		int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SCHED_PRIORITY, err );
+		if( !err )
+			if( (int_val > sched_get_priority_min(in_sched_algorithm)) || (int_val < sched_get_priority_max(in_sched_algorithm)) )
+				sched_priority = int_val;
+			else
+				sched_priority = sched_get_priority_min(in_sched_algorithm);
+		else
+			sched_priority = 10;
+
 		session.reset( ptr );
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	//! upstream thread create
 		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create
+
+		//pthread_setschedparam
+		int	retval, sched_policy;
+		sched_param	scheduler_param;
+		int_val	= pthread_getschedparam( upthread->native_handle(), &sched_policy, &scheduler_param );
+		if( SCHED_FIFO == sched_algorithm ){
+			scheduler_param.__sched_priority	= sched_priority;
+			sched_policy	= SCHED_FIFO;
+		}else if( SCHED_RR == sched_algorithm ){
+			scheduler_param.__sched_priority	= sched_priority;
+			sched_policy	= SCHED_RR;
+		}else if( SCHED_BATCH == sched_algorithm ){
+			sched_policy	= SCHED_BATCH;
+		}
+		retval			= pthread_setschedparam( upthread->native_handle(), sched_algorithm, &scheduler_param );
+		retval			= pthread_setschedparam( downthread->native_handle(), sched_algorithm, &scheduler_param );
 	}
 	//! destractor
 	~session_thread_control(){
