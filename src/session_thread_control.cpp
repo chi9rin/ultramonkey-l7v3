@@ -47,34 +47,6 @@ void	session_thread_control::upstream_run(){
 //	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
 //#endif
 
-//	Parameter		param;
-//	l7vs::error_code	err;
-
-//	int				ret_val, sched_policy;
-//	sched_param		scheduler_param;
-//	ret_val			= sched_getparam( 0, &scheduler_param );
-//	sched_policy	= sched_getscheduler( 0 );
-//	if( SCHED_FIFO == sched_algorithm ){
-//		scheduler_param.__sched_priority	= sched_priority;
-//		sched_policy	= SCHED_FIFO;
-//	}else if( SCHED_RR == sched_algorithm ){
-//		scheduler_param.__sched_priority	= sched_priority;
-//		sched_policy	= SCHED_RR;
-//	}else if( SCHED_BATCH == sched_algorithm ){
-//		sched_policy	= SCHED_BATCH;
-//	}
-//	ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
-//	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-//		boost::format	fmt( "upstream_run : parameter of task scheduler algorithm : priority = %d / algorithm : %d" );
-//		fmt % scheduler_param.__sched_priority % sched_policy;
-//		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 2, fmt.str(), __FILE__, __LINE__ );
-//	}
-//	if( unlikely( 0 > ret_val ) ){
-//		boost::format	errlog_fmt( "error at upstream_run, set task scheduler algorithm. : %d" );
-//		errlog_fmt % errno;
-//		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, errlog_fmt.str(), __FILE__, __LINE__ );
-//	}
-
 	state_tag	state;
 	upthread_running_mutex.lock();
 	{	// get first state from class upstream state.
@@ -126,31 +98,6 @@ void	session_thread_control::downstream_run(){
 	sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
 //	sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
 //#endif
-
-//	int				ret_val, sched_policy;
-//	sched_param		scheduler_param;
-//	ret_val			= sched_getparam( 0, &scheduler_param );
-//	sched_policy	= sched_getscheduler( 0 );
-//	if( SCHED_FIFO == sched_algorithm ){
-//		scheduler_param.__sched_priority	= sched_priority;
-//		sched_policy	= SCHED_FIFO;
-//	}else if( SCHED_RR == sched_algorithm ){
-//		scheduler_param.__sched_priority	= sched_priority;
-//		sched_policy	= SCHED_RR;
-//	}else if( SCHED_BATCH == sched_algorithm ){
-//		sched_policy	= SCHED_BATCH;
-//	}
-//	ret_val			= sched_setscheduler( 0, sched_policy, &scheduler_param );
-//	if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-//		boost::format	fmt( "upstream_run : parameter of task scheduler algorithm : priority = %d / algorithm : %d" );
-//		fmt % scheduler_param.__sched_priority % sched_policy;
-//		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 4, fmt.str(), __FILE__, __LINE__ );
-//	}
-//	if( unlikely( 0 > ret_val ) ){
-//		boost::format	errlog_fmt( "error at upstream_run, set task scheduler algorithm. : %d" );
-//		errlog_fmt % errno;
-//		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 2, errlog_fmt.str(), __FILE__, __LINE__ );
-//	}
 
 	state_tag	state;
 	downthread_running_mutex.lock();

@@ -29,9 +29,13 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <boost/shared_ptr.hpp>
+#include <sched.h>
 
 #include "l7vsd.h"
 #include "error_code.h"
+
+#define	PARAM_SCHED_ALGORITHM	"task_scheduler_algorithm"
+#define PARAM_SCHED_PRIORITY	"task_scheduler_priority"
 
 namespace l7vs{
 
@@ -851,6 +855,22 @@ int	l7vsd::run( int argc, char* argv[] ) {
 			logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 1, "maxfileno parameter not found.", __FILE__, __LINE__ );
 			maxfileno = 1024;
 		}
+		//set process scheduler & priority
+		int	scheduler = SCHED_OTHER;
+		int	int_val = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM, err);
+		if( (SCHED_FIFO == int_val) || (SCHED_RR == int_val) || (SCHED_OTHER == int_val) || (SCHED_BATCH == int_val) )
+			scheduler = int_val;
+		int	proc_pri  = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err);
+		if( err ){
+			proc_pri  = sched_get_priority_min( scheduler );
+		}
+
+		sched_param		scheduler_param;
+		int	ret_val		= sched_getparam( 0, &scheduler_param );
+		if( (SCHED_FIFO == scheduler) || (SCHED_RR == scheduler) ){
+			scheduler_param.__sched_priority	= proc_pri;
+		}
+		ret_val			= sched_setscheduler( 0, scheduler, &scheduler_param );
 
 		struct rlimit lim;
 		lim.rlim_cur = maxfileno;

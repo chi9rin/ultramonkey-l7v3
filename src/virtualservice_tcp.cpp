@@ -548,7 +548,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					}
 					return;
 				}
-				session_thread_control*	p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, param_data.schedule_algorithm );
+				session_thread_control*	p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, -1 );
 				while( !pool_sessions.push( p_stc ) ){}
 			}
 			catch( std::bad_alloc ex ){

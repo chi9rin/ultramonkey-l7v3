@@ -57,9 +57,7 @@
 #define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
-#define	PARAM_SCHED_ALGORITHM	"task_scheduler_algorithm"
 #define	PARAM_REP_INTERVAL		"interval"
-#define PARAM_SCHED_PRIORITY	"task_scheduler_priority"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
 #define	SCHEDMOD_NOTLOAD_ERROR_MSG	"Schedule Module not loaded"
@@ -136,14 +134,10 @@ protected:
 				nic_realserver_side;
 		int		session_pool_size;
 		long	bps_interval;
-		int		schedule_algorithm;
 		long	rep_interval;
-		int		schedule_priority;
 		parameter_data() :	session_pool_size( SESSION_POOL_NUM_DEFAULT ),
 							bps_interval( BPS_INTERVAL_DEFAULT ),
-							schedule_algorithm( SCHED_OTHER ),
-							rep_interval( REP_INTERVAL_DEFAULT ),
-							schedule_priority( SCHEDULER_PRIORITY ) {}
+							rep_interval( REP_INTERVAL_DEFAULT ){}
 	};
 
 	boost::thread::id			this_id;

@@ -118,8 +118,10 @@ public:
 		}else if( SCHED_BATCH == sched_algorithm ){
 			sched_policy	= SCHED_BATCH;
 		}
-		retval			= pthread_setschedparam( upthread->native_handle(), sched_algorithm, &scheduler_param );
-		retval			= pthread_setschedparam( downthread->native_handle(), sched_algorithm, &scheduler_param );
+		if( 0 <= sched_algorithm ){
+			retval			= pthread_setschedparam( upthread->native_handle(), sched_algorithm, &scheduler_param );
+			retval			= pthread_setschedparam( downthread->native_handle(), sched_algorithm, &scheduler_param );
+		}
 	}
 	//! destractor
 	~session_thread_control(){

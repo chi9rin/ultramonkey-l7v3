@@ -798,7 +798,6 @@ namespace l7vs{
 				}
 			}else{
 				func = up_thread_function_array[func_type->second];
-//				boost::this_thread::yield();
 				if(unlikely( !func.second )){
 					//Error not find function map
 					std::stringstream buf;
@@ -992,7 +991,6 @@ namespace l7vs{
 		//----Debug log----------------------------------------------------------------------
 		thread_state_update(DOWN_THREAD_ACTIVE,true);
 		down_thread_function_pair	func	= down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
-//		boost::this_thread::yield();
 		if(unlikely( !func.second )){
 			//Error not find function map
 			std::stringstream buf;

@@ -182,6 +182,8 @@ con_count = 10
 #
 [l7vsd]
 maxfileno = 65535
+task_scheduler_algorithm	= 2
+task_scheduler_priority		= 99
 
 #
 # virtualservice setting
@@ -190,9 +192,7 @@ maxfileno = 65535
 nic_realserver_side			= "eth0"
 session_thread_pool_size	= 16
 throughput_calc_interval	= 500
-task_scheduler_algorithm	= 2
-task_scheduler_priority		= 99
-mun_of_core_uses		= 8
+num_of_core_uses		= 8
 
 #
 # l7vsd replication setting
