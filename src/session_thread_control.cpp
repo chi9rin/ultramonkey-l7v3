@@ -38,14 +38,18 @@ void	session_thread_control::upstream_run(){
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, fmt.str(), __FILE__, __LINE__ );
 	}
 
-//#ifdef	SCHED_SETAFFINITY
 	cpu_set_t       mask;
-	CPU_ZERO( &mask );
-	sched_getaffinity( 0, sizeof( cpu_set_t ), &mask );
-	CPU_CLR( static_cast<int>( 0 ), &mask );
-	sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
-//	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
-//#endif
+	//numが1以上なら、その数だけCPU_SETする
+	if( 0 < num_of_core_uses ){
+		CPU_ZERO( &mask );
+		for( int i = 0; i < num_of_core_uses; ++i ){
+			CPU_SET( static_cast<int>( i ), &mask );
+		}
+		sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
+	}
+#ifdef	SCHED_SETAFFINITY
+	sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
+#endif
 
 	state_tag	state;
 	upthread_running_mutex.lock();
@@ -90,14 +94,18 @@ void	session_thread_control::downstream_run(){
 		boost::format fmt("in_function : void session_thread_control::downstream_run()");
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 3, fmt.str(), __FILE__, __LINE__ );
 	}
-//#ifdef	SCHED_SETAFFINITY
 	cpu_set_t       mask;
-	CPU_ZERO( &mask );
-	sched_getaffinity( 0, sizeof( cpu_set_t ), &mask );
-	CPU_CLR( static_cast<int>( 0 ), &mask );
-	sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
-//	sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
-//#endif
+	//numが1以上なら、その数だけCPU_SETする
+	if( 0 < num_of_core_uses ){
+		CPU_ZERO( &mask );
+		for( int i = 1; i < num_of_core_uses; ++i ){
+			CPU_SET( static_cast<int>( i ), &mask );
+		}
+		sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
+	}
+#ifdef	SCHED_SETAFFINITY
+	sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
+#endif
 
 	state_tag	state;
 	downthread_running_mutex.lock();

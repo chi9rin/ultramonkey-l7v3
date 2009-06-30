@@ -35,7 +35,8 @@
 #include "parameter.h"
 #include "error_code.h"
 
-#define PARAM_SCHED_PRIORITY	"task_scheduler_priority"
+#define PARAM_SCHED_PRIORITY    "task_scheduler_priority"
+#define	NUM_OF_CORE_USES	"num_of_core_uses"
 
 namespace l7vs{
 
@@ -80,6 +81,7 @@ protected:
 
 	int					sched_algorithm;
 	int					sched_priority;
+	int					num_of_core_uses;
 public:
 	//! constractor.
 	//! @param session_ptr	session class shared ptr
@@ -92,7 +94,8 @@ public:
 		int			int_val;
 		l7vs::error_code	err;
 		Parameter		param;
-		int_val	= param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SCHED_PRIORITY, err );
+		//get scheduler priority parameter
+		int_val	= param.get_int( l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err );
 		if( !err )
 			if( (int_val > sched_get_priority_min(in_sched_algorithm)) || (int_val < sched_get_priority_max(in_sched_algorithm)) )
 				sched_priority = int_val;
@@ -100,6 +103,12 @@ public:
 				sched_priority = sched_get_priority_min(in_sched_algorithm);
 		else
 			sched_priority = 10;
+		//get number of use cpu_cores
+		int_val = param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, NUM_OF_CORE_USES, err );
+		if( !err )
+			num_of_core_uses = int_val;
+		else
+			num_of_core_uses = 0;
 
 		session.reset( ptr );
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	//! upstream thread create
