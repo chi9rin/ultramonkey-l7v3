@@ -43,7 +43,7 @@ void	session_thread_control::upstream_run(){
 	if( 0 < num_of_core_uses ){
 		CPU_ZERO( &mask );
 		for( int i = 0; i < num_of_core_uses; ++i ){
-			CPU_SET( static_cast<int>( i ), &mask );
+			CPU_SET( i, &mask );
 		}
 		sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
 	}
@@ -99,7 +99,7 @@ void	session_thread_control::downstream_run(){
 	if( 0 < num_of_core_uses ){
 		CPU_ZERO( &mask );
 		for( int i = 0; i < num_of_core_uses; ++i ){
-			CPU_SET( static_cast<int>( i ), &mask );
+			CPU_SET( i, &mask );
 		}
 		sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
 	}
