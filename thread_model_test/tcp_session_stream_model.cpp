@@ -23,6 +23,7 @@ namespace l7vs{
         }
 
         void tcp_session_stream_model::Run_up(){
+
                 boost::array< char , 65535> buff;
                 boost::system::error_code ec;
 
@@ -42,7 +43,6 @@ namespace l7vs{
                         boost::this_thread::yield();
                 }
 
-
                 // ノンブロッキングに設定
                 boost::asio::socket_base::non_blocking_io cmd(true);
                 cl_socket.io_control(cmd,ec);
@@ -53,6 +53,7 @@ namespace l7vs{
                 }
 
                 while(true){// UPスレッドメインループ
+                        boost::this_thread::yield();
                         {
 				rd_scoped_lock scope_lock(exit_flag_update_mutex);
                                 if(exit_flag){
@@ -61,7 +62,6 @@ namespace l7vs{
                                 }
                         }
 
-                        boost::this_thread::yield();
                         // 受信
                         size_t recv_size = 0;
                         {
@@ -85,7 +85,8 @@ namespace l7vs{
                                 //RS接続
                                 {
                                         rw_scoped_lock scope_lock(rs_close_mutex);
-                                        if(!rs_socket.connect(realserver_endpoint,ec)){
+                                        rs_socket.connect(realserver_endpoint,ec);
+                                        if(ec){
                                                 //接続失敗 -> 終了のお知らせ
                                                 rw_scoped_lock scope_lock(exit_flag_update_mutex);
                                                 exit_flag = true;
@@ -101,6 +102,7 @@ namespace l7vs{
                                         exit_flag = true;
                                         break;
                                 }
+
                         }
 
                         // 送信
@@ -163,22 +165,20 @@ namespace l7vs{
                         }
                         boost::this_thread::yield();
                 }
-
                 while(true){// DWスレッドメインループ
+                        boost::this_thread::yield();
                         {
 				rd_scoped_lock scope_lock(exit_flag_update_mutex);
-                                if(exit_flag){
+                                if(exit_flag == true){
                                         //終了のお知らせ
                                         break;
                                 }
                         }
-                        boost::this_thread::yield();
 
                         // RS接続チェック
                         if(!rs_socket.is_open()){
                                 continue;
                         }
-
                         // RS受信
                         size_t recv_size = 0;
                         {
@@ -196,7 +196,6 @@ namespace l7vs{
                                         break;
                                 }
                         }
-
                         // CL送信
                         size_t send_size = 0;
                         while(send_size < recv_size){
@@ -229,6 +228,5 @@ namespace l7vs{
                         rw_scoped_lock scope_lock(threadB_state_mutex);
                         threadB_state = 0;
                 }
-
         }
 }
