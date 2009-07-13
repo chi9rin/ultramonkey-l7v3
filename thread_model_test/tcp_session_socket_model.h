@@ -7,6 +7,7 @@
 
 #include "wrlock.h"
 #include "lockfree_queue.h"
+#include "tcp_session_base.h"
 
 namespace l7vs{
 
@@ -23,23 +24,24 @@ namespace l7vs{
                 };
         };
 
-	class tcp_session_socket_model : private boost::noncopyable{
+	class tcp_session_socket_model : public tcp_session_base{
 		public:
 
-			tcp_session_socket_model(boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
+			tcp_session_socket_model(virtual_service* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
 			~tcp_session_socket_model();
 
 			boost::asio::ip::tcp::socket& get_cl_socket();
-                        
-                        
+
+                        void Run_main(){
+                                Run_cl();
+                                pVs->release_session(this);
+                        };
+                        void Run_sub(){
+                                Run_rs();
+                        };
+
                         void Run_cl();
                         void Run_rs();
-
-
-			//! control socket
-			boost::asio::ip::tcp::socket cl_socket;
-			boost::asio::ip::tcp::socket rs_socket;
-
 
                         wr_mutex        threadA_state_mutex;
                         int             threadA_state;
@@ -49,8 +51,6 @@ namespace l7vs{
 
                         lockfree_queue< socket_data > cl2rs_msg;
                         lockfree_queue< socket_data > rs2cl_msg;
-                        
-                        boost::asio::ip::tcp::endpoint realserver_endpoint;
 	};
 }
 
