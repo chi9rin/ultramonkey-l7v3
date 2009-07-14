@@ -15,13 +15,8 @@ namespace l7vs{
                         tcp_session_stream_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
                         ~tcp_session_stream_model();
 
-                        void Run_main(){
-                                Run_up();
-                                pVs->release_session(this);
-                        };
-                        void Run_sub(){
-                                Run_dw();
-                        };
+                        void Run_main();
+                        void Run_sub();
 
                         void Run_up();
                         void Run_dw();

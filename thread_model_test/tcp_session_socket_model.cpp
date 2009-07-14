@@ -19,6 +19,15 @@ namespace l7vs{
 	tcp_session_socket_model::~tcp_session_socket_model(){
 	}
 
+        void tcp_session_socket_model::Run_main(){
+                Run_cl();
+                pVs->release_session(this);
+        };
+        void tcp_session_socket_model::Run_sub(){
+                Run_rs();
+        };
+
+
         void tcp_session_socket_model::Run_cl(){
 
 #ifdef _DEBUG_MODE_

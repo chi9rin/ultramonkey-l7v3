@@ -18,6 +18,14 @@ namespace l7vs{
 	tcp_session_stream_model::~tcp_session_stream_model(){
 	}
 
+        void tcp_session_stream_model::Run_main(){
+                Run_up();
+                pVs->release_session(this);
+        };
+        void tcp_session_stream_model::Run_sub(){
+                Run_dw();
+        };
+
         void tcp_session_stream_model::Run_up(){
 
 #ifdef _DEBUG_MODE_

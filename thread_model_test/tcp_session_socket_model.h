@@ -30,13 +30,8 @@ namespace l7vs{
 			tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
 			~tcp_session_socket_model();
 
-                        void Run_main(){
-                                Run_cl();
-                                pVs->release_session(this);
-                        };
-                        void Run_sub(){
-                                Run_rs();
-                        };
+                        void Run_main();
+                        void Run_sub();
 
                         void Run_cl();
                         void Run_rs();
