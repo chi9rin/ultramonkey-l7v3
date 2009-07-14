@@ -17,10 +17,6 @@ namespace l7vs{
 	tcp_session_socket_model::~tcp_session_socket_model(){
 	}
 
-        boost::asio::ip::tcp::socket& tcp_session_socket_model::get_cl_socket(){
-                return cl_socket;
-        }
-
         void tcp_session_socket_model::Run_cl(){
 
 #ifdef _DEBUG_MODE_

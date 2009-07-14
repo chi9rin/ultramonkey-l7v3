@@ -23,6 +23,11 @@ namespace l7vs{
 			virtual ~tcp_session_base(){
                         };
 
+                        virtual boost::asio::ip::tcp::socket& get_cl_socket(){
+                                return cl_socket;
+                        };
+
+
                         virtual void Run_main(){
                         };
                         virtual void Run_sub(){
