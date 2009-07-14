@@ -22,6 +22,8 @@ int main( int argc, char* argv[] ){
 std::cout << "vsd start" <<std::endl;
 	l7vs::l7vsd vsd;
 	ret =  vsd.run( argc, argv );
+
+
 	// restore sigmask
 //	pthread_sigmask( SIG_SETMASK, &oldmask, NULL );
 	return ret;

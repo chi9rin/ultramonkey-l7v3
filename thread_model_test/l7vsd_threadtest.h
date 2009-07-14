@@ -16,21 +16,16 @@
 #include "atomic.h"
 #include "lockfree_queue.h"
 #include "lockfree_hashmap.h"
-#include "virtualservice_element.h"
-//#include "realserver_element.h"
-//#include "realserver.h"
-//#include "endpoint.h"
-//#include "session_result_message.h"
 
 namespace l7vs{
-class	tcp_session{};
+//class	tcp_session{};
 
 boost::asio::io_service		dispatcher;			//!< dispatcher
 
 class	session_thread_control : private boost::noncopyable{
 public:
 	typedef	boost::shared_ptr< boost::thread >	thread_ptr;		//! shared_ptr thread typedef
-	typedef	boost::shared_ptr< tcp_session >	session_ptr;	//! shared_ptr session typedef
+	typedef	boost::shared_ptr< tcp_session_base >	session_ptr;	//! shared_ptr session typedef
 	typedef	boost::thread::id					thread_id_type;	//! thread id typedef
 	enum	state_tag{	//! @enum state_tag upthread and down thread state enum
 		WAIT	= 0,	//! thread pooling mode
@@ -124,7 +119,7 @@ protected:
 
 public:
 	//! constractor.
-	session_thread_control( tcp_session* ptr) :upthread_state( WAIT ),downthread_state( WAIT ){
+	session_thread_control( tcp_session_base* ptr) :upthread_state( WAIT ),downthread_state( WAIT ){
 		int			int_val;
 
 		session.reset( ptr );
@@ -190,16 +185,21 @@ public:
 //	void			session_stop(){ session->set_virtual_service_message( tcp_session::SESSION_END ); }
 };
 
+
+
+
+
+
+
 class	virtualservice_tcp{
 public:
 	typedef	lockfree_queue< session_thread_control >
 								session_queue_type;
-	typedef	lockfree_hashmap< tcp_session, session_thread_control >
+	typedef	lockfree_hashmap< tcp_session_base, session_thread_control >
 								session_map_type;
-	typedef	boost::shared_ptr< tcp_session >	session_ptr;	//! shared_ptr session typedef
+	typedef	boost::shared_ptr< tcp_session_base >	session_ptr;	//! shared_ptr session typedef
 protected:
 	boost::asio::ip::tcp::acceptor acceptor_;
-	virtualservice_element		element;		//! virtual service element
 	session_queue_type			pool_sessions;
 	session_map_type			waiting_sessions;
 	session_map_type			active_sessions;
@@ -207,7 +207,7 @@ protected:
 
 	void	handle_accept(l7vs::session_thread_control* stc_ptr,boost::system::error_code& err ){
 		session_thread_control*		stc_ptr_noconst = const_cast<session_thread_control*>( stc_ptr );
-		tcp_session*	tmp_session	= stc_ptr_noconst->get_session().get();
+		tcp_session_base*	tmp_session	= stc_ptr_noconst->get_session().get();
 
 		active_sessions.insert( tmp_session, stc_ptr_noconst );
 		waiting_sessions.erase( tmp_session );
@@ -226,30 +226,36 @@ protected:
 		waiting_sessions.insert( tmp_session, stc_ptr_register_accept );
 
 		//regist accept event handler
-//		acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_socket(),
+//		acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_cl_socket(),
 //					boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
 	
 	}
 
 public:
-	virtualservice_tcp()
-						:acceptor_( dispatcher ) {}
+	boost::asio::ip::tcp::endpoint tcp_accept_endpoint;
+
+	virtualservice_tcp(std::string ip_address,int port)
+						:acceptor_( dispatcher ),
+						tcp_accept_endpoint(boost::asio::ip::address::from_string(ip_address), port) {}
+
 	~virtualservice_tcp(){}
 
+
+
 	void	initialize(){
-		//get cpumask
-		boost::asio::ip::address	address	= element.tcp_accept_endpoint.address();
+
+		boost::asio::ip::address	address	= tcp_accept_endpoint.address();
 
 		//bind acceptor
 		boost::system::error_code	acceptor_err;
-		acceptor_.open( element.tcp_accept_endpoint.protocol(), acceptor_err );
+		acceptor_.open( tcp_accept_endpoint.protocol(), acceptor_err );
 		acceptor_.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ), acceptor_err );
-		acceptor_.bind( element.tcp_accept_endpoint, acceptor_err );
+		acceptor_.bind( tcp_accept_endpoint, acceptor_err );
 		//create session pool
 		{
 			for( int i = 0; i < 100; ++i ){
 //				tcp_session*	sess	= new tcp_session( *this, dispatcher);
-				tcp_session*	sess	= new tcp_session();
+				tcp_session_base*	sess	= new tcp_session_base(this,dispatcher,tcp_accept_endpoint);
 //				session_result_message	result	= sess->initialize();
 				session_thread_control*	p_stc = new session_thread_control( sess );
 				while( !pool_sessions.push( p_stc ) ){}
@@ -265,7 +271,7 @@ public:
 			boost::this_thread::yield();
 		}
 		for(;;){
-			tcp_session*				tmp_session	= NULL;
+			tcp_session_base*				tmp_session	= NULL;
 			session_thread_control*		tmp_stc		= NULL;
 			waiting_sessions.pop( tmp_session, tmp_stc );
 			if( !tmp_stc ){
@@ -341,7 +347,7 @@ public:
 		}
 	}
 */
-	void	release_session(tcp_session* session_ptr ){
+	void	release_session(tcp_session_base* session_ptr ){
 		session_thread_control*		stc_ptr = active_sessions.find( session_ptr );
 		active_sessions.erase( session_ptr );
 //		stc_ptr->get_session()->initialize();
@@ -383,6 +389,19 @@ protected:
 	volatile	sig_atomic_t	exit_requested;		//!< signal exit flag
 	volatile	sig_atomic_t	received_sig;		//!< received signal
 
+
+
+	//! option parse function object type.
+	typedef	boost::function< bool ( int&, int, char*[] ) >
+			parse_opt_func_type;
+	//! option string - parse function object map type
+	typedef	std::map< std::string, parse_opt_func_type >
+			parse_opt_map_type;
+	//! list option function map dictionary.
+	parse_opt_map_type	option_dic;
+
+public:
+
 	void	sig_exit_handler(){
 		sigset_t	sigmask;
 		sigemptyset( &sigmask );
@@ -398,30 +417,20 @@ protected:
 		exit_requested = 1;
 	}
 
-	//! option parse function object type.
-	typedef	boost::function< bool ( int&, int, char*[] ) >
-			parse_opt_func_type;
-	//! option string - parse function object map type
-	typedef	std::map< std::string, parse_opt_func_type >
-			parse_opt_map_type;
-	//! list option function map dictionary.
-	parse_opt_map_type	option_dic;
-
-public:
-
 	int		run( int, char*[] ) {
-//		mlockall(MCL_FUTURE);
 		struct rlimit lim;
 		lim.rlim_cur = 65535;
 		lim.rlim_max = 65535;
 		int ret;
 		ret = setrlimit( RLIMIT_NOFILE, &lim );
 		// signal handler thread start
-		boost::thread	sigthread( boost::bind( &sig_exit_handler, this ) );
+		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
 		sigthread.detach();
 
+
+
 std::cout << "vs start" <<std::endl;
-		virtualservice_tcp vs;
+		virtualservice_tcp vs("127.0.0.1",7000);
 
 std::cout << "vs initialize" <<std::endl;
 		vs.initialize();
@@ -429,18 +438,18 @@ std::cout << "vs run" <<std::endl;
 		vs.run();
 std::cout << "mainloop start" <<std::endl;
 		// main loop
+		dispatcher.poll();
+
 		for(;;){
 			if( unlikely( exit_requested ) ){
 				break;
 			}
-			dispatcher.poll();
 			timespec	wait_val;
 			wait_val.tv_sec		= 0;
 			wait_val.tv_nsec	= 10;
 			nanosleep( &wait_val, NULL );
 			boost::this_thread::yield();
 		}
-		munlockall();
 std::cout << "exit" <<std::endl;
 		return 0;
 	}
