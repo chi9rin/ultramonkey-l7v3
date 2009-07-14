@@ -12,7 +12,8 @@
 #include <boost/thread/condition.hpp>
 
 #include "tcp_session_base.h"
-
+#include "tcp_session_socket_model.h"
+#include "tcp_session_stream_model.h"
 #include "atomic.h"
 #include "lockfree_queue.h"
 #include "lockfree_hashmap.h"
@@ -234,10 +235,12 @@ protected:
 
 public:
 	boost::asio::ip::tcp::endpoint tcp_accept_endpoint;
+	boost::asio::ip::tcp::endpoint tcp_rs_endpoint;
 
-	virtualservice_tcp(std::string ip_address,int port)
+	virtualservice_tcp(std::string ip_address,int port,std::string rs_ip_address,int rs_port)
 						:acceptor_( dispatcher ),
-						tcp_accept_endpoint(boost::asio::ip::address::from_string(ip_address), port) {}
+						tcp_accept_endpoint(boost::asio::ip::address::from_string(ip_address), port),
+						tcp_rs_endpoint(boost::asio::ip::address::from_string(rs_ip_address), rs_port) {}
 
 	~virtualservice_tcp(){}
 
@@ -256,7 +259,9 @@ public:
 		{
 			for( int i = 0; i < 100; ++i ){
 //				tcp_session*	sess	= new tcp_session( *this, dispatcher);
-				tcp_session_base*	sess	= new tcp_session_base(this,dispatcher,tcp_accept_endpoint);
+				tcp_session_socket_model*	sess	= new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
+//				tcp_session_stream_model*	sess	= new  tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
+
 //				session_result_message	result	= sess->initialize();
 				session_thread_control*	p_stc = new session_thread_control( sess );
 				while( !pool_sessions.push( p_stc ) ){}
@@ -432,7 +437,7 @@ public:
 
 
 
-		virtualservice_tcp vs("127.0.0.1",7000);
+		virtualservice_tcp vs("127.0.0.1",7000,"127.0.0.1",7000);
 		vs.initialize();
 		vs.run();
 		// main loop
