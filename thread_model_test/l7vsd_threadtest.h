@@ -260,11 +260,8 @@ public:
 		{
 			for( int i = 0; i < 100; ++i ){
 //				tcp_session*	sess	= new tcp_session( *this, dispatcher);
-				if (flg == 1){
 					tcp_session_socket_model*	sess	= new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
-				}else{
-					tcp_session_stream_model*	sess	= new  tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
-				}
+//					tcp_session_stream_model*	sess	= new  tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
 
 //				session_result_message	result	= sess->initialize();
 				session_thread_control*	p_stc = new session_thread_control( sess );
