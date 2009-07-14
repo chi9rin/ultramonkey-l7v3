@@ -18,8 +18,6 @@
 #include "lockfree_hashmap.h"
 
 namespace l7vs{
-//class	tcp_session{};
-
 boost::asio::io_service		dispatcher;			//!< dispatcher
 
 class	session_thread_control : private boost::noncopyable{
@@ -73,7 +71,8 @@ protected:
 			}
 			else{	//state RUNNING
 //				session->up_thread_run();	//session upstream thread looping.
-
+				session->Run_main();
+				session->Run_sub();
 
 				stopupstream();
 			}
@@ -107,6 +106,8 @@ protected:
 			}
 			else{	//state RUNNING
 //				session->down_thread_run();//session downstream thread looping.
+				session->Run_main();
+				session->Run_sub();
 				stopdownstream();
 			}
 			rw_scoped_lock	downstate_lock( downthread_state_mutex );
@@ -448,6 +449,7 @@ public:
 			boost::this_thread::yield();
 		}
 		return 0;
+
 	}
 
 };
