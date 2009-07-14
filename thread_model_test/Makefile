@@ -8,7 +8,9 @@ LIBS		=	-lboost_system-gcc41-mt \
 
 LDFLAGS		= -lrt -ldl
 
-SRCS		= l7vsd_threadtest.cpp
+SRCS		= l7vsd_threadtest.cpp \
+		  tcp_session_socket_model.cpp \
+		  tcp_session_stream_model.cpp 
 
 .SUFFIXES:	.o .cpp
 .cpp.o:
