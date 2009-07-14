@@ -19,7 +19,6 @@
 #include "lockfree_hashmap.h"
 
 namespace l7vs{
-boost::asio::io_service		dispatcher;			//!< dispatcher
 
 class	session_thread_control : private boost::noncopyable{
 public:
@@ -206,6 +205,7 @@ protected:
 	session_map_type			waiting_sessions;
 	session_map_type			active_sessions;
 
+	boost::asio::io_service		dispatcher;			//!< dispatcher
 
 	void	handle_accept(const l7vs::session_thread_control* stc_ptr,const boost::system::error_code& err ){
 		session_thread_control*		stc_ptr_noconst = const_cast<session_thread_control*>( stc_ptr );
@@ -396,7 +396,7 @@ protected:
 	volatile	sig_atomic_t	exit_requested;		//!< signal exit flag
 	volatile	sig_atomic_t	received_sig;		//!< received signal
 
-
+//	boost::asio::io_service		dispatcher;			//!< dispatcher
 
 	//! option parse function object type.
 	typedef	boost::function< bool ( int&, int, char*[] ) >
@@ -443,7 +443,7 @@ public:
 		vs.initialize();
 		vs.run();
 		// main loop
-		dispatcher.poll();
+		//dispatcher.poll();
 
 		for(;;){
 			if( unlikely( exit_requested ) ){
