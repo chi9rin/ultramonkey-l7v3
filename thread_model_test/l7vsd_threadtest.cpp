@@ -14,6 +14,14 @@
 
 int main( int argc, char* argv[] ){
 	int ret = 0;
+
+
+	if( argc < 2 ){
+		std::cout << "usage : 1:socket model   2:strem model" << std::endl;
+		return 0;
+	}
+	int flg = boost::lexical_cast<int>( argv[1] );
+
 	// signal block
 //	sigset_t	newmask;
 //	sigset_t	oldmask;
@@ -21,7 +29,7 @@ int main( int argc, char* argv[] ){
 //	ret = pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
 std::cout << "vsd start" <<std::endl;
 	l7vs::l7vsd vsd;
-	ret =  vsd.run( argc, argv );
+	ret =  vsd.run( flg );
 
 
 	// restore sigmask

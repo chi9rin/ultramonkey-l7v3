@@ -234,11 +234,12 @@ protected:
 	}
 
 public:
+	int flg;
 	boost::asio::ip::tcp::endpoint tcp_accept_endpoint;
 	boost::asio::ip::tcp::endpoint tcp_rs_endpoint;
 
-	virtualservice_tcp(std::string ip_address,int port,std::string rs_ip_address,int rs_port)
-						:acceptor_( dispatcher ),
+	virtualservice_tcp(int _flg,std::string ip_address,int port,std::string rs_ip_address,int rs_port)
+						:flg(_flg),acceptor_( dispatcher ),
 						tcp_accept_endpoint(boost::asio::ip::address::from_string(ip_address), port),
 						tcp_rs_endpoint(boost::asio::ip::address::from_string(rs_ip_address), rs_port) {}
 
@@ -259,8 +260,11 @@ public:
 		{
 			for( int i = 0; i < 100; ++i ){
 //				tcp_session*	sess	= new tcp_session( *this, dispatcher);
-				tcp_session_socket_model*	sess	= new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
-//				tcp_session_stream_model*	sess	= new  tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
+				if (flg == 1){
+					tcp_session_socket_model*	sess	= new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
+				}else{
+					tcp_session_stream_model*	sess	= new  tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
+				}
 
 //				session_result_message	result	= sess->initialize();
 				session_thread_control*	p_stc = new session_thread_control( sess );
@@ -423,21 +427,22 @@ public:
 		exit_requested = 1;
 	}
 
-	int		run( int, char*[] ) {
+	int		run( int flg ) {
+
 		int rett = daemon(0,0);
 
-		struct rlimit lim;
-		lim.rlim_cur = 65535;
-		lim.rlim_max = 65535;
-		int ret;
-		ret = setrlimit( RLIMIT_NOFILE, &lim );
+//		struct rlimit lim;
+//		lim.rlim_cur = 65535;
+//		lim.rlim_max = 65535;
+//		int ret;
+//		ret = setrlimit( RLIMIT_NOFILE, &lim );
 		// signal handler thread start
 		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
 		sigthread.detach();
 
 
 
-		virtualservice_tcp vs("127.0.0.1",7000,"127.0.0.1",7000);
+		virtualservice_tcp vs(flg,"127.0.0.1",7000,"127.0.0.1",7000);
 		vs.initialize();
 		vs.run();
 		// main loop
