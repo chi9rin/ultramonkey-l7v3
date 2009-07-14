@@ -27,7 +27,7 @@ namespace l7vs{
 	class tcp_session_socket_model : public tcp_session_base{
 		public:
 
-			tcp_session_socket_model(virtual_service* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
+			tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
 			~tcp_session_socket_model();
 
                         void Run_main(){

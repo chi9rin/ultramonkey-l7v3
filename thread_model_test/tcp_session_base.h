@@ -4,15 +4,13 @@
 
 #include <boost/asio.hpp>
 
-#include "virtual_service.h"
-
-
 namespace l7vs{
+        class virtualservice_tcp;
 	class tcp_session_base : private boost::noncopyable{
 		public:
 
 			tcp_session_base(
-                                virtual_service* pService,
+                                virtualservice_tcp* pService,
                                 boost::asio::io_service& io,
                                 boost::asio::ip::tcp::endpoint rs_endpoint):
                                 pVs(pService),
@@ -33,7 +31,7 @@ namespace l7vs{
                         virtual void Run_sub(){
                         };
 
-                        virtual_service* pVs;
+                        virtualservice_tcp* pVs;
 			boost::asio::ip::tcp::socket cl_socket;
 			boost::asio::ip::tcp::socket rs_socket;
                         boost::asio::ip::tcp::endpoint realserver_endpoint;

@@ -1,12 +1,14 @@
 //#define _DEBUG_MODE_
 
 #include <boost/thread/thread.hpp>
+#include "l7vsd_threadtest.h"
 #include "tcp_session_socket_model.h"
+
  
 namespace l7vs{
 
 	//! construcor
-	tcp_session_socket_model::tcp_session_socket_model(virtual_service* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint):
+	tcp_session_socket_model::tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint):
                 tcp_session_base(pService,io,rs_endpoint),
                 threadA_state(0),
                 threadB_state(0){
