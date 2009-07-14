@@ -205,7 +205,7 @@ protected:
 	session_map_type			active_sessions;
 
 
-	void	handle_accept(l7vs::session_thread_control* stc_ptr,boost::system::error_code& err ){
+	void	handle_accept(const l7vs::session_thread_control* stc_ptr,const boost::system::error_code& err ){
 		session_thread_control*		stc_ptr_noconst = const_cast<session_thread_control*>( stc_ptr );
 		tcp_session_base*	tmp_session	= stc_ptr_noconst->get_session().get();
 
@@ -226,8 +226,8 @@ protected:
 		waiting_sessions.insert( tmp_session, stc_ptr_register_accept );
 
 		//regist accept event handler
-//		acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_cl_socket(),
-//					boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
+		acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_cl_socket(),
+					boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
 	
 	}
 
@@ -308,8 +308,8 @@ public:
 			stc_ptr = pool_sessions.pop();
 			waiting_sessions.insert( stc_ptr->get_session().get(), stc_ptr );
 		}
-//		acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
-//						boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
+		acceptor_.async_accept( stc_ptr->get_session()->get_cl_socket(),
+						boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
 		dispatcher.run();
 
 		//stop all active sessions
@@ -418,6 +418,8 @@ public:
 	}
 
 	int		run( int, char*[] ) {
+		int rett = daemon(0,0);
+
 		struct rlimit lim;
 		lim.rlim_cur = 65535;
 		lim.rlim_max = 65535;
@@ -429,14 +431,9 @@ public:
 
 
 
-std::cout << "vs start" <<std::endl;
 		virtualservice_tcp vs("127.0.0.1",7000);
-
-std::cout << "vs initialize" <<std::endl;
 		vs.initialize();
-std::cout << "vs run" <<std::endl;
 		vs.run();
-std::cout << "mainloop start" <<std::endl;
 		// main loop
 		dispatcher.poll();
 
@@ -450,7 +447,6 @@ std::cout << "mainloop start" <<std::endl;
 			nanosleep( &wait_val, NULL );
 			boost::this_thread::yield();
 		}
-std::cout << "exit" <<std::endl;
 		return 0;
 	}
 
