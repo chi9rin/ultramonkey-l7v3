@@ -370,24 +370,24 @@ namespace l7vs{
 #ifdef _DEBUG_MODE_
                                                 std::cout << "tcp_session_socket_model::Run_rs rs_socket.connect OK\n";
 #endif
-                                        }
-                                        // ノンブロッキングに設定
-                                        boost::asio::socket_base::non_blocking_io cmd(true);
-                                        rs_socket.io_control(cmd,ec);
-                                        if(ec){
-                                                //ノンブロッキング設定失敗 -> 終了のお知らせ
+                                                // ノンブロッキングに設定
+                                                boost::asio::socket_base::non_blocking_io cmd(true);
+                                                rs_socket.io_control(cmd,ec);
+                                                if(ec){
+                                                        //ノンブロッキング設定失敗 -> 終了のお知らせ
 #ifdef _DEBUG_MODE_
-                                                std::cout << "tcp_session_socket_model::Run_rs rs_socket.io_control error[";
-                                                std::cout << ec.message();
-                                                std::cout << "]\n";
+                                                        std::cout << "tcp_session_socket_model::Run_rs rs_socket.io_control error[";
+                                                        std::cout << ec.message();
+                                                        std::cout << "]\n";
 #endif
-                                                if(pdata == NULL){
-                                                        pdata = new socket_data();
+                                                        if(pdata == NULL){
+                                                                pdata = new socket_data();
+                                                        }
+                                                        pdata->data_size = 0;
+                                                        pdata->msg_type = 0;
+                                                        while(!rs2cl_msg.push(pdata)){}
+                                                        pdata = NULL;
                                                 }
-                                                pdata->data_size = 0;
-                                                pdata->msg_type = 0;
-                                                while(!rs2cl_msg.push(pdata)){}
-                                                pdata = NULL;
                                         }
                                         // 接続要求処理完了
                                         delete pmsg;
