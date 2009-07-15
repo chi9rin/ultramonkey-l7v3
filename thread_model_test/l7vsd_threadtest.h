@@ -379,18 +379,17 @@ public:
 
 
 
-class virtual_service;
 
 class l7vsd : private boost::noncopyable{
 public:
-	typedef	boost::shared_ptr< virtual_service >	virtualservice_ptr;		//!< shared_ptr	virtualservice typedef
+	typedef	boost::shared_ptr< virtualservice_tcp >	virtualservice_ptr;		//!< shared_ptr	virtualservice typedef
 
 	l7vsd():exit_requested(0),
 			received_sig(0){}
 	~l7vsd(){}
 
 protected:
-//	boost::thread_group			vs_threads;			//!< virtual_service thread group
+	boost::thread_group			vs_threads;			//!< virtual_service thread group
 
 //	mutable	vslist_type			vslist;				//!< virtual_service list
 
@@ -434,7 +433,7 @@ public:
 	}
 
 	int		run( int flg ) {
-printf("CHK1\n");
+
 //		int rett = daemon(0,0);
 
 //		struct rlimit lim;
@@ -446,23 +445,25 @@ printf("CHK1\n");
 		scheduler_param.__sched_priority	= 99;
 
 		int ret_val			= sched_setscheduler( 0, 2, &scheduler_param );
+		std::cout << "sched_setscheduler return = " << ret_val << std::endl;
 		// signal handler thread start
-		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
-		sigthread.detach();
+//		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
+//		sigthread.detach();
 		
 //		boost::asio::io_service io;
 
-printf("CHK2\n");
 		boost::asio::ip::tcp::endpoint ret1(boost::asio::ip::address::from_string("10.144.133.122"), 7000);
-printf("CHK3\n");
 		boost::asio::ip::tcp::endpoint ret2(boost::asio::ip::address::from_string("192.168.100.107"), 80);
-printf("CHK4\n");
-		virtualservice_tcp vs(flg,"10.144.133.122",7000,"192.168.100.107",80);
-printf("CHK5\n");
 
-		vs.initialize();
-		vs.run();
-printf("CHK6\n");
+		virtualservice_ptr	vsptr;
+		vsptr.reset( new virtualservice_tcp(flg,"10.144.133.122",7000,"192.168.100.107",80) );
+		vsptr->initialize();
+		vs_threads.create_thread( boost::bind( &virtualservice_tcp::run, vsptr ) );
+
+//		virtualservice_tcp vs(flg,"10.144.133.122",7000,"192.168.100.107",80);
+//		vs.initialize();
+
+//		vs.run();
 		// main loop
 		//dispatcher.poll();
 //		int rett = daemon(0,0);
@@ -476,7 +477,6 @@ printf("CHK6\n");
 			nanosleep( &wait_val, NULL );
 			boost::this_thread::yield();
 		}
-printf("CHK4\n");
 
 		return 0;
 	}
