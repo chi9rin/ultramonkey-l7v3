@@ -152,6 +152,17 @@ public:
 		session.reset( ptr );
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	
 		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );
+		//pthread_setschedparam
+
+		int	retval, sched_policy;
+		sched_param	scheduler_param;
+//		int_val	= pthread_getschedparam( upthread->native_handle(), &sched_policy, &scheduler_param );
+		scheduler_param.__sched_priority	= 99;
+		sched_policy	= 2;
+		retval			= pthread_setschedparam( upthread->native_handle(), 2, &scheduler_param );
+		retval			= pthread_setschedparam( downthread->native_handle(), 2, &scheduler_param );
+
+
 	}
 	~session_thread_control(){
 	}
