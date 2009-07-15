@@ -73,7 +73,6 @@ protected:
 		for(;;){	// thread loop
 			if( state == WAIT ){	// after create or session end. this thread is pooling mode
 				boost::mutex::scoped_lock	lock( upthread_condition_mutex );
-	 			upthread_condition.wait( lock );	// thread is condition wait.( start at notify_all() )
 				boost::xtime	wait;
 				boost::xtime_get( &wait, boost::TIME_UTC );
 				wait.sec += 1;
@@ -85,9 +84,7 @@ protected:
 				break;
 			}
 			else{	//state RUNNING
-//				session->up_thread_run();	//session upstream thread looping.
 				session->Run_main();
-//				session->Run_sub();
 
 				stopupstream();
 			}
@@ -119,7 +116,6 @@ protected:
 		for(;;){	//thread loop
 			if( state == WAIT ){	//after create or session end. this thread is pooling mode
 				boost::mutex::scoped_lock	lock( downthread_condition_mutex );
-	 			downthread_condition.wait( lock ); // thread is condition wait( start at notify_all() )
 				boost::xtime	wait;
 				boost::xtime_get( &wait, boost::TIME_UTC );
 				wait.sec += 1;
@@ -131,8 +127,6 @@ protected:
 				break;
 			}
 			else{	//state RUNNING
-//				session->down_thread_run();//session downstream thread looping.
-//				session->Run_main();
 				session->Run_sub();
 				stopdownstream();
 			}
@@ -152,11 +146,9 @@ public:
 		session.reset( ptr );
 		upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );	
 		downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );
-		//pthread_setschedparam
 
 		int	retval, sched_policy;
 		sched_param	scheduler_param;
-//		int_val	= pthread_getschedparam( upthread->native_handle(), &sched_policy, &scheduler_param );
 		scheduler_param.__sched_priority	= 99;
 		sched_policy	= 2;
 		retval			= pthread_setschedparam( upthread->native_handle(), 2, &scheduler_param );
@@ -222,12 +214,6 @@ public:
 	void			session_stop(){}
 //	void			session_stop(){ session->set_virtual_service_message( tcp_session::SESSION_END ); }
 };
-
-
-
-
-
-
 
 class	virtualservice_tcp{
 public:
@@ -301,7 +287,6 @@ public:
 		}
 		{
 			for( int i = 0; i < 32; ++i ){
-//				tcp_session*	sess	= new tcp_session( *this, dispatcher);
 				session_thread_control*	p_stc;
 				if( flg == 1 ){
 					tcp_session_socket_model* sess = new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
@@ -310,7 +295,6 @@ public:
 					tcp_session_stream_model* sess = new tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
 					p_stc = new session_thread_control( sess );
 				}
-//				session_result_message	result	= sess->initialize();
 				while( !pool_sessions.push( p_stc ) ){}
 			}
 		}
@@ -346,9 +330,7 @@ public:
 			stc = NULL;
 		}
 		active_sessions.clear();
-//		release_virtual_service( element );
 	}
-//	void						set_virtualservice( const virtualservice_element&, error_code& );
 
 	void	run(){
 		boost::asio::socket_base::receive_buffer_size option(8192 * 192);
@@ -377,29 +359,6 @@ public:
 		dispatcher.stop();
 	}
 
-/*
-	void	connection_active( const boost::asio::ip::tcp::endpoint& in ){
-		for( std::list<realserver>::iterator itr = rs_list.begin();itr != rs_list.end();++itr ){
-			if( itr->tcp_endpoint == in ){
-				itr->decrement_active();
-				itr->increment_inact();
-				break;
-			}
-		}
-	}
-
-	void	connection_inactive(boost::asio::ip::tcp::endpoint& in ){
-		session_thread_control*	stc_ptr = active_sessions.find( session_ptr );
-	
-		active_sessions.erase( session_ptr );
-		stc_ptr->get_session()->initialize();
-		for(;;){
-			if( likely( pool_sessions.push( stc_ptr ) ) ){
-				break;
-			}
-		}
-	}
-*/
 	void	release_session(tcp_session_base* session_ptr ){
 		session_thread_control*		stc_ptr = active_sessions.find( session_ptr );
 		active_sessions.erase( session_ptr );
@@ -441,7 +400,6 @@ protected:
 	volatile	sig_atomic_t	exit_requested;		//!< signal exit flag
 	volatile	sig_atomic_t	received_sig;		//!< received signal
 
-//	boost::asio::io_service		dispatcher;			//!< dispatcher
 
 	//! option parse function object type.
 	typedef	boost::function< bool ( int&, int, char*[] ) >
@@ -484,25 +442,16 @@ public:
 		int ret_val			= sched_setscheduler( 0, 2, &scheduler_param );
 		std::cout << "sched_setscheduler return = " << ret_val << std::endl;
 		// signal handler thread start
-//		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
-//		sigthread.detach();
-		
-//		boost::asio::io_service io;
 
 		boost::asio::ip::tcp::endpoint ret1(boost::asio::ip::address::from_string("10.144.133.122"), 7000);
 		boost::asio::ip::tcp::endpoint ret2(boost::asio::ip::address::from_string("192.168.100.107"), 80);
 
 		virtualservice_ptr	vsptr;
-		vsptr.reset( new virtualservice_tcp(flg,"10.144.133.122",7000,"192.168.100.107",80) );
+		vsptr.reset( new virtualservice_tcp(flg,"192.168.10.121",7000,"192.168.20.105",80) );
 		vsptr->initialize();
 		vs_threads.create_thread( boost::bind( &virtualservice_tcp::run, vsptr ) );
 
-//		virtualservice_tcp vs(flg,"10.144.133.122",7000,"192.168.100.107",80);
-//		vs.initialize();
-
-//		vs.run();
 		// main loop
-		//dispatcher.poll();
 //		int rett = daemon(0,0);
 		for(;;){
 			if( unlikely( exit_requested ) ){
