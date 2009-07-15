@@ -72,7 +72,7 @@ protected:
 			else{	//state RUNNING
 //				session->up_thread_run();	//session upstream thread looping.
 				session->Run_main();
-				session->Run_sub();
+//				session->Run_sub();
 
 				stopupstream();
 			}
@@ -106,7 +106,7 @@ protected:
 			}
 			else{	//state RUNNING
 //				session->down_thread_run();//session downstream thread looping.
-				session->Run_main();
+//				session->Run_main();
 				session->Run_sub();
 				stopdownstream();
 			}
@@ -200,12 +200,11 @@ public:
 								session_map_type;
 	typedef	boost::shared_ptr< tcp_session_base >	session_ptr;	//! shared_ptr session typedef
 protected:
+       boost::asio::io_service         dispatcher;                     //!< dispatcher
 	boost::asio::ip::tcp::acceptor acceptor_;
 	session_queue_type			pool_sessions;
 	session_map_type			waiting_sessions;
 	session_map_type			active_sessions;
-
-	boost::asio::io_service		dispatcher;			//!< dispatcher
 
 	void	handle_accept(const l7vs::session_thread_control* stc_ptr,const boost::system::error_code& err ){
 		session_thread_control*		stc_ptr_noconst = const_cast<session_thread_control*>( stc_ptr );
@@ -238,8 +237,9 @@ public:
 	boost::asio::ip::tcp::endpoint tcp_accept_endpoint;
 	boost::asio::ip::tcp::endpoint tcp_rs_endpoint;
 
-	virtualservice_tcp(int _flg,std::string ip_address,int port,std::string rs_ip_address,int rs_port)
-						:flg(_flg),acceptor_( dispatcher ),
+	virtualservice_tcp(int _flg,std::string ip_address,int port,std::string rs_ip_address,int rs_port):
+		acceptor_( dispatcher ),
+		flg(_flg),
 						tcp_accept_endpoint(boost::asio::ip::address::from_string(ip_address), port),
 						tcp_rs_endpoint(boost::asio::ip::address::from_string(rs_ip_address), rs_port) {}
 
@@ -257,14 +257,23 @@ public:
 		acceptor_.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ), acceptor_err );
 		acceptor_.bind( tcp_accept_endpoint, acceptor_err );
 		//create session pool
+		if( flg == 1 ){
+			std::cout << "create thread pool tcp_session_socket_model" << std::endl;
+		}else{
+			std::cout << "create thread pool tcp_session_stream_model" << std::endl;
+		}
 		{
-			for( int i = 0; i < 100; ++i ){
+			for( int i = 0; i < 32; ++i ){
 //				tcp_session*	sess	= new tcp_session( *this, dispatcher);
-					tcp_session_socket_model*	sess	= new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
-//					tcp_session_stream_model*	sess	= new  tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
-
+				session_thread_control*	p_stc;
+				if( flg == 1 ){
+					tcp_session_socket_model* sess = new tcp_session_socket_model(this,dispatcher,tcp_rs_endpoint);
+					p_stc = new session_thread_control( sess );
+				}else{
+					tcp_session_stream_model* sess = new tcp_session_stream_model(this,dispatcher,tcp_rs_endpoint);
+					p_stc = new session_thread_control( sess );
+				}
 //				session_result_message	result	= sess->initialize();
-				session_thread_control*	p_stc = new session_thread_control( sess );
 				while( !pool_sessions.push( p_stc ) ){}
 			}
 		}
@@ -425,26 +434,38 @@ public:
 	}
 
 	int		run( int flg ) {
-
-		int rett = daemon(0,0);
+printf("CHK1\n");
+//		int rett = daemon(0,0);
 
 //		struct rlimit lim;
 //		lim.rlim_cur = 65535;
 //		lim.rlim_max = 65535;
 //		int ret;
 //		ret = setrlimit( RLIMIT_NOFILE, &lim );
+		sched_param		scheduler_param;
+		scheduler_param.__sched_priority	= 99;
+
+		int ret_val			= sched_setscheduler( 0, 2, &scheduler_param );
 		// signal handler thread start
 		boost::thread	sigthread( boost::bind( &l7vsd::sig_exit_handler, this ) );
 		sigthread.detach();
+		
+//		boost::asio::io_service io;
 
+printf("CHK2\n");
+		boost::asio::ip::tcp::endpoint ret1(boost::asio::ip::address::from_string("10.144.133.122"), 7000);
+printf("CHK3\n");
+		boost::asio::ip::tcp::endpoint ret2(boost::asio::ip::address::from_string("192.168.100.107"), 80);
+printf("CHK4\n");
+		virtualservice_tcp vs(flg,"10.144.133.122",7000,"192.168.100.107",80);
+printf("CHK5\n");
 
-
-		virtualservice_tcp vs(flg,"127.0.0.1",7000,"127.0.0.1",7000);
 		vs.initialize();
 		vs.run();
+printf("CHK6\n");
 		// main loop
 		//dispatcher.poll();
-
+//		int rett = daemon(0,0);
 		for(;;){
 			if( unlikely( exit_requested ) ){
 				break;
@@ -455,8 +476,9 @@ public:
 			nanosleep( &wait_val, NULL );
 			boost::this_thread::yield();
 		}
-		return 0;
+printf("CHK4\n");
 
+		return 0;
 	}
 
 };

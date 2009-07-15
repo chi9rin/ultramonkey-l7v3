@@ -14,13 +14,12 @@
 
 int main( int argc, char* argv[] ){
 	int ret = 0;
-
+	int flg = 1;
 
 	if( argc < 2 ){
-		std::cout << "usage : 1:socket model   2:strem model" << std::endl;
-		return 0;
+	} else {
+		flg = boost::lexical_cast<int>( argv[1] );
 	}
-	int flg = boost::lexical_cast<int>( argv[1] );
 
 	// signal block
 //	sigset_t	newmask;
