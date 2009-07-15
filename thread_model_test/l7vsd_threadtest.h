@@ -30,6 +30,9 @@ public:
 		RUNNING,		//! thread running mode
 		EXIT			//! thread exit mode
  	};
+	cpu_set_t			vsnic_cpumask;
+	cpu_set_t			rsnic_cpumask;
+
 protected:
 	thread_ptr			upthread;					//! upstream thread
 	wr_mutex			upthread_state_mutex;		//! mutex for upstream thread status
@@ -49,6 +52,18 @@ protected:
 	boost::condition	downthread_joining_condition;
 	session_ptr			session;					//! session class shared pointer
 	void				upstream_run(){
+
+		cpu_set_t       mask;
+		//numが1以上なら、その数だけCPU_SETする
+		if( 0 < 7 ){
+			CPU_ZERO( &mask );
+			for( int i = 0; i < 7; ++i ){
+				CPU_SET( i, &mask );
+			}
+			sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
+		}
+		sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
+
 		state_tag	state;
 		upthread_running_mutex.lock();
 		{	// get first state from class upstream state.
@@ -84,6 +99,17 @@ protected:
 		upthread_joining_condition.notify_all();
 	}
 	void				downstream_run(){
+		cpu_set_t       mask;
+		//numが1以上なら、その数だけCPU_SETする
+		if( 0 < 7 ){
+			CPU_ZERO( &mask );
+			for( int i = 0; i < 7; ++i ){
+				CPU_SET( i, &mask );
+			}
+			sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
+		}
+		sched_setaffinity( 0, sizeof( cpu_set_t ), &vsnic_cpumask );
+
 		state_tag	state;
 		downthread_running_mutex.lock();
 		{
