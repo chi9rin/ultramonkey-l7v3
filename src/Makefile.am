@@ -43,6 +43,8 @@ l7vsd_SOURCES	=	\
 			../include/session_result_message.h \
 			../include/tcp_data.h \
 			../include/tcp_socket.h \
+			../include/tcp_ssl_socket.h \
+			../include/tcp_socket_option.h \
 			../include/tcp_realserver_connetc_socket_list.h \
 			../include/tcp_thread_message.h \
 			../include/tcp_thread_message_que.h \
@@ -67,6 +69,7 @@ l7vsd_SOURCES	=	\
 			data_buff_base.cpp \
 			tcp_data.cpp \
 			tcp_socket.cpp \
+			tcp_ssl_socket.cpp \
 			tcp_realserver_connect_socket_list.cpp \
 			tcp_thread_message_que.cpp \
 			udp_data.cpp \

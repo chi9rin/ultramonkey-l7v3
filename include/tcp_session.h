@@ -34,6 +34,7 @@
 #include "protocol_module_base.h"
 #include "session_result_message.h"
 #include "tcp_socket.h"
+#include "tcp_ssl_socket.h"
 #include "tcp_realserver_connect_socket_list.h"
 #include "tcp_data.h"
 //#include "tcp_thread_message_que.h"
@@ -81,7 +82,7 @@ namespace l7vs{
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
 			//! @param[in]		set socket option info 
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,const tcp_socket::tcp_socket_option_info set_option);
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,const tcp_socket_option_info set_option);
 			
 			//! destructor
 			virtual ~tcp_session();
@@ -180,7 +181,7 @@ namespace l7vs{
 			//! wait flag mutex
 			wr_mutex session_pause_flag_mutex;
 			//! client socket
-			tcp_socket client_socket;
+			tcp_ssl_socket client_socket;
 			//! sorryserver socket
 			socket_element sorryserver_socket;
 			//! up thread use realserver socket map
@@ -249,7 +250,7 @@ namespace l7vs{
 			std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_down_thread_function_map;
 			
 			//! socket option 
-			tcp_socket::tcp_socket_option_info socket_opt_info;
+			tcp_socket_option_info socket_opt_info;
 			
 			//! up and down thread state update
 			//! @param[in]		thread_flag is regist or unregist bitset

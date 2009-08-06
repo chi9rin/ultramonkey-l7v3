@@ -225,7 +225,7 @@ namespace l7vs{
 	//! @param[in/out]	vs is parent virtualservice object
 	//! @param[in/out]	io is session use io service object
 	//! @param[in]		set socket option info 
-	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,tcp_socket::tcp_socket_option_info set_option):
+	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,tcp_socket_option_info set_option):
 	io(session_io),
 	parent_service(vs),
 	exit_flag(false),

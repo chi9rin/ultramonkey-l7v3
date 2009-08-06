@@ -66,7 +66,7 @@ am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
 	l7vsd-command_receiver.$(OBJEXT) \
 	l7vsd-command_session.$(OBJEXT) l7vsd-replication.$(OBJEXT) \
 	l7vsd-snmpbridge.$(OBJEXT) l7vsd-data_buff_base.$(OBJEXT) \
-	l7vsd-tcp_data.$(OBJEXT) l7vsd-tcp_socket.$(OBJEXT) \
+	l7vsd-tcp_data.$(OBJEXT) l7vsd-tcp_socket.$(OBJEXT) l7vsd-tcp_ssl_socket.$(OBJEXT) \
 	l7vsd-tcp_realserver_connect_socket_list.$(OBJEXT) \
 	l7vsd-tcp_thread_message_que.$(OBJEXT) \
 	l7vsd-udp_data.$(OBJEXT) \
@@ -246,6 +246,8 @@ l7vsd_SOURCES = \
 			../include/session_result_message.h \
 			../include/tcp_data.h \
 			../include/tcp_socket.h \
+			../include/tcp_ssl_socket.h \
+			../include/tcp_socket_option.h \
 			../include/tcp_realserver_connetc_socket_list.h \
 			../include/tcp_thread_message.h \
 			../include/tcp_thread_message_que.h \
@@ -270,6 +272,7 @@ l7vsd_SOURCES = \
 			data_buff_base.cpp \
 			tcp_data.cpp \
 			tcp_socket.cpp \
+			tcp_ssl_socket.cpp \
 			tcp_realserver_connect_socket_list.cpp \
 			tcp_thread_message_que.cpp \
 			udp_data.cpp \
@@ -407,6 +410,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_session.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_ssl_socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_thread_message_que.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_request.Po@am__quote@
@@ -689,6 +693,20 @@ l7vsd-tcp_socket.obj: tcp_socket.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_socket.cpp' object='l7vsd-tcp_socket.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_socket.obj `if test -f 'tcp_socket.cpp'; then $(CYGPATH_W) 'tcp_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_socket.cpp'; fi`
+
+l7vsd-tcp_ssl_socket.o: tcp_ssl_socket.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_ssl_socket.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_ssl_socket.Tpo" -c -o l7vsd-tcp_ssl_socket.o `test -f 'tcp_ssl_socket.cpp' || echo '$(srcdir)/'`tcp_ssl_socket.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_ssl_socket.Tpo" "$(DEPDIR)/l7vsd-tcp_ssl_socket.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_ssl_socket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_ssl_socket.cpp' object='l7vsd-tcp_ssl_socket.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_ssl_socket.o `test -f 'tcp_ssl_socket.cpp' || echo '$(srcdir)/'`tcp_ssl_socket.cpp
+
+l7vsd-tcp_ssl_socket.obj: tcp_ssl_socket.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_ssl_socket.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_ssl_socket.Tpo" -c -o l7vsd-tcp_ssl_socket.obj `if test -f 'tcp_ssl_socket.cpp'; then $(CYGPATH_W) 'tcp_ssl_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_ssl_socket.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_ssl_socket.Tpo" "$(DEPDIR)/l7vsd-tcp_ssl_socket.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_ssl_socket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_ssl_socket.cpp' object='l7vsd-tcp_ssl_socket.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_ssl_socket.obj `if test -f 'tcp_ssl_socket.cpp'; then $(CYGPATH_W) 'tcp_ssl_socket.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_ssl_socket.cpp'; fi`
 
 l7vsd-tcp_realserver_connect_socket_list.o: tcp_realserver_connect_socket_list.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_realserver_connect_socket_list.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_realserver_connect_socket_list.Tpo" -c -o l7vsd-tcp_realserver_connect_socket_list.o `test -f 'tcp_realserver_connect_socket_list.cpp' || echo '$(srcdir)/'`tcp_realserver_connect_socket_list.cpp; \

@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_socket.h
- *	@brief	tcp session socket class
+ *	@file	tcp_ssl_socket.h
+ *	@brief	tcp ssl session socket class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -22,8 +22,8 @@
  *
  **********************************************************************/
 
-#ifndef TCP_SOCKET_H
-#define TCP_SOCKET_H
+#ifndef TCP_SSL_SOCKET_H
+#define TCP_SSL_SOCKET_H
 
 #include <bitset>
 #include <boost/asio.hpp>
@@ -36,12 +36,12 @@
 
 namespace l7vs{
 
-//!	@class	tcp_socket
+//!	@class	tcp_ssl_socket
 //! @brief	this class is tcp session object use socket.
-	class tcp_socket : private boost::noncopyable{
+	class tcp_ssl_socket : private boost::noncopyable{
 		public:
-			//! tcp_socket_option
-//			struct tcp_socket_option_info{
+			//! tcp_ssl_socket_option
+//			struct tcp_ssl_socket_option_info{
 //				//! TCP_NODELAY   (false:not set,true:set option)
 //				bool nodelay_opt;
 //				//! TCP_NODELAY option value  (false:off,true:on)
@@ -59,26 +59,26 @@ namespace l7vs{
 			//! construcor
 			//! @param[in/out]	socket use io service object
 			//! @param[in]		set socket option info 
-			tcp_socket(boost::asio::io_service& io): my_socket(io), open_flag(false){
+			tcp_ssl_socket(boost::asio::io_service& io): my_socket(io), open_flag(false){
 				opt_info.nodelay_opt = false;
 				opt_info.cork_opt = false;
 				opt_info.quickack_opt = false;
 				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
 				}
 			}
 			//! construcor
 			//! @param[in/out]	socket use io service object
 			//! @param[in]		set socket option info 
-			tcp_socket(boost::asio::io_service& io, const tcp_socket_option_info set_option): my_socket(io), open_flag(false), opt_info(set_option){
+			tcp_ssl_socket(boost::asio::io_service& io, const tcp_socket_option_info set_option): my_socket(io), open_flag(false), opt_info(set_option){
 				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
 				}
 			}
 			//! destructor
-			~tcp_socket(){
+			~tcp_ssl_socket(){
 				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 2, "tcp_socket::~tcp_socket", __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 2, "tcp_ssl_socket::~tcp_ssl_socket", __FILE__, __LINE__ );
 				}
 			}
 			
@@ -86,7 +86,7 @@ namespace l7vs{
 			//! @return			reference control socket
 			boost::asio::ip::tcp::socket& get_socket(){
 				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 3, "tcp_socket::get_socket", __FILE__, __LINE__ );
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 3, "tcp_ssl_socket::get_socket", __FILE__, __LINE__ );
 				}
 				return my_socket;
 			}
@@ -131,8 +131,8 @@ namespace l7vs{
 			bool open_flag;
 			//! socket option 
 			tcp_socket_option_info opt_info;
-	};// class tcp_socket
+	};// class tcp_ssl_socket
 }// namespace l7vs
 
-#endif//TCP_SOCKET_H
+#endif//TCP_SSL_SOCKET_H
  
