@@ -40,11 +40,19 @@
 /*!
  * virtualservice_tcp class constructor.
  */
-l7vs::virtualservice_tcp::virtualservice_tcp(	const l7vsd& invsd,
-												const replication& inrep,
-												const virtualservice_element& inelement )
-												 :	virtualservice_base( invsd, inrep, inelement ),
-													acceptor_( dispatcher ) {}
+l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd& invsd,
+					     const replication& inrep,
+					     const virtualservice_element& inelement )
+					     :
+					     virtualservice_base( invsd, inrep, inelement ),
+					     acceptor_( dispatcher ),
+					     sslcontext(dispatcher, boost::asio::ssl::context::sslv23),
+					     server_password("test"),
+					     cert_chain_filename("/home/morisita/Test_SSLProxy_module/cert/server.pem"),
+					     server_private_keyfilename("/home/morisita/Test_SSLProxy_module/cert/server.pem"),
+					     tmp_dh_filename("/home/morisita/Test_SSLProxy_module/cert/dh512.pem")
+	{
+	}
 /*!
  * virtualservice_tcp class destructor.
  */
@@ -532,11 +540,22 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					element.tcp_accept_endpoint,
 					element.udp_recv_endpoint );
 
+	// Set SSL_context
+	{
+		sslcontext.set_options(boost::asio::ssl::context::default_workarounds |
+				       boost::asio::ssl::context::no_sslv2 |
+				       boost::asio::ssl::context::single_dh_use);
+		sslcontext.set_password_callback(boost::bind(&virtualservice_tcp::get_password, this));
+		sslcontext.use_certificate_chain_file(cert_chain_filename);
+		sslcontext.use_private_key_file(server_private_keyfilename, boost::asio::ssl::context::pem);
+		sslcontext.use_tmp_dh_file(tmp_dh_filename);
+	}
+
 	//create session pool
 	{
 		for( int i = 0; i < param_data.session_pool_size; ++i ){
 			try{
-				tcp_session*	sess	= new tcp_session( *this, dispatcher, set_sock_opt);
+				tcp_session*	sess	= new tcp_session( *this, dispatcher, sslcontext, set_sock_opt);
 				session_result_message	result	= sess->initialize();
 				if( result.flag == true ){
 					err.setter( result.flag, result.message );

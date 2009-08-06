@@ -42,7 +42,7 @@ namespace l7vs{
 		rw_scoped_lock scope_lock(close_mutex);
 		
 		if(likely(!open_flag)){
-			my_socket.connect(connect_endpoint,ec);
+			my_socket.lowest_layer().connect(connect_endpoint,ec);
 			if(unlikely(!ec)){
 				open_flag = true;
 				//----Debug log----------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace l7vs{
 				//set TCP_NODELAY
 				if(opt_info.nodelay_opt){
 					boost::asio::ip::tcp::no_delay set_option(opt_info.nodelay_val);
-					my_socket.set_option(set_option,ec);
+					my_socket.lowest_layer().set_option(set_option,ec);
 					if(unlikely(ec)){
 						//ERROR
 						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 100, "socket option(TCP_NODELAY) set failed" , __FILE__, __LINE__ );
@@ -71,7 +71,7 @@ namespace l7vs{
 				if(opt_info.cork_opt){
 					int val = opt_info.cork_val;
 					size_t len = sizeof(val);
-					boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+					boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
 					if(unlikely(ec)){
 						//ERROR
 						Logger::putLogError( LOG_CAT_L7VSD_SESSION, 101, "socket option(TCP_CORK) set failed" , __FILE__, __LINE__ );
@@ -87,6 +87,45 @@ namespace l7vs{
 		return open_flag;
 	}
 	
+	//! handshake socket
+	//! @param[in]		handshake_type is handshaking as a server or client
+	//! @param[out]		ec is reference error code object
+	//! @return 		true is handshaked
+	//! @return 		false is handshake failure
+	bool tcp_ssl_socket::handshake(boost::asio::ssl::stream_base::handshake_type type,
+				       boost::system::error_code& ec)
+	{
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_ssl_socket::handshake", __FILE__, __LINE__ );
+		}
+
+		rw_scoped_lock scope_lock(close_mutex);
+
+		bool bres = true;
+		my_socket.handshake(type, ec);
+		if(unlikely(ec)) {
+			bres = false;
+			//----Debug log----------------------------------------------------------------------
+			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] tcp_ssl_socket::handshake [";
+				buf << ec;
+				buf << "]";
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+			}
+			//----Debug log----------------------------------------------------------------------
+			
+			//ERROR
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "Handshake failed" , __FILE__, __LINE__ );
+		}
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_ssl_socket::handshake", __FILE__, __LINE__ );
+		}
+		return bres;
+	}
+	
 	//! accept socket
 	void tcp_ssl_socket::accept(){
         rw_scoped_lock scope_lock(close_mutex);
@@ -99,7 +138,7 @@ namespace l7vs{
 			buf << "Thread ID[";
 			buf << boost::this_thread::get_id();
 			buf << "] tcp_ssl_socket::accept [";
-			buf << my_socket.remote_endpoint(ec);
+			buf << my_socket.lowest_layer().remote_endpoint(ec);
 			buf << "]";
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 6, buf.str(), __FILE__, __LINE__ );
 		}
@@ -109,7 +148,7 @@ namespace l7vs{
 		if(opt_info.nodelay_opt){
 			boost::system::error_code ec;
 			boost::asio::ip::tcp::no_delay set_option(opt_info.nodelay_val);
-			my_socket.set_option(set_option,ec);
+			my_socket.lowest_layer().set_option(set_option,ec);
 			if(unlikely(ec)){
 						//ERROR
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 102, "socket option(TCP_NODELAY) set failed" , __FILE__, __LINE__ );
@@ -121,7 +160,7 @@ namespace l7vs{
 			boost::system::error_code ec;
 			int val = opt_info.cork_val;
 			size_t len = sizeof(val);
-			boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+			boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
 			if(unlikely(ec)){
 						//ERROR
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 103, "socket option(TCP_CORK) set failed" , __FILE__, __LINE__ );
@@ -138,7 +177,7 @@ namespace l7vs{
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 7, "in_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
 		}
 		
-        rw_scoped_lock scope_lock(close_mutex);
+		rw_scoped_lock scope_lock(close_mutex);
 
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -148,7 +187,7 @@ namespace l7vs{
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] tcp_ssl_socket::close [";
-				buf << my_socket.remote_endpoint(ec);
+				buf << my_socket.lowest_layer().remote_endpoint(ec);
 				buf << "]";
 				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 8, buf.str(), __FILE__, __LINE__ );
 			}
@@ -159,7 +198,7 @@ namespace l7vs{
 			open_flag = false;
 			bres = true;
 		}
-		my_socket.close(ec);
+		my_socket.lowest_layer().close(ec);
 		
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 7, "out_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
@@ -175,7 +214,7 @@ namespace l7vs{
 		}
 		
 		boost::asio::socket_base::non_blocking_io cmd(true);
-		my_socket.io_control(cmd,ec);
+		my_socket.lowest_layer().io_control(cmd,ec);
 		
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9, "out_function : tcp_ssl_socket::set_non_blocking_mode", __FILE__, __LINE__ );
@@ -225,7 +264,7 @@ namespace l7vs{
 				if(opt_info.quickack_opt){
 					int val = opt_info.quickack_val;
 					size_t len = sizeof(val);
-					boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
+					boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
 					if (unlikely(!open_flag)) {
 						ec.clear();
 					}

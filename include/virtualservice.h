@@ -313,9 +313,16 @@ protected:
 
 	bool 						defer_accept_opt;				//! is set option TCP_DEFER_ACCEPT
 	int 						defer_accept_val;				//! TCP_DEFER_ACCEPT option value
-	tcp_socket_option_info set_sock_opt;		//! socket option for tcp_session class
+	tcp_socket_option_info				set_sock_opt;		//! socket option for tcp_session class
 
-	
+	// for SSL.
+	boost::asio::ssl::context			sslcontext;
+	std::string					server_password;
+	std::string					cert_chain_filename;
+	std::string					server_private_keyfilename;
+	std::string					tmp_dh_filename;
+	std::string					get_password() {return server_password;}
+
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
 

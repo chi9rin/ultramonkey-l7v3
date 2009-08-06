@@ -40,22 +40,6 @@ namespace l7vs{
 //! @brief	this class is tcp session object use socket.
 	class tcp_socket : private boost::noncopyable{
 		public:
-			//! tcp_socket_option
-//			struct tcp_socket_option_info{
-//				//! TCP_NODELAY   (false:not set,true:set option)
-//				bool nodelay_opt;
-//				//! TCP_NODELAY option value  (false:off,true:on)
-//				bool nodelay_val;
-//				//! TCP_CORK      (false:not set,true:set option)
-//				bool cork_opt;
-//				//! TCP_CORK option value     (false:off,true:on)
-//				bool cork_val;
-//				//! TCP_QUICKACK  (false:not set,true:set option)
-//				bool quickack_opt;
-//				//! TCP_QUICKACK option value (false:off,true:on)
-//				bool quickack_val;
-//			};
-			
 			//! construcor
 			//! @param[in/out]	socket use io service object
 			//! @param[in]		set socket option info 
@@ -126,7 +110,7 @@ namespace l7vs{
 			//! control socket
 			boost::asio::ip::tcp::socket my_socket;
 			//! socket close mutex
-            wr_mutex close_mutex;
+			wr_mutex close_mutex;
 			//! socket open flag
 			bool open_flag;
 			//! socket option 

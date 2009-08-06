@@ -76,13 +76,13 @@ namespace l7vs{
 			//! construcor
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io);
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context);
 						
 			//! construcor
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
 			//! @param[in]		set socket option info 
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,const tcp_socket_option_info set_option);
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context, const tcp_socket_option_info set_option);
 			
 			//! destructor
 			virtual ~tcp_session();
@@ -90,7 +90,7 @@ namespace l7vs{
 			session_result_message initialize();
 			//! get reference client side socket
 			//! @return			reference client side socket
-			boost::asio::ip::tcp::socket& get_client_socket();
+			ssl_socket::lowest_layer_type& get_client_socket();
 			//! is thread wait
 			//! @return 		true is wait
 			//! @return 		false is not wait
@@ -110,47 +110,47 @@ namespace l7vs{
 			typedef boost::function< void(TCP_PROCESS_TYPE_TAG) > tcp_session_func;
 			//! up thread call function type
 			enum UP_THREAD_FUNC_TYPE_TAG{
-				UP_FUNC_CLIENT_ACCEPT = 0,					//! up_thread_client_accept_event function
-				UP_FUNC_CLIENT_DISCONNECT,					//! up_thread_client_disconnect function
+				UP_FUNC_CLIENT_ACCEPT = 0,				//! up_thread_client_accept_event function
+				UP_FUNC_CLIENT_DISCONNECT,				//! up_thread_client_disconnect function
 				UP_FUNC_CLIENT_DISCONNECT_EVENT,			//! up_thread_client_disconnect_event function
-				UP_FUNC_CLIENT_RECEIVE,						//! up_thread_client_receive function
+				UP_FUNC_CLIENT_RECEIVE,					//! up_thread_client_receive function
 				UP_FUNC_CLIENT_RESPOND_SEND,				//! up_thread_client_respond function
 				UP_FUNC_CLIENT_RESPOND_SEND_EVENT,			//! up_thread_client_respond_event function
 				UP_FUNC_REALSERVER_GET_DEST_EVENT,			//! up_thread_realserver_get_distination_event function
-				UP_FUNC_REALSERVER_CONNECT,					//! up_thread_realserver_connect function
+				UP_FUNC_REALSERVER_CONNECT,				//! up_thread_realserver_connect function
 				UP_FUNC_REALSERVER_CONNECT_EVENT,			//! up_thread_realserver_connect_event function
-				UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT,		//! up_thread_realserver_connection_fail_event function
-				UP_FUNC_REALSERVER_SEND,					//! up_thread_realserver_send function
+				UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT,			//! up_thread_realserver_connection_fail_event function
+				UP_FUNC_REALSERVER_SEND,				//! up_thread_realserver_send function
 				UP_FUNC_REALSERVER_DISCONNECT,				//! up_thread_realserver_disconnect function
-				UP_FUNC_REALSERVER_DISCONNECT_EVENT,		//! up_thread_realserver_disconnect_event function
+				UP_FUNC_REALSERVER_DISCONNECT_EVENT,			//! up_thread_realserver_disconnect_event function
 				UP_FUNC_REALSERVER_ALL_DISCONNECT,			//! up_thread_all_realserver_disconnect function
 				UP_FUNC_SORRYSERVER_GET_DEST,				//! up_thread_sorryserver_get_destination_event function
 				UP_FUNC_SORRYSERVER_CONNECT,				//! up_thread_sorryserver_connect function
 				UP_FUNC_SORRYSERVER_CONNECT_EVENT,			//! up_thread_sorryserver_connect_event function
-				UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT,		//! up_thread_sorryserver_connection_fail_event function
-				UP_FUNC_SORRYSERVER_SEND,					//! up_thread_sorryserver_send function
+				UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT,			//! up_thread_sorryserver_connection_fail_event function
+				UP_FUNC_SORRYSERVER_SEND,				//! up_thread_sorryserver_send function
 				UP_FUNC_SORRYSERVER_DISCONNECT,				//! up_thread_sorryserver_disconnect function
 				UP_FUNC_SORRYSERVER_MOD_DISCONNECT,			//! up_thread_sorryserver_mod_disconnect function
-				UP_FUNC_SORRYSERVER_DISCONNECT_EVENT,		//! up_thread_sorryserver_disconnect_event function
-				UP_FUNC_SORRY_ENABLE_EVENT,					//! up_thread_sorry_enable_event function
+				UP_FUNC_SORRYSERVER_DISCONNECT_EVENT,			//! up_thread_sorryserver_disconnect_event function
+				UP_FUNC_SORRY_ENABLE_EVENT,				//! up_thread_sorry_enable_event function
 				UP_FUNC_SORRY_DISABLE_EVENT,				//! up_thread_sorry_disable_event function
-				UP_FUNC_EXIT								//! up_thread_exit function
+				UP_FUNC_EXIT						//! up_thread_exit function
 			};
 			//! down thread call function type
 			enum DOWN_THREAD_FUNC_TYPE_TAG{
 				DOWN_FUNC_CLIENT_DISCONNECT = 0,			//! down_thread_client_disconnect function
 				DOWN_FUNC_CLIENT_DISCONNECT_EVENT,			//! down_thread_client_disconnect_event function
 				DOWN_FUNC_CLIENT_CONNECTION_CHK,			//! down_thread_client_connection_chk_event function
-				DOWN_FUNC_CLIENT_SEND,						//! down_thread_client_send function
-				DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT,		//! down_thread_client_respond_event function
+				DOWN_FUNC_CLIENT_SEND,					//! down_thread_client_send function
+				DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT,			//! down_thread_client_respond_event function
 				DOWN_FUNC_REALSERVER_RECEIVE,				//! down_thread_realserver_receive function
 				DOWN_FUNC_REALSERVER_DISCONNECT,			//! down_thread_realserver_disconnect function
-				DOWN_FUNC_REALSERVER_DISCONNECT_EVENT,		//! down_thread_realserver_disconnect_event function
-				DOWN_FUNC_REALSERVER_ALL_DISCONNECT,		//! down_thread_all_realserver_disconnect function
+				DOWN_FUNC_REALSERVER_DISCONNECT_EVENT,			//! down_thread_realserver_disconnect_event function
+				DOWN_FUNC_REALSERVER_ALL_DISCONNECT,			//! down_thread_all_realserver_disconnect function
 				DOWN_FUNC_SORRYSERVER_RECEIVE,				//! down_thread_sorryserver_receive function
 				DOWN_FUNC_SORRYSERVER_DISCONNECT,			//! down_thread_sorryserver_disconnect function
-				DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT,		//! down_thread_sorryserver_mod_disconnect function
-				DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT,		//! down_thread_sorryserver_disconnect_event function
+				DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT,			//! down_thread_sorryserver_mod_disconnect function
+				DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT,			//! down_thread_sorryserver_disconnect_event function
 				DOWN_FUNC_SORRY_ENABLE_EVENT,				//! down_thread_sorry_enable_event function
 				DOWN_FUNC_SORRY_DISABLE_EVENT,				//! down_thread_sorry_disable_event function
 				DOWN_FUNC_EXIT								//! down_thread_exit function

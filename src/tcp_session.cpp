@@ -40,14 +40,14 @@ namespace l7vs{
 	//! construcor
 	//! @param[in/out]	vs is parent virtualservice object
 	//! @param[in/out]	io is session use io service object
-	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io):
+	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context):
 		io(session_io),
 		parent_service(vs),
 		exit_flag(false),
 		thread_state(0),
 		protocol_module(NULL),
 		session_pause_flag(false),
-		client_socket(session_io),
+		client_socket(session_io, context),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192){
 			
@@ -225,14 +225,14 @@ namespace l7vs{
 	//! @param[in/out]	vs is parent virtualservice object
 	//! @param[in/out]	io is session use io service object
 	//! @param[in]		set socket option info 
-	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io,tcp_socket_option_info set_option):
+	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context, tcp_socket_option_info set_option):
 	io(session_io),
 	parent_service(vs),
 	exit_flag(false),
 	thread_state(0),
 	protocol_module(NULL),
 	session_pause_flag(false),
-	client_socket(session_io,set_option),
+	client_socket(session_io, context, set_option),
 	upstream_buffer_size(8192),
 	downstream_buffer_size(8192),
 	socket_opt_info(set_option){
@@ -497,9 +497,9 @@ namespace l7vs{
 	}
 	//! get reference client side socket
 	//! @return			reference client side socket
-	boost::asio::ip::tcp::socket& tcp_session::get_client_socket()
+	ssl_socket::lowest_layer_type& tcp_session::get_client_socket()
 	{
-		return client_socket.get_socket();
+		return client_socket.get_socket().lowest_layer();
 	}
 	//! is thread wait
 	//! @return 		true is wait
@@ -660,17 +660,17 @@ namespace l7vs{
 			buf << "] protocol_module is NULL!";
 			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 8, buf.str(), __FILE__, __LINE__ );
 			{
-                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+				rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 				exit_flag = true;
 			}
 		}
 		bool is_exit;
 		{
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
-			if(unlikely( !client_socket.get_socket().is_open() )){
+			if(unlikely( !client_socket.get_socket().lowest_layer().is_open() )){
 				//client socket not open Error!
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -678,7 +678,7 @@ namespace l7vs{
 				buf << "] client socket not open!";
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 9, buf.str(), __FILE__, __LINE__ );
 				{
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
@@ -688,11 +688,11 @@ namespace l7vs{
 		client_socket.accept();
 		endpoint cl_end;
 		{
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
-			cl_end = client_socket.get_socket().remote_endpoint(ec);
+			cl_end = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
 			if(unlikely( ec )){
 				//client endpoint get Error!
 				std::stringstream buf;
@@ -702,13 +702,13 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 10, buf.str(), __FILE__, __LINE__ );
 				{
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
 		}
 		{
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
@@ -721,20 +721,20 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 11, buf.str(), __FILE__, __LINE__ );
 				{
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
 		}
 
 		{
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
 			//set client_socket options(recieve buffer size)
 			boost::asio::socket_base::receive_buffer_size	opt1( upstream_buffer_size );
-			client_socket.get_socket().set_option( opt1 ,ec);
+			client_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
 			if(unlikely( ec )){
 				//client socket Error!
 				std::stringstream buf;
@@ -744,20 +744,20 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__ );
 				{
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
 		}
 
 		{
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
 			//set client_socket options(send buffer size)
 			boost::asio::socket_base::send_buffer_size		opt2( downstream_buffer_size );
-			client_socket.get_socket().set_option( opt2 ,ec);
+			client_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
 			if(unlikely( ec )){
 				//client socket Error!
 				std::stringstream buf;
@@ -767,7 +767,7 @@ namespace l7vs{
 				buf << ec.message();
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__ );
 				{
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}
@@ -778,7 +778,7 @@ namespace l7vs{
 		std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type;
 		up_thread_function_pair	func;
 		{
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely(!is_exit)){
@@ -793,7 +793,7 @@ namespace l7vs{
 				buf << module_event;	
 				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 14, buf.str(), __FILE__, __LINE__ );
 				{
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 					exit_flag = true;
 				}
 			}else{
@@ -807,7 +807,7 @@ namespace l7vs{
 					buf << func_type->second;
 					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 15, buf.str(), __FILE__, __LINE__ );
 					{
-                        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+						rw_scoped_lock scoped_lock(exit_flag_update_mutex);
 						exit_flag = true;
 					}
 				}else{
@@ -828,7 +828,7 @@ namespace l7vs{
 		bool is_pause;
 		while(true){
 			{
-                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+				rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 				if(unlikely(exit_flag)) break;
 			}
 
@@ -844,13 +844,13 @@ namespace l7vs{
 						if(!session_pause_flag) break;
 					}
 					{
-                        rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+						rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 						if(exit_flag) break;
 					}
 				}
 				thread_state_update(UP_THREAD_LOCK,false);
 				{
-                    rd_scoped_lock scoped_lock(exit_flag_update_mutex);
+					rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 					if(exit_flag) break;
 				}
 			}
@@ -1159,6 +1159,22 @@ namespace l7vs{
 			up_thread_exit(process_type);
 			return;
 		}
+
+		// Handshake start
+		boost::system::error_code ec;
+		bool bres = client_socket.handshake(boost::asio::ssl::stream_base::server, ec);
+		if(likely(bres)) {
+			//Error handshake failed
+			std::stringstream buf;
+			buf << "Thread ID[";
+			buf << boost::this_thread::get_id();
+			buf << "] handshake failed : ";
+			buf << bres;	
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+			up_thread_exit(process_type);
+			return;
+		}
+
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
 		if(unlikely( !func.second )){
 			//Error not find function map
@@ -1198,7 +1214,7 @@ namespace l7vs{
 			if(recv_size > 0){
 				//----Debug log----------------------------------------------------------------------
 				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-					boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().remote_endpoint(ec);
+					boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
 					std::stringstream buf;
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
@@ -2559,7 +2575,7 @@ namespace l7vs{
 			parent_service.update_down_send_size(send_size);
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-				boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().remote_endpoint(ec);
+				boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
