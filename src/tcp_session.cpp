@@ -40,14 +40,18 @@ namespace l7vs{
 	//! construcor
 	//! @param[in/out]	vs is parent virtualservice object
 	//! @param[in/out]	io is session use io service object
-	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context):
+	//! @param[in]		flag is session use SSL flag
+	//! @param[in]		context is session use SSL context object
+	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, bool flag, boost::asio::ssl::context& context):
 		io(session_io),
 		parent_service(vs),
 		exit_flag(false),
 		thread_state(0),
 		protocol_module(NULL),
 		session_pause_flag(false),
-		client_socket(session_io, context),
+		client_socket(session_io),
+		client_ssl_socket(session_io, context),
+		ssl_sess_flag(flag),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192){
 			
@@ -224,18 +228,22 @@ namespace l7vs{
 	//! construcor
 	//! @param[in/out]	vs is parent virtualservice object
 	//! @param[in/out]	io is session use io service object
+	//! @param[in]		flag is session use SSL flag
+	//! @param[in]		context is session use SSL context object
 	//! @param[in]		set socket option info 
-	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context, tcp_socket_option_info set_option):
-	io(session_io),
-	parent_service(vs),
-	exit_flag(false),
-	thread_state(0),
-	protocol_module(NULL),
-	session_pause_flag(false),
-	client_socket(session_io, context, set_option),
-	upstream_buffer_size(8192),
-	downstream_buffer_size(8192),
-	socket_opt_info(set_option){
+	tcp_session::tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, bool flag, boost::asio::ssl::context& context, tcp_socket_option_info set_option):
+		io(session_io),
+		parent_service(vs),
+		exit_flag(false),
+		thread_state(0),
+		protocol_module(NULL),
+		session_pause_flag(false),
+		client_socket(session_io, set_option),
+		client_ssl_socket(session_io, context, set_option),
+		ssl_sess_flag(flag),
+		upstream_buffer_size(8192),
+		downstream_buffer_size(8192),
+		socket_opt_info(set_option){
 		
 		// sorryserver socket
 //		tcp_socket_ptr sorry_socket(new tcp_socket(session_io));
@@ -497,9 +505,15 @@ namespace l7vs{
 	}
 	//! get reference client side socket
 	//! @return			reference client side socket
-	ssl_socket::lowest_layer_type& tcp_session::get_client_socket()
+	boost::asio::ip::tcp::socket& tcp_session::get_client_socket()
 	{
-		return client_socket.get_socket().lowest_layer();
+		return client_socket.get_socket();
+	}
+	//! get reference client side ssl socket
+	//! @return			reference client side ssl socket
+	ssl_socket::lowest_layer_type& tcp_session::get_client_ssl_socket()
+	{
+		return client_ssl_socket.get_socket().lowest_layer();
 	}
 	//! is thread wait
 	//! @return 		true is wait
@@ -670,7 +684,13 @@ namespace l7vs{
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
-			if(unlikely( !client_socket.get_socket().lowest_layer().is_open() )){
+			bool bres;
+			if (!ssl_sess_flag) {
+				bres = client_socket.get_socket().lowest_layer().is_open();
+			} else {
+				bres = client_ssl_socket.get_socket().lowest_layer().is_open();
+			}
+			if(unlikely( !bres )){
 				//client socket not open Error!
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -685,14 +705,22 @@ namespace l7vs{
 		}
 		
 		boost::system::error_code ec;
-		client_socket.accept();
+		if (!ssl_sess_flag) {
+			client_socket.accept();
+		} else {
+			client_ssl_socket.accept();
+		}
 		endpoint cl_end;
 		{
 			rd_scoped_lock scoped_lock(exit_flag_update_mutex);
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
-			cl_end = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+			if (!ssl_sess_flag) {
+				cl_end = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+			} else {
+				cl_end = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+			}
 			if(unlikely( ec )){
 				//client endpoint get Error!
 				std::stringstream buf;
@@ -712,7 +740,13 @@ namespace l7vs{
 			is_exit = exit_flag;
 		}
 		if(likely( !is_exit )){
-			if(unlikely( !client_socket.set_non_blocking_mode(ec) )){
+			bool bres;
+			if (!ssl_sess_flag) {
+				bres = client_socket.set_non_blocking_mode(ec);
+			} else {
+				bres = client_ssl_socket.set_non_blocking_mode(ec);
+			}
+			if(unlikely( !bres )){
 				// socket set nonblocking mode error
 				std::stringstream buf;
 				buf << "Thread ID[";
@@ -734,7 +768,11 @@ namespace l7vs{
 		if(likely( !is_exit )){
 			//set client_socket options(recieve buffer size)
 			boost::asio::socket_base::receive_buffer_size	opt1( upstream_buffer_size );
-			client_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
+			if (!ssl_sess_flag) {
+				client_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
+			} else {
+				client_ssl_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
+			}
 			if(unlikely( ec )){
 				//client socket Error!
 				std::stringstream buf;
@@ -757,7 +795,11 @@ namespace l7vs{
 		if(likely( !is_exit )){
 			//set client_socket options(send buffer size)
 			boost::asio::socket_base::send_buffer_size		opt2( downstream_buffer_size );
-			client_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
+			if (!ssl_sess_flag) {
+				client_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
+			} else {
+				client_ssl_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
+			}
 			if(unlikely( ec )){
 				//client socket Error!
 				std::stringstream buf;
@@ -1161,18 +1203,20 @@ namespace l7vs{
 		}
 
 		// Handshake start
-		boost::system::error_code ec;
-		bool bres = client_socket.handshake(boost::asio::ssl::stream_base::server, ec);
-		if(likely(bres)) {
-			//Error handshake failed
-			std::stringstream buf;
-			buf << "Thread ID[";
-			buf << boost::this_thread::get_id();
-			buf << "] handshake failed : ";
-			buf << bres;	
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-			up_thread_exit(process_type);
-			return;
+		if (!ssl_sess_flag) {
+			boost::system::error_code ec;
+			bool bres = client_ssl_socket.handshake(boost::asio::ssl::stream_base::server, ec);
+			if(likely(bres)) {
+				//Error handshake failed
+				std::stringstream buf;
+				buf << "Thread ID[";
+				buf << boost::this_thread::get_id();
+				buf << "] handshake failed : ";
+				buf << bres;	
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+				up_thread_exit(process_type);
+				return;
+			}
 		}
 
 		up_thread_function_pair	func	= up_thread_function_array[func_type->second];
@@ -1208,13 +1252,23 @@ namespace l7vs{
 		up_thread_data_client_side.initialize();
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_client_side.get_data();
 		boost::system::error_code ec;
-		size_t recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
+		size_t recv_size;
+		if (!ssl_sess_flag) {
+			recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
+		} else {
+			recv_size = client_ssl_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
+		}
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			if(recv_size > 0){
 				//----Debug log----------------------------------------------------------------------
 				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-					boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+					boost::asio::ip::tcp::endpoint client_endpoint;
+					if (!ssl_sess_flag) {
+						client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+					} else {
+						client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+					}
 					std::stringstream buf;
 					buf << "Thread ID[";
 					buf << boost::this_thread::get_id();
@@ -1339,7 +1393,12 @@ namespace l7vs{
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
 		boost::system::error_code ec;
-		bool bres = client_socket.close(ec);
+		bool bres;
+		if (!ssl_sess_flag) {
+			bres = client_socket.close(ec);
+		} else {
+			bres = client_ssl_socket.close(ec);
+		}
 		if(bres){
 			tcp_thread_message*		up_msg		= new tcp_thread_message;
 			tcp_thread_message*		down_msg	= new tcp_thread_message;
@@ -2235,7 +2294,11 @@ namespace l7vs{
 		}
 		up_thread_send_realserver_socket_map.clear();
 		down_thread_connect_socket_list.clear();
-		client_socket.close(ec);
+		if (!ssl_sess_flag) {
+			client_socket.close(ec);
+		} else {
+			client_ssl_socket.close(ec);
+		}
 		sorryserver_socket.second->close(ec);
 	}
 
@@ -2567,7 +2630,12 @@ namespace l7vs{
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
 		std::size_t data_size = down_thread_data_client_side.get_size();
 		std::size_t send_data_size = down_thread_data_client_side.get_send_size();
-		std::size_t send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+		std::size_t send_size;
+		if (!ssl_sess_flag) {
+			send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+		} else {
+			send_size = client_ssl_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+		}
 		DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			send_data_size += send_size;
@@ -2575,7 +2643,12 @@ namespace l7vs{
 			parent_service.update_down_send_size(send_size);
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-				boost::asio::ip::tcp::endpoint client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+				boost::asio::ip::tcp::endpoint client_endpoint;
+				if (!ssl_sess_flag) {
+					client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+				} else {
+					client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+				}
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
@@ -2631,7 +2704,12 @@ namespace l7vs{
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
 		boost::system::error_code ec;
-		bool bres = client_socket.close(ec);
+		bool bres;
+		if (!ssl_sess_flag) {
+			bres = client_socket.close(ec);
+		} else {
+			bres = client_ssl_socket.close(ec);
+		}
 		if(bres){
 			tcp_thread_message*		up_msg		= new tcp_thread_message;
 			tcp_thread_message*		down_msg	= new tcp_thread_message;
@@ -2984,7 +3062,11 @@ namespace l7vs{
 			close_socket++;
 		}
 		down_thread_receive_realserver_socket_list.clear();
-		client_socket.close(ec);
+		if (!ssl_sess_flag) {
+			client_socket.close(ec);
+		} else {
+			client_ssl_socket.close(ec);
+		}
 		sorryserver_socket.second->close(ec);
 	}
 	

@@ -325,7 +325,7 @@ protected:
 	std::string					get_ssl_password();
 	bool						get_ssl_parameter();
 	bool						set_ssl_context();
-	void						load_ssl_flag();
+	void						load_ssl_vs_flag();
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
@@ -360,7 +360,7 @@ public:
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
 	
-	bool						ssl_flag;
+	bool						ssl_vs_flag;
 };
 
 //!

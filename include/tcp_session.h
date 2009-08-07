@@ -76,13 +76,17 @@ namespace l7vs{
 			//! construcor
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context);
+			//! @param[in]		flag is session use SSL flag
+			//! @param[in]		context is session use SSL context object
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, bool flag, boost::asio::ssl::context& context);
 						
 			//! construcor
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
+			//! @param[in]		flag is session use SSL flag
+			//! @param[in]		context is session use SSL context object
 			//! @param[in]		set socket option info 
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, boost::asio::ssl::context& context, const tcp_socket_option_info set_option);
+			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, bool flag, boost::asio::ssl::context& context, const tcp_socket_option_info set_option);
 			
 			//! destructor
 			virtual ~tcp_session();
@@ -90,7 +94,10 @@ namespace l7vs{
 			session_result_message initialize();
 			//! get reference client side socket
 			//! @return			reference client side socket
-			ssl_socket::lowest_layer_type& get_client_socket();
+			boost::asio::ip::tcp::socket& get_client_socket(); 
+			//! get reference client side ssl socket
+			//! @return			reference client side ssl socket
+			ssl_socket::lowest_layer_type& get_client_ssl_socket();
 			//! is thread wait
 			//! @return 		true is wait
 			//! @return 		false is not wait
@@ -181,7 +188,11 @@ namespace l7vs{
 			//! wait flag mutex
 			wr_mutex session_pause_flag_mutex;
 			//! client socket
-			tcp_ssl_socket client_socket;
+			tcp_socket client_socket;
+			//! client ssl socket
+			tcp_ssl_socket client_ssl_socket;
+			//! ssl session flag
+			bool ssl_sess_flag;
 			//! sorryserver socket
 			socket_element sorryserver_socket;
 			//! up thread use realserver socket map

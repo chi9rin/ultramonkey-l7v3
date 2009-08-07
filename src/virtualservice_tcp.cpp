@@ -359,8 +359,13 @@ void	l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_control
 	}
 
 	//regist accept event handler
-	acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_socket(),
-				boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
+	if (!ssl_vs_flag) {
+		acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_socket(),
+					boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
+	} else {
+		acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_ssl_socket(),
+					boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
+	}
 
 	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
 		Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 58, "out_function : void virtualservice_tcp::handle_accept( const boost::shared_ptr<session_thread_control> , const boost::system::error_code& err )", __FILE__, __LINE__ );
@@ -538,8 +543,8 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 
 	// SSL setting
 	{
-		load_ssl_flag();
-		if (ssl_flag) {
+		load_ssl_vs_flag();
+		if (ssl_vs_flag) {
 			// get SSL parameter
 			if(unlikely(!get_ssl_parameter())) {
 				//Error
@@ -559,7 +564,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	{
 		for( int i = 0; i < param_data.session_pool_size; ++i ){
 			try{
-				tcp_session*	sess	= new tcp_session( *this, dispatcher, sslcontext, set_sock_opt);
+				tcp_session*	sess	= new tcp_session( *this, dispatcher, ssl_vs_flag, sslcontext, set_sock_opt);
 				session_result_message	result	= sess->initialize();
 				if( result.flag == true ){
 					err.setter( result.flag, result.message );
@@ -1237,8 +1242,13 @@ void	l7vs::virtualservice_tcp::run(){
 		//regist accept event handler
 		waiting_sessions.insert( stc_ptr->get_session().get(), stc_ptr );
 	}
-	acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
-					boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
+	if (!ssl_vs_flag) {
+		acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
+						boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
+	} else {
+		acceptor_.async_accept( stc_ptr->get_session()->get_client_ssl_socket(),
+						boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
+	}
 	//regist timer event handler
 	calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
 	calc_bps_timer->async_wait( boost::bind( &virtualservice_tcp::handle_throughput_update, 
@@ -1706,15 +1716,15 @@ l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse
 /*!
  * load ssl flag
  */
-void	l7vs::virtualservice_tcp::load_ssl_flag()
+void	l7vs::virtualservice_tcp::load_ssl_vs_flag()
 {
 	l7vs::error_code	vs_err;
 	Parameter		param;
-	ssl_flag = false;
+	ssl_vs_flag = false;
 	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
 	if (likely(!vs_err)) {
 		if (int_val == 1) {
-			ssl_flag = true;
+			ssl_vs_flag = true;
 		}
 	}
 }
