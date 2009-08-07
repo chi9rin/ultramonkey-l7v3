@@ -46,11 +46,7 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd& invsd,
 					     :
 					     virtualservice_base( invsd, inrep, inelement ),
 					     acceptor_( dispatcher ),
-					     sslcontext(dispatcher, boost::asio::ssl::context::sslv23),
-					     server_password("test"),
-					     cert_chain_filename("/home/morisita/Test_SSLProxy_module/cert/server.pem"),
-					     server_private_keyfilename("/home/morisita/Test_SSLProxy_module/cert/server.pem"),
-					     tmp_dh_filename("/home/morisita/Test_SSLProxy_module/cert/dh512.pem")
+					     sslcontext(dispatcher, boost::asio::ssl::context::sslv23)
 	{
 	}
 /*!
@@ -540,15 +536,23 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					element.tcp_accept_endpoint,
 					element.udp_recv_endpoint );
 
-	// Set SSL_context
+	// SSL setting
 	{
-		sslcontext.set_options(boost::asio::ssl::context::default_workarounds |
-				       boost::asio::ssl::context::no_sslv2 |
-				       boost::asio::ssl::context::single_dh_use);
-		sslcontext.set_password_callback(boost::bind(&virtualservice_tcp::get_password, this));
-		sslcontext.use_certificate_chain_file(cert_chain_filename);
-		sslcontext.use_private_key_file(server_private_keyfilename, boost::asio::ssl::context::pem);
-		sslcontext.use_tmp_dh_file(tmp_dh_filename);
+		load_ssl_flag();
+		if (ssl_flag) {
+			// get SSL parameter
+			if(unlikely(!get_ssl_parameter())) {
+				//Error
+				Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl parameter failed", __FILE__, __LINE__ );
+				return;
+			}
+			// set SSL context
+			if(unlikely(!set_ssl_context())) {
+				//Error
+				Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl context failed", __FILE__, __LINE__ );
+				return;
+			}
+		}
 	}
 
 	//create session pool
@@ -1699,3 +1703,69 @@ l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse
 	return result;
 }
 
+/*!
+ * load ssl flag
+ */
+void	l7vs::virtualservice_tcp::load_ssl_flag()
+{
+	l7vs::error_code	vs_err;
+	Parameter		param;
+	ssl_flag = false;
+	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
+	if (likely(!vs_err)) {
+		if (int_val == 1) {
+			ssl_flag = true;
+		}
+	}
+}
+
+/*!
+ * get private key file password (for callback function)
+ *
+ * @return password string
+ */
+std::string	l7vs::virtualservice_tcp::get_ssl_password()
+{
+	return server_password;
+}
+
+/*!
+ * get ssl parameter
+ *
+ * @return get ssl parameter result
+ */
+bool	l7vs::virtualservice_tcp::get_ssl_parameter()
+{
+	bool bres = false;
+	// get ssl parameter from config file
+	cert_chain_filename = "/home/morisita/Test_SSLProxy_module/cert/server.pem";
+	server_private_keyfilename = "/home/morisita/Test_SSLProxy_module/cert/server.pem";
+	server_password = "test";
+	tmp_dh_filename = "/home/morisita/Test_SSLProxy_module/cert/dh512.pem";
+	bres = true;
+	return bres;
+}
+
+/*!
+ * set ssl context
+ *
+ * @return set ssl context result
+ */
+bool	l7vs::virtualservice_tcp::set_ssl_context()
+{
+	bool bres = get_ssl_parameter();
+	if(unlikely(!bres)) {
+		//Error
+		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "get ssl parameter failed", __FILE__, __LINE__ );
+		return bres;
+	}
+	sslcontext.set_options(boost::asio::ssl::context::default_workarounds |
+			       boost::asio::ssl::context::no_sslv2 |
+			       boost::asio::ssl::context::single_dh_use);
+	sslcontext.set_password_callback(boost::bind(&virtualservice_tcp::get_ssl_password, this));
+	sslcontext.use_certificate_chain_file(cert_chain_filename);
+	sslcontext.use_private_key_file(server_private_keyfilename, boost::asio::ssl::context::pem);
+	sslcontext.use_tmp_dh_file(tmp_dh_filename);
+	bres = true;
+	return bres;
+}

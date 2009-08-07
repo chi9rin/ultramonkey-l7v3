@@ -58,6 +58,7 @@
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
 #define	PARAM_REP_INTERVAL		"interval"
+#define	PARAM_SSL_FLAG		"ssl_flag"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
 #define	SCHEDMOD_NOTLOAD_ERROR_MSG	"Schedule Module not loaded"
@@ -321,7 +322,10 @@ protected:
 	std::string					cert_chain_filename;
 	std::string					server_private_keyfilename;
 	std::string					tmp_dh_filename;
-	std::string					get_password() {return server_password;}
+	std::string					get_ssl_password();
+	bool						get_ssl_parameter();
+	bool						set_ssl_context();
+	void						load_ssl_flag();
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
@@ -356,6 +360,7 @@ public:
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
 	
+	bool						ssl_flag;
 };
 
 //!
