@@ -1203,7 +1203,7 @@ namespace l7vs{
 		}
 
 		// Handshake start
-		if (!ssl_sess_flag) {
+		if (ssl_sess_flag) {
 			boost::system::error_code ec;
 			bool bres = client_ssl_socket.handshake(boost::asio::ssl::stream_base::server, ec);
 			if(likely(bres)) {
