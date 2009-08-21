@@ -894,6 +894,41 @@ bool	l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] ){
 	}
 	return true;
 }
+//! virtualservice option ssl function
+//! @param[in]	argument position
+//! @param[in]	argument count
+//! @param[in]	argument value
+bool	l7vs::l7vsadm::parse_opt_vs_ssl_func( int& pos, int argc, char* argv[] ){
+	Logger	logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_ssl_func", __FILE__, __LINE__ );
+
+	if( ++pos >= argc ){
+		std::string	buf("sslflag value is not specified.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+		return false;
+	}
+	try{
+		int	tmp = boost::lexical_cast< int >( argv[pos] );
+		if( ( 0 != tmp ) && ( 1 != tmp ) ){
+			std::string	buf("invalid sslflag value.");
+			l7vsadm_err.setter( true, buf );
+			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+			return false;
+		}
+		if( 0 == tmp )
+			request.vs_element.ssl_flag = INT_MAX;	// clear value
+		else
+			request.vs_element.ssl_flag = 1;
+	}
+	catch( boost::bad_lexical_cast& e ){
+		// don't convert argv[pos] is
+		std::string	buf("invalid sslflag value.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+		return false;
+	}
+	return true;
+}
 //! realserver command parsing.
 //! @param[in]	request command
 //! @param[in]	argument count
@@ -1492,6 +1527,7 @@ bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 	"  --qos-up        -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
 	"  --qos-down      -q QoSval-down         QoS Threshold(bps) set to client direction\n"
 	"  --udp           -p                     VirtualService UDP mode on\n"
+	"  --ssl           -S ssl-flag            Use SSL\n"
 	"  --real-server   -r server-address      server-address is host:port\n"
 	"  --weight        -w weight              scheduling weight set to real server\n"
 	"  --switch        -s replication-switch  start or stop replication\n"
@@ -1655,6 +1691,7 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 	buf << "     SorryAddress:Port Sorry_cc Sorry_flag\n";
 	buf << "     QoS-up   Throughput-up\n";
 	buf << "     QoS-down Throughput-down\n";
+	buf << "     SSL_flag\n";
 	buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
 	BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
 		std::string	vsepstr;
@@ -1690,6 +1727,8 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 		buf << boost::format( "    %lld %lld\n" )
 			% (vse.qos_downstream * 8)
 			% (vse.throughput_downstream * 8);
+		buf << boost::format( "    %d\n" )
+			% vse.ssl_flag;
 		BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
 			std::string	rsepstr;
 			if( vse.udpmode )
@@ -1770,6 +1809,8 @@ l7vs::l7vsadm::l7vsadm()
 	vs_option_dic["--qos-down"]		= boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
 	vs_option_dic["-p"]				= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
 	vs_option_dic["--udp"]			= boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+	vs_option_dic["-S"]				= boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
+	vs_option_dic["--ssl"]			= boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
 	// create realserver option dictionary
 	rs_option_dic["-t"]				= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
 	rs_option_dic["--target"]		= boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );

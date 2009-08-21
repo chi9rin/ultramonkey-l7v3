@@ -228,6 +228,8 @@ protected:
 	bool	parse_opt_vs_qosdown_func( int&, int, char*[] );
 	//! virtualservice option udp func.
 	bool	parse_opt_vs_udp_func( int&, int, char*[] );
+	//! virtualservice option ssl function
+	bool	parse_opt_vs_ssl_func( int&, int, char*[] );
 	// realserver option function
 	//! realserver weight set
 	bool	parse_opt_rs_weight_func( int&, int, char*[] );

@@ -61,6 +61,7 @@ public:
 	unsigned long long		qos_downstream;
 	unsigned long long		throughput_upstream;
 	unsigned long long		throughput_downstream;
+	int				ssl_flag;
 
 	virtualservice_element() :	udpmode(false),
 				sorry_maxconnection(0LL),
@@ -68,7 +69,8 @@ public:
 				qos_upstream(0ULL),
 				qos_downstream(0ULL),
 				throughput_upstream(0ULL),
-				throughput_downstream(0ULL) {}
+				throughput_downstream(0ULL),
+				ssl_flag(0) {}
 				
 	virtualservice_element( const virtualservice_element& in )
 			:	udpmode( in.udpmode ),
@@ -82,7 +84,8 @@ public:
 				qos_upstream( in.qos_upstream ),
 				qos_downstream( in.qos_downstream ),
 				throughput_upstream( in.throughput_upstream ),
-				throughput_downstream( in.throughput_downstream ){
+				throughput_downstream( in.throughput_downstream ),
+				ssl_flag( in.ssl_flag ){
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
 			protocol_args.push_back( str );
@@ -105,6 +108,7 @@ public:
 		qos_downstream = in.qos_downstream;
 		throughput_upstream = in.throughput_upstream;
 		throughput_downstream = in.throughput_downstream;
+		ssl_flag = in.ssl_flag;
 
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
@@ -126,7 +130,8 @@ public:
 				elem1.qos_upstream == elem2.qos_upstream &&
 				elem1.qos_downstream == elem2.qos_downstream &&
 				elem1.throughput_upstream == elem2.throughput_upstream &&
-				elem1.throughput_downstream == elem2.throughput_downstream ){
+				elem1.throughput_downstream == elem2.throughput_downstream &&
+				elem1.ssl_flag == elem2.ssl_flag ){
 				if( elem1.realserver_vector.size() != elem2.realserver_vector.size() ) return false;
 				for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 					if( elem1.realserver_vector[i] != elem2.realserver_vector[i] ) return false;	
@@ -146,7 +151,8 @@ public:
 				elem1.qos_upstream != elem2.qos_upstream ||
 				elem1.qos_downstream != elem2.qos_downstream ||
 				elem1.throughput_upstream != elem2.throughput_upstream ||
-				elem1.throughput_downstream != elem2.throughput_downstream ){
+				elem1.throughput_downstream != elem2.throughput_downstream ||
+				elem1.ssl_flag != elem2.ssl_flag ){
 				if( elem1.realserver_vector.size() == elem2.realserver_vector.size() ){
 					for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 						if( elem1.realserver_vector[i] == elem2.realserver_vector[i] ) return false;
@@ -200,7 +206,8 @@ public:
 								"qos_upstream=%d: "
 								"qos_downstream=%d: "
 								"throughput_upstream=%d: " 
-								"throughput_downstream=%d}" )
+								"throughput_downstream=%d: "
+								"ssl_flag=%d}" )
 								% args
 								% elem.sorry_maxconnection
 								% elem.sorry_endpoint
@@ -208,7 +215,8 @@ public:
 								% elem.qos_upstream
 								% elem.qos_downstream
 								% elem.throughput_upstream
-								% elem.throughput_downstream;
+								% elem.throughput_downstream
+								% elem.ssl_flag;
 		return os;
 	}
 
@@ -233,6 +241,7 @@ private:
 		ar & qos_downstream;
 		ar & throughput_upstream;
 		ar & throughput_downstream;
+		ar & ssl_flag;
 	}
 };
 

@@ -899,6 +899,11 @@ void	l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservice_e
 
 		active_sessions.do_all( boost::bind( &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag ) );
 	}
+	//ssl_flag;
+	if( INT_MAX == elem.ssl_flag )
+		element.ssl_flag			= 0;
+	else if( 0 != elem.ssl_flag )
+		element.ssl_flag			= 1;
 
 	err.setter( false, "" );
 
@@ -1714,18 +1719,21 @@ l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse
 }
 
 /*!
- * load ssl flag
+ * load ssl flag form parameter file or l7vsadm option
  */
 void	l7vs::virtualservice_tcp::load_ssl_vs_flag()
 {
-	l7vs::error_code	vs_err;
-	Parameter		param;
+//	l7vs::error_code	vs_err;
+//	Parameter		param;
 	ssl_vs_flag = false;
-	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
-	if (likely(!vs_err)) {
-		if (int_val == 1) {
-			ssl_vs_flag = true;
-		}
+//	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
+//	if (likely(!vs_err)) {
+//		if (int_val == 1) {
+//			ssl_vs_flag = true;
+//		}
+//	}
+	if (element.ssl_flag == 1) {
+		ssl_vs_flag = true;
 	}
 }
 
@@ -1757,7 +1765,7 @@ bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 }
 
 /*!
- * set ssl context
+ * set ssl context and other ssl settings
  *
  * @return set ssl context result
  */
