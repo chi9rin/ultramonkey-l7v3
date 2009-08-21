@@ -1552,7 +1552,7 @@ std::string	l7vs::l7vsadm::usage(){
 	"  l7vsadm -A|E -t service-address -m proto-module [module-args]\n"
 	"          [-s scheduler] [-u connection-count] [-b sorry-server]\n"
 	"          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down]\n"
-    "          [-p ]\n"
+	"          [-p ] [-S ssl-flag]\n"
 	"  l7vsadm -D -t service-address -m proto-module [module-args]\n"
 	"  l7vsadm -C\n"
 	"  l7vsadm -a|e -t service-address -m proto-module [module-args] [-u]\n"

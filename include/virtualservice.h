@@ -58,7 +58,6 @@
 #define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
 #define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
 #define	PARAM_REP_INTERVAL		"interval"
-#define	PARAM_SSL_FLAG		"ssl_flag"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
 #define	SCHEDMOD_NOTLOAD_ERROR_MSG	"Schedule Module not loaded"
@@ -69,6 +68,25 @@
 #define	REP_AREA_SIZE_ERR_MSG		"Replication area size error"
 
 #define	REP_AREA_NAME				"virtualservice"
+
+//! SSL method default
+#define DEFAULT_SSL_METHOD		boost::asio::ssl::context::sslv23	//! SSLv23_method
+//! SSL context default
+#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/"
+#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_PRIVATE_KEY_FILETYPE	boost::asio::ssl::context::pem		//! SSL_FILETYPE_PEM
+#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/"
+#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
+#define DEFAULT_VERIFY_CERT_DEPTH	9
+#define DEFAULT_SSL_OPTIONS		(SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_SINGLE_DH_USE)
+#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_CIPHER_LIST		"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
+#define MAX_PASSWD_SIZE			256
+//! SSL session cache default
+#define DEFAULT_SESSION_CACHE_MODE	SSL_SESS_CACHE_SERVER			//! "on"
+#define DEFAULT_SESSION_CACHE_SIZE	SSL_SESSION_CACHE_MAX_SIZE_DEFAULT	//! 20480
+#define DEFAULT_SESSION_CACHE_TIMEOUT	300
 
 namespace l7vs{
 
@@ -316,16 +334,36 @@ protected:
 	int 						defer_accept_val;				//! TCP_DEFER_ACCEPT option value
 	tcp_socket_option_info				set_sock_opt;		//! socket option for tcp_session class
 
-	// for SSL.
+	// SSL flag
+	bool						ssl_vs_flag;
+	// SSL context
 	boost::asio::ssl::context			sslcontext;
-	std::string					server_password;
-	std::string					cert_chain_filename;
-	std::string					server_private_keyfilename;
-	std::string					tmp_dh_filename;
+	// SSL context parameter
+	std::string					ca_dir;
+	std::string					ca_file;
+	std::string					cert_chain_dir;
+	std::string					cert_chain_file;
+	std::string					private_key_dir;
+	std::string					private_key_file;
+	boost::asio::ssl::context::file_format		private_key_filetype;
+	std::string					private_key_passwd_dir;
+	std::string					private_key_passwd_file;
+	int						verify_options;
+	int						verify_cert_depth;
+	long int					ssl_options;
+	bool						is_tmp_dh_use;
+	std::string					tmp_dh_dir;
+	std::string					tmp_dh_file;
+	std::string					cipher_list;
+	// SSL session cache parameter
+	bool						is_session_cache_use;
+	long						session_cache_mode;
+	long						session_cache_size;
+	long						session_cache_timeout;
+	// SSL functions
 	std::string					get_ssl_password();
 	bool						get_ssl_parameter();
-	bool						set_ssl_context();
-	void						load_ssl_vs_flag();
+	bool						set_ssl_config();
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
@@ -359,8 +397,6 @@ public:
 	void						release_session( const tcp_session* session_ptr );
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
-	
-	bool						ssl_vs_flag;
 };
 
 //!

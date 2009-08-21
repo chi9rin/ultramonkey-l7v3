@@ -46,7 +46,7 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd& invsd,
 					     :
 					     virtualservice_base( invsd, inrep, inelement ),
 					     acceptor_( dispatcher ),
-					     sslcontext(dispatcher, boost::asio::ssl::context::sslv23)
+					     sslcontext(dispatcher, DEFAULT_SSL_METHOD)
 	{
 	}
 /*!
@@ -542,21 +542,19 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 					element.udp_recv_endpoint );
 
 	// SSL setting
-	{
-		load_ssl_vs_flag();
-		if (ssl_vs_flag) {
-			// get SSL parameter
-			if(unlikely(!get_ssl_parameter())) {
-				//Error
-				Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl parameter failed", __FILE__, __LINE__ );
-				return;
-			}
-			// set SSL context
-			if(unlikely(!set_ssl_context())) {
-				//Error
-				Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl context failed", __FILE__, __LINE__ );
-				return;
-			}
+	ssl_vs_flag = element.ssl_flag;
+	if (ssl_vs_flag) {
+		// get SSL parameter
+		if(unlikely(!get_ssl_parameter())) {
+			//Error
+			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "get ssl parameter failed", __FILE__, __LINE__ );
+			return;
+		}
+		// set SSL configuration
+		if(unlikely(!set_ssl_config())) {
+			//Error
+			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl config failed", __FILE__, __LINE__ );
+			return;
 		}
 	}
 
@@ -1719,32 +1717,32 @@ l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse
 }
 
 /*!
- * load ssl flag form parameter file or l7vsadm option
- */
-void	l7vs::virtualservice_tcp::load_ssl_vs_flag()
-{
-//	l7vs::error_code	vs_err;
-//	Parameter		param;
-	ssl_vs_flag = false;
-//	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
-//	if (likely(!vs_err)) {
-//		if (int_val == 1) {
-//			ssl_vs_flag = true;
-//		}
-//	}
-	if (element.ssl_flag == 1) {
-		ssl_vs_flag = true;
-	}
-}
-
-/*!
  * get private key file password (for callback function)
  *
  * @return password string
  */
 std::string	l7vs::virtualservice_tcp::get_ssl_password()
 {
-	return server_password;
+	// Get password from file.
+	std::string retstr = "";
+	FILE  *fp;
+	char buf[MAX_PASSWD_SIZE + 3];
+	if ((fp = fopen((private_key_passwd_dir + private_key_passwd_file).c_str(), "r")) == NULL) {
+		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password file cannot open.", __FILE__, __LINE__ );
+	} else {
+		if (fgets(buf, MAX_PASSWD_SIZE + 3, fp) == NULL) {
+			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password not found in file.", __FILE__, __LINE__ );
+		} else {
+			if (strlen(buf) > MAX_PASSWD_SIZE) {
+				Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password is too long.", __FILE__, __LINE__ );
+			} else {
+				buf[strlen(buf) - 1] = '\0';
+				retstr = buf;
+			}
+		}
+		fclose(fp);
+	}
+	return retstr;
 }
 
 /*!
@@ -1756,34 +1754,124 @@ bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 {
 	bool bres = false;
 	// get ssl parameter from config file
-	cert_chain_filename = "/home/morisita/Test_SSLProxy_module/cert/server.pem";
-	server_private_keyfilename = "/home/morisita/Test_SSLProxy_module/cert/server.pem";
-	server_password = "test";
-	tmp_dh_filename = "/home/morisita/Test_SSLProxy_module/cert/dh512.pem";
+//	l7vs::error_code	vs_err;
+//	Parameter		param;
+//	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
+//	if (likely(!vs_err)) {
+//		// get OK
+//	}
+
+	// SSL context parameter
+//	ca_dir = DEFAULT_CA_DIR;
+	ca_dir = "/etc/l7vs/sslproxy/cert/";
+	ca_file = "rootCA.pem";
+
+//	cert_chain_dir = DEFAULT_CERT_CHAIN_DIR;
+	cert_chain_dir = "/etc/l7vs/sslproxy/cert/";
+	cert_chain_file = "server.pem";
+
+//	private_key_dir = DEFAULT_PRIVATE_KEY_DIR;
+	private_key_dir = "/etc/l7vs/sslproxy/cert/";
+	private_key_file = "server.pem";
+	private_key_filetype = DEFAULT_PRIVATE_KEY_FILETYPE;
+
+//	private_key_passwd_dir = "/etc/l7vs/sslproxy/cert/";
+	private_key_passwd_dir = "/etc/l7vs/sslproxy/cert/";
+	private_key_passwd_file = "server.pass";
+
+//	verify_options = DEFAULT_VERIFY_OPTIONS;
+	verify_options = (SSL_VERIFY_NONE);
+	verify_cert_depth = DEFAULT_VERIFY_CERT_DEPTH;
+
+	ssl_options = DEFAULT_SSL_OPTIONS;
+//	ssl_options = (boost::asio::ssl::context::default_workarounds |
+//		       boost::asio::ssl::context::no_sslv2 |
+//		       boost::asio::ssl::context::single_dh_use);
+
+	is_tmp_dh_use = true;
+	if (is_tmp_dh_use) {
+//		tmp_dh_dir = DEFAULT_TMP_DH_DIR;
+		tmp_dh_dir = "/etc/l7vs/sslproxy/cert/";
+		tmp_dh_file = "dh512.pem";
+	}
+
+	cipher_list = DEFAULT_CIPHER_LIST;
+
+	// SSL session cache parameter
+	is_session_cache_use = true;
+	if (is_session_cache_use) {
+		session_cache_mode = DEFAULT_SESSION_CACHE_MODE;
+		session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
+//		session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
+		session_cache_timeout = 60;
+	}
+
 	bres = true;
 	return bres;
 }
 
 /*!
- * set ssl context and other ssl settings
+ * set ssl context and ssl session cache configuration
  *
- * @return set ssl context result
+ * @return set ssl config result
  */
-bool	l7vs::virtualservice_tcp::set_ssl_context()
+bool	l7vs::virtualservice_tcp::set_ssl_config()
 {
-	bool bres = get_ssl_parameter();
-	if(unlikely(!bres)) {
-		//Error
-		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "get ssl parameter failed", __FILE__, __LINE__ );
-		return bres;
+	// SSL context setting.
+	try {
+		// Set root CA.
+		if (ca_file.size() == 0) {
+			// root CA path.
+			sslcontext.add_verify_path(ca_dir);
+		} else {
+			// root CA flie.
+			sslcontext.load_verify_file(ca_dir + ca_file);
+		}
+		// Set certificate chain file.
+		sslcontext.use_certificate_chain_file(cert_chain_dir + cert_chain_file);
+		// Set password callback function.
+		sslcontext.set_password_callback(boost::bind(&virtualservice_tcp::get_ssl_password, this));
+		// Set private key file and filetype.
+		sslcontext.use_private_key_file(private_key_dir + private_key_file, private_key_filetype);
+		// Set verify options on the context.
+		sslcontext.set_verify_mode(verify_options);
+		// Set verify depth on the context.
+		SSL_CTX_set_verify_depth(sslcontext.impl(), verify_cert_depth);
+		// Set SSL options on the context.
+		sslcontext.set_options(ssl_options);
+		// Set temporary Diffie-Hellman parameters file.
+		if (is_tmp_dh_use) {
+			sslcontext.use_tmp_dh_file(tmp_dh_dir + tmp_dh_file);
+		}
+		// Set cipher list on the context.
+		if (unlikely(SSL_CTX_set_cipher_list(sslcontext.impl(), cipher_list.c_str()) != 1)) {
+			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set cipher list failed", __FILE__, __LINE__ );
+			throw -1;
+		}
+	} catch (...) {
+		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl context failed", __FILE__, __LINE__ );
+		return false;
 	}
-	sslcontext.set_options(boost::asio::ssl::context::default_workarounds |
-			       boost::asio::ssl::context::no_sslv2 |
-			       boost::asio::ssl::context::single_dh_use);
-	sslcontext.set_password_callback(boost::bind(&virtualservice_tcp::get_ssl_password, this));
-	sslcontext.use_certificate_chain_file(cert_chain_filename);
-	sslcontext.use_private_key_file(server_private_keyfilename, boost::asio::ssl::context::pem);
-	sslcontext.use_tmp_dh_file(tmp_dh_filename);
-	bres = true;
-	return bres;
+
+	// SSL session cache setting.
+	try {
+		if (is_session_cache_use) {
+			// Set session id context on the context.
+			SSL_CTX_set_session_id_context(sslcontext.impl(), (const unsigned char *)"sslproxy", 8);
+			// Set session cache mode on the context.
+			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
+			// Set session cache size on the context.
+			SSL_CTX_sess_set_cache_size(sslcontext.impl(), session_cache_size);
+			// Set session cache timeout on the context.
+			SSL_CTX_set_timeout(sslcontext.impl(), session_cache_timeout);
+		} else {
+			// session cache OFF.
+			SSL_CTX_set_session_cache_mode(sslcontext.impl(), SSL_SESS_CACHE_OFF);
+		}
+	} catch (...) {
+		Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl session cache failed", __FILE__, __LINE__ );
+		return false;
+	}
+
+	return true;
 }
