@@ -562,7 +562,7 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	{
 		for( int i = 0; i < param_data.session_pool_size; ++i ){
 			try{
-				tcp_session*	sess	= new tcp_session( *this, dispatcher, ssl_vs_flag, sslcontext, set_sock_opt);
+				tcp_session*	sess	= new tcp_session( *this, dispatcher, ssl_vs_flag, sslcontext, handshake_timeout, set_sock_opt);
 				session_result_message	result	= sess->initialize();
 				if( result.flag == true ){
 					err.setter( result.flag, result.message );
@@ -1805,6 +1805,9 @@ bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 //		session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
 		session_cache_timeout = 60;
 	}
+
+	// SSL handshake timer parameter
+	handshake_timeout = DEFAULT_HANDSHAKE_TIMEOUT;
 
 	bres = true;
 	return bres;

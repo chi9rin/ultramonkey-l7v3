@@ -89,11 +89,9 @@ namespace l7vs{
 	
 	//! handshake socket
 	//! @param[in]		handshake_type is handshaking as a server or client
-	//! @param[out]		ec is reference error code object
 	//! @return 		true is handshaked
 	//! @return 		false is handshake failure
-	bool tcp_ssl_socket::handshake(boost::asio::ssl::stream_base::handshake_type type,
-				       boost::system::error_code& ec)
+	bool tcp_ssl_socket::handshake(boost::asio::ssl::stream_base::handshake_type type)
 	{
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_ssl_socket::handshake", __FILE__, __LINE__ );
@@ -102,23 +100,27 @@ namespace l7vs{
 		rw_scoped_lock scope_lock(close_mutex);
 
 		bool bres = true;
+		boost::system::error_code ec;
 		my_socket.handshake(type, ec);
-		if(unlikely(ec)) {
-			bres = false;
+		if(ec) {
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 				std::stringstream buf;
 				buf << "Thread ID[";
 				buf << boost::this_thread::get_id();
 				buf << "] tcp_ssl_socket::handshake [";
-				buf << ec;
+				buf << ec.message();
 				buf << "]";
 				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
 			}
 			//----Debug log----------------------------------------------------------------------
-			
-			//ERROR
-			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "Handshake failed" , __FILE__, __LINE__ );
+			// if error_code is try_again[Resource temporarily unavailable] then not error.
+			// (l7vsd-3.x-shamshel-refine is same too.)
+			if (ec != boost::asio::error::try_again) {
+				bres = false;
+				//ERROR
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl socket handshaking failed" , __FILE__, __LINE__ );
+			}
 		}
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
 			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_ssl_socket::handshake", __FILE__, __LINE__ );
@@ -254,7 +256,7 @@ namespace l7vs{
 	std::size_t tcp_ssl_socket::read_some(boost::asio::mutable_buffers_1 buffers,
 		boost::system::error_code& ec){
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "in_function : tcp_ssl_socket::read_some", __FILE__, __LINE__ );
+//			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "in_function : tcp_ssl_socket::read_some", __FILE__, __LINE__ );
 		}
 
 		rd_scoped_lock scope_lock(close_mutex);
@@ -289,7 +291,7 @@ namespace l7vs{
 
 			}
 		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "out_function : tcp_ssl_socket::read_some", __FILE__, __LINE__ );
+//			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "out_function : tcp_ssl_socket::read_some", __FILE__, __LINE__ );
 		}
 		return res_size;
 	}

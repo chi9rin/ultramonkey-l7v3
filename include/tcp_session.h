@@ -78,16 +78,27 @@ namespace l7vs{
 			//! @param[in/out]	io is session use io service object
 			//! @param[in]		flag is session use SSL flag
 			//! @param[in]		context is session use SSL context object
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, bool flag, boost::asio::ssl::context& context);
-						
+			//! @param[in]		timeout is session use SSL handshake timeout
+			tcp_session(virtualservice_tcp& vs,
+				    boost::asio::io_service& session_io,
+				    bool flag,
+				    boost::asio::ssl::context& context,
+				    int timeout);
+
 			//! construcor
 			//! @param[in/out]	vs is parent virtualservice object
 			//! @param[in/out]	io is session use io service object
 			//! @param[in]		flag is session use SSL flag
 			//! @param[in]		context is session use SSL context object
+			//! @param[in]		timeout is session use SSL handshake timeout
 			//! @param[in]		set socket option info 
-			tcp_session(virtualservice_tcp& vs,boost::asio::io_service& session_io, bool flag, boost::asio::ssl::context& context, const tcp_socket_option_info set_option);
-			
+			tcp_session(virtualservice_tcp& vs,
+				    boost::asio::io_service& session_io,
+				    bool flag,
+				    boost::asio::ssl::context& context,
+				    int timeout,
+				    const tcp_socket_option_info set_option);
+
 			//! destructor
 			virtual ~tcp_session();
 			//! initialize
@@ -193,6 +204,16 @@ namespace l7vs{
 			tcp_ssl_socket client_ssl_socket;
 			//! ssl session flag
 			bool ssl_sess_flag;
+			//! handshake timer
+			typedef boost::shared_ptr<boost::asio::deadline_timer>  deadline_timer_ptr_type;
+			deadline_timer_ptr_type handshake_timer;
+			//! handshake timer handler
+			void handle_handshake_timer(const boost::system::error_code& error);
+			//! handshake timeout
+			int handshake_timeout;
+			//! handshaked flag
+			bool handshaked;
+
 			//! sorryserver socket
 			socket_element sorryserver_socket;
 			//! up thread use realserver socket map

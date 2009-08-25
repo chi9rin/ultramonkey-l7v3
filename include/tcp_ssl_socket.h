@@ -96,8 +96,7 @@ namespace l7vs{
 			bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec);
 			//! handshake socket
 			//! @param[in]		handshake_type is handshaking as a server or client
-			//! @param[out]		ec is reference error code object
-			bool handshake(boost::asio::ssl::stream_base::handshake_type type, boost::system::error_code& ec);
+			bool handshake(boost::asio::ssl::stream_base::handshake_type type);
 			//! accept
 			void accept();
 			//! close socket

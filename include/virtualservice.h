@@ -87,6 +87,8 @@
 #define DEFAULT_SESSION_CACHE_MODE	SSL_SESS_CACHE_SERVER			//! "on"
 #define DEFAULT_SESSION_CACHE_SIZE	SSL_SESSION_CACHE_MAX_SIZE_DEFAULT	//! 20480
 #define DEFAULT_SESSION_CACHE_TIMEOUT	300
+//! SSL handshake timeout default
+#define DEFAULT_HANDSHAKE_TIMEOUT	10
 
 namespace l7vs{
 
@@ -360,6 +362,8 @@ protected:
 	long						session_cache_mode;
 	long						session_cache_size;
 	long						session_cache_timeout;
+	// SSL handshake timer parameter
+	int						handshake_timeout;
 	// SSL functions
 	std::string					get_ssl_password();
 	bool						get_ssl_parameter();
