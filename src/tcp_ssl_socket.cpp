@@ -93,37 +93,68 @@ namespace l7vs{
 	//! @return 		false is handshake failure
 	bool tcp_ssl_socket::handshake(boost::asio::ssl::stream_base::handshake_type type)
 	{
-		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_ssl_socket::handshake", __FILE__, __LINE__ );
+		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+			Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_ssl_socket::handshake", __FILE__, __LINE__);
 		}
 
 		rw_scoped_lock scope_lock(close_mutex);
 
-		bool bres = true;
+		bool bres = false;
+		bool retryed = false;
 		boost::system::error_code ec;
-		my_socket.handshake(type, ec);
-		if(ec) {
-			//----Debug log----------------------------------------------------------------------
-			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-				std::stringstream buf;
-				buf << "Thread ID[";
-				buf << boost::this_thread::get_id();
-				buf << "] tcp_ssl_socket::handshake [";
-				buf << ec.message();
-				buf << "]";
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+		while (true) {
+			my_socket.handshake(type, ec);
+			if (ec) {
+				if (ec == boost::asio::error::try_again) {
+					if (!retryed) {
+						retryed = true;
+						// retry handshake (try_again[Resource temporarily unavailable])
+						//----Debug log----------------------------------------------------------------------
+						if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+							std::stringstream buf;
+							buf << "Thread ID[";
+							buf << boost::this_thread::get_id();
+							buf << "] tcp_ssl_socket::handshake : retry handshake";
+							Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
+						}
+						//----Debug log----------------------------------------------------------------------
+					}
+				} else {
+					// handshake NG
+					//ERROR
+					Logger::putLogError(LOG_CAT_L7VSD_SESSION, 999, "ssl socket handshaking failed" , __FILE__, __LINE__);
+					//----Debug log----------------------------------------------------------------------
+					if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+						std::stringstream buf;
+						buf << "Thread ID[";
+						buf << boost::this_thread::get_id();
+						buf << "] tcp_ssl_socket::handshake [";
+						buf << ec.message();
+						buf << "]";
+						Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
+					}
+					//----Debug log----------------------------------------------------------------------
+					break;
+				}
+			} else {
+				// handshake OK
+				bres = true;
+				//----Debug log----------------------------------------------------------------------
+				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+					std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] tcp_ssl_socket::handshake : handshake OK";
+					Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
+				}
+				//----Debug log----------------------------------------------------------------------
+				break;
 			}
-			//----Debug log----------------------------------------------------------------------
-			// if error_code is try_again[Resource temporarily unavailable] then not error.
-			// (l7vsd-3.x-shamshel-refine is same too.)
-			if (ec != boost::asio::error::try_again) {
-				bres = false;
-				//ERROR
-				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl socket handshaking failed" , __FILE__, __LINE__ );
-			}
+			boost::this_thread::yield();
 		}
-		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_ssl_socket::handshake", __FILE__, __LINE__ );
+
+		if (unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+			Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_ssl_socket::handshake", __FILE__, __LINE__);
 		}
 		return bres;
 	}

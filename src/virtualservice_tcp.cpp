@@ -556,6 +556,9 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "set ssl config failed", __FILE__, __LINE__ );
 			return;
 		}
+//		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+			print_ssl_config();
+//		}
 	}
 
 	//create session pool
@@ -1877,4 +1880,33 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 	}
 
 	return true;
+}
+
+void l7vs::virtualservice_tcp::print_ssl_config()
+{
+	std::stringstream buf;
+	buf << "Print SSL configuration ";
+	buf << "Verify mode["   << SSL_CTX_get_verify_mode(sslcontext.impl())        << "] ";
+	buf << "Verify depth["  << SSL_CTX_get_verify_depth(sslcontext.impl())       << "] ";
+	buf << "SSL options["   << SSL_CTX_get_options(sslcontext.impl())            << "] ";
+	buf << "Cache mode["    << SSL_CTX_get_session_cache_mode(sslcontext.impl()) << "] ";
+	buf << "Cache size["    << SSL_CTX_sess_get_cache_size(sslcontext.impl())    << "] ";
+	buf << "Cache timeout[" << SSL_CTX_get_timeout(sslcontext.impl())            << "] ";
+	Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+}
+
+
+void l7vs::virtualservice_tcp::print_ssl_session()
+{
+	std::stringstream buf;
+	buf << "Print SSL session cache ";
+	buf << "Session number["     << SSL_CTX_sess_number(sslcontext.impl())             << "] ";
+	buf << "Accept["             << SSL_CTX_sess_accept(sslcontext.impl())             << "] ";
+	buf << "Accept good["        << SSL_CTX_sess_accept_good(sslcontext.impl())        << "] ";
+	buf << "Accept renegotiate[" << SSL_CTX_sess_accept_renegotiate(sslcontext.impl()) << "] ";
+	buf << "Hits["               << SSL_CTX_sess_hits(sslcontext.impl())               << "] ";
+	buf << "Misses["             << SSL_CTX_sess_misses(sslcontext.impl())             << "] ";
+	buf << "Timeouts["           << SSL_CTX_sess_timeouts(sslcontext.impl())           << "] ";
+	buf << "Cache full["         << SSL_CTX_sess_cache_full(sslcontext.impl())         << "] ";
+	Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
 }

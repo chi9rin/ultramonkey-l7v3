@@ -368,6 +368,7 @@ protected:
 	std::string					get_ssl_password();
 	bool						get_ssl_parameter();
 	bool						set_ssl_config();
+	void						print_ssl_config();
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
@@ -401,6 +402,8 @@ public:
 	void						release_session( const tcp_session* session_ptr );
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
+
+	void						print_ssl_session();
 };
 
 //!

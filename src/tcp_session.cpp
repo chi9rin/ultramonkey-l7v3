@@ -940,6 +940,16 @@ namespace l7vs{
 		
 		up_thread_all_socket_close();
 		thread_state_update(UP_THREAD_ACTIVE,false);
+
+		if (ssl_sess_flag) {
+			//----Debug log----------------------------------------------------------------------
+//			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+				// print session information
+				parent_service.print_ssl_session();
+//			}
+			//----Debug log----------------------------------------------------------------------
+		}
+
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 			std::stringstream buf;
@@ -1198,7 +1208,7 @@ namespace l7vs{
 		}
 		//----Debug log----------------------------------------------------------------------
 	}
-	//! up thread raise module event of handle_accept
+	//! up thread raise module event of handle_accept and do handshake
 	//! @param[in]		process_type is prosecess type
 	void tcp_session::up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type){
 		
@@ -1238,7 +1248,10 @@ namespace l7vs{
 			handshake_timer->async_wait(boost::bind(&tcp_session::handle_handshake_timer, 
 							       this,
 							       boost::asio::placeholders::error));
+			// do handshake.
 			bool bres = client_ssl_socket.handshake(boost::asio::ssl::stream_base::server);
+			// handshke timer operation cancel.
+			handshake_timer->cancel();
 			if (unlikely(!bres)) {
 				//Error handshake failed
 				std::stringstream buf;
@@ -1249,6 +1262,8 @@ namespace l7vs{
 				up_thread_exit(process_type);
 				return;
 			}
+			// set handshaked flag.
+			handshaked = true;
 			//----Debug log----------------------------------------------------------------------
 			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
 				std::stringstream buf;
@@ -1276,6 +1291,7 @@ namespace l7vs{
 	}
 
 	//! handshake timer handler
+	//! @param[in]		error is timer operation result error code
 	void tcp_session::handle_handshake_timer(const boost::system::error_code& error) {
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1363,21 +1379,6 @@ namespace l7vs{
 		UP_THREAD_FUNC_TYPE_TAG func_tag;
 		if(!ec){
 			if(recv_size > 0){
-				// when some client data received. handshakeing is complete.
-				if (ssl_sess_flag && !handshaked) {
-					// set handshaked flag and handshke timer operation cancel.
-					handshaked = true;
-					handshake_timer->cancel();
-					//----Debug log----------------------------------------------------------------------
-					if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-						std::stringstream buf;
-						buf << "Thread ID[";
-						buf << boost::this_thread::get_id();
-						buf << "] ssl session handshakeing is complete";
-						Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-					}
-					//----Debug log----------------------------------------------------------------------
-				}
 				//----Debug log----------------------------------------------------------------------
 				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
 					boost::asio::ip::tcp::endpoint client_endpoint;
