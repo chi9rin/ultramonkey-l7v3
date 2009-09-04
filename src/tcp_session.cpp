@@ -516,6 +516,14 @@ namespace l7vs{
 			msg.flag = true;
 			msg.message = "Not fond protocol module";
 		}
+
+		// Reset SSL structure to allow another connection.
+		if (ssl_sess_flag) {
+			if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
+			}
+		}
+
 		return msg;
 	}
 	//! get reference client side socket
