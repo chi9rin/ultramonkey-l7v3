@@ -36,6 +36,12 @@
 
 #include "utility.h"
 
+
+//static int new_session_cb(SSL *ssl, SSL_SESSION *session);
+//static SSL_SESSION *get_session_cb(SSL *ssl, unsigned char *ssid, int ssid_len, int *ref);
+//static void remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *session);
+
+
 // imprementation for virtualservice_tcp
 /*!
  * virtualservice_tcp class constructor.
@@ -565,7 +571,13 @@ void	l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
 	{
 		for( int i = 0; i < param_data.session_pool_size; ++i ){
 			try{
-				tcp_session*	sess	= new tcp_session( *this, dispatcher, ssl_vs_flag, sslcontext, handshake_timeout, set_sock_opt);
+				tcp_session*	sess	= new tcp_session(*this,
+									  dispatcher,
+									  ssl_vs_flag,
+									  sslcontext,
+									  handshake_timeout,
+									  is_session_cache_use,
+									  set_sock_opt);
 				session_result_message	result	= sess->initialize();
 				if( result.flag == true ){
 					err.setter( result.flag, result.message );
@@ -1866,10 +1878,21 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 			SSL_CTX_set_session_id_context(sslcontext.impl(), (const unsigned char *)"sslproxy", 8);
 			// Set session cache mode on the context.
 			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
+//			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_AUTO_CLEAR);
+//			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_INTERNAL);
 			// Set session cache size on the context.
 			SSL_CTX_sess_set_cache_size(sslcontext.impl(), session_cache_size);
 			// Set session cache timeout on the context.
 			SSL_CTX_set_timeout(sslcontext.impl(), session_cache_timeout);
+
+//// For external SSL session cache
+//			// Set SSL session cache callback function.(new/get/remove)
+//			int (*pFunc)(ssl_st*, SSL_SESSION*) = &virtualservice_tcp::new_session_cb;
+//			SSL_CTX_sess_set_new_cb(sslcontext.impl(), pFunc);
+//			SSL_CTX_sess_set_new_cb(sslcontext.impl(), new_session_cb);
+//			SSL_CTX_sess_set_get_cb(sslcontext.impl(), get_session_cb);
+//			SSL_CTX_sess_set_remove_cb(sslcontext.impl(), remove_session_cb);
+
 		} else {
 			// session cache OFF.
 			SSL_CTX_set_session_cache_mode(sslcontext.impl(), SSL_SESS_CACHE_OFF);
@@ -1881,6 +1904,264 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 
 	return true;
 }
+
+
+/*
+//// For external SSL session cache
+//! SSL session cache table
+//std::map<std::string, SSL_SESSION>		sessioncacheTable;
+//boost::mutex					sessioncacheTable_mutex;
+
+#define MAX_SESSION_ID_SIZE SSL_MAX_SSL_SESSION_ID_LENGTH * 2 + 1
+#define MAX_SESSION_CACHE_SIZE 10
+
+//static int new_session_cb(SSL *ssl, SSL_SESSION *session)
+int l7vs::virtualservice_tcp::new_session_cb(SSL *ssl, SSL_SESSION *session)
+{
+	{
+		std::stringstream buf;
+		buf << "Callback new_session_cb() SSL_MAX_SSL_SESSION_ID_LENGTH[";
+		buf << SSL_MAX_SSL_SESSION_ID_LENGTH;
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+
+	char session_key[MAX_SESSION_ID_SIZE] = {0};
+
+	// Make session_key for add.
+	for (unsigned int i = 0; i < session->session_id_length; i++) {
+		sprintf(session_key, "%s%02X", session_key, session->session_id[i]);
+	}
+	session_key[strlen(session_key)] = '\0';
+
+	struct timeval now;
+
+	gettimeofday(&now, NULL);
+
+	std::vector<std::string> cleanup_list;
+
+	boost::mutex::scoped_lock sclock(sessioncacheTable_mutex);
+
+	if (sessioncacheTable.size() >= MAX_SESSION_CACHE_SIZE) {
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : sessioncacheTable overflow. Cleanup session.", __FILE__, __LINE__ );
+
+		std::map<std::string, SSL_SESSION>::iterator it = sessioncacheTable.begin();
+		std::map<std::string, SSL_SESSION>::iterator ite = sessioncacheTable.end();
+
+		for (std::map<std::string, SSL_SESSION>::iterator its = it; its != ite; its++) {
+			{
+				std::stringstream buf;
+				buf << "For clean session.time[";
+				buf << its->second.time;
+				buf << "] session.timeout[";
+				buf << its->second.timeout;
+				buf << "] now[";
+				buf << now.tv_sec;
+				buf << "]";
+				l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+			}
+			{
+				std::stringstream buf;
+				buf << "For clean session_id[";
+				buf << its->first;
+				buf << "]";
+				l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+			}
+			// Check expire.
+			if (its->second.time + its->second.timeout < now.tv_sec) {
+				cleanup_list.push_back(its->first);
+				// sessioncacheTable.erase(its);
+				// 消した状態でイテレータループまわすと消したものにもアクセスする？
+				l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Expire session found.", __FILE__, __LINE__ );
+			}
+		}
+		{
+			std::stringstream buf;
+			buf << "In new_session_cb() : Expire session count[";
+			buf << cleanup_list.size();
+			buf << "]";
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+		}
+		for (unsigned int i = 0; i < cleanup_list.size(); i++) {
+			sessioncacheTable.erase(cleanup_list[i]);
+		}
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Cleanup END.", __FILE__, __LINE__ );
+	}
+
+	std::string ssid = boost::lexical_cast<std::string>(session_key);
+	{
+		std::stringstream buf;
+		buf << "String session_id[";
+		buf << ssid;
+		buf << "] len[";
+		buf << ssid.size();
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+	{
+		std::stringstream buf;
+		buf << "For new session.time[";
+		buf << session->time;
+		buf << "] session.timeout[";
+		buf << session->timeout;
+		buf << "] now[";
+		buf << now.tv_sec;
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+
+	if (sessioncacheTable.size() < MAX_SESSION_CACHE_SIZE) {
+		if (sessioncacheTable.end() != sessioncacheTable.find(ssid)) {
+			sessioncacheTable.erase(ssid);
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Session already exist. Session erased.", __FILE__, __LINE__ );
+		}
+		memcpy(&sessioncacheTable[ssid], session, sizeof(SSL_SESSION));
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Session added.", __FILE__, __LINE__ );
+	} else {
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : sessioncacheTable overflow. Session not added.", __FILE__, __LINE__ );
+	}
+
+	{
+		std::stringstream buf;
+		buf << "sessioncacheTable.size[";
+		buf << sessioncacheTable.size();
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+
+	return 0;
+}
+
+//static SSL_SESSION* get_session_cb(SSL *ssl, unsigned char *session_id, int session_id_len, int *ref)
+SSL_SESSION* l7vs::virtualservice_tcp::get_session_cb(SSL *ssl, unsigned char *session_id, int session_id_len, int *ref)
+{
+	l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Callback get_session_cb()", __FILE__, __LINE__ );
+
+	char session_key[MAX_SESSION_ID_SIZE] = {0};
+
+	// Make session_key for get.
+	for (int i = 0; i < session_id_len; i++) {
+		sprintf(session_key, "%s%02X", session_key, session_id[i]);
+	}
+	session_key[strlen(session_key)] = '\0';
+
+	SSL_SESSION *ret_session = NULL;
+	struct timeval now;
+
+	gettimeofday(&now, NULL);
+
+	boost::mutex::scoped_lock sclock(sessioncacheTable_mutex);
+
+	std::string ssid = boost::lexical_cast<std::string>(session_key);
+	{
+		std::stringstream buf;
+		buf << "String session_id[";
+		buf << ssid;
+		buf << "] len[";
+		buf << ssid.size();
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+
+	if (sessioncacheTable.end() != sessioncacheTable.find(ssid)) {
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Session found.", __FILE__, __LINE__ );
+		{
+			std::stringstream buf;
+			buf << "For get sessioncacheTable[ssid].time[";
+			buf << sessioncacheTable[ssid].time;
+			buf << "] sessioncacheTable[ssid].timeout[";
+			buf << sessioncacheTable[ssid].timeout;
+			buf << "] now[";
+			buf << now.tv_sec;
+			buf << "]";
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+		}
+		// Check expire.
+		if (sessioncacheTable[ssid].time + sessioncacheTable[ssid].time < now.tv_sec) {
+			sessioncacheTable.erase(ssid);
+			ret_session = NULL;
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Session expired. Session erased.", __FILE__, __LINE__ );
+		} else {
+			ret_session = &sessioncacheTable[ssid];
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Get session OK.", __FILE__, __LINE__ );
+		}
+	} else {
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Session not found.", __FILE__, __LINE__ );
+	}
+
+	ref = 0;
+	return ret_session;
+}
+
+//static void remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *session)
+void l7vs::virtualservice_tcp::remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *session)
+{
+	l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Callback remove_session_cb()", __FILE__, __LINE__ );
+
+	char session_key[MAX_SESSION_ID_SIZE] = {0};
+
+	// Make session_key for add.
+	for (unsigned int i = 0; i < session->session_id_length; i++) {
+		sprintf(session_key, "%s%02X", session_key, session->session_id[i]);
+	}
+	session_key[strlen(session_key)] = '\0';
+
+	struct timeval now;
+
+	gettimeofday(&now, NULL);
+
+	boost::mutex::scoped_lock sclock(sessioncacheTable_mutex);
+
+	std::string ssid = boost::lexical_cast<std::string>(session->session_id);
+	{
+		std::stringstream buf;
+		buf << "String session_id[";
+		buf << ssid;
+		buf << "] len[";
+		buf << ssid.size();
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+	{
+		std::stringstream buf;
+		buf << "For remove session.time[";
+		buf << session->time;
+		buf << "] session.timeout[";
+		buf << session->timeout;
+		buf << "] now[";
+		buf << now.tv_sec;
+		buf << "]";
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+	}
+	if(sessioncacheTable.end() != sessioncacheTable.find(ssid)) {
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Session found. ", __FILE__, __LINE__ );
+		{
+			std::stringstream buf;
+			buf << "sessioncacheTable[ssid].time[";
+			buf << sessioncacheTable[ssid].time;
+			buf << "] sessioncacheTable[ssid].timeout[";
+			buf << sessioncacheTable[ssid].timeout;
+			buf << "] now[";
+			buf << now.tv_sec;
+			buf << "]";
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
+		}
+		// Check expire.
+		if (sessioncacheTable[ssid].time + sessioncacheTable[ssid].time < now.tv_sec) {
+			sessioncacheTable.erase(ssid);
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Remove session OK.", __FILE__, __LINE__ );
+		} else {
+			l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Session not expired. Session not erased.", __FILE__, __LINE__ );
+		}
+	} else {
+		l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Session not found.", __FILE__, __LINE__ );
+	}
+
+	return;
+}
+//// For external SSL session cache
+*/
+
 
 void l7vs::virtualservice_tcp::print_ssl_config()
 {

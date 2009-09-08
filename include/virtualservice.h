@@ -404,6 +404,18 @@ public:
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
 
 	void						print_ssl_session();
+
+
+////For external SSL session cache
+//	//! SSL session cache table
+//	std::map<std::string, SSL_SESSION>		sessioncacheTable;
+//	boost::mutex					sessioncacheTable_mutex;
+//	//! SSL session cache callback functions
+//	int						new_session_cb(SSL *ssl, SSL_SESSION *session);
+//	SSL_SESSION*					get_session_cb(SSL *ssl, unsigned char *session_id, int session_id_len, int *ref);
+//	void						remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *session);
+
+
 };
 
 //!

@@ -83,7 +83,8 @@ namespace l7vs{
 				    boost::asio::io_service& session_io,
 				    bool flag,
 				    boost::asio::ssl::context& context,
-				    int timeout);
+				    int timeout,
+				    bool is_cache_use);
 
 			//! construcor
 			//! @param[in/out]	vs is parent virtualservice object
@@ -97,6 +98,7 @@ namespace l7vs{
 				    bool flag,
 				    boost::asio::ssl::context& context,
 				    int timeout,
+				    bool is_cache_use,
 				    const tcp_socket_option_info set_option);
 
 			//! destructor
@@ -213,6 +215,10 @@ namespace l7vs{
 			int handshake_timeout;
 			//! handshaked flag
 			bool handshaked;
+			//! ssl session cache flag
+			bool sess_cache_flag;
+			//! reset ssl object for reuse
+			int ssl_clear_keep_cache(SSL *s);
 
 			//! sorryserver socket
 			socket_element sorryserver_socket;

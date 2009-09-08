@@ -47,7 +47,8 @@ namespace l7vs{
 				 boost::asio::io_service& session_io,
 				 bool flag,
 				 boost::asio::ssl::context& context,
-				 int timeout)
+				 int timeout,
+				 bool is_cache_use)
 		:
 		io(session_io),
 		parent_service(vs),
@@ -59,6 +60,7 @@ namespace l7vs{
 		client_ssl_socket(session_io, context),
 		ssl_sess_flag(flag),
 		handshake_timeout(timeout),
+		sess_cache_flag(is_cache_use),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192){
 			
@@ -244,6 +246,7 @@ namespace l7vs{
 				 bool flag,
 				 boost::asio::ssl::context& context,
 				 int timeout,
+				 bool is_cache_use,
 				 tcp_socket_option_info set_option)
 		:
 		io(session_io),
@@ -256,6 +259,7 @@ namespace l7vs{
 		client_ssl_socket(session_io, context, set_option),
 		ssl_sess_flag(flag),
 		handshake_timeout(timeout),
+		sess_cache_flag(is_cache_use),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192),
 		socket_opt_info(set_option){
@@ -519,13 +523,102 @@ namespace l7vs{
 
 		// Reset SSL structure to allow another connection.
 		if (ssl_sess_flag) {
-			if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
+			if (sess_cache_flag) {
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "Do ssl_clear_keep_cache()", __FILE__, __LINE__ );
+				if (ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0) {
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
+				}
+			} else {
+				if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
+				}
 			}
 		}
 
 		return msg;
 	}
+
+	//! reset ssl object for reuse (keep SSL session cache)
+	//! @param[in]		ssl object
+	//! @return 		1 is clear OK
+	//! @return 		0 is clear NG
+	int tcp_session::ssl_clear_keep_cache(SSL *s)
+	{
+		if (s->method == NULL) {
+			SSLerr(SSL_F_SSL_CLEAR,SSL_R_NO_METHOD_SPECIFIED);
+			return(0);
+		}
+
+		s->session=NULL;
+
+		s->error=0;
+		s->hit=0;
+		s->shutdown=0;
+
+		if (s->new_session) {
+			SSLerr(SSL_F_SSL_CLEAR,ERR_R_INTERNAL_ERROR);
+			return 0;
+		}
+
+		s->type=0;
+
+		s->state=SSL_ST_BEFORE|((s->server)?SSL_ST_ACCEPT:SSL_ST_CONNECT);
+
+		s->version=s->method->version;
+		s->client_version=s->version;
+		s->rwstate=SSL_NOTHING;
+		s->rstate=SSL_ST_READ_HEADER;
+
+		if (s->init_buf != NULL) {
+			BUF_MEM_free(s->init_buf);
+			s->init_buf=NULL;
+		}
+
+//		ssl_clear_cipher_ctx(s);
+//void ssl_clear_cipher_ctx(SSL *s)
+//	{
+	if (s->enc_read_ctx != NULL)
+		{
+		EVP_CIPHER_CTX_cleanup(s->enc_read_ctx);
+		OPENSSL_free(s->enc_read_ctx);
+		s->enc_read_ctx=NULL;
+		}
+	if (s->enc_write_ctx != NULL)
+		{
+		EVP_CIPHER_CTX_cleanup(s->enc_write_ctx);
+		OPENSSL_free(s->enc_write_ctx);
+		s->enc_write_ctx=NULL;
+		}
+//#ifndef OPENSSL_NO_COMP
+//	if (s->expand != NULL)
+//		{
+//		COMP_CTX_free(s->expand);
+//		s->expand=NULL;
+//		}
+//	if (s->compress != NULL)
+//		{
+//		COMP_CTX_free(s->compress);
+//		s->compress=NULL;
+//		}
+//#endif
+//	}
+
+		s->first_packet=0;
+
+		/* Check to see if we were changed into a different method, if
+		 * so, revert back if we are not doing session-id reuse. */
+		if (!s->in_handshake && (s->session == NULL) && (s->method != s->ctx->method)) {
+			s->method->ssl_free(s);
+			s->method=s->ctx->method;
+			if (!s->method->ssl_new(s)) {
+				return(0);
+			}
+		} else {
+			s->method->ssl_clear(s);
+		}
+		return(1);
+	}
+
 	//! get reference client side socket
 	//! @return			reference client side socket
 	boost::asio::ip::tcp::socket& tcp_session::get_client_socket()
