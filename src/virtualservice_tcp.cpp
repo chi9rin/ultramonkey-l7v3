@@ -1816,7 +1816,8 @@ bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 	is_session_cache_use = true;
 	if (is_session_cache_use) {
 		session_cache_mode = DEFAULT_SESSION_CACHE_MODE;
-		session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
+//		session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
+		session_cache_size = 10;
 //		session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
 		session_cache_timeout = 60;
 	}
@@ -1877,8 +1878,8 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 			// Set session id context on the context.
 			SSL_CTX_set_session_id_context(sslcontext.impl(), (const unsigned char *)"sslproxy", 8);
 			// Set session cache mode on the context.
-			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
-//			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_AUTO_CLEAR);
+//			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
+			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_AUTO_CLEAR);
 //			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_INTERNAL);
 			// Set session cache size on the context.
 			SSL_CTX_sess_set_cache_size(sslcontext.impl(), session_cache_size);

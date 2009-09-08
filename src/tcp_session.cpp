@@ -61,6 +61,7 @@ namespace l7vs{
 		ssl_sess_flag(flag),
 		handshake_timeout(timeout),
 		sess_cache_flag(is_cache_use),
+		ssl_context(context),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192){
 			
@@ -260,6 +261,7 @@ namespace l7vs{
 		ssl_sess_flag(flag),
 		handshake_timeout(timeout),
 		sess_cache_flag(is_cache_use),
+		ssl_context(context),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192),
 		socket_opt_info(set_option){
@@ -528,6 +530,7 @@ namespace l7vs{
 				if (ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0) {
 					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
 				}
+				SSL_CTX_flush_sessions(ssl_context.impl(), time(0));
 			} else {
 				if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
 					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
@@ -574,40 +577,32 @@ namespace l7vs{
 			s->init_buf=NULL;
 		}
 
-//		ssl_clear_cipher_ctx(s);
-//void ssl_clear_cipher_ctx(SSL *s)
-//	{
-	if (s->enc_read_ctx != NULL)
-		{
-		EVP_CIPHER_CTX_cleanup(s->enc_read_ctx);
-		OPENSSL_free(s->enc_read_ctx);
-		s->enc_read_ctx=NULL;
+		// ssl_clear_cipher_ctx(SSL *s)
+		if (s->enc_read_ctx != NULL) {
+			EVP_CIPHER_CTX_cleanup(s->enc_read_ctx);
+			OPENSSL_free(s->enc_read_ctx);
+			s->enc_read_ctx=NULL;
 		}
-	if (s->enc_write_ctx != NULL)
-		{
-		EVP_CIPHER_CTX_cleanup(s->enc_write_ctx);
-		OPENSSL_free(s->enc_write_ctx);
-		s->enc_write_ctx=NULL;
+		if (s->enc_write_ctx != NULL) {
+			EVP_CIPHER_CTX_cleanup(s->enc_write_ctx);
+			OPENSSL_free(s->enc_write_ctx);
+			s->enc_write_ctx=NULL;
 		}
-//#ifndef OPENSSL_NO_COMP
-//	if (s->expand != NULL)
-//		{
-//		COMP_CTX_free(s->expand);
-//		s->expand=NULL;
-//		}
-//	if (s->compress != NULL)
-//		{
-//		COMP_CTX_free(s->compress);
-//		s->compress=NULL;
-//		}
-//#endif
-//	}
+		if (s->expand != NULL) {
+			COMP_CTX_free(s->expand);
+			s->expand=NULL;
+		}
+		if (s->compress != NULL) {
+			COMP_CTX_free(s->compress);
+			s->compress=NULL;
+		}
 
 		s->first_packet=0;
 
 		/* Check to see if we were changed into a different method, if
 		 * so, revert back if we are not doing session-id reuse. */
 		if (!s->in_handshake && (s->session == NULL) && (s->method != s->ctx->method)) {
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "In ssl_clear_keep_cache() method changed", __FILE__, __LINE__ );
 			s->method->ssl_free(s);
 			s->method=s->ctx->method;
 			if (!s->method->ssl_new(s)) {
