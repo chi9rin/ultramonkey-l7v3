@@ -72,22 +72,31 @@
 //! SSL method default
 #define DEFAULT_SSL_METHOD		boost::asio::ssl::context::sslv23	//! SSLv23_method
 //! SSL context default
-#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/"
-#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/"
-#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/"
+//#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/"
+#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/cert/"
+//#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/cert/"
+//#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/cert/"
 #define DEFAULT_PRIVATE_KEY_FILETYPE	boost::asio::ssl::context::pem		//! SSL_FILETYPE_PEM
-#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/"
-#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
+//#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/"
+#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/cert/"
+//#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
+#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_NONE)
 #define DEFAULT_VERIFY_CERT_DEPTH	9
 #define DEFAULT_SSL_OPTIONS		(SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_SINGLE_DH_USE)
-#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/"
+//#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/cert/"
 #define DEFAULT_CIPHER_LIST		"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 #define MAX_PASSWD_SIZE			256
 //! SSL session cache default
-#define DEFAULT_SESSION_CACHE_MODE	SSL_SESS_CACHE_SERVER			//! "on"
+//#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR)	//! "on"
+#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_OFF)
 #define DEFAULT_SESSION_CACHE_SIZE	SSL_SESSION_CACHE_MAX_SIZE_DEFAULT	//! 20480
-#define DEFAULT_SESSION_CACHE_TIMEOUT	300
+//#define DEFAULT_SESSION_CACHE_TIMEOUT	300
+#define DEFAULT_SESSION_CACHE_TIMEOUT	60
 //! SSL handshake timeout default
+//#define DEFAULT_HANDSHAKE_TIMEOUT	30
 #define DEFAULT_HANDSHAKE_TIMEOUT	10
 
 namespace l7vs{

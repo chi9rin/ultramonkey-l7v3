@@ -1777,36 +1777,27 @@ bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 //	}
 
 	// SSL context parameter
-//	ca_dir = DEFAULT_CA_DIR;
-	ca_dir = "/etc/l7vs/sslproxy/cert/";
+	ca_dir = DEFAULT_CA_DIR;
 	ca_file = "rootCA.pem";
 
-//	cert_chain_dir = DEFAULT_CERT_CHAIN_DIR;
-	cert_chain_dir = "/etc/l7vs/sslproxy/cert/";
+	cert_chain_dir = DEFAULT_CERT_CHAIN_DIR;
 	cert_chain_file = "server.pem";
 
-//	private_key_dir = DEFAULT_PRIVATE_KEY_DIR;
-	private_key_dir = "/etc/l7vs/sslproxy/cert/";
+	private_key_dir = DEFAULT_PRIVATE_KEY_DIR;
 	private_key_file = "server.pem";
 	private_key_filetype = DEFAULT_PRIVATE_KEY_FILETYPE;
 
-//	private_key_passwd_dir = "/etc/l7vs/sslproxy/cert/";
-	private_key_passwd_dir = "/etc/l7vs/sslproxy/cert/";
+	private_key_passwd_dir = DEFAULT_PRIVATE_KEY_PASSWD_DIR;
 	private_key_passwd_file = "server.pass";
 
-//	verify_options = DEFAULT_VERIFY_OPTIONS;
-	verify_options = (SSL_VERIFY_NONE);
+	verify_options = DEFAULT_VERIFY_OPTIONS;
 	verify_cert_depth = DEFAULT_VERIFY_CERT_DEPTH;
 
 	ssl_options = DEFAULT_SSL_OPTIONS;
-//	ssl_options = (boost::asio::ssl::context::default_workarounds |
-//		       boost::asio::ssl::context::no_sslv2 |
-//		       boost::asio::ssl::context::single_dh_use);
 
 	is_tmp_dh_use = true;
 	if (is_tmp_dh_use) {
-//		tmp_dh_dir = DEFAULT_TMP_DH_DIR;
-		tmp_dh_dir = "/etc/l7vs/sslproxy/cert/";
+		tmp_dh_dir = DEFAULT_TMP_DH_DIR;
 		tmp_dh_file = "dh512.pem";
 	}
 
@@ -1816,14 +1807,39 @@ bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 	is_session_cache_use = true;
 	if (is_session_cache_use) {
 		session_cache_mode = DEFAULT_SESSION_CACHE_MODE;
-//		session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
-		session_cache_size = 10;
-//		session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
-		session_cache_timeout = 60;
+		session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
+		session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
 	}
 
 	// SSL handshake timer parameter
 	handshake_timeout = DEFAULT_HANDSHAKE_TIMEOUT;
+
+	std::stringstream buf;
+	buf << "Print SSL parameter ";
+	buf << "ca_dir["			<< ca_dir			<< "] ";
+	buf << "ca_file["			<< ca_file			<< "] ";
+	buf << "cert_chain_dir["		<< cert_chain_dir		<< "] ";
+	buf << "cert_chain_file["		<< cert_chain_file		<< "] ";
+	buf << "private_key_dir["		<< private_key_dir		<< "] ";
+	buf << "private_key_file["		<< private_key_file		<< "] ";
+	buf << "private_key_filetype["		<< private_key_filetype		<< "] ";
+	buf << "private_key_passwd_dir["	<< private_key_passwd_dir	<< "] ";
+	buf << "private_key_passwd_file["	<< private_key_passwd_file	<< "] ";
+	buf << "verify_options["		<< verify_options		<< "] ";
+	buf << "verify_cert_depth["		<< verify_cert_depth		<< "] ";
+	buf << "ssl_options["			<< ssl_options			<< "] ";
+	if (is_tmp_dh_use) {
+		buf << "tmp_dh_dir["		<< tmp_dh_dir			<< "] ";
+		buf << "tmp_dh_file["		<< tmp_dh_file			<< "] ";
+	}
+	buf << "cipher_list["			<< cipher_list			<< "] ";
+	if (is_session_cache_use) {
+		buf << "session_cache_mode["	<< session_cache_mode		<< "] ";
+		buf << "session_cache_size["	<< session_cache_size		<< "] ";
+		buf << "session_cache_timeout["	<< session_cache_timeout	<< "] ";
+	}
+	buf << "handshake_timeout["		<< handshake_timeout		<< "] ";
+	Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
 
 	bres = true;
 	return bres;
@@ -1878,8 +1894,8 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 			// Set session id context on the context.
 			SSL_CTX_set_session_id_context(sslcontext.impl(), (const unsigned char *)"sslproxy", 8);
 			// Set session cache mode on the context.
-//			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
-			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_AUTO_CLEAR);
+			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
+//// For external SSL session cache
 //			SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_INTERNAL);
 			// Set session cache size on the context.
 			SSL_CTX_sess_set_cache_size(sslcontext.impl(), session_cache_size);
@@ -1906,16 +1922,20 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 	return true;
 }
 
-
-/*
 //// For external SSL session cache
 //! SSL session cache table
 //std::map<std::string, SSL_SESSION>		sessioncacheTable;
 //boost::mutex					sessioncacheTable_mutex;
 
-#define MAX_SESSION_ID_SIZE SSL_MAX_SSL_SESSION_ID_LENGTH * 2 + 1
-#define MAX_SESSION_CACHE_SIZE 10
+//// For external SSL session cache
+//! default value of session-id size and session cache table size
+//#define MAX_SESSION_ID_SIZE SSL_MAX_SSL_SESSION_ID_LENGTH * 2 + 1
+//#define MAX_SESSION_CACHE_SIZE 10
 
+/*
+//// For external SSL session cache
+//! session callback functions (new/remove/get)
+//  global function -> OK. virtualservice_tcp class member function -> NG.
 //static int new_session_cb(SSL *ssl, SSL_SESSION *session)
 int l7vs::virtualservice_tcp::new_session_cb(SSL *ssl, SSL_SESSION *session)
 {
@@ -2163,32 +2183,30 @@ void l7vs::virtualservice_tcp::remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *
 //// For external SSL session cache
 */
 
-
 void l7vs::virtualservice_tcp::print_ssl_config()
 {
 	std::stringstream buf;
 	buf << "Print SSL configuration ";
-	buf << "Verify mode["   << SSL_CTX_get_verify_mode(sslcontext.impl())        << "] ";
-	buf << "Verify depth["  << SSL_CTX_get_verify_depth(sslcontext.impl())       << "] ";
-	buf << "SSL options["   << SSL_CTX_get_options(sslcontext.impl())            << "] ";
-	buf << "Cache mode["    << SSL_CTX_get_session_cache_mode(sslcontext.impl()) << "] ";
-	buf << "Cache size["    << SSL_CTX_sess_get_cache_size(sslcontext.impl())    << "] ";
-	buf << "Cache timeout[" << SSL_CTX_get_timeout(sslcontext.impl())            << "] ";
+	buf << "Verify mode["	<< SSL_CTX_get_verify_mode(sslcontext.impl())		<< "] ";
+	buf << "Verify depth["	<< SSL_CTX_get_verify_depth(sslcontext.impl())		<< "] ";
+	buf << "SSL options["	<< SSL_CTX_get_options(sslcontext.impl())		<< "] ";
+	buf << "Cache mode["	<< SSL_CTX_get_session_cache_mode(sslcontext.impl())	<< "] ";
+	buf << "Cache size["	<< SSL_CTX_sess_get_cache_size(sslcontext.impl())	<< "] ";
+	buf << "Cache timeout["	<< SSL_CTX_get_timeout(sslcontext.impl())		<< "] ";
 	Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
 }
-
 
 void l7vs::virtualservice_tcp::print_ssl_session()
 {
 	std::stringstream buf;
 	buf << "Print SSL session cache ";
-	buf << "Session number["     << SSL_CTX_sess_number(sslcontext.impl())             << "] ";
-	buf << "Accept["             << SSL_CTX_sess_accept(sslcontext.impl())             << "] ";
-	buf << "Accept good["        << SSL_CTX_sess_accept_good(sslcontext.impl())        << "] ";
-	buf << "Accept renegotiate[" << SSL_CTX_sess_accept_renegotiate(sslcontext.impl()) << "] ";
-	buf << "Hits["               << SSL_CTX_sess_hits(sslcontext.impl())               << "] ";
-	buf << "Misses["             << SSL_CTX_sess_misses(sslcontext.impl())             << "] ";
-	buf << "Timeouts["           << SSL_CTX_sess_timeouts(sslcontext.impl())           << "] ";
-	buf << "Cache full["         << SSL_CTX_sess_cache_full(sslcontext.impl())         << "] ";
+	buf << "Session number["	<< SSL_CTX_sess_number(sslcontext.impl())		<< "] ";
+	buf << "Accept["		<< SSL_CTX_sess_accept(sslcontext.impl())		<< "] ";
+	buf << "Accept good["		<< SSL_CTX_sess_accept_good(sslcontext.impl())		<< "] ";
+	buf << "Accept renegotiate["	<< SSL_CTX_sess_accept_renegotiate(sslcontext.impl())	<< "] ";
+	buf << "Hits["			<< SSL_CTX_sess_hits(sslcontext.impl())			<< "] ";
+	buf << "Misses["		<< SSL_CTX_sess_misses(sslcontext.impl())		<< "] ";
+	buf << "Timeouts["		<< SSL_CTX_sess_timeouts(sslcontext.impl())		<< "] ";
+	buf << "Cache full["		<< SSL_CTX_sess_cache_full(sslcontext.impl())		<< "] ";
 	Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
 }

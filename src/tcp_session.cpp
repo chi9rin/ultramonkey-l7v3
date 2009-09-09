@@ -526,22 +526,31 @@ namespace l7vs{
 		// Reset SSL structure to allow another connection.
 		if (ssl_sess_flag) {
 			if (sess_cache_flag) {
-				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "Do ssl_clear_keep_cache()", __FILE__, __LINE__ );
 				if (ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0) {
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
 				}
+				// check expired cached sessions and do flushing
 				SSL_CTX_flush_sessions(ssl_context.impl(), time(0));
 			} else {
 				if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
 				}
 			}
+			//----Debug log----------------------------------------------------------------------
+//			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+				// print session information
+				parent_service.print_ssl_session();
+//			}
+			//----Debug log----------------------------------------------------------------------
 		}
 
 		return msg;
 	}
 
 	//! reset ssl object for reuse (keep SSL session cache)
+	//! this function based from SSL_clear(SSL *s) in OpenSSL.
+	//! keeping SSL session cache it by not executing ssl_clear_bad_session(s). 
+	//! OpenSSL ssl_lib.c code is GNU Public Licence.
 	//! @param[in]		ssl object
 	//! @return 		1 is clear OK
 	//! @return 		0 is clear NG
@@ -552,6 +561,8 @@ namespace l7vs{
 			return(0);
 		}
 
+		// not execute ssl_clear_bad_session(s) and SSL_SESSION_free(s->session)
+		// set NULL only
 		s->session=NULL;
 
 		s->error=0;
@@ -602,7 +613,7 @@ namespace l7vs{
 		/* Check to see if we were changed into a different method, if
 		 * so, revert back if we are not doing session-id reuse. */
 		if (!s->in_handshake && (s->session == NULL) && (s->method != s->ctx->method)) {
-			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "In ssl_clear_keep_cache() method changed", __FILE__, __LINE__ );
+//			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "In ssl_clear_keep_cache() method changed", __FILE__, __LINE__ );
 			s->method->ssl_free(s);
 			s->method=s->ctx->method;
 			if (!s->method->ssl_new(s)) {
@@ -1036,15 +1047,6 @@ namespace l7vs{
 		
 		up_thread_all_socket_close();
 		thread_state_update(UP_THREAD_ACTIVE,false);
-
-		if (ssl_sess_flag) {
-			//----Debug log----------------------------------------------------------------------
-//			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-				// print session information
-				parent_service.print_ssl_session();
-//			}
-			//----Debug log----------------------------------------------------------------------
-		}
 
 		//----Debug log----------------------------------------------------------------------
 		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
