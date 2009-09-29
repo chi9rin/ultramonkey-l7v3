@@ -219,8 +219,6 @@ namespace l7vs{
 			bool sess_cache_flag;
 			//! reset ssl object for reuse
 			int ssl_clear_keep_cache(SSL *s);
-			// SSL context
-			boost::asio::ssl::context& ssl_context;
 
 			//! sorryserver socket
 			socket_element sorryserver_socket;

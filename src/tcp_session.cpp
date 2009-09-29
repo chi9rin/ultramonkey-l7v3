@@ -61,7 +61,6 @@ namespace l7vs{
 		ssl_sess_flag(flag),
 		handshake_timeout(timeout),
 		sess_cache_flag(is_cache_use),
-		ssl_context(context),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192){
 			
@@ -261,7 +260,6 @@ namespace l7vs{
 		ssl_sess_flag(flag),
 		handshake_timeout(timeout),
 		sess_cache_flag(is_cache_use),
-		ssl_context(context),
 		upstream_buffer_size(8192),
 		downstream_buffer_size(8192),
 		socket_opt_info(set_option){
@@ -529,8 +527,8 @@ namespace l7vs{
 				if (ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0) {
 					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
 				}
-				// check expired cached sessions and do flushing
-				SSL_CTX_flush_sessions(ssl_context.impl(), time(0));
+				// do flush cached sessions
+				parent_service.flush_ssl_session();
 			} else {
 				if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
 					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
@@ -539,6 +537,7 @@ namespace l7vs{
 			//----Debug log----------------------------------------------------------------------
 //			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
 				// print session information
+				// Need ssl_context lock?
 				parent_service.print_ssl_session();
 //			}
 			//----Debug log----------------------------------------------------------------------
@@ -1468,7 +1467,7 @@ namespace l7vs{
 		up_thread_data_client_side.initialize();
 		boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_client_side.get_data();
 		boost::system::error_code ec;
-		size_t recv_size;
+		std::size_t recv_size;
 		if (!ssl_sess_flag) {
 			recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
 		} else {

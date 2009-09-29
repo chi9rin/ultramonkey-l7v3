@@ -124,7 +124,7 @@ namespace l7vs{
 					//ERROR
 					Logger::putLogError(LOG_CAT_L7VSD_SESSION, 999, "ssl socket handshaking failed" , __FILE__, __LINE__);
 					//----Debug log----------------------------------------------------------------------
-					if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+//					if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
 						std::stringstream buf;
 						buf << "Thread ID[";
 						buf << boost::this_thread::get_id();
@@ -132,7 +132,7 @@ namespace l7vs{
 						buf << ec.message();
 						buf << "]";
 						Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-					}
+//					}
 					//----Debug log----------------------------------------------------------------------
 					break;
 				}
@@ -296,7 +296,7 @@ namespace l7vs{
 				//set TCP_QUICKACK
 				if(opt_info.quickack_opt){
 					int val = opt_info.quickack_val;
-					size_t len = sizeof(val);
+					std::size_t len = sizeof(val);
 					boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
 					if (unlikely(!open_flag)) {
 						ec.clear();
@@ -313,7 +313,19 @@ namespace l7vs{
 				}
 				boost::this_thread::yield();
 				res_size = my_socket.read_some(buffers,ec);
+std::stringstream buf;
+buf << "my_socket.read_some(buffers,ec) res_size[";
+buf << res_size;
+buf << "]";
+Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str() , __FILE__, __LINE__ );
 				if(unlikely(ec)){
+std::stringstream buf;
+buf << "Thread ID[";
+buf << boost::this_thread::get_id();
+buf << "] tcp_ssl_socket::read_some [";
+buf << ec.message();
+buf << "]";
+Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
 					if (unlikely(!open_flag)) {
 						res_size = 0;
 						ec.clear();

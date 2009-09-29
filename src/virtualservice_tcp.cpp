@@ -1922,6 +1922,16 @@ bool	l7vs::virtualservice_tcp::set_ssl_config()
 	return true;
 }
 
+/*!
+ * flush ssl session
+ */
+void	l7vs::virtualservice_tcp::flush_ssl_session()
+{
+	// check expired cached sessions and do flushing
+	// Need ssl_context lock?
+	SSL_CTX_flush_sessions(sslcontext.impl(), time(0));
+}
+
 //// For external SSL session cache
 //! SSL session cache table
 //std::map<std::string, SSL_SESSION>		sessioncacheTable;
@@ -2198,6 +2208,7 @@ void l7vs::virtualservice_tcp::print_ssl_config()
 
 void l7vs::virtualservice_tcp::print_ssl_session()
 {
+	// Need Lock?
 	std::stringstream buf;
 	buf << "Print SSL session cache ";
 	buf << "Session number["	<< SSL_CTX_sess_number(sslcontext.impl())		<< "] ";

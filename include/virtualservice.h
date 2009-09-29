@@ -90,8 +90,8 @@
 #define DEFAULT_CIPHER_LIST		"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 #define MAX_PASSWD_SIZE			256
 //! SSL session cache default
-//#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR)	//! "on"
-#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_OFF)
+#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR)	//! "on"
+//#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_OFF)
 #define DEFAULT_SESSION_CACHE_SIZE	SSL_SESSION_CACHE_MAX_SIZE_DEFAULT	//! 20480
 //#define DEFAULT_SESSION_CACHE_TIMEOUT	300
 #define DEFAULT_SESSION_CACHE_TIMEOUT	60
@@ -412,6 +412,7 @@ public:
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
 
+	void						flush_ssl_session();
 	void						print_ssl_session();
 
 
