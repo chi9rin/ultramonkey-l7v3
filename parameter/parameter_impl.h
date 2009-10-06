@@ -38,10 +38,13 @@ namespace l7vs{
 class ParameterImpl : private boost::noncopyable {
 protected:
 	typedef	std::map< std::string, int >			int_map_type;
-	typedef	std::map< std::string, std::string >	string_map_type;
+	typedef	std::map< std::string, std::string >		string_map_type;
+	typedef	std::multimap< std::string, std::string >	multistring_map_type;
 
 	//! parameter data of string
 	string_map_type							stringMap;
+	//! parameter data of multi string
+	multistring_map_type						multistringMap;
 	//! parameter data of int
 	int_map_type							intMap;
 	//! create mutex
@@ -73,6 +76,13 @@ public:
 	//! @return true success
 	bool	read_file( const PARAMETER_COMPONENT_TAG );
 
+	//! target component read specified filename
+	//!	@param[in]	component tag
+	//!	@param[in]	file name
+	//! @return false failer
+	//! @return true success
+	bool	read_specified_file( const PARAMETER_COMPONENT_TAG, const std::string& filename );
+
 	//! int value getter
 	//! @param[in]	component tag
 	//! @param[in]	keystring
@@ -86,6 +96,14 @@ public:
 	//! @param[out]	errorcode
 	//! @return		string value
 	std::string	get_string( const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
+
+	//! multistring value getter
+	//! @param[in]	component tag
+	//! @param[in]	keystring
+	//! @param[inout]	multistring map
+	//! @param[out]	errorcode
+	//! @return	last foundstring value
+	std::string	get_multistring( const PARAMETER_COMPONENT_TAG, const std::string&, multistring_map_type&, error_code& );
 };
 
 }

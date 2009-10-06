@@ -69,6 +69,16 @@ bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp){
 	return impl.read_file( comp );
 }
 
+/*!
+ * read specified configuration file function
+ * @param[in]   comp		section TAG
+ * @param[in]   filename	ssl configuration filename
+ * @return	true = success read file / false = failure read file
+ */
+bool l7vs::Parameter::read_specified_file(PARAMETER_COMPONENT_TAG comp, const std::string& filename){
+	ParameterImpl&	impl = ParameterImpl::get_instance();
+	return impl.read_specified_file( comp, filename );
+}
 
 /*!
  * get integer data.
@@ -94,4 +104,20 @@ std::string l7vs::Parameter::get_string(		const l7vs::PARAMETER_COMPONENT_TAG co
 												l7vs::error_code& err ){
 	ParameterImpl&	impl = ParameterImpl::get_instance();
 	return impl.get_string( comp, key, err );
+}
+
+/*!
+ * get character map data.
+ * @param[in]	comp	section TAG
+ * @param[in]	key	key string
+ * @param[inout]	retmap	string map
+ * @param[out]	errr	error code
+ * @return	value
+ */
+std::string l7vs::Parameter::get_multistring(		const l7vs::PARAMETER_COMPONENT_TAG comp,
+												const std::string& key,
+												std::multimap<std::string, std::string>& retmap,
+												l7vs::error_code& err ){
+	ParameterImpl&	impl = ParameterImpl::get_instance();
+	return impl.get_multistring( comp, key, retmap, err );
 }

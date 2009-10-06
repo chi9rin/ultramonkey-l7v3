@@ -25,6 +25,7 @@
 #define PARAMETER_H
 
 #include <string>
+#include <map>
 #include "parameter_enum.h"
 #include "error_code.h"
 
@@ -42,8 +43,15 @@ public:
 	//! reload file function
 	//! @param[in] parameter conponent tag
 	//! @return true success file read
-	//!	@return false failer file read
+	//! @return false failure file read
 	bool	read_file(const PARAMETER_COMPONENT_TAG);
+
+	//! read specified configuration file function
+	//! @param[in] parameter conponent tag
+	//! @param[in] configuration filename
+	//! @return true success file read
+	//! @return false failure file read
+	bool	read_specified_file(const PARAMETER_COMPONENT_TAG, const std::string& filename);
 
 	//! parameter int value getter
 	//! @param[in]	parametercategory
@@ -58,6 +66,14 @@ public:
 	//! @param[out] error code
 	//!	@return	string value
 	std::string	get_string(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
+
+	//! parameter multistring value getter
+	//! @param[in]	parametercategory
+	//! @param[in]	parameter key
+	//! @param[inout] string map
+	//! @param[out] error code
+	//! @return	string value
+	std::string	get_multistring(const PARAMETER_COMPONENT_TAG, const std::string&, std::multimap<std::string, std::string>&, error_code& );
 };
 
 }	//namespace l7vs

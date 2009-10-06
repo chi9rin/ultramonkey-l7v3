@@ -1761,88 +1761,398 @@ std::string	l7vs::virtualservice_tcp::get_ssl_password()
 }
 
 /*!
+ * Convert verify option string to intger(#define).
+ *
+ * @param[in]	opt_string	option string
+ * @retval	ret	option value
+ * @retval	-1	no match
+ */
+int l7vs::virtualservice_tcp::conv_verify_option(std::string opt_string)
+{
+	/*-------- DEBUG LOG --------*/
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		std::stringstream buf;
+		buf << "in_function : int virtualservice_tcp::conv_verify_option(std::string opt_string) : ";
+		buf << "opt_string = " << opt_string;
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+				    buf.str(),
+				    __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
+	int ret = -1;
+	/*!
+	 * /usr/include/openssl/ssl.h
+	 * #define SSL_VERIFY_NONE                 0x00
+	 * #define SSL_VERIFY_PEER                 0x01
+	 * #define SSL_VERIFY_FAIL_IF_NO_PEER_CERT 0x02
+	 * #define SSL_VERIFY_CLIENT_ONCE          0x04
+	 */
+	if (opt_string == "SSL_VERIFY_NONE") {
+		ret = SSL_VERIFY_NONE;
+	}
+	if (opt_string == "SSL_VERIFY_PEER") {
+		ret = SSL_VERIFY_PEER;
+	}
+	if (opt_string == "SSL_VERIFY_FAIL_IF_NO_PEER_CERT") {
+		ret = SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
+	}
+	if (opt_string == "SSL_VERIFY_CLIENT_ONCE") {
+		ret = SSL_VERIFY_CLIENT_ONCE;
+	}
+
+	/*-------- DEBUG LOG --------*/
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		std::stringstream buf;
+		buf << "out_function : int virtualservice_tcp::conv_verify_option(std::string opt_string) : ";
+		buf << "return_value = " << ret;
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+				    buf.str(),
+				    __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+	// if ret == -1 then No match.
+	return ret;
+}
+
+/*!
+ * Convert SSL option string to intger(#define).
+ *
+ * @param[in]	opt_string	option string
+ * @retval	ret	option value
+ * @retval	-1	no match
+ */
+long int l7vs::virtualservice_tcp::conv_ssl_option(std::string opt_string)
+{
+	return 1;
+}
+
+/*!
  * get ssl parameter
  *
  * @return get ssl parameter result
  */
 bool	l7vs::virtualservice_tcp::get_ssl_parameter()
 {
-	bool bres = false;
-	// get ssl parameter from config file
-//	l7vs::error_code	vs_err;
-//	Parameter		param;
-//	int int_val = param.get_int(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_SSL_FLAG, vs_err);
-//	if (likely(!vs_err)) {
-//		// get OK
+	/*-------- DEBUG LOG --------*/
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+			"in_function : bool virtualservice_tcp::get_ssl_parameter()",
+			 __FILE__, __LINE__ );
+	}
+	/*------ DEBUG LOG END ------*/
+
+	typedef	std::multimap< std::string, std::string > multistring_map_type;
+
+	Parameter param;
+	multistring_map_type msmap;
+	l7vs::error_code err;
+	bool retbool = false;
+
+	std::string filename = "/etc/l7vs/sslproxy/sslproxy.target_1.cf";
+
+	try {
+		// Read ssl configuration file.
+		if (unlikely(!param.read_specified_file(l7vs::PARAM_COMP_SSL, filename))) {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "SSL config file read error.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		//// SSL context parameter
+		// Get parameter "ca_dir".
+		ca_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "ca_dir", msmap, err);
+		if (unlikely(err) || ca_dir == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "ca_dir parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			ca_dir = DEFAULT_CA_DIR;
+		}
+
+		// Get parameter "ca_file".
+		ca_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "ca_file", msmap, err);
+		if (unlikely(err)) {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Cannot get ca_file parameter.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		// Get parameter "cert_chain_dir".
+		cert_chain_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "cert_chain_dir", msmap, err);
+		if (unlikely(err) || cert_chain_dir == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "cert_chain_dir parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			cert_chain_dir = DEFAULT_CERT_CHAIN_DIR;
+		}
+
+		// Get parameter "cert_chain_file".
+		ca_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "cert_chain_file", msmap, err);
+		if (unlikely(err) || cert_chain_file == "") {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Cannot get cert_chain_file parameter.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		// Get parameter "private_key_dir".
+		private_key_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_dir", msmap, err);
+		if (unlikely(err) || private_key_dir == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "private_key_dir parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			private_key_dir = DEFAULT_PRIVATE_KEY_DIR;
+		}
+
+		// Get parameter "private_key_file".
+		private_key_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_file", msmap, err);
+		if (unlikely(err) || private_key_file == "") {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Cannot get private_key_file parameter.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		// Get parameter "private_key_filetype".
+		// and convert string to filetype define value.
+		/*!
+		 * /usr/include/openssl/ssl.h
+		 * #define SSL_FILETYPE_PEM        X509_FILETYPE_PEM  ->1
+		 * #define SSL_FILETYPE_ASN1       X509_FILETYPE_ASN1 ->2
+		 */
+		std::string filetype_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_filetype", msmap, err);
+		if (unlikely(err) || filetype_str == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "private_key_filetype parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			private_key_filetype = DEFAULT_PRIVATE_KEY_FILETYPE;
+		} else if (filetype_str == "SSL_FILETYPE_PEM") {
+			private_key_filetype = boost::asio::ssl::context::pem;
+		} else if (filetype_str == "SSL_FILETYPE_ASN1") {
+			private_key_filetype = boost::asio::ssl::context::asn1;
+		} else {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "private_key_filetype convert error.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		// Get parameter "private_key_passwd_dir".
+		private_key_passwd_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_passwd_dir", msmap, err);
+		if (unlikely(err) || private_key_passwd_dir == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "private_key_passwd_dir parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			private_key_passwd_dir = DEFAULT_PRIVATE_KEY_PASSWD_DIR;
+		}
+
+		// Get parameter "private_key_passwd_file".
+		private_key_passwd_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_passwd_file", msmap, err);
+		if (unlikely(err) || private_key_passwd_file == "") {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Cannot get private_key_passwd_file parameter.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		// Get parameter "verify_options".
+		std::string verify_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "verify_options", msmap, err);
+		if (unlikely(err)) {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "verify_options parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			verify_options = DEFAULT_VERIFY_OPTIONS;
+		} else {
+			// Make verify option bit data.
+			for (multistring_map_type::iterator itr = msmap.begin(); itr != msmap.end(); ++itr) {
+				// Convert string to define value.
+				int int_val = conv_verify_option(itr->second);
+				if (unlikely(int_val == -1)) {
+					Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+							    "verify_options convert error.",
+							    __FILE__, __LINE__ );
+					throw -1;
+				}
+				verify_options = (verify_options | int_val);
+			}
+		}
+
+		// Get parameter "verify_cert_depth".
+		verify_cert_depth = param.get_int(l7vs::PARAM_COMP_SSL, "verify_cert_depth", err);
+		if (unlikely(err)) {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "verify_cert_depth parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			verify_cert_depth = DEFAULT_VERIFY_CERT_DEPTH;
+		} else if (unlikely(verify_cert_depth < 0 || verify_cert_depth > INT_MAX)) {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Invalid verify_cert_depth parameter value.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		// Get parameter "ssl_options".
+		// and Check dh parameter file use or not.
+		is_tmp_dh_use = false;
+		std::string option_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "ssl_options", msmap, err);
+		if (unlikely(err)) {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "ssl_options parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			ssl_options = DEFAULT_SSL_OPTIONS;
+			is_tmp_dh_use = true;
+		} else {
+			// Make ssl option bit data.
+			for (multistring_map_type::iterator itr = msmap.begin(); itr != msmap.end(); ++itr) {
+				// Convert string to define value.
+				long int longint_val = conv_ssl_option(itr->second);
+				if (unlikely(longint_val == -1)) {
+					Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+							    "ssl_options convert error.",
+							    __FILE__, __LINE__ );
+					throw -1;
+				} else if (longint_val == SSL_OP_SINGLE_DH_USE) {
+					is_tmp_dh_use = true;
+				}
+				ssl_options = (ssl_options | longint_val);
+			}
+		}
+
+		if (is_tmp_dh_use) {
+			// Get parameter "tmp_dh_dir".
+			tmp_dh_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "tmp_dh_dir", msmap, err);
+			if (unlikely(err) || tmp_dh_dir == "") {
+				Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+						   "tmp_dh_dir parameter not found. Use default value.",
+						   __FILE__, __LINE__ );
+				tmp_dh_dir = DEFAULT_TMP_DH_DIR;
+			}
+			// Get parameter "tmp_dh_file".
+			tmp_dh_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "tmp_dh_file", msmap, err);
+			if (unlikely(err) || tmp_dh_file == "") {
+				Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+						    "Cannot get tmp_dh_file parameter.",
+						    __FILE__, __LINE__ );
+				throw -1;
+			}
+		}
+
+		// Get parameter "cipher_list".
+		cipher_list = param.get_multistring(l7vs::PARAM_COMP_SSL, "cipher_list", msmap, err);
+		if (unlikely(err) || cipher_list == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "cipher_list parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			cipher_list = DEFAULT_CIPHER_LIST;
+		}
+
+		//// SSL session cache parameter
+		// Get parameter "session_cache".
+		is_session_cache_use = false;
+		std::string cache_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "session_cache", msmap, err);
+		if (unlikely(err) || cache_str == "") {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "session_cache parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			is_session_cache_use = true;
+		} else if (cache_str == "on") {
+			is_session_cache_use = true;
+		} else if (cache_str == "off") {
+			is_session_cache_use = false;
+		} else {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Invalid session_cache parameter value.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		if (is_session_cache_use) {
+			session_cache_mode = DEFAULT_SESSION_CACHE_MODE;
+			// Get parameter "session_cache_size".
+			session_cache_size = param.get_int(l7vs::PARAM_COMP_SSL, "session_cache_size", err);
+			if (unlikely(err)) {
+				Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+						   "session_cache_size parameter not found. Use default value.",
+						   __FILE__, __LINE__ );
+				session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
+			} else if (session_cache_size < 0 || session_cache_size > LONG_MAX) {
+				Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+						    "Invalid session_cache_size parameter value.",
+						    __FILE__, __LINE__ );
+				throw -1;
+			}
+			// Get parameter "session_cache_timeout".
+			session_cache_timeout = param.get_int(l7vs::PARAM_COMP_SSL, "session_cache_timeout", err);
+			if (unlikely(err)) {
+				Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+						   "session_cache_timeout parameter not found. Use default value.",
+						   __FILE__, __LINE__ );
+				session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
+			} else if (session_cache_timeout < 0 || session_cache_timeout > LONG_MAX) {
+				Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+						    "Invalid session_cache_timeout parameter value.",
+						    __FILE__, __LINE__ );
+				throw -1;
+			}
+		} else {
+			session_cache_mode = SSL_SESS_CACHE_OFF;
+		}
+
+		//// SSL handshake timer parameter
+		// Get parameter "timeout_sec".
+		handshake_timeout = param.get_int(l7vs::PARAM_COMP_SSL, "timeout_sec", err);
+		if (unlikely(err)) {
+			Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					   "timeout_sec parameter not found. Use default value.",
+					   __FILE__, __LINE__ );
+			handshake_timeout = DEFAULT_HANDSHAKE_TIMEOUT;
+		} else if (handshake_timeout <= 0 || handshake_timeout > INT_MAX) {
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+					    "Invalid timeout_sec parameter value.",
+					    __FILE__, __LINE__ );
+			throw -1;
+		}
+
+		retbool = true;
+
+	} catch (int e) {
+		retbool = false;
+	}
+	/*-------- DEBUG LOG --------*/
+//	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		std::stringstream buf;
+		buf << "out_function : bool virtualservice_tcp::get_ssl_parameter() : ";
+		buf << "ca_dir = "				<< ca_dir			<< ", ";
+		buf << "ca_file = "				<< ca_file			<< ", ";
+		buf << "cert_chain_dir = "			<< cert_chain_dir		<< ", ";
+		buf << "cert_chain_file = "			<< cert_chain_file		<< ", ";
+		buf << "private_key_dir = "			<< private_key_dir		<< ", ";
+		buf << "private_key_file = "			<< private_key_file		<< ", ";
+		buf << "private_key_filetype = "		<< private_key_filetype		<< ", ";
+		buf << "private_key_passwd_dir = "		<< private_key_passwd_dir	<< ", ";
+		buf << "private_key_passwd_file = "		<< private_key_passwd_file	<< ", ";
+		buf << "verify_options = "			<< verify_options		<< ", ";
+		buf << "verify_cert_depth = "			<< verify_cert_depth		<< ", ";
+		buf << "ssl_options = "				<< ssl_options			<< ", ";
+		if (is_tmp_dh_use) {
+			buf << "tmp_dh_dir = "			<< tmp_dh_dir			<< ", ";
+			buf << "tmp_dh_file = "			<< tmp_dh_file			<< ", ";
+		}
+		buf << "cipher_list = "				<< cipher_list			<< ", ";
+		buf << "session_cache_mode = "			<< session_cache_mode		<< ", ";
+		if (is_session_cache_use) {
+			buf << "session_cache_size = "		<< session_cache_size		<< ", ";
+			buf << "session_cache_timeout = "	<< session_cache_timeout	<< ", ";
+		}
+		buf << "handshake_timeout = "			<< handshake_timeout;
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+				    buf.str(),
+				    __FILE__, __LINE__ );
 //	}
-
-	// SSL context parameter
-	ca_dir = DEFAULT_CA_DIR;
-	ca_file = "rootCA.pem";
-
-	cert_chain_dir = DEFAULT_CERT_CHAIN_DIR;
-	cert_chain_file = "server.pem";
-
-	private_key_dir = DEFAULT_PRIVATE_KEY_DIR;
-	private_key_file = "server.pem";
-	private_key_filetype = DEFAULT_PRIVATE_KEY_FILETYPE;
-
-	private_key_passwd_dir = DEFAULT_PRIVATE_KEY_PASSWD_DIR;
-	private_key_passwd_file = "server.pass";
-
-	verify_options = DEFAULT_VERIFY_OPTIONS;
-	verify_cert_depth = DEFAULT_VERIFY_CERT_DEPTH;
-
-	ssl_options = DEFAULT_SSL_OPTIONS;
-
-	is_tmp_dh_use = true;
-	if (is_tmp_dh_use) {
-		tmp_dh_dir = DEFAULT_TMP_DH_DIR;
-		tmp_dh_file = "dh512.pem";
-	}
-
-	cipher_list = DEFAULT_CIPHER_LIST;
-
-	// SSL session cache parameter
-	is_session_cache_use = true;
-	if (is_session_cache_use) {
-		session_cache_mode = DEFAULT_SESSION_CACHE_MODE;
-		session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
-		session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
-	}
-
-	// SSL handshake timer parameter
-	handshake_timeout = DEFAULT_HANDSHAKE_TIMEOUT;
-
-	std::stringstream buf;
-	buf << "Print SSL parameter ";
-	buf << "ca_dir["			<< ca_dir			<< "] ";
-	buf << "ca_file["			<< ca_file			<< "] ";
-	buf << "cert_chain_dir["		<< cert_chain_dir		<< "] ";
-	buf << "cert_chain_file["		<< cert_chain_file		<< "] ";
-	buf << "private_key_dir["		<< private_key_dir		<< "] ";
-	buf << "private_key_file["		<< private_key_file		<< "] ";
-	buf << "private_key_filetype["		<< private_key_filetype		<< "] ";
-	buf << "private_key_passwd_dir["	<< private_key_passwd_dir	<< "] ";
-	buf << "private_key_passwd_file["	<< private_key_passwd_file	<< "] ";
-	buf << "verify_options["		<< verify_options		<< "] ";
-	buf << "verify_cert_depth["		<< verify_cert_depth		<< "] ";
-	buf << "ssl_options["			<< ssl_options			<< "] ";
-	if (is_tmp_dh_use) {
-		buf << "tmp_dh_dir["		<< tmp_dh_dir			<< "] ";
-		buf << "tmp_dh_file["		<< tmp_dh_file			<< "] ";
-	}
-	buf << "cipher_list["			<< cipher_list			<< "] ";
-	if (is_session_cache_use) {
-		buf << "session_cache_mode["	<< session_cache_mode		<< "] ";
-		buf << "session_cache_size["	<< session_cache_size		<< "] ";
-		buf << "session_cache_timeout["	<< session_cache_timeout	<< "] ";
-	}
-	buf << "handshake_timeout["		<< handshake_timeout		<< "] ";
-	Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-
-	bres = true;
-	return bres;
+	/*------ DEBUG LOG END ------*/
+	return retbool;
 }
 
 /*!

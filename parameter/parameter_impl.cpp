@@ -73,6 +73,7 @@ bool	l7vs::ParameterImpl::init(){
 	tag_section_table_map[PARAM_COMP_L7VSADM]		= "l7vsadm";
 	tag_section_table_map[PARAM_COMP_SNMPAGENT]		= "snmpagent";
 	tag_section_table_map[PARAM_COMP_SSLPROXY]		= "sslproxy";
+	tag_section_table_map[PARAM_COMP_SSL]			= "ssl";
 	create_map_flag	= read_file( PARAM_COMP_ALL );
 	return	create_map_flag;
 }
@@ -82,6 +83,15 @@ bool	l7vs::ParameterImpl::init(){
 //! @return true read success
 //! @return false read false
 bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
+	return read_specified_file( comp, PARAMETER_FILE );
+}
+
+//! read specified config file
+//! @param[in]	COMPONENT TAG
+//! @param[in]	file name
+//! @return true read success
+//! @return false read false
+bool	l7vs::ParameterImpl::read_specified_file( const l7vs::PARAMETER_COMPONENT_TAG comp, const std::string& filename){
 
 	typedef std::vector< std::string > 				split_vector_type;
 	typedef	std::pair< std::string, int > 			int_pair_type;
@@ -89,12 +99,15 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 
 	boost::mutex::scoped_lock	lock( param_mutex );
 	std::string		line;
-	std::ifstream	ifs( PARAMETER_FILE );
+	std::ifstream	ifs( filename.c_str() );
 	string_map_type	string_map;
+	multistring_map_type	multistring_map;
 	int_map_type	int_map;
 
 	if( !ifs ){
-		Logger::putLogFatal( logcat, 2, "CONFIG FILE NOT OPEN : " PARAMETER_FILE , __FILE__, __LINE__ );
+		std::stringstream buf;
+		buf << "CONFIG FILE NOT OPEN : " << filename;
+		Logger::putLogFatal( logcat, 2, buf.str() , __FILE__, __LINE__ );
 		return false;	// don't open config files.
 	}
 
@@ -132,12 +145,16 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 			key += split_vec[0];
 			if( split_vec[1].at(0) == '\"' && split_vec[1].at( split_vec[1].size()-1 ) == '\"' ){ //string value
 				std::string strvalue = split_vec[1].substr( 1, split_vec[1].size()-2 ); //erase double cautation
-				std::pair< string_map_type::iterator, bool > ret =
-					string_map.insert( string_pair_type( key, strvalue ) );	//tmp map insert
-				if( !ret.second ){	//insert error
-					boost::format	formatter( "section.key is duplicate. section.key = %1%, value = %2%" );
-					formatter % key % strvalue;
-					Logger::putLogError( logcat, 1, formatter.str(), __FILE__, __LINE__ );
+				if( comp == PARAM_COMP_SSL ) {
+					multistring_map.insert( string_pair_type( key, strvalue ) );	//tmp map insert
+				} else {
+					std::pair< string_map_type::iterator, bool > ret =
+						string_map.insert( string_pair_type( key, strvalue ) );	//tmp map insert
+					if( !ret.second ){	//insert error
+						boost::format	formatter( "section.key is duplicate. section.key = %1%, value = %2%" );
+						formatter % key % strvalue;
+						Logger::putLogError( logcat, 1, formatter.str(), __FILE__, __LINE__ );
+					}
 				}
 			}
 			else{	// int value
@@ -227,10 +244,14 @@ bool	l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp ){
 				}
 			}
 		}
+
+		multistringMap.clear();
+		BOOST_FOREACH( string_pair_type p, multistring_map ){ //all temp multistring map copy
+			multistringMap.insert( p );
+		}
 	}
 	return true;
 }
-
 
 //! get a integer parameter
 //! @param[in]	PARAMETER_COMPONENT_TAG
@@ -241,13 +262,14 @@ int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 									const std::string& key,
 									l7vs::error_code& err ){
 	boost::mutex::scoped_lock	lock( param_mutex );
+	err.setter(false, "");
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
 	int_map_type::iterator intmap_iterator = intMap.find( section_table_iterator->second + "." + key );
-	if( intmap_iterator != intMap.end() )
-			return intmap_iterator->second;
-	else
+	if( intmap_iterator != intMap.end() ) {
+		return intmap_iterator->second;
+	} else {
 		err.setter( true, "don't find key" );
-
+	}
 	return 0;
 }
 
@@ -256,17 +278,46 @@ int	l7vs::ParameterImpl::get_int(	const l7vs::PARAMETER_COMPONENT_TAG comp,
 //! @param[in]	const std::string
 //! @param[out]	error code
 //! @return		string value
-
 std::string	l7vs::ParameterImpl::get_string( const l7vs::PARAMETER_COMPONENT_TAG comp,
 											 const std::string& key,
 											 l7vs::error_code& err ){
 	boost::mutex::scoped_lock	lock( param_mutex );
+	err.setter(false, "");
 	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator	section_table_iterator = tag_section_table_map.find( comp );
 	string_map_type::iterator strmap_iterator = stringMap.find( section_table_iterator->second + "." + key );
-	if( strmap_iterator != stringMap.end() )
+	if( strmap_iterator != stringMap.end() ) {
 		return strmap_iterator->second;
-	else
+	} else {
 		err.setter( true, "don't find key" );
-
+	}
 	return std::string("");
+}
+
+//! get multistring parameter
+//! @param[in]    PARAMETER_COMPONENT_TAG
+//! @param[in]    const std::string
+//! @param[inout] std::multimap<std::string, std::string>&
+//! @param[out]   error code
+//! @return       last found string value
+std::string l7vs::ParameterImpl::get_multistring(const PARAMETER_COMPONENT_TAG comp,
+					     const std::string& key,
+					     multistring_map_type& retmap,
+					     l7vs::error_code& err)
+{
+	boost::mutex::scoped_lock lock( param_mutex );
+	err.setter(false, "");
+	std::string retstr = "";
+	std::map< PARAMETER_COMPONENT_TAG, std::string >::iterator section_table_iterator = tag_section_table_map.find( comp );
+	std::string comp_key = section_table_iterator->second + "." + key;
+	retmap.clear();
+	for (multistring_map_type::iterator itr = multistringMap.begin(); itr != multistringMap.end(); ++itr ) {
+		if (itr->first == comp_key) {
+			retmap.insert(std::pair<std::string, std::string>(key, itr->second));
+			retstr = itr->second;
+		}
+	}
+	if (retstr == "") {
+		err.setter(true, "don't find key");
+	}
+	return retstr;
 }

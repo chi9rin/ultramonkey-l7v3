@@ -54,9 +54,9 @@
 #include "lockfree_queue.h"
 #include "lockfree_hashmap.h"
 
-#define	PARAM_RS_SIDE_NIC_NAME	"nic_realserver_side"
-#define	PARAM_POOLSIZE_KEY_NAME	"session_thread_pool_size"
-#define	PARAM_BPS_CALC_INTERVAL	"throughput_calc_interval"
+#define	PARAM_RS_SIDE_NIC_NAME		"nic_realserver_side"
+#define	PARAM_POOLSIZE_KEY_NAME		"session_thread_pool_size"
+#define	PARAM_BPS_CALC_INTERVAL		"throughput_calc_interval"
 #define	PARAM_REP_INTERVAL		"interval"
 
 #define	PROTOMOD_NOTLOAD_ERROR_MSG	"Protocol Module not loaded"
@@ -67,37 +67,28 @@
 #define	REP_BLOCK_SIZE_ERR_MSG		"Replication area block size error"
 #define	REP_AREA_SIZE_ERR_MSG		"Replication area size error"
 
-#define	REP_AREA_NAME				"virtualservice"
+#define	REP_AREA_NAME			"virtualservice"
 
 //! SSL method default
 #define DEFAULT_SSL_METHOD		boost::asio::ssl::context::sslv23	//! SSLv23_method
 //! SSL context default
-//#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/"
-#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/cert/"
-//#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/"
-#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/cert/"
-//#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/"
-#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/cert/"
+#define DEFAULT_CA_DIR			"/etc/l7vs/sslproxy/"
+#define DEFAULT_CERT_CHAIN_DIR		"/etc/l7vs/sslproxy/"
+#define DEFAULT_PRIVATE_KEY_DIR		"/etc/l7vs/sslproxy/"
 #define DEFAULT_PRIVATE_KEY_FILETYPE	boost::asio::ssl::context::pem		//! SSL_FILETYPE_PEM
-//#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/"
-#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/cert/"
-//#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
-#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_NONE)
+#define DEFAULT_PRIVATE_KEY_PASSWD_DIR	"/etc/l7vs/sslproxy/"
+#define DEFAULT_VERIFY_OPTIONS		(SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
 #define DEFAULT_VERIFY_CERT_DEPTH	9
 #define DEFAULT_SSL_OPTIONS		(SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_SINGLE_DH_USE)
-//#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/"
-#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/cert/"
+#define DEFAULT_TMP_DH_DIR		"/etc/l7vs/sslproxy/"
 #define DEFAULT_CIPHER_LIST		"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 #define MAX_PASSWD_SIZE			256
 //! SSL session cache default
 #define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR)	//! "on"
-//#define DEFAULT_SESSION_CACHE_MODE	(SSL_SESS_CACHE_OFF)
 #define DEFAULT_SESSION_CACHE_SIZE	SSL_SESSION_CACHE_MAX_SIZE_DEFAULT	//! 20480
-//#define DEFAULT_SESSION_CACHE_TIMEOUT	300
-#define DEFAULT_SESSION_CACHE_TIMEOUT	60
+#define DEFAULT_SESSION_CACHE_TIMEOUT	300
 //! SSL handshake timeout default
-//#define DEFAULT_HANDSHAKE_TIMEOUT	30
-#define DEFAULT_HANDSHAKE_TIMEOUT	10
+#define DEFAULT_HANDSHAKE_TIMEOUT	30
 
 namespace l7vs{
 
@@ -375,6 +366,8 @@ protected:
 	int						handshake_timeout;
 	// SSL functions
 	std::string					get_ssl_password();
+	int						conv_verify_option(std::string);
+	long int					conv_ssl_option(std::string);
 	bool						get_ssl_parameter();
 	bool						set_ssl_config();
 	void						print_ssl_config();

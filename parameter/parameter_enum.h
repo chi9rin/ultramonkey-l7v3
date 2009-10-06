@@ -40,7 +40,8 @@ enum PARAMETER_COMPONENT_TAG {
 	PARAM_COMP_LOGGER,			//!< parameter category logger
 	PARAM_COMP_L7VSADM,			//!< parameter category l7vsadm
 	PARAM_COMP_SNMPAGENT,		//!< parameter category snmpagent
-	PARAM_COMP_SSLPROXY			//!< parameter category sslproxy
+	PARAM_COMP_SSLPROXY,			//!< parameter category sslproxy
+	PARAM_COMP_SSL			//!< parameter category ssl
 };
 
 }	//namespace l7vsd
