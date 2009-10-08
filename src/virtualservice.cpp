@@ -57,7 +57,7 @@ void	l7vs::virtual_service::initialize( l7vs::error_code& err ){
 	if( NULL != vs )
 		vs->initialize( err );
 	else{
-		err.setter( false, "Fail, create VirtualService" );
+		err.setter( true, "Fail, create VirtualService" );
 	}
 }
 void	l7vs::virtual_service::finalize( l7vs::error_code& err ){
