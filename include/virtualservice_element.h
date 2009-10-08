@@ -62,6 +62,7 @@ public:
 	unsigned long long		throughput_upstream;
 	unsigned long long		throughput_downstream;
 	int				ssl_flag;
+	std::string			ssl_conf_filename;
 
 	virtualservice_element() :	udpmode(false),
 				sorry_maxconnection(0LL),
@@ -85,7 +86,8 @@ public:
 				qos_downstream( in.qos_downstream ),
 				throughput_upstream( in.throughput_upstream ),
 				throughput_downstream( in.throughput_downstream ),
-				ssl_flag( in.ssl_flag ){
+				ssl_flag( in.ssl_flag ),
+				ssl_conf_filename( in.ssl_conf_filename ){
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
 			protocol_args.push_back( str );
@@ -109,6 +111,7 @@ public:
 		throughput_upstream = in.throughput_upstream;
 		throughput_downstream = in.throughput_downstream;
 		ssl_flag = in.ssl_flag;
+		ssl_conf_filename = in.ssl_conf_filename;
 
 		realserver_vector.clear();
 		BOOST_FOREACH( std::string str, in.protocol_args ){
@@ -131,7 +134,8 @@ public:
 				elem1.qos_downstream == elem2.qos_downstream &&
 				elem1.throughput_upstream == elem2.throughput_upstream &&
 				elem1.throughput_downstream == elem2.throughput_downstream &&
-				elem1.ssl_flag == elem2.ssl_flag ){
+				elem1.ssl_flag == elem2.ssl_flag &&
+				elem1.ssl_conf_filename == elem2.ssl_conf_filename ){
 				if( elem1.realserver_vector.size() != elem2.realserver_vector.size() ) return false;
 				for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 					if( elem1.realserver_vector[i] != elem2.realserver_vector[i] ) return false;	
@@ -152,7 +156,8 @@ public:
 				elem1.qos_downstream != elem2.qos_downstream ||
 				elem1.throughput_upstream != elem2.throughput_upstream ||
 				elem1.throughput_downstream != elem2.throughput_downstream ||
-				elem1.ssl_flag != elem2.ssl_flag ){
+				elem1.ssl_flag != elem2.ssl_flag ||
+				elem1.ssl_conf_filename != elem2.ssl_conf_filename ){
 				if( elem1.realserver_vector.size() == elem2.realserver_vector.size() ){
 					for( unsigned int i = 0; i < elem1.realserver_vector.size(); ++i ){
 						if( elem1.realserver_vector[i] == elem2.realserver_vector[i] ) return false;
@@ -207,7 +212,8 @@ public:
 								"qos_downstream=%d: "
 								"throughput_upstream=%d: " 
 								"throughput_downstream=%d: "
-								"ssl_flag=%d}" )
+								"ssl_flag=%d: "
+								"ssl_conf_filename=%s}" )
 								% args
 								% elem.sorry_maxconnection
 								% elem.sorry_endpoint
@@ -216,7 +222,8 @@ public:
 								% elem.qos_downstream
 								% elem.throughput_upstream
 								% elem.throughput_downstream
-								% elem.ssl_flag;
+								% elem.ssl_flag
+								% elem.ssl_conf_filename;
 		return os;
 	}
 
@@ -242,6 +249,7 @@ private:
 		ar & throughput_upstream;
 		ar & throughput_downstream;
 		ar & ssl_flag;
+		ar & ssl_conf_filename;
 	}
 };
 

@@ -536,9 +536,14 @@ namespace l7vs{
 			}
 			//----Debug log----------------------------------------------------------------------
 //			if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-				// print session information
+				// print ssl session cache information
 				// Need ssl_context lock?
-				parent_service.print_ssl_session();
+				std::stringstream buf;
+				buf << "session_result_message tcp_session::initialize() : ";
+				parent_service.get_ssl_session_cache_info(buf);
+				Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+						    buf.str(),
+						    __FILE__, __LINE__ );
 //			}
 			//----Debug log----------------------------------------------------------------------
 		}

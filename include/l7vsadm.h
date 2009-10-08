@@ -50,6 +50,7 @@
 #define L7VSADM_DEFAULT_WAIT_COUNT (10)		//!< Default wait count
 #define L7VSADM_MAX_WAIT (60)				//!< Max wait value
 #define L7VS_MODNAME_LEN (16)				//!< Module name length
+#define L7VS_FILENAME_LEN (256)				//!< File name length
 
 namespace l7vs{
 

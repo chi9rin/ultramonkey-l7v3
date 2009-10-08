@@ -338,6 +338,7 @@ protected:
 
 	// SSL flag
 	bool						ssl_vs_flag;
+	std::string					ssl_conf_filename;
 	// SSL context
 	boost::asio::ssl::context			sslcontext;
 	// SSL context parameter
@@ -370,7 +371,6 @@ protected:
 	long int					conv_ssl_option(std::string);
 	bool						get_ssl_parameter();
 	bool						set_ssl_config();
-	void						print_ssl_config();
 
 	void						handle_replication_interrupt( const boost::system::error_code& );
 	void						read_replicationdata();
@@ -405,8 +405,11 @@ public:
 	
 	protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
 
+	// SSL functions
 	void						flush_ssl_session();
-	void						print_ssl_session();
+	// SSL functions (for debug)
+	void						get_ssl_config(std::stringstream&);
+	void						get_ssl_session_cache_info(std::stringstream&);
 
 
 ////For external SSL session cache

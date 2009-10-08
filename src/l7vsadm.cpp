@@ -902,31 +902,29 @@ bool	l7vs::l7vsadm::parse_opt_vs_ssl_func( int& pos, int argc, char* argv[] ){
 	Logger	logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_ssl_func", __FILE__, __LINE__ );
 
 	if( ++pos >= argc ){
-		std::string	buf("sslflag value is not specified.");
+		std::string	buf("ssl config filename is not specified.");
 		l7vsadm_err.setter( true, buf );
 		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
 		return false;
 	}
-	try{
-		int	tmp = boost::lexical_cast< int >( argv[pos] );
-		if( ( 0 != tmp ) && ( 1 != tmp ) ){
-			std::string	buf("invalid sslflag value.");
-			l7vsadm_err.setter( true, buf );
-			Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
-			return false;
-		}
-		if( 0 == tmp )
-			request.vs_element.ssl_flag = INT_MAX;	// clear value
-		else
-			request.vs_element.ssl_flag = 1;
-	}
-	catch( boost::bad_lexical_cast& e ){
-		// don't convert argv[pos] is
-		std::string	buf("invalid sslflag value.");
+	// ssl config file check.
+	std::string conf_filename = argv[pos];
+	if( L7VS_FILENAME_LEN < conf_filename.length() ){
+		std::string buf("ssl config filename is too long.");
 		l7vsadm_err.setter( true, buf );
 		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
 		return false;
 	}
+	FILE  *fp;
+	if ((fp = fopen(conf_filename.c_str(), "r")) == NULL) {
+		std::string buf("ssl config file cannot open.");
+		l7vsadm_err.setter( true, buf );
+		Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+		return false;
+	}
+	fclose(fp);
+	request.vs_element.ssl_conf_filename = conf_filename;
+	request.vs_element.ssl_flag = 1;
 	return true;
 }
 //! realserver command parsing.
@@ -1527,7 +1525,7 @@ bool	l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd
 	"  --qos-up        -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
 	"  --qos-down      -q QoSval-down         QoS Threshold(bps) set to client direction\n"
 	"  --udp           -p                     VirtualService UDP mode on\n"
-	"  --ssl           -S ssl-flag            Use SSL\n"
+	"  --ssl           -S ssl-config-file     SSL configuration file(Use SSL)\n"
 	"  --real-server   -r server-address      server-address is host:port\n"
 	"  --weight        -w weight              scheduling weight set to real server\n"
 	"  --switch        -s replication-switch  start or stop replication\n"
@@ -1552,7 +1550,7 @@ std::string	l7vs::l7vsadm::usage(){
 	"  l7vsadm -A|E -t service-address -m proto-module [module-args]\n"
 	"          [-s scheduler] [-u connection-count] [-b sorry-server]\n"
 	"          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down]\n"
-	"          [-p ] [-S ssl-flag]\n"
+	"          [-p ] [-S ssl-config-file]\n"
 	"  l7vsadm -D -t service-address -m proto-module [module-args]\n"
 	"  l7vsadm -C\n"
 	"  l7vsadm -a|e -t service-address -m proto-module [module-args] [-u]\n"
@@ -1691,7 +1689,7 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 	buf << "     SorryAddress:Port Sorry_cc Sorry_flag\n";
 	buf << "     QoS-up   Throughput-up\n";
 	buf << "     QoS-down Throughput-down\n";
-	buf << "     SSL_flag\n";
+	buf << "     SSL_flag SSL_config_file\n";
 	buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
 	BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
 		std::string	vsepstr;
@@ -1727,8 +1725,9 @@ void	l7vs::l7vsadm::disp_list_verbose(){
 		buf << boost::format( "    %lld %lld\n" )
 			% (vse.qos_downstream * 8)
 			% (vse.throughput_downstream * 8);
-		buf << boost::format( "    %d\n" )
-			% vse.ssl_flag;
+		buf << boost::format( "    %d %s\n" )
+			% vse.ssl_flag
+			% vse.ssl_conf_filename;
 		BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
 			std::string	rsepstr;
 			if( vse.udpmode )
@@ -2009,6 +2008,7 @@ l7vs::l7vsadm::l7vsadm()
 	string_parameter_dic["l7vsadm"]			= PARAM_COMP_L7VSADM;
 	string_parameter_dic["snmpagent"]		= PARAM_COMP_SNMPAGENT;
 	string_parameter_dic["sslproxy"]		= PARAM_COMP_SSLPROXY;
+	string_parameter_dic["ssl"]			= PARAM_COMP_SSL;
 
 	// create disp_result dictionary.
 	disp_result_dic[l7vsadm_request::CMD_LIST]			= boost::bind( &l7vsadm::disp_list, this );
