@@ -188,5 +188,8 @@ int ssl_protocol_module_base::check_ssl_record_sendable( bool is_message_form_cl
 		return 1;
 	}
 }
-
+bool ssl_protocol_module_base::is_exec_OK(unsigned int vs_attr)
+{
+    return !(vs_attr & VS_CONTACT_CLASS_SSL);
+}
 }

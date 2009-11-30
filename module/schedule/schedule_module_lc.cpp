@@ -23,6 +23,7 @@
  **********************************************************************/
 #include "schedule_module_lc.h"
 #include <boost/format.hpp>
+#include "utility.h"
 
 namespace l7vs{
 
@@ -35,23 +36,23 @@ schedule_module_least_connection::~schedule_module_least_connection(){}
 
 //!	initialize function
 void	schedule_module_least_connection::initialize(){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 1, "Function in : schedule_module_least_connection::initialize", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 100000, "Function in : schedule_module_least_connection::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
 
-	if ( !putLogInfo.empty() )
+	if ( likely(!putLogInfo.empty() ))
 	{
-		putLogInfo( 5001, "Function was initialized.", __FILE__, __LINE__);
+		putLogInfo( 100000, "Function was initialized.", __FILE__, __LINE__);
 	}
 
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 2, "Function out : schedule_module_least_connection::initialize", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 100001, "Function out : schedule_module_least_connection::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -79,10 +80,10 @@ void	schedule_module_least_connection::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&		outendpoint ){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 3, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 100002, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -96,26 +97,26 @@ void	schedule_module_least_connection::handle_schedule(
 	//! set clear data as NULL
 	outendpoint = tcp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
+	if ( unlikely(inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() )){
 		//! invalid iterator function
-		if ( !putLogFatal.empty() )
+		if ( likely(!putLogFatal.empty() ))
 		{
-			putLogFatal( 8001, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 100000, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
 				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
 					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
 														% loop
 														% itr->tcp_endpoint.address()
 														% itr->tcp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 4, buf, __FILE__, __LINE__);
+					putLogDebug( 100003, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -130,20 +131,20 @@ void	schedule_module_least_connection::handle_schedule(
 		}
 	}
 
-	if ( active == INT_MAX ){
+	if ( unlikely(active == INT_MAX )){
 		//! no data
-		if ( !putLogError.empty() )
+		if ( likely(!putLogError.empty() ))
 		{
-			putLogError( 7001, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 100000, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
 
 END:
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 5, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 100004, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -161,23 +162,23 @@ void	schedule_module_least_connection::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&		outendpoint ){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 6, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 100005, "Function in : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
 
-	if ( !putLogWarn.empty() )
+	if ( likely(!putLogWarn.empty() ))
 	{
-		putLogWarn( 6001, "UDP function was not supported.", __FILE__, __LINE__);
+		putLogWarn( 100001, "UDP function was not supported.", __FILE__, __LINE__);
 	}
 
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 7, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty() )){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel() )){
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 100006, "Function out : schedule_module_least_connection::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}

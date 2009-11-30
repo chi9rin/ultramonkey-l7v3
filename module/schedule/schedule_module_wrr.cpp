@@ -24,6 +24,8 @@
 #include "schedule_module_wrr.h"
 #include <boost/format.hpp>
 
+#include "utility.h"
+
 namespace l7vs{
 
 //!	constractor
@@ -35,10 +37,10 @@ schedule_module_weighted_round_robin::~schedule_module_weighted_round_robin(){}
 
 //!	initialize function
 void	schedule_module_weighted_round_robin::initialize(){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 20001, "Function in : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
+				putLogDebug( 300000, "Function in : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -53,14 +55,14 @@ void	schedule_module_weighted_round_robin::initialize(){
 	vs_weights.maxWeight = 0;
 	vs_weights.gcd = 0;
 
-	if ( !putLogInfo.empty() ){
-		putLogInfo( 25001, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
+	if ( likely(!putLogInfo.empty()) ){
+		putLogInfo( 300000, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
 	}
 
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 20002, "Function out : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
+				putLogDebug( 300001, "Function out : schedule_module_weighted_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -88,10 +90,10 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::tcp::endpoint&		outendpoint ){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 20003, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
+				putLogDebug( 300002, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -104,37 +106,37 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	//! set clear data as NULL
 	outendpoint = tcp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
+	if ( unlikely(inlist_begin.empty() || inlist_end.empty() || inlist_next.empty()) ){
 		//! invalid iterator function
-		if ( !putLogFatal.empty() )
+		if ( likely(!putLogFatal.empty()) )
 		{
-			putLogFatal( 28001, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 300000, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
 				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
 					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
 														% loop
 														% itr->tcp_endpoint.address()
 														% itr->tcp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 20004, buf, __FILE__, __LINE__);
+					putLogDebug( 300003, buf, __FILE__, __LINE__);
 				}
 			}
 		}
 	}
 	//! Debug log END
 
-	if ( -1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next ) ){
+	if ( unlikely(-1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next )) ){
 		//! init error( no data )
-		if ( !putLogError.empty() )
+		if ( likely(!putLogError.empty()) )
 		{
-			putLogError( 27001, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 300000, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -150,14 +152,14 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		}
 
 		//! Debug log
-		if ( !getloglevel.empty() ){
-			if ( LOG_LV_DEBUG == getloglevel() ){
-				if ( !putLogDebug.empty() ){
-					buf = boost::io::str( boost::format( "previous endpoint : %s:%d currentweight(%d)" ) 
+		if ( likely(!getloglevel.empty()) ){
+			if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+				if ( likely(!putLogDebug.empty()) ){
+					buf = boost::io::str( boost::format( "previous endpoint : %s:%d currentweight(%d)" )
 														% tcp_endpoint.address()
 														% tcp_endpoint.port()
 														% vs_weights.currentWeight );
-					putLogDebug( 20005, buf, __FILE__, __LINE__);
+					putLogDebug( 300004, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -188,15 +190,15 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 
 			//! Debug log
-			if ( !getloglevel.empty() ){
-				if ( LOG_LV_DEBUG == getloglevel() ){
-					if ( !putLogDebug.empty() ){
+			if ( likely(!getloglevel.empty()) ){
+				if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+					if ( likely(!putLogDebug.empty()) ){
 						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d) currentweight(%d)" )
 															% itr->tcp_endpoint.address()
 															% itr->tcp_endpoint.port()
 															% itr->weight
 															% vs_weights.currentWeight );
-						putLogDebug( 20006, buf, __FILE__, __LINE__);
+						putLogDebug( 300005, buf, __FILE__, __LINE__);
 					}
 				}
 			}
@@ -218,10 +220,10 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	}
 
 END:
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 20007, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
+				putLogDebug( 300006, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -239,10 +241,10 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&		outendpoint ){
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 20008, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
+				putLogDebug( 300007, "Function in : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -255,37 +257,37 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	//! set clear data as NULL
 	outendpoint = udp_local_endpoint;
 
-	if ( inlist_begin.empty() || inlist_end.empty() || inlist_next.empty() ){
+	if ( unlikely(inlist_begin.empty() || inlist_end.empty() || inlist_next.empty()) ){
 		//! invalid iterator function
-		if ( !putLogFatal.empty() )
+		if ( likely(!putLogFatal.empty()) )
 		{
-			putLogFatal( 28002, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 300001, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
 
 	//! Debug log
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
 				for ( loop = 1, itr = inlist_begin(); itr != inlist_end(); itr = inlist_next( itr ), loop++ ){
 					buf = boost::io::str( boost::format( "realserver[%d] : %s:%d weight(%d)" )
 														% loop
 														% itr->udp_endpoint.address()
 														% itr->udp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 20009, buf, __FILE__, __LINE__);
+					putLogDebug( 300008, buf, __FILE__, __LINE__);
 				}
 			}
 		}
 	}
 
 	//! Debug log END
-	if ( -1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next ) ){
+	if ( unlikely(-1 == sched_wrr_service_init ( inlist_begin, inlist_end, inlist_next )) ){
 		//! init error( no data )
-		if ( !putLogError.empty() )
+		if ( likely(!putLogError.empty()) )
 		{
-			putLogError( 27002, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 300001, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -301,14 +303,14 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		}
 
 		//! Debug log
-		if ( !getloglevel.empty() ){
-			if ( LOG_LV_DEBUG == getloglevel() ){
-				if ( !putLogDebug.empty() ){
-					buf = boost::io::str( boost::format( "previous endpoint : %s:%d currentweight(%d)" ) 
+		if ( likely(!getloglevel.empty()) ){
+			if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+				if ( likely(!putLogDebug.empty()) ){
+					buf = boost::io::str( boost::format( "previous endpoint : %s:%d currentweight(%d)" )
 														% udp_endpoint.address()
 														% udp_endpoint.port()
 														% vs_weights.currentWeight );
-					putLogDebug( 20010, buf, __FILE__, __LINE__);
+					putLogDebug( 300009, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -339,15 +341,15 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 		for ( ; itr != inlist_end(); itr = inlist_next( itr ) ){
 
 			//! Debug log
-			if ( !getloglevel.empty() ){
-				if ( LOG_LV_DEBUG == getloglevel() ){
-					if ( !putLogDebug.empty() ){
+			if ( likely(!getloglevel.empty()) ){
+				if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+					if ( likely(!putLogDebug.empty()) ){
 						buf = boost::io::str( boost::format( "itr : %s:%d weight(%d) currentweight(%d)" )
 															% itr->udp_endpoint.address()
 															% itr->udp_endpoint.port()
 															% itr->weight
 															% vs_weights.currentWeight );
-						putLogDebug( 20011, buf, __FILE__, __LINE__);
+						putLogDebug( 300010, buf, __FILE__, __LINE__);
 					}
 				}
 			}
@@ -369,10 +371,10 @@ void	schedule_module_weighted_round_robin::handle_schedule(
 	}
 
 END:
-	if ( !getloglevel.empty() ){
-		if ( LOG_LV_DEBUG == getloglevel() ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 20012, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
+	if ( likely(!getloglevel.empty()) ){
+		if ( unlikely(LOG_LV_DEBUG == getloglevel()) ){
+			if ( likely(!putLogDebug.empty()) ){
+				putLogDebug( 300011, "Function out : schedule_module_weighted_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -389,12 +391,12 @@ int		schedule_module_weighted_round_robin::sched_wrr_service_init(
 							rslist_iterator_next_func_type		inlist_next ){
 
 	vs_weights.maxWeight = sched_wrr_getMaxWeight( inlist_begin, inlist_end, inlist_next );
-	if ( vs_weights.maxWeight <= 0 ){
+	if ( unlikely(vs_weights.maxWeight <= 0) ){
 		return -1;
 	}
 
 	vs_weights.gcd = sched_wrr_getGCD( inlist_begin, inlist_end, inlist_next );
-	if ( vs_weights.gcd <= 0 ){
+	if ( unlikely(vs_weights.gcd <= 0) ){
 		return -1;
 	}
 	return 0;
@@ -431,7 +433,7 @@ int		schedule_module_weighted_round_robin::sched_wrr_gcd( int a, int b ){
 		}
 	}
 
-	return ( a );	
+	return ( a );
 }
 
 int		schedule_module_weighted_round_robin::sched_wrr_getGCD(
@@ -448,7 +450,7 @@ int		schedule_module_weighted_round_robin::sched_wrr_getGCD(
 			break;
 		}
 	}
-	if ( itr == inlist_end() ){
+	if ( unlikely(itr == inlist_end()) ){
 		//! no data
 		return -1;
 	}

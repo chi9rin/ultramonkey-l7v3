@@ -37,10 +37,10 @@ schedule_module_round_robin::~schedule_module_round_robin(){}
 
 //!	initialize function
 void	schedule_module_round_robin::initialize(){
-	if ( !getloglevel.empty() ){
+	if ( likely(!getloglevel.empty() )){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 10001, "Function in : schedule_module_round_robin::initialize", __FILE__, __LINE__);
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 200000, "Function in : schedule_module_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -53,13 +53,13 @@ void	schedule_module_round_robin::initialize(){
 
 	if ( likely( !putLogInfo.empty() ) )
 	{
-		putLogInfo( 15001, "Saved endpoint was initialized.", __FILE__, __LINE__);
+		putLogInfo( 200000, "Saved endpoint was initialized.", __FILE__, __LINE__);
 	}
 
 	if ( likely( !getloglevel.empty() ) ){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( likely( !putLogDebug.empty() ) ){
-				putLogDebug( 10002, "Function out : schedule_module_round_robin::initialize", __FILE__, __LINE__);
+				putLogDebug( 200001, "Function out : schedule_module_round_robin::initialize", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -90,7 +90,7 @@ void	schedule_module_round_robin::handle_schedule(
 	if ( likely( !getloglevel.empty() ) ){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( likely( !putLogDebug.empty() ) ){
-				putLogDebug( 10003, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 200002, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -107,7 +107,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( likely( !putLogFatal.empty() ) )
 		{
-			putLogFatal( 18001, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 200000, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -122,7 +122,7 @@ void	schedule_module_round_robin::handle_schedule(
 														% itr->tcp_endpoint.address()
 														% itr->tcp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 10004, buf, __FILE__, __LINE__);
+					putLogDebug( 200003, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -140,7 +140,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! no data
 		if ( likely( !putLogError.empty() ) )
 		{
-			putLogError( 17001, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 200000, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -156,10 +156,10 @@ void	schedule_module_round_robin::handle_schedule(
 	if ( likely( !getloglevel.empty() ) ){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( likely( !putLogDebug.empty() ) ){
-				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" ) 
+				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" )
 													% tcp_endpoint.address()
 													% tcp_endpoint.port() );
-				putLogDebug( 10005, buf, __FILE__, __LINE__);
+				putLogDebug( 200004, buf, __FILE__, __LINE__);
 			}
 		}
 	}
@@ -185,7 +185,7 @@ void	schedule_module_round_robin::handle_schedule(
 															% itr->tcp_endpoint.address()
 															% itr->tcp_endpoint.port()
 															% itr->weight );
-						putLogDebug( 10006, buf, __FILE__, __LINE__);
+						putLogDebug( 200005, buf, __FILE__, __LINE__);
 					}
 				}
 			}
@@ -204,7 +204,7 @@ END:
 	if ( likely( !getloglevel.empty() ) ){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( likely( !putLogDebug.empty() ) ){
-				putLogDebug( 10007, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 200006, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -222,10 +222,10 @@ void	schedule_module_round_robin::handle_schedule(
 							rslist_iterator_end_func_type		inlist_end,
 							rslist_iterator_next_func_type		inlist_next,
 							boost::asio::ip::udp::endpoint&		outendpoint ){
-	if ( !getloglevel.empty() ){
+	if ( likely(!getloglevel.empty() )){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
-			if ( !putLogDebug.empty() ){
-				putLogDebug( 10008, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+			if ( likely(!putLogDebug.empty() )){
+				putLogDebug( 200007, "Function in : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}
@@ -242,7 +242,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! invalid iterator function
 		if ( likely( !putLogFatal.empty() ))
 		{
-			putLogFatal( 18002, "Iterator function is empty.", __FILE__, __LINE__);
+			putLogFatal( 200001, "Iterator function is empty.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -257,7 +257,7 @@ void	schedule_module_round_robin::handle_schedule(
 														% itr->udp_endpoint.address()
 														% itr->udp_endpoint.port()
 														% itr->weight );
-					putLogDebug( 10009, buf, __FILE__, __LINE__);
+					putLogDebug( 200008, buf, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -275,7 +275,7 @@ void	schedule_module_round_robin::handle_schedule(
 		//! no data
 		if ( likely( !putLogError.empty() ) )
 		{
-			putLogError( 17002, "There is no realserver on list.", __FILE__, __LINE__);
+			putLogError( 200001, "There is no realserver on list.", __FILE__, __LINE__);
 		}
 		goto END;
 	}
@@ -291,10 +291,10 @@ void	schedule_module_round_robin::handle_schedule(
 	if ( likely( !getloglevel.empty() ) ){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( likely( !putLogDebug.empty() ) ){
-				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" ) 
+				buf = boost::io::str( boost::format( "previous endpoint : %s:%d" )
 													% udp_endpoint.address()
 													% udp_endpoint.port() );
-				putLogDebug( 10010, buf, __FILE__, __LINE__);
+				putLogDebug( 200009, buf, __FILE__, __LINE__);
 			}
 		}
 	}
@@ -320,7 +320,7 @@ void	schedule_module_round_robin::handle_schedule(
 															% itr->udp_endpoint.address()
 															% itr->udp_endpoint.port()
 															% itr->weight );
-						putLogDebug( 10011, buf, __FILE__, __LINE__);
+						putLogDebug( 200010, buf, __FILE__, __LINE__);
 					}
 				}
 			}
@@ -339,7 +339,7 @@ END:
 	if ( likely( !getloglevel.empty() ) ){
 		if ( unlikely( LOG_LV_DEBUG == getloglevel() ) ){
 			if ( likely( !putLogDebug.empty() ) ){
-				putLogDebug( 10012, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
+				putLogDebug( 200011, "Function out : schedule_module_round_robin::handle_schedule", __FILE__, __LINE__);
 			}
 		}
 	}

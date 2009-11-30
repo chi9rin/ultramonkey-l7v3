@@ -189,6 +189,24 @@ void	schedule_module_test(){
 	BOOST_MESSAGE( "unit_test[15]" );
 	schedule_module_lc->replication_interrupt();
 
+	// unit_test[16]  handle_schedule(tcp)メソッドのテスト8 server3が返る
+	BOOST_MESSAGE( "unit_test[16]" );
+	rs_list.clear();
+    server1.increment_active();
+    server1.increment_active();
+    server1.increment_active();
+	rs_list.push_back( server1 );
+	server2.increment_active();
+	server2.increment_active();
+	rs_list.push_back( server2 );
+	server3.increment_active();
+	rs_list.push_back( server3 );
+	server4.increment_active();
+	server4.increment_active();
+	rs_list.push_back( server4 );
+	schedule_module_lc->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
+	BOOST_CHECK( server3.tcp_endpoint == endpoint1 );
+
 //	destroy_module( schedule_module_lc );
 	control.unload_module( schedule_module_lc );
 	control.finalize();

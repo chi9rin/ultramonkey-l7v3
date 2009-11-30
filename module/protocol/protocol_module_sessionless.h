@@ -29,6 +29,7 @@
 #define PROTOCOL_MODULE_SESSIONLESS_H
 
 #define MAX_OPTION_SIZE 128
+#define MAX_SESSIONLESS_MODULE_BUFFER_SIZE (4 * 1024* 1024 + MAX_BUFFER_SIZE)
 
 namespace l7vs
 {
@@ -121,7 +122,7 @@ protected:
 	int forwarded_for;
 	boost:: array<char,MAX_OPTION_SIZE> sorry_uri ;
 	std::map<boost::thread::id, thread_data_ptr> session_thread_data_map;
-	boost::mutex session_thread_data_map_mutex;
+	boost::mutex	session_thread_data_map_mutex;
 
 public:
 	static const std::string MODULE_NAME;

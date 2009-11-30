@@ -27,6 +27,7 @@
 #include "protocol_module_base.h"
 #include "ssl_protocol_module_base.h"
 #include "boost/format.hpp"
+#include "utility.h"
 
 namespace l7vs
 {
@@ -45,7 +46,7 @@ sslid_session_data_processor::sslid_session_data_processor(
 {
     //ctor
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         boost::format formatter("in_function : Constructor sslid_session_data_processor::"
                                 "sslid_session_data_processor(int maxlist, "
@@ -55,17 +56,17 @@ sslid_session_data_processor::sslid_session_data_processor(
                                 "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
                                 "maxlist = %d, timeout = %d, replication_data_processor = &(%d).");
         formatter % maxlist % timeout % static_cast<void*>(replication_data_processor);
-        putLogDebug(30171, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(300141, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
     // parameter check
-    if (maxlist < 0 || timeout < 0 || replication_data_processor == NULL)
+    if (unlikely(maxlist < 0 || timeout < 0 || replication_data_processor == NULL))
     {
         /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(30172, "out_function : Constructor sslid_session_data_processor::"
+            putLogDebug(300142, "out_function : Constructor sslid_session_data_processor::"
                                 "sslid_session_data_processor(int maxlist, int timeout, "
                                 "sslid_replication_data_processor* replication_data_processor, "
                                 "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
@@ -79,9 +80,9 @@ sslid_session_data_processor::sslid_session_data_processor(
     }
 
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(30173, "out_function : Constructor sslid_session_data_processor::"
+        putLogDebug(300143, "out_function : Constructor sslid_session_data_processor::"
                     "sslid_session_data_processor(int maxlist, int timeout, "
                     "sslid_replication_data_processor* replication_data_processor, "
                     "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
@@ -97,9 +98,9 @@ sslid_session_data_processor::~sslid_session_data_processor()
 {
     //dtor
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(30174, "in/out_function : Destructor sslid_session_data_processor::"
+        putLogDebug(300144, "in/out_function : Destructor sslid_session_data_processor::"
                     "~sslid_session_data_processor().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -116,7 +117,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                                     boost::asio::ip::tcp::endpoint& endpoint)
 {
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         std::string buffer;
         ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
@@ -125,7 +126,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                                 "boost::asio::ip::tcp::endpoint& endpoint) : "
                                 "session_id = %s, endpoint = [%s]:%d.");
         formatter % buffer % endpoint.address().to_string() % endpoint.port();
-        putLogDebug(30175, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(300145, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -148,9 +149,9 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                  itlasttime == session_lasttime_map.end())
             {
                 /*-------- DEBUG LOG --------*/
-                if (LOG_LV_DEBUG == getloglevel())
+                if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
-                    putLogDebug(30176, "out_function : int sslid_session_data_processor::"
+                    putLogDebug(300146, "out_function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data(const std::string& session_id, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.",
                                 __FILE__, __LINE__);
@@ -203,7 +204,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
 
             replication_data_processor->put_into_temp_list(temp_data);
             /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
                 std::string buffer;
                 ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
@@ -211,10 +212,10 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
                                         "get_endpoint_from_session_data() : put_into_temp_list() "
                                         "--delete item session_id = %s -- end.");
                 formatter % buffer;
-                putLogDebug(30177, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(300147, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
-        }
+            }
     }
     catch(const std::exception& e)
     {
@@ -222,19 +223,19 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37068, formatter.str(), __FILE__, __LINE__);
+        putLogError(300059, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
 
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data(const std::string& session_id, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
         formatter % ret;
-        putLogDebug(30178, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(300148, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -254,7 +255,7 @@ int sslid_session_data_processor::write_session_data(
                                     time_t now_time)
 {
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         std::string buffer;
         ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
@@ -264,7 +265,7 @@ int sslid_session_data_processor::write_session_data(
                                 "time_t now_time) : session_id = %s, "
                                 "endpoint = [%s]:%d, now_time = %lu.");
         formatter % buffer % endpoint.address().to_string() % endpoint.port() % now_time;
-        putLogDebug(30179, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(300149, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -276,9 +277,9 @@ int sslid_session_data_processor::write_session_data(
         if (maxlist <= 0)
         {
              /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(30180, "out_function : int sslid_session_data_processor::"
+                putLogDebug(300150, "out_function : int sslid_session_data_processor::"
                             "write_session_data(const std::string& session_id, "
                             "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                             "return_value = 0.", __FILE__, __LINE__);
@@ -323,7 +324,7 @@ int sslid_session_data_processor::write_session_data(
             temp_data.last_time = now_time;
             replication_data_processor->put_into_temp_list(temp_data);
             /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
                 std::string buffer;
                 ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
@@ -331,7 +332,7 @@ int sslid_session_data_processor::write_session_data(
                                         "write_session_data() : put_into_temp_list() "
                                         "--update item session_id = %s -- end.");
                 formatter % buffer;
-                putLogDebug(30181, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(300151, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -344,9 +345,9 @@ int sslid_session_data_processor::write_session_data(
                 if (clear_expired_session_data() == 1)
                 {
                     /*-------- DEBUG LOG --------*/
-                    if (LOG_LV_DEBUG == getloglevel())
+                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
-                        putLogDebug(30182, "out_function : int sslid_session_data_processor::"
+                        putLogDebug(300152, "out_function : int sslid_session_data_processor::"
                                     "write_session_data(const std::string& session_id, "
                                     "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                                     "return_value = 0.", __FILE__, __LINE__);
@@ -357,9 +358,9 @@ int sslid_session_data_processor::write_session_data(
                 }
 
                 /*-------- DEBUG LOG --------*/
-                if (LOG_LV_DEBUG == getloglevel())
+                if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
-                    putLogDebug(30183, "function : int sslid_session_data_processor::"
+                    putLogDebug(300153, "function : int sslid_session_data_processor::"
                                 "write_session_data() : clear_expired_session_data() END.",
                                 __FILE__, __LINE__);
                 }
@@ -380,7 +381,7 @@ int sslid_session_data_processor::write_session_data(
             temp_data.last_time = now_time;
             replication_data_processor->put_into_temp_list(temp_data);
             /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
                 std::string buffer;
                 ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
@@ -388,7 +389,7 @@ int sslid_session_data_processor::write_session_data(
                                         "write_session_data() : put_into_temp_list() "
                                         "--add item session_id = %s -- end.");
                 formatter % buffer;
-                putLogDebug(30184, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(300154, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -399,12 +400,12 @@ int sslid_session_data_processor::write_session_data(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "write_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37069, formatter.str(), __FILE__, __LINE__);
+        putLogError(300060, formatter.str(), __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(30185, "out_function : int sslid_session_data_processor::"
+            putLogDebug(300155, "out_function : int sslid_session_data_processor::"
                         "write_session_data(const std::string& session_id, "
                         "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                         "return_value = -1.", __FILE__, __LINE__);
@@ -415,9 +416,9 @@ int sslid_session_data_processor::write_session_data(
     }
 
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(30186, "out_function : int sslid_session_data_processor::"
+        putLogDebug(300156, "out_function : int sslid_session_data_processor::"
                     "write_session_data(const std::string& session_id, "
                     "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                     "return_value = 0.", __FILE__, __LINE__);
@@ -435,24 +436,24 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
                                                     sslid_replication_data* replication_area )
 {
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         boost::format formatter("in_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area(sslid_replication_data* replication_area) : "
                                 "replication_area = &(%d).");
         formatter % static_cast<void*>(replication_area);
-        putLogDebug(30187, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(300157, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
     // null check
-    if (replication_area == NULL)
+    if (unlikely(replication_area == NULL))
     {
-        putLogError(37070, "Replication area is NULL.", __FILE__, __LINE__);
+        putLogError(300061, "Replication area is NULL.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(30188, "out_function : int sslid_session_data_processor::"
+            putLogDebug(300158, "out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area("
                                 "sslid_replication_data* replication_area) : return_value = -1.", __FILE__, __LINE__);
         }
@@ -465,7 +466,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     {
         // restore replication data to map
         /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
             char* pdata = reinterpret_cast<char*>(replication_area);
             std::string datadump;
@@ -475,7 +476,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
                                     "read_session_data_from_replication_area() : "
                                     "data begin = 0, data_size = %d, data = %s");
             formatter % maxlist % datadump;
-            putLogDebug(30189, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(300159, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         for (int i = 0; i < maxlist; ++i)
@@ -501,19 +502,19 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();
-        putLogError(37071, formatter.str(), __FILE__, __LINE__);
+        putLogError(300062, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
 
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area(slid_replication_data* replication_area) : "
                                 "return_value = %d.");
         formatter % ret;
-        putLogDebug(30190, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(300160, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -525,9 +526,9 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
 int sslid_session_data_processor::clear_expired_session_data()
 {
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(30191, "in_function : int sslid_session_data_processor::"
+        putLogDebug(300161, "in_function : int sslid_session_data_processor::"
                     "clear_expired_session_data().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -540,9 +541,9 @@ int sslid_session_data_processor::clear_expired_session_data()
     if (session_endpoint_map.size() == 0)
     {
          /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(30192, "out_function : int sslid_session_data_processor::"
+            putLogDebug(300162, "out_function : int sslid_session_data_processor::"
                         "clear_expired_session_data() : return_value = 1.",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -574,7 +575,7 @@ int sslid_session_data_processor::clear_expired_session_data()
             // put into replication temp list
             replication_data_processor->put_into_temp_list(temp_data);
             /*-------- DEBUG LOG --------*/
-            if (LOG_LV_DEBUG == getloglevel())
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
                 std::string buffer;
                 ssl_protocol_module_base::dump_session_id(temp_data.session_id.c_str(), temp_data.session_id.size(), buffer);
@@ -582,7 +583,7 @@ int sslid_session_data_processor::clear_expired_session_data()
                             "clear_expired_session_data() : put_into_temp_list() "
                             "--delete expired time item session_id = %s -- end.");
                 formatter % buffer;
-                putLogDebug(30193, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(300163, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
         }
@@ -605,7 +606,7 @@ int sslid_session_data_processor::clear_expired_session_data()
         temp_data.session_id = session_id;
         replication_data_processor->put_into_temp_list(temp_data);
         /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == getloglevel())
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
             std::string buffer;
             ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
@@ -613,18 +614,18 @@ int sslid_session_data_processor::clear_expired_session_data()
                         "clear_expired_session_data() : put_into_temp_list() "
                         "--delete oldest time item session_id = %s -- end.");
             formatter % buffer;
-            putLogDebug(30194, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(300164, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
     }
 
     /*-------- DEBUG LOG --------*/
-    if (LOG_LV_DEBUG == getloglevel())
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
         boost::format formatter("out_function : int sslid_session_data_processor::"
                                 "clear_expired_session_data() : return_value = %d.");
         formatter % ret;
-        putLogDebug(30195, formatter.str(),  __FILE__, __LINE__);
+        putLogDebug(300165, formatter.str(),  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 

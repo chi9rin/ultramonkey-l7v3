@@ -32,6 +32,9 @@
 #include "realserver.h"
 #include <boost/format.hpp>
 
+#define VS_CONTACT_CLASS_NORMAL (0)
+#define VS_CONTACT_CLASS_SSL (0x00000001)
+
 namespace l7vs{
 
 //!	@class	protocol_module_base
@@ -393,6 +396,8 @@ public:
 	virtual	EVENT_TAG	handle_realserver_close(
 									const boost::thread::id thread_id,
 									const boost::asio::ip::udp::endpoint& rs_endpoint ) = 0;
+	//! call from 
+	virtual bool		is_exec_OK(unsigned int vs_attr)  {return true;}
 	//! format dump data.
 	//! @param[in]	data want to format
 	//! @param[in]	data size

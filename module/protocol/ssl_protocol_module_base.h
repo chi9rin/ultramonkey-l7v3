@@ -49,6 +49,9 @@ class ssl_protocol_module_base : public protocol_module_base
 		const static size_t SESSION_ID_BEGAIN_OFFSET = 44;
 		const static size_t SSL_RECORD_MIN_SIZE = 6;
     public:
+	    bool is_exec_OK(unsigned int vs_attr);
+
+    public:
     //! format dump data.
 	//! @param[in]	data want to format
 	//! @param[in]	data size

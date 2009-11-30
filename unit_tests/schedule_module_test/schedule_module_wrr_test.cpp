@@ -201,7 +201,7 @@ void	schedule_module_test(){
 	BOOST_CHECK( endpoint3 == endpoint1 );
 
 	// unit_test[11]  handle_schedule(tcp)メソッドのテスト４(重みが設定されているので最大値のserver3が返る)
-	BOOST_MESSAGE( "unit_test[10]" );
+	BOOST_MESSAGE( "unit_test[11]" );
 	rs_list.clear();
 	server1.weight = 2;
 	rs_list.push_back( server1 );
@@ -368,7 +368,7 @@ void	schedule_module_test(){
 	rslist_next = boost::bind( &list_next, _1 );
 
 	BOOST_CHECK_EQUAL( schedule_module_wrr_fake.sched_wrr_service_init_wrapper( rslist_begin, rslist_end, rslist_next ), -1 );
-	
+
 	// unit_test[34] sched_wrr_service_initメソッドのテスト２(リストの項目が全て振り分け無し)
 	BOOST_MESSAGE( "unit_test[34]" );
 	rs_list.clear();
@@ -414,8 +414,8 @@ void	schedule_module_test(){
 	BOOST_CHECK_EQUAL( schedule_module_wrr_fake.sched_wrr_gcd_wrapper( 6, 3 ), 3 );
 
 
-	// unit_test[x1]  handle_schedule(tcp)メソッドのテスト(重みが設定されているので最大値のserver2が返る)
-	BOOST_MESSAGE( "unit_test[x1]" );
+	// unit_test[39]  handle_schedule(tcp)メソッドのテスト(重みが設定されているので最大値のserver2が返る)
+	BOOST_MESSAGE( "unit_test[39]" );
 	rs_list.clear();
 	server1.weight = 1;
 	rs_list.push_back( server1 );
@@ -425,18 +425,18 @@ void	schedule_module_test(){
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server2.tcp_endpoint == endpoint1 );
 
-	// unit_test[x2]  handle_schedule(tcp)メソッドのテスト2(一巡し重みが設定されているのでserver1が返る)
-	BOOST_MESSAGE( "unit_test[x2]" );
+	// unit_test[40]  handle_schedule(tcp)メソッドのテスト2(一巡し重みが設定されているのでserver1が返る)
+	BOOST_MESSAGE( "unit_test[40]" );
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server1.tcp_endpoint == endpoint1 );
 
-	// unit_test[x3]  handle_schedule(tcp)メソッドのテスト3(重みが設定されているので次のserver2が返る)
-	BOOST_MESSAGE( "unit_test[x3]" );
+	// unit_test[41]  handle_schedule(tcp)メソッドのテスト3(重みが設定されているので次のserver2が返る)
+	BOOST_MESSAGE( "unit_test[41]" );
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server2.tcp_endpoint == endpoint1 );
 
-	// unit_test[x4]  handle_schedule(tcp)メソッドのテスト4(一巡し重みが設定されているので最大値のserver2が返る)
-	BOOST_MESSAGE( "unit_test[x4]" );
+	// unit_test[42]  handle_schedule(tcp)メソッドのテスト4(一巡し重みが設定されているので最大値のserver2が返る)
+	BOOST_MESSAGE( "unit_test[42]" );
 	schedule_module_wrr->handle_schedule( thread_id, rslist_begin, rslist_end, rslist_next, endpoint1 ) ;
 	BOOST_CHECK( server2.tcp_endpoint == endpoint1 );
 
