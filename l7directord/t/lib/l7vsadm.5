@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+print <<"L7VSADM";
+Layer-7 Virtual Server version 2.0.0-1
+Prot LocalAddress:Port ProtoMod Scheduler Reschedule Protomod_key_string
+  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
+TCP 127.0.0.1:80 sessionless rr 1 
+TCP 192.168.0.1:8080 sslid rr 1 
+TCP 192.168.0.100:10000 cinsert rr 1 --cookie-name monkey
+L7VSADM
