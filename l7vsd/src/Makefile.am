@@ -206,8 +206,8 @@ l7vsd_SOURCES	=	\
 			tcp_session.cpp \
 			udp_session.cpp
 l7vsd_LDADD	= \
-			../libl7vsd_logger.a \
-			../libl7vsd_parameter.a \
+			libl7vsd_logger.a \
+			libl7vsd_parameter.a \
 			-llog4cxx \
 			-lrt \
 			-lssl \
@@ -234,8 +234,8 @@ l7vsadm_SOURCES	=	\
 			l7vsadm.cpp
 
 l7vsadm_LDADD	=	\
-			../libl7vsadm_logger.a \
-			../libl7vsadm_parameter.a \
+			libl7vsadm_logger.a \
+			libl7vsadm_parameter.a \
 			-llog4cxx \
 			-lrt \
 			-lboost_thread-gcc41-mt \

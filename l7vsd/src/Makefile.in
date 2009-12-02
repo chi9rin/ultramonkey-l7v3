@@ -112,8 +112,7 @@ am_l7vsadm_OBJECTS = l7vsadm-protocol_module_control.$(OBJEXT) \
 	l7vsadm-schedule_module_control.$(OBJEXT) \
 	l7vsadm-l7vsadm.$(OBJEXT)
 l7vsadm_OBJECTS = $(am_l7vsadm_OBJECTS)
-l7vsadm_DEPENDENCIES = ../libl7vsadm_logger.a \
-	../libl7vsadm_parameter.a
+l7vsadm_DEPENDENCIES = libl7vsadm_logger.a libl7vsadm_parameter.a
 am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
 	l7vsd-virtualservice_base.$(OBJEXT) \
 	l7vsd-virtualservice_tcp.$(OBJEXT) \
@@ -134,7 +133,7 @@ am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
 	l7vsd-udp_request.$(OBJEXT) l7vsd-tcp_session.$(OBJEXT) \
 	l7vsd-udp_session.$(OBJEXT)
 l7vsd_OBJECTS = $(am_l7vsd_OBJECTS)
-l7vsd_DEPENDENCIES = ../libl7vsd_logger.a ../libl7vsd_parameter.a
+l7vsd_DEPENDENCIES = libl7vsd_logger.a libl7vsd_parameter.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -480,8 +479,8 @@ l7vsd_SOURCES = \
 			udp_session.cpp
 
 l7vsd_LDADD = \
-			../libl7vsd_logger.a \
-			../libl7vsd_parameter.a \
+			libl7vsd_logger.a \
+			libl7vsd_parameter.a \
 			-llog4cxx \
 			-lrt \
 			-lssl \
@@ -508,8 +507,8 @@ l7vsadm_SOURCES = \
 			l7vsadm.cpp
 
 l7vsadm_LDADD = \
-			../libl7vsadm_logger.a \
-			../libl7vsadm_parameter.a \
+			libl7vsadm_logger.a \
+			libl7vsadm_parameter.a \
 			-llog4cxx \
 			-lrt \
 			-lboost_thread-gcc41-mt \
