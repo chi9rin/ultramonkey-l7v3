@@ -21,6 +21,6 @@
 #
 ######################################################################
 
-SUBDIRS = conf init.d logger parameter src module modtester
+SUBDIRS = doc l7directord l7vsd
 AUTOMAKE_OPTIONS = foreign
 

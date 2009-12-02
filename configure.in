@@ -90,16 +90,16 @@ AC_SUBST(l7vs_config)
 AC_SUBST(MANDIR)
 AC_SUBST(snmpagent_libs)
 
-AC_CONFIG_FILES([parameter/Makefile]
-                [logger/Makefile]
-                [module/Makefile]
-                [module/schedule/Makefile]
-                [module/protocol/Makefile]
-                [src/Makefile]
+AC_CONFIG_FILES([doc/Makefile]
+                [l7directord/Makefile]
+                [l7vsd/Makefile]
+                [l7vsd/init.d/Makefile]
+                [l7vsd/modtester/Makefile]
+                [l7vsd/module/Makefile]
+                [l7vsd/module/protocol/Makefile]
+                [l7vsd/module/schedule/Makefile]
+                [l7vsd/src/Makefile]
                 [snmpagent/Makefile]
-                [Makefile]
-                [conf/Makefile]
-                [modtester/Makefile]
-				[init.d/Makefile])
+                [Makefile])
 
 AC_OUTPUT(l7vsd.spec)

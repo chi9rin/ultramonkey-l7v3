@@ -1,7 +1,9 @@
-sysconf_l7directorddir = $(sysconfdir)/ha.d/conf
-dist_sysconf_l7directord_DATA = conf/l7directord.cf.sample
+AUTOMAKE_OPTIONS 	= foreign
 
-initddir = $(sysconfdir)/rc.d/init.d
-dist_initd_SCRIPTS = init.d/l7directord
+SBINDIR                 = @sbindir@
+RCDIR                   = /etc/init.d
 
-dist_sbin_SCRIPTS = l7directord
+install:
+	$(INSTALL) -m 755 -D ./l7directord $(SBINDIR)/l7directord
+	$(INSTALL) -m 755 -D ./init.d/l7directord $(RCDIR)/l7directord
+

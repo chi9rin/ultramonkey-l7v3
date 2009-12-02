@@ -19,7 +19,7 @@ VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ..
+top_builddir = ../..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
 install_sh_DATA = $(install_sh) -c -m 644
@@ -35,7 +35,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = l7directord
+subdir = l7vsd/init.d
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -151,8 +151,6 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-SBINDIR = @sbindir@
-RCDIR = /etc/init.d
 all: all-am
 
 .SUFFIXES:
@@ -165,9 +163,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  l7directord/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  l7vsd/init.d/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  l7directord/Makefile
+	  $(AUTOMAKE) --foreign  l7vsd/init.d/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -314,8 +312,7 @@ uninstall-am: uninstall-info-am
 
 
 install:
-	$(INSTALL) -m 755 -D ./l7directord $(SBINDIR)/l7directord
-	$(INSTALL) -m 755 -D ./init.d/l7directord $(RCDIR)/l7directord
+	$(INSTALL) -m 755 -D ./l7vsd /etc/init.d/l7vsd
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

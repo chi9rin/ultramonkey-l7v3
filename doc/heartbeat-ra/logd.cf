@@ -1,0 +1,3 @@
+logfile /var/log/ha-log
+debugfile /var/log/ha-debug
+logfacility none

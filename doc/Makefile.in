@@ -35,7 +35,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = l7directord
+subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -151,8 +151,8 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-SBINDIR = @sbindir@
-RCDIR = /etc/init.d
+L7VS_CONF_DIR = @l7vs_config@
+L7DIRECTORD_CONFDIR = /etc/ha.d/conf
 all: all-am
 
 .SUFFIXES:
@@ -165,9 +165,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  l7directord/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  doc/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  l7directord/Makefile
+	  $(AUTOMAKE) --foreign  doc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -314,8 +314,8 @@ uninstall-am: uninstall-info-am
 
 
 install:
-	$(INSTALL) -m 755 -D ./l7directord $(SBINDIR)/l7directord
-	$(INSTALL) -m 755 -D ./init.d/l7directord $(RCDIR)/l7directord
+	$(INSTALL) -b -m 644 -D ./conf/l7vs.cf $(L7VS_CONF_DIR)
+	$(INSTALL) -m 644 -D ./conf/l7directord.cf.sample $(L7DIRECTORD_CONFDIR)/l7directord.cf.sample
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

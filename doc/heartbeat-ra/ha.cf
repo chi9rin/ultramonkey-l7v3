@@ -1,0 +1,21 @@
+crm on
+use_logd on
+
+debug 0
+udpport 694
+keepalive 2
+warntime 7
+deadtime 10
+initdead 48
+
+bcast eth2
+bcast eth3
+
+node hpww0101
+node hpww0201
+
+watchdog /dev/watchdog
+respawn root /usr/lib64/heartbeat/pingd -m 100 -a default_ping_set
+ping 192.168.43.14
+respawn root /usr/lib64/heartbeat/diskd -N /dev/sda -a diskcheck_status_internal -i 10
+respawn root /etc/ha.d/monitoring/heartbeat_logmoni.sh monitor
