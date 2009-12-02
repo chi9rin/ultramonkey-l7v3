@@ -97,7 +97,6 @@ protected:
 								search_vslist( const virtualservice_element& )	const;	//!< vs_list search function
 
 	bool						help;				//!< help mode
-	bool						debug;				//!< debug mode
 
 	boost::posix_time::ptime	starttime;			//!< l7vsd startup time
 
@@ -143,7 +142,6 @@ public:
 protected:
 	bool	check_options( int, char*[] );			//!< check option func
 	bool	parse_help( int&, int, char*[] );		//!< parse help func
-	bool	parse_debug( int&, int, char*[] );		//!< parse debug func
 
 	std::string	usage();							//!< make usage message
 	
