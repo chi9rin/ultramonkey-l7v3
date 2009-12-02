@@ -1344,7 +1344,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             session_thread_data_map_type::iterator it = session_thread_data_map.find(thread_id);
             if (unlikely(it == session_thread_data_map.end() || it->second == NULL))
             {
-                boost::format formatter("Invalid thread id. thread id: % id.");
+                boost::format formatter("Invalid thread id. thread id: %d.");
                 formatter % boost::this_thread::get_id();
                 putLogError(300031, formatter.str(), __FILE__, __LINE__);
 
@@ -1368,7 +1368,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
             if (threaddata->data_size + recvlen > threaddata->data_buffer.size())
             {
                 std::cerr << "protocol_module_sslid::handle_client_recv() : Data size bigger than buffer size." << std::endl;
-                boost::format formatter("Data size bigger than buffer size. thread id : % id.");
+                boost::format formatter("Data size bigger than buffer size. thread id : %d.");
                 formatter % boost::this_thread::get_id();
                 putLogError(300032, formatter.str(), __FILE__, __LINE__);
                 threaddata->end_flag = END_FLAG_ON;
@@ -1665,7 +1665,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                     "protocol_module_sslid::handle_realserver_select("
                                                     "const boost::thread::id thread_id, boost::asio::"
                                                     "ip::tcp::endpoint& rs_endpoint) : return_value = %d. "
-						    "thread id : % id.");
+						    "thread id : %d.");
                             formatter % FINALIZE % boost::this_thread::get_id();
                             putLogDebug(300059, formatter.str(), __FILE__, __LINE__);
                         }

@@ -5530,7 +5530,7 @@ namespace l7vs
                         else
                         {
                             //set return status
-                            status = CLIENT_RECV;
+                            status = REALSERVER_SELECT;
                         }
 
                         //set switch flag off
@@ -5682,7 +5682,7 @@ namespace l7vs
                         else
                         {
                             //set return status
-                            status = CLIENT_RECV;
+                            status = REALSERVER_SELECT;
                         }
 
                         //set switch flag off
