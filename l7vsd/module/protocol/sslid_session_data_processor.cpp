@@ -135,18 +135,14 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
     try
     {
         std::map<std::string, boost::asio::ip::tcp::endpoint>::iterator itendpoint;
-        std::map<std::string, time_t>::iterator itlasttime;
-        time_t oldtime = 0;
         boost::asio::ip::tcp::endpoint temp_endpoint;
 
         {
             // lock the session map
             boost::mutex::scoped_lock sclock(session_map_mutex);
             itendpoint = session_endpoint_map.find(session_id);
-            itlasttime = session_lasttime_map.find(session_id);
             // can't get the data
-            if (itendpoint == session_endpoint_map.end() ||
-                 itlasttime == session_lasttime_map.end())
+            if (itendpoint == session_endpoint_map.end())
             {
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -160,62 +156,19 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
 
                 return 1;
             }
-            oldtime = itlasttime->second;
-            temp_endpoint = itendpoint->second;
-        }
 
-        // expired time check
-        time_t now;
-        time(&now);
-        if (now - oldtime <= timeout)
+            endpoint = itendpoint->second;
+	}
+
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            // time in
-             endpoint = temp_endpoint;
+            boost::format formatter("function : int sslid_session_data_processor::"
+                                    "get_endpoint_from_session_data() : endpoint is exist endpoint = [%s]:%d.");
+            formatter % endpoint.address().to_string() % endpoint.port();
+            putLogDebug(300147, formatter.str(), __FILE__, __LINE__);
         }
-        else
-        {
-            // time out
-            {
-                // lock the session map
-                boost::mutex::scoped_lock sclocktimeout(session_map_mutex);
-                // delete session from the map
-                std::multimap<time_t, std::string>::iterator itbegin;
-                std::multimap<time_t, std::string>::iterator itend;
-                itbegin = lasttime_session_map.lower_bound(oldtime);
-                itend = lasttime_session_map.upper_bound(oldtime);
-
-                while (itbegin != itend)
-                {
-                    if (itbegin->first == oldtime && itbegin->second == session_id)
-                    {
-                        lasttime_session_map.erase(itbegin);
-                        break;
-                    }
-                    ++itbegin;
-                }
-                session_endpoint_map.erase(session_id);
-                session_lasttime_map.erase(session_id);
-            }
-
-            // update the replication list
-            sslid_replication_temp_data temp_data;
-            temp_data.op_code = 'D';
-            temp_data.session_id = session_id;
-
-            replication_data_processor->put_into_temp_list(temp_data);
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
-            {
-                std::string buffer;
-                ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
-                boost::format formatter("function : int sslid_session_data_processor::"
-                                        "get_endpoint_from_session_data() : put_into_temp_list() "
-                                        "--delete item session_id = %s -- end.");
-                formatter % buffer;
-                putLogDebug(300147, formatter.str(), __FILE__, __LINE__);
-            }
-            /*------DEBUG LOG END------*/
-            }
+        /*------DEBUG LOG END------*/
     }
     catch(const std::exception& e)
     {
@@ -361,7 +314,7 @@ int sslid_session_data_processor::write_session_data(
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
                     putLogDebug(300153, "function : int sslid_session_data_processor::"
-                                "write_session_data() : clear_expired_session_data() END.",
+                                "write_session_data() : clear_expired_session_data() end.",
                                 __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
@@ -536,8 +489,6 @@ int sslid_session_data_processor::clear_expired_session_data()
     // map must be already locked
     int ret = 0;
 
-    bool bdelete = false;
-
     if (session_endpoint_map.size() == 0)
     {
          /*-------- DEBUG LOG --------*/
@@ -551,73 +502,40 @@ int sslid_session_data_processor::clear_expired_session_data()
         return 1;
     }
 
-    // none record time expired, delete the oldest session
-    // get current time
-    time_t now;
-    time(&now);
-    // delete all the expired time from the session_lasttime_map
     sslid_replication_temp_data temp_data;
-    std::multimap<time_t, std::string>::iterator itmulti;
-    for (itmulti = lasttime_session_map.begin(); itmulti != lasttime_session_map.end();)
+    std::string session_id = lasttime_session_map.begin()->second;
+    lasttime_session_map.erase(lasttime_session_map.begin());
+    session_endpoint_map.erase(session_id);
+    session_lasttime_map.erase(session_id);
+    /*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        // record the oldest time
-        if (now - itmulti->first > timeout)
-        {
-            // time out
-            bdelete = true;
-            temp_data.op_code = 'D';
-            temp_data.session_id = itmulti->second;
-
-            session_endpoint_map.erase(itmulti->second);
-            session_lasttime_map.erase(itmulti->second);
-            lasttime_session_map.erase(itmulti++);
-
-            // put into replication temp list
-            replication_data_processor->put_into_temp_list(temp_data);
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
-            {
-                std::string buffer;
-                ssl_protocol_module_base::dump_session_id(temp_data.session_id.c_str(), temp_data.session_id.size(), buffer);
-                boost::format formatter("function : int sslid_session_data_processor::"
-                            "clear_expired_session_data() : put_into_temp_list() "
-                            "--delete expired time item session_id = %s -- end.");
-                formatter % buffer;
-                putLogDebug(300163, formatter.str(), __FILE__, __LINE__);
-            }
-            /*------DEBUG LOG END------*/
-        }
-        else
-        {
-            // time in
-            break;
-        }
+        std::string buffer;
+        ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
+        boost::format formatter("function : int sslid_session_data_processor::"
+                    "clear_expired_session_data() : "
+                    "--delete oldest time item form the map session_id = %s -- end.");
+        formatter % buffer;
+        putLogDebug(300163, formatter.str(), __FILE__, __LINE__);
     }
+    /*------DEBUG LOG END------*/
 
-    if (!bdelete)
+    // put into replication temp list
+    temp_data.op_code = 'D';
+    temp_data.session_id = session_id;
+    replication_data_processor->put_into_temp_list(temp_data);
+    /*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        std::string session_id = lasttime_session_map.begin()->second;
-        lasttime_session_map.erase(lasttime_session_map.begin());
-        session_endpoint_map.erase(session_id);
-        session_lasttime_map.erase(session_id);
-
-        // put into replication temp list
-        temp_data.op_code = 'D';
-        temp_data.session_id = session_id;
-        replication_data_processor->put_into_temp_list(temp_data);
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            std::string buffer;
-            ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
-            boost::format formatter("function : int sslid_session_data_processor::"
-                        "clear_expired_session_data() : put_into_temp_list() "
-                        "--delete oldest time item session_id = %s -- end.");
-            formatter % buffer;
-            putLogDebug(300164, formatter.str(), __FILE__, __LINE__);
-        }
-        /*------DEBUG LOG END------*/
+        std::string buffer;
+        ssl_protocol_module_base::dump_session_id(session_id.c_str(), session_id.size(), buffer);
+        boost::format formatter("function : int sslid_session_data_processor::"
+                    "clear_expired_session_data() : put_into_temp_list() "
+                    "--delete oldest time item session_id = %s -- end.");
+        formatter % buffer;
+        putLogDebug(300164, formatter.str(), __FILE__, __LINE__);
     }
+    /*------DEBUG LOG END------*/
 
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))

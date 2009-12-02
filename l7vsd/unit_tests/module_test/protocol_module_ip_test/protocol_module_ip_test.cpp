@@ -1776,6 +1776,9 @@ public:
         BOOST_CHECK_EQUAL(itr->second->data_state, HTTP_START);
         BOOST_CHECK_EQUAL(itr->second->last_status, REALSERVER_RECV);
         BOOST_CHECK_EQUAL(itr->second->ip_hash, static_cast<int>(l7vs_ip_service_calc_hash(itr->second->client_endpoint)));
+	BOOST_CHECK_EQUAL(itr->second->buffer_sequence.empty(), true);
+	
+	this->handle_session_finalize(boost::this_thread::get_id(), down_thread.get_id());
     }
 
     //handle_session_initialize
@@ -1831,7 +1834,11 @@ public:
             BOOST_CHECK_EQUAL(itr->second->current_message_rest_size, 0u);
             BOOST_CHECK_EQUAL(itr->second->data_state, HTTP_START);
             BOOST_CHECK_EQUAL(itr->second->last_status, REALSERVER_RECV);
+	    BOOST_CHECK_EQUAL(itr->second->buffer_sequence.empty(), true);
+
         }
+	this->handle_session_finalize(boost::this_thread::get_id(), down_thread.get_id());
+
     }
 
     //handle_session_finalize
@@ -2071,6 +2078,7 @@ public:
             ret = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
             BOOST_CHECK_EQUAL(ret, FINALIZE);
             BOOST_CHECK_EQUAL(thread_data->last_status, FINALIZE);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2100,6 +2108,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,thread_data->data_length);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2129,6 +2138,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,thread_data->data_length);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2158,6 +2168,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,thread_data->data_length);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2187,6 +2198,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,thread_data->data_length);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2211,6 +2223,7 @@ public:
             ret = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
             BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
             BOOST_CHECK_EQUAL(thread_data->last_status, CLIENT_RECV);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2239,6 +2252,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,10u + http_header_len);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2268,6 +2282,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,10u + http_header_len);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2295,6 +2310,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,48u);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
         cout << "[118]--------------------------------------------- " << endl;
@@ -2324,6 +2340,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,http_header_len-8);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2351,6 +2368,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,48u);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
         cout << "[120]--------------------------------------------- " << endl;
@@ -2380,6 +2398,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,http_header_len - 8);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2408,6 +2427,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,69u+100u);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2435,6 +2455,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,69u+100u);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2460,6 +2481,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,110u);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2484,6 +2506,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size,110u);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
         cout << "[125]--------------------------------------------- " << endl;
@@ -2506,6 +2529,7 @@ public:
             ret = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2529,6 +2553,7 @@ public:
             ret = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2552,6 +2577,7 @@ public:
             ret = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
 
@@ -2575,6 +2601,7 @@ public:
             ret = this->handle_client_recv(boost::this_thread::get_id(), recvbuffer, recvlen);
             BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+			delete [] thread_data->data_buffer;	
             session_thread_data_map.clear();
         }
     }
@@ -2611,6 +2638,7 @@ public:
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
                 BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
                 BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_CONNECT);
+				delete [] thread_data->data_buffer;	
                 session_thread_data_map.erase(boost::this_thread::get_id());
             }
         }
@@ -4159,7 +4187,6 @@ public:
                              const char*, int)> inputLogInfo = stb_putLogInfo;
         boost::function<void(const unsigned int, const std::string&,
                              const char*, int)> inputLogDebug = stb_putLogDebug;
-        char* ip_replication_area_begain = new char[10];
 
         boost::asio::ip::tcp::endpoint virtual_service_endpoint;
         ip_session_table_entry ip_session_entry_data;
@@ -4192,7 +4219,6 @@ public:
             }
         }
 
-        delete [] ip_replication_area_begain;
     }
 
     //handle_realserver_select(udp)
@@ -4265,6 +4291,7 @@ public:
             BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             BOOST_CHECK_EQUAL(send_buffer_len, strlen(send_buffer_context));
             BOOST_CHECK_EQUAL(thread_data->buffer_sequence.empty(), true);
+            delete[] thread_data->data_buffer;
             this->session_thread_data_map.clear();
         }
 
@@ -4753,7 +4780,6 @@ public:
             data->current_message_rest_size = 0;
             data->data_length = 0;
             data->data_offset = 5;
-            data->data_state = HTTP_BODY;
             ret = this->handle_realserver_send(boost::this_thread::get_id());
             BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
             BOOST_CHECK_EQUAL(data->data_state, HTTP_START);
@@ -4819,7 +4845,6 @@ public:
             data->data_buffer = data_buffer;
             memset(data->data_buffer, 0, MAX_BUFFER_SIZE);
             memcpy(data->data_buffer, buffer, strlen(buffer));
-            data->data_offset = 0;
             data->current_message_rest_size = 0;
             data->data_length = strlen(buffer);
             data->data_state = HTTP_BODY;
@@ -4968,6 +4993,7 @@ public:
         }
 
 
+		delete [] data_buffer;
     }
 
     //handle_realserver_send
@@ -5177,7 +5203,7 @@ public:
 
             ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
 
-            char * send_buffer_context = "POST /sorry.html HTTP/1.0\r\nX-Forwarded-For: 10.10.10.10\r\nContent-Length: 65493\r\n\r\n";
+            char * send_buffer_context = "POST /sorry_uri.html HTTP/1.0\r\nX-Forwarded-For: 10.10.10.10\r\nContent-Length: 65493\r\n\r\n";
             cmp_ret = memcmp(send_buffer.c_array(), send_buffer_context, strlen(send_buffer_context));
             BOOST_CHECK_EQUAL(cmp_ret, 0);// uriを置き換えし、X-Forworded-For文字列を添加する
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);// 遷移先ステータスを設定する
@@ -5223,7 +5249,7 @@ public:
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, SORRYSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(thread_data->data_state, HTTP_BODY);// データ状態にHTTP_BODYを設定する
-            BOOST_CHECK_EQUAL(send_buffer_len, http_header_len + 10);//sorry_uri's length
+            BOOST_CHECK_EQUAL(send_buffer_len, http_header_len );//sorry_uri's length
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 65493u);// 未送信データサイズに送信可能サイズを減算する
             BOOST_CHECK_EQUAL(thread_data->data_length, 0u);
@@ -5355,9 +5381,9 @@ public:
             char* http_header_ptr = "Get / HTTP/1.0\r\nContent-Length: 200\r\n\r\n";
             size_t http_header_len = strlen(http_header_ptr);
             memcpy(thread_data->data_buffer, http_header_ptr, http_header_len);
-            thread_data->data_length = http_header_len - 16; //ship "Get / HTTP/1.0\r\n"
-            thread_data->data_offset = 16;//"Get / HTTP/1.0\r\n"is already sent
-            thread_data->current_message_rest_size = http_header_len - 16 + 200;
+            thread_data->data_length = http_header_len - 15; //ship "Get / HTTP/1.0\r\n"
+            thread_data->data_offset = 15;//"Get / HTTP/1.0\r\n"is already sent
+            thread_data->current_message_rest_size = http_header_len - 15 + 200;
             thread_data->data_buffer_size = MAX_BUFFER_SIZE;
             this->forwarded_for = FORWARDED_FOR_ON;
             thread_data->forwarded_for_buffer.assign('0');
@@ -5413,7 +5439,7 @@ public:
             buffer_element = std::make_pair(thread_data->forwarded_for_buffer.data(), 31);
             thread_data->buffer_sequence.push_back(buffer_element);
 
-            buffer_element = std::make_pair(thread_data->data_buffer + 16, 23);
+            buffer_element = std::make_pair(thread_data->data_buffer + 15, thread_data->data_length);
             thread_data->buffer_sequence.push_back(buffer_element);
 
             ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
@@ -5645,7 +5671,8 @@ public:
         data->thread_id = boost::this_thread::get_id();
         this->session_thread_data_map[boost::this_thread::get_id()] = data;
         ret = this->handle_sorryserver_connection_fail(boost::this_thread::get_id(), ep);
-        BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT); // 遷移先ステータス status = CLIENT_DISCONNECT
+        BOOST_CHECK_EQUAL(data->end_flag, END_FLAG_ON);
+		BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT); // 遷移先ステータス status = CLIENT_DISCONNECT
         BOOST_CHECK_EQUAL(data->last_status, CLIENT_DISCONNECT);// 遷移ステータスを保存する
     }
 
@@ -6049,6 +6076,7 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
             boost::asio::ip::tcp::endpoint ep;
             status = this->handle_realserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
+			BOOST_CHECK_EQUAL(status, this->session_thread_data_map[boost::this_thread::get_id()]->last_status);
             BOOST_CHECK_EQUAL(status, FINALIZE);
             this->session_thread_data_map.clear();
             delete[] down_thread_data->data_buffer;
@@ -6454,6 +6482,8 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
             boost::asio::ip::tcp::endpoint ep;
             status = this->handle_sorryserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
+			BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->switch_flag, SWITCH_FLAG_OFF);
+			BOOST_CHECK_EQUAL(status, this->session_thread_data_map[boost::this_thread::get_id()]->last_status);
             BOOST_CHECK_EQUAL(status, FINALIZE);
             this->session_thread_data_map.clear();
             delete[] down_thread_data->data_buffer;
@@ -6478,6 +6508,7 @@ public:
             status = this->handle_sorryserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
             BOOST_CHECK_EQUAL(status, this->session_thread_data_map[boost::this_thread::get_id()]->last_status);
             BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+			BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_message_rest_size, 20u);
             this->session_thread_data_map.clear();
             delete[] down_thread_data->data_buffer;
         }
@@ -7368,7 +7399,7 @@ public:
         size_t datalen = 0;
         size_t datalen_t = 0;
         EVENT_TAG status;
-        char* ip_replication_area_begain = new char[100];
+        char* ip_replication_area_begain = NULL;
         int ip_replication_area_size = 100;
         std::string session_id;
         boost::asio::ip::tcp::endpoint virtual_service_endpoint;
@@ -7441,18 +7472,17 @@ public:
                 BOOST_CHECK_EQUAL(cmp_ret, 0);
                 BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_message_rest_size, 0u);
                 BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_offset, 15u);
-                BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_length, 15u);
+                BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_length, 5u);
 
                 ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(ip_data_processor))
                                                ->get_session_data_stub(down_thread_data->ip_hash);
                 //BOOST_CHECK_EQUAL(entry.rs_endpoint, init_endpoint);
                 //BOOST_CHECK(entry.last_time != 0);
 
-                delete down_thread_data->data_buffer;
+                delete [] down_thread_data->data_buffer;
                 this->session_thread_data_map.erase(boost::this_thread::get_id());
 
             }
-            delete [] ip_replication_area_begain;
         }
     }
 
@@ -8504,7 +8534,7 @@ public:
             status = this->handle_sorry_enable(boost::this_thread::get_id());
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
-                BOOST_CHECK_EQUAL(thread_data->sorry_flag, SORRY_FLAG_OFF);
+                BOOST_CHECK_EQUAL(thread_data->sorry_flag, SORRY_FLAG_ON);
                 BOOST_CHECK_EQUAL(status, ACCEPT);
                 BOOST_CHECK_EQUAL(thread_data->last_status, ACCEPT);
             }

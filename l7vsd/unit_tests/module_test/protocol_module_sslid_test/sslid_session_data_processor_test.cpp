@@ -248,7 +248,7 @@ public:
 		boost::asio::ip::tcp::endpoint get_endpoint;
 		boost::asio::ip::tcp::endpoint saved_endpoint;
 		sslid_replication_temp_data temp_list_data;
-		sslid_replication_data_processor_replacement *this_replication_data_processor =
+		//sslid_replication_data_processor_replacement *this_replication_data_processor =
 			dynamic_cast<sslid_replication_data_processor_replacement *>(this->replication_data_processor);
 
     cout << "[7]------------------------------------------" << endl;
@@ -276,13 +276,13 @@ public:
 		this->session_endpoint_map.clear();
 		this->session_lasttime_map.clear();
 		this->lasttime_session_map.clear();
-		this->session_endpoint_map[session_id] = saved_endpoint;
+		//this->session_endpoint_map[session_id] = saved_endpoint;
 		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
 		// function result check
 		BOOST_CHECK_EQUAL(result, 1);
 
     cout << "[10]------------------------------------------" << endl;
-		// unit_test[10] １つのデータがmapに存在して、タイムアウトしない場合、戻り値が正常（０）で設定する。
+		// unit_test[10] １つのデータがmapに存在しする場合、戻り値が正常（０）で設定する。
 		result = 10;
 		session_id = "test_id123456789abcdefghijklmnop";
 		saved_endpoint.address(boost::asio::ip::address::from_string("192.168.120.102"));
@@ -302,32 +302,32 @@ public:
 
     cout << "[11]------------------------------------------" << endl;
 		// unit_test[11] １つのデータがmapに存在して、タイムアウトの場合、戻り値が正常（０）で設定する。
-		result = 10;
-		this->timeout = 0;
-		this->session_endpoint_map.clear();
-		this->session_lasttime_map.clear();
-		this->lasttime_session_map.clear();
-		this_replication_data_processor->get_temp_list().clear();
-		this->session_endpoint_map[session_id] = saved_endpoint;
-		this->session_lasttime_map[session_id] = last_time - 10;
-		this->lasttime_session_map.insert(std::make_pair(last_time - 10, session_id));
-		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
+		//result = 10;
+		//this->timeout = 0;
+		//this->session_endpoint_map.clear();
+		//this->session_lasttime_map.clear();
+		//this->lasttime_session_map.clear();
+		//this_replication_data_processor->get_temp_list().clear();
+		//this->session_endpoint_map[session_id] = saved_endpoint;
+		//this->session_lasttime_map[session_id] = last_time - 10;
+		//this->lasttime_session_map.insert(std::make_pair(last_time - 10, session_id));
+		//result = this->get_endpoint_from_session_data(session_id, get_endpoint);
 		// get the item which put into the temp_list
-		this_replication_data_processor->to_get_from_temp_list(temp_list_data);
+		//this_replication_data_processor->to_get_from_temp_list(temp_list_data);
 		// session_endpoint_map item removed check
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 0u);
 		// session_lasttime_map item removed check
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
 		// lasttime_session_map item removed check
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
 		// function result check
-		BOOST_CHECK_EQUAL(result, 0);
+		//BOOST_CHECK_EQUAL(result, 0);
 		// the item which put into the temp_list check
-		BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
+		//BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
+		//BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
 
     cout << "[12]------------------------------------------" << endl;
-		// unit_test[12] mapに3つデータがあり、且つ３つデータが全部タイムアウトしない場合、戻り値が正常（０）で設定する。
+		// unit_test[12] mapに3つデータがあり、戻り値が正常（０）で設定する。
 		result = 10;
 		std::string temp_session_id1 = "temp_session_idyyyyyuuuu33456780";
 		std::string temp_session_id2 = "temp_session_id456789012rtyuerxy";
@@ -353,7 +353,7 @@ public:
 		BOOST_CHECK_EQUAL(get_endpoint, saved_endpoint);
 
     cout << "[13]------------------------------------------" << endl;
-		// unit_test[13] mapに3つデータがあり、且つ２つデータがタイムアウトしなくて,１つのデータだけタイムアウトの場合、戻り値が正常（０）で設定する。
+		// unit_test[13] mapに3つデータがあり、戻り値が正常（０）で設定する。
 		time_t temp_last_time = time(0) - 10;
 		time_t out_time = time(0) - 5000;
 		result = 10;
@@ -378,61 +378,61 @@ public:
 
     cout << "[14]------------------------------------------" << endl;
 		// unit_test[14] mapに3つデータがあり、且つ３つデータが全部タイムアウトの場合、戻り値が正常（０）で設定する。
-		temp_last_time = last_time - 10;
-		this->timeout = 0;
-		this->session_endpoint_map.clear();
-		this->session_lasttime_map.clear();
-		this->lasttime_session_map.clear();
-		this_replication_data_processor->get_temp_list().clear();
-		this->session_endpoint_map[session_id] = saved_endpoint;
-		this->session_endpoint_map[temp_session_id1] = temp_endpoint;
-		this->session_endpoint_map[temp_session_id2] = temp_endpoint;
-		this->session_lasttime_map[session_id] = temp_last_time ;
-		this->session_lasttime_map[temp_session_id1] = temp_last_time;
-		this->session_lasttime_map[temp_session_id2] = temp_last_time;
-		this->lasttime_session_map.insert(std::make_pair(temp_last_time, session_id));
-		this->lasttime_session_map.insert(std::make_pair(temp_last_time, temp_session_id1));
-		this->lasttime_session_map.insert(std::make_pair(temp_last_time, temp_session_id2));
-		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
+		//temp_last_time = last_time - 10;
+		//this->timeout = 0;
+		//this->session_endpoint_map.clear();
+		//this->session_lasttime_map.clear();
+		//this->lasttime_session_map.clear();
+		//this_replication_data_processor->get_temp_list().clear();
+		//this->session_endpoint_map[session_id] = saved_endpoint;
+		//this->session_endpoint_map[temp_session_id1] = temp_endpoint;
+		//this->session_endpoint_map[temp_session_id2] = temp_endpoint;
+		//this->session_lasttime_map[session_id] = temp_last_time ;
+		//this->session_lasttime_map[temp_session_id1] = temp_last_time;
+		//this->session_lasttime_map[temp_session_id2] = temp_last_time;
+		//this->lasttime_session_map.insert(std::make_pair(temp_last_time, session_id));
+		//this->lasttime_session_map.insert(std::make_pair(temp_last_time, temp_session_id1));
+		//this->lasttime_session_map.insert(std::make_pair(temp_last_time, temp_session_id2));
+		//result = this->get_endpoint_from_session_data(session_id, get_endpoint);
 		// get the item which put into the temp_list
-		this_replication_data_processor->to_get_from_temp_list(temp_list_data);
+		//this_replication_data_processor->to_get_from_temp_list(temp_list_data);
 		// session_endpoint_map item removed check
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 2u);
+		//BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 2u);
 		// session_lasttime_map item removed check
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 2u);
+		//BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 2u);
 		// lasttime_session_map item removed check
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 2u);
+		//BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 2u);
 		// function result check
-		BOOST_CHECK_EQUAL(result, 0);
+		//BOOST_CHECK_EQUAL(result, 0);
 		// the item which put into the temp_list check
-		BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
+		//BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
+		//BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
 
     cout << "[15]------------------------------------------" << endl;
 		// unit_test[15] メンバー関数timeoutが0でなくて、且つ検索対象データがタイムアウトの場合、戻り値が正常（０）で設定する。
-		temp_last_time = time(0) - 20;
-		this->timeout = 10;
-		this->session_endpoint_map.clear();
-		this->session_lasttime_map.clear();
-		this->lasttime_session_map.clear();
-		this_replication_data_processor->get_temp_list().clear();
-		this->session_endpoint_map[session_id] = saved_endpoint;
-		this->session_lasttime_map[session_id] = temp_last_time;
-		this->lasttime_session_map.insert(std::make_pair(temp_last_time, session_id));
-		result = this->get_endpoint_from_session_data(session_id, get_endpoint);
+		//temp_last_time = time(0) - 20;
+		//this->timeout = 10;
+		//this->session_endpoint_map.clear();
+		//this->session_lasttime_map.clear();
+		//this->lasttime_session_map.clear();
+		//this_replication_data_processor->get_temp_list().clear();
+		//this->session_endpoint_map[session_id] = saved_endpoint;
+		//this->session_lasttime_map[session_id] = temp_last_time;
+		//this->lasttime_session_map.insert(std::make_pair(temp_last_time, session_id));
+		//result = this->get_endpoint_from_session_data(session_id, get_endpoint);
 		// get the item which put into the temp_list
-		this_replication_data_processor->to_get_from_temp_list(temp_list_data);
+		//this_replication_data_processor->to_get_from_temp_list(temp_list_data);
 		// session_endpoint_map item removed check
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 0u);
 		// session_lasttime_map item removed check
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
 		// lasttime_session_map item removed check
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
 		// function result check
-		BOOST_CHECK_EQUAL(result, 0);
+		//BOOST_CHECK_EQUAL(result, 0);
 		// the item which put into the temp_list check
-		BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
+		//BOOST_CHECK_EQUAL(temp_list_data.op_code, 'D');
+		//BOOST_CHECK_EQUAL(temp_list_data.session_id, session_id);
 
     cout << "[16]------------------------------------------" << endl;
 		// unit_test[16] endpointがipv6で、１つのデータが存在して、且つタイムアウトしない場合、戻り値が正常（０）で設定する。
@@ -488,10 +488,10 @@ public:
 						this, session_id1, endpoint1));
 		thread_group.create_thread(boost::bind(
 						&sslid_session_data_processor_test_class::get_endpoint_from_session_data_thread,
-						this, session_id2, default_endpoint));
+						this, session_id2, endpoint2));
 		thread_group.create_thread(boost::bind(
 						&sslid_session_data_processor_test_class::get_endpoint_from_session_data_thread,
-						this, session_id3, default_endpoint));
+						this, session_id3, endpoint3));
 		thread_group.join_all();
 	}
 
@@ -929,39 +929,39 @@ public:
 
     cout << "[31]------------------------------------------" << endl;
 		// unit_test[31] mapに全てのアイテムがタイムアウトの場合、全てのアイテムを削除する。
-		test_time = time(0) - 5;
-		this->timeout = 0;
-		this->session_endpoint_map.clear();
-		this->session_lasttime_map.clear();
-		this->lasttime_session_map.clear();
-		this_replication_data_processor->get_temp_list().clear();
-		this->session_endpoint_map.insert(std::make_pair(session_id1, saved_endpoint1));
-		this->session_endpoint_map.insert(std::make_pair(session_id2, saved_endpoint2));
-		this->session_lasttime_map.insert(std::make_pair(session_id1, test_time));
-		this->session_lasttime_map.insert(std::make_pair(session_id2, test_time));
-		this->lasttime_session_map.insert(std::make_pair(test_time, session_id1));
-		this->lasttime_session_map.insert(std::make_pair(test_time, session_id2));
-		result = this->clear_expired_session_data();
+		//test_time = time(0) - 5;
+		//this->timeout = 0;
+		//this->session_endpoint_map.clear();
+		//this->session_lasttime_map.clear();
+		//this->lasttime_session_map.clear();
+		//this_replication_data_processor->get_temp_list().clear();
+		//this->session_endpoint_map.insert(std::make_pair(session_id1, saved_endpoint1));
+		//this->session_endpoint_map.insert(std::make_pair(session_id2, saved_endpoint2));
+		//this->session_lasttime_map.insert(std::make_pair(session_id1, test_time));
+		//this->session_lasttime_map.insert(std::make_pair(session_id2, test_time));
+		//this->lasttime_session_map.insert(std::make_pair(test_time, session_id1));
+		//this->lasttime_session_map.insert(std::make_pair(test_time, session_id2));
+		//result = this->clear_expired_session_data();
 		// get data which put into temp_list
-		sslid_replication_temp_data& first_temp_list_data = this_replication_data_processor->get_temp_list().front();
-		sslid_replication_temp_data& last_temp_list_data = this_replication_data_processor->get_temp_list().back();
+		//sslid_replication_temp_data& first_temp_list_data = this_replication_data_processor->get_temp_list().front();
+		//sslid_replication_temp_data& last_temp_list_data = this_replication_data_processor->get_temp_list().back();
 		// function result check
-		BOOST_CHECK_EQUAL(result, 0);
+		//BOOST_CHECK_EQUAL(result, 0);
 		// session_endpoint_map items remove check
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 0u);
 		// session_lasttime_map items remove check
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 0u);
 		// lasttime_session_map items remove check
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
+		//BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 0u);
 		// temp_list item check
-		BOOST_CHECK_EQUAL(this_replication_data_processor->get_temp_list().size(), 2u);
-		BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id1);
-		BOOST_CHECK_EQUAL(last_temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(last_temp_list_data.session_id, session_id2);
+		//BOOST_CHECK_EQUAL(this_replication_data_processor->get_temp_list().size(), 2u);
+		//BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
+		//BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id1);
+		//BOOST_CHECK_EQUAL(last_temp_list_data.op_code, 'D');
+		//BOOST_CHECK_EQUAL(last_temp_list_data.session_id, session_id2);
 
     cout << "[32]------------------------------------------" << endl;
-		// unit_test[32] mapに１つのアイテムがタイムアウトで、もう１つのアイテムがタイムアウトしない場合、タイムアウトのアイテムだけ削除する。
+		// unit_test[32] mapに二つのアイテムの場合、タイムアウトのアイテムだけ削除する。
 		saved_endpoint2.port(88);
 		this->timeout = 100;
 		test_time = time(0);
@@ -982,7 +982,7 @@ public:
 		it2 = this->session_lasttime_map.begin();
 		it3 = this->lasttime_session_map.begin();
 		// get data which put into temp_list
-		first_temp_list_data = this_replication_data_processor->get_temp_list().front();
+		sslid_replication_temp_data& first_temp_list_data = this_replication_data_processor->get_temp_list().front();
 		// remove ruslt check(item 'test_id123456789abcdefghijklmnop' is removed, but item 'test_id2abcdefghijklmnop23456789' is still existing)
 		// function result check
 		BOOST_CHECK_EQUAL(result, 0);
@@ -1004,46 +1004,46 @@ public:
 
     cout << "[33]------------------------------------------" << endl;
 		// unit_test[33] mapに全てのアイテムがタイムアウトしない場合、一番古いアイテムを削除する。
-		this->timeout = 10000;
-		time_t earlier_time = test_time -5;
-		time_t earliest_time = test_time -10;
-		this->session_endpoint_map.clear();
-		this->session_lasttime_map.clear();
-		this->lasttime_session_map.clear();
-		this_replication_data_processor->get_temp_list().clear();
-		this->session_endpoint_map.insert(std::make_pair(session_id1, saved_endpoint1));
-		this->session_endpoint_map.insert(std::make_pair(session_id2, saved_endpoint2));
-		this->session_lasttime_map.insert(std::make_pair(session_id1, earlier_time));
-		this->session_lasttime_map.insert(std::make_pair(session_id2, earliest_time));
-		this->lasttime_session_map.insert(std::make_pair(earlier_time, session_id1));
-		this->lasttime_session_map.insert(std::make_pair(earliest_time, session_id2));
-		result = this->clear_expired_session_data();
-		it1 = this->session_endpoint_map.begin();
-		it2 = this->session_lasttime_map.begin();
-		it3 = this->lasttime_session_map.begin();
+		//this->timeout = 10000;
+		//time_t earlier_time = test_time -5;
+		//time_t earliest_time = test_time -10;
+		//this->session_endpoint_map.clear();
+		//this->session_lasttime_map.clear();
+		//this->lasttime_session_map.clear();
+		//this_replication_data_processor->get_temp_list().clear();
+		//this->session_endpoint_map.insert(std::make_pair(session_id1, saved_endpoint1));
+		//this->session_endpoint_map.insert(std::make_pair(session_id2, saved_endpoint2));
+		//this->session_lasttime_map.insert(std::make_pair(session_id1, earlier_time));
+		//this->session_lasttime_map.insert(std::make_pair(session_id2, earliest_time));
+		//this->lasttime_session_map.insert(std::make_pair(earlier_time, session_id1));
+		//this->lasttime_session_map.insert(std::make_pair(earliest_time, session_id2));
+		//result = this->clear_expired_session_data();
+		//it1 = this->session_endpoint_map.begin();
+		//it2 = this->session_lasttime_map.begin();
+		//it3 = this->lasttime_session_map.begin();
 		// get data which put into temp_list
-		first_temp_list_data = this_replication_data_processor->get_temp_list().front();
+		//first_temp_list_data = this_replication_data_processor->get_temp_list().front();
 		// remove ruslt check(item 'test_id2abcdefghijklmnop23456789' which has the earliest lasttime is removed)
 		// function result check
-		BOOST_CHECK_EQUAL(result, 0);
+		//BOOST_CHECK_EQUAL(result, 0);
 		// session_endpoint_map item remove check
-		BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 1u);
-		BOOST_CHECK_EQUAL(it1->first, session_id1);
-		BOOST_CHECK_EQUAL(it1->second, saved_endpoint1);
+		//BOOST_CHECK_EQUAL(this->session_endpoint_map.size(), 1u);
+		//BOOST_CHECK_EQUAL(it1->first, session_id1);
+		//BOOST_CHECK_EQUAL(it1->second, saved_endpoint1);
 		// session_lasttime_map item remove check
-		BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 1u);
-		BOOST_CHECK_EQUAL(it2->first, session_id1);
-		BOOST_CHECK_EQUAL(it2->second, earlier_time);
+		//BOOST_CHECK_EQUAL(this->session_lasttime_map.size(), 1u);
+		//BOOST_CHECK_EQUAL(it2->first, session_id1);
+		//BOOST_CHECK_EQUAL(it2->second, earlier_time);
 		// lasttime_session_map item remove check
-		BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 1u);
-		BOOST_CHECK_EQUAL(it3->first, earlier_time);
-		BOOST_CHECK_EQUAL(it3->second, session_id1);
+		//BOOST_CHECK_EQUAL(this->lasttime_session_map.size(), 1u);
+		//BOOST_CHECK_EQUAL(it3->first, earlier_time);
+		//BOOST_CHECK_EQUAL(it3->second, session_id1);
 		// temp_list item check
-		BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
-		BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id2);
+		//BOOST_CHECK_EQUAL(first_temp_list_data.op_code, 'D');
+		//BOOST_CHECK_EQUAL(first_temp_list_data.session_id, session_id2);
 
     cout << "[34]------------------------------------------" << endl;
-		// unit_test[34] mapに全てのアイテムがタイムアウトしない場合、lasttimeが全て同じの場合、１つ目のアイテムを削除する。
+		// unit_test[34] mapに全てのアイテムlasttimeが全て同じの場合、１つ目のアイテムを削除する。
 		std::string session_id3 = "test_id3wasfgasdasdwasdrggrtrrrr";
 		this->timeout = 10000;
 		this->session_endpoint_map.clear();
