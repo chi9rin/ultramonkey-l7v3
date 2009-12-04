@@ -52,7 +52,6 @@ inline LOG_LEVEL_TAG& operator++(LOG_LEVEL_TAG& level) {
 
 //!    @enum    LOG_CATEGORY_TAG
 //!    @brief    Category enumeration.
-//!    @brief    LOG_CAT_SSLPROXY_LOGGER should be first for logger log.
 enum LOG_CATEGORY_TAG{
     LOG_CAT_NONE = 0,                        //!< logcategory is none
     LOG_CAT_L7VSD_NETWORK,                    //!< logcategory is network
@@ -105,12 +104,6 @@ enum LOG_CATEGORY_TAG{
     LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL,        //!< logcategory is snmpagent systemcall signal
     LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT,    //!< logcategory is snmpagent systemcall env
 
-    LOG_CAT_SSLPROXY_LOGGER,                //!< logcategory is snmpproxy logger
-    LOG_CAT_SSLPROXY_PARAMETER,                //!< logcategory is snmpproxy parameter
-    LOG_CAT_SSLPROXY_COMMON,                //!< logcategory is snmpproxy common
-    LOG_CAT_SSLPROXY_SERVER,                //!< logcategory is snmpproxy server
-    LOG_CAT_SSLPROXY_SESSION,                //!< logcategory is snmpproxy session
-    LOG_CAT_SSLPROXY_CONNECTION,            //!< logcategory is snmpproxy connection
     LOG_CAT_END,                                //!< end of logcategory
 };
 
