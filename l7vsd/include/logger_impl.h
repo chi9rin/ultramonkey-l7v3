@@ -51,6 +51,10 @@
 #define LOGGER_PROCESS_ID "SNM"
 #endif
 
+#define LOGGER_PROCESS_PROTOCOL_MODULE_ID "PRM"
+
+#define LOGGER_PROCESS_SCHEDULE_MODULE_ID "SCM"
+
 #define LOGGER_NULL "/dev/null"
 
 #define LOGGER_LEVEL_NUM (6)
@@ -180,33 +184,29 @@ public:
                                         const std::string& message,
                                         const char *file,
                                         int line){
-        std::stringstream buf;
+        std::stringstream	buf; 
+
+        std::string logger_process_id = LOGGER_PROCESS_ID;
+
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "PM"
-                % LOG_LV_FATAL
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
             break;
         case    LOG_CAT_SCHEDULE:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "SM"
-                % LOG_LV_FATAL
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
             break;
         default:
-            buf << boost::format( "%s%d%02d%05d %s %s" )
-                % LOGGER_PROCESS_ID
+            logger_process_id = LOGGER_PROCESS_ID;
+        }
+
+        buf << boost::format( "%s%d%02d%05d %s %s" )
+                % logger_process_id
                 % LOG_LV_FATAL
                 % cat
                 % message_id
                 % message.c_str()
                 % hostname;
-        }
+
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
             log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(    log4cxx::Level::getFatal(),
@@ -239,32 +239,28 @@ public:
                                         const char *file,
                                         int line){
         std::stringstream    buf;
+
+        std::string logger_process_id = LOGGER_PROCESS_ID;
+
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "PM"
-                % LOG_LV_ERROR
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
             break;
         case    LOG_CAT_SCHEDULE:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "SM"
-                % LOG_LV_ERROR
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
             break;
         default:
-            buf << boost::format( "%s%d%02d%05d %s %s" )
-                % LOGGER_PROCESS_ID
+            logger_process_id = LOGGER_PROCESS_ID;
+        }
+
+        buf << boost::format( "%s%d%02d%05d %s %s" )
+                % logger_process_id
                 % LOG_LV_ERROR
                 % cat
                 % message_id
                 % message.c_str()
                 % hostname;
-        }
+
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
             log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(    log4cxx::Level::getError(),
@@ -297,32 +293,28 @@ public:
                                         const char *file,
                                         int line){
         std::stringstream buf;
+
+        std::string logger_process_id = LOGGER_PROCESS_ID;
+
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "PM"
-                % LOG_LV_WARN
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
             break;
         case    LOG_CAT_SCHEDULE:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "SM"
-                % LOG_LV_WARN
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
             break;
         default:
-            buf << boost::format( "%s%d%02d%05d %s %s" )
-                % LOGGER_PROCESS_ID
+            logger_process_id = LOGGER_PROCESS_ID;
+        }
+
+        buf << boost::format( "%s%d%02d%05d %s %s" )
+                % logger_process_id
                 % LOG_LV_WARN
                 % cat
                 % message_id
                 % message.c_str()
                 % hostname;
-        }
+
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
             log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(    log4cxx::Level::getWarn(),
@@ -351,32 +343,28 @@ public:
                                         const char *file,
                                         int line){
         std::stringstream    buf;
+       
+        std::string logger_process_id = LOGGER_PROCESS_ID;
+
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "PM"
-                % LOG_LV_INFO
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
             break;
         case    LOG_CAT_SCHEDULE:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "SM"
-                % LOG_LV_INFO
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
             break;
         default:
-            buf << boost::format( "%s%d%02d%05d %s %s" )
-                % LOGGER_PROCESS_ID
+            logger_process_id = LOGGER_PROCESS_ID;
+        }
+
+        buf << boost::format( "%s%d%02d%05d %s %s" )
+                % logger_process_id
                 % LOG_LV_INFO
                 % cat
                 % message_id
                 % message.c_str()
                 % hostname;
-        }
+ 
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
             log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(    log4cxx::Level::getInfo(),
@@ -405,32 +393,27 @@ public:
                                         const char *file,
                                         int line){
         std::stringstream    buf;
+        std::string logger_process_id = LOGGER_PROCESS_ID;
+
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "PM"
-                % LOG_LV_DEBUG
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
             break;
         case    LOG_CAT_SCHEDULE:
-            buf << boost::format( "%s%d%06d %s %s" )
-                % "SM"
-                % LOG_LV_DEBUG
-                % message_id
-                % message.c_str()
-                % hostname;
+            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID; 
             break;
         default:
-            buf << boost::format( "%s%d%02d%05d %s %s" )
-                % LOGGER_PROCESS_ID
+            logger_process_id = LOGGER_PROCESS_ID;
+        }
+
+        buf << boost::format( "%s%d%02d%05d %s %s" )
+                % logger_process_id
                 % LOG_LV_DEBUG
                 % cat
                 % message_id
                 % message.c_str()
                 % hostname;
-        }
+
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
             log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(    log4cxx::Level::getDebug(),
