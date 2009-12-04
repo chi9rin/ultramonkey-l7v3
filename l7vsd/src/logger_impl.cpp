@@ -61,13 +61,6 @@
     #define LOGGER_ROTATION_TIMING_KEY                "l7vsd_rotation_timing"
     #define LOGGER_ROTATION_TIMING_VALUE_KEY        "l7vsd_rotation_timing_value"
 
-    #define LOGGER_CONN_LOG_FILENAME_KEY            "l7vsd_conn_log_filename"
-    #define LOGGER_CONN_ROTATION_KEY                "l7vsd_conn_rotation"
-    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY        "l7vsd_conn_max_backup_index"
-    #define LOGGER_CONN_MAX_FILE_SIZE_KEY            "l7vsd_conn_max_filesize"
-    #define LOGGER_CONN_ROTATION_TIMING_KEY            "l7vsd_conn_rotation_timing"
-    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY    "l7vsd_conn_rotation_timing_value"
-
 #elif defined(LOGGER_PROCESS_ADM)
     #define    LOGGER_LOG_FILENAME_KEY                    "l7vsadm_log_filename"
     #define LOGGER_ROTATION_KEY                        "l7vsadm_rotation"
@@ -75,13 +68,6 @@
     #define LOGGER_MAX_FILE_SIZE_KEY                "l7vsadm_max_filesize"
     #define LOGGER_ROTATION_TIMING_KEY                "l7vsadm_rotation_timing"
     #define LOGGER_ROTATION_TIMING_VALUE_KEY        "l7vsadm_rotation_timing_value"
-
-    #define LOGGER_CONN_LOG_FILENAME_KEY            ""
-    #define LOGGER_CONN_ROTATION_KEY                ""
-    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY        ""
-    #define LOGGER_CONN_MAX_FILE_SIZE_KEY             ""
-    #define LOGGER_CONN_ROTATION_TIMING_KEY            ""
-    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY    ""
 
 #elif(LOGGER_PROCESS_SNM)
     #define    LOGGER_LOG_FILENAME_KEY                    "snmp_log_filename"
@@ -91,27 +77,13 @@
     #define LOGGER_ROTATION_TIMING_KEY                "snmp_rotation_timing"
     #define LOGGER_ROTATION_TIMING_VALUE_KEY        "snmp_rotation_timing_value"
 
-    #define LOGGER_CONN_LOG_FILENAME_KEY            "snmp_conn_log_filename"
-    #define LOGGER_CONN_ROTATION_KEY                "snmp_conn_rotation"
-    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY        "snmp_conn_max_backup_index"
-    #define LOGGER_CONN_MAX_FILE_SIZE_KEY            "snmp_conn_max_filesize"
-    #define LOGGER_CONN_ROTATION_TIMING_KEY            "snmp_conn_rotation_timing"
-    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY    "snmp_conn_rotation_timing_value"
+    #define LOGGER_CONN_LOG_FILENAME_KEY			"snmp_conn_log_filename"
+    #define LOGGER_CONN_ROTATION_KEY				"snmp_conn_rotation"
+    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY		"snmp_conn_max_backup_index"
+    #define LOGGER_CONN_MAX_FILE_SIZE_KEY			"snmp_conn_max_filesize"
+    #define LOGGER_CONN_ROTATION_TIMING_KEY			"snmp_conn_rotation_timing"
+    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY	"snmp_conn_rotation_timing_value"
 
-#else    //sslproxy
-    #define LOGGER_LOG_FILENAME_KEY                    "sslproxy_log_filename"
-    #define LOGGER_ROTATION_KEY                        "sslproxy_rotation"
-    #define LOGGER_MAX_BACKUP_INDEX_KEY                "sslproxy_max_backup_index"
-    #define LOGGER_MAX_FILE_SIZE_KEY                "sslproxy_max_filesize"
-    #define LOGGER_ROTATION_TIMING_KEY                "sslproxy_rotation_timing"
-    #define LOGGER_ROTATION_TIMING_VALUE_KEY        "sslproxy_rotation_timing_value"
-    
-    #define LOGGER_CONN_LOG_FILENAME_KEY            "sslproxy_conn_log_filename"
-    #define LOGGER_CONN_ROTATION_KEY                "sslproxy_conn_rotation"
-    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY        "sslproxy_conn_max_backup_index"
-    #define LOGGER_CONN_MAX_FILE_SIZE_KEY            "sslproxy_conn_max_filesize"
-    #define LOGGER_CONN_ROTATION_TIMING_KEY            "sslproxy_conn_rotation_timing"
-    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY    "sslproxy_conn_rotation_timing_value"
 #endif
 
 /*!
@@ -378,36 +350,6 @@ l7vs::LoggerImpl::LoggerImpl()
     name_category_map["snmpagent_system_environment"] = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
     category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = "snmpagent_system_environment";
 
-#elif defined(LOGGER_PROCESS_SSL)
-    // sslproxy logger category initialize
-    category_level_map[LOG_CAT_SSLPROXY_LOGGER] = LOG_LV_DEBUG;
-    name_category_map["sslproxy_logger"] = LOG_CAT_SSLPROXY_LOGGER;
-    category_name_map[LOG_CAT_SSLPROXY_LOGGER] = "sslproxy_logger";
-
-    // sslproxy parameter category initialize
-    category_level_map[LOG_CAT_SSLPROXY_PARAMETER] = LOG_LV_DEBUG;
-    name_category_map["sslproxy_parameter"] = LOG_CAT_SSLPROXY_PARAMETER;
-    category_name_map[LOG_CAT_SSLPROXY_PARAMETER] = "sslproxy_parameter";
-
-    // sslproxy common category initialize
-    category_level_map[LOG_CAT_SSLPROXY_COMMON] = LOG_LV_DEBUG;
-    name_category_map["sslproxy_common"] = LOG_CAT_SSLPROXY_COMMON;
-    category_name_map[LOG_CAT_SSLPROXY_COMMON] = "sslproxy_common";
-
-    // sslproxy server category initialize
-    category_level_map[LOG_CAT_SSLPROXY_SERVER] = LOG_LV_DEBUG;
-    name_category_map["sslproxy_server"] = LOG_CAT_SSLPROXY_SERVER;
-    category_name_map[LOG_CAT_SSLPROXY_SERVER] = "sslproxy_server";
-
-    // sslproxy session category initialize
-    category_level_map[LOG_CAT_SSLPROXY_SESSION] = LOG_LV_DEBUG;
-    name_category_map["sslproxy_session"] = LOG_CAT_SSLPROXY_SESSION;
-    category_name_map[LOG_CAT_SSLPROXY_SESSION] = "sslproxy_session";
-
-    // sslproxy connection category initialize
-    category_level_map[LOG_CAT_SSLPROXY_CONNECTION] = LOG_LV_DEBUG;
-    name_category_map["sslproxy_connection"] = LOG_CAT_SSLPROXY_CONNECTION;
-    category_name_map[LOG_CAT_SSLPROXY_CONNECTION] = "sslproxy_connection";
 #endif
 
     BOOST_FOREACH( category_level_map_type::value_type const& itr, category_level_map ){
@@ -423,8 +365,6 @@ void l7vs::LoggerImpl::logic_error( const unsigned int logno, const std::string&
     putLogError( l7vs::LOG_CAT_L7VSADM_LOGGER,logno, str, file, line );
 #elif defined(LOGGER_PROCESS_SNM)
     putLogError( l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line );
-#elif defined(LOGGER_PROCESS_SSL)
-    putLogError( l7vs::LOG_CAT_SSLPROXY_LOGGER, logno, str, file, line );
 #else
     throw std::logic_error( str );
 
@@ -537,8 +477,6 @@ void l7vs::LoggerImpl::errorConf(    unsigned int message_id,
         log_category = LOG_CAT_L7VSADM_LOGGER;
 #elif defined(LOGGER_PROCESS_SNM)
         log_category = LOG_CAT_SNMPAGENT_LOGGER;
-#elif defined(LOGGER_PROCESS_SSL)
-        log_category = LOG_CAT_SSLPROXY_LOGGER;
 #else
         log_category = LOG_CAT_L7VSD_LOGGER;
 #endif
@@ -580,364 +518,232 @@ void l7vs::LoggerImpl::loadConf(){
     normal_log_property.rotation_timing_key                = LOGGER_ROTATION_TIMING_KEY;
     normal_log_property.rotation_timing_value_key        = LOGGER_ROTATION_TIMING_VALUE_KEY;
 
-    access_log_property.log_filename_key                = LOGGER_CONN_LOG_FILENAME_KEY;
-    access_log_property.rotation_key                    = LOGGER_CONN_ROTATION_KEY;
-    access_log_property.max_backup_index_key            = LOGGER_CONN_MAX_BACKUP_INDEX_KEY;
-    access_log_property.max_file_size_key                = LOGGER_CONN_MAX_FILE_SIZE_KEY;
-    access_log_property.rotation_timing_key                = LOGGER_CONN_ROTATION_TIMING_KEY;
-    access_log_property.rotation_timing_value_key        = LOGGER_CONN_ROTATION_TIMING_VALUE_KEY;
-
     //get normal log filename
     appender_property* property = &normal_log_property;
 
-    for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
-        // setting keyname check
-        if( "" == property->log_filename_key )    break;    // no conn_log setting.
+    // setting keyname check
+    if( "" == property->log_filename_key )    return;    // no conn_log setting.
 
-        // filename check
-        l7vs::error_code ec;
-        property->log_filename_value = param.get_string(PARAM_COMP_LOGGER, property->log_filename_key, ec);
-        if( ec ){
-            std::stringstream    ss;
-            ss << "Not exist logfilename_key : " << property->log_filename_key;
-            logic_error( 1, ss.str(), __FILE__, __LINE__ );
-        }
-    
-        // get rotation
-        std::string rotationStr = param.get_string(PARAM_COMP_LOGGER, property->rotation_key, ec);
-        if( !ec ){
-            if ("size" == rotationStr) property->rotation_value = LOG_ROT_SIZE;
-            else if ("date" == rotationStr) property->rotation_value = LOG_ROT_DATE;
-            else if ("datesize" == rotationStr) property->rotation_value = LOG_ROT_DATESIZE;
-            else {
-                std::stringstream    ss;
-                ss << "Invalid Log Rotation Setting : " << rotationStr;
-                throw std::logic_error( ss.str() );
-            }
-        }
-        else{
-            logic_error( 2, "Not Exist Log Rotation Setting.", __FILE__, __LINE__ );
-        }
+    // filename check
+    l7vs::error_code ec;
+    property->log_filename_value = param.get_string(PARAM_COMP_LOGGER, property->log_filename_key, ec);
+    if( ec ){
+        std::stringstream    ss;
+        ss << "Not exist logfilename_key : " << property->log_filename_key;
+        logic_error( 1, ss.str(), __FILE__, __LINE__ );
+    }
 
-        // get max backup index
-        std::string maxBackupIndexStr = param.get_string( PARAM_COMP_LOGGER, property->max_backup_index_key, ec );
-        if( !ec ) {
-            try {
-                property->max_backup_index_value = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
-            }
-            catch (const boost::bad_lexical_cast& bc) {
-                std::stringstream    ss;
-                ss << "Invalid MaxBackupIndex Value : " << maxBackupIndexStr << ".";
-                throw std::logic_error( ss.str() );
-            }
-            if (LOGGER_BACKUP_INDEX_LOWER_LIMIT > property->max_backup_index_value) {
-                std::stringstream ss;
-                ss << "Max Backup Index must at least " << LOGGER_BACKUP_INDEX_LOWER_LIMIT << ".";
-                throw std::logic_error( ss.str() );
-            }
-            if (LOGGER_BACKUP_INDEX_LIMIT < property->max_backup_index_value) {
-                std::stringstream ss;
-                ss << "Max Backup Index must at most " << LOGGER_BACKUP_INDEX_LIMIT << ".";
-                throw std::logic_error( ss.str() );
-            }
-        }
+    // get rotation
+    std::string rotationStr = param.get_string(PARAM_COMP_LOGGER, property->rotation_key, ec);
+    if( !ec ){
+        if ("size" == rotationStr) property->rotation_value = LOG_ROT_SIZE;
+        else if ("date" == rotationStr) property->rotation_value = LOG_ROT_DATE;
+        else if ("datesize" == rotationStr) property->rotation_value = LOG_ROT_DATESIZE;
         else {
-            logic_error( 3, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__ );
+            std::stringstream    ss;
+            ss << "Invalid Log Rotation Setting : " << rotationStr;
+            throw std::logic_error( ss.str() );
+        }
+    }
+    else{
+        logic_error( 2, "Not Exist Log Rotation Setting.", __FILE__, __LINE__ );
+    }
+
+    // get max backup index
+    std::string maxBackupIndexStr = param.get_string( PARAM_COMP_LOGGER, property->max_backup_index_key, ec );
+    if( !ec ) {
+        try {
+            property->max_backup_index_value = boost::lexical_cast<unsigned int>(maxBackupIndexStr);
+        }
+        catch (const boost::bad_lexical_cast& bc) {
+            std::stringstream    ss;
+            ss << "Invalid MaxBackupIndex Value : " << maxBackupIndexStr << ".";
+            throw std::logic_error( ss.str() );
+        }
+        if (LOGGER_BACKUP_INDEX_LOWER_LIMIT > property->max_backup_index_value) {
+            std::stringstream ss;
+            ss << "Max Backup Index must at least " << LOGGER_BACKUP_INDEX_LOWER_LIMIT << ".";
+            throw std::logic_error( ss.str() );
+        }
+        if (LOGGER_BACKUP_INDEX_LIMIT < property->max_backup_index_value) {
+            std::stringstream ss;
+            ss << "Max Backup Index must at most " << LOGGER_BACKUP_INDEX_LIMIT << ".";
+            throw std::logic_error( ss.str() );
+        }
+    }
+    else {
+        logic_error( 3, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__ );
+    }
+
+    // get max filesize check
+    if (LOG_ROT_SIZE == property->rotation_value || LOG_ROT_DATESIZE == property->rotation_value) {
+        // get max file size
+        std::string maxFileSizeStr;
+        maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property->max_file_size_key, ec);
+        if( ec )    logic_error( 4, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
+
+        std::string size_val;
+        std::string last_str = maxFileSizeStr.substr(maxFileSizeStr.length() - 1, 1);
+        // when unit was specified
+        if (("K" == last_str) || ("M" == last_str) || ("G" == last_str))
+            size_val = maxFileSizeStr.substr(0, maxFileSizeStr.length() - 1);
+        else
+            size_val = maxFileSizeStr;
+
+        try {
+            property->max_file_size_value = boost::lexical_cast<size_t>(size_val);
+        }
+        catch (const boost::bad_lexical_cast& bc){
+            logic_error( 5, "Invalid FileSize Value.", __FILE__, __LINE__ );
         }
 
-        // get max filesize check
-        if (LOG_ROT_SIZE == property->rotation_value || LOG_ROT_DATESIZE == property->rotation_value) {
-            // get max file size
-            std::string maxFileSizeStr;
-            maxFileSizeStr = param.get_string(PARAM_COMP_LOGGER, property->max_file_size_key, ec);
-            if( ec )    logic_error( 4, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
-            
-            std::string size_val;
-            std::string last_str = maxFileSizeStr.substr(maxFileSizeStr.length() - 1, 1);
-            // when unit was specified
-            if (("K" == last_str) || ("M" == last_str) || ("G" == last_str))
-                size_val = maxFileSizeStr.substr(0, maxFileSizeStr.length() - 1);
-            else
-                size_val = maxFileSizeStr;
-                
-            try {
-                property->max_file_size_value = boost::lexical_cast<size_t>(size_val);
+        if ("K" == last_str) {
+            if ((ULLONG_MAX / 1024) < property->max_file_size_value){
+                    logic_error( 6, "Invalid FileSize Value.", __FILE__, __LINE__);
             }
-            catch (const boost::bad_lexical_cast& bc){
-                logic_error( 5, "Invalid FileSize Value.", __FILE__, __LINE__ );
-            }
-    
-            if ("K" == last_str) {
-                if ((ULLONG_MAX / 1024) < property->max_file_size_value){
-                        logic_error( 6, "Invalid FileSize Value.", __FILE__, __LINE__);
-                }
-                property->max_file_size_value = property->max_file_size_value * 1024;
-            }
-            else if ("M" == last_str) {
-                if ((ULLONG_MAX / 1024 / 1024) < property->max_file_size_value)
-                    logic_error( 7, "Invalid FileSize Value.", __FILE__, __LINE__);
-                property->max_file_size_value = property->max_file_size_value * 1024 * 1024;
-            }
-            else if ("G" == last_str) {
-                if ((ULLONG_MAX / 1024 / 1024 / 1024) < property->max_file_size_value)
-                    logic_error( 8, "Invalid FileSize Value.", __FILE__, __LINE__);
-                property->max_file_size_value = property->max_file_size_value * 1024 * 1024 * 1024;
-            }
-            if (LOGGER_FILESIZE_LOWER_LIMIT > property->max_file_size_value){
-                int limit = LOGGER_FILESIZE_LOWER_LIMIT;
-                std::ostringstream oss;
-                oss << "FileSize must at least " << limit << " bytes.";
-                logic_error( 9, oss.str(), __FILE__, __LINE__);
-            }
+            property->max_file_size_value = property->max_file_size_value * 1024;
         }
+        else if ("M" == last_str) {
+            if ((ULLONG_MAX / 1024 / 1024) < property->max_file_size_value)
+                logic_error( 7, "Invalid FileSize Value.", __FILE__, __LINE__);
+            property->max_file_size_value = property->max_file_size_value * 1024 * 1024;
+        }
+        else if ("G" == last_str) {
+            if ((ULLONG_MAX / 1024 / 1024 / 1024) < property->max_file_size_value)
+                logic_error( 8, "Invalid FileSize Value.", __FILE__, __LINE__);
+            property->max_file_size_value = property->max_file_size_value * 1024 * 1024 * 1024;
+        }
+        if (LOGGER_FILESIZE_LOWER_LIMIT > property->max_file_size_value){
+            int limit = LOGGER_FILESIZE_LOWER_LIMIT;
+            std::ostringstream oss;
+            oss << "FileSize must at least " << limit << " bytes.";
+            logic_error( 9, oss.str(), __FILE__, __LINE__);
+        }
+    }
 
+    // get rotation timing
+    if(LOG_ROT_DATE == property->rotation_value || LOG_ROT_DATESIZE == property->rotation_value) {
         // get rotation timing
-        if(LOG_ROT_DATE == property->rotation_value || LOG_ROT_DATESIZE == property->rotation_value) {
-            // get rotation timing
-            std::string rotationTimingStr = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_key, ec);
+        std::string rotationTimingStr = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_key, ec);
+        if( !ec ){
+            if ("year" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_YEAR;
+            else if ("month" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_MONTH;
+            else if ("week" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_WEEK;
+            else if ("date" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_DATE;
+            else if ("hour" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_HOUR;
+            else logic_error( 10, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
+        }
+        else{    logic_error( 11, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);}
+
+        if(LOG_TIM_YEAR == property->rotation_timing_value ){
+            std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
             if( !ec ){
-                if ("year" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_YEAR;
-                else if ("month" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_MONTH;
-                else if ("week" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_WEEK;
-                else if ("date" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_DATE;
-                else if ("hour" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_HOUR;
-                else logic_error( 10, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
-            }
-            else{    logic_error( 11, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);}
-
-            if(LOG_TIM_YEAR == property->rotation_timing_value ){
-                std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
-                if( !ec ){
-                    std::string::size_type fpos = 0;
-                    std::string::size_type rpos = 0;
-                    int month = 0;
-                    int date = 0;
-                    int hour = 0;
-                    int minute = 0;
-                    // find month
-                    rpos = ret.find_first_of('/', fpos);
-                    if (std::string::npos != rpos) {
-                        std::string monthStr = ret.substr(fpos, rpos - fpos);
-                        try {
-                            month = boost::lexical_cast<int>(monthStr);
-                        }
-                        catch (const boost::bad_lexical_cast& bc) {
-                                logic_error( 12, "Parse Timing Year Error.", __FILE__, __LINE__);
-                        }
-                        if (1 > month || month > 12) {
-                            logic_error( 13, "Parse Timing Year Error.", __FILE__, __LINE__);
-                        }
-                        fpos = rpos + 1;
-                        // find date
-                        rpos = ret.find_first_of(' ', fpos);
-                        if (std::string::npos != rpos){
-                            std::string dateStr = ret.substr(fpos, rpos - fpos);
-                            try {
-                                date = boost::lexical_cast<int>(dateStr);
-                            }
-                            catch (const boost::bad_lexical_cast& bc) {
-                                logic_error( 14, "Parse Timing Year Error.", __FILE__, __LINE__);
-                            }
-                        }
-                        if (1 > date || date > 31)  logic_error( 15, "Parse Timing Year Error.", __FILE__, __LINE__);
-
-                        int dates[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-                        if (date > dates[month - 1]) logic_error( 16, "Parse Timing Year Error.", __FILE__, __LINE__);
-
-                        fpos = rpos + 1;
-                        // find hour 
-                        rpos = ret.find_first_of(':', fpos);
-                        if(std::string::npos != rpos) {
-                            std::string hourStr = ret.substr(fpos, rpos - fpos);
-                            try{
-                                hour = boost::lexical_cast<int>(hourStr);
-                            }
-                            catch(const boost::bad_lexical_cast& bc){
-                                logic_error( 17, "Parse Timing Year Error.", __FILE__, __LINE__);
-                            }
-                            if(0 > hour || hour > 23) logic_error( 18, "Parse Timing Year Error.", __FILE__, __LINE__);
-
-                            // minute
-                            std::string minuteStr = ret.substr(rpos + 1);
-                            try {
-                                minute = boost::lexical_cast<int>(minuteStr);
-                            }
-                            catch(const boost::bad_lexical_cast& bc){
-                                logic_error( 19, "Parse Timing Year Error.", __FILE__, __LINE__);
-                            }
-                            if (0 > minute || minute > 59) logic_error( 20, "Parse Timing Year Error.", __FILE__, __LINE__);
-                        }
-                        else{
-                            logic_error( 21, "Parse Timing Year Error.", __FILE__, __LINE__);
-                        }
+                std::string::size_type fpos = 0;
+                std::string::size_type rpos = 0;
+                int month = 0;
+                int date = 0;
+                int hour = 0;
+                int minute = 0;
+                // find month
+                rpos = ret.find_first_of('/', fpos);
+                if (std::string::npos != rpos) {
+                    std::string monthStr = ret.substr(fpos, rpos - fpos);
+                    try {
+                        month = boost::lexical_cast<int>(monthStr);
                     }
-                    else{
-                        logic_error( 22, "Parse Timing Year Error.", __FILE__, __LINE__);
+                    catch (const boost::bad_lexical_cast& bc) {
+                            logic_error( 12, "Parse Timing Year Error.", __FILE__, __LINE__);
                     }
-
-                    // format to internal rotation timing value expresson
-                    std::ostringstream oss;
-                    oss << std::setfill('0') << std::setw(2) << month
-                        << std::setfill('0') << std::setw(2) << date
-                        << std::setfill('0') << std::setw(2) << hour
-                        << std::setfill('0') << std::setw(2) << minute;
-                    
-                    property->rotation_timing_value_value = oss.str();
-
-                }
-                else {
-                    logic_error( 23, "Not Exist Log RotaionTiming Year Setting.", __FILE__, __LINE__);
-                }
-            }
-        
-
-            if (LOG_TIM_MONTH == property->rotation_timing_value ) {
-                std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
-                if( !ec ){
-                    std::string::size_type fpos = 0;
-                    std::string::size_type rpos = 0;
-                    int date = 0;
-                    int hour = 0;
-                    int minute = 0;
-                    // find day
+                    if (1 > month || month > 12) {
+                        logic_error( 13, "Parse Timing Year Error.", __FILE__, __LINE__);
+                    }
+                    fpos = rpos + 1;
+                    // find date
                     rpos = ret.find_first_of(' ', fpos);
-                    if(std::string::npos != rpos) {
+                    if (std::string::npos != rpos){
                         std::string dateStr = ret.substr(fpos, rpos - fpos);
-                        try{
+                        try {
                             date = boost::lexical_cast<int>(dateStr);
                         }
-                        catch(const boost::bad_lexical_cast& bc) {
-                            logic_error( 24, "Parse Timing Month Error.", __FILE__, __LINE__);
+                        catch (const boost::bad_lexical_cast& bc) {
+                            logic_error( 14, "Parse Timing Year Error.", __FILE__, __LINE__);
                         }
-                        if(1 > date || date > 31) {
-                            logic_error( 25, "Parse Timing Month Error.", __FILE__, __LINE__);
+                    }
+                    if (1 > date || date > 31)  logic_error( 15, "Parse Timing Year Error.", __FILE__, __LINE__);
+
+                    int dates[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+                    if (date > dates[month - 1]) logic_error( 16, "Parse Timing Year Error.", __FILE__, __LINE__);
+
+                    fpos = rpos + 1;
+                    // find hour
+                    rpos = ret.find_first_of(':', fpos);
+                    if(std::string::npos != rpos) {
+                        std::string hourStr = ret.substr(fpos, rpos - fpos);
+                        try{
+                            hour = boost::lexical_cast<int>(hourStr);
                         }
-                        fpos = rpos + 1;
-                        // find hour
-                        rpos = ret.find_first_of(':', fpos);
-                        if(std::string::npos != rpos) {
-                            std::string hourStr = ret.substr(fpos, rpos - fpos);
-                            try{
-                                hour = boost::lexical_cast<int>(hourStr);
-                            }
-                            catch(const boost::bad_lexical_cast& bc) {
-                                logic_error( 26, "Parse Timing Month Error.", __FILE__, __LINE__);
-                            }
-                            if(0 > hour || hour > 23) {
-                                logic_error( 27, "Parse Timing Month Error.", __FILE__, __LINE__);
-                            }
-                            // minute
-                            std::string minuteStr = ret.substr(rpos + 1);
-                            try{
-                                minute = boost::lexical_cast<int>(minuteStr);
-                            }
-                            catch(const boost::bad_lexical_cast& bc) {
-                                logic_error( 28, "Parse Timing Month Error.", __FILE__, __LINE__);
-                            }
-                            if(0 > minute || minute > 59) {
-                                logic_error( 29, "Parse Timing Month Error.", __FILE__, __LINE__);
-                            }
+                        catch(const boost::bad_lexical_cast& bc){
+                            logic_error( 17, "Parse Timing Year Error.", __FILE__, __LINE__);
                         }
-                        else{
-                            logic_error( 30, "Parse Timing Month Error.", __FILE__, __LINE__);
+                        if(0 > hour || hour > 23) logic_error( 18, "Parse Timing Year Error.", __FILE__, __LINE__);
+
+                        // minute
+                        std::string minuteStr = ret.substr(rpos + 1);
+                        try {
+                            minute = boost::lexical_cast<int>(minuteStr);
                         }
+                        catch(const boost::bad_lexical_cast& bc){
+                            logic_error( 19, "Parse Timing Year Error.", __FILE__, __LINE__);
+                        }
+                        if (0 > minute || minute > 59) logic_error( 20, "Parse Timing Year Error.", __FILE__, __LINE__);
                     }
                     else{
-                        logic_error( 31, "Parse Timing Month Error.", __FILE__, __LINE__);
+                        logic_error( 21, "Parse Timing Year Error.", __FILE__, __LINE__);
                     }
-    
-                    // format to internal rotation timing value expresson
-                    std::stringstream oss;
-                    oss << std::setfill('0') << std::setw(2) << date
-                        << std::setfill('0') << std::setw(2) << hour
-                        << std::setfill('0') << std::setw(2) << minute;
-                    
-                    property->rotation_timing_value_value = oss.str();
-    
                 }
                 else{
-                    logic_error( 32, "Not Exist Log RotaionTiming Month Setting.", __FILE__, __LINE__);
+                    logic_error( 22, "Parse Timing Year Error.", __FILE__, __LINE__);
                 }
-            }
 
-            if(LOG_TIM_WEEK == property->rotation_timing_value ){
-                std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
-                if( !ec ){
-                    std::string::size_type fpos = 0;
-                    std::string::size_type rpos = 0;
-                    int week = 0;
-                    int hour = 0;
-                    int minute = 0;
-                    rpos = ret.find_first_of(' ', fpos);
-                    //find week
-                    if (std::string::npos != rpos) {
-                        std::string weekStr = ret.substr(fpos, rpos - fpos);
-    
-                        if ("sun" == weekStr) week = 0;
-                        else if("mon" == weekStr) week = 1;
-                        else if("tue" == weekStr) week = 2;
-                        else if("wed" == weekStr) week = 3;
-                        else if("thu" == weekStr) week = 4;
-                        else if("fri" == weekStr) week = 5;
-                        else if("sat" == weekStr) week = 6;
-                        else{
-                            logic_error( 33, "Parse Timing Week Error.", __FILE__, __LINE__);
-                        }
-                        fpos = rpos + 1;
-                        // find hour
-                        rpos = ret.find_first_of(':', fpos);
-                        if(std::string::npos != rpos) {
-                            std::string hourStr = ret.substr(fpos, rpos - fpos);
-                            try{
-                                hour = boost::lexical_cast<int>(hourStr);
-                            }
-                            catch (const boost::bad_lexical_cast& bc) {
-                                logic_error( 34, "Parse Timing Week Error.", __FILE__, __LINE__);
-                            }
-                            if(0 > hour || hour > 23) {
-                                logic_error( 35, "Parse Timing Week Error.", __FILE__, __LINE__);
-                            }
-                            // minute
-                            std::string minuteStr = ret.substr(rpos + 1);
-                            try{
-                                minute = boost::lexical_cast<int>(minuteStr);
-                            }
-                            catch(const boost::bad_lexical_cast& bc) {
-                                logic_error( 36, "Parse Timing Week Error.", __FILE__, __LINE__);
-                            }
-                            if(0 > minute || minute > 59) {
-                                logic_error( 37, "Parse Timing Week Error.", __FILE__, __LINE__);
-                            }
-                        }
-                        else{
-                            logic_error( 38, "Parse Timing Week Error.", __FILE__, __LINE__);
-                        }
-                    }
-                    else{
-                        logic_error( 39, "Parse Timing Week Error.", __FILE__, __LINE__);
-                    }
-    
-                    // format to internal rotation timing value expresson
-                    std::ostringstream oss;
-                    oss << std::setfill('0') << std::setw(1) << week
-                        << std::setfill('0') << std::setw(2) << hour
-                        << std::setfill('0') << std::setw(2) << minute;
-    
-                    property->rotation_timing_value_value = oss.str();
-                }
-                else{
-                    logic_error( 40, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
-                }
-            }
+                // format to internal rotation timing value expresson
+                std::ostringstream oss;
+                oss << std::setfill('0') << std::setw(2) << month
+                    << std::setfill('0') << std::setw(2) << date
+                    << std::setfill('0') << std::setw(2) << hour
+                    << std::setfill('0') << std::setw(2) << minute;
 
-            if(LOG_TIM_DATE == property->rotation_timing_value){
-                std::string ret =param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
-                if( !ec ){
-                    std::string::size_type fpos = 0;
-                    std::string::size_type rpos = 0;
-                    int hour = 0;
-                    int minute = 0;
-                    //find time
+                property->rotation_timing_value_value = oss.str();
+
+            }
+            else {
+                logic_error( 23, "Not Exist Log RotaionTiming Year Setting.", __FILE__, __LINE__);
+            }
+        }
+
+
+        if (LOG_TIM_MONTH == property->rotation_timing_value ) {
+            std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
+            if( !ec ){
+                std::string::size_type fpos = 0;
+                std::string::size_type rpos = 0;
+                int date = 0;
+                int hour = 0;
+                int minute = 0;
+                // find day
+                rpos = ret.find_first_of(' ', fpos);
+                if(std::string::npos != rpos) {
+                    std::string dateStr = ret.substr(fpos, rpos - fpos);
+                    try{
+                        date = boost::lexical_cast<int>(dateStr);
+                    }
+                    catch(const boost::bad_lexical_cast& bc) {
+                        logic_error( 24, "Parse Timing Month Error.", __FILE__, __LINE__);
+                    }
+                    if(1 > date || date > 31) {
+                        logic_error( 25, "Parse Timing Month Error.", __FILE__, __LINE__);
+                    }
+                    fpos = rpos + 1;
+                    // find hour
                     rpos = ret.find_first_of(':', fpos);
                     if(std::string::npos != rpos) {
                         std::string hourStr = ret.substr(fpos, rpos - fpos);
@@ -945,10 +751,10 @@ void l7vs::LoggerImpl::loadConf(){
                             hour = boost::lexical_cast<int>(hourStr);
                         }
                         catch(const boost::bad_lexical_cast& bc) {
-                            logic_error( 41, "Parse Timing Date Error.", __FILE__, __LINE__);
+                            logic_error( 26, "Parse Timing Month Error.", __FILE__, __LINE__);
                         }
                         if(0 > hour || hour > 23) {
-                            logic_error( 42, "Parse Timing Date Error.", __FILE__, __LINE__);
+                            logic_error( 27, "Parse Timing Month Error.", __FILE__, __LINE__);
                         }
                         // minute
                         std::string minuteStr = ret.substr(rpos + 1);
@@ -956,56 +762,178 @@ void l7vs::LoggerImpl::loadConf(){
                             minute = boost::lexical_cast<int>(minuteStr);
                         }
                         catch(const boost::bad_lexical_cast& bc) {
-                            logic_error( 43, "Parse Timing Date Error.", __FILE__, __LINE__);
+                            logic_error( 28, "Parse Timing Month Error.", __FILE__, __LINE__);
                         }
                         if(0 > minute || minute > 59) {
-                            logic_error( 44, "Parse Timing Date Error.", __FILE__, __LINE__);
+                            logic_error( 29, "Parse Timing Month Error.", __FILE__, __LINE__);
                         }
                     }
                     else{
-                        logic_error( 45, "Parse Timing Date Error.", __FILE__, __LINE__);
+                        logic_error( 30, "Parse Timing Month Error.", __FILE__, __LINE__);
                     }
-    
-                    // format to internal rotation timing value expresson
-                    std::ostringstream oss;
-                    oss << std::setfill('0') << std::setw(2) << hour
-                        << std::setfill('0') << std::setw(2) << minute;
-    
-                    property->rotation_timing_value_value = oss.str();
                 }
                 else{
-                    logic_error( 46, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
+                    logic_error( 31, "Parse Timing Month Error.", __FILE__, __LINE__);
                 }
-            }
 
-            if(LOG_TIM_HOUR == property->rotation_timing_value) {
-                std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
-                if( !ec ){
-                    // minute
-                    int minute = 0;
-                    try {
-                        minute = boost::lexical_cast<int>(ret);
-                    }
-                    catch(const boost::bad_lexical_cast& bc){
-                        logic_error( 47, "Parse Timing Hour Error.", __FILE__, __LINE__);
-                    }
-                    if (0 > minute || minute > 59) {
-                        logic_error( 48, "Parse Timing Hour Error.", __FILE__, __LINE__);
-                    }
-    
-                    // format to internal rotation timing value expresson
-                    std::ostringstream oss;
-                    oss << std::setfill('0') << std::setw(2) << minute;
-                    
-                    property->rotation_timing_value_value = oss.str();
-                }
-                else {
-                    logic_error( 49, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
-                }
+                // format to internal rotation timing value expresson
+                std::stringstream oss;
+                oss << std::setfill('0') << std::setw(2) << date
+                    << std::setfill('0') << std::setw(2) << hour
+                    << std::setfill('0') << std::setw(2) << minute;
+
+                property->rotation_timing_value_value = oss.str();
+
+            }
+            else{
+                logic_error( 32, "Not Exist Log RotaionTiming Month Setting.", __FILE__, __LINE__);
             }
         }
-        property = &access_log_property;
-    }        //for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
+
+        if(LOG_TIM_WEEK == property->rotation_timing_value ){
+            std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
+            if( !ec ){
+                std::string::size_type fpos = 0;
+                std::string::size_type rpos = 0;
+                int week = 0;
+                int hour = 0;
+                int minute = 0;
+                rpos = ret.find_first_of(' ', fpos);
+                //find week
+                if (std::string::npos != rpos) {
+                    std::string weekStr = ret.substr(fpos, rpos - fpos);
+
+                    if ("sun" == weekStr) week = 0;
+                    else if("mon" == weekStr) week = 1;
+                    else if("tue" == weekStr) week = 2;
+                    else if("wed" == weekStr) week = 3;
+                    else if("thu" == weekStr) week = 4;
+                    else if("fri" == weekStr) week = 5;
+                    else if("sat" == weekStr) week = 6;
+                    else{
+                        logic_error( 33, "Parse Timing Week Error.", __FILE__, __LINE__);
+                    }
+                    fpos = rpos + 1;
+                    // find hour
+                    rpos = ret.find_first_of(':', fpos);
+                    if(std::string::npos != rpos) {
+                        std::string hourStr = ret.substr(fpos, rpos - fpos);
+                        try{
+                            hour = boost::lexical_cast<int>(hourStr);
+                        }
+                        catch (const boost::bad_lexical_cast& bc) {
+                            logic_error( 34, "Parse Timing Week Error.", __FILE__, __LINE__);
+                        }
+                        if(0 > hour || hour > 23) {
+                            logic_error( 35, "Parse Timing Week Error.", __FILE__, __LINE__);
+                        }
+                        // minute
+                        std::string minuteStr = ret.substr(rpos + 1);
+                        try{
+                            minute = boost::lexical_cast<int>(minuteStr);
+                        }
+                        catch(const boost::bad_lexical_cast& bc) {
+                            logic_error( 36, "Parse Timing Week Error.", __FILE__, __LINE__);
+                        }
+                        if(0 > minute || minute > 59) {
+                            logic_error( 37, "Parse Timing Week Error.", __FILE__, __LINE__);
+                        }
+                    }
+                    else{
+                        logic_error( 38, "Parse Timing Week Error.", __FILE__, __LINE__);
+                    }
+                }
+                else{
+                    logic_error( 39, "Parse Timing Week Error.", __FILE__, __LINE__);
+                }
+
+                // format to internal rotation timing value expresson
+                std::ostringstream oss;
+                oss << std::setfill('0') << std::setw(1) << week
+                    << std::setfill('0') << std::setw(2) << hour
+                    << std::setfill('0') << std::setw(2) << minute;
+
+                property->rotation_timing_value_value = oss.str();
+            }
+            else{
+                logic_error( 40, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
+            }
+        }
+
+        if(LOG_TIM_DATE == property->rotation_timing_value){
+            std::string ret =param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
+            if( !ec ){
+                std::string::size_type fpos = 0;
+                std::string::size_type rpos = 0;
+                int hour = 0;
+                int minute = 0;
+                //find time
+                rpos = ret.find_first_of(':', fpos);
+                if(std::string::npos != rpos) {
+                    std::string hourStr = ret.substr(fpos, rpos - fpos);
+                    try{
+                        hour = boost::lexical_cast<int>(hourStr);
+                    }
+                    catch(const boost::bad_lexical_cast& bc) {
+                        logic_error( 41, "Parse Timing Date Error.", __FILE__, __LINE__);
+                    }
+                    if(0 > hour || hour > 23) {
+                        logic_error( 42, "Parse Timing Date Error.", __FILE__, __LINE__);
+                    }
+                    // minute
+                    std::string minuteStr = ret.substr(rpos + 1);
+                    try{
+                        minute = boost::lexical_cast<int>(minuteStr);
+                    }
+                    catch(const boost::bad_lexical_cast& bc) {
+                        logic_error( 43, "Parse Timing Date Error.", __FILE__, __LINE__);
+                    }
+                    if(0 > minute || minute > 59) {
+                        logic_error( 44, "Parse Timing Date Error.", __FILE__, __LINE__);
+                    }
+                }
+                else{
+                    logic_error( 45, "Parse Timing Date Error.", __FILE__, __LINE__);
+                }
+
+                // format to internal rotation timing value expresson
+                std::ostringstream oss;
+                oss << std::setfill('0') << std::setw(2) << hour
+                    << std::setfill('0') << std::setw(2) << minute;
+
+                property->rotation_timing_value_value = oss.str();
+            }
+            else{
+                logic_error( 46, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
+            }
+        }
+
+        if(LOG_TIM_HOUR == property->rotation_timing_value) {
+            std::string ret = param.get_string(PARAM_COMP_LOGGER, property->rotation_timing_value_key, ec);
+            if( !ec ){
+                // minute
+                int minute = 0;
+                try {
+                    minute = boost::lexical_cast<int>(ret);
+                }
+                catch(const boost::bad_lexical_cast& bc){
+                    logic_error( 47, "Parse Timing Hour Error.", __FILE__, __LINE__);
+                }
+                if (0 > minute || minute > 59) {
+                    logic_error( 48, "Parse Timing Hour Error.", __FILE__, __LINE__);
+                }
+
+                // format to internal rotation timing value expresson
+                std::ostringstream oss;
+                oss << std::setfill('0') << std::setw(2) << minute;
+
+                property->rotation_timing_value_value = oss.str();
+            }
+            else {
+                logic_error( 49, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
+            }
+        }
+    }
 
     // appender setting
     try {
@@ -1018,189 +946,175 @@ void l7vs::LoggerImpl::loadConf(){
 
         log4cxx::rolling::RollingFileAppenderPtr    normalAppender;
         log4cxx::rolling::RollingFileAppenderPtr    accessAppender;
-        
-        for( int appender_count = 0 ; appender_count < 2; ++appender_count ){
-            if( 0 == appender_count )
-                property = &normal_log_property;
-            else
-                property = &access_log_property;
 
-            if( "" == property->log_filename_key )    break;    // no conn_log setting.
+        property = &normal_log_property;
 
-            switch (property->rotation_value) {
-            case LOG_ROT_SIZE:
-                {
-                    // create FixedWindcd owRollingPolicy
-                    log4cxx::rolling::FixedWindowRollingPolicyPtr fixedRollingPolicy =
-                        new log4cxx::rolling::FixedWindowRollingPolicy();
-        
-                    // setting minIndex
-                    fixedRollingPolicy->setMinIndex(1);
-        
-                    // setting maxIndex
-                    fixedRollingPolicy->setMaxIndex(property->max_backup_index_value);
-    
-                    // setting FileNamePattern
-                    std::ostringstream sizeFile;
-                    sizeFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
-                    fixedRollingPolicy->setFileNamePattern(sizeFile.str());
-        
-                    // create SizeBasedTriggeringPolicy
-                    log4cxx::rolling::SizeBasedTriggeringPolicyPtr sizeTriggeringPolicy =
-                        new log4cxx::rolling::SizeBasedTriggeringPolicy();
-    
-                    // setting maxFileSize
-                    sizeTriggeringPolicy->setMaxFileSize(property->max_file_size_value);
-        
-                    // create RollingFileAppender
-                    log4cxx::rolling::RollingFileAppenderPtr sizeAppender =
-                        new log4cxx::rolling::RollingFileAppender();
-        
-                    // set layout
-                    sizeAppender->setLayout(layout);
-        
-                    // set RollingPolicy
-                    sizeAppender->setRollingPolicy(fixedRollingPolicy);
-        
-                    // set TriggeringPolicy
-                    sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
-    
-                    // set Log Filename
-                    try{
-                        sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-                    }
-                    catch( const std::exception& e ){
-                        std::stringstream    buf;
-                        buf << "File Create Failed:" << property->log_filename_value;
-                        throw std::logic_error( buf.str() );
-                    }
-        
-                    // activate appender options
-                    sizeAppender->activateOptions(pool);
-        
-                    // add size_base_appender to CategoryLogger
-                    //cat_logger->addAppender(sizeAppender);
-                    if( 0 == appender_count )
-                        normalAppender = sizeAppender;
-                    else
-                        accessAppender = sizeAppender;
+        if( "" == property->log_filename_key )    return;    // no conn_log setting.
 
-                    break;
+        switch (property->rotation_value) {
+        case LOG_ROT_SIZE:
+            {
+                // create FixedWindcd owRollingPolicy
+                log4cxx::rolling::FixedWindowRollingPolicyPtr fixedRollingPolicy =
+                    new log4cxx::rolling::FixedWindowRollingPolicy();
+
+                // setting minIndex
+                fixedRollingPolicy->setMinIndex(1);
+
+                // setting maxIndex
+                fixedRollingPolicy->setMaxIndex(property->max_backup_index_value);
+
+                // setting FileNamePattern
+                std::ostringstream sizeFile;
+                sizeFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
+                fixedRollingPolicy->setFileNamePattern(sizeFile.str());
+
+                // create SizeBasedTriggeringPolicy
+                log4cxx::rolling::SizeBasedTriggeringPolicyPtr sizeTriggeringPolicy =
+                    new log4cxx::rolling::SizeBasedTriggeringPolicy();
+
+                // setting maxFileSize
+                sizeTriggeringPolicy->setMaxFileSize(property->max_file_size_value);
+
+                // create RollingFileAppender
+                log4cxx::rolling::RollingFileAppenderPtr sizeAppender =
+                    new log4cxx::rolling::RollingFileAppender();
+
+                // set layout
+                sizeAppender->setLayout(layout);
+
+                // set RollingPolicy
+                sizeAppender->setRollingPolicy(fixedRollingPolicy);
+
+                // set TriggeringPolicy
+                sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
+
+                // set Log Filename
+                try{
+                    sizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
                 }
-            case LOG_ROT_DATE:
-                {
-                    // create StrictTimeBasedRollingPolicy
-                    log4cxx::rolling::StrictTimeBasedRollingPolicyPtr strictRollingPolicy =
-                        new log4cxx::rolling::StrictTimeBasedRollingPolicy();
-        
-                    // setting minIndex
-                    strictRollingPolicy->setMinIndex(1);
-        
-                    // setting maxIndex
-                    strictRollingPolicy->setMaxIndex(property->max_backup_index_value);
-    
-                    // setting FileNamePattern
-                    std::ostringstream dateFile;
-                    dateFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
-                    strictRollingPolicy->setFileNamePattern(dateFile.str());
-    
-                    // setting Rotation Timing
-                    strictRollingPolicy->setRotationTiming(property->rotation_timing_value);
-        
-                    // setting Rotation Timing Value
-                    strictRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
-        
-                    //create RollingFileAppender
-                    log4cxx::rolling::RollingFileAppenderPtr dateAppender =
-                        new log4cxx::rolling::RollingFileAppender();
-                
-                    // set layout
-                    dateAppender->setLayout(layout);
-    
-                    // set RollingPolicy (TriggeringPolicy also included RollingPolicy)
-                    dateAppender->setRollingPolicy(strictRollingPolicy);
-        
-                    // set Log Filename
-                    try{
-                        dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-                    }
-                    catch( const std::exception& e ){
-                        std::stringstream    buf;
-                        buf << "File Create Failed:" << property->log_filename_value;
-                        throw std::logic_error( buf.str() );
-                    }
-        
-                    // activate appender options
-                    dateAppender->activateOptions(pool);
-        
-                    // add date_based_appender to CategoryLogger
-                    //cat_logger->addAppender(dateAppender);
-                    if( 0 == appender_count )
-                        normalAppender = dateAppender;
-                    else
-                        accessAppender = dateAppender;
+                catch( const std::exception& e ){
+                    std::stringstream    buf;
+                    buf << "File Create Failed:" << property->log_filename_value;
+                    throw std::logic_error( buf.str() );
+                }
 
-                    break;
+                // activate appender options
+                sizeAppender->activateOptions(pool);
+
+                // add size_base_appender to CategoryLogger
+                //cat_logger->addAppender(sizeAppender);
+                normalAppender = sizeAppender;
+
+                break;
+            }
+        case LOG_ROT_DATE:
+            {
+                // create StrictTimeBasedRollingPolicy
+                log4cxx::rolling::StrictTimeBasedRollingPolicyPtr strictRollingPolicy =
+                    new log4cxx::rolling::StrictTimeBasedRollingPolicy();
+
+                // setting minIndex
+                strictRollingPolicy->setMinIndex(1);
+
+                // setting maxIndex
+                strictRollingPolicy->setMaxIndex(property->max_backup_index_value);
+
+                // setting FileNamePattern
+                std::ostringstream dateFile;
+                dateFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
+                strictRollingPolicy->setFileNamePattern(dateFile.str());
+
+                // setting Rotation Timing
+                strictRollingPolicy->setRotationTiming(property->rotation_timing_value);
+
+                // setting Rotation Timing Value
+                strictRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
+
+                //create RollingFileAppender
+                log4cxx::rolling::RollingFileAppenderPtr dateAppender =
+                    new log4cxx::rolling::RollingFileAppender();
+
+                // set layout
+                dateAppender->setLayout(layout);
+
+                // set RollingPolicy (TriggeringPolicy also included RollingPolicy)
+                dateAppender->setRollingPolicy(strictRollingPolicy);
+
+                // set Log Filename
+                try{
+                    dateAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
                 }
-            default:    //LOG_ROT_DATESIZE:
-                {
-                    // create TimeAndSizeBasedRollingPolicy
-                    log4cxx::rolling::TimeAndSizeBasedRollingPolicyPtr timeSizeRollingPolicy =
-                        new log4cxx::rolling::TimeAndSizeBasedRollingPolicy();
-        
-                    // setting minIndex
-                    timeSizeRollingPolicy->setMinIndex(1);
-        
-                    // setting maxIndex
-                    timeSizeRollingPolicy->setMaxIndex(property->max_backup_index_value);
-    
-                    // setting FileNamePattern
-                    std::ostringstream dateSizeFile;
-                    dateSizeFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
-                    timeSizeRollingPolicy->setFileNamePattern(dateSizeFile.str());
-        
-                    // setting Rotation Timing
-                    timeSizeRollingPolicy->setRotationTiming(property->rotation_timing_value);
-        
-                    // setting Rotation Timing Value
-                    timeSizeRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
-        
-                    // setting MaxFileSize
-                    timeSizeRollingPolicy->setMaxFileSize(property->max_file_size_value);
-        
-                    // create Rolling FileAppender
-                    log4cxx::rolling::RollingFileAppenderPtr dateSizeAppender =
-                        new log4cxx::rolling::RollingFileAppender();
-        
-                    // set layout
-                    dateSizeAppender->setLayout(layout);
-        
-                    // set RollingPolicy (TriggeringPolicy also included RollingPolicy)
-                    dateSizeAppender->setRollingPolicy(timeSizeRollingPolicy);
-        
-                    // set Log Filename
-                    try{
-                        dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
-                    }
-                    catch( const std::exception& e ){
-                        std::stringstream    buf;
-                        buf << "File Create Failed:" << property->log_filename_value;
-                        throw std::logic_error( buf.str() );
-                    }
-        
-                    // activate appender options
-                    dateSizeAppender->activateOptions(pool);
-        
-                    // add time_and_size_based_appender to CategoryLogger
-                    //cat_logger->addAppender(dateSizeAppender);
-                    if( 0 == appender_count )
-                        normalAppender = dateSizeAppender;
-                    else
-                        accessAppender = dateSizeAppender;
-    
+                catch( const std::exception& e ){
+                    std::stringstream    buf;
+                    buf << "File Create Failed:" << property->log_filename_value;
+                    throw std::logic_error( buf.str() );
                 }
-            }    //switch
-        }    //for 
+
+                // activate appender options
+                dateAppender->activateOptions(pool);
+
+                // add date_based_appender to CategoryLogger
+                //cat_logger->addAppender(dateAppender);
+                normalAppender = dateAppender;
+
+                break;
+            }
+        default:    //LOG_ROT_DATESIZE:
+            {
+                // create TimeAndSizeBasedRollingPolicy
+                log4cxx::rolling::TimeAndSizeBasedRollingPolicyPtr timeSizeRollingPolicy =
+                    new log4cxx::rolling::TimeAndSizeBasedRollingPolicy();
+
+                // setting minIndex
+                timeSizeRollingPolicy->setMinIndex(1);
+
+                // setting maxIndex
+                timeSizeRollingPolicy->setMaxIndex(property->max_backup_index_value);
+
+                // setting FileNamePattern
+                std::ostringstream dateSizeFile;
+                dateSizeFile << property->log_filename_value << "." << LOGGER_FILE_PATTERN;
+                timeSizeRollingPolicy->setFileNamePattern(dateSizeFile.str());
+
+                // setting Rotation Timing
+                timeSizeRollingPolicy->setRotationTiming(property->rotation_timing_value);
+
+                // setting Rotation Timing Value
+                timeSizeRollingPolicy->setRotationTimingValue(property->rotation_timing_value_value);
+
+                // setting MaxFileSize
+                timeSizeRollingPolicy->setMaxFileSize(property->max_file_size_value);
+
+                // create Rolling FileAppender
+                log4cxx::rolling::RollingFileAppenderPtr dateSizeAppender =
+                    new log4cxx::rolling::RollingFileAppender();
+
+                // set layout
+                dateSizeAppender->setLayout(layout);
+
+                // set RollingPolicy (TriggeringPolicy also included RollingPolicy)
+                dateSizeAppender->setRollingPolicy(timeSizeRollingPolicy);
+
+                // set Log Filename
+                try{
+                    dateSizeAppender->setFile(property->log_filename_value, true, false, LOGGER_DEFAULT_BUFFER_SIZE, pool);
+                }
+                catch( const std::exception& e ){
+                    std::stringstream    buf;
+                    buf << "File Create Failed:" << property->log_filename_value;
+                    throw std::logic_error( buf.str() );
+                }
+
+                // activate appender options
+                dateSizeAppender->activateOptions(pool);
+
+                // add time_and_size_based_appender to CategoryLogger
+                //cat_logger->addAppender(dateSizeAppender);
+                normalAppender = dateSizeAppender;
+
+            }
+        }    //switch
 
         for( category_level_map_type::iterator cat_itr = category_level_map.begin();
              cat_itr != category_level_map.end();
@@ -1214,30 +1128,16 @@ void l7vs::LoggerImpl::loadConf(){
 
 #if    defined(LOGGER_PROCESS_VSD)
             if( cat_itr->first == LOG_CAT_L7VSD_NETWORK_ACCESS ){
-                //property = &access_log_property;
                 cat_logger->addAppender(accessAppender);
             }
             else{
-                //property = &normal_log_property;
                 cat_logger->addAppender(normalAppender);
             }
 #elif defined(LOGGER_PROCESS_ADM)
-            //property = &normal_log_property;
             cat_logger->addAppender(normalAppender);
 #elif defined(LOGGER_PROCESS_SNM)
-            //property = &normal_log_property;
             cat_logger->addAppender(normalAppender);
-#elif defined(LOGGER_PROCESS_SSL)
-            if( cat_itr->first == LOG_CAT_SSLPROXY_CONNECTION ){
-                //property = &access_log_property;
-                cat_logger->addAppender(accessAppender);
-            }
-            else{
-                //property = &normal_log_property;
-                cat_logger->addAppender(normalAppender);
-            }
 #else
-            //property = &normal_log_property;
             cat_logger->addAppender(normalAppender);
 #endif
 
@@ -1268,8 +1168,6 @@ void l7vs::LoggerImpl::loadConf(){
             log_category = LOG_CAT_L7VSADM_LOGGER;
 #elif defined(LOGGER_PROCESS_SNM)
             log_category = LOG_CAT_SNMPAGENT_LOGGER;
-#elif defined(LOGGER_PROCESS_SSL)
-            log_category = LOG_CAT_SSLPROXY_LOGGER;
 #else
             log_category = LOG_CAT_L7VSD_LOGGER;
 #endif
@@ -1320,4 +1218,5 @@ void l7vs::LoggerImpl::loadConf(){
         oss <<  "Logger Reload Config Failed : " << e.what();
         errorConf( 2, oss.str(), __FILE__, __LINE__);
     }
+
 }
