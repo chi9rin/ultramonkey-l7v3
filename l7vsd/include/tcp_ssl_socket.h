@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_ssl_socket.h
- *	@brief	tcp ssl session socket class
+ *    @file    tcp_ssl_socket.h
+ *    @brief    tcp ssl session socket class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -39,101 +39,101 @@ typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket>  ssl_socket;
 
 namespace l7vs{
 
-//!	@class	tcp_ssl_socket
-//! @brief	this class is tcp session object use socket.
-	class tcp_ssl_socket : private boost::noncopyable{
-		public:
-			//! construcor
-			//! @param[in/out]	socket use io service object
-			//! @param[in]		set socket option info 
-			tcp_ssl_socket(boost::asio::io_service& io,
-				       boost::asio::ssl::context& context)
-				       :
-				       my_socket(io, context),
-				       open_flag(false)
-			{
-				opt_info.nodelay_opt = false;
-				opt_info.cork_opt = false;
-				opt_info.quickack_opt = false;
-				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
-				}
-			}
-			//! construcor
-			//! @param[in/out]	socket use io service object
-			//! @param[in]		set socket option info 
-			tcp_ssl_socket(boost::asio::io_service& io,
-				       boost::asio::ssl::context& context,
-				       const tcp_socket_option_info set_option)
-				       :
-				       my_socket(io, context),
-				       open_flag(false),
-				       opt_info(set_option)
-			{
-				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
-				}
-			}
-			//! destructor
-			~tcp_ssl_socket(){
-				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 2, "tcp_ssl_socket::~tcp_ssl_socket", __FILE__, __LINE__ );
-				}
-			}
-			
-			//! get reference control socket
-			//! @return			reference control socket
-			ssl_socket& get_socket(){
-				if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 3, "tcp_ssl_socket::get_socket", __FILE__, __LINE__ );
-				}
-				return my_socket;
-			}
+//!    @class    tcp_ssl_socket
+//! @brief    this class is tcp session object use socket.
+    class tcp_ssl_socket : private boost::noncopyable{
+        public:
+            //! construcor
+            //! @param[in/out]    socket use io service object
+            //! @param[in]        set socket option info 
+            tcp_ssl_socket(boost::asio::io_service& io,
+                       boost::asio::ssl::context& context)
+                       :
+                       my_socket(io, context),
+                       open_flag(false)
+            {
+                opt_info.nodelay_opt = false;
+                opt_info.cork_opt = false;
+                opt_info.quickack_opt = false;
+                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
+                }
+            }
+            //! construcor
+            //! @param[in/out]    socket use io service object
+            //! @param[in]        set socket option info 
+            tcp_ssl_socket(boost::asio::io_service& io,
+                       boost::asio::ssl::context& context,
+                       const tcp_socket_option_info set_option)
+                       :
+                       my_socket(io, context),
+                       open_flag(false),
+                       opt_info(set_option)
+            {
+                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
+                }
+            }
+            //! destructor
+            ~tcp_ssl_socket(){
+                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 2, "tcp_ssl_socket::~tcp_ssl_socket", __FILE__, __LINE__ );
+                }
+            }
+            
+            //! get reference control socket
+            //! @return            reference control socket
+            ssl_socket& get_socket(){
+                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 3, "tcp_ssl_socket::get_socket", __FILE__, __LINE__ );
+                }
+                return my_socket;
+            }
 
-			//! connect socket
-			//! @param[in]		connect_endpoint is connection endpoint
-			//! @param[out]		ec is reference error code object
-			bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec);
-			//! handshake socket
-			//! @param[in]		handshake_type is handshaking as a server or client
-			bool handshake(boost::asio::ssl::stream_base::handshake_type type);
-			//! accept
-			void accept();
-			//! close socket
-			//! @param[out]		ec is reference error code object
-			//! @return 		true is socket close
-			//! @return 		false is not open socket
-			bool close(boost::system::error_code& ec);
-			//! set non blocking mode of the socket 
-			//! @return			ec is reference error code object
-			bool set_non_blocking_mode(boost::system::error_code& ec);
-			//! write socket
-			//! @param[in]		buffers is wite data buffer
-			//! @param[out]		ec is reference error code object
-			//! @return			write data size
-			std::size_t write_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec);
-			//! read socket
-			//! @param[out]		buffers is read data buffer
-			//! @param[out]		ec is reference error code object
-			//! @return			read data size
-			std::size_t read_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec);
-			//! is open
-			//! @return 		true is open
-			//! @return 		false is close
-			bool is_open(){
-				return open_flag;
-			}
+            //! connect socket
+            //! @param[in]        connect_endpoint is connection endpoint
+            //! @param[out]        ec is reference error code object
+            bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec);
+            //! handshake socket
+            //! @param[in]        handshake_type is handshaking as a server or client
+            bool handshake(boost::asio::ssl::stream_base::handshake_type type);
+            //! accept
+            void accept();
+            //! close socket
+            //! @param[out]        ec is reference error code object
+            //! @return         true is socket close
+            //! @return         false is not open socket
+            bool close(boost::system::error_code& ec);
+            //! set non blocking mode of the socket 
+            //! @return            ec is reference error code object
+            bool set_non_blocking_mode(boost::system::error_code& ec);
+            //! write socket
+            //! @param[in]        buffers is wite data buffer
+            //! @param[out]        ec is reference error code object
+            //! @return            write data size
+            std::size_t write_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec);
+            //! read socket
+            //! @param[out]        buffers is read data buffer
+            //! @param[out]        ec is reference error code object
+            //! @return            read data size
+            std::size_t read_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec);
+            //! is open
+            //! @return         true is open
+            //! @return         false is close
+            bool is_open(){
+                return open_flag;
+            }
 
-		protected:
-			//! control socket
-			ssl_socket my_socket;
-			//! socket close mutex
-			wr_mutex close_mutex;
-			//! socket open flag
-			bool open_flag;
-			//! socket option 
-			tcp_socket_option_info opt_info;
-	};// class tcp_ssl_socket
+        protected:
+            //! control socket
+            ssl_socket my_socket;
+            //! socket close mutex
+            wr_mutex close_mutex;
+            //! socket open flag
+            bool open_flag;
+            //! socket option 
+            tcp_socket_option_info opt_info;
+    };// class tcp_ssl_socket
 }// namespace l7vs
 
 #endif//TCP_SSL_SOCKET_H

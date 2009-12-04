@@ -50,7 +50,7 @@ IMPLEMENT_LOG4CXX_OBJECT(TimeAndSizeBasedRollingPolicy)
  * @return  void
  */
 TimeAndSizeBasedRollingPolicy::TimeAndSizeBasedRollingPolicy() :
-	maxFileSize(DEFAULT_MAX_FILE_SIZE)
+    maxFileSize(DEFAULT_MAX_FILE_SIZE)
 {
 }
 
@@ -61,7 +61,7 @@ TimeAndSizeBasedRollingPolicy::TimeAndSizeBasedRollingPolicy() :
  */
 size_t TimeAndSizeBasedRollingPolicy::getMaxFileSize()
 {
-	return maxFileSize;
+    return maxFileSize;
 }
 
 /*!
@@ -71,7 +71,7 @@ size_t TimeAndSizeBasedRollingPolicy::getMaxFileSize()
  */ 
 void TimeAndSizeBasedRollingPolicy::setMaxFileSize(size_t size)
 {
-	maxFileSize = size;
+    maxFileSize = size;
 }
 
 /*!
@@ -82,14 +82,14 @@ void TimeAndSizeBasedRollingPolicy::setMaxFileSize(size_t size)
  */
 void TimeAndSizeBasedRollingPolicy::setOption(const LogString& option, const LogString& value)
 {
-	if (StringHelper::equalsIgnoreCase(option,
-		LOG4CXX_STR("MAXFILESIZE"),
-		LOG4CXX_STR("maxfilesize"))) {
-		maxFileSize = OptionConverter::toFileSize(value, DEFAULT_MAX_FILE_SIZE);
-	}
-	else {
-		StrictTimeBasedRollingPolicy::setOption(option, value);
-	}
+    if (StringHelper::equalsIgnoreCase(option,
+        LOG4CXX_STR("MAXFILESIZE"),
+        LOG4CXX_STR("maxfilesize"))) {
+        maxFileSize = OptionConverter::toFileSize(value, DEFAULT_MAX_FILE_SIZE);
+    }
+    else {
+        StrictTimeBasedRollingPolicy::setOption(option, value);
+    }
 }
 
 /*!
@@ -102,12 +102,12 @@ void TimeAndSizeBasedRollingPolicy::setOption(const LogString& option, const Log
  * @retval  false not rollover yet
  */
 bool TimeAndSizeBasedRollingPolicy::isTriggeringEvent(
-	Appender* appender,
-	const log4cxx::spi::LoggingEventPtr& event,
-	const LogString& filename,
-	size_t fileLength)  
+    Appender* appender,
+    const log4cxx::spi::LoggingEventPtr& event,
+    const LogString& filename,
+    size_t fileLength)  
 {
 
-	return (fileLength >= maxFileSize || 
-		StrictTimeBasedRollingPolicy::isTriggeringEvent(appender, event, filename, fileLength));
+    return (fileLength >= maxFileSize || 
+        StrictTimeBasedRollingPolicy::isTriggeringEvent(appender, event, filename, fileLength));
 }

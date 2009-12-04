@@ -39,78 +39,78 @@ using namespace l7vs;
 //log stub function
 char hostname[] = "127.0.0.1";
 
-LOG_LEVEL_TAG	stb_getloglevel(){
-	return LOG_LV_DEBUG;
+LOG_LEVEL_TAG    stb_getloglevel(){
+    return LOG_LV_DEBUG;
 }
-LOG_LEVEL_TAG	stb_getloglevel_is_none(){
-	return LOG_LV_NONE;
+LOG_LEVEL_TAG    stb_getloglevel_is_none(){
+    return LOG_LV_NONE;
 }
 
-void	stb_putLogFatal( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_FATAL
-//				% message_id
-//				% message.c_str()
-//				% hostname;
+void    stb_putLogFatal( const unsigned int message_id, const std::string& message, const char* file, int line){
+//    cout << boost::format( "%s%d%06d %s %s" )
+//                % "PM"
+//                % LOG_LV_FATAL
+//                % message_id
+//                % message.c_str()
+//                % hostname;
 //    cout << endl;
 }
-void	stb_putLogError( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_ERROR
-//				% message_id
-//				% message.c_str()
-//				% hostname;
+void    stb_putLogError( const unsigned int message_id, const std::string& message, const char* file, int line){
+//    cout << boost::format( "%s%d%06d %s %s" )
+//                % "PM"
+//                % LOG_LV_ERROR
+//                % message_id
+//                % message.c_str()
+//                % hostname;
 //    cout << endl;
 }
-void	stb_putLogWarn( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_WARN
-//				% message_id
-//				% message.c_str()
-//				% hostname;
+void    stb_putLogWarn( const unsigned int message_id, const std::string& message, const char* file, int line){
+//    cout << boost::format( "%s%d%06d %s %s" )
+//                % "PM"
+//                % LOG_LV_WARN
+//                % message_id
+//                % message.c_str()
+//                % hostname;
 //    cout << endl;
 }
-void	stb_putLogInfo( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_INFO
-//				% message_id
-//				% message.c_str()
-//				% hostname;
+void    stb_putLogInfo( const unsigned int message_id, const std::string& message, const char* file, int line){
+//    cout << boost::format( "%s%d%06d %s %s" )
+//                % "PM"
+//                % LOG_LV_INFO
+//                % message_id
+//                % message.c_str()
+//                % hostname;
 //    cout << endl;
 }
-void	stb_putLogDebug( const unsigned int message_id, const std::string& message, const char* file, int line){
-//	cout << boost::format( "%s%d%06d %s %s" )
-//				% "PM"
-//				% LOG_LV_DEBUG
-//				% message_id
-//				% message.c_str()
-//				% hostname;
+void    stb_putLogDebug( const unsigned int message_id, const std::string& message, const char* file, int line){
+//    cout << boost::format( "%s%d%06d %s %s" )
+//                % "PM"
+//                % LOG_LV_DEBUG
+//                % message_id
+//                % message.c_str()
+//                % hostname;
 //    cout << endl;
 }
 
 //new operator function
 static bool new_flg = false;
 void new_install(){
-	new_flg = true;
+    new_flg = true;
 }
 void new_uninstall(){
-	new_flg = false;
+    new_flg = false;
 }
 void* operator new[](size_t size){
-	if (new_flg)
-		throw std::bad_alloc();
-	else
-	{
-		void* p = malloc(size);
-		return p;
-	}
+    if (new_flg)
+        throw std::bad_alloc();
+    else
+    {
+        void* p = malloc(size);
+        return p;
+    }
 }
 void operator delete[](void* p){
-	free(p);
+    free(p);
 }
 
 //RealServerリストの各操作関数
@@ -124,7 +124,7 @@ protocol_module_sessionless::realserverlist_type::iterator rslist_end() {
 }
 //RealServerリスト次要素取得関数
 protocol_module_sessionless::realserverlist_type::iterator rslist_next(
-		protocol_module_sessionless::realserverlist_type::iterator iter) {
+        protocol_module_sessionless::realserverlist_type::iterator iter) {
     return protocol_module_sessionless::realserverlist_type::iterator();
 }
 //RealServerリストロック関数
@@ -135,7 +135,7 @@ void rslist_unlock() {
 }
 //コンポーネント領域割り当て関数
 void* pay_memory(const std::string& str, unsigned int* pro) {
-	return 0 ;
+    return 0 ;
 }
 //コンポーネント領域ロック関数
 void area_lock() {}
@@ -143,10 +143,10 @@ void area_lock() {}
 void area_unlock() {}
 //Client振り分け処理関数
 void schedule_tcp_stb( const boost::thread::id id,
-		           protocol_module_base::rs_list_itr_func_type func_type1,
-		           protocol_module_base::rs_list_itr_func_type func_type2,
-		           protocol_module_base::rs_list_itr_next_func_type func_type3,
-		           boost::asio::ip::tcp::endpoint& ) {
+                   protocol_module_base::rs_list_itr_func_type func_type1,
+                   protocol_module_base::rs_list_itr_func_type func_type2,
+                   protocol_module_base::rs_list_itr_next_func_type func_type3,
+                   boost::asio::ip::tcp::endpoint& ) {
 }
 
 //Thread function
@@ -156,35 +156,35 @@ void down_thread_func(){}
 // using string to endpoint template function
 template<typename InternetProtocol>
 boost::asio::ip::basic_endpoint<InternetProtocol> string_to_endpoint(std::string str){
-	std::string::size_type pos = str.find(":");
-	std::string hostname = str.substr(0, pos);
-	std::string portname = str.substr(pos + 1, str.length());
-	boost::asio::io_service io_service;
-	typename InternetProtocol::resolver resolver(io_service);
-	typename InternetProtocol::resolver::query query(hostname, portname);
-	typename InternetProtocol::resolver::iterator end;
-	typename InternetProtocol::resolver::iterator itr = resolver.resolve(query);
-	if (itr == end)
-		return typename InternetProtocol::endpoint();
-	return *itr;
+    std::string::size_type pos = str.find(":");
+    std::string hostname = str.substr(0, pos);
+    std::string portname = str.substr(pos + 1, str.length());
+    boost::asio::io_service io_service;
+    typename InternetProtocol::resolver resolver(io_service);
+    typename InternetProtocol::resolver::query query(hostname, portname);
+    typename InternetProtocol::resolver::iterator end;
+    typename InternetProtocol::resolver::iterator itr = resolver.resolve(query);
+    if (itr == end)
+        return typename InternetProtocol::endpoint();
+    return *itr;
 }
 
 //schedule function
 void schedule_tcp_determinate(//endpoint = 決定
-		const boost::thread::id thread_id,
-		protocol_module_base::rs_list_itr_func_type rs_list_begin,
-		protocol_module_base::rs_list_itr_func_type rs_list_end,
-		protocol_module_base::rs_list_itr_next_func_type rs_list_next,
-		boost::asio::ip::tcp::endpoint &rs_endpoint){
-	rs_endpoint = string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888");
+        const boost::thread::id thread_id,
+        protocol_module_base::rs_list_itr_func_type rs_list_begin,
+        protocol_module_base::rs_list_itr_func_type rs_list_end,
+        protocol_module_base::rs_list_itr_next_func_type rs_list_next,
+        boost::asio::ip::tcp::endpoint &rs_endpoint){
+    rs_endpoint = string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888");
 }
 
 void schedule_tcp_nodeterminate(//endpoint = 未決定
-		const boost::thread::id thread_id,
-		protocol_module_base::rs_list_itr_func_type rs_list_begin,
-		protocol_module_base::rs_list_itr_func_type rs_list_end,
-		protocol_module_base::rs_list_itr_next_func_type rs_list_next,
-		boost::asio::ip::tcp::endpoint &rs_endpoint){
+        const boost::thread::id thread_id,
+        protocol_module_base::rs_list_itr_func_type rs_list_begin,
+        protocol_module_base::rs_list_itr_func_type rs_list_end,
+        protocol_module_base::rs_list_itr_next_func_type rs_list_next,
+        boost::asio::ip::tcp::endpoint &rs_endpoint){
 }
 
 //test class
@@ -197,12 +197,12 @@ boost::mutex check_mutex;
 void install_stb_log_func(){
     typedef boost::function< void ( const unsigned int, const std::string&, const char*, int ) > log_func_type;
 
-    boost::function< LOG_LEVEL_TAG(void) >	getloglevel = &stb_getloglevel;
-    log_func_type	putLogFatal	= &stb_putLogFatal;
-    log_func_type	putLogError	= &stb_putLogError;
-    log_func_type	putLogWarn	= &stb_putLogWarn;
-    log_func_type	putLogInfo	= &stb_putLogInfo;
-    log_func_type	putLogDebug	= &stb_putLogDebug;
+    boost::function< LOG_LEVEL_TAG(void) >    getloglevel = &stb_getloglevel;
+    log_func_type    putLogFatal    = &stb_putLogFatal;
+    log_func_type    putLogError    = &stb_putLogError;
+    log_func_type    putLogWarn    = &stb_putLogWarn;
+    log_func_type    putLogInfo    = &stb_putLogInfo;
+    log_func_type    putLogDebug    = &stb_putLogDebug;
     this->init_logger_functions(getloglevel, putLogFatal, putLogError,
         putLogWarn, putLogInfo, putLogDebug);
 
@@ -373,389 +373,389 @@ void finalize_test() {
 void is_use_sorry_test() {
     cout << "[8]--------------------------------------------- " << endl;
     // unit_test[8] 正常系で必ずtrueを返す
-	BOOST_CHECK_EQUAL(this->is_use_sorry(), true);
+    BOOST_CHECK_EQUAL(this->is_use_sorry(), true);
 }
 
 //check_parameter 馬翠翠
 void check_parameter_test() {
     check_message_result result;
-	vector<string> args;
+    vector<string> args;
 
-	cout << "[9]--------------------------------------------- " << endl;
-	// unit_test[9] オプション文字列にデータなし場合、チェック結果フラグにTRUEを設定する
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[9]--------------------------------------------- " << endl;
+    // unit_test[9] オプション文字列にデータなし場合、チェック結果フラグにTRUEを設定する
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[10]--------------------------------------------- " << endl;
-	// unit_test[10] オプション文字列 = "-F"の場合、チェック結果フラグにTRUEを設定する
-	args.push_back("-F");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[10]--------------------------------------------- " << endl;
+    // unit_test[10] オプション文字列 = "-F"の場合、チェック結果フラグにTRUEを設定する
+    args.push_back("-F");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[11]--------------------------------------------- " << endl;
-	// unit_test[11] オプション文字列 = "--forwarded-for"の場合、チェック結果フラグにTRUEを設定する
-	args.clear();
-	args.push_back("--forwarded-for");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[11]--------------------------------------------- " << endl;
+    // unit_test[11] オプション文字列 = "--forwarded-for"の場合、チェック結果フラグにTRUEを設定する
+    args.clear();
+    args.push_back("--forwarded-for");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[12]--------------------------------------------- " << endl;
-	// unit_test[12] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
-	// unit_test[12] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF 次要素の文字列長 > 127の場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
+    cout << "[12]--------------------------------------------- " << endl;
+    // unit_test[12] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
+    // unit_test[12] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF 次要素の文字列長 > 127の場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
 
-	cout << "[13]--------------------------------------------- " << endl;
-	// unit_test[13] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
-	// unit_test[13] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックOKの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/bc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
-	args.push_back("--sorry-uri");
-	args.push_back("/bc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
-	BOOST_CHECK_EQUAL(result.flag, false);
+    cout << "[13]--------------------------------------------- " << endl;
+    // unit_test[13] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+    // unit_test[13] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックOKの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/bc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
+    args.push_back("--sorry-uri");
+    args.push_back("/bc78/0123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
+    BOOST_CHECK_EQUAL(result.flag, false);
 
-	cout << "[14]--------------------------------------------- " << endl;
-	// unit_test[14] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[14] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックNGの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/a\r\n/123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/a\r\n/123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/' is not a valid URI.");
+    cout << "[14]--------------------------------------------- " << endl;
+    // unit_test[14] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+    // unit_test[14] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックNGの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/a\r\n/123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/a\r\n/123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/12345678/' is not a valid URI.");
 
-	cout << "[15]--------------------------------------------- " << endl;
-	// unit_test[15] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
-	// unit_test[15] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 < 127 チェックOKの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/abc123");
-	args.push_back("--sorry-uri");
-	args.push_back("/abc123");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
-	BOOST_CHECK_EQUAL(result.flag, false);
+    cout << "[15]--------------------------------------------- " << endl;
+    // unit_test[15] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+    // unit_test[15] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 < 127 チェックOKの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/abc123");
+    args.push_back("--sorry-uri");
+    args.push_back("/abc123");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
+    BOOST_CHECK_EQUAL(result.flag, false);
 
-	cout << "[16]--------------------------------------------- " << endl;
-	// unit_test[16] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[16] test data:オプション文字列 = "-S"、sorryURI設定フラグ = OFF、次要素の文字列長 < 127 チェックNGの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("123\r\n");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '123\r\n' is not a valid URI.");
+    cout << "[16]--------------------------------------------- " << endl;
+    // unit_test[16] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+    // unit_test[16] test data:オプション文字列 = "-S"、sorryURI設定フラグ = OFF、次要素の文字列長 < 127 チェックNGの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("123\r\n");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '123\r\n' is not a valid URI.");
 
-	cout << "[17]--------------------------------------------- " << endl;
-	// unit_test[17] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set  option value '-S/--sorry-uri'."を設定する
-	// unit_test[17] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素が存在しない場合
-	args.clear();
-	args.push_back("-S");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[17]--------------------------------------------- " << endl;
+    // unit_test[17] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set  option value '-S/--sorry-uri'."を設定する
+    // unit_test[17] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素が存在しない場合
+    args.clear();
+    args.push_back("-S");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
-	cout << "[18]--------------------------------------------- " << endl;
-	// unit_test[18] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
-	// unit_test[18] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = ONの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/123/abc");
-	args.push_back("-S");
-	args.push_back("/123/999");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
+    cout << "[18]--------------------------------------------- " << endl;
+    // unit_test[18] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+    // unit_test[18] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = ONの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/123/abc");
+    args.push_back("-S");
+    args.push_back("/123/999");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 
-	cout << "[19]--------------------------------------------- " << endl;
-	// unit_test[19] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
-	// unit_test[19] test data:オプション文字列"-F"、"-S" 以外の場合
-	args.clear();
-	args.push_back("-D");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Option error.");
+    cout << "[19]--------------------------------------------- " << endl;
+    // unit_test[19] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+    // unit_test[19] test data:オプション文字列"-F"、"-S" 以外の場合
+    args.clear();
+    args.push_back("-D");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Option error.");
 
-	cout << "[20]--------------------------------------------- " << endl;
-	// unit_test[20] オプション文字列"-S"、"--forwarded-for"の場合、チェック結果フラグにTRUEを設定する
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/123/abc");
-	args.push_back("--forwarded-for");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[20]--------------------------------------------- " << endl;
+    // unit_test[20] オプション文字列"-S"、"--forwarded-for"の場合、チェック結果フラグにTRUEを設定する
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/123/abc");
+    args.push_back("--forwarded-for");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[21]--------------------------------------------- " << endl;
-	// unit_test[21] オプション文字列"-F"、"--sorry-uri" の場合、チェック結果フラグにTRUEを設定する
-	args.clear();
-	args.push_back("-F");
-	args.push_back("--sorry-uri");
-	args.push_back("/123/abc");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[21]--------------------------------------------- " << endl;
+    // unit_test[21] オプション文字列"-F"、"--sorry-uri" の場合、チェック結果フラグにTRUEを設定する
+    args.clear();
+    args.push_back("-F");
+    args.push_back("--sorry-uri");
+    args.push_back("/123/abc");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[22]--------------------------------------------- " << endl;
-	// unit_test[22] オプション文字列"-F"、"--forwarded-for" の場合、チェック結果フラグにTRUEを設定する
-	args.clear();
-	args.push_back("-F");
-	args.push_back("--forwarded-for");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[22]--------------------------------------------- " << endl;
+    // unit_test[22] オプション文字列"-F"、"--forwarded-for" の場合、チェック結果フラグにTRUEを設定する
+    args.clear();
+    args.push_back("-F");
+    args.push_back("--forwarded-for");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[23]--------------------------------------------- " << endl;
-	// unit_test[23] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[23] test data:オプション文字列"-F"、"-S" の場合
-	args.clear();
-	args.push_back("-F");
-	args.push_back("-S");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[23]--------------------------------------------- " << endl;
+    // unit_test[23] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+    // unit_test[23] test data:オプション文字列"-F"、"-S" の場合
+    args.clear();
+    args.push_back("-F");
+    args.push_back("-S");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
-	cout << "[24]--------------------------------------------- " << endl;
-	// unit_test[24] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[24] test data:オプション文字列"--sorry-uri"、"--forwarded-for" の場合
-	args.clear();
-	args.push_back("--sorry-uri");
-	args.push_back("--forwarded-for");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[24]--------------------------------------------- " << endl;
+    // unit_test[24] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+    // unit_test[24] test data:オプション文字列"--sorry-uri"、"--forwarded-for" の場合
+    args.clear();
+    args.push_back("--sorry-uri");
+    args.push_back("--forwarded-for");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
-	cout << "[25]--------------------------------------------- " << endl;
-	// unit_test[25] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
-	// unit_test[25] test data:オプション文字列"--forwarded-for"、"-R"の場合
-	args.clear();
-	args.push_back("--forwarded-for");
-	args.push_back("-R");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Option error.");
+    cout << "[25]--------------------------------------------- " << endl;
+    // unit_test[25] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+    // unit_test[25] test data:オプション文字列"--forwarded-for"、"-R"の場合
+    args.clear();
+    args.push_back("--forwarded-for");
+    args.push_back("-R");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Option error.");
 
-	cout << "[26]--------------------------------------------- " << endl;
-	// unit_test[26] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[26] test data:オプション文字列"S"、"-R"の場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("-R");
-	result = this->check_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[26]--------------------------------------------- " << endl;
+    // unit_test[26] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+    // unit_test[26] test data:オプション文字列"S"、"-R"の場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("-R");
+    result = this->check_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 }
 
 //set_parameter 馬翠翠
 void set_parameter_test() {
     check_message_result result;
-	vector<string> args;
+    vector<string> args;
 
-	cout << "[27]--------------------------------------------- " << endl;
-	// unit_test[27] オプション文字列にデータなし場合、チェック結果フラグにTRUEを設定する
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[27]--------------------------------------------- " << endl;
+    // unit_test[27] オプション文字列にデータなし場合、チェック結果フラグにTRUEを設定する
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[28]--------------------------------------------- " << endl;
-	// unit_test[28] オプション文字列 = "-F"の場合、送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
-	args.push_back("-F");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[28]--------------------------------------------- " << endl;
+    // unit_test[28] オプション文字列 = "-F"の場合、送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
+    args.push_back("-F");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[29]--------------------------------------------- " << endl;
-	// unit_test[29] オプション文字列 = "--forwarded-for"の場合、送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
-	args.clear();
-	args.push_back("--forwarded-for");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[29]--------------------------------------------- " << endl;
+    // unit_test[29] オプション文字列 = "--forwarded-for"の場合、送信元設定指示設定フラグをON,チェック結果フラグにTRUEを設定する
+    args.clear();
+    args.push_back("--forwarded-for");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[30]--------------------------------------------- " << endl;
-	// unit_test[30] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
-	// unit_test[30] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 > 127の場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
+    cout << "[30]--------------------------------------------- " << endl;
+    // unit_test[30] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is too long."（%sは次要素）を設定する
+    // unit_test[30] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 > 127の場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value '/bcdef1234567890/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is too long.");
 
-	cout << "[31]--------------------------------------------- " << endl;
-	// unit_test[31] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
-	// unit_test[31] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックOKの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/bcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
-	args.push_back("--sorry-uri");
-	args.push_back("/bcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
-	BOOST_CHECK_EQUAL(result.flag, false);
+    cout << "[31]--------------------------------------------- " << endl;
+    // unit_test[31] sorry-uri設定フラグをON、チェック結果メッセージに"Cannot set multiple option '-S/--sorry-uri'."を設定する
+    // unit_test[31] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックOKの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/bcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+    args.push_back("--sorry-uri");
+    args.push_back("/bcdef123456789/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
+    BOOST_CHECK_EQUAL(result.flag, false);
 
-	cout << "[32]--------------------------------------------- " << endl;
-	// unit_test[32] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[32] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックNGの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("abcdef12345\r\n/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abcdef12345\r\n/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is not a valid URI.");
+    cout << "[32]--------------------------------------------- " << endl;
+    // unit_test[32] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+    // unit_test[32] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 = 127 チェックNGの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("abcdef12345\r\n/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abcdef12345\r\n/0123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/123456789/' is not a valid URI.");
 
-	cout << "[33]--------------------------------------------- " << endl;
-	// unit_test[33] sorry-uriに次要素の文字列を設定する
-	// unit_test[33] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 < 127 チェックOKの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/abc/123");
-	result = this->set_parameter(args);
-	int ret = strcmp(this->sorry_uri.data(), "/abc/123");
-	BOOST_CHECK_EQUAL(ret, 0);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[33]--------------------------------------------- " << endl;
+    // unit_test[33] sorry-uriに次要素の文字列を設定する
+    // unit_test[33] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素の文字列長 < 127 チェックOKの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/abc/123");
+    result = this->set_parameter(args);
+    int ret = strcmp(this->sorry_uri.data(), "/abc/123");
+    BOOST_CHECK_EQUAL(ret, 0);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[34]--------------------------------------------- " << endl;
-	// unit_test[34] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
-	// unit_test[34] test data:次要素の文字列長 < 127 チェックNGの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("abc\r\n");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abc\r\n' is not a valid URI.");
+    cout << "[34]--------------------------------------------- " << endl;
+    // unit_test[34] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"'-S/--sorry-uri' option value '%s' is not a valid URI."（%sは次要素）を設定する
+    // unit_test[34] test data:次要素の文字列長 < 127 チェックNGの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("abc\r\n");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "'-S/--sorry-uri' option value 'abc\r\n' is not a valid URI.");
 
-	cout << "[35]--------------------------------------------- " << endl;
-	// unit_test[35] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set  option value '-S/--sorry-uri'."を設定する
-	// unit_test[35] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素が存在しない場合
-	args.clear();
-	args.push_back("-S");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[35]--------------------------------------------- " << endl;
+    // unit_test[35] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set  option value '-S/--sorry-uri'."を設定する
+    // unit_test[35] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = OFF、次要素が存在しない場合
+    args.clear();
+    args.push_back("-S");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
-	cout << "[36]--------------------------------------------- " << endl;
-	// unit_test[36] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
-	// unit_test[36] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = ONの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/abc/123");
-	args.push_back("-S");
-	args.push_back("/abc/123");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
+    cout << "[36]--------------------------------------------- " << endl;
+    // unit_test[36] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Cannot set multiple option ''-S/--sorry-uri'."を設定する
+    // unit_test[36] test data:オプション文字列 = "-S"、sorry-uri設定フラグ = ONの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/abc/123");
+    args.push_back("-S");
+    args.push_back("/abc/123");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Cannot set multiple option '-S/--sorry-uri'.");
 
-	cout << "[37]--------------------------------------------- " << endl;
-	// unit_test[37] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
-	// unit_test[37] test data:オプション文字列"-F"、"-S" 以外の場合
-	args.clear();
-	args.push_back("-D");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Option error.");
+    cout << "[37]--------------------------------------------- " << endl;
+    // unit_test[37] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+    // unit_test[37] test data:オプション文字列"-F"、"-S" 以外の場合
+    args.clear();
+    args.push_back("-D");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Option error.");
 
-	cout << "[38]--------------------------------------------- " << endl;
-	// unit_test[38] 送信元設定指示に0を設定する
-	// unit_test[38] test data:チェック結果フラグ = TRUE、送信元設定指示設定フラグ = OFFの場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("/abc/123");
-	this->set_parameter(args);
-	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_OFF);
+    cout << "[38]--------------------------------------------- " << endl;
+    // unit_test[38] 送信元設定指示に0を設定する
+    // unit_test[38] test data:チェック結果フラグ = TRUE、送信元設定指示設定フラグ = OFFの場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("/abc/123");
+    this->set_parameter(args);
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_OFF);
 
-	cout << "[39]--------------------------------------------- " << endl;
-	// unit_test[39] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
-	// unit_test[39] test data:オプション文字列"--forwarded-for"、"-S" の場合
-	args.clear();
-	args.push_back("--forwarded-for");
-	args.push_back("-S");
-	args.push_back("/abc/123");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
-	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
+    cout << "[39]--------------------------------------------- " << endl;
+    // unit_test[39] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
+    // unit_test[39] test data:オプション文字列"--forwarded-for"、"-S" の場合
+    args.clear();
+    args.push_back("--forwarded-for");
+    args.push_back("-S");
+    args.push_back("/abc/123");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 
-	cout << "[40]--------------------------------------------- " << endl;
-	// unit_test[40] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
-	// unit_test[40] test data:オプション文字列"--sorry-uri"、"-F" の場合
-	args.clear();
-	args.push_back("--sorry-uri");
-	args.push_back("/abc/123");
-	args.push_back("-F");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
-	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
+    cout << "[40]--------------------------------------------- " << endl;
+    // unit_test[40] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
+    // unit_test[40] test data:オプション文字列"--sorry-uri"、"-F" の場合
+    args.clear();
+    args.push_back("--sorry-uri");
+    args.push_back("/abc/123");
+    args.push_back("-F");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 
-	cout << "[41]--------------------------------------------- " << endl;
-	// unit_test[41] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
-	// unit_test[41] test data:オプション文字列"--forwarded-for"、"-F" の場合
-	args.clear();
-	args.push_back("--forwarded-for");
-	args.push_back("-F");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
-	BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
+    cout << "[41]--------------------------------------------- " << endl;
+    // unit_test[41] チェック結果フラグにTRUEを設定する、送信元設定指示に1を設定する
+    // unit_test[41] test data:オプション文字列"--forwarded-for"、"-F" の場合
+    args.clear();
+    args.push_back("--forwarded-for");
+    args.push_back("-F");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
+    BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_ON);
 
-	cout << "[42]--------------------------------------------- " << endl;
-	// unit_test[42] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[42] test data:オプション文字列"-F"、"-S" の場合
-	args.clear();
-	args.push_back("-F");
-	args.push_back("-S");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[42]--------------------------------------------- " << endl;
+    // unit_test[42] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+    // unit_test[42] test data:オプション文字列"-F"、"-S" の場合
+    args.clear();
+    args.push_back("-F");
+    args.push_back("-S");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
-	cout << "[43]--------------------------------------------- " << endl;
-	// unit_test[43] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[43] test data:オプション文字列"--sorry-uri"、"--forwarded-for" の場合
-	args.clear();
-	args.push_back("--sorry-uri");
-	args.push_back("--forwarded-for");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[43]--------------------------------------------- " << endl;
+    // unit_test[43] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+    // unit_test[43] test data:オプション文字列"--sorry-uri"、"--forwarded-for" の場合
+    args.clear();
+    args.push_back("--sorry-uri");
+    args.push_back("--forwarded-for");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 
-	cout << "[44]--------------------------------------------- " << endl;
-	// unit_test[44] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
-	// unit_test[44] test data:オプション文字列"--forwarded-for"、"-R"の場合
-	args.clear();
-	args.push_back("--forwarded-for");
-	args.push_back("-R");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Option error.");
+    cout << "[44]--------------------------------------------- " << endl;
+    // unit_test[44] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"Option error."を設定する
+    // unit_test[44] test data:オプション文字列"--forwarded-for"、"-R"の場合
+    args.clear();
+    args.push_back("--forwarded-for");
+    args.push_back("-R");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Option error.");
 
-	cout << "[45]--------------------------------------------- " << endl;
-	// unit_test[45] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
-	// unit_test[45] test data:オプション文字列"-S"、"-R"の場合
-	args.clear();
-	args.push_back("-S");
-	args.push_back("-R");
-	result = this->set_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
+    cout << "[45]--------------------------------------------- " << endl;
+    // unit_test[45] チェック結果フラグにFALSEを設定する、チェック結果メッセージに"You have to set option value '-S/--sorry-uri'."を設定する
+    // unit_test[45] test data:オプション文字列"-S"、"-R"の場合
+    args.clear();
+    args.push_back("-S");
+    args.push_back("-R");
+    result = this->set_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "You have to set option value '-S/--sorry-uri'.");
 }
 
 //add_parameter 馬翠翠
 void add_parameter_test() {
     check_message_result result;
-	vector<string> args;
+    vector<string> args;
 
-	cout << "[46]--------------------------------------------- " << endl;
-	// unit_test[46] オプション文字列が存在しない場合,正常系で必ずtrueを返す
-	result = this->add_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, true);
+    cout << "[46]--------------------------------------------- " << endl;
+    // unit_test[46] オプション文字列が存在しない場合,正常系で必ずtrueを返す
+    result = this->add_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, true);
 
-	cout << "[47]--------------------------------------------- " << endl;
-	// unit_test[47] オプション文字列が存在する場合,チェック結果フラグにFALSEを設定する, チェック結果メッセージに"Cannot add option."を設定する
-	args.push_back("-F");
-	result = this->add_parameter(args);
-	BOOST_CHECK_EQUAL(result.flag, false);
-	BOOST_CHECK_EQUAL(result.message, "Cannot add option.");
+    cout << "[47]--------------------------------------------- " << endl;
+    // unit_test[47] オプション文字列が存在する場合,チェック結果フラグにFALSEを設定する, チェック結果メッセージに"Cannot add option."を設定する
+    args.push_back("-F");
+    result = this->add_parameter(args);
+    BOOST_CHECK_EQUAL(result.flag, false);
+    BOOST_CHECK_EQUAL(result.message, "Cannot add option.");
 }
 
 //register_schedule(tcp) 董作方
@@ -781,7 +781,7 @@ void handle_session_initialize_test() {
     boost::asio::ip::tcp::endpoint ep_tcp = string_to_endpoint<boost::asio::ip::tcp> ("100.100.100.100:8888");
     boost::asio::ip::udp::endpoint ep_udp = string_to_endpoint<boost::asio::ip::udp> ("100.100.100.100:8080");
 
-    EVENT_TAG ret =	this->handle_session_initialize(boost::this_thread::get_id(), down_thread.get_id(),ep_tcp,ep_udp);
+    EVENT_TAG ret =    this->handle_session_initialize(boost::this_thread::get_id(), down_thread.get_id(),ep_tcp,ep_udp);
     BOOST_CHECK_EQUAL(ret, ACCEPT);
 
 
@@ -909,7 +909,7 @@ void handle_session_finalize_test_thread() {
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         thread_map_iterator = this->session_thread_data_map.find(boost::this_thread::get_id());
-    	bret = (thread_map_iterator == this->session_thread_data_map.end());
+        bret = (thread_map_iterator == this->session_thread_data_map.end());
     }
     {
         boost::mutex::scoped_lock sclock(check_mutex);
@@ -3229,26 +3229,26 @@ void handle_realserver_select_tcp_test(){
 
 //handle_realserver_select(tcp)_thread 馮家純
 void handle_realserver_select_tcp_test_thread(){
-	EVENT_TAG ret;
-	cout << "[161]--------------------------------------------- " << endl;
-	//unit_test[161] endpoint = 決定
-	boost::thread down_thread(down_thread_func);
+    EVENT_TAG ret;
+    cout << "[161]--------------------------------------------- " << endl;
+    //unit_test[161] endpoint = 決定
+    boost::thread down_thread(down_thread_func);
     thread_data_ptr dataup(new session_thread_data_sessionless);
     thread_data_ptr datadown(new session_thread_data_sessionless);
-	dataup->thread_division = THREAD_DIVISION_UP_STREAM;
-	dataup->pair_thread_id = down_thread.get_id();
-	datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	datadown->pair_thread_id = boost::this_thread::get_id();
-	datadown->recive_data_map.clear();
+    dataup->thread_division = THREAD_DIVISION_UP_STREAM;
+    dataup->pair_thread_id = down_thread.get_id();
+    datadown->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    datadown->pair_thread_id = boost::this_thread::get_id();
+    datadown->recive_data_map.clear();
 
-	{
-		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
-		this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
-		this->session_thread_data_map[down_thread.get_id()] = datadown;
-	}
+    {
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
+        this->session_thread_data_map[down_thread.get_id()] = datadown;
+    }
 
-	boost::asio::ip::tcp::endpoint ep;
-	ret = this->handle_realserver_select(boost::this_thread::get_id(), ep);
+    boost::asio::ip::tcp::endpoint ep;
+    ret = this->handle_realserver_select(boost::this_thread::get_id(), ep);
 
     {
         boost::mutex::scoped_lock sclock(check_mutex);
@@ -4450,9 +4450,9 @@ void handle_realserver_connection_fail_test_thread() {
     thread_data_ptr data(new session_thread_data_sessionless);
     data->thread_id = boost::this_thread::get_id();
     {
-		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         this->session_thread_data_map[boost::this_thread::get_id()] = data;
-	}
+    }
 
     ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
 
@@ -4871,7 +4871,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
 
     cout << "[214]--------------------------------------------- " << endl;
-    //unit_test[214] 	session_thread_data_map中に上りスレッド中にThreadID対応のデータがない
+    //unit_test[214]     session_thread_data_map中に上りスレッド中にThreadID対応のデータがない
     this->session_thread_data_map[boost::this_thread::get_id()].reset();
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
@@ -4879,7 +4879,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[215]--------------------------------------------- " << endl;
-    //unit_test[215] 	session_thread_data_map中に上りスレッドのデータ無し場合のテスト
+    //unit_test[215]     session_thread_data_map中に上りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.erase(boost::this_thread::get_id());
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
@@ -4887,7 +4887,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[216]--------------------------------------------- " << endl;
-    //unit_test[216] 	session_thread_data_map中に上りスレッドと下りスレッドのデータ無し場合のテスト
+    //unit_test[216]     session_thread_data_map中に上りスレッドと下りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.clear();
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
 
@@ -4895,7 +4895,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[217]--------------------------------------------- " << endl;
-    //unit_test[217] 	session_thread_data_map中に下りスレッドのデータ無し場合のテスト
+    //unit_test[217]     session_thread_data_map中に下りスレッドのデータ無し場合のテスト
     this->session_thread_data_map.clear();
     this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep);
@@ -4957,10 +4957,10 @@ void handle_sorryserver_select_test_thread(){
     datadown->recive_data_map.clear();
 
     {
-		boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         this->session_thread_data_map[boost::this_thread::get_id()] = dataup;
         this->session_thread_data_map[downt.get_id()] = datadown;
-	}
+    }
 
     //send_status送信可能データ
     send_status st;
@@ -6118,7 +6118,7 @@ void handle_sorryserver_connection_fail_test() {
 
     cout << "[248]--------------------------------------------- " << endl;
     //unit_test[248] session_thread_data_map中にthread_id無し
-    EVENT_TAG ret =	this->handle_sorryserver_connection_fail(boost::this_thread::get_id(), ep_tcp);
+    EVENT_TAG ret =    this->handle_sorryserver_connection_fail(boost::this_thread::get_id(), ep_tcp);
     BOOST_CHECK_EQUAL(ret, FINALIZE);
 
     cout << "[249]--------------------------------------------- " << endl;
@@ -10288,7 +10288,7 @@ void handle_sorryserver_recv_test_thread(){
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         this->session_thread_data_map[boost::this_thread::get_id()] = psession_thread_data;
-    	this->forwarded_for = 1;
+        this->forwarded_for = 1;
     }
 
     init_recive_data(recive_data_tmp);
@@ -11043,360 +11043,360 @@ void handle_client_disconnect_test_thread_func(const boost::thread::id thread_id
 //handle_sorry_enable 馬翠翠
 void handle_sorry_enable_test() {
     EVENT_TAG status;
-	send_status sendstatus;
-	recive_data receivedata;
-	thread_data_ptr thread_data(new session_thread_data_sessionless);
-	boost::thread thread_up(&up_thread_func);
-	boost::thread thread_down(&down_thread_func);
+    send_status sendstatus;
+    recive_data receivedata;
+    thread_data_ptr thread_data(new session_thread_data_sessionless);
+    boost::thread thread_up(&up_thread_func);
+    boost::thread thread_down(&down_thread_func);
 
-	// 上りスレッドの場合
-	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
-	thread_data->thread_id = boost::this_thread::get_id();
-	this->session_thread_data_map.insert(pair<boost::thread::id,
-				thread_data_ptr> (boost::this_thread::get_id(),
-				thread_data));
+    // 上りスレッドの場合
+    thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
+    thread_data->thread_id = boost::this_thread::get_id();
+    this->session_thread_data_map.insert(pair<boost::thread::id,
+                thread_data_ptr> (boost::this_thread::get_id(),
+                thread_data));
 
     cout << "[478]--------------------------------------------- " << endl;
     // unit_test[478] 上りスレッド対応のendpointなし,status = FINALIZE
     init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, FINALIZE);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[479]--------------------------------------------- " << endl;
-	// unit_test[479] accept完了フラグOFFの場合,sorry状態をON,status = ACCEPT
-	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_OFF;
-	this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp
-				= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, ACCEPT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[479]--------------------------------------------- " << endl;
+    // unit_test[479] accept完了フラグOFFの場合,sorry状態をON,status = ACCEPT
+    this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp
+                = string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, ACCEPT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[480]--------------------------------------------- " << endl;
-	// unit_test[480] accept完了フラグON,sorry状態,送信可能データあり list 1件の場合,status = SORRYSERVER_CONNECT
-	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[480]--------------------------------------------- " << endl;
+    // unit_test[480] accept完了フラグON,sorry状態,送信可能データあり list 1件の場合,status = SORRYSERVER_CONNECT
+    this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[481]--------------------------------------------- " << endl;
-	// unit_test[481] 送信可能データあり list 2件 1件あり場合,status = SORRYSERVER_CONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[481]--------------------------------------------- " << endl;
+    // unit_test[481] 送信可能データあり list 2件 1件あり場合,status = SORRYSERVER_CONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[482]--------------------------------------------- " << endl;
-	// unit_test[482] 送信可能データなし list 3件の場合,status =SORRYSERVER_SELECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.size();
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status,SORRYSERVER_SELECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[482]--------------------------------------------- " << endl;
+    // unit_test[482] 送信可能データなし list 3件の場合,status =SORRYSERVER_SELECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.size();
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status,SORRYSERVER_SELECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[483]--------------------------------------------- " << endl;
-	// unit_test[483] sorry状態以外,送信継続データあり list 1件の場合,終了フラグをON,status = REALSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag,END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[483]--------------------------------------------- " << endl;
+    // unit_test[483] sorry状態以外,送信継続データあり list 1件の場合,終了フラグをON,status = REALSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag,END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[484]--------------------------------------------- " << endl;
-	// unit_test[484] 送信継続データあり list 2件 1件あり場合,終了フラグをON,status = REALSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[484]--------------------------------------------- " << endl;
+    // unit_test[484] 送信継続データあり list 2件 1件あり場合,終了フラグをON,status = REALSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[485]--------------------------------------------- " << endl;
-	// unit_test[485] 送信継続データなし list 3件の場合,sorryserver切替中フラグON,sorry状態をON,status = REALSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_OK;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorryserver_switch_flag, SORRYSERVER_SWITCH_FLAG_ON);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
-	BOOST_CHECK_EQUAL(status,REALSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[485]--------------------------------------------- " << endl;
+    // unit_test[485] 送信継続データなし list 3件の場合,sorryserver切替中フラグON,sorry状態をON,status = REALSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_OK;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorryserver_switch_flag, SORRYSERVER_SWITCH_FLAG_ON);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
+    BOOST_CHECK_EQUAL(status,REALSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	// 下りスレッドの場合
-	this->session_thread_data_map.clear();
-	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	thread_data->thread_id = boost::this_thread::get_id();
-	this->session_thread_data_map.insert(pair<boost::thread::id,
-				thread_data_ptr> (boost::this_thread::get_id(),
-				thread_data));
-	this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint
-						= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.243:8800");
+    // 下りスレッドの場合
+    this->session_thread_data_map.clear();
+    thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    thread_data->thread_id = boost::this_thread::get_id();
+    this->session_thread_data_map.insert(pair<boost::thread::id,
+                thread_data_ptr> (boost::this_thread::get_id(),
+                thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint
+                        = string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.243:8800");
 
-	cout << "[486]--------------------------------------------- " << endl;
-	// unit_test[486] sorry状態,送信可能データあり list 1件の場合,status = CLIENT_CONNECTION_CHECK
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[486]--------------------------------------------- " << endl;
+    // unit_test[486] sorry状態,送信可能データあり list 1件の場合,status = CLIENT_CONNECTION_CHECK
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[487]--------------------------------------------- " << endl;
-	// unit_test[487] 送信可能データあり list 2件 1件あり場合,status =CLIENT_CONNECTION_CHECK
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[487]--------------------------------------------- " << endl;
+    // unit_test[487] 送信可能データあり list 2件 1件あり場合,status =CLIENT_CONNECTION_CHECK
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[488]--------------------------------------------- " << endl;
-	// unit_test[488] 送信可能データなし list 3件の場合,sorryフラグをON,sorryserver切替中フラグON,status = SORRYSERVER_RECV
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorryserver_switch_flag, SORRYSERVER_SWITCH_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[488]--------------------------------------------- " << endl;
+    // unit_test[488] 送信可能データなし list 3件の場合,sorryフラグをON,sorryserver切替中フラグON,status = SORRYSERVER_RECV
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorryserver_switch_flag, SORRYSERVER_SWITCH_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[489]--------------------------------------------- " << endl;
-	// unit_test[489] sorry状態以外,送信不可データあり list 1件の場合,終了フラグをON,status = REALSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag , END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[489]--------------------------------------------- " << endl;
+    // unit_test[489] sorry状態以外,送信不可データあり list 1件の場合,終了フラグをON,status = REALSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag , END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[490]--------------------------------------------- " << endl;
-	// unit_test[490] 送信データ残サイズ ＞ ０　が存在する list 2件の場合,終了フラグをON,status = REALSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 20;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag , END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[490]--------------------------------------------- " << endl;
+    // unit_test[490] 送信データ残サイズ ＞ ０　が存在する list 2件の場合,終了フラグをON,status = REALSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 20;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag , END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, REALSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[491]--------------------------------------------- " << endl;
-	// unit_test[491] 送信不可データなしかつ送信データ残サイズ ＞ ０　が存在しない list 1件の場合,sorry状態をON
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[491]--------------------------------------------- " << endl;
+    // unit_test[491] 送信不可データなしかつ送信データ残サイズ ＞ ０　が存在しない list 1件の場合,sorry状態をON
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[492]--------------------------------------------- " << endl;
-	// unit_test[492] 送信不可データなしかつ送信データ残サイズ ＞ ０が存在しない,送信可能データなし list 1件の場合,status = SORRYSERVER_RECV
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[492]--------------------------------------------- " << endl;
+    // unit_test[492] 送信不可データなしかつ送信データ残サイズ ＞ ０が存在しない,送信可能データなし list 1件の場合,status = SORRYSERVER_RECV
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[493]--------------------------------------------- " << endl;
-	// unit_test[493] status = CLIENT_CONNECTION_CHECK
-	// unit_test[493] test data:送信不可データなし かつ　送信データ残サイズ ＞ ０が存在しない場合,送信可能データあり list 3件
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_CONTINUE;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[493]--------------------------------------------- " << endl;
+    // unit_test[493] status = CLIENT_CONNECTION_CHECK
+    // unit_test[493] test data:送信不可データなし かつ　送信データ残サイズ ＞ ０が存在しない場合,送信可能データあり list 3件
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_CONTINUE;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[494]--------------------------------------------- " << endl;
-	// unit_test[494] 下りスレッドのendpoint対応のrecive_dataなし場合,sorry状態をON,status = SORRYSERVER_RECV
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[494]--------------------------------------------- " << endl;
+    // unit_test[494] 下りスレッドのendpoint対応のrecive_dataなし場合,sorry状態をON,status = SORRYSERVER_RECV
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_RECV);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_ON);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[495]--------------------------------------------- " << endl;
-	// unit_test[495] session_thread_data NULLの場合,status = FINALIZE
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	thread_data_ptr thread_data_null;
-	this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_null;
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
+    cout << "[495]--------------------------------------------- " << endl;
+    // unit_test[495] session_thread_data NULLの場合,status = FINALIZE
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    thread_data_ptr thread_data_null;
+    this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_null;
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, FINALIZE);
 
-	cout << "[496]--------------------------------------------- " << endl;
-	// unit_test[496] thread_id対応のsession_thread_dataなし場合,status = FINALIZE
-	this->session_thread_data_map.clear();
-	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	thread_data->thread_id = thread_down.get_id();
-	this->session_thread_data_map.insert(pair<boost::thread::id,
-				thread_data_ptr> (thread_down.get_id(),
-				thread_data));
-	this->session_thread_data_map[thread_down.get_id()]->target_endpoint
-						= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.243:8800");
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_OK;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[thread_down.get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[thread_down.get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_enable(thread_up.get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
-	this->session_thread_data_map[thread_down.get_id()]->recive_data_map.clear();
+    cout << "[496]--------------------------------------------- " << endl;
+    // unit_test[496] thread_id対応のsession_thread_dataなし場合,status = FINALIZE
+    this->session_thread_data_map.clear();
+    thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    thread_data->thread_id = thread_down.get_id();
+    this->session_thread_data_map.insert(pair<boost::thread::id,
+                thread_data_ptr> (thread_down.get_id(),
+                thread_data));
+    this->session_thread_data_map[thread_down.get_id()]->target_endpoint
+                        = string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.243:8800");
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_OK;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[thread_down.get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[thread_down.get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_enable(thread_up.get_id());
+    BOOST_CHECK_EQUAL(status, FINALIZE);
+    this->session_thread_data_map[thread_down.get_id()]->recive_data_map.clear();
 
     cout << "[497]--------------------------------------------- " << endl;
     // unit_test[497] 上りスレッドの戻り値が「ACCEPT」を設定する、下りスレッドの戻り値が「CLIENT_CONNECTION_CHECK」を設定する
     // unit_test[497] test data:上りスレッドと下りスレッドの場合
     init_send_status(sendstatus);
-	init_recive_data(receivedata);
+    init_recive_data(receivedata);
     thread_data_ptr thread_data_up(new session_thread_data_sessionless);
     // 上りスレッド,accept完了フラグOFFの場合
     thread_data_up->thread_division = THREAD_DIVISION_UP_STREAM;
     thread_data_up->accept_end_flag = ACCEPT_END_FLAG_OFF;
     thread_data_up->thread_id = thread_up.get_id();
-	thread_data_up->pair_thread_id = thread_down.get_id();
+    thread_data_up->pair_thread_id = thread_down.get_id();
     thread_data_up->recive_data_map[thread_data_up->client_endpoint_tcp];
     // 下りスレッド,sorry状態の場合,送信可能データありの場合
     thread_data_ptr thread_data_down(new session_thread_data_sessionless);
@@ -11435,396 +11435,396 @@ void handle_sorry_enable_test_thread_func(const boost::thread::id thread_id,
 void handle_sorry_enable_test_thread(){
 
     EVENT_TAG status;
-	send_status sendstatus;
-	recive_data receivedata;
-	thread_data_ptr thread_data(new session_thread_data_sessionless);
+    send_status sendstatus;
+    recive_data receivedata;
+    thread_data_ptr thread_data(new session_thread_data_sessionless);
 
-	// 上りスレッドの場合
-	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
-	thread_data->thread_id = boost::this_thread::get_id();
+    // 上りスレッドの場合
+    thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
+    thread_data->thread_id = boost::this_thread::get_id();
     {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
     }
 
-	cout << "[498]--------------------------------------------- " << endl;
-	// unit_test[498] accept完了フラグON,sorry状態,送信可能データあり list 1件の場合,status = SORRYSERVER_CONNECT
-	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_enable(boost::this_thread::get_id());
-	{
-	    boost::mutex::scoped_lock sclock(check_mutex);
+    cout << "[498]--------------------------------------------- " << endl;
+    // unit_test[498] accept完了フラグON,sorry状態,送信可能データあり list 1件の場合,status = SORRYSERVER_CONNECT
+    this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_enable(boost::this_thread::get_id());
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
         BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
-	}
+    }
 
 }
 
 //handle_sorry_disable 馬翠翠
 void handle_sorry_disable_test(){
     EVENT_TAG status;
-	send_status sendstatus;
-	recive_data receivedata;
-	thread_data_ptr thread_data(new session_thread_data_sessionless);
-	boost::thread thread_up(&up_thread_func);
-	boost::thread thread_down(&down_thread_func);
+    send_status sendstatus;
+    recive_data receivedata;
+    thread_data_ptr thread_data(new session_thread_data_sessionless);
+    boost::thread thread_up(&up_thread_func);
+    boost::thread thread_down(&down_thread_func);
 
-	// 上りスレッドの場合
-	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
-	thread_data->thread_id = boost::this_thread::get_id();
-	this->session_thread_data_map.insert(pair<boost::thread::id,
-				thread_data_ptr> (boost::this_thread::get_id(),
-				thread_data));
-	this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp
-					= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
+    // 上りスレッドの場合
+    thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
+    thread_data->thread_id = boost::this_thread::get_id();
+    this->session_thread_data_map.insert(pair<boost::thread::id,
+                thread_data_ptr> (boost::this_thread::get_id(),
+                thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp
+                    = string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
 
     cout << "[499]--------------------------------------------- " << endl;
     // unit_test[499] 上りスレッド対応のendpointなし,status = FINALIZE
     init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, FINALIZE);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
 
-	cout << "[500]--------------------------------------------- " << endl;
-	// unit_test[500] accept完了フラグOFFの場合,sorry状態をOFF,status = ACCEPT
-	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_OFF;
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
-	BOOST_CHECK_EQUAL(status, ACCEPT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[500]--------------------------------------------- " << endl;
+    // unit_test[500] accept完了フラグOFFの場合,sorry状態をOFF,status = ACCEPT
+    this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_OFF;
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
+    BOOST_CHECK_EQUAL(status, ACCEPT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[501]--------------------------------------------- " << endl;
-	// unit_test[501] 終了フラグをON,status = SORRYSERVER_DISCONNECT
-	// unit_test[501] test data:accept完了フラグONの場合,sorry状態の場合,送信継続データあり list 1件
-	this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[501]--------------------------------------------- " << endl;
+    // unit_test[501] 終了フラグをON,status = SORRYSERVER_DISCONNECT
+    // unit_test[501] test data:accept完了フラグONの場合,sorry状態の場合,送信継続データあり list 1件
+    this->session_thread_data_map[boost::this_thread::get_id()]->accept_end_flag = ACCEPT_END_FLAG_ON;
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[502]--------------------------------------------- " << endl;
-	// unit_test[502] 送信継続データあり list 2件 1件あり場合,終了フラグをON,status = SORRYSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[502]--------------------------------------------- " << endl;
+    // unit_test[502] 送信継続データあり list 2件 1件あり場合,終了フラグをON,status = SORRYSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[503]--------------------------------------------- " << endl;
-	// unit_test[503] 送信継続データなし list 3件の場合,realserver切替中,sorry状態をOFF,status = SORRYSERVER_DISCONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_OK;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_switch_flag, REALSERVER_SWITCH_FLAG_ON);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[503]--------------------------------------------- " << endl;
+    // unit_test[503] 送信継続データなし list 3件の場合,realserver切替中,sorry状態をOFF,status = SORRYSERVER_DISCONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_OK;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_switch_flag, REALSERVER_SWITCH_FLAG_ON);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[504]--------------------------------------------- " << endl;
-	// unit_test[504] sorry状態以外,送信可能データあり list 1件の場合,status = REALSERVER_CONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[504]--------------------------------------------- " << endl;
+    // unit_test[504] sorry状態以外,送信可能データあり list 1件の場合,status = REALSERVER_CONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[505]--------------------------------------------- " << endl;
-	// unit_test[505] 送信可能データあり list 2件 1件ありの場合,status = REALSERVER_CONNECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[505]--------------------------------------------- " << endl;
+    // unit_test[505] 送信可能データあり list 2件 1件ありの場合,status = REALSERVER_CONNECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[506]--------------------------------------------- " << endl;
-	// unit_test[506] 送信可能データなし list 3件の場合,status = REALSERVER_SELECT
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[506]--------------------------------------------- " << endl;
+    // unit_test[506] 送信可能データなし list 3件の場合,status = REALSERVER_SELECT
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	// 下りスレッドの場合
-	this->session_thread_data_map.clear();
-	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	thread_data->thread_id = boost::this_thread::get_id();
-	this->session_thread_data_map.insert(pair<boost::thread::id,
-				thread_data_ptr> (boost::this_thread::get_id(),
-				thread_data));
-	this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint
-					= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
+    // 下りスレッドの場合
+    this->session_thread_data_map.clear();
+    thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    thread_data->thread_id = boost::this_thread::get_id();
+    this->session_thread_data_map.insert(pair<boost::thread::id,
+                thread_data_ptr> (boost::this_thread::get_id(),
+                thread_data));
+    this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint
+                    = string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
 
 
-	cout << "[507]--------------------------------------------- " << endl;
-	// unit_test[507] 終了フラグをON,sorry状態をOFF,realserver切替中,status = SORRYSERVER_DISCONNECT
-	// unit_test[507] test data:sorry状態の場合,送信不可データあり list 1件
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				std::pair<boost::asio::ip::tcp::endpoint, recive_data>(
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_switch_flag, REALSERVER_SWITCH_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[507]--------------------------------------------- " << endl;
+    // unit_test[507] 終了フラグをON,sorry状態をOFF,realserver切替中,status = SORRYSERVER_DISCONNECT
+    // unit_test[507] test data:sorry状態の場合,送信不可データあり list 1件
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                std::pair<boost::asio::ip::tcp::endpoint, recive_data>(
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_switch_flag, REALSERVER_SWITCH_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[508]--------------------------------------------- " << endl;
-	// unit_test[508] 終了フラグをON,status = SORRYSERVER_DISCONNECT
-	// unit_test[508] test data:送信データ残サイズ ＞ ０　が存在する場合 list 2件
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 20;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-	BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[508]--------------------------------------------- " << endl;
+    // unit_test[508] 終了フラグをON,status = SORRYSERVER_DISCONNECT
+    // unit_test[508] test data:送信データ残サイズ ＞ ０　が存在する場合 list 2件
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 20;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+    BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[509]--------------------------------------------- " << endl;
-	// unit_test[509] sorry状態をOFF
-	// unit_test[509] test data:送信不可データなし　かつ　送信データ残サイズ ＞ ０　が存在しない場合 list 1件
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[509]--------------------------------------------- " << endl;
+    // unit_test[509] sorry状態をOFF
+    // unit_test[509] test data:送信不可データなし　かつ　送信データ残サイズ ＞ ０　が存在しない場合 list 1件
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[510]--------------------------------------------- " << endl;
-	// unit_test[510] sorry状態をOFF,送信可能データなし status = REALSERVER_RECV
-	// unit_test[510] test data:送信不可データなし　かつ　送信データ残サイズ ＞ ０　が存在しない場合,送信可能データなし list 1件
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[510]--------------------------------------------- " << endl;
+    // unit_test[510] sorry状態をOFF,送信可能データなし status = REALSERVER_RECV
+    // unit_test[510] test data:送信不可データなし　かつ　送信データ残サイズ ＞ ０　が存在しない場合,送信可能データなし list 1件
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[511]--------------------------------------------- " << endl;
-	// unit_test[511] status = CLIENT_CONNECTION_CHECK
-	// unit_test[511] test data:送信不可データなし　かつ　送信データ残サイズ ＞ ０　が存在しない場合,送信可能データあり list 3件
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_CONTINUE;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_END;
-	sendstatus.send_rest_size = 0;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[511]--------------------------------------------- " << endl;
+    // unit_test[511] status = CLIENT_CONNECTION_CHECK
+    // unit_test[511] test data:送信不可データなし　かつ　送信データ残サイズ ＞ ０　が存在しない場合,送信可能データあり list 3件
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_CONTINUE;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_END;
+    sendstatus.send_rest_size = 0;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[512]--------------------------------------------- " << endl;
-	// unit_test[512] sorry状態以外,送信可能データあり list 1件の場合,status = CLIENT_CONNECTION_CHECK
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[512]--------------------------------------------- " << endl;
+    // unit_test[512] sorry状態以外,送信可能データあり list 1件の場合,status = CLIENT_CONNECTION_CHECK
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag = SORRY_FLAG_OFF;
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[513]--------------------------------------------- " << endl;
-	// unit_test[513] 送信可能データあり list 2件 1件ありの場合,status = CLIENT_CONNECTION_CHECK
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_OK;
-	sendstatus.send_possible_size = 10;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[513]--------------------------------------------- " << endl;
+    // unit_test[513] 送信可能データあり list 2件 1件ありの場合,status = CLIENT_CONNECTION_CHECK
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_OK;
+    sendstatus.send_possible_size = 10;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[514]--------------------------------------------- " << endl;
-	// unit_test[514] 送信可能データなし list 3件の場合,status =REALSERVER_RECV
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_END;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	sendstatus.status = SEND_NG;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[514]--------------------------------------------- " << endl;
+    // unit_test[514] 送信可能データなし list 3件の場合,status =REALSERVER_RECV
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_END;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    sendstatus.status = SEND_NG;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[boost::this_thread::get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[515]--------------------------------------------- " << endl;
-	// unit_test[515] 下りスレッドのendpoint対応のrecive_dataなし場合,sorry状態をOFF,status = REALSERVER_RECV
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
-	BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
-	this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
+    cout << "[515]--------------------------------------------- " << endl;
+    // unit_test[515] 下りスレッドのendpoint対応のrecive_dataなし場合,sorry状態をOFF,status = REALSERVER_RECV
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.1:8800"),
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->sorry_flag, SORRY_FLAG_OFF);
+    BOOST_CHECK_EQUAL(status, REALSERVER_RECV);
+    this->session_thread_data_map[boost::this_thread::get_id()]->recive_data_map.clear();
 
-	cout << "[516]--------------------------------------------- " << endl;
-	// unit_test[516] session_thread_data NULLの場合,status = FINALIZE
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	thread_data_ptr thread_data_null;
-	this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_null;
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
+    cout << "[516]--------------------------------------------- " << endl;
+    // unit_test[516] session_thread_data NULLの場合,status = FINALIZE
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    thread_data_ptr thread_data_null;
+    this->session_thread_data_map[boost::this_thread::get_id()] = thread_data_null;
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    BOOST_CHECK_EQUAL(status, FINALIZE);
 
-	cout << "[517]--------------------------------------------- " << endl;
-	// unit_test[517] thread_id対応のsession_thread_dataなし場合,status =FINALIZE
-	this->session_thread_data_map.clear();
-	thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	thread_data->thread_id = thread_down.get_id();
-	this->session_thread_data_map.insert(pair<boost::thread::id,
-				thread_data_ptr> (thread_down.get_id(),
-				thread_data));
-	this->session_thread_data_map[thread_down.get_id()]->target_endpoint
-						= string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
-	init_send_status(sendstatus);
-	init_recive_data(receivedata);
-	sendstatus.status = SEND_OK;
-	receivedata.send_status_list.push_back(sendstatus);
-	this->session_thread_data_map[thread_down.get_id()]->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						this->session_thread_data_map[thread_down.get_id()]->target_endpoint,
-						receivedata));
-	status = this->handle_sorry_disable(thread_up.get_id());
-	BOOST_CHECK_EQUAL(status, FINALIZE);
-	this->session_thread_data_map[thread_down.get_id()]->recive_data_map.clear();
+    cout << "[517]--------------------------------------------- " << endl;
+    // unit_test[517] thread_id対応のsession_thread_dataなし場合,status =FINALIZE
+    this->session_thread_data_map.clear();
+    thread_data->thread_division = THREAD_DIVISION_DOWN_STREAM;
+    thread_data->thread_id = thread_down.get_id();
+    this->session_thread_data_map.insert(pair<boost::thread::id,
+                thread_data_ptr> (thread_down.get_id(),
+                thread_data));
+    this->session_thread_data_map[thread_down.get_id()]->target_endpoint
+                        = string_to_endpoint<boost::asio::ip::tcp> ("192.168.120.109:8800");
+    init_send_status(sendstatus);
+    init_recive_data(receivedata);
+    sendstatus.status = SEND_OK;
+    receivedata.send_status_list.push_back(sendstatus);
+    this->session_thread_data_map[thread_down.get_id()]->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        this->session_thread_data_map[thread_down.get_id()]->target_endpoint,
+                        receivedata));
+    status = this->handle_sorry_disable(thread_up.get_id());
+    BOOST_CHECK_EQUAL(status, FINALIZE);
+    this->session_thread_data_map[thread_down.get_id()]->recive_data_map.clear();
 
     cout << "[518]--------------------------------------------- " << endl;
     // unit_test[518] 上りスレッドの戻り値が「ACCEPT」を設定する、下りスレッドの戻り値が「CLIENT_CONNECTION_CHECK」を設定する
     // unit_test[518] test data:上りスレッドと下りスレッドの場合
     init_send_status(sendstatus);
-	init_recive_data(receivedata);
+    init_recive_data(receivedata);
     thread_data_ptr thread_data_up(new session_thread_data_sessionless);
     // 上りスレッド,accept完了フラグOFFの場合
     thread_data_up->thread_division = THREAD_DIVISION_UP_STREAM;
     thread_data_up->accept_end_flag = ACCEPT_END_FLAG_OFF;
     thread_data_up->thread_id = thread_up.get_id();
-	thread_data_up->pair_thread_id = thread_down.get_id();
+    thread_data_up->pair_thread_id = thread_down.get_id();
     thread_data_up->recive_data_map[thread_data_up->client_endpoint_tcp];
     // 下りスレッド,sorry状態以外の場合,送信可能データありの場合
     thread_data_ptr thread_data_down(new session_thread_data_sessionless);
@@ -11865,35 +11865,35 @@ void handle_sorry_disable_test_thread_func(const boost::thread::id thread_id,
 void handle_sorry_disable_test_thread(){
 
     EVENT_TAG status;
-	send_status sendstatus;
-	recive_data receivedata;
-	thread_data_ptr thread_data(new session_thread_data_sessionless);
+    send_status sendstatus;
+    recive_data receivedata;
+    thread_data_ptr thread_data(new session_thread_data_sessionless);
 
-	// 上りスレッドの場合
-	thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
-	thread_data->thread_id = boost::this_thread::get_id();
-	{
+    // 上りスレッドの場合
+    thread_data->thread_division = THREAD_DIVISION_UP_STREAM;
+    thread_data->thread_id = boost::this_thread::get_id();
+    {
         boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
         this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
     }
 
-	cout << "[519]--------------------------------------------- " << endl;
-	// unit_test[519] 終了フラグをON,status = SORRYSERVER_DISCONNECT
-	// unit_test[519] test data:accept完了フラグONの場合,sorry状態の場合,送信継続データあり list 1件
-	thread_data->accept_end_flag = ACCEPT_END_FLAG_ON;
-	thread_data->sorry_flag = SORRY_FLAG_ON;
-	sendstatus.status = SEND_CONTINUE;
-	receivedata.send_status_list.push_back(sendstatus);
-	thread_data->recive_data_map.insert(
-				pair<boost::asio::ip::tcp::endpoint, recive_data> (
-						thread_data->client_endpoint_tcp,
-						receivedata));
-	status = this->handle_sorry_disable(boost::this_thread::get_id());
-	{
-	    boost::mutex::scoped_lock sclock(check_mutex);
+    cout << "[519]--------------------------------------------- " << endl;
+    // unit_test[519] 終了フラグをON,status = SORRYSERVER_DISCONNECT
+    // unit_test[519] test data:accept完了フラグONの場合,sorry状態の場合,送信継続データあり list 1件
+    thread_data->accept_end_flag = ACCEPT_END_FLAG_ON;
+    thread_data->sorry_flag = SORRY_FLAG_ON;
+    sendstatus.status = SEND_CONTINUE;
+    receivedata.send_status_list.push_back(sendstatus);
+    thread_data->recive_data_map.insert(
+                pair<boost::asio::ip::tcp::endpoint, recive_data> (
+                        thread_data->client_endpoint_tcp,
+                        receivedata));
+    status = this->handle_sorry_disable(boost::this_thread::get_id());
+    {
+        boost::mutex::scoped_lock sclock(check_mutex);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
         BOOST_CHECK_EQUAL(status, SORRYSERVER_DISCONNECT);
-	}
+    }
 }
 
 //handle_realserver_disconnect(tcp) 馮家純
@@ -12298,8 +12298,8 @@ void handle_sorryserver_disconnect_test(){
     this->session_thread_data_map[t5.get_id()] = data5;
     //make 下りスレッドの場合 1->下りスレッド
     data5->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	data5->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
-	data5->end_flag = END_FLAG_OFF;
+    data5->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
+    data5->end_flag = END_FLAG_OFF;
     //make 送信可能データあり
     send_status st5;
     st5.status = SEND_OK;
@@ -12324,8 +12324,8 @@ void handle_sorryserver_disconnect_test(){
     this->session_thread_data_map[t6.get_id()] = data6;
     //make 下りスレッドの場合 1->下りスレッド
     data6->thread_division = THREAD_DIVISION_DOWN_STREAM;
-	data6->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
-	data6->end_flag = END_FLAG_OFF;
+    data6->realserver_switch_flag = REALSERVER_SWITCH_FLAG_OFF;
+    data6->end_flag = END_FLAG_OFF;
     //make 送信可能データなし
     send_status st6;
     //send_possible=0
@@ -12389,7 +12389,7 @@ void handle_sorryserver_disconnect_test(){
 }
 
 void handle_sorryserver_disconnect_test_thread_func(const boost::thread::id thread_id,
-	                            const boost::asio::ip::tcp::endpoint & rs_endpoint, EVENT_TAG check_value){
+                                const boost::asio::ip::tcp::endpoint & rs_endpoint, EVENT_TAG check_value){
     EVENT_TAG ret = this->handle_sorryserver_disconnect(thread_id, rs_endpoint);
     {
         boost::mutex::scoped_lock sclock(check_mutex);
@@ -12446,8 +12446,8 @@ void handle_realserver_close_test(){
  ***********************************************************************************/
 //protocol_module_sessionless 馮家純
 void protocol_module_sessionless_test(){
-	protocol_module_sessionless_test_class obj;
-	obj.protocol_module_sessionless_test();
+    protocol_module_sessionless_test_class obj;
+    obj.protocol_module_sessionless_test();
 }
 
 //is_tcp 馮家純
@@ -12553,7 +12553,7 @@ void handle_accept_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_accept_test_thread,&obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_accept_test_thread,&obj));
     }
     threads.join_all();
 }
@@ -12569,7 +12569,7 @@ void handle_client_recv_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_recv_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_recv_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12582,18 +12582,18 @@ void handle_realserver_select_tcp_test(){
 
 //handle_realserver_select(tcp)_thread 馮家純
 void handle_realserver_select_tcp_test_thread(){
-	protocol_module_sessionless_test_class obj;
+    protocol_module_sessionless_test_class obj;
 
-	//register function
-	protocol_module_sessionless_test_class::tcp_schedule_func_type func = &schedule_tcp_determinate;
+    //register function
+    protocol_module_sessionless_test_class::tcp_schedule_func_type func = &schedule_tcp_determinate;
 
-	obj.register_schedule(func);
+    obj.register_schedule(func);
 
-	boost::thread_group threads;
-	for(int i = 0; i < THREAD_COUNT; ++i){
-		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_select_tcp_test_thread, &obj));
-	}
-	threads.join_all();
+    boost::thread_group threads;
+    for(int i = 0; i < THREAD_COUNT; ++i){
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_select_tcp_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_realserver_select(udp) 馮家純
@@ -12613,7 +12613,7 @@ void handle_realserver_connect_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_connect_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_connect_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12626,11 +12626,11 @@ void handle_realserver_connection_fail_test(){
 
 void handle_realserver_connection_fail_test_thread(){
     protocol_module_sessionless_test_class obj;
-	boost::thread_group threads;
-	for(int i = 0; i < THREAD_COUNT; ++i){
-		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_connection_fail_test_thread, &obj));
-	}
-	threads.join_all();
+    boost::thread_group threads;
+    for(int i = 0; i < THREAD_COUNT; ++i){
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_connection_fail_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_realserver_send 董作方
@@ -12644,7 +12644,7 @@ void handle_realserver_send_test_thread(){
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_send_test_thread,&obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_send_test_thread,&obj));
     }
     threads.join_all();
 }
@@ -12658,10 +12658,10 @@ void handle_sorryserver_select_test(){
 void handle_sorryserver_select_test_thread(){
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
-	for(int i = 0; i < THREAD_COUNT; ++i){
-		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_select_test_thread, &obj));
-	}
-	threads.join_all();
+    for(int i = 0; i < THREAD_COUNT; ++i){
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_select_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_sorryserver_connect 郎希倹
@@ -12675,7 +12675,7 @@ void handle_sorryserver_connect_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_connect_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_connect_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12691,7 +12691,7 @@ void handle_sorryserver_connection_fail_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_connection_fail_test_thread,&obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_connection_fail_test_thread,&obj));
     }
     threads.join_all();
 }
@@ -12707,7 +12707,7 @@ void handle_sorryserver_send_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_send_test_thread,&obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_send_test_thread,&obj));
     }
     threads.join_all();
 }
@@ -12723,7 +12723,7 @@ void handle_realserver_recv_tcp_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_recv_tcp_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_recv_tcp_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12745,7 +12745,7 @@ void handle_sorryserver_recv_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_recv_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_recv_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12765,10 +12765,10 @@ void handle_client_connection_check_test(){
 void handle_client_connection_check_test_thread(){
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
-	for(int i = 0; i < THREAD_COUNT; ++i){
-		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_connection_check_test_thread, &obj));
-	}
-	threads.join_all();
+    for(int i = 0; i < THREAD_COUNT; ++i){
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_connection_check_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_client_select 馮家純
@@ -12788,7 +12788,7 @@ void handle_client_send_test_thread(){
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i=0; i<THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_send_test_thread,&obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_client_send_test_thread,&obj));
     }
     threads.join_all();
 }
@@ -12811,7 +12811,7 @@ void handle_sorry_enable_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_enable_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_enable_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12827,7 +12827,7 @@ void handle_sorry_disable_test_thread() {
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; i++) {
-    	threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_disable_test_thread, &obj));
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorry_disable_test_thread, &obj));
     }
     threads.join_all();
 }
@@ -12842,10 +12842,10 @@ void handle_realserver_disconnect_tcp_test(){
 void handle_realserver_disconnect_tcp_test_thread(){
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
-	for(int i = 0; i < THREAD_COUNT; ++i){
-		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_disconnect_tcp_test_thread, &obj));
-	}
-	threads.join_all();
+    for(int i = 0; i < THREAD_COUNT; ++i){
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_realserver_disconnect_tcp_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_sorryserver_disconnect 馮家純
@@ -12857,10 +12857,10 @@ void handle_sorryserver_disconnect_test(){
 void handle_sorryserver_disconnect_test_thread(){
     protocol_module_sessionless_test_class obj;
     boost::thread_group threads;
-	for(int i = 0; i < THREAD_COUNT; ++i){
-		threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_disconnect_test_thread, &obj));
-	}
-	threads.join_all();
+    for(int i = 0; i < THREAD_COUNT; ++i){
+        threads.create_thread(bind(&protocol_module_sessionless_test_class::handle_sorryserver_disconnect_test_thread, &obj));
+    }
+    threads.join_all();
 }
 
 //handle_realserver_close 馮家純
@@ -12870,68 +12870,68 @@ void handle_realserver_close_test(){
 }
 
 
-test_suite*	init_unit_test_suite( int argc, char* argv[] ){
+test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
-	test_suite* ts = BOOST_TEST_SUITE( "sessionless test" );
+    test_suite* ts = BOOST_TEST_SUITE( "sessionless test" );
 
-	ts->add(BOOST_TEST_CASE(&protocol_module_sessionless_test));
-	ts->add(BOOST_TEST_CASE(&is_tcp_test));
-	ts->add(BOOST_TEST_CASE(&is_udp_test));
-	ts->add(BOOST_TEST_CASE(&get_name_test));
-	ts->add(BOOST_TEST_CASE(&initialize_test));
-	ts->add(BOOST_TEST_CASE(&finalize_test));
-	ts->add(BOOST_TEST_CASE(&is_use_sorry_test));
-	ts->add(BOOST_TEST_CASE(&check_parameter_test));
-	ts->add(BOOST_TEST_CASE(&set_parameter_test));
-	ts->add(BOOST_TEST_CASE(&add_parameter_test));
-	ts->add(BOOST_TEST_CASE(&register_schedule_tcp_test));
-	ts->add(BOOST_TEST_CASE(&handle_session_initialize_test));
-	ts->add(BOOST_TEST_CASE(&handle_session_initialize_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_session_finalize_test));
-	ts->add(BOOST_TEST_CASE(&handle_session_finalize_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_accept_test));
-	ts->add(BOOST_TEST_CASE(&handle_accept_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_client_recv_test));
-	ts->add(BOOST_TEST_CASE(&handle_client_recv_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_select_udp_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_connection_fail_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_connection_fail_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_send_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_send_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_select_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_select_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connect_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connect_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connection_fail_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_connection_fail_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_send_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_send_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_recv_tcp_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_recv_tcp_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_recv_udp_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_recv_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_recv_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_response_send_inform_test));
-	ts->add(BOOST_TEST_CASE(&handle_client_connection_check_test));
-	ts->add(BOOST_TEST_CASE(&handle_client_connection_check_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_client_select_test));
-	ts->add(BOOST_TEST_CASE(&handle_client_send_test));
-	ts->add(BOOST_TEST_CASE(&handle_client_send_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_client_disconnect_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorry_enable_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorry_enable_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_sorry_disable_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorry_disable_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_tcp_test));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_tcp_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test));
-	ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test_thread));
-	ts->add(BOOST_TEST_CASE(&handle_realserver_close_test));
+    ts->add(BOOST_TEST_CASE(&protocol_module_sessionless_test));
+    ts->add(BOOST_TEST_CASE(&is_tcp_test));
+    ts->add(BOOST_TEST_CASE(&is_udp_test));
+    ts->add(BOOST_TEST_CASE(&get_name_test));
+    ts->add(BOOST_TEST_CASE(&initialize_test));
+    ts->add(BOOST_TEST_CASE(&finalize_test));
+    ts->add(BOOST_TEST_CASE(&is_use_sorry_test));
+    ts->add(BOOST_TEST_CASE(&check_parameter_test));
+    ts->add(BOOST_TEST_CASE(&set_parameter_test));
+    ts->add(BOOST_TEST_CASE(&add_parameter_test));
+    ts->add(BOOST_TEST_CASE(&register_schedule_tcp_test));
+    ts->add(BOOST_TEST_CASE(&handle_session_initialize_test));
+    ts->add(BOOST_TEST_CASE(&handle_session_initialize_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_session_finalize_test));
+    ts->add(BOOST_TEST_CASE(&handle_session_finalize_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_accept_test));
+    ts->add(BOOST_TEST_CASE(&handle_accept_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_client_recv_test));
+    ts->add(BOOST_TEST_CASE(&handle_client_recv_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_select_udp_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_connection_fail_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_connection_fail_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_send_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_send_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_select_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_select_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_connect_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_connect_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_connection_fail_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_connection_fail_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_send_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_send_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_recv_tcp_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_recv_tcp_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_recv_udp_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_recv_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_recv_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_response_send_inform_test));
+    ts->add(BOOST_TEST_CASE(&handle_client_connection_check_test));
+    ts->add(BOOST_TEST_CASE(&handle_client_connection_check_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_client_select_test));
+    ts->add(BOOST_TEST_CASE(&handle_client_send_test));
+    ts->add(BOOST_TEST_CASE(&handle_client_send_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_client_disconnect_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorry_enable_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorry_enable_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_sorry_disable_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorry_disable_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_tcp_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_disconnect_tcp_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test));
+    ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_close_test));
 
-	framework::master_test_suite().add(ts);
-	return 0;
+    framework::master_test_suite().add(ts);
+    return 0;
 }

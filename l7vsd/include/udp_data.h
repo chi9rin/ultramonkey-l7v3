@@ -1,6 +1,6 @@
 /*!
- *	@file	udp_data.h
- *	@brief	udp request processing data class
+ *    @file    udp_data.h
+ *    @brief    udp request processing data class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -29,9 +29,9 @@
 
 namespace l7vs{
 
-//!	@class	udp_data
-//! @brief	this class is udp session object use data for processing.
-	typedef data_buff_base<boost::asio::ip::udp> udp_data;
+//!    @class    udp_data
+//! @brief    this class is udp session object use data for processing.
+    typedef data_buff_base<boost::asio::ip::udp> udp_data;
 
 }// namespace l7vs
 

@@ -32,50 +32,50 @@
 namespace l7vs{
 
 
-//!	@class	Parameter
-//!	@brief	configure file controller
-//! @brief	set key to get value.
+//!    @class    Parameter
+//!    @brief    configure file controller
+//! @brief    set key to get value.
 class Parameter{
 public:
-	Parameter();							//!< default constractor
-	~Parameter();							//!< default destractor
+    Parameter();                            //!< default constractor
+    ~Parameter();                            //!< default destractor
 
-	//! reload file function
-	//! @param[in] parameter conponent tag
-	//! @return true success file read
-	//! @return false failure file read
-	bool	read_file(const PARAMETER_COMPONENT_TAG);
+    //! reload file function
+    //! @param[in] parameter conponent tag
+    //! @return true success file read
+    //! @return false failure file read
+    bool    read_file(const PARAMETER_COMPONENT_TAG);
 
-	//! read specified configuration file function
-	//! @param[in] parameter conponent tag
-	//! @param[in] configuration filename
-	//! @return true success file read
-	//! @return false failure file read
-	bool	read_specified_file(const PARAMETER_COMPONENT_TAG, const std::string& filename);
+    //! read specified configuration file function
+    //! @param[in] parameter conponent tag
+    //! @param[in] configuration filename
+    //! @return true success file read
+    //! @return false failure file read
+    bool    read_specified_file(const PARAMETER_COMPONENT_TAG, const std::string& filename);
 
-	//! parameter int value getter
-	//! @param[in]	parametercategory
-	//!	@param[in]	parameter key
-	//! @param[out]	error code
-	//!	@return	intvalue
-	int		get_int(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
+    //! parameter int value getter
+    //! @param[in]    parametercategory
+    //!    @param[in]    parameter key
+    //! @param[out]    error code
+    //!    @return    intvalue
+    int        get_int(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
 
-	//! parameter string value getter
-	//! @param[in]	parametercategory
-	//!	@param[in]	parameter key
-	//! @param[out] error code
-	//!	@return	string value
-	std::string	get_string(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
+    //! parameter string value getter
+    //! @param[in]    parametercategory
+    //!    @param[in]    parameter key
+    //! @param[out] error code
+    //!    @return    string value
+    std::string    get_string(const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
 
-	//! parameter multistring value getter
-	//! @param[in]	parametercategory
-	//! @param[in]	parameter key
-	//! @param[inout] string map
-	//! @param[out] error code
-	//! @return	string value
-	std::string	get_multistring(const PARAMETER_COMPONENT_TAG, const std::string&, std::multimap<std::string, std::string>&, error_code& );
+    //! parameter multistring value getter
+    //! @param[in]    parametercategory
+    //! @param[in]    parameter key
+    //! @param[inout] string map
+    //! @param[out] error code
+    //! @return    string value
+    std::string    get_multistring(const PARAMETER_COMPONENT_TAG, const std::string&, std::multimap<std::string, std::string>&, error_code& );
 };
 
-}	//namespace l7vs
-	
-#endif	//PARAMETER_H
+}    //namespace l7vs
+    
+#endif    //PARAMETER_H

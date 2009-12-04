@@ -32,91 +32,91 @@
 #include "logger_rotation_enum.h"
 
 namespace log4cxx {
-	namespace rolling {
-		/*!
-		 *  log4cxx time based rolling policy class.
-		 *  this policy class can specify rolling time more strictly
-		 *  than normal TimeBasedRollingPolicy.
-		 */
-		class LOG4CXX_EXPORT StrictTimeBasedRollingPolicy :
-			public FixedWindowRollingPolicy,
-			public TriggeringPolicy
-		{
-			DECLARE_LOG4CXX_OBJECT(StrictTimeBasedRollingPolicy)
-			BEGIN_LOG4CXX_CAST_MAP()
-				LOG4CXX_CAST_ENTRY(StrictTimeBasedRollingPolicy)
-				LOG4CXX_CAST_ENTRY_CHAIN(FixedWindowRollingPolicy)
-				LOG4CXX_CAST_ENTRY_CHAIN(TriggeringPolicy)
-			END_LOG4CXX_CAST_MAP()
+    namespace rolling {
+        /*!
+         *  log4cxx time based rolling policy class.
+         *  this policy class can specify rolling time more strictly
+         *  than normal TimeBasedRollingPolicy.
+         */
+        class LOG4CXX_EXPORT StrictTimeBasedRollingPolicy :
+            public FixedWindowRollingPolicy,
+            public TriggeringPolicy
+        {
+            DECLARE_LOG4CXX_OBJECT(StrictTimeBasedRollingPolicy)
+            BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(StrictTimeBasedRollingPolicy)
+                LOG4CXX_CAST_ENTRY_CHAIN(FixedWindowRollingPolicy)
+                LOG4CXX_CAST_ENTRY_CHAIN(TriggeringPolicy)
+            END_LOG4CXX_CAST_MAP()
 
-		protected:
-			//! time of next rollover
-			time_t nextCheck;
-			/*!
-			 *  rotation timing
-			 *  LOG_TIM_YEAR   = yearly
-			 *  LOG_TIM_MONTH  = monthly
-			 *  LOG_TIM_WEEK   = weekly
-			 *  LOG_TIM_DATE   = daily
-			 *  LOG_TIM_HOUR   = hourly
-			 */
-			l7vs::LOG_ROTATION_TIMING_TAG rotationTiming;
-			/*!
-			 *  rotation timing value 
-			 *
-			 *  rotation timing     value
-			 *  -------------------------------------------------
-			 *  LOG_TIM_YEAR	"03051500"	(3/5 15:00)
-			 *  LOG_TIM_MONTH	"051100"	(5 11:00)
-			 *  LOG_TIM_WEEK	"12000"		(mon 20:00) sun = 0, sat = 6
-			 *  LOG_TIM_DATE	"1500"		(15:00)
-			 *  LOG_TIM_HOUR	"45"		(45)
-			 */
-			std::string rotationTimingValue;
-			//! calculate next rollover timing
-			time_t getNextCheck(time_t now_time);
-			
-		public:
-			//! default constructor
-			StrictTimeBasedRollingPolicy();
-			//! increase reffernce count
-			void addRef() const;
-			//! decrease reffernce count
-			void releaseRef() const;
-			//! option setter
-			void setOption(const LogString&, const LogString&);
-			//! evaluate and activate options
-			void activateOptions(log4cxx::helpers::Pool& );
+        protected:
+            //! time of next rollover
+            time_t nextCheck;
+            /*!
+             *  rotation timing
+             *  LOG_TIM_YEAR   = yearly
+             *  LOG_TIM_MONTH  = monthly
+             *  LOG_TIM_WEEK   = weekly
+             *  LOG_TIM_DATE   = daily
+             *  LOG_TIM_HOUR   = hourly
+             */
+            l7vs::LOG_ROTATION_TIMING_TAG rotationTiming;
+            /*!
+             *  rotation timing value 
+             *
+             *  rotation timing     value
+             *  -------------------------------------------------
+             *  LOG_TIM_YEAR    "03051500"    (3/5 15:00)
+             *  LOG_TIM_MONTH    "051100"    (5 11:00)
+             *  LOG_TIM_WEEK    "12000"        (mon 20:00) sun = 0, sat = 6
+             *  LOG_TIM_DATE    "1500"        (15:00)
+             *  LOG_TIM_HOUR    "45"        (45)
+             */
+            std::string rotationTimingValue;
+            //! calculate next rollover timing
+            time_t getNextCheck(time_t now_time);
+            
+        public:
+            //! default constructor
+            StrictTimeBasedRollingPolicy();
+            //! increase reffernce count
+            void addRef() const;
+            //! decrease reffernce count
+            void releaseRef() const;
+            //! option setter
+            void setOption(const LogString&, const LogString&);
+            //! evaluate and activate options
+            void activateOptions(log4cxx::helpers::Pool& );
 
-			//! rotationTiming getter
-			l7vs::LOG_ROTATION_TIMING_TAG getRotationTiming();
-			//! rotationTiming setter
-			void setRotationTiming(const l7vs::LOG_ROTATION_TIMING_TAG);
-			//! rotatioTimingValue getter
-			std::string getRotationTimingValue();
-			//! rotatioTimingValue setter
-			void setRotationTimingValue(const std::string&);
-			
-			//! rolling policy initialize
-			RolloverDescriptionPtr initialize(
-				const LogString& file,
-				const bool append,
-				log4cxx::helpers::Pool& pool);
-			//! invoke when rollover event
-			RolloverDescriptionPtr rollover(const LogString& activeFile,
-				log4cxx::helpers::Pool& pool);
-			
-			//! returns do rollover or not 
-			virtual bool isTriggeringEvent(
-				Appender* appender,
-				const log4cxx::spi::LoggingEventPtr& event,
-				const LogString& filename,
-				size_t fileLength);
-			
-		};
-		LOG4CXX_PTR_DEF(StrictTimeBasedRollingPolicy);
-	}
+            //! rotationTiming getter
+            l7vs::LOG_ROTATION_TIMING_TAG getRotationTiming();
+            //! rotationTiming setter
+            void setRotationTiming(const l7vs::LOG_ROTATION_TIMING_TAG);
+            //! rotatioTimingValue getter
+            std::string getRotationTimingValue();
+            //! rotatioTimingValue setter
+            void setRotationTimingValue(const std::string&);
+            
+            //! rolling policy initialize
+            RolloverDescriptionPtr initialize(
+                const LogString& file,
+                const bool append,
+                log4cxx::helpers::Pool& pool);
+            //! invoke when rollover event
+            RolloverDescriptionPtr rollover(const LogString& activeFile,
+                log4cxx::helpers::Pool& pool);
+            
+            //! returns do rollover or not 
+            virtual bool isTriggeringEvent(
+                Appender* appender,
+                const log4cxx::spi::LoggingEventPtr& event,
+                const LogString& filename,
+                size_t fileLength);
+            
+        };
+        LOG4CXX_PTR_DEF(StrictTimeBasedRollingPolicy);
+    }
 }
 
-#endif	//__STRICT_TIME_BASED_ROLLING_POLICY_H__
+#endif    //__STRICT_TIME_BASED_ROLLING_POLICY_H__
 

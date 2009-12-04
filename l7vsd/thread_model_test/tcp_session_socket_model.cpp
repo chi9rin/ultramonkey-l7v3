@@ -7,17 +7,17 @@
  
 namespace l7vs{
 
-	//! construcor
-	tcp_session_socket_model::tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint):
+    //! construcor
+    tcp_session_socket_model::tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint):
                 tcp_session_base(pService,io,rs_endpoint),
                 threadA_state(0),
                 threadB_state(0){
                 
-	}
+    }
 
-	//! destructor
-	tcp_session_socket_model::~tcp_session_socket_model(){
-	}
+    //! destructor
+    tcp_session_socket_model::~tcp_session_socket_model(){
+    }
 
         void tcp_session_socket_model::Run_main(){
                 Run_cl();

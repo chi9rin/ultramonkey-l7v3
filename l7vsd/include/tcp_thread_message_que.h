@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_thread_message_que.h
- *	@brief	tcp session thread message queue class
+ *    @file    tcp_thread_message_que.h
+ *    @brief    tcp session thread message queue class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -32,37 +32,37 @@
 #include "wrlock.h"
 
 namespace l7vs{
-//!	@class	tcp_thread_message
-//! @brief	tcp_thread_message class name define.
-	class tcp_thread_message;
-	
-//!	@class	data_buff_base
-//! @brief	this class is tcp_thread_message object queue.
-	class tcp_thread_message_que : private boost::noncopyable{
-		public:
-			//!	queue message type
-			typedef boost::shared_ptr<tcp_thread_message> tcp_thread_message_ptr;
-			
-			//! construcor
-			tcp_thread_message_que();
-			//! destructor
-			~tcp_thread_message_que();
-			//! push queue
-			//! @param[in]	push message
-			void push(tcp_thread_message_ptr message);
-			//! front queue
-			tcp_thread_message_ptr front();
-			//! queue check empty
-			bool empty();
-			//! clear queue
-			void clear();
-		protected:
-			//! message queue
-			std::queue< tcp_thread_message_ptr > message_que;
-			//! queue access mutex
-			wr_mutex que_mutex;
-			
-	};// class tcp_thread_message_que
+//!    @class    tcp_thread_message
+//! @brief    tcp_thread_message class name define.
+    class tcp_thread_message;
+    
+//!    @class    data_buff_base
+//! @brief    this class is tcp_thread_message object queue.
+    class tcp_thread_message_que : private boost::noncopyable{
+        public:
+            //!    queue message type
+            typedef boost::shared_ptr<tcp_thread_message> tcp_thread_message_ptr;
+            
+            //! construcor
+            tcp_thread_message_que();
+            //! destructor
+            ~tcp_thread_message_que();
+            //! push queue
+            //! @param[in]    push message
+            void push(tcp_thread_message_ptr message);
+            //! front queue
+            tcp_thread_message_ptr front();
+            //! queue check empty
+            bool empty();
+            //! clear queue
+            void clear();
+        protected:
+            //! message queue
+            std::queue< tcp_thread_message_ptr > message_que;
+            //! queue access mutex
+            wr_mutex que_mutex;
+            
+    };// class tcp_thread_message_que
 }// namespace l7vs
 
 #endif//TCP_THREAD_MESSAGE_H

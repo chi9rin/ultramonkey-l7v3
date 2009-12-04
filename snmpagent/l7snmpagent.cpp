@@ -47,7 +47,7 @@ set_sighandler(int sig, void (*handler)(int))
 static int
 set_sighandlers()
 {
-	l7vs::Logger	logger;
+    l7vs::Logger    logger;
     if( LOG_LV_DEBUG == logger.getLogLevel( l7vs::LOG_CAT_SNMPAGENT_START_STOP ) ){
         std::string debugstr( "in_function set_sighandler()" );
         logger.putLogDebug( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, debugstr, __FILE__, __LINE__ );
@@ -59,10 +59,10 @@ set_sighandlers()
     do {                                                                                                \
         ret = set_sighandler((sig), (handler));                                                         \
         if (ret < 0) {                                                                                  \
-			if (LOG_LV_DEBUG == logger.getLogLevel(l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL)) {            \
-				std::ostringstream str; \
-				str << "out_function: static int set_sighandlers(void) return_value: " << ret; \
-				logger.putLogDebug(l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL, 0, str.str(), __FILE__, __LINE__ );      \
+            if (LOG_LV_DEBUG == logger.getLogLevel(l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL)) {            \
+                std::ostringstream str; \
+                str << "out_function: static int set_sighandlers(void) return_value: " << ret; \
+                logger.putLogDebug(l7vs::LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL, 0, str.str(), __FILE__, __LINE__ );      \
             }                                                                                           \
             return ret;                                                                                 \
         }                                                                                               \
@@ -94,7 +94,7 @@ set_sighandlers()
 int
 main(int argc, char* argv[])
 {
-	l7vs::Logger	logger;
+    l7vs::Logger    logger;
     logger.putLogInfo( l7vs::LOG_CAT_SNMPAGENT_START_STOP, 0, "start l7snmpagent", __FILE__, __LINE__ );
 
     if( LOG_LV_DEBUG == logger.getLogLevel( l7vs::LOG_CAT_SNMPAGENT_START_STOP ) ){

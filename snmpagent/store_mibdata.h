@@ -1,13 +1,13 @@
 //
-//!	@file	store_mibdata.h
-//!	@brief	net-snmp mibdata stored header
+//!    @file    store_mibdata.h
+//!    @brief    net-snmp mibdata stored header
 //
-//	copyright(c) sdy corporation.2008
-//	mail: h.okada at sdy.co.jp
-//	Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
+//    copyright(c) sdy corporation.2008
+//    mail: h.okada at sdy.co.jp
+//    Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
 //
-//	Distributed under the Boost Software License, Version 1.0. (See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//    Distributed under the Boost Software License, Version 1.0. (See accompanying
+//    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef STORE_MIBDATA_H
@@ -25,7 +25,7 @@
 #include "MessengerClient.h"
 
 #define DISPLAYSTRING_LEN           (256)     // RFC2579
-#define	L7VS_IPADDR_LEN				(128)
+#define    L7VS_IPADDR_LEN                (128)
 
 struct vsdata {
     unsigned short      index;

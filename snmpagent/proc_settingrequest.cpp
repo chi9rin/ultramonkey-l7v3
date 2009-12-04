@@ -16,7 +16,7 @@ proc_settingrequest::~proc_settingrequest()
 }
 
 
-void	proc_settingrequest::do_process()
+void    proc_settingrequest::do_process()
 {
 
 

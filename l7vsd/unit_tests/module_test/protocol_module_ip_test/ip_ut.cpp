@@ -28,12 +28,12 @@
 #include "ip_replication_data_processor_test.cpp"
 #include "ip_session_data_processor_test.cpp"
 
-test_suite*	init_unit_test_suite( int argc, char* argv[] ){
+test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
-	protocol_module_ip_test_main();
-	ip_replication_data_processor_test_main();
-	ip_session_data_processor_test_main();
+    protocol_module_ip_test_main();
+    ip_replication_data_processor_test_main();
+    ip_session_data_processor_test_main();
 
-	return 0;
+    return 0;
 }
 

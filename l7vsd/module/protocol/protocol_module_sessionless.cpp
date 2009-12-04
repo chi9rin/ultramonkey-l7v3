@@ -112,16 +112,16 @@ namespace l7vs
         /*------DEBUG LOG END------*/
     }
     //! initialize function. called from module control. module loaded call
-    //! @param[in]	realserver list iterator begin function object type
-    //!	@param[in]	realserver list iterator end function object type
-    //! @param[in]	realserver list iterator next function object type
-    //! @param[in]	realserver list mutex lock function object type.
-    //! @param[in]	realserver list mutex unlock function object type
-    void protocol_module_sessionless::initialize(rs_list_itr_func_type	inlist_begin,
-            rs_list_itr_func_type	inlist_end,
-            rs_list_itr_next_func_type	inlist_next,
-            boost::function< void( void ) >	inlist_lock,
-            boost::function< void( void ) >	inlist_unlock)
+    //! @param[in]    realserver list iterator begin function object type
+    //!    @param[in]    realserver list iterator end function object type
+    //! @param[in]    realserver list iterator next function object type
+    //! @param[in]    realserver list mutex lock function object type.
+    //! @param[in]    realserver list mutex unlock function object type
+    void protocol_module_sessionless::initialize(rs_list_itr_func_type    inlist_begin,
+            rs_list_itr_func_type    inlist_end,
+            rs_list_itr_next_func_type    inlist_next,
+            boost::function< void( void ) >    inlist_lock,
+            boost::function< void( void ) >    inlist_unlock)
     {
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -281,8 +281,8 @@ namespace l7vs
     }
 
     //! module parameter check.used by l7vsadm
-    //! @param[in]	module paramter string list
-    //! @return	result.flag true is parameter is noproblem.
+    //! @param[in]    module paramter string list
+    //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     protocol_module_base::check_message_result protocol_module_sessionless::check_parameter(const std::vector<
             std::string>& args)
@@ -309,9 +309,9 @@ namespace l7vs
         check_result.flag = true;
         bool forward_checked = false;
         bool sorryuri_checked = false;
-        sregex	sorry_uri_regex
-        =	+(	'/' >>
-             *(	alpha |
+        sregex    sorry_uri_regex
+        =    +(    '/' >>
+             *(    alpha |
                 digit |
                 ( set = ';', ':', '@', '&', '=' ) |
                 ( set = '$', '-', '_', '.', '+' ) |
@@ -466,7 +466,7 @@ namespace l7vs
 
     //! parameter set
     //! @param[in] module paramter string list
-    //! @return	result.flag true is parameter is noproblem.
+    //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     protocol_module_base::check_message_result protocol_module_sessionless::set_parameter(const std::vector<
             std::string>& args)
@@ -493,9 +493,9 @@ namespace l7vs
         check_result.flag = true;
         bool forward_checked = false;
         bool sorryuri_checked = false;
-        sregex	sorry_uri_regex
-        =	+(	'/' >>
-             *(	alpha |
+        sregex    sorry_uri_regex
+        =    +(    '/' >>
+             *(    alpha |
                 digit |
                 ( set = ';', ':', '@', '&', '=' ) |
                 ( set = '$', '-', '_', '.', '+' ) |
@@ -668,7 +668,7 @@ namespace l7vs
 
     //! parameter add
     //! @param[in] module paramter string list
-    //! @return	result.flag true is parameter is noproblem.
+    //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     protocol_module_base::check_message_result protocol_module_sessionless::add_parameter(const std::vector<
             std::string>& args)
@@ -756,9 +756,9 @@ namespace l7vs
     }
 
     //! called from session initialzie use in upstream_thread
-    //! @param[in]	upstream thread id.
-    //! @param[in]	downstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id.
+    //! @param[in]    downstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_initialize(
         const boost::thread::id up_thread_id, const boost::thread::id down_thread_id,
         const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
@@ -907,9 +907,9 @@ namespace l7vs
         return status;
     }
     //! called from session finalize use in upstream thread.
-    //! @param[in]	upstream thread id.
-    //! @param[in]	downstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id.
+    //! @param[in]    downstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_finalize(
         const boost::thread::id up_thread_id, const boost::thread::id down_thread_id)
     {
@@ -1002,8 +1002,8 @@ namespace l7vs
     }
 
     //! called from after session accept.in client socket use in upstream thread.
-    //! @param[in]	upstream thread id.
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id.
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const boost::thread::id thread_id)
     {
 
@@ -1108,10 +1108,10 @@ namespace l7vs
     }
 
     //! called from after session recv in client socket. use in upstream thread.
-    //! @param[in]	upstream thread id
-    //! @param[in]	recive buffer refarence.
-    //! @param[in]	recive length
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    recive buffer refarence.
+    //! @param[in]    recive length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(const boost::thread::id thread_id,
             const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
     {
@@ -2189,9 +2189,9 @@ namespace l7vs
     }
 
     //! called from after realserver select.use in upstream thread.
-    //! @param[in]	upstream thread id
-    //! @param[out]	realserver TCP endpoint
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[out]    realserver TCP endpoint
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint & rs_endpoint)
     {
@@ -2357,11 +2357,11 @@ namespace l7vs
     }
 
     //! called from after realserver select
-    //! @param[in]	upstream thread id
-    //! @param[out]	realserver UDP endpoint
-    //! @param[out]	sendbuffer reference
-    //! @param[out]	send data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[out]    realserver UDP endpoint
+    //! @param[out]    sendbuffer reference
+    //! @param[out]    send data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_select(
         const boost::thread::id thread_id, boost::asio::ip::udp::endpoint& rs_endpoint, boost::array<char,
         MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
@@ -2381,10 +2381,10 @@ namespace l7vs
         return STOP;
     }
     //! called from after realserver connect
-    //! @param[in]	upstream thread id
-    //! @param[out]	sendbuffer reference
-    //! @param[out]	send data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[out]    sendbuffer reference
+    //! @param[out]    send data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_connect(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
     {
@@ -2949,9 +2949,9 @@ namespace l7vs
     }
 
     //! called from after realserver connection fail
-    //! @param[in]	upstream thread id
-    //! @param[in]	fail realserver endpoint reference
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    fail realserver endpoint reference
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_connection_fail(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & rs_endpoint)
     {
@@ -3044,8 +3044,8 @@ namespace l7vs
         return status;
     }
     //! called from after realserver send.
-    //! @param[in]	upstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_send(
         const boost::thread::id thread_id)
     {
@@ -3214,9 +3214,9 @@ namespace l7vs
     }
 
     //! called from after sorryserver select
-    //! @param[in]	upstream thread id
-    //! @param[in]	sorryserver endpiont reference
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    sorryserver endpiont reference
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint& sorry_endpoint)
     {
@@ -3337,10 +3337,10 @@ namespace l7vs
     }
 
     //! called from after sorryserver connect
-    //!	@param[in]	upstream thread id
-    //! @param[out]	send buffer reference.
-    //! @param[out]	send length
-    //! @return		session use EVENT mode.
+    //!    @param[in]    upstream thread id
+    //! @param[out]    send buffer reference.
+    //! @param[out]    send length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_connect(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
     {
@@ -3945,9 +3945,9 @@ namespace l7vs
     }
 
     //! called from after sorryserver connection fail
-    //! @param[in]	upstream thread id
-    //! @param[in]	sorryserver endpoint reference.
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    sorryserver endpoint reference.
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_connection_fail(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & sorry_endpoint)
     {
@@ -4044,8 +4044,8 @@ namespace l7vs
     }
 
     //! called from after sorryserver send
-    //! @param[in]	upstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_send(
         const boost::thread::id thread_id)
     {
@@ -4214,11 +4214,11 @@ namespace l7vs
     }
 
     //! called from after realserver recive.for UDP
-    //! @param[in]	downstream thread id
-    //! @param[in]	realserver UDP endpoint reference
-    //! @param[in]	recive from realserver buffer reference
-    //! @param[in]	recv data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    downstream thread id
+    //! @param[in]    realserver UDP endpoint reference
+    //! @param[in]    recive from realserver buffer reference
+    //! @param[in]    recv data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::udp::endpoint& rs_endpoint, const boost::array<char,
         MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -4240,11 +4240,11 @@ namespace l7vs
     }
 
     //! called from after realserver recvive for TCP/IP
-    //! @param[in]	downstream thread id
-    //! @param[in]	realserver TCP/IP endpoint reference
-    //! @param[in]	realserver recive buffer reference.
-    //! @param[in]	recv data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    downstream thread id
+    //! @param[in]    realserver TCP/IP endpoint reference
+    //! @param[in]    realserver recive buffer reference.
+    //! @param[in]    recv data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint& rs_endpoint, const boost::array<char,
         MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -5304,11 +5304,11 @@ namespace l7vs
 
 
     //! called from after sorryserver recive
-    //! @param[in]	downstream thread id
-    //! @param[in]	sorryserver endpoint reference
-    //! @param[in]	recive from realserver buffer reference.
-    //! @param[in]	recv data length
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id
+    //! @param[in]    sorryserver endpoint reference
+    //! @param[in]    recive from realserver buffer reference.
+    //! @param[in]    recv data length
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint& sorry_endpoint, const boost::array<
         char, MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -6347,8 +6347,8 @@ namespace l7vs
     }
 
     //! called from UPSTEEARM thread. make module original message.
-    //! @param[in]	downstream thread id.
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id.
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_response_send_inform(
         const boost::thread::id thread_id)
     {
@@ -6366,10 +6366,10 @@ namespace l7vs
     }
 
     //! called from after client connection check. use TCP/IP only. create client send message.
-    //! @param[in]	downstream thread id
-    //! @param[out]	send budffer reference
-    //! @param[out]	send data length
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id
+    //! @param[out]    send budffer reference
+    //! @param[out]    send data length
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_connection_check(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
     {
@@ -6561,11 +6561,11 @@ namespace l7vs
     }
 
     //! called from after client select. use UDP only
-    //! @param[in]	downstream thread id
-    //!	@param[in]	client udp endpoint
-    //! @param[out]	send buffer reference
-    //! @param[out]	send data length
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id
+    //!    @param[in]    client udp endpoint
+    //! @param[out]    send buffer reference
+    //! @param[out]    send data length
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_select(
         const boost::thread::id thread_id, boost::asio::ip::udp::endpoint& cl_endpoint, boost::array<char,
         MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
@@ -6586,9 +6586,9 @@ namespace l7vs
         return STOP;
     }
 
-    //!	called from after client send
-    //!	@param[in]	downstream thread id
-    //! @return 	session use EVENT mode
+    //!    called from after client send
+    //!    @param[in]    downstream thread id
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
         const boost::thread::id thread_id)
     {
@@ -6761,8 +6761,8 @@ namespace l7vs
     }
 
     //! call from client disconnect event. use upstream thread and downstream thread.
-    //! @param[in]	upstream and downstream thread id( check! one thread one event! )
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event! )
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_disconnect(
         const boost::thread::id thread_id)
     {
@@ -6779,8 +6779,8 @@ namespace l7vs
     }
 
     //! call from sorry mode event. use upstream thread and downstream thread
-    //! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event and first time call pattern )
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable(
         const boost::thread::id thread_id)
     {
@@ -7076,8 +7076,8 @@ namespace l7vs
     }
 
     //! call from sorry mode disable. use upstream thread and downstream thread.
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disable(
         const boost::thread::id thread_id)
     {
@@ -7374,9 +7374,9 @@ namespace l7vs
     }
 
     //! call from realserver disconnect. use upstream thread and downstream thread
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @param[in]	disconnected realserver endpoint.
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @param[in]    disconnected realserver endpoint.
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_disconnect(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & rs_endpoint)
     {
@@ -7573,10 +7573,10 @@ namespace l7vs
     }
 
     //! call from sorry server disconnect. use upstraem thread and downstream thread
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @param[in]	disconnect sorryserver endpoint
-    //! @return		session use EVENT mode
-    //! @return		session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @param[in]    disconnect sorryserver endpoint
+    //! @return        session use EVENT mode
+    //! @return        session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_disconnect(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & sorry_endpoint)
     {
@@ -7775,9 +7775,9 @@ namespace l7vs
     }
 
     //! call from realserver disconnect. use upstream thread and downstream thread.
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @param[in]	disconnect realserver endpoint
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @param[in]    disconnect realserver endpoint
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_close(
         const boost::thread::id thread_id, const boost::asio::ip::udp::endpoint & rs_endpoint)
     {

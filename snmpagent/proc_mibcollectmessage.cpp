@@ -16,7 +16,7 @@ proc_mibcollectmessage::~proc_mibcollectmessage()
 }
 
 
-void	proc_mibcollectmessage::do_process()
+void    proc_mibcollectmessage::do_process()
 {
 
 

@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_thread_message.h
- *	@brief	tcp session thread message class
+ *    @file    tcp_thread_message.h
+ *    @brief    tcp session thread message class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -32,21 +32,21 @@
 
 namespace l7vs{
 
-//!	@class	tcp_thread_message
-//! @brief	this class is notify message in tcp session thread.
-	class tcp_thread_message : private boost::noncopyable{
-		public:
-			//! construcor 
-			tcp_thread_message(){}
-			//! destructor
-			~tcp_thread_message(){}
-			
-			//! request call function object
-			boost::function<void(tcp_session::TCP_PROCESS_TYPE_TAG)> message;
-			//! function require endpoint 
-			boost::asio::ip::tcp::endpoint endpoint_info;
-			
-	};// class tcp_thread_message
+//!    @class    tcp_thread_message
+//! @brief    this class is notify message in tcp session thread.
+    class tcp_thread_message : private boost::noncopyable{
+        public:
+            //! construcor 
+            tcp_thread_message(){}
+            //! destructor
+            ~tcp_thread_message(){}
+            
+            //! request call function object
+            boost::function<void(tcp_session::TCP_PROCESS_TYPE_TAG)> message;
+            //! function require endpoint 
+            boost::asio::ip::tcp::endpoint endpoint_info;
+            
+    };// class tcp_thread_message
 }// namespace l7vs
 
 #endif//TCP_THREAD_MESSAGE_H

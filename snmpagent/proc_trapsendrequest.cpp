@@ -16,7 +16,7 @@ proc_trapsendrequest::~proc_trapsendrequest()
 }
 
 
-void	proc_trapsendrequest::do_process()
+void    proc_trapsendrequest::do_process()
 {
 
 

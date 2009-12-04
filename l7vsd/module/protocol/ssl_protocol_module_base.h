@@ -44,36 +44,36 @@ class ssl_protocol_module_base : public protocol_module_base
                                                     size_t recv_length,
                                                     size_t& all_length,
                                                     bool& is_hello_message);
-	protected:
-		const static size_t HELLO_MSG_HEADER_LENGTH = 76;
-		const static size_t SESSION_ID_BEGAIN_OFFSET = 44;
-		const static size_t SSL_RECORD_MIN_SIZE = 6;
+    protected:
+        const static size_t HELLO_MSG_HEADER_LENGTH = 76;
+        const static size_t SESSION_ID_BEGAIN_OFFSET = 44;
+        const static size_t SSL_RECORD_MIN_SIZE = 6;
     public:
-	    bool is_exec_OK(unsigned int vs_attr);
+        bool is_exec_OK(unsigned int vs_attr);
 
     public:
     //! format dump data.
-	//! @param[in]	data want to format
-	//! @param[in]	data size
-	//! @param[out]	format string
-	//! @return
-	static void  dump_session_id(
-									const char* data,
-									const size_t data_size,
-									std::string& data_dump)
-	{
-	    if (data == NULL || data_size == 0)
-	    {
-	        return;
-	    }
+    //! @param[in]    data want to format
+    //! @param[in]    data size
+    //! @param[out]    format string
+    //! @return
+    static void  dump_session_id(
+                                    const char* data,
+                                    const size_t data_size,
+                                    std::string& data_dump)
+    {
+        if (data == NULL || data_size == 0)
+        {
+            return;
+        }
 
-		boost::format formatter("%02X");
-		for (size_t i = 0; i < data_size; i++)
-		{
-			formatter % static_cast<unsigned short>(static_cast<unsigned char>(data[i]));
-			data_dump += formatter.str();
-		}
-	}
+        boost::format formatter("%02X");
+        for (size_t i = 0; i < data_size; i++)
+        {
+            formatter % static_cast<unsigned short>(static_cast<unsigned char>(data[i]));
+            data_dump += formatter.str();
+        }
+    }
 };
 
 }   // namespace l7vsd

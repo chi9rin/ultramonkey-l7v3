@@ -158,7 +158,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
             }
 
             endpoint = itendpoint->second;
-	}
+    }
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))

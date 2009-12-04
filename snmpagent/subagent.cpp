@@ -112,31 +112,31 @@ l7ag_subagent::stop()
 void
 l7ag_subagent::reload_config()
 {
-	l7vs::Parameter		param;
-	l7vs::error_code	err;
+    l7vs::Parameter        param;
+    l7vs::error_code    err;
     //パラメータの読み込み
     //NIC
-	snmpparam.nic = param.get_string( l7vs::PARAM_COMP_SNMPAGENT, "nic", err );
-	if( err ){
-		snmpparam.nic = NIC_DEFAULT;
-	}
+    snmpparam.nic = param.get_string( l7vs::PARAM_COMP_SNMPAGENT, "nic", err );
+    if( err ){
+        snmpparam.nic = NIC_DEFAULT;
+    }
     //EndPoint
-	snmpparam.address = param.get_string( l7vs::PARAM_COMP_SNMPAGENT, "ip_addr", err );
-	if( err ){
+    snmpparam.address = param.get_string( l7vs::PARAM_COMP_SNMPAGENT, "ip_addr", err );
+    if( err ){
         snmpparam.address = ADDR_DEFAULT;
     }
-	snmpparam.portno = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "port", err );
-	if( err ){
+    snmpparam.portno = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "port", err );
+    if( err ){
         snmpparam.portno = PORT_DEFAULT;
     }
     //RequestInterval
-	snmpparam.interval = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "interval", err );
-	if( err ){
+    snmpparam.interval = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "interval", err );
+    if( err ){
         snmpparam.interval = INTERVAL_DEFAULT;
     }
     //status
-	snmpparam.status = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "status", err );
-	if( err ){
+    snmpparam.status = param.get_int( l7vs::PARAM_COMP_SNMPAGENT, "status", err );
+    if( err ){
         snmpparam.status = 0;
     }
 
@@ -147,87 +147,87 @@ l7ag_subagent::reload_config()
 void
 l7ag_subagent::load_loglevel()
 {
-	l7vs::Parameter		param;
-	l7vs::error_code	err;
-	std::string			tmpstr;
+    l7vs::Parameter        param;
+    l7vs::error_code    err;
+    std::string            tmpstr;
     //log level 取得
     snmpparam.loglevel.clear();
 
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_start_stop", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_START_STOP,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_START_STOP,
-			l7vs::LOG_LV_INFO) );
-	}
-
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_manager_receive", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,
-			l7vs::LOG_LV_INFO ) );
-	}
-
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_manager_send", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND,
-			l7vs::LOG_LV_INFO ) );
-	}
-
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_l7vsd_receive", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,
-			l7vs::LOG_LV_INFO ) );
-	}
-
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_l7vsd_send", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND,
-			l7vs::LOG_LV_INFO ) );
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_start_stop", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_START_STOP,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_START_STOP,
+            l7vs::LOG_LV_INFO) );
     }
 
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_logger", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_LOGGER,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_LOGGER,
-			l7vs::LOG_LV_INFO ) );
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_manager_receive", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,
+            l7vs::LOG_LV_INFO ) );
     }
 
-	tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_parameter", err );
-	if( !err ){
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_PARAMETER,
-			levelstring_map[tmpstr] ) );
-	}else{
-		snmpparam.loglevel.insert(
-			std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_PARAMETER,
-			l7vs::LOG_LV_INFO ) );
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_manager_send", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_MANAGER_SEND,
+            l7vs::LOG_LV_INFO ) );
+    }
+
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_l7vsd_receive", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,
+            l7vs::LOG_LV_INFO ) );
+    }
+
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_l7vsd_send", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_L7VSD_SEND,
+            l7vs::LOG_LV_INFO ) );
+    }
+
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_logger", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_LOGGER,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_LOGGER,
+            l7vs::LOG_LV_INFO ) );
+    }
+
+    tmpstr = param.get_string( l7vs::PARAM_COMP_LOGGER, "snmpagent_parameter", err );
+    if( !err ){
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_PARAMETER,
+            levelstring_map[tmpstr] ) );
+    }else{
+        snmpparam.loglevel.insert(
+            std::pair<l7vs::LOG_CATEGORY_TAG,l7vs::LOG_LEVEL_TAG>( l7vs::LOG_CAT_SNMPAGENT_PARAMETER,
+            l7vs::LOG_LV_INFO ) );
     }
 }
 

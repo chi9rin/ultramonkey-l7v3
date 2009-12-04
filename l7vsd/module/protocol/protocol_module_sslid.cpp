@@ -70,7 +70,7 @@ bool protocol_module_sslid::is_tcp()
 
 //! udp protocol support check
 //! @return udp support is true
-	//! @return udp not-support is false
+    //! @return udp not-support is false
 bool protocol_module_sslid::is_udp()
 {
     /*-------- DEBUG LOG --------*/
@@ -1185,7 +1185,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
                                 "const boost::thread::id down_thread_id, "
                                 "const boost::asio::ip::tcp::endpoint& client_endpoint_tcp, "
                                 "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : return_value = %d. "
-				"thread id : %d.");
+                "thread id : %d.");
         formatter % status % boost::this_thread::get_id();
         putLogDebug(300039, formatter.str(), __FILE__, __LINE__);
     }
@@ -1574,7 +1574,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     // find session_thread_data_sslid's pointer from map
     thread_data_ptr threaddata;
     EVENT_TAG status = FINALIZE;
-    realserverlist_type::iterator	rs_list_itr;
+    realserverlist_type::iterator    rs_list_itr;
 
     try
     {
@@ -1665,7 +1665,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                     "protocol_module_sslid::handle_realserver_select("
                                                     "const boost::thread::id thread_id, boost::asio::"
                                                     "ip::tcp::endpoint& rs_endpoint) : return_value = %d. "
-						    "thread id : %d.");
+                            "thread id : %d.");
                             formatter % FINALIZE % boost::this_thread::get_id();
                             putLogDebug(300059, formatter.str(), __FILE__, __LINE__);
                         }
@@ -1742,81 +1742,81 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
 
                         if (ret == 0)
                         {
-			    //find the rs_endpoint in the rs_list
-			    rs_list_lock();
+                //find the rs_endpoint in the rs_list
+                rs_list_lock();
 
-			    rs_list_itr = rs_list_begin();
-			    int is_match = 0;
+                rs_list_itr = rs_list_begin();
+                int is_match = 0;
 
-			    while (rs_list_itr != rs_list_end())
-			    {
-				if (rs_list_itr->tcp_endpoint == threaddata->selected_realserver)
-				{
-				    is_match = 1;
-				    break;
-				}
+                while (rs_list_itr != rs_list_end())
+                {
+                if (rs_list_itr->tcp_endpoint == threaddata->selected_realserver)
+                {
+                    is_match = 1;
+                    break;
+                }
 
-				rs_list_itr = rs_list_next(rs_list_itr);
-			    }
+                rs_list_itr = rs_list_next(rs_list_itr);
+                }
 
-			    if (is_match)
-			    {
-				// get the endpoint successfully
-				rs_endpoint = threaddata->selected_realserver;
-				status = REALSERVER_CONNECT;
-			    }
-			    else
-			    {
-				// failed to get the endpoint
-				if (reschedule == 1)
-				{
-				    // reschedule mode
-				    boost::asio::ip::tcp::endpoint temp_endpoint;
-				    boost::asio::ip::tcp::endpoint comp_endpoint;   // for compare the endpoint
-				    schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
-				    if (temp_endpoint != comp_endpoint)
-				    {
-					// get the endpoint by reschedule successfully
-					threaddata->selected_realserver = temp_endpoint;
-					rs_endpoint = temp_endpoint;
-					status = REALSERVER_CONNECT;
-				    }
-				    else
-				    {
-					// failed to get the endpoint by reschedule
-					// set end_flag ON, and set the status CLIENT_DISCONNECT
-					threaddata->end_flag = END_FLAG_ON;
-					status = CLIENT_DISCONNECT;
-					/*-------- DEBUG LOG --------*/
-					if (unlikely(LOG_LV_DEBUG == getloglevel()))
-					{
-					    boost::format formatter("function : protocol_module_base::EVENT_TAG "
-								    "protocol_module_sslid::handle_realserver_select() : "
-								    "END_FLAG_ON. thread id : %d.");
-					    formatter % boost::this_thread::get_id();
-					    putLogDebug(300063, formatter.str(), __FILE__, __LINE__);
-					}
-					/*------DEBUG LOG END------*/
-				    }
-				}
-				else
-				{
-				    // no reschedule mode
-				    // set end_flag ON and disconnect the client
-				    threaddata->end_flag = END_FLAG_ON;
-				    status = CLIENT_DISCONNECT;
-				    /*-------- DEBUG LOG --------*/
-				    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-				    {
-					boost::format formatter("function : protocol_module_base::EVENT_TAG "
-								"protocol_module_sslid::handle_realserver_select() "
-								": END_FLAG_ON. thread id : %d.");
-					formatter % boost::this_thread::get_id();
-					putLogDebug(300064, formatter.str(), __FILE__, __LINE__);
-				    }
-				    /*------DEBUG LOG END------*/
-				}
-			    }
+                if (is_match)
+                {
+                // get the endpoint successfully
+                rs_endpoint = threaddata->selected_realserver;
+                status = REALSERVER_CONNECT;
+                }
+                else
+                {
+                // failed to get the endpoint
+                if (reschedule == 1)
+                {
+                    // reschedule mode
+                    boost::asio::ip::tcp::endpoint temp_endpoint;
+                    boost::asio::ip::tcp::endpoint comp_endpoint;   // for compare the endpoint
+                    schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                    if (temp_endpoint != comp_endpoint)
+                    {
+                    // get the endpoint by reschedule successfully
+                    threaddata->selected_realserver = temp_endpoint;
+                    rs_endpoint = temp_endpoint;
+                    status = REALSERVER_CONNECT;
+                    }
+                    else
+                    {
+                    // failed to get the endpoint by reschedule
+                    // set end_flag ON, and set the status CLIENT_DISCONNECT
+                    threaddata->end_flag = END_FLAG_ON;
+                    status = CLIENT_DISCONNECT;
+                    /*-------- DEBUG LOG --------*/
+                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                    {
+                        boost::format formatter("function : protocol_module_base::EVENT_TAG "
+                                    "protocol_module_sslid::handle_realserver_select() : "
+                                    "END_FLAG_ON. thread id : %d.");
+                        formatter % boost::this_thread::get_id();
+                        putLogDebug(300063, formatter.str(), __FILE__, __LINE__);
+                    }
+                    /*------DEBUG LOG END------*/
+                    }
+                }
+                else
+                {
+                    // no reschedule mode
+                    // set end_flag ON and disconnect the client
+                    threaddata->end_flag = END_FLAG_ON;
+                    status = CLIENT_DISCONNECT;
+                    /*-------- DEBUG LOG --------*/
+                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                    {
+                    boost::format formatter("function : protocol_module_base::EVENT_TAG "
+                                "protocol_module_sslid::handle_realserver_select() "
+                                ": END_FLAG_ON. thread id : %d.");
+                    formatter % boost::this_thread::get_id();
+                    putLogDebug(300064, formatter.str(), __FILE__, __LINE__);
+                    }
+                    /*------DEBUG LOG END------*/
+                }
+                }
                         }
                         else
                         {
@@ -1957,7 +1957,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
     {
         std::cerr << "protocol_module_sslid::handle_realserver_select() : Unknown exception." << std::endl;
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-				"handle_realserver_select() : Unknown exception. thread id : %d.");
+                "handle_realserver_select() : Unknown exception. thread id : %d.");
         formatter % boost::this_thread::get_id();
         putLogError(300037, formatter.str(), __FILE__, __LINE__);
 
@@ -2133,7 +2133,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
                     boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                             "handle_realserver_connection_fail(const boost::thread::id thread_id, "
                                             "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d. "
-					    "thread id : %d.");
+                        "thread id : %d.");
                     formatter % FINALIZE % boost::this_thread::get_id();
                     putLogDebug(300075, formatter.str(), __FILE__, __LINE__);
                 }
@@ -2160,9 +2160,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_connect
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-		boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-					"handle_realserver_connection_fail() : END_FLAG_ON. thread id : %d.");
-		formatter % boost::this_thread::get_id();
+        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
+                    "handle_realserver_connection_fail() : END_FLAG_ON. thread id : %d.");
+        formatter % boost::this_thread::get_id();
                 putLogDebug(300076, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -2410,7 +2410,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_sorryserver_connection_fail(const boost::thread::id thread_id, "
                                 "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d. "
-				"thread id : %d.");
+                "thread id : %d.");
         formatter % STOP % boost::this_thread::get_id();
         putLogDebug(300085, formatter.str(), __FILE__, __LINE__);
     }
@@ -2430,7 +2430,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
     {
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_sorryserver_send(const boost::thread::id thread_id) : return_value = %d."
-				"thread id : %d.");
+                "thread id : %d.");
         formatter % STOP % boost::this_thread::get_id();
         putLogDebug(300086, formatter.str(), __FILE__, __LINE__);
     }
@@ -2748,7 +2748,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
 //! @param[in] sorryserver endpoint reference
 //! @param[in] recive from realserver buffer reference.
 //! @param[in] recv data length
-//! @return 	session use EVENT mode(STOP).
+//! @return     session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
     const boost::thread::id thread_id,
     const boost::asio::ip::tcp::endpoint& sorry_endpoint,
@@ -2782,7 +2782,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_info
     {
         boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_response_send_inform(const boost::thread::id thread_id) : return_value = %d. "
-				"thread id : %d.");
+                "thread id : %d.");
         formatter % STOP % boost::this_thread::get_id();
         putLogDebug(300100, formatter.str(), __FILE__, __LINE__);
     }
@@ -2792,10 +2792,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_info
 }
 
 //! called from after client connection check. use TCP/IP only. create client send message.
-//! @param[in]	downstream thread id
-//! @param[out]	send budffer reference
-//! @param[out]	send data length
-//! @return 	session use EVENT mode(CLIENT_SEND, FINALIZE).
+//! @param[in]    downstream thread id
+//! @param[out]    send budffer reference
+//! @param[out]    send data length
+//! @return     session use EVENT mode(CLIENT_SEND, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_check(
     const boost::thread::id thread_id,
     boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
@@ -2968,9 +2968,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
 //! called from after client select. use UDP only
 //! @param[in] downstream thread id
 //! @param[in] client udp endpoint
-//! @param[out]	send buffer reference
-//! @param[out]	send data length
-//! @return 	session use EVENT mode(STOP).
+//! @param[out]    send buffer reference
+//! @param[out]    send data length
+//! @return     session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_select(
     const boost::thread::id thread_id,
     boost::asio::ip::udp::endpoint& cl_endpoint,
@@ -2995,7 +2995,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_select(
 
 //! called from after client send
 //! @param[in] downstream thread id
-//! @return 	session use EVENT mode(CLIENT_DISCONNECT,
+//! @return     session use EVENT mode(CLIENT_DISCONNECT,
 //!              REALSERVER_RECV, CLIENT_CONNECTION_CHECK, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
     const boost::thread::id thread_id)
@@ -3181,7 +3181,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
 
 //! call from client disconnect event. use upstream thread and downstream thread.
 //! @param[in] upstream and downstream thread id(check! one thread one event!)
-//! @return 	session use EVENT mode(FINALIZE).
+//! @return     session use EVENT mode(FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
     const boost::thread::id thread_id)
 {
@@ -3201,7 +3201,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
 
 //! call from sorry mode event. use upstream thread and downstream thread
 //! @param[in] upstream and downstream thread id(check! one thread one event and first time call pattern)
-//! @return 	session use EVENT mode(STOP).
+//! @return     session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
     const boost::thread::id thread_id)
 {
@@ -3220,7 +3220,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
 
 //! call from sorry mode disable. use upstream thread and downstream thread.
 //! @param[in] upstream and downstream thread id(check! one thread one event)
-//! @return 	session use EVENT mode(STOP).
+//! @return     session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
     const boost::thread::id thread_id)
 {
@@ -3240,7 +3240,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
 //! call from realserver disconnect. use upstream thread and downstream thread
 //! @param[in] upstream and downstream thread id(check! one thread one event)
 //! @param[in] disconnected realserver endpoint.
-//! @return 	session use EVENT mode(STOP).
+//! @return     session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_disconnect(
     const boost::thread::id thread_id,
     const boost::asio::ip::tcp::endpoint& rs_endpoint)
@@ -3684,10 +3684,10 @@ bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endp
 
 extern "C" l7vs::protocol_module_base*
 create_module(){
-	return dynamic_cast<l7vs::protocol_module_base*>(new l7vs::protocol_module_sslid());
+    return dynamic_cast<l7vs::protocol_module_base*>(new l7vs::protocol_module_sslid());
 }
 
 extern "C" void
 destroy_module( l7vs::protocol_module_base* in ){
-	delete in;
+    delete in;
 }

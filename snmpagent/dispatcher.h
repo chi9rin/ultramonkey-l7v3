@@ -1,13 +1,13 @@
 //
-//!	@file	dispatcher.h
-//!	@brief	snmpagent dispatch header
+//!    @file    dispatcher.h
+//!    @brief    snmpagent dispatch header
 //
-//	copyright(c) sdy corporation.2008
-//	mail: h.okada at sdy.co.jp
-//	Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
+//    copyright(c) sdy corporation.2008
+//    mail: h.okada at sdy.co.jp
+//    Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
 //
-//	Distributed under the Boost Software License, Version 1.0. (See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//    Distributed under the Boost Software License, Version 1.0. (See accompanying
+//    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef L7AG_DISPATCHER_H
@@ -30,20 +30,20 @@ typedef lockedqueue<QueueContainer> MessageQueue;
 typedef lockedqueue<trapdata>       TrapQueue;
 
 //
-//! @class	l7ag_dispatcher
-//!	@brief	message dispatch class
+//! @class    l7ag_dispatcher
+//!    @brief    message dispatch class
 class l7ag_dispatcher{
 
 private:
-    bool        stop_flag;			//! stopping flag
-    pthread_t   dispatch_thread;	//!	dispatch thread id
+    bool        stop_flag;            //! stopping flag
+    pthread_t   dispatch_thread;    //!    dispatch thread id
 
-    MessageQueue*   message_que;	//! message queue object pointer
-    TrapQueue*      trap_que;		//!	trap queue object pointer
+    MessageQueue*   message_que;    //! message queue object pointer
+    TrapQueue*      trap_que;        //!    trap queue object pointer
 
-    size_t  msg_size;				//! message size
-    char*   msg;					//! message pointer
-    size_t  msg_pos;				//! message posision
+    size_t  msg_size;                //! message size
+    char*   msg;                    //! message pointer
+    size_t  msg_pos;                //! message posision
 
     std::map< int,boost::function<void (void*)> > dispatch_functions;
 

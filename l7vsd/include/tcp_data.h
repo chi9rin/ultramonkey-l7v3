@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_data.h
- *	@brief	tcp session processing data class
+ *    @file    tcp_data.h
+ *    @brief    tcp session processing data class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -29,9 +29,9 @@
 
 namespace l7vs{
 
-//!	@class	tcp_data
-//! @brief	this class is tcp session object use data for processing.
-	typedef data_buff_base<boost::asio::ip::tcp> tcp_data;
+//!    @class    tcp_data
+//! @brief    this class is tcp session object use data for processing.
+    typedef data_buff_base<boost::asio::ip::tcp> tcp_data;
 
 }// namespace l7vs
 

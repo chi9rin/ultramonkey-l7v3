@@ -1,6 +1,6 @@
 /*!
- *	@file	data_buff_base.cpp
- *	@brief	session object receive and send buffer class
+ *    @file    data_buff_base.cpp
+ *    @brief    session object receive and send buffer class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.

@@ -33,8 +33,8 @@
  * @param   category that want to know
  * @return  log level
  */
-inline	l7vs::LOG_LEVEL_TAG logger_get_log_level(const l7vs::LOG_CATEGORY_TAG cat){
-	return l7vs::Logger::getLogLevel(cat);
+inline    l7vs::LOG_LEVEL_TAG logger_get_log_level(const l7vs::LOG_CATEGORY_TAG cat){
+    return l7vs::Logger::getLogLevel(cat);
 }
 
 /*!
@@ -45,11 +45,11 @@ inline	l7vs::LOG_LEVEL_TAG logger_get_log_level(const l7vs::LOG_CATEGORY_TAG cat
  * @retval  0  succeed
  * @retval  -1 failed
  */
-inline int	logger_set_log_level(const l7vs::LOG_CATEGORY_TAG cat, const l7vs::LOG_LEVEL_TAG level){
-	if (l7vs::Logger::setLogLevel(cat, level)) {
-		return 0;
-	}
-	return -1;
+inline int    logger_set_log_level(const l7vs::LOG_CATEGORY_TAG cat, const l7vs::LOG_LEVEL_TAG level){
+    if (l7vs::Logger::setLogLevel(cat, level)) {
+        return 0;
+    }
+    return -1;
 }
 
 /*!
@@ -62,8 +62,8 @@ inline int	logger_set_log_level(const l7vs::LOG_CATEGORY_TAG cat, const l7vs::LO
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_fatal(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
-	l7vs::Logger::putLogFatal(cat, message_id, message, file, line);
+inline    void    logger_put_log_fatal(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+    l7vs::Logger::putLogFatal(cat, message_id, message, file, line);
 }
 
 /*!
@@ -76,8 +76,8 @@ inline	void	logger_put_log_fatal(const l7vs::LOG_CATEGORY_TAG cat, const unsigne
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_error(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
-	l7vs::Logger::putLogError(cat, message_id, message, file, line);
+inline    void    logger_put_log_error(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+    l7vs::Logger::putLogError(cat, message_id, message, file, line);
 }
 
 /*!
@@ -90,8 +90,8 @@ inline	void	logger_put_log_error(const l7vs::LOG_CATEGORY_TAG cat, const unsigne
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_warn(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int  message_id, char* file, int line, const char* message){
-	l7vs::Logger::putLogWarn(cat, message_id, message, file, line);
+inline    void    logger_put_log_warn(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int  message_id, char* file, int line, const char* message){
+    l7vs::Logger::putLogWarn(cat, message_id, message, file, line);
 }
 
 /*!
@@ -104,8 +104,8 @@ inline	void	logger_put_log_warn(const l7vs::LOG_CATEGORY_TAG cat, const unsigned
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_info(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
-	l7vs::Logger::putLogInfo(cat, message_id, message, file, line);
+inline    void    logger_put_log_info(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+    l7vs::Logger::putLogInfo(cat, message_id, message, file, line);
 }
 
 /*!
@@ -118,33 +118,33 @@ inline	void	logger_put_log_info(const l7vs::LOG_CATEGORY_TAG cat, const unsigned
  * @param   log message 
  * @retrun  void
  */
-inline	void	logger_put_log_debug(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
-	l7vs::Logger::putLogDebug(cat, message_id, message, file, line);
+inline    void    logger_put_log_debug(const l7vs::LOG_CATEGORY_TAG cat, const unsigned int message_id, char* file, int line, const char* message){
+    l7vs::Logger::putLogDebug(cat, message_id, message, file, line);
 }
 
 #define LOGGER_PUT_LOG_FATAL(cat, message_id, message, arg...) { \
-	char buf[BUF_LEN]; \
-	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_fatal(cat, message_id, __FILE__, __LINE__, buf); }
-	
+    char buf[BUF_LEN]; \
+    snprintf(buf, BUF_LEN, message, ##arg); \
+    logger_put_log_fatal(cat, message_id, __FILE__, __LINE__, buf); }
+    
 #define LOGGER_PUT_LOG_ERROR(cat, message_id, message, arg...) { \
-	char buf[BUF_LEN]; \
-	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_error(cat, message_id, __FILE__, __LINE__, buf); }
+    char buf[BUF_LEN]; \
+    snprintf(buf, BUF_LEN, message, ##arg); \
+    logger_put_log_error(cat, message_id, __FILE__, __LINE__, buf); }
 
 #define LOGGER_PUT_LOG_WARN(cat, message_id, message, arg...) { \
-	char buf[BUF_LEN]; \
-	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_warn(cat, message_id, __FILE__, __LINE__, buf); }
+    char buf[BUF_LEN]; \
+    snprintf(buf, BUF_LEN, message, ##arg); \
+    logger_put_log_warn(cat, message_id, __FILE__, __LINE__, buf); }
 
 #define LOGGER_PUT_LOG_INFO(cat, message_id, message, arg...) { \
-	char buf[BUF_LEN]; \
-	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_info(cat, message_id, __FILE__, __LINE__, buf); }
+    char buf[BUF_LEN]; \
+    snprintf(buf, BUF_LEN, message, ##arg); \
+    logger_put_log_info(cat, message_id, __FILE__, __LINE__, buf); }
 
 #define LOGGER_PUT_LOG_DEBUG(cat, message_id, message, arg...) { \
-	char buf[BUF_LEN]; \
-	snprintf(buf, BUF_LEN, message, ##arg); \
-	logger_put_log_debug(cat, message_id, __FILE__, __LINE__, buf); }
+    char buf[BUF_LEN]; \
+    snprintf(buf, BUF_LEN, message, ##arg); \
+    logger_put_log_debug(cat, message_id, __FILE__, __LINE__, buf); }
 
-#endif	//__LOGGER_WRAPPER_H__
+#endif    //__LOGGER_WRAPPER_H__

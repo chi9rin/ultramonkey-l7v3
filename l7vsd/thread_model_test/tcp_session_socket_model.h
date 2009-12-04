@@ -12,7 +12,7 @@
 namespace l7vs{
 
         class socket_data {
-		public:
+        public:
                 int msg_type;
 
                 boost::array< char , 65535> buff;
@@ -20,15 +20,15 @@ namespace l7vs{
                 std::size_t data_size;
                 socket_data():msg_type(0),data_size(0){
                 };
-		~socket_data(){
+        ~socket_data(){
                 };
         };
 
-	class tcp_session_socket_model : public tcp_session_base{
-		public:
+    class tcp_session_socket_model : public tcp_session_base{
+        public:
 
-			tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
-			~tcp_session_socket_model();
+            tcp_session_socket_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint);
+            ~tcp_session_socket_model();
 
                         void Run_main();
                         void Run_sub();
@@ -44,7 +44,7 @@ namespace l7vs{
 
                         lockfree_queue< socket_data > cl2rs_msg;
                         lockfree_queue< socket_data > rs2cl_msg;
-	};
+    };
 }
 
 #endif//TCP_SESSION_SOCKET_MODEL_H

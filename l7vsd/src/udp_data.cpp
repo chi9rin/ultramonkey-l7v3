@@ -1,6 +1,6 @@
 /*!
- *	@file	udp_data.cpp
- *	@brief	udp request processing data class
+ *    @file    udp_data.cpp
+ *    @brief    udp request processing data class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.

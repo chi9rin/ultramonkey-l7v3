@@ -112,16 +112,16 @@ namespace l7vs
         /*------DEBUG LOG END------*/
     }
     //! initialize function. called from module control. module loaded call
-    //! @param[in]	realserver list iterator begin function object type
-    //!	@param[in]	realserver list iterator end function object type
-    //! @param[in]	realserver list iterator next function object type
-    //! @param[in]	realserver list mutex lock function object type.
-    //! @param[in]	realserver list mutex unlock function object type
-    void protocol_module_ip::initialize(rs_list_itr_func_type	inlist_begin,
-                                        rs_list_itr_func_type	inlist_end,
-                                        rs_list_itr_next_func_type	inlist_next,
-                                        boost::function< void( void ) >	inlist_lock,
-                                        boost::function< void( void ) >	inlist_unlock)
+    //! @param[in]    realserver list iterator begin function object type
+    //!    @param[in]    realserver list iterator end function object type
+    //! @param[in]    realserver list iterator next function object type
+    //! @param[in]    realserver list mutex lock function object type.
+    //! @param[in]    realserver list mutex unlock function object type
+    void protocol_module_ip::initialize(rs_list_itr_func_type    inlist_begin,
+                                        rs_list_itr_func_type    inlist_end,
+                                        rs_list_itr_next_func_type    inlist_next,
+                                        boost::function< void( void ) >    inlist_lock,
+                                        boost::function< void( void ) >    inlist_unlock)
     {
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -297,8 +297,8 @@ namespace l7vs
     }
 
     //! module parameter check.used by l7vsadm
-    //! @param[in]	module paramter string list
-    //! @return	result.flag true is parameter is noproblem.
+    //! @param[in]    module paramter string list
+    //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     protocol_module_base::check_message_result protocol_module_ip::check_parameter(const std::vector<
             std::string>& args)
@@ -328,9 +328,9 @@ namespace l7vs
         bool no_reschedule_flag = false;
         bool forward_checked = false;
         bool sorryuri_checked = false;
-        sregex	sorry_uri_regex
-        =	+(	'/' >>
-             *(	alpha |
+        sregex    sorry_uri_regex
+        =    +(    '/' >>
+             *(    alpha |
                 digit |
                 ( set = ';', ':', '@', '&', '=' ) |
                 ( set = '$', '-', '_', '.', '+' ) |
@@ -585,7 +585,7 @@ namespace l7vs
 
     //! parameter set
     //! @param[in] module paramter string list
-    //! @return	result.flag true is parameter is noproblem.
+    //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     protocol_module_base::check_message_result protocol_module_ip::set_parameter(const std::vector<
             std::string>& args)
@@ -616,9 +616,9 @@ namespace l7vs
         bool forward_checked = false;
         bool sorryuri_checked = false;
         boost::format formatter;
-        sregex	sorry_uri_regex
-        =	+(	'/' >>
-             *(	alpha |
+        sregex    sorry_uri_regex
+        =    +(    '/' >>
+             *(    alpha |
                 digit |
                 ( set = ';', ':', '@', '&', '=' ) |
                 ( set = '$', '-', '_', '.', '+' ) |
@@ -709,7 +709,7 @@ namespace l7vs
                     {
                         // not set no-reschedule flag
                         reschedule_flag = true;
-			reschedule = 1;
+            reschedule = 1;
                     }
                     else
                     {
@@ -727,7 +727,7 @@ namespace l7vs
                     {
                         // not set reschedule flag
                         no_reschedule_flag = true;
-			reschedule = 0;
+            reschedule = 0;
 
                     }
                     else
@@ -744,7 +744,7 @@ namespace l7vs
                 {
                     //set forwarded flag ON
                     forward_checked = true;
-		    forwarded_for = FORWARDED_FOR_ON;
+            forwarded_for = FORWARDED_FOR_ON;
                 }
                 //option string  = "-S"
                 else if (*it == "-S" || *it == "--sorry-uri")
@@ -787,7 +787,7 @@ namespace l7vs
                                 if (regex_match(*it, sorry_uri_regex))
                                 {
                                     sorryuri_checked = true;
-				    memcpy(sorry_uri.data(), it->c_str(), it->size());
+                    memcpy(sorry_uri.data(), it->c_str(), it->size());
                                 }
                                 //check NG
                                 else
@@ -1086,7 +1086,7 @@ namespace l7vs
 
     //! parameter add
     //! @param[in] module paramter string list
-    //! @return	result.flag true is parameter is noproblem.
+    //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     protocol_module_base::check_message_result protocol_module_ip::add_parameter(const std::vector<
             std::string>& args)
@@ -1169,9 +1169,9 @@ namespace l7vs
     }
 
     //! called from session initialzie use in upstream_thread
-    //! @param[in]	upstream thread id.
-    //! @param[in]	downstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id.
+    //! @param[in]    downstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_session_initialize(
         const boost::thread::id up_thread_id, const boost::thread::id down_thread_id,
         const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
@@ -1210,23 +1210,23 @@ namespace l7vs
             //calculate ip address's hash
             ip_hash = l7vs_ip_service_calc_hash(client_endpoint_tcp);
 
-            p_up->thread_id			    = up_thread_id;
-            p_up->thread_division		    = THREAD_DIVISION_UP_STREAM;
-            p_up->pair_thread_id		    = down_thread_id;
-            p_up->accept_end_flag		    = ACCEPT_END_FLAG_OFF;
-            p_up->end_flag			    = END_FLAG_OFF;
-            p_up->sorry_flag			    = SORRY_FLAG_OFF;
-            p_up->switch_flag			    = SWITCH_FLAG_OFF;
-            p_up->last_status			    = INITIALIZE;
-            p_up->client_endpoint		    = client_endpoint_tcp;
-            p_up->data_buffer			    = new char[MAX_BUFFER_SIZE];
-            p_up->data_buffer_size		    = MAX_BUFFER_SIZE;
-            p_up->data_length			    = 0;
-            p_up->data_offset			    = 0;
-            p_up->current_message_rest_size	    = 0;
-            p_up->data_state			    = HTTP_START;
+            p_up->thread_id                = up_thread_id;
+            p_up->thread_division            = THREAD_DIVISION_UP_STREAM;
+            p_up->pair_thread_id            = down_thread_id;
+            p_up->accept_end_flag            = ACCEPT_END_FLAG_OFF;
+            p_up->end_flag                = END_FLAG_OFF;
+            p_up->sorry_flag                = SORRY_FLAG_OFF;
+            p_up->switch_flag                = SWITCH_FLAG_OFF;
+            p_up->last_status                = INITIALIZE;
+            p_up->client_endpoint            = client_endpoint_tcp;
+            p_up->data_buffer                = new char[MAX_BUFFER_SIZE];
+            p_up->data_buffer_size            = MAX_BUFFER_SIZE;
+            p_up->data_length                = 0;
+            p_up->data_offset                = 0;
+            p_up->current_message_rest_size        = 0;
+            p_up->data_state                = HTTP_START;
             p_up->realserver_connect_failed_count   = 0;
-            p_up->ip_hash			    = ip_hash;
+            p_up->ip_hash                = ip_hash;
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1274,23 +1274,23 @@ namespace l7vs
             }
             /*------DEBUG LOG END------*/
 
-            p_down->thread_id			    = down_thread_id;
-            p_down->thread_division		    = THREAD_DIVISION_DOWN_STREAM;
-            p_down->pair_thread_id		    = up_thread_id;
-            p_down->accept_end_flag		    = ACCEPT_END_FLAG_OFF;
-            p_down->end_flag			    = END_FLAG_OFF;
-            p_down->sorry_flag			    = SORRY_FLAG_OFF;
-            p_down->switch_flag			    = SWITCH_FLAG_OFF;
-            p_down->last_status			    = INITIALIZE;
-            p_down->client_endpoint		    = client_endpoint_tcp;
-            p_down->data_buffer			    = new char[MAX_BUFFER_SIZE];
-            p_down->data_buffer_size		    = MAX_BUFFER_SIZE;
-            p_down->data_length			    = 0;
-            p_down->data_offset			    = 0;
-            p_down->current_message_rest_size	    = 0;
-            p_down->data_state			    = HTTP_START;
+            p_down->thread_id                = down_thread_id;
+            p_down->thread_division            = THREAD_DIVISION_DOWN_STREAM;
+            p_down->pair_thread_id            = up_thread_id;
+            p_down->accept_end_flag            = ACCEPT_END_FLAG_OFF;
+            p_down->end_flag                = END_FLAG_OFF;
+            p_down->sorry_flag                = SORRY_FLAG_OFF;
+            p_down->switch_flag                = SWITCH_FLAG_OFF;
+            p_down->last_status                = INITIALIZE;
+            p_down->client_endpoint            = client_endpoint_tcp;
+            p_down->data_buffer                = new char[MAX_BUFFER_SIZE];
+            p_down->data_buffer_size            = MAX_BUFFER_SIZE;
+            p_down->data_length                = 0;
+            p_down->data_offset                = 0;
+            p_down->current_message_rest_size        = 0;
+            p_down->data_state                = HTTP_START;
             p_down->realserver_connect_failed_count = 0;
-            p_down->ip_hash			    = ip_hash;
+            p_down->ip_hash                = ip_hash;
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1381,9 +1381,9 @@ namespace l7vs
         return status;
     }
     //! called from session finalize use in upstream thread.
-    //! @param[in]	upstream thread id.
-    //! @param[in]	downstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id.
+    //! @param[in]    downstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_session_finalize(
         const boost::thread::id up_thread_id, const boost::thread::id down_thread_id)
     {
@@ -1497,8 +1497,8 @@ namespace l7vs
     }
 
     //! called from after session accept.in client socket use in upstream thread.
-    //! @param[in]	upstream thread id.
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id.
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_accept(const boost::thread::id thread_id)
     {
         /*-------- DEBUG LOG --------*/
@@ -1608,10 +1608,10 @@ namespace l7vs
     }
 
     //! called from after session recv in client socket. use in upstream thread.
-    //! @param[in]	upstream thread id
-    //! @param[in]	recive buffer refarence.
-    //! @param[in]	recive length
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    recive buffer refarence.
+    //! @param[in]    recive length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boost::thread::id thread_id,
             const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
     {
@@ -1631,18 +1631,18 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status			    = FINALIZE;
-        bool find_ret				    = false;
-        size_t http_header_offset		    = 0;
-        size_t http_header_len			    = 0;
+        EVENT_TAG status                = FINALIZE;
+        bool find_ret                    = false;
+        size_t http_header_offset            = 0;
+        size_t http_header_len                = 0;
         size_t http_header_content_length_offset    = 0;
-        size_t http_header_content_length_len	    = 0;
-        int content_length_value		    = 0;
-        const size_t CR_LF_LEN			    = 2; //length of "\r\n"
-        const size_t CR_LF_CR_LF_LEN		    = 4; //length of "\r\n\r\n"
-        session_thread_data_map_it		    session_thread_it;
-        thread_data_ptr				    session_data_ptr;
-        http_utility::CHECK_RESULT_TAG 		    check_ret;
+        size_t http_header_content_length_len        = 0;
+        int content_length_value            = 0;
+        const size_t CR_LF_LEN                = 2; //length of "\r\n"
+        const size_t CR_LF_CR_LF_LEN            = 4; //length of "\r\n\r\n"
+        session_thread_data_map_it            session_thread_it;
+        thread_data_ptr                    session_data_ptr;
+        http_utility::CHECK_RESULT_TAG             check_ret;
 
         std::string content_length;
         cmatch regex_ret;
@@ -1936,9 +1936,9 @@ namespace l7vs
     }
 
     //! called from after realserver select.use in upstream thread.
-    //! @param[in]	upstream thread id
-    //! @param[out]	realserver TCP endpoint
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[out]    realserver TCP endpoint
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint & rs_endpoint)
     {
@@ -1960,7 +1960,7 @@ namespace l7vs
         thread_data_ptr session_data_ptr;
         session_thread_data_map_it session_thread_it;
         session_thread_data_map_it session_thread_it_end;
-        realserverlist_type::iterator	rs_list_itr;
+        realserverlist_type::iterator    rs_list_itr;
 
         if (unlikely(schedule_tcp.empty()))
         {
@@ -2314,11 +2314,11 @@ namespace l7vs
     }
 
     //! called from after realserver select
-    //! @param[in]	upstream thread id
-    //! @param[out]	realserver UDP endpoint
-    //! @param[out]	sendbuffer reference
-    //! @param[out]	send data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[out]    realserver UDP endpoint
+    //! @param[out]    sendbuffer reference
+    //! @param[out]    send data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_select(
         const boost::thread::id thread_id, boost::asio::ip::udp::endpoint& rs_endpoint, boost::array<char,
         MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
@@ -2338,10 +2338,10 @@ namespace l7vs
         return STOP;
     }
     //! called from after realserver connect
-    //! @param[in]	upstream thread id
-    //! @param[out]	sendbuffer reference
-    //! @param[out]	send data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[out]    sendbuffer reference
+    //! @param[out]    send data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_connect(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
     {
@@ -2357,13 +2357,13 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status		    = FINALIZE;
-        size_t send_possible_size	    = 0;
+        EVENT_TAG status            = FINALIZE;
+        size_t send_possible_size        = 0;
         size_t x_forwarded_for_insert_pos   = 0;
-        thread_data_ptr			    session_data_ptr;
-        session_thread_data_map_it	    session_thread_it;
-        std::pair<char*, size_t>	    buffer_element;
-        std::string			    x_forwarded_for_context;
+        thread_data_ptr                session_data_ptr;
+        session_thread_data_map_it        session_thread_it;
+        std::pair<char*, size_t>        buffer_element;
+        std::string                x_forwarded_for_context;
 
         try
         {
@@ -2486,7 +2486,7 @@ namespace l7vs
             //put buffer_sequence data into sendbuffer
             put_data_into_sendbuffer(session_data_ptr, sendbuffer, datalen);
 
-	    session_data_ptr->realserver_connect_failed_count = 0;
+        session_data_ptr->realserver_connect_failed_count = 0;
             //set return status
             status = REALSERVER_SEND;
 
@@ -2547,9 +2547,9 @@ namespace l7vs
     }
 
     //! called from after realserver connection fail
-    //! @param[in]	upstream thread id
-    //! @param[in]	fail realserver endpoint reference
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    fail realserver endpoint reference
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_connection_fail(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & rs_endpoint)
     {
@@ -2669,8 +2669,8 @@ namespace l7vs
         return status;
     }
     //! called from after realserver send.
-    //! @param[in]	upstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_send(
         const boost::thread::id thread_id)
     {
@@ -2684,14 +2684,14 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status				= FINALIZE;
-        size_t http_header_all_offset			= 0;
-        size_t http_header_all_len			= 0;
-        size_t http_header_content_length_offset	= 0;
-        size_t http_header_content_length_len		= 0;
-        const size_t CR_LF_LEN				= 2;
-        const size_t CR_LF_CR_LF_LEN			= 4;
-        int content_length_value			= 0;
+        EVENT_TAG status                = FINALIZE;
+        size_t http_header_all_offset            = 0;
+        size_t http_header_all_len            = 0;
+        size_t http_header_content_length_offset    = 0;
+        size_t http_header_content_length_len        = 0;
+        const size_t CR_LF_LEN                = 2;
+        const size_t CR_LF_CR_LF_LEN            = 4;
+        int content_length_value            = 0;
 
         std::string content_length;
         cmatch regex_ret;
@@ -2935,7 +2935,7 @@ namespace l7vs
         }
         catch (const std::exception& ex)
         {
-            std::cerr << "protocol_module_ip::handle_realserver_send() : exception : error = " << ex.what() << "." << std::endl;				//set data state HTTP_HEADER
+            std::cerr << "protocol_module_ip::handle_realserver_send() : exception : error = " << ex.what() << "." << std::endl;                //set data state HTTP_HEADER
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_send() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
@@ -2971,9 +2971,9 @@ namespace l7vs
     }
 
     //! called from after sorryserver select
-    //! @param[in]	upstream thread id
-    //! @param[in]	sorryserver endpiont reference
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    sorryserver endpiont reference
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint& sorry_endpoint)
     {
@@ -3083,10 +3083,10 @@ namespace l7vs
     }
 
     //! called from after sorryserver connect
-    //!	@param[in]	upstream thread id
-    //! @param[out]	send buffer reference.
-    //! @param[out]	send length
-    //! @return		session use EVENT mode.
+    //!    @param[in]    upstream thread id
+    //! @param[out]    send buffer reference.
+    //! @param[out]    send length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_connect(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
     {
@@ -3102,15 +3102,15 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status		    = FINALIZE;
-        size_t send_possible_size	    = 0;
-        size_t uri_offset		    = 0;
-        size_t uri_len			    = 0;
+        EVENT_TAG status            = FINALIZE;
+        size_t send_possible_size        = 0;
+        size_t uri_offset            = 0;
+        size_t uri_len                = 0;
         size_t x_forwarded_for_insert_pos   = 0;
-        thread_data_ptr			    session_data_ptr;
-        session_thread_data_map_it	    session_thread_it;
-        std::pair<char*, size_t>	    buffer_element;
-        std::string			    x_forwarded_for_context;
+        thread_data_ptr                session_data_ptr;
+        session_thread_data_map_it        session_thread_it;
+        std::pair<char*, size_t>        buffer_element;
+        std::string                x_forwarded_for_context;
 
         try
         {
@@ -3314,9 +3314,9 @@ namespace l7vs
         return status;
     }
     //! called from after sorryserver connection fail
-    //! @param[in]	upstream thread id
-    //! @param[in]	sorryserver endpoint reference.
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @param[in]    sorryserver endpoint reference.
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_connection_fail(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & sorry_endpoint)
     {
@@ -3411,8 +3411,8 @@ namespace l7vs
     }
 
     //! called from after sorryserver send
-    //! @param[in]	upstream thread id
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream thread id
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_send(
         const boost::thread::id thread_id)
     {
@@ -3426,14 +3426,14 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status				= FINALIZE;
-        size_t http_header_all_offset			= 0;
-        size_t http_header_all_len			= 0;
-        size_t http_header_content_length_offset	= 0;
-        size_t http_header_content_length_len		= 0;
-        const size_t CR_LF_LEN				= 2;
-        const size_t CR_LF_CR_LF_LEN			= 4;
-        int content_length_value			= 0;
+        EVENT_TAG status                = FINALIZE;
+        size_t http_header_all_offset            = 0;
+        size_t http_header_all_len            = 0;
+        size_t http_header_content_length_offset    = 0;
+        size_t http_header_content_length_len        = 0;
+        const size_t CR_LF_LEN                = 2;
+        const size_t CR_LF_CR_LF_LEN            = 4;
+        int content_length_value            = 0;
 
         std::string content_length;
         cmatch regex_ret;
@@ -3714,11 +3714,11 @@ namespace l7vs
     }
 
     //! called from after realserver recive.for UDP
-    //! @param[in]	downstream thread id
-    //! @param[in]	realserver UDP endpoint reference
-    //! @param[in]	recive from realserver buffer reference
-    //! @param[in]	recv data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    downstream thread id
+    //! @param[in]    realserver UDP endpoint reference
+    //! @param[in]    recive from realserver buffer reference
+    //! @param[in]    recv data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::udp::endpoint& rs_endpoint, const boost::array<char,
         MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -3739,11 +3739,11 @@ namespace l7vs
     }
 
     //! called from after realserver recvive for TCP/IP
-    //! @param[in]	downstream thread id
-    //! @param[in]	realserver TCP/IP endpoint reference
-    //! @param[in]	realserver recive buffer reference.
-    //! @param[in]	recv data length
-    //! @return		session use EVENT mode.
+    //! @param[in]    downstream thread id
+    //! @param[in]    realserver TCP/IP endpoint reference
+    //! @param[in]    realserver recive buffer reference.
+    //! @param[in]    recv data length
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint& rs_endpoint, const boost::array<char,
         MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -3765,23 +3765,23 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status			    = FINALIZE;
+        EVENT_TAG status                = FINALIZE;
 
-        bool find_ret				    = false;
-        size_t http_header_offset		    = 0;
-        size_t http_header_len			    = 0;
+        bool find_ret                    = false;
+        size_t http_header_offset            = 0;
+        size_t http_header_len                = 0;
         size_t http_header_content_length_offset    = 0;
-        size_t http_header_content_length_len	    = 0;
-        int content_length_value		    = 0;
-        const size_t CR_LF_LEN			    = 2; //length of "\r\n"
-        const size_t CR_LF_CR_LF_LEN		    = 4; //length of "\r\n\r\n"
+        size_t http_header_content_length_len        = 0;
+        int content_length_value            = 0;
+        const size_t CR_LF_LEN                = 2; //length of "\r\n"
+        const size_t CR_LF_CR_LF_LEN            = 4; //length of "\r\n\r\n"
 
-        session_thread_data_map_it		    session_thread_it;
-        thread_data_ptr				    session_data_ptr;
-        http_utility::CHECK_RESULT_TAG		    check_ret;
+        session_thread_data_map_it            session_thread_it;
+        thread_data_ptr                    session_data_ptr;
+        http_utility::CHECK_RESULT_TAG            check_ret;
 
-        std::string				    content_length;
-        cmatch					    regex_ret;
+        std::string                    content_length;
+        cmatch                        regex_ret;
         cregex content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
 
         if (unlikely(recvlen > recvbuffer.size()))
@@ -4082,11 +4082,11 @@ namespace l7vs
 
 
     //! called from after sorryserver recive
-    //! @param[in]	downstream thread id
-    //! @param[in]	sorryserver endpoint reference
-    //! @param[in]	recive from realserver buffer reference.
-    //! @param[in]	recv data length
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id
+    //! @param[in]    sorryserver endpoint reference
+    //! @param[in]    recive from realserver buffer reference.
+    //! @param[in]    recv data length
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint& sorry_endpoint, const boost::array<
         char, MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -4108,21 +4108,21 @@ namespace l7vs
         }
         /*------DEBUG LOG END------*/
 
-        EVENT_TAG status			    = FINALIZE;
-        bool find_ret				    = false;
-        size_t http_header_offset		    = 0;
-        size_t http_header_len			    = 0;
+        EVENT_TAG status                = FINALIZE;
+        bool find_ret                    = false;
+        size_t http_header_offset            = 0;
+        size_t http_header_len                = 0;
         size_t http_header_content_length_offset    = 0;
-        size_t http_header_content_length_len	    = 0;
-        int content_length_value		    = 0;
-        const size_t CR_LF_LEN			    = 2; //length of "\r\n"
-        const size_t CR_LF_CR_LF_LEN		    = 4; //length of "\r\n\r\n"
+        size_t http_header_content_length_len        = 0;
+        int content_length_value            = 0;
+        const size_t CR_LF_LEN                = 2; //length of "\r\n"
+        const size_t CR_LF_CR_LF_LEN            = 4; //length of "\r\n\r\n"
 
-        session_thread_data_map_it		    session_thread_it;
-        thread_data_ptr				    session_data_ptr;
-        http_utility::CHECK_RESULT_TAG		    check_ret;
-        std::string				    content_length;
-        cmatch					    regex_ret;
+        session_thread_data_map_it            session_thread_it;
+        thread_data_ptr                    session_data_ptr;
+        http_utility::CHECK_RESULT_TAG            check_ret;
+        std::string                    content_length;
+        cmatch                        regex_ret;
         cregex content_length_regex = icase("Content-Length") >> ":" >> *~_d >> (s1 = +_d) >> *~_d;
 
         if (unlikely(recvlen > recvbuffer.size()))
@@ -4424,8 +4424,8 @@ namespace l7vs
     }
 
     //! called from UPSTEEARM thread. make module original message.
-    //! @param[in]	downstream thread id.
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id.
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_response_send_inform(
         const boost::thread::id thread_id)
     {
@@ -4444,10 +4444,10 @@ namespace l7vs
     }
 
     //! called from after client connection check. use TCP/IP only. create client send message.
-    //! @param[in]	downstream thread id
-    //! @param[out]	send budffer reference
-    //! @param[out]	send data length
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id
+    //! @param[out]    send budffer reference
+    //! @param[out]    send data length
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_connection_check(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
     {
@@ -4613,11 +4613,11 @@ namespace l7vs
     }
 
     //! called from after client select. use UDP only
-    //! @param[in]	downstream thread id
-    //!	@param[in]	client udp endpoint
-    //! @param[out]	send buffer reference
-    //! @param[out]	send data length
-    //! @return 	session use EVENT mode
+    //! @param[in]    downstream thread id
+    //!    @param[in]    client udp endpoint
+    //! @param[out]    send buffer reference
+    //! @param[out]    send data length
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_select(
         const boost::thread::id thread_id, boost::asio::ip::udp::endpoint& cl_endpoint, boost::array<char,
         MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)
@@ -4637,9 +4637,9 @@ namespace l7vs
         return STOP;
     }
 
-    //!	called from after client send
-    //!	@param[in]	downstream thread id
-    //! @return 	session use EVENT mode
+    //!    called from after client send
+    //!    @param[in]    downstream thread id
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_send(
         const boost::thread::id thread_id)
     {
@@ -4654,13 +4654,13 @@ namespace l7vs
         /*------DEBUG LOG END------*/
 
         EVENT_TAG status = FINALIZE;
-        size_t http_header_all_offset		= 0;
-        size_t http_header_all_len		= 0;
+        size_t http_header_all_offset        = 0;
+        size_t http_header_all_len        = 0;
         size_t http_header_content_length_offset= 0;
-        size_t http_header_content_length_len	= 0;
-        const size_t CR_LF_LEN 			= 2;
-        const size_t CR_LF_CR_LF_LEN		= 4;
-        int content_length_value		= 0;
+        size_t http_header_content_length_len    = 0;
+        const size_t CR_LF_LEN             = 2;
+        const size_t CR_LF_CR_LF_LEN        = 4;
+        int content_length_value        = 0;
 
         std::string content_length;
         cmatch regex_ret;
@@ -4959,8 +4959,8 @@ namespace l7vs
     }
 
     //! call from client disconnect event. use upstream thread and downstream thread.
-    //! @param[in]	upstream and downstream thread id( check! one thread one event! )
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event! )
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_disconnect(
         const boost::thread::id thread_id)
     {
@@ -4977,8 +4977,8 @@ namespace l7vs
     }
 
     //! call from sorry mode event. use upstream thread and downstream thread
-    //! @param[in]	upstream and downstream thread id( check! one thread one event and first time call pattern )
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event and first time call pattern )
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorry_enable(
         const boost::thread::id thread_id)
     {
@@ -5222,8 +5222,8 @@ namespace l7vs
     }
 
     //! call from sorry mode disable. use upstream thread and downstream thread.
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorry_disable(
         const boost::thread::id thread_id)
     {
@@ -5467,9 +5467,9 @@ namespace l7vs
     }
 
     //! call from realserver disconnect. use upstream thread and downstream thread
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @param[in]	disconnected realserver endpoint.
-    //! @return 	session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @param[in]    disconnected realserver endpoint.
+    //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_disconnect(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & rs_endpoint)
     {
@@ -5540,7 +5540,7 @@ namespace l7vs
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
-                                                    "handle_realserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &" 					    "rs_endpoint) : SWITCH_FLAG_OFF. thread id : %d.");
+                                                    "handle_realserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &"                         "rs_endpoint) : SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
                             putLogDebug(600149, formatter.str(), __FILE__, __LINE__ );
                         }
@@ -5618,10 +5618,10 @@ namespace l7vs
     }
 
     //! call from sorry server disconnect. use upstraem thread and downstream thread
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @param[in]	disconnect sorryserver endpoint
-    //! @return		session use EVENT mode
-    //! @return		session use EVENT mode
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @param[in]    disconnect sorryserver endpoint
+    //! @return        session use EVENT mode
+    //! @return        session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_disconnect(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & sorry_endpoint)
     {
@@ -5692,7 +5692,7 @@ namespace l7vs
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
-                                                    "handle_sorryserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &" 					    "sorry_endpoint) : SWITCH_FLAG_OFF. thread id : %d.");
+                                                    "handle_sorryserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &"                         "sorry_endpoint) : SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
                             putLogDebug(600153, formatter.str(), __FILE__, __LINE__ );
                         }
@@ -5773,9 +5773,9 @@ namespace l7vs
     }
 
     //! call from realserver disconnect. use upstream thread and downstream thread.
-    //! @param[in]	upstream and downstream thread id( check! one thread one event )
-    //! @param[in]	disconnect realserver endpoint
-    //! @return		session use EVENT mode.
+    //! @param[in]    upstream and downstream thread id( check! one thread one event )
+    //! @param[in]    disconnect realserver endpoint
+    //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_close(
         const boost::thread::id thread_id, const boost::asio::ip::udp::endpoint & rs_endpoint)
     {
@@ -6107,7 +6107,7 @@ namespace l7vs
         /*------DEBUG LOG END------*/
 
         size_t sendbuffer_rest_size = 0;
-        size_t new_offset	    = 0;
+        size_t new_offset        = 0;
 
         if (unlikely(data_ptr == NULL || data_ptr->data_buffer == NULL || data_ptr->buffer_sequence.empty()))
         {
@@ -6251,12 +6251,12 @@ namespace l7vs
 
     //! call from put_data_to_buffer_with_x_forwarded_for(). get x_forwarded_for header's offset and length
     //! if the buffer isn't include x_forwarded_for header, create a new one
-    //! @param[in]	buffer
-    //! @param[in]	buffer_len
+    //! @param[in]    buffer
+    //! @param[in]    buffer_len
     //! @param[out] x_forwarded_for_insert_pos
     //! @param[out] x_forwarded_for_context
     //! @return  true:create a new x_forwarded_for header
-    //!	     false: edit old one
+    //!         false: edit old one
     bool protocol_module_ip::create_x_forwarded_for(const std::string& client_endpoint,
             const char* buffer,
             const size_t buffer_len,
@@ -6276,10 +6276,10 @@ namespace l7vs
 
         bool find_ret = false;
         size_t x_forwarded_for_offset   = 0;
-        size_t x_forwarded_for_len	= 0;
+        size_t x_forwarded_for_len    = 0;
         size_t http_header_all_offset   = 0;
-        size_t http_header_all_len	= 0;
-        const char* X_FORWARDED_FOR	= "X-Forwarded-For";
+        size_t http_header_all_len    = 0;
+        const char* X_FORWARDED_FOR    = "X-Forwarded-For";
 
         //search "X-Forwared-For" header
         find_ret = http_utility::find_http_header_x_forwarded_for(buffer, buffer_len,

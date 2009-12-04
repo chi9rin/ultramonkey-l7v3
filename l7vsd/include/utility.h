@@ -1,6 +1,6 @@
 /*!
- *	@file	utility.h
- *	@brief	utility macro header.
+ *    @file    utility.h
+ *    @brief    utility macro header.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -29,7 +29,7 @@
 //! static "if" weight algolithm teach compiler.
 //! compiler output CPU TBL code.
 //! usage:
-//!	if( likely( hoge ) ){ fasecall } else { slowcall }
+//!    if( likely( hoge ) ){ fasecall } else { slowcall }
 //! if( unlikely( hoge ) ){ slowcall } else { fastcall }
 #define likely(c)   __builtin_expect(!!(c), 1)
 #define unlikely(c) __builtin_expect(!!(c), 0)

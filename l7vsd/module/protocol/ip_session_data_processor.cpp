@@ -136,16 +136,16 @@ int ip_session_data_processor::get_endpoint_from_session_data(
         // ip hash check
         if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE))
         {
-	    putLogError(600104, "invalid parameter value.", __FILE__, __LINE__);
-    	    /*-------- DEBUG LOG --------*/
-    	    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    	    {
-     	        boost::format formatter("out_function : int ip_session_data_processor::"
+        putLogError(600104, "invalid parameter value.", __FILE__, __LINE__);
+            /*-------- DEBUG LOG --------*/
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            {
+                 boost::format formatter("out_function : int ip_session_data_processor::"
                                          "get_endpoint_from_ip_data(int ip_hash, "
                                          "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.");
-    	        putLogDebug(600191, formatter.str(), __FILE__, __LINE__);
-   	    }
-    	    /*------DEBUG LOG END------*/
+                putLogDebug(600191, formatter.str(), __FILE__, __LINE__);
+           }
+            /*------DEBUG LOG END------*/
             return 1;
         }
 
@@ -214,12 +214,12 @@ int ip_session_data_processor::write_session_data(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-     	boost::format formatter("in_function : int ip_session_data_processor::"
+         boost::format formatter("in_function : int ip_session_data_processor::"
                                          "write_session_data(int ip_hash,"
                                          "const boost::asio::ip::tcp::endpoint& endpoint, "
                                          "time_t now_time) : ip_hash = %d, now_time = %d.");
-	formatter % ip_hash % now_time;
-    	putLogDebug(600193, formatter.str(), __FILE__, __LINE__);
+    formatter % ip_hash % now_time;
+        putLogDebug(600193, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -231,17 +231,17 @@ int ip_session_data_processor::write_session_data(
         // ip hash check
         if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE))
         {
-	    putLogError(600106, "invalid parameter value.", __FILE__, __LINE__);
-    	    /*-------- DEBUG LOG --------*/
-    	    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    	    {
-     	        boost::format formatter("out_function : int ip_session_data_processor::"
+        putLogError(600106, "invalid parameter value.", __FILE__, __LINE__);
+            /*-------- DEBUG LOG --------*/
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            {
+                 boost::format formatter("out_function : int ip_session_data_processor::"
                                          "write_session_data(int ip_hash,"
                                          "const boost::asio::ip::tcp::endpoint& endpoint, "
                                          "time_t now_time) : return_value = 1.");
-    	        putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
-   	    }
-    	    /*------DEBUG LOG END------*/
+                putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
+           }
+            /*------DEBUG LOG END------*/
             return 1;
         }
 

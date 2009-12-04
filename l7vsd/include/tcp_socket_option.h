@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_socket_option.h
- *	@brief	tcp session socket option class
+ *    @file    tcp_socket_option.h
+ *    @brief    tcp session socket option class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -27,18 +27,18 @@
 
 //! tcp_socket_option
 struct tcp_socket_option_info{
-	//! TCP_NODELAY   (false:not set,true:set option)
-	bool nodelay_opt;
-	//! TCP_NODELAY option value  (false:off,true:on)
-	bool nodelay_val;
-	//! TCP_CORK      (false:not set,true:set option)
-	bool cork_opt;
-	//! TCP_CORK option value     (false:off,true:on)
-	bool cork_val;
-	//! TCP_QUICKACK  (false:not set,true:set option)
-	bool quickack_opt;
-	//! TCP_QUICKACK option value (false:off,true:on)
-	bool quickack_val;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    bool nodelay_opt;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    bool nodelay_val;
+    //! TCP_CORK      (false:not set,true:set option)
+    bool cork_opt;
+    //! TCP_CORK option value     (false:off,true:on)
+    bool cork_val;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    bool quickack_opt;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    bool quickack_val;
 };
 
 #endif//TCP_SOCKET_OPTION_H

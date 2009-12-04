@@ -1,13 +1,13 @@
 //
-//!	@file	massage.h
-//!	@brief	snmpagent - l7vsd message header
+//!    @file    massage.h
+//!    @brief    snmpagent - l7vsd message header
 //
-//	copyright(c) sdy corporation.2008
-//	mail: h.okada at sdy.co.jp
-//	Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
+//    copyright(c) sdy corporation.2008
+//    mail: h.okada at sdy.co.jp
+//    Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
 //
-//	Distributed under the Boost Software License, Version 1.0. (See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//    Distributed under the Boost Software License, Version 1.0. (See accompanying
+//    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef MESSAGE_H
@@ -15,12 +15,12 @@
 
 #define PADDINGSIZE             (1)
 
-#define OIDDATASIZE             (128)	// must 64 multiple number for structure byte offset
+#define OIDDATASIZE             (128)    // must 64 multiple number for structure byte offset
 #define COMMANDDATASIZE         (256)
-#define TRAPREQUESTMESSAGESIZE  (64)	// must 64 multiple number for structure byte offset
-#define MIBREQUESTDATASIZE      (64)	// must 64 multiple number for structure byte offset
-#define	L7VS_MODNAME_LEN		(256)	// l7vs.h remove this numeric. define this,
-#define	L7VS_PROTOMOD_OPT_LEN	(512)	// l7vs.h remove this numeric, define this,
+#define TRAPREQUESTMESSAGESIZE  (64)    // must 64 multiple number for structure byte offset
+#define MIBREQUESTDATASIZE      (64)    // must 64 multiple number for structure byte offset
+#define    L7VS_MODNAME_LEN        (256)    // l7vs.h remove this numeric. define this,
+#define    L7VS_PROTOMOD_OPT_LEN    (512)    // l7vs.h remove this numeric, define this,
 
 //message id definitions(l7vsd to subagent)
 #define MESSAGE_ID_COMMANDREQUEST           (0)
@@ -202,4 +202,4 @@ struct  l7ag_mibrequest_message
     unsigned char   data[MIBREQUESTDATASIZE];   //! Expansion
 };
 
-#endif	//MESSAGE_H
+#endif    //MESSAGE_H

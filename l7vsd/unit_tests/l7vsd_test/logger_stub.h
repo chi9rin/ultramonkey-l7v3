@@ -1,13 +1,13 @@
-#ifndef	LOGGER_H
-#define	LOGGER_H
-namespace	l7vs{
+#ifndef    LOGGER_H
+#define    LOGGER_H
+namespace    l7vs{
 class Logger{
 public:
-	Logger(){};
+    Logger(){};
 
 
 };
 
-}	//namespace l7vs
+}    //namespace l7vs
 
-#endif	//LOGGER_H
+#endif    //LOGGER_H

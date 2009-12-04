@@ -1,13 +1,13 @@
 //
-//!	@file	dispaatcher.cpp
-//!	@brief	snmpagent - l7vsd message dispatcher
+//!    @file    dispaatcher.cpp
+//!    @brief    snmpagent - l7vsd message dispatcher
 //
-//	copyright(c) sdy corporation.2008
-//	mail: h.okada at sdy.co.jp
-//	Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
+//    copyright(c) sdy corporation.2008
+//    mail: h.okada at sdy.co.jp
+//    Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
 //
-//	Distributed under the Boost Software License, Version 1.0. (See accompanying
-//	file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//    Distributed under the Boost Software License, Version 1.0. (See accompanying
+//    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 #include <sys/time.h>
 #include "dispatcher.h"
@@ -273,8 +273,8 @@ l7ag_dispatcher::process_mib_collect_response_rs( void* p_data ){
  */
 void
 l7ag_dispatcher::change_loglevel( unsigned long long category, unsigned long long loglevel ){
-	l7vs::Logger	logger;
-	logger.setLogLevel( static_cast<l7vs::LOG_CATEGORY_TAG>(category), static_cast<l7vs::LOG_LEVEL_TAG>(loglevel) );
+    l7vs::Logger    logger;
+    logger.setLogLevel( static_cast<l7vs::LOG_CATEGORY_TAG>(category), static_cast<l7vs::LOG_LEVEL_TAG>(loglevel) );
 }
 
 /*!
@@ -282,8 +282,8 @@ l7ag_dispatcher::change_loglevel( unsigned long long category, unsigned long lon
  */
 void
 l7ag_dispatcher::reload_configure(){
-	l7vs::Parameter		parameter;
-	parameter.read_file( l7vs::PARAM_COMP_SNMPAGENT );
+    l7vs::Parameter        parameter;
+    parameter.read_file( l7vs::PARAM_COMP_SNMPAGENT );
 }
 
 void

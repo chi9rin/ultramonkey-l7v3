@@ -6,17 +6,17 @@
 
 namespace l7vs{
 
-	//! construcor
-	tcp_session_stream_model::tcp_session_stream_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint):
+    //! construcor
+    tcp_session_stream_model::tcp_session_stream_model(virtualservice_tcp* pService,boost::asio::io_service& io,boost::asio::ip::tcp::endpoint rs_endpoint):
                 tcp_session_base(pService,io,rs_endpoint),
                 threadA_state(0),
                 threadB_state(0),
                 exit_flag(false){
-	}
+    }
 
-	//! destructor
-	tcp_session_stream_model::~tcp_session_stream_model(){
-	}
+    //! destructor
+    tcp_session_stream_model::~tcp_session_stream_model(){
+    }
 
         void tcp_session_stream_model::Run_main(){
                 Run_up();
@@ -70,7 +70,7 @@ namespace l7vs{
                 while(true){// UPスレッドメインループ
                         boost::this_thread::yield();
                         {
-				rd_scoped_lock scope_lock(exit_flag_update_mutex);
+                rd_scoped_lock scope_lock(exit_flag_update_mutex);
                                 if(exit_flag){
                                         //終了のお知らせ
                                         break;
@@ -238,7 +238,7 @@ namespace l7vs{
                 while(true){// DWスレッドメインループ
                         boost::this_thread::yield();
                         {
-				rd_scoped_lock scope_lock(exit_flag_update_mutex);
+                rd_scoped_lock scope_lock(exit_flag_update_mutex);
                                 if(exit_flag == true){
                                         //終了のお知らせ
                                         break;

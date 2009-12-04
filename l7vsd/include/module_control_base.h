@@ -1,6 +1,6 @@
 /*!
- *	@file	protocol_module_base.h
- *	@brief	shared object protocol module absctract class
+ *    @file    protocol_module_base.h
+ *    @brief    shared object protocol module absctract class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -25,41 +25,41 @@
 #ifndef MODULE_CONTROL_BASE
 #define MODULE_CONTROL_BASE
 
-#include	<string>
-#include	<boost/noncopyable.hpp>
+#include    <string>
+#include    <boost/noncopyable.hpp>
 
 namespace l7vs{
 
 //
-//! @class	module_control_base_alloc
-//! @brief	this class throw then don't allocate memory.
-class	module_control_bad_alloc : public std::bad_alloc {
+//! @class    module_control_base_alloc
+//! @brief    this class throw then don't allocate memory.
+class    module_control_bad_alloc : public std::bad_alloc {
 public:
-//	module_control_bad_alloc( ) : std::bad_alloc( ){
-		
-//	}
+//    module_control_bad_alloc( ) : std::bad_alloc( ){
+        
+//    }
 };
 
 //
-//! @class	module_control_error
-//!	@brief	this class throw then logical error
-class	module_control_error : public std::logic_error {
+//! @class    module_control_error
+//!    @brief    this class throw then logical error
+class    module_control_error : public std::logic_error {
 
 };
 
 //
-//! @class	module_control_base
-//!	@brief	base abstract class. all module control is extend this class. 
-class	module_control_base : private boost::noncopyable{
+//! @class    module_control_base
+//!    @brief    base abstract class. all module control is extend this class. 
+class    module_control_base : private boost::noncopyable{
 protected:
-	std::string	modulefile_path;		//!<	shared object path
-	virtual	~module_control_base(){};	//!<	destractor
+    std::string    modulefile_path;        //!<    shared object path
+    virtual    ~module_control_base(){};    //!<    destractor
 public:
-	//!	@brief	initialize prototype function is fist called
-	virtual	void	initialize( const std::string& infile_path ) = 0;
-	//! @brief	finalize prototype function is last called
-	virtual	void	finalize() = 0;
+    //!    @brief    initialize prototype function is fist called
+    virtual    void    initialize( const std::string& infile_path ) = 0;
+    //! @brief    finalize prototype function is last called
+    virtual    void    finalize() = 0;
 };
 
-}	// namespace l7vs
+}    // namespace l7vs
 #endif//MODULE_CONTROL_BASE

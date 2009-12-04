@@ -34,100 +34,100 @@ namespace l7vs{
 //! @brief this class create Logger Inmlement class and mediate function.
 class Logger{
 protected:
-	const LOG_CATEGORY_TAG	scopedLogCategory;
-	const unsigned int		scopedLogId;
-	const std::string		scopedLogMessage;
-	const char*				scopedLogFile;
-	const int				scopedLogLine;
+    const LOG_CATEGORY_TAG    scopedLogCategory;
+    const unsigned int        scopedLogId;
+    const std::string        scopedLogMessage;
+    const char*                scopedLogFile;
+    const int                scopedLogLine;
 
 public:
-	//! default constructor creates implement class.
-	Logger();
+    //! default constructor creates implement class.
+    Logger();
 
-	//! log output constractor
-	//! scoped log output( Logger destractor output log)
-	//! @param[in]	Log output category tag
-	//! @param[in]	log id
-	//! @param[in]	log message
-	//!	@param[in]	filename	(=__FILE__)
-	//! @param[in]	lineno		(=__LINE__)
-	Logger( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int);
+    //! log output constractor
+    //! scoped log output( Logger destractor output log)
+    //! @param[in]    Log output category tag
+    //! @param[in]    log id
+    //! @param[in]    log message
+    //!    @param[in]    filename    (=__FILE__)
+    //! @param[in]    lineno        (=__LINE__)
+    Logger( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int);
 
-	//! destructor.(output log then use log output constractor)
-	~Logger();
+    //! destructor.(output log then use log output constractor)
+    ~Logger();
 
-	//! load Configuration.
-	void loadConf();
+    //! load Configuration.
+    void loadConf();
 
-	//! retrieve category's log level.
-	//! @param[in]	logcategory
-	//! @return		loglevel
-	static LOG_LEVEL_TAG getLogLevel( LOG_CATEGORY_TAG );
+    //! retrieve category's log level.
+    //! @param[in]    logcategory
+    //! @return        loglevel
+    static LOG_LEVEL_TAG getLogLevel( LOG_CATEGORY_TAG );
 
-	//! retrieve all category's log level.
-	//! @param[in]	logcategory
-	//! @return		loglevel
-	static void getLogLevelAll( category_level_list_type& );
+    //! retrieve all category's log level.
+    //! @param[in]    logcategory
+    //! @return        loglevel
+    static void getLogLevelAll( category_level_list_type& );
 
-	//! set category's log level.
-	//!	@param[in]	logcategory
-	//!	@param[in]	loglevel
-	//!	@return true	success loglevel change
-	//!	@return	false	failer loglevel change
-	static bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
+    //! set category's log level.
+    //!    @param[in]    logcategory
+    //!    @param[in]    loglevel
+    //!    @return true    success loglevel change
+    //!    @return    false    failer loglevel change
+    static bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
 
-	//! set all category's log level.
-	//!	@param[in]	logcategory
-	//!	@param[in]	loglevel
-	//!	@return true	success loglevel change
-	//!	@return	false	failer loglevel change
-	static bool setLogLevelAll( LOG_LEVEL_TAG level );
+    //! set all category's log level.
+    //!    @param[in]    logcategory
+    //!    @param[in]    loglevel
+    //!    @return true    success loglevel change
+    //!    @return    false    failer loglevel change
+    static bool setLogLevelAll( LOG_LEVEL_TAG level );
 
-	//! output fatal log.
-	//! @param[in]	Log output category tag
-	//! @param[in]	log id
-	//! @param[in]	log message
-	//!	@param[in]	filename	(=__FILE__)
-	//! @param[in]	lineno		(=__LINE__)
-	static void putLogFatal( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+    //! output fatal log.
+    //! @param[in]    Log output category tag
+    //! @param[in]    log id
+    //! @param[in]    log message
+    //!    @param[in]    filename    (=__FILE__)
+    //! @param[in]    lineno        (=__LINE__)
+    static void putLogFatal( LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
-	//! output error log.
-	//! @param[in]	Log output category tag
-	//! @param[in]	log id
-	//! @param[in]	log message
-	//!	@param[in]	filename	(=__FILE__)
-	//! @param[in]	lineno		(=__LINE__)
-	static void putLogError(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+    //! output error log.
+    //! @param[in]    Log output category tag
+    //! @param[in]    log id
+    //! @param[in]    log message
+    //!    @param[in]    filename    (=__FILE__)
+    //! @param[in]    lineno        (=__LINE__)
+    static void putLogError(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
-	//! output warn log.
-	//! @param[in]	Log output category tag
-	//! @param[in]	log id
-	//! @param[in]	log message
-	//!	@param[in]	filename	(=__FILE__)
-	//! @param[in]	lineno		(=__LINE__)
-	static void putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+    //! output warn log.
+    //! @param[in]    Log output category tag
+    //! @param[in]    log id
+    //! @param[in]    log message
+    //!    @param[in]    filename    (=__FILE__)
+    //! @param[in]    lineno        (=__LINE__)
+    static void putLogWarn(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
-	//! output info log.
-	//! @param[in]	Log output category tag
-	//! @param[in]	log id
-	//! @param[in]	log message
-	//!	@param[in]	filename	(=__FILE__)
-	//! @param[in]	lineno		(=__LINE__)
-	static void putLogInfo(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+    //! output info log.
+    //! @param[in]    Log output category tag
+    //! @param[in]    log id
+    //! @param[in]    log message
+    //!    @param[in]    filename    (=__FILE__)
+    //! @param[in]    lineno        (=__LINE__)
+    static void putLogInfo(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
-	//! output debug log.
-	//! @param[in]	Log output category tag
-	//! @param[in]	log id
-	//! @param[in]	log message
-	//!	@param[in]	filename	(=__FILE__)
-	//! @param[in]	lineno		(=__LINE__)
-	static void putLogDebug(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
+    //! output debug log.
+    //! @param[in]    Log output category tag
+    //! @param[in]    log id
+    //! @param[in]    log message
+    //!    @param[in]    filename    (=__FILE__)
+    //! @param[in]    lineno        (=__LINE__)
+    static void putLogDebug(LOG_CATEGORY_TAG, const unsigned int, const std::string&, const char*, int );
 
-	//! set snmp sendtrap function
-	//! @param   snmp send trap function object
-	//! @retrun  void
-	static void	setSnmpSendtrap( const snmpSendtrapFuncType func );
+    //! set snmp sendtrap function
+    //! @param   snmp send trap function object
+    //! @retrun  void
+    static void    setSnmpSendtrap( const snmpSendtrapFuncType func );
 };
-}	//namespace l7vs
+}    //namespace l7vs
 
-#endif	//LOGGER_H
+#endif    //LOGGER_H

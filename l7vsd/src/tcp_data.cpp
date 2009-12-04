@@ -1,6 +1,6 @@
 /*!
- *	@file	tcp_data.cpp
- *	@brief	tcp session processing data class
+ *    @file    tcp_data.cpp
+ *    @brief    tcp session processing data class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
