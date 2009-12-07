@@ -46,10 +46,21 @@ inline void save(
     boost::asio::ip::basic_endpoint<T> const& t,
     const unsigned int /* file_version */
 ){
-    std::string        addr    = t.address().to_string();
-    unsigned short    port    = t.port();
-    ar << boost::serialization::make_nvp( "addr", addr );
+    std::string     addr    = t.address().to_string();
+    unsigned short  port    = t.port();
+    unsigned long   scope_id = 0;
+    if( addr.find_first_of( "%" ) != std::string::npos ){
+        std::string addr_ = addr.substr( 0, addr.find_first_of( "%" ) );
+        std::string ifname = addr.substr( addr.find_first_of( "%" ) + 1 );
+        scope_id = if_nametoindex( ifname.c_str() );
+        if( scope_id == 0 )
+            scope_id = atoi(ifname.c_str());
+        ar << boost::serialization::make_nvp( "addr", addr_ );
+    }else{
+        ar << boost::serialization::make_nvp( "addr", addr );    
+    }
     ar << boost::serialization::make_nvp( "port", port );
+    ar << boost::serialization::make_nvp( "scope_id", scope_id );
 }
 
 template<class Archive, class T>
@@ -58,11 +69,20 @@ inline void load(
     boost::asio::ip::basic_endpoint<T>& t,
     const unsigned int /* file_version */ 
 ){
-    std::string        addr;
-    unsigned short    port;
+    std::string     addr;
+    unsigned short  port;
+    unsigned long   scope_id;
     ar >> boost::serialization::make_nvp( "addr", addr );
     ar >> boost::serialization::make_nvp( "port", port );
-    t = boost::asio::ip::basic_endpoint<T>( boost::asio::ip::address::from_string( addr ), port );
+    ar >> boost::serialization::make_nvp( "scope_id", scope_id );
+    boost::asio::ip::address tmp = boost::asio::ip::address::from_string( addr );
+    if ( tmp.is_v6() ){
+        boost::asio::ip::address_v6 v6addr = boost::asio::ip::address_v6::from_string( addr );
+        v6addr.scope_id(scope_id);
+        t = boost::asio::ip::basic_endpoint<T>( v6addr, port );
+    }else{
+        t = boost::asio::ip::basic_endpoint<T>( boost::asio::ip::address_v4::from_string( addr ), port );
+    }
 }
 
 }    // namespace serialization
