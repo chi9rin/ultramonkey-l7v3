@@ -18,7 +18,8 @@ namespace l7vs{
     };
 }
 
-#include "../../../src/tcp_thread_message.cpp"
+//#include "../../../src/tcp_thread_message.cpp"
+#include "../../../include/tcp_thread_message.h"
 
 using namespace boost::unit_test_framework;
 
