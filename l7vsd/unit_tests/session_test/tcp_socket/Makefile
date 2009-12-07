@@ -6,8 +6,7 @@
 TARGET		= tcp_socket_test_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
-INCLUDES	=	-I../../../parameter \
-				-I./ \
+INCLUDES	=		-I./ \
 				-I../../../src \
 				-I../../../include \
 				-I../logger_stb
