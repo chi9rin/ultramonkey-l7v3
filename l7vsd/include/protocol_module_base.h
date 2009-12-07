@@ -173,7 +173,9 @@ public:
     //! @return    result.flag true is parameter is noproblem.
     //! @return result.flag false is paramter is problem.
     virtual    check_message_result    add_parameter( const std::vector<std::string>& args ) = 0;
-
+    //! get option info
+    //! @param[out] module parameter string
+    virtual void                    get_option_info( std::string& option ) = 0;
     //! TCP/IP scheduled function registation.
     //! @param[in] schedule module TCP/IP scheduled function object type
     virtual    void    register_schedule( tcp_schedule_func_type inschedule ) = 0;

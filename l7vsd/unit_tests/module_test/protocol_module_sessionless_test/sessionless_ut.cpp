@@ -12439,6 +12439,28 @@ void handle_realserver_close_test(){
     BOOST_CHECK_EQUAL(ret, STOP);
 }
 
+void get_option_info_test(){
+    {
+        cout << "[546]--------------------------------------------- " << endl;
+        //unit_test[546] forwarded_forが0、sorry_uriが""の場合
+        this->forwarded_for = 0;
+        memset(this->sorry_uri.c_array(), 0, MAX_OPTION_SIZE);
+        std::string option;
+        this->get_option_info(option);
+        BOOST_CHECK_EQUAL(strcmp(option.c_str(), "--sorry-uri ''"), 0);
+    }
+    {
+        cout << "[547]--------------------------------------------- " << endl;
+        //unit_test[547] forwarded_forが1、sorry_uriが"/sorry"の場合
+        this->forwarded_for = 1;
+        memset(this->sorry_uri.c_array(), 0, MAX_OPTION_SIZE);
+        strcpy(this->sorry_uri.c_array(), "/sorry");
+        std::string option;
+        this->get_option_info(option);
+        BOOST_CHECK_EQUAL(strcmp(option.c_str(), "--forwarded-for --sorry-uri '/sorry'"), 0);
+    }
+}
+
 };
 
 /***********************************************************************************
@@ -12869,6 +12891,11 @@ void handle_realserver_close_test(){
     obj.handle_realserver_close_test();
 }
 
+void get_option_info_test(){
+    protocol_module_sessionless_test_class obj;
+    obj.get_option_info_test();
+}
+
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
@@ -12931,6 +12958,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test));
     ts->add(BOOST_TEST_CASE(&handle_sorryserver_disconnect_test_thread));
     ts->add(BOOST_TEST_CASE(&handle_realserver_close_test));
+    ts->add(BOOST_TEST_CASE(&get_option_info_test));
 
     framework::master_test_suite().add(ts);
     return 0;

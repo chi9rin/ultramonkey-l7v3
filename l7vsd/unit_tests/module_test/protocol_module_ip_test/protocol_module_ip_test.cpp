@@ -378,6 +378,33 @@ public:
     {
     }
 
+    void set_replication_data_processor(ip_replication_data_processor* p)
+    {
+        replication_data_processor = p;
+    }
+
+    void set_ip_data_processor(ip_session_data_processor* p)
+    {
+        ip_data_processor = p;
+    }
+
+    ip_replication_data_processor* get_replication_data_processor() const
+    {
+        return replication_data_processor;
+    }
+
+    void release_replication_data_processor()
+    {
+        delete replication_data_processor;
+        replication_data_processor = NULL;
+    }
+
+    void release_ip_data_processor()
+    {
+        delete ip_data_processor;
+        ip_data_processor = NULL;
+    }
+
 
     protocol_module_ip_test_class()
     {
@@ -2722,122 +2749,115 @@ public:
         }
 
         cout << "[133]--------------------------------------------- " << endl;
-        //unit_test[133] realserver_connect_failed_count=0の場合
         //unit_test[133] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[133] schedule_moduleにて振り分け先realserverを未決定
         //unit_test[133] status = CLIENT_DISCONNECT
         {
-//            this->session_thread_data_map.clear();
-//            thread_data_ptr data_ptr(new session_thread_data_ip);
-//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-//            tcp_schedule_func_type func_err = &schedule_tcp_nodeterminate;
-//            this->register_schedule(func_err);
-//            data_ptr->realserver_connect_failed_count = 0;
-//            data_ptr->client_endpoint = ep1;
-//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-//
-//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-//                    inputLogWarn, inputLogInfo, inputLogDebug);
-//            this->ip_data_processor = new ip_session_data_processor_stub(
-//                3600, this->replication_data_processor, ingetloglevel,
-//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-//                inputLogDebug);
-//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-//                                                 rs_endpoint);
-//
-//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-//            this->session_thread_data_map.clear();
-//            delete this->replication_data_processor;
-//            delete this->ip_data_processor;
-//            this->replication_data_processor = NULL;
-//            this->ip_data_processor = NULL;
+            this->session_thread_data_map.clear();
+            thread_data_ptr data_ptr(new session_thread_data_ip);
+            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+            tcp_schedule_func_type func_err = &schedule_tcp_nodeterminate;
+            this->register_schedule(func_err);
+            data_ptr->client_endpoint = ep1;
+            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+
+            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                    inputLogWarn, inputLogInfo, inputLogDebug);
+            this->ip_data_processor = new ip_session_data_processor_stub(
+                3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+                                                 rs_endpoint);
+
+            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+            this->session_thread_data_map.clear();
+            delete this->replication_data_processor;
+            delete this->ip_data_processor;
+            this->replication_data_processor = NULL;
+            this->ip_data_processor = NULL;
         }
 
         cout << "[134]--------------------------------------------- " << endl;
-        //unit_test[134] realserver_connect_failed_count=0の場合
         //unit_test[134] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[134] schedule_moduleにて振り分け先realserverを決定
         //unit_test[134] データ状態がHTTP_STARTの場合
         //unit_test[134] status = CLIENT_RECV
         {
-//            this->session_thread_data_map.clear();
-//            thread_data_ptr data_ptr(new session_thread_data_ip);
-//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-//            tcp_schedule_func_type func = &schedule_tcp_determinate;
-//            this->register_schedule(func);
-//            data_ptr->realserver_connect_failed_count = 0;
-//            data_ptr->data_state = HTTP_START;
-//            data_ptr->client_endpoint = ep1;
-//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-//
-//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-//                    inputLogWarn, inputLogInfo, inputLogDebug);
-//            this->ip_data_processor = new ip_session_data_processor_stub(
-//                3600, this->replication_data_processor, ingetloglevel,
-//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-//                inputLogDebug);
-//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-//                                                 rs_endpoint);
-//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-//
-//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-//            BOOST_CHECK_EQUAL(entry.last_time, 0);
-//            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
-//            this->session_thread_data_map.clear();
-//            delete this->replication_data_processor;
-//            delete this->ip_data_processor;
-//            this->replication_data_processor = NULL;
-//            this->ip_data_processor = NULL;
+            this->session_thread_data_map.clear();
+            thread_data_ptr data_ptr(new session_thread_data_ip);
+            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+            tcp_schedule_func_type func = &schedule_tcp_determinate;
+            this->register_schedule(func);
+            data_ptr->data_state = HTTP_START;
+            data_ptr->client_endpoint = ep1;
+            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+
+            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                    inputLogWarn, inputLogInfo, inputLogDebug);
+            this->ip_data_processor = new ip_session_data_processor_stub(
+                3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+                                                 rs_endpoint);
+            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+
+            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+            BOOST_CHECK_EQUAL(entry.last_time, 0);
+            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+            this->session_thread_data_map.clear();
+            delete this->replication_data_processor;
+            delete this->ip_data_processor;
+            this->replication_data_processor = NULL;
+            this->ip_data_processor = NULL;
 
         }
 
         cout << "[135]--------------------------------------------- " << endl;
-        //unit_test[135] realserver_connect_failed_count=0の場合
         //unit_test[135] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[135] schedule_moduleにて振り分け先realserverを決定
         //unit_test[135] データ状態がHTTP_HEADERの場合
         //unit_test[135] status =REALSERVER_CONNECT
         {
-      //      this->session_thread_data_map.clear();
-      //      thread_data_ptr data_ptr(new session_thread_data_ip);
-      //      this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-      //      tcp_schedule_func_type func = &schedule_tcp_determinate;
-      //      this->register_schedule(func);
-      //      data_ptr->realserver_connect_failed_count = 0;
-      //      data_ptr->data_state = HTTP_HEADER;
-      //      data_ptr->client_endpoint = ep1;
-      //      data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-      //      this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-      //              ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-      //              inputLogWarn, inputLogInfo, inputLogDebug);
-      //      this->ip_data_processor = new ip_session_data_processor_stub(
-      //          3600, this->replication_data_processor, ingetloglevel,
-      //          inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-      //          inputLogDebug);
-      //      (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-      //      ret = this->handle_realserver_select(boost::this_thread::get_id(),
-      //                                           rs_endpoint);
-      //      ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-      //      BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-      //      BOOST_CHECK_EQUAL(entry.last_time, 0);
-      //      BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-      //      BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-      //      this->session_thread_data_map.clear();
-      //      delete this->replication_data_processor;
-      //      delete this->ip_data_processor;
-      //      this->replication_data_processor = NULL;
-      //      this->ip_data_processor = NULL;
+            this->session_thread_data_map.clear();
+            thread_data_ptr data_ptr(new session_thread_data_ip);
+            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+            tcp_schedule_func_type func = &schedule_tcp_determinate;
+            this->register_schedule(func);
+            data_ptr->data_state = HTTP_HEADER;
+            data_ptr->client_endpoint = ep1;
+            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                    inputLogWarn, inputLogInfo, inputLogDebug);
+            this->ip_data_processor = new ip_session_data_processor_stub(
+                3600, this->replication_data_processor, ingetloglevel,
+                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                inputLogDebug);
+            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+                                                 rs_endpoint);
+            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+            BOOST_CHECK_EQUAL(entry.last_time, 0);
+            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+            this->session_thread_data_map.clear();
+            delete this->replication_data_processor;
+            delete this->ip_data_processor;
+            this->replication_data_processor = NULL;
+            this->ip_data_processor = NULL;
 
         }
 
         cout << "[136]--------------------------------------------- " << endl;
-        //unit_test[136] realserver_connect_failed_count=0の場合
         //unit_test[136] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[136] schedule_moduleにて振り分け先realserverを決定
         //unit_test[136] データ状態がHTTP_BODYの場合
@@ -2848,7 +2868,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_determinate;
             this->register_schedule(func);
-       //     data_ptr->realserver_connect_failed_count = 0;
             data_ptr->data_state = HTTP_BODY;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
@@ -2876,7 +2895,6 @@ public:
         }
 
         cout << "[137]--------------------------------------------- " << endl;
-        //unit_test[137] realserver_connect_failed_count=0の場合
         //unit_test[137] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[137] schedule_moduleにて振り分け先realserverを決定
         //unit_test[137] データ状態がUNKNOWNの場合
@@ -2887,7 +2905,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_determinate;
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->data_state = UNKNOWN;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
@@ -2914,7 +2931,6 @@ public:
         }
 
         cout << "[138]--------------------------------------------- " << endl;
-        //unit_test[138] realserver_connect_failed_count=0の場合
         //unit_test[138] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[138] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在する場合
         //unit_test[138] データ状態がHTTP_STARTの場合
@@ -2925,7 +2941,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = HTTP_START;
@@ -2959,7 +2974,6 @@ public:
         }
 
         cout << "[139]--------------------------------------------- " << endl;
-        //unit_test[139] realserver_connect_failed_count=0の場合
         //unit_test[139] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[139] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在する場合
         //unit_test[139] データ状態がHTTP_HEADERの場合
@@ -2970,7 +2984,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = HTTP_HEADER;
@@ -3003,7 +3016,6 @@ public:
         }
 
         cout << "[140]--------------------------------------------- " << endl;
-        //unit_test[140] realserver_connect_failed_count=0の場合
         //unit_test[140] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[140] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在する場合
         //unit_test[140] データ状態がHTTP_BODYの場合
@@ -3014,7 +3026,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = HTTP_BODY;
@@ -3046,7 +3057,6 @@ public:
             this->ip_data_processor = NULL;
         }
         cout << "[141]--------------------------------------------- " << endl;
-        //unit_test[141] realserver_connect_failed_count=0の場合
         //unit_test[141] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[141] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在する場合
         //unit_test[141] データ状態がUNKNOWNの場合
@@ -3057,7 +3067,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = UNKNOWN;
@@ -3087,7 +3096,6 @@ public:
         }
 
         cout << "[142]--------------------------------------------- " << endl;
-        //unit_test[142] realserver_connect_failed_count=0の場合
         //unit_test[142] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[142] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[142] no rescheduleモード
@@ -3098,7 +3106,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             this->reschedule = 0;
@@ -3125,7 +3132,6 @@ public:
         }
 
         cout << "[143]--------------------------------------------- " << endl;
-        //unit_test[143] realserver_connect_failed_count=0の場合
         //unit_test[143] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[143] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[143] rescheduleモード
@@ -3137,7 +3143,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_nodeterminate;
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             this->reschedule = 1;
@@ -3164,7 +3169,6 @@ public:
         }
 
         cout << "[144]--------------------------------------------- " << endl;
-        //unit_test[144] realserver_connect_failed_count=0の場合
         //unit_test[144] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[144] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[144] rescheduleモード
@@ -3177,7 +3181,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_determinate;
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = HTTP_START;
@@ -3208,7 +3211,6 @@ public:
         }
 
         cout << "[145]--------------------------------------------- " << endl;
-        //unit_test[145] realserver_connect_failed_count=0の場合
         //unit_test[145] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[145] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[145] rescheduleモード
@@ -3221,7 +3223,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_determinate;
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = HTTP_HEADER;
@@ -3252,7 +3253,6 @@ public:
         }
 
         cout << "[146]--------------------------------------------- " << endl;
-        //unit_test[146] realserver_connect_failed_count=0の場合
         //unit_test[146] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[146] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[146] rescheduleモード
@@ -3265,7 +3265,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_determinate;
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = HTTP_BODY;
@@ -3296,7 +3295,6 @@ public:
         }
 
         cout << "[147]--------------------------------------------- " << endl;
-        //unit_test[147] realserver_connect_failed_count=0の場合
         //unit_test[147] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[147] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[147] rescheduleモード
@@ -3309,7 +3307,6 @@ public:
             this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
             tcp_schedule_func_type func = &schedule_tcp_determinate;
             this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = 0;
             data_ptr->client_endpoint = ep1;
             data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             data_ptr->data_state = UNKNOWN;
@@ -3346,32 +3343,32 @@ public:
         //unit_test[148] schedule_moduleにて振り分け先realserverを未決定
         //unit_test[148] status = CLIENT_DISCONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func_err = &schedule_tcp_nodeterminate;
-            this->register_schedule(func_err);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func_err = &schedule_tcp_nodeterminate;
+//            this->register_schedule(func_err);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[149]--------------------------------------------- " << endl;
@@ -3381,36 +3378,36 @@ public:
         //unit_test[149] データ状態がHTTP_STARTの場合
         //unit_test[149] status = CLIENT_RECV
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->data_state = HTTP_START;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->data_state = HTTP_START;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[150]--------------------------------------------- " << endl;
@@ -3420,35 +3417,35 @@ public:
         //unit_test[150] データ状態がHTTP_HEADERの場合
         //unit_test[150] status =REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->data_state = HTTP_HEADER;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->data_state = HTTP_HEADER;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[151]--------------------------------------------- " << endl;
@@ -3458,36 +3455,36 @@ public:
         //unit_test[151] データ状態がHTTP_BODYの場合
         //unit_test[151] status =REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->data_state = HTTP_BODY;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            //    install_stb_replication_func();
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->data_state = HTTP_BODY;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            //    install_stb_replication_func();
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[152]--------------------------------------------- " << endl;
@@ -3497,35 +3494,35 @@ public:
         //unit_test[152] データ状態がUNKNOWNの場合
         //unit_test[152] status =REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->data_state = UNKNOWN;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->data_state = UNKNOWN;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[153]--------------------------------------------- " << endl;
@@ -3535,41 +3532,41 @@ public:
         //unit_test[153] データ状態がHTTP_STARTの場合
         //unit_test[153] status = CLIENT_RECV
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = HTTP_START;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            realserver server;
-            server.tcp_endpoint = ep2;
-            rs_list.clear();
-            rs_list.push_back(server);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = HTTP_START;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            realserver server;
+//            server.tcp_endpoint = ep2;
+//            rs_list.clear();
+//            rs_list.push_back(server);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[154]--------------------------------------------- " << endl;
@@ -3579,41 +3576,41 @@ public:
         //unit_test[154] データ状態がHTTP_HEADERの場合
         //unit_test[154] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = HTTP_HEADER;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            realserver server;
-            server.tcp_endpoint = ep2;
-            rs_list.clear();
-            rs_list.push_back(server);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = HTTP_HEADER;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            realserver server;
+//            server.tcp_endpoint = ep2;
+//            rs_list.clear();
+//            rs_list.push_back(server);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[155]--------------------------------------------- " << endl;
@@ -3623,41 +3620,41 @@ public:
         //unit_test[155] データ状態がHTTP_BODYの場合
         //unit_test[155] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = HTTP_BODY;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            realserver server;
-            server.tcp_endpoint = ep2;
-            rs_list.clear();
-            rs_list.push_back(server);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = HTTP_BODY;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            realserver server;
+//            server.tcp_endpoint = ep2;
+//            rs_list.clear();
+//            rs_list.push_back(server);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
         cout << "[156]--------------------------------------------- " << endl;
         //unit_test[156] realserver_connect_failed_count=-1の場合
@@ -3666,41 +3663,41 @@ public:
         //unit_test[156] データ状態がUNKNOWNの場合
         //unit_test[156] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = UNKNOWN;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            realserver server;
-            server.tcp_endpoint = ep2;
-            rs_list.clear();
-            rs_list.push_back(server);
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = UNKNOWN;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            realserver server;
+//            server.tcp_endpoint = ep2;
+//            rs_list.clear();
+//            rs_list.push_back(server);
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[157]--------------------------------------------- " << endl;
@@ -3710,35 +3707,35 @@ public:
         //unit_test[157] no rescheduleモード
         //unit_test[157] status = CLIENT_DISCONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            this->reschedule = 0;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            rs_list.clear();
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = bind(&schedule_tcp_determinate_config_result, _1, _2, _3, _4, _5, ep2);
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            this->reschedule = 0;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            rs_list.clear();
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[158]--------------------------------------------- " << endl;
@@ -3749,35 +3746,35 @@ public:
         //unit_test[158] schedule_moduleにて振り分け先realserverを未決定する
         //unit_test[158] status = CLIENT_DISCONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_nodeterminate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            this->reschedule = 1;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            rs_list.clear();
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_nodeterminate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            this->reschedule = 1;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            rs_list.clear();
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[159]--------------------------------------------- " << endl;
@@ -3789,39 +3786,39 @@ public:
         //unit_test[159] データ状態がHTTP_STARTの場合
         //unit_test[159] status = CLIENT_RECV
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = HTTP_START;
-            this->reschedule = 1;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            rs_list.clear();
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = HTTP_START;
+//            this->reschedule = 1;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            rs_list.clear();
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[160]--------------------------------------------- " << endl;
@@ -3833,39 +3830,39 @@ public:
         //unit_test[160] データ状態がHTTP_HEADERの場合
         //unit_test[160] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = HTTP_HEADER;
-            this->reschedule = 1;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            rs_list.clear();
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = HTTP_HEADER;
+//            this->reschedule = 1;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            rs_list.clear();
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[161]--------------------------------------------- " << endl;
@@ -3877,39 +3874,39 @@ public:
         //unit_test[161] データ状態がHTTP_BODYの場合
         //unit_test[161] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = HTTP_BODY;
-            this->reschedule = 1;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            rs_list.clear();
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = HTTP_BODY;
+//            this->reschedule = 1;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            rs_list.clear();
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[162]--------------------------------------------- " << endl;
@@ -3921,39 +3918,39 @@ public:
         //unit_test[162] データ状態がUNKNOWNの場合
         //unit_test[162] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = -1;
-            data_ptr->client_endpoint = ep1;
-            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
-            data_ptr->data_state = UNKNOWN;
-            this->reschedule = 1;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-            ip_session_entry_data.rs_endpoint = ep2;
-            ip_session_entry_data.last_time = 0;
-            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
-            rs_list.clear();
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
-            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
-            BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = -1;
+//            data_ptr->client_endpoint = ep1;
+//            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
+//            data_ptr->data_state = UNKNOWN;
+//            this->reschedule = 1;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//            ip_session_entry_data.rs_endpoint = ep2;
+//            ip_session_entry_data.last_time = 0;
+//            (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->write_session_data_stub(data_ptr->ip_hash, ip_session_entry_data);
+//            rs_list.clear();
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//            ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
+//            BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
+//            BOOST_CHECK_EQUAL(entry.last_time, 0);
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
 
@@ -3965,32 +3962,32 @@ public:
         //unit_test[163] データ状態がHTTP_STARTの場合
         //unit_test[163] status = CLIENT_RECV
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
-            data_ptr->data_state = HTTP_START;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
+//            data_ptr->data_state = HTTP_START;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+//            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[164]--------------------------------------------- " << endl;
@@ -3999,32 +3996,32 @@ public:
         //unit_test[164] データ状態がHTTP_HEADERの場合
         //unit_test[164] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
-            data_ptr->data_state = HTTP_HEADER;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
+//            data_ptr->data_state = HTTP_HEADER;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[165]--------------------------------------------- " << endl;
@@ -4033,32 +4030,32 @@ public:
         //unit_test[165] データ状態がHTTP_BODYの場合
         //unit_test[165] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
-            data_ptr->data_state = HTTP_BODY;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
+//            data_ptr->data_state = HTTP_BODY;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
 
@@ -4068,32 +4065,32 @@ public:
         //unit_test[166] データ状態がHTTP_UNKNOWNの場合
         //unit_test[166] status = REALSERVER_CONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_determinate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
-            data_ptr->data_state = UNKNOWN;
-            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
-                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
-                    inputLogWarn, inputLogInfo, inputLogDebug);
-            this->ip_data_processor = new ip_session_data_processor_stub(
-                3600, this->replication_data_processor, ingetloglevel,
-                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
-                inputLogDebug);
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
-            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
-            this->session_thread_data_map.clear();
-            delete this->replication_data_processor;
-            delete this->ip_data_processor;
-            this->replication_data_processor = NULL;
-            this->ip_data_processor = NULL;
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_determinate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
+//            data_ptr->data_state = UNKNOWN;
+//            this->replication_data_processor = new ip_replication_data_processor(ip_replication_area_begain,
+//                    ip_replication_area_size, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+//                    inputLogWarn, inputLogInfo, inputLogDebug);
+//            this->ip_data_processor = new ip_session_data_processor_stub(
+//                3600, this->replication_data_processor, ingetloglevel,
+//                inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+//                inputLogDebug);
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+//            BOOST_CHECK_EQUAL((rs_endpoint != tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
+//            this->session_thread_data_map.clear();
+//            delete this->replication_data_processor;
+//            delete this->ip_data_processor;
+//            this->replication_data_processor = NULL;
+//            this->ip_data_processor = NULL;
         }
 
         cout << "[167]--------------------------------------------- " << endl;
@@ -4101,20 +4098,20 @@ public:
         //unit_test[167] schedule_moduleにて振り分け先realserverを未決定
         //unit_test[167] status = CLIENT_DISCONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            tcp_schedule_func_type func = &schedule_tcp_nodeterminate;
-            this->register_schedule(func);
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-            this->session_thread_data_map.clear();
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            tcp_schedule_func_type func = &schedule_tcp_nodeterminate;
+//            this->register_schedule(func);
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT - 1;
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+//            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+//            this->session_thread_data_map.clear();
         }
 
 
@@ -4123,18 +4120,18 @@ public:
         //unit_test[168] realserver_connect_failed_count == realserver_connect_failed_max_countの場合
         //unit_test[168] status = CLIENT_DISCONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT;
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-            this->session_thread_data_map.clear();
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT;
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+//            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+//            this->session_thread_data_map.clear();
 
         }
 
@@ -4142,18 +4139,18 @@ public:
         //unit_test[169] realserver_connect_failed_count = realserver_connect_failed_max_count+1の場合
         //unit_test[169] status = CLIENT_DISCONNECT
         {
-            this->session_thread_data_map.clear();
-            thread_data_ptr data_ptr(new session_thread_data_ip);
-            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT +1;
-
-            ret = this->handle_realserver_select(boost::this_thread::get_id(),
-                                                 rs_endpoint);
-
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
-            this->session_thread_data_map.clear();
+//            this->session_thread_data_map.clear();
+//            thread_data_ptr data_ptr(new session_thread_data_ip);
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
+//            //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT +1;
+//
+//            ret = this->handle_realserver_select(boost::this_thread::get_id(),
+//                                                 rs_endpoint);
+//
+//            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+//            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
+//            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+//            this->session_thread_data_map.clear();
 
         }
 
@@ -4172,18 +4169,7 @@ public:
         boost::asio::ip::tcp::endpoint ep2(boost::asio::ip::address::from_string("192.168.120.250"),
                                            12345);
 
-        boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
-        boost::function<void(const unsigned int, const std::string&,
-                             const char*, int)> inputLogFatal = stb_putLogFatal;
-        boost::function<void(const unsigned int, const std::string&,
-                             const char*, int)> inputLogError = stb_putLogError;
-        boost::function<void(const unsigned int, const std::string&,
-                             const char*, int)> inputLogWarn = stb_putLogWarn;
-        boost::function<void(const unsigned int, const std::string&,
-                             const char*, int)> inputLogInfo = stb_putLogInfo;
-        boost::function<void(const unsigned int, const std::string&,
-                             const char*, int)> inputLogDebug = stb_putLogDebug;
-
+        
         boost::asio::ip::tcp::endpoint virtual_service_endpoint;
         ip_session_table_entry ip_session_entry_data;
 
@@ -4195,22 +4181,30 @@ public:
         rs_list_unlock = &rslist_unlock;
 
         cout << "[170]--------------------------------------------- " << endl;
-        //unit_test[170] realserver_connect_failed_count = realserver_connect_failed_max_count+1の場合
+        //unit_test[170] get_endpoint_from_session_data後endpoint = 未決定
+        //unit_test[170] schedule_moduleにて振り分け先realserverを未決定
         //unit_test[170] status = CLIENT_DISCONNECT
+
         {
             thread_data_ptr data_ptr(new session_thread_data_ip);
+            data_ptr->client_endpoint = ep1;
+            data_ptr->ip_hash = l7vs_ip_service_calc_hash(data_ptr->client_endpoint);
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
                 this->session_thread_data_map[boost::this_thread::get_id()] = data_ptr;
-                //data_ptr->realserver_connect_failed_count = REALSERVER_CONNECT_FAILED_COUNT +1;
+                tcp_schedule_func_type func_err = &schedule_tcp_nodeterminate;
+                this->register_schedule(func_err);
             }
+
             ret = this->handle_realserver_select(boost::this_thread::get_id(),
                                                  rs_endpoint);
+            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+            BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
-                BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-                BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
-                BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
                 this->session_thread_data_map.erase(boost::this_thread::get_id());
             }
         }
@@ -4260,7 +4254,6 @@ public:
         //unit_test[174] データ状態にHTTP_BODYを設定する
         //unit_test[174] status = REALSERVER_SEND
         //unit_test[174] 送信バッファにデータをコピーし、X-Forworded-For文字列を添加する
-        //unit_test[174] realserver_connect_failed_count ＝0
         {
             thread_data_ptr thread_data(new session_thread_data_ip);
             this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
@@ -4284,7 +4277,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(thread_data->data_state, HTTP_BODY);// データ状態にHTTP_BODYを設定する
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             BOOST_CHECK_EQUAL(send_buffer_len, strlen(send_buffer_context));
             BOOST_CHECK_EQUAL(thread_data->buffer_sequence.empty(), true);
             delete[] thread_data->data_buffer;
@@ -4298,8 +4290,6 @@ public:
         //unit_test[175] データ状態にHTTP_BODYを設定する
         //unit_test[175] status = REALSERVER_SEND
         //unit_test[175] 送信バッファにデータをコピーし
-        //unit_test[175] realserver_connect_failed_count ＝0
-
         {
             thread_data_ptr thread_data(new session_thread_data_ip);
             this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
@@ -4322,7 +4312,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(thread_data->data_state, HTTP_BODY);// データ状態にHTTP_BODYを設定する
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             BOOST_CHECK_EQUAL(send_buffer_len, http_header_len);// 送信データサイズに送信可能サイズを設定する
             cmp_ret = memcmp(send_buffer.c_array(),thread_data->data_buffer,http_header_len);
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
@@ -4338,7 +4327,6 @@ public:
         //unit_test[176] データ状態がHTTP_BODY
         //unit_test[176] status = REALSERVER_SEND
         //unit_test[176] 送信バッファにデータをコピーし
-        //unit_test[176] realserver_connect_failed_count ＝0
         {
             thread_data_ptr thread_data(new session_thread_data_ip);
             this->session_thread_data_map[boost::this_thread::get_id()] = thread_data;
@@ -4361,7 +4349,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(send_buffer_len, http_header_len);
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             cmp_ret = memcmp(send_buffer.c_array(),http_header_ptr,http_header_len);
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 90u);// 未送信データサイズに送信可能サイズを減算する
@@ -4378,7 +4365,6 @@ public:
         //unit_test[177] データ状態がUNKNOWN
         //unit_test[177] status = REALSERVER_SEND
         //unit_test[177] 送信バッファにデータをコピーし
-        //unit_test[177] realserver_connect_failed_count ＝0
         {
 
             thread_data_ptr thread_data(new session_thread_data_ip);
@@ -4403,7 +4389,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(send_buffer_len, http_header_len);// 送信データサイズに送信可能サイズを設定する
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             cmp_ret = memcmp(send_buffer.c_array(),thread_data->data_buffer + 0u, http_header_len);
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 0u);// 未送信データサイズに送信可能サイズを減算する
@@ -4417,7 +4402,6 @@ public:
         //unit_test[178] 送信データリストが空ではないの場合(size = 1, forwarded_for = 0)
         //unit_test[178] status = REALSERVER_SEND
         //unit_test[178] 送信バッファにデータをコピーし
-        //unit_test[178] realserver_connect_failed_count ＝0
         {
 
             thread_data_ptr thread_data(new session_thread_data_ip);
@@ -4442,7 +4426,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(send_buffer_len, http_header_len - 6);// 送信データサイズに送信可能サイズを設定する
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             cmp_ret = memcmp(send_buffer.c_array(),thread_data->data_buffer + 6u, send_buffer_len);
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 15u);// 未送信データサイズに送信可能サイズを減算する
@@ -4457,7 +4440,6 @@ public:
         //unit_test[179] 送信データリストが空ではないの場合(size = 2, forwarded_for = 1)
         //unit_test[179] status = REALSERVER_SEND
         //unit_test[179] 送信バッファにデータをコピーし
-        //unit_test[179] realserver_connect_failed_count ＝0
         {
 
             thread_data_ptr thread_data(new session_thread_data_ip);
@@ -4491,7 +4473,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(send_buffer_len, strlen(send_buffer_context));
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             cmp_ret = memcmp(send_buffer.c_array(),send_buffer_context, send_buffer_len);
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 15u);// 未送信データサイズに送信可能サイズを減算する
@@ -4505,7 +4486,6 @@ public:
         //unit_test[180] 送信データリストが空ではないの場合(size = 3, forwarded_for = 1)
         //unit_test[180] status = REALSERVER_SEND
         //unit_test[180] 送信バッファにデータをコピーし
-        //unit_test[180] realserver_connect_failed_count ＝0
         {
 
             thread_data_ptr thread_data(new session_thread_data_ip);
@@ -4537,7 +4517,6 @@ public:
             BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
             BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
             BOOST_CHECK_EQUAL(send_buffer_len, strlen(send_buffer_context));// 送信データサイズに送信可能サイズを設定する
-            //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
             cmp_ret = memcmp(send_buffer.c_array(),send_buffer_context, send_buffer_len);
             BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
             BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 15u);// 未送信データサイズに送信可能サイズを減算する
@@ -4563,7 +4542,6 @@ public:
         //unit_test[181] 送信データリストが空ではないの場合(size = 3, forwarded_for = 1)
         //unit_test[181] status = REALSERVER_SEND
         //unit_test[181] 送信バッファにデータをコピーし
-        //unit_test[181] realserver_connect_failed_count ＝0
         {
 
             thread_data_ptr thread_data(new session_thread_data_ip);
@@ -4601,7 +4579,6 @@ public:
                 BOOST_CHECK_EQUAL(ret, REALSERVER_SEND);// 遷移先ステータスを設定する
                 BOOST_CHECK_EQUAL(thread_data->last_status, REALSERVER_SEND);// 遷移ステータスを保存する
                 BOOST_CHECK_EQUAL(send_buffer_len, strlen(send_buffer_context));// 送信データサイズに送信可能サイズを設定する
-                //BOOST_CHECK_EQUAL(thread_data->realserver_connect_failed_count, 0);
                 cmp_ret = memcmp(send_buffer.c_array(),send_buffer_context, send_buffer_len);
                 BOOST_CHECK_EQUAL(cmp_ret, 0);// 送信バッファにデータを送信可能サイズ分コピーする
                 BOOST_CHECK_EQUAL(thread_data->current_message_rest_size, 15u);// 未送信データサイズに送信可能サイズを減算する
@@ -4644,34 +4621,30 @@ public:
         }
 
         cout << "[184]--------------------------------------------- " << endl;
-        //unit_test[184] rescheduleモード realserver_connect_failed_count で1を加算する 遷移先ステータスをREALSERVER_SELECT設定する
+        //unit_test[184] rescheduleモード  遷移先ステータスをREALSERVER_SELECT設定する
         {
-            boost::asio::ip::tcp::endpoint ep;
-
-            thread_data_ptr data(new session_thread_data_ip);
-            data->thread_id = boost::this_thread::get_id();
-            //data->realserver_connect_failed_count = 1;
-            this->reschedule = 1;
-            this->session_thread_data_map[boost::this_thread::get_id()] = data;
-
-            ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-
-            //遷移先ステータスを設定する
-            //status = REALSERVER_SELECT
-            BOOST_CHECK_EQUAL(ret, REALSERVER_SELECT);
-            BOOST_CHECK_EQUAL(data->last_status, REALSERVER_SELECT);
-            //BOOST_CHECK_EQUAL(data->realserver_connect_failed_count, 2);
+//            boost::asio::ip::tcp::endpoint ep;
+//
+//            thread_data_ptr data(new session_thread_data_ip);
+//            data->thread_id = boost::this_thread::get_id();
+//            this->reschedule = 1;
+//            this->session_thread_data_map[boost::this_thread::get_id()] = data;
+//
+//            ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//
+//            //遷移先ステータスを設定する
+//            //status = REALSERVER_SELECT
+//            BOOST_CHECK_EQUAL(ret, REALSERVER_SELECT);
+//            BOOST_CHECK_EQUAL(data->last_status, REALSERVER_SELECT);
         }
 
         cout << "[185]--------------------------------------------- " << endl;
-        //unit_test[185] no rescheduleモード  遷移先ステータスをCLIENT_DISCONNECT設定する
+        //unit_test[185] 遷移先ステータスをCLIENT_DISCONNECT設定する
         {
             boost::asio::ip::tcp::endpoint ep;
 
             thread_data_ptr data(new session_thread_data_ip);
             data->thread_id = boost::this_thread::get_id();
-            //data->realserver_connect_failed_count = 1;
-            this->reschedule = 0;
             this->session_thread_data_map[boost::this_thread::get_id()] = data;
 
             ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
@@ -4688,19 +4661,15 @@ public:
     void handle_realserver_connection_fail_test_thread()
     {
         EVENT_TAG ret;
-        boost::asio::ip::tcp::endpoint ep_err1;
 
         cout << "[186]--------------------------------------------- " << endl;
-        //unit_test[186] no rescheduleモード  遷移先ステータスをCLIENT_DISCONNECT設定する
+        //unit_test[186] 遷移先ステータスをCLIENT_DISCONNECT設定する
         {
             boost::asio::ip::tcp::endpoint ep;
 
             thread_data_ptr data(new session_thread_data_ip);
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
-                data->thread_id = boost::this_thread::get_id();
-                //data->realserver_connect_failed_count = 1;
-                this->reschedule = 0;
                 this->session_thread_data_map[boost::this_thread::get_id()] = data;
             }
             ret = this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
@@ -10363,6 +10332,33 @@ public:
             delete[] thread_data->data_buffer;
         }
     }
+
+    void get_option_info_test()
+    {
+        {
+            cout << "[414]--------------------------------------------- " << endl;
+            //unit_test[414] timeoutが0、forwarded_forが0、rescheduleが0、sorry_uriが""の場合
+            this->timeout = 0;
+            this->forwarded_for = 0;
+            this->reschedule = 0;
+            memset(this->sorry_uri.c_array(), 0, MAX_OPTION_SIZE);
+            std::string option;
+            this->get_option_info(option);
+            BOOST_CHECK_EQUAL(strcmp(option.c_str(), "--timeout 0 --no-reschedule --sorry-uri ''"), 0); 
+        }
+        {
+            cout << "[415]--------------------------------------------- " << endl;
+            //unit_test[415] timeoutが3600、forwarded_forが1、rescheduleが1、sorry_uriが"/sorry"の場合
+            this->timeout = 3600;
+            this->forwarded_for = 1;
+            this->reschedule = 1;
+            memset(this->sorry_uri.c_array(), 0, MAX_OPTION_SIZE);
+            strcpy(this->sorry_uri.c_array(), "/sorry");
+            std::string option;
+            this->get_option_info(option);
+            BOOST_CHECK_EQUAL(strcmp(option.c_str(), "--timeout 3600 --forwarded-for --reschedule --sorry-uri '/sorry'"), 0);
+        }
+    }
 };
 
 /***********************************************************************************
@@ -10533,10 +10529,27 @@ void handle_realserver_select_tcp_test_thread()
 {
     protocol_module_ip_test_class obj;
 
-    //register function
-    protocol_module_ip_test_class::tcp_schedule_func_type func = &schedule_tcp_determinate;
+    boost::asio::ip::tcp::endpoint virtual_service_endpoint;
+    boost::function<LOG_LEVEL_TAG(void)> ingetloglevel = stb_getloglevel;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogFatal = stb_putLogFatal;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogError = stb_putLogError;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogWarn = stb_putLogWarn;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogInfo = stb_putLogInfo;
+    boost::function<void(const unsigned int, const std::string&,
+            const char*, int)> inputLogDebug = stb_putLogDebug;
 
-    obj.register_schedule(func);
+    obj.set_replication_data_processor(new ip_replication_data_processor(NULL,
+                        10, virtual_service_endpoint, ingetloglevel, inputLogFatal, inputLogError,
+                        inputLogWarn, inputLogInfo, inputLogDebug));
+    obj.set_ip_data_processor(new ip_session_data_processor_stub(
+                        3600, obj.get_replication_data_processor(), ingetloglevel,
+                        inputLogFatal, inputLogError, inputLogWarn, inputLogInfo,
+                        inputLogDebug));
+    
 
     boost::thread_group threads;
     for (int i = 0; i < THREAD_COUNT; ++i)
@@ -10544,6 +10557,9 @@ void handle_realserver_select_tcp_test_thread()
         threads.create_thread(bind(&protocol_module_ip_test_class::handle_realserver_select_tcp_test_thread, &obj));
     }
     threads.join_all();
+
+    obj.release_replication_data_processor();
+    obj.release_ip_data_processor();
 }
 
 //handle_realserver_select(udp)
@@ -10885,7 +10901,11 @@ void put_data_into_sendbuffer_test()
     protocol_module_ip_test_class obj;
     obj.put_data_into_sendbuffer_test();
 }
-
+void get_option_info_test()
+{
+    protocol_module_ip_test_class obj;
+    obj.get_option_info_test();
+}
 
 test_suite*    protocol_module_ip_test_main( )
 {
@@ -10911,8 +10931,8 @@ test_suite*    protocol_module_ip_test_main( )
     ts->add(BOOST_TEST_CASE(&handle_accept_test_thread));
     ts->add(BOOST_TEST_CASE(&handle_client_recv_test));
     ts->add(BOOST_TEST_CASE(&handle_client_recv_test_thread));
-    //ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test));
-    //ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test_thread));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test));
+    ts->add(BOOST_TEST_CASE(&handle_realserver_select_tcp_test_thread));
     ts->add(BOOST_TEST_CASE(&handle_realserver_select_udp_test));
     ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test));
     ts->add(BOOST_TEST_CASE(&handle_realserver_connect_test_thread));
@@ -10952,6 +10972,7 @@ test_suite*    protocol_module_ip_test_main( )
     ts->add(BOOST_TEST_CASE(&create_x_forwarded_for_test));
     ts->add(BOOST_TEST_CASE(&get_data_from_recvbuffer_test));
     ts->add(BOOST_TEST_CASE(&put_data_into_sendbuffer_test));
+    ts->add(BOOST_TEST_CASE(&get_option_info_test));
 
     framework::master_test_suite().add(ts);
     return 0;

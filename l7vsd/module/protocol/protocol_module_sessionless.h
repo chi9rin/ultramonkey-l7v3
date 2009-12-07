@@ -29,7 +29,7 @@
 #define PROTOCOL_MODULE_SESSIONLESS_H
 
 #define MAX_OPTION_SIZE 128
-#define MAX_SESSIONLESS_MODULE_BUFFER_SIZE (4 * 1024* 1024 + MAX_BUFFER_SIZE)
+#define MAX_SESSIONLESS_MODULE_BUFFER_SIZE 8190
 
 namespace l7vs
 {
@@ -168,6 +168,7 @@ public:
     check_message_result check_parameter(const std::vector<std::string>& args);
     check_message_result set_parameter(const std::vector<std::string>& args);
     check_message_result add_parameter(const std::vector<std::string>& args);
+    void get_option_info(std::string& option);
     void handle_rslist_update();
     void register_schedule(tcp_schedule_func_type inschedule);
     void register_schedule(udp_schedule_func_type inschedule);

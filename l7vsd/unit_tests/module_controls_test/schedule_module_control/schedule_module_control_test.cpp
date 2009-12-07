@@ -13,14 +13,15 @@ using namespace boost::unit_test;
 void    schedule_module_control_getInstance_test(){
     BOOST_TEST_MESSAGE( "schedule_module_control_getInstance_test" );
     // unit_test[1]  getInstance 取得したインスタンスが一致していることのチェック
-    schedule_module_control_testclass& control = schedule_module_control_testclass::getInstance();
-    schedule_module_control_testclass& control_2 = schedule_module_control_testclass::getInstance();
+    schedule_module_control& control = schedule_module_control::getInstance();
+    schedule_module_control& control_2 = schedule_module_control::getInstance();
     BOOST_CHECK_EQUAL( &control, &control_2 );
 
+    schedule_module_control_testclass& control_3 = schedule_module_control_testclass::getInstance();
     // unit_test[2]  getInstance modulefile_pathのデフォルト値のチェック
-    BOOST_CHECK_EQUAL( control.get_modulefile_path(), "" );
+    BOOST_CHECK_EQUAL( control_3.get_modulefile_path(), "" );
     // unit_test[3]  getInstance ロードモジュールのマップのデフォルトサイズのチェック
-    schedule_module_control::name_module_info_map& loadmodulemap = control.get_loadmodule_map();
+    schedule_module_control::name_module_info_map& loadmodulemap = control_3.get_loadmodule_map();
     BOOST_CHECK_EQUAL( loadmodulemap.size(), (size_t)0 );
 }
 

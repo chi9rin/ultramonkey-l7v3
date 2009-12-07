@@ -718,7 +718,32 @@ namespace l7vs
         return check_result;
     }
 
+    //! get option info
+    //! @param[out] module paramter string
+    void protocol_module_sessionless::get_option_info(std::string& option)
+    {
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+        {
+            putLogDebug(100019, "in_function : void protocol_module_sessionless::get_option_info("
+                        "std::string& option).", __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
 
+        boost::format option_formatter("%s--sorry-uri '%s'");
+        option_formatter % (forwarded_for ? "--forwarded-for " : "") % sorry_uri.c_array();
+        option.assign(option_formatter.str());     
+
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+        {
+            boost::format formatter("out_function : void protocol_module_sessionless::get_option_info("
+                                    "std::string& option) : option = %s.");
+            formatter % option;
+            putLogDebug(100020, formatter.str(), __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+    }
 
     //! TCP/IP scheduled function registation.
     //! @param[in] schedule module TCP/IP scheduled function object type
@@ -727,7 +752,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(100019, "in_function : void protocol_module_sessionless::register_schedule("
+            putLogDebug(100021, "in_function : void protocol_module_sessionless::register_schedule("
                         "tcp_schedule_func_type inschedule).", __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -735,7 +760,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(100020, "out_function : void protocol_module_sessionless::register_schedule("
+            putLogDebug(100022, "out_function : void protocol_module_sessionless::register_schedule("
                         "tcp_schedule_func_type inschedule).", __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
@@ -748,7 +773,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(100021,
+            putLogDebug(100023,
                         "in/out_function : void protocol_module_sessionless::register_schedule(udp_schedule_func_type inschedule).",
                         __FILE__, __LINE__ );
         }
@@ -773,7 +798,7 @@ namespace l7vs
                                     "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : "
                                     "up_thread_id = %d, down_thread_id = %d, client_endpoint_tcp = [%s]:%d.");
             formatter % up_thread_id % down_thread_id % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port() ;
-            putLogDebug(100022, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100024, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -787,7 +812,7 @@ namespace l7vs
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(p_up.get()) % sizeof(session_thread_data_sessionless);
-                putLogDebug(100023, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100025, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             p_up->thread_id = up_thread_id;
@@ -817,7 +842,7 @@ namespace l7vs
                 formatter % p_up->thread_id % p_up->thread_division % p_up->pair_thread_id % p_up->accept_end_flag
                 % p_up->end_flag % p_up->sorry_flag % p_up->sorryserver_switch_flag % p_up->realserver_switch_flag
                 % p_up->last_status % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port();
-                putLogDebug(100024, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100026, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -827,7 +852,7 @@ namespace l7vs
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(p_down.get()) % sizeof(session_thread_data_sessionless);
-                putLogDebug(100025, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100027, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             p_down->thread_id = down_thread_id;
@@ -852,7 +877,7 @@ namespace l7vs
                 formatter % p_down->thread_id % p_down->thread_division % p_down->pair_thread_id % p_down->accept_end_flag
                 % p_down->end_flag % p_down->sorry_flag % p_down->sorryserver_switch_flag
                 % p_down->realserver_switch_flag % p_down->last_status % client_endpoint_tcp.address().to_string() % client_endpoint_tcp.port();
-                putLogDebug(100026, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100028, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -900,7 +925,7 @@ namespace l7vs
                                     "const boost::thread::id down_thread_id, const boost::asio::ip::tcp::endpoint& client_endpoint_tcp, "
                                     "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100027, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100029, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -922,7 +947,7 @@ namespace l7vs
                                     "const boost::thread::id down_thread_id) : "
                                     "up_thread_id = %d, down_thread_id = %d.");
             formatter % up_thread_id % down_thread_id;
-            putLogDebug(100028, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100030, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = STOP;
@@ -945,7 +970,7 @@ namespace l7vs
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_up.get());
-                    putLogDebug(100029, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100031, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 session_thread_data_map.erase(up_thread_id);
@@ -959,7 +984,7 @@ namespace l7vs
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_down.get());
-                    putLogDebug(100030, formatter.str(), __FILE__,
+                    putLogDebug(100032, formatter.str(), __FILE__,
                                 __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
@@ -995,7 +1020,7 @@ namespace l7vs
                                     "handle_session_finalize(const boost::thread::id up_thread_id, "
                                     "const boost::thread::id down_thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100031, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100033, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -1013,7 +1038,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_accept(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100032, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100034, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1044,7 +1069,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_accept(const boost::thread::id thread_id) : ACCEPT_END_FLAG_ON. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(100033, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100035, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -1069,7 +1094,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_accept() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100034, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100036, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -1101,7 +1126,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_accept(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100035, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100037, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -1126,7 +1151,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : thread_id = %d, recvbuffer = %s, recvlen = %d.");
             formatter % thread_id % buffer % recvlen;
-            putLogDebug(100036, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100038, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1168,7 +1193,7 @@ namespace l7vs
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(100037, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100039, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return FINALIZE;
@@ -1256,7 +1281,7 @@ namespace l7vs
                                     "handle_client_recv() : send status list dump : send status list size = %d.%s");
 
                     formatter % recv_data.send_status_list.size() % datadump;
-                    putLogDebug(100038, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100040, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1310,7 +1335,7 @@ namespace l7vs
                                     "handle_client_recv() : send status list dump : send status list size = %d.%s");
 
                     formatter % recv_data.send_status_list.size() % datadump;
-                    putLogDebug(100039, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100041, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1337,7 +1362,7 @@ namespace l7vs
                                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                                 formatter % FINALIZE % boost::this_thread::get_id();
-                                putLogDebug(100040, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100042, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             return FINALIZE;
@@ -1351,7 +1376,7 @@ namespace l7vs
                         {
                             boost::format formatter("new : address = &(%d), size = %lu.");
                             formatter % static_cast<void*>(buffer1) % buffer_size;
-                            putLogDebug(100041, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100043, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memset(buffer1, 0, buffer_size);
@@ -1362,7 +1387,7 @@ namespace l7vs
                         {
                             boost::format formatter("new : address = &(%d), size = %lu.");
                             formatter % static_cast<void*>(buffer2) % buffer_size;
-                            putLogDebug(100042, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100044, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memset(buffer2, 0, buffer_size);
@@ -1377,7 +1402,7 @@ namespace l7vs
                                 "handle_client_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_start % data_remain_size % datadump;
-                            putLogDebug(100043, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100045, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from old buffer to new buffer
@@ -1392,7 +1417,7 @@ namespace l7vs
                                 "handle_client_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(100044, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100046, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -1406,7 +1431,7 @@ namespace l7vs
                                 "handle_client_recv() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % recvlen % datadump;
-                            putLogDebug(100045, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100047, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -1420,7 +1445,7 @@ namespace l7vs
                                 "handle_client_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(100046, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100048, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //free old buffer1 and old buffer2
@@ -1431,7 +1456,7 @@ namespace l7vs
                             {
                                 boost::format formatter("delete : address = &(%d).");
                                 formatter % static_cast<void*>(recv_data.recive_buffer1);
-                                putLogDebug(100047, formatter.str(), __FILE__,
+                                putLogDebug(100049, formatter.str(), __FILE__,
                                             __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
@@ -1446,7 +1471,7 @@ namespace l7vs
                             {
                                 boost::format formatter("delete : address = &(%d).");
                                 formatter % static_cast<void*>(recv_data.recive_buffer2);
-                                putLogDebug(100048, formatter.str(), __FILE__,
+                                putLogDebug(100050, formatter.str(), __FILE__,
                                             __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
@@ -1488,7 +1513,7 @@ namespace l7vs
                                     "handle_client_recv() : before memcpy (data dump) : "
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % data_remain_start % data_remain_size  % datadump;
-                                putLogDebug(100049, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100051, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from buffer1 to buffer2
@@ -1503,7 +1528,7 @@ namespace l7vs
                                     "handle_client_recv() : after memcpy (data dump) : "
                                     "data begin = 0, data_size = %d, data = %s");
                                 formatter % recvlen % datadump;
-                                putLogDebug(100050, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100052, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             /*-------- DEBUG LOG --------*/
@@ -1516,7 +1541,7 @@ namespace l7vs
                                     "handle_client_recv() : before memcpy (data dump) : "
                                     "data begin = 0, data_size = %d, data = %s");
                                 formatter % recvlen % datadump;
-                                putLogDebug(100051, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100053, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
@@ -1530,7 +1555,7 @@ namespace l7vs
                                     "handle_client_recv() : after memcpy (data dump) : "
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % data_remain_size % recvlen % datadump;
-                                putLogDebug(100052, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100054, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //set buffer2 as using buffer
@@ -1551,7 +1576,7 @@ namespace l7vs
                                     "handle_client_recv() : before memcpy (data dump) : "
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % data_remain_start % data_remain_size % datadump;
-                                putLogDebug(100053, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100055, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from buffer2 to buffer1
@@ -1566,7 +1591,7 @@ namespace l7vs
                                     "handle_client_recv() : after memcpy (data dump) : "
                                     "data begin = 0, data_size = %d, data = %s");
                                 formatter % data_remain_size % datadump;
-                                putLogDebug(100054, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100056, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             /*-------- DEBUG LOG --------*/
@@ -1579,7 +1604,7 @@ namespace l7vs
                                     "handle_client_recv() : before memcpy (data dump) : "
                                     "data begin = 0, data_size = %d, data = %s");
                                 formatter % recvlen % datadump;
-                                putLogDebug(100055, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100057, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -1593,7 +1618,7 @@ namespace l7vs
                                     "handle_client_recv() : after memcpy (data dump) : "
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % data_remain_size % recvlen % datadump;
-                                putLogDebug(100056, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100058, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //set buffer1 as using buffer
@@ -1636,7 +1661,7 @@ namespace l7vs
                                                 "handle_client_recv() : before memcpy (data dump) : "
                                                 "data begin = 0, data_size = %d, data = %s");
                         formatter % recvlen % datadump;
-                        putLogDebug(100057, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100059, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from parameter to using buffer
@@ -1653,7 +1678,7 @@ namespace l7vs
                                                 "data begin = %d, data_size = %d, data = %s");
                         formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size )
                         % recvlen % datadump;
-                        putLogDebug(100058, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100060, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //buffer's rest size recalc
@@ -1715,7 +1740,7 @@ namespace l7vs
                                                     "handle_client_recv() : call check_http_method : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100059, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100061, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //check http method result is OK
@@ -1730,7 +1755,7 @@ namespace l7vs
                                                         "handle_client_recv() : call check_http_version : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % check_result % boost::this_thread::get_id();
-                                putLogDebug(100060, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100062, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                         }
@@ -1747,7 +1772,7 @@ namespace l7vs
                                                         "handle_client_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                putLogDebug(100061, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100063, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //search http header result is OK
@@ -1763,7 +1788,7 @@ namespace l7vs
                                                             "handle_client_recv() : call find_http_header : "
                                                             "return_value = %d. thread id : %d.");
                                     formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                    putLogDebug(100062, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100064, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //search Content_Length result is OK
@@ -1893,7 +1918,7 @@ namespace l7vs
                                     "handle_client_recv() : send status list dump : send status list size = %d.%s");
 
                     formatter % recv_data.send_status_list.size() % datadump;
-                    putLogDebug(100063, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100065, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //there are still rest data need to process
@@ -1928,7 +1953,7 @@ namespace l7vs
                                                 "handle_client_recv() : call check_http_method : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100064, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100066, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //check http method result is OK
@@ -1944,7 +1969,7 @@ namespace l7vs
                                                     "handle_client_recv() : call check_http_version : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100065, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100067, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -1961,7 +1986,7 @@ namespace l7vs
                                                     "handle_client_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100066, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100068, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //searched whole http header
@@ -1977,7 +2002,7 @@ namespace l7vs
                                                         "handle_client_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                putLogDebug(100067, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100069, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -2096,7 +2121,7 @@ namespace l7vs
                                     "handle_client_recv() : send status list dump : send status list size = %d.%s");
 
                     formatter % recv_data.send_status_list.size() % datadump;
-                    putLogDebug(100068, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100070, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //search for send_possible item in status list
@@ -2131,7 +2156,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_client_recv() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100069, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100071, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -2181,7 +2206,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100070, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100072, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2203,7 +2228,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint & rs_endpoint) : "
                                     "thread_id = %d, rs_endpoint = [%s]:%d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(100071, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100073, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -2227,7 +2252,7 @@ namespace l7vs
                                         "boost::asio::ip::tcp::endpoint & rs_endpoint)"
                                         " : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(100072, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100074, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return FINALIZE;
@@ -2259,7 +2284,7 @@ namespace l7vs
                                         "handle_realserver_select() : call schedule_tcp : "
                                         "rs_endpoint = [%s]:%d. thread id : %d.");
                 formatter % rs_endpoint.address().to_string() % rs_endpoint.port() % boost::this_thread::get_id();
-                putLogDebug(100073, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100075, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -2302,7 +2327,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_realserver_select() : END_FLAG_ON. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100074, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100076, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 status = CLIENT_DISCONNECT;
@@ -2316,7 +2341,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_select() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100075, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100077, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -2349,7 +2374,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint & rs_endpoint)"
                                     " : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100076, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100078, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2375,7 +2400,7 @@ namespace l7vs
                                     "size_t& datalen) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(100077, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100079, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -2396,7 +2421,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100078, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100080, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2487,7 +2512,7 @@ namespace l7vs
                                                 "handle_realserver_connect() : call find_http_header : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % static_cast<int>(ret) % boost::this_thread::get_id();
-                        putLogDebug(100079, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100081, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //search http header result is OK
@@ -2517,7 +2542,7 @@ namespace l7vs
                                                     "handle_realserver_connect() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(ret) % boost::this_thread::get_id();
-                            putLogDebug(100080, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100082, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         if (!ret)
@@ -2533,7 +2558,7 @@ namespace l7vs
                                                         "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                                         "size_t& datalen) : return_value = %d. thread id : %d.");
                                 formatter % FINALIZE % boost::this_thread::get_id();
-                                putLogDebug(100081, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100083, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             return FINALIZE;
@@ -2561,7 +2586,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_realserver_connect() : Copy data loop start. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100082, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100084, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 while (true)
@@ -2590,7 +2615,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (it->send_offset + it->send_end_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100083, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100085, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //copy data from recive_buffer to sendbuffer by sending_possible size
@@ -2610,7 +2635,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (send_buffer_end_size - send_buffer_remian_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100084, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100086, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
 
@@ -2635,7 +2660,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (it->send_offset + it->send_end_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100085, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100087, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //copy data from recive_buffer to sendbuffer by send buffer rest size
@@ -2654,7 +2679,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (send_buffer_end_size - send_buffer_remian_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100086, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100088, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 it->send_end_size += copy_size;
@@ -2688,7 +2713,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(100087, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100089, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
@@ -2705,7 +2730,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(100088, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100090, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += copy_size;
@@ -2727,7 +2752,7 @@ namespace l7vs
                                         "handle_realserver_connect() : before memcpy (data dump) : "
                                         "data begin = 0, data_size = %d, data = %s");
                                     formatter % edit_min->data_size % datadump;
-                                    putLogDebug(100089, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100091, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //copy  X-Forwarded-For
@@ -2745,7 +2770,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (send_buffer_end_size - send_buffer_remian_size)
                                     % edit_min->data_size % datadump;
-                                    putLogDebug(100090, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100092, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 it->send_end_size += edit_min->replace_size;
@@ -2776,7 +2801,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(100091, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100093, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data as large as possible
@@ -2795,7 +2820,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(100092, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100094, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -2812,7 +2837,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_realserver_connect() : Copy data loop end. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100093, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100095, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -2836,7 +2861,7 @@ namespace l7vs
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % it->send_offset
                         % copy_size % datadump;
-                        putLogDebug(100094, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100096, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by send_possible size
@@ -2851,7 +2876,7 @@ namespace l7vs
                             "handle_realserver_connect() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % copy_size % datadump;
-                        putLogDebug(100095, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100097, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     it->send_end_size = copy_size;
@@ -2873,7 +2898,7 @@ namespace l7vs
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % it->send_offset
                         % send_buffer_remian_size % datadump;
-                        putLogDebug(100096, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100098, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by buffer rest size
@@ -2888,7 +2913,7 @@ namespace l7vs
                             "handle_realserver_connect() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % send_buffer_remian_size % datadump;
-                        putLogDebug(100097, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100099, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     it->send_end_size = send_buffer_remian_size;
@@ -2909,7 +2934,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_connect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100098, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100100, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -2941,7 +2966,7 @@ namespace l7vs
                                     "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                     "size_t& datalen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100099, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100101, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2963,7 +2988,7 @@ namespace l7vs
                                     "const boost::asio::ip::tcp::endpoint & rs_endpoint) : "
                                     "thread_id = %d, rs_endpoint = [%s]:%d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(100100, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100102, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2994,7 +3019,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_connection_fail() : END_FLAG_ON. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(100101, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100103, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = CLIENT_DISCONNECT;
@@ -3007,7 +3032,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_connection_fail() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100102, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100104, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -3038,7 +3063,7 @@ namespace l7vs
                                     "handle_realserver_connection_fail(const boost::thread::id thread_id, "
                                     "const boost::asio::ip::tcp::endpoint & rs_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100103, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100105, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -3056,7 +3081,7 @@ namespace l7vs
                                     "handle_realserver_send(const boost::thread::id thread_id) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100104, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100106, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -3175,7 +3200,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_send() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100105, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100107, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -3206,7 +3231,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_realserver_send(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100106, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100108, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3228,7 +3253,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint& sorry_endpoint) : "
                                     "thread_id = %d, sorry_endpoint = [%s]:%d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-            putLogDebug(100107, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100109, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -3289,7 +3314,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_select() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100108, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100110, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -3330,7 +3355,7 @@ namespace l7vs
                 "handle_sorryserver_select(const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d."
                 " thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100109, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100111, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -3352,7 +3377,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100110, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100112, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -3448,7 +3473,7 @@ namespace l7vs
                                                     "handle_sorryserver_connect() : call find_uri : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(ret) % boost::this_thread::get_id();
-                            putLogDebug(100111, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100113, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //search http header result is OK
@@ -3479,7 +3504,7 @@ namespace l7vs
                                                     "handle_sorryserver_connect() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(ret) % boost::this_thread::get_id();
-                            putLogDebug(100112, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100114, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -3510,7 +3535,7 @@ namespace l7vs
                                                         "handle_sorryserver_connect() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(ret) % boost::this_thread::get_id();
-                                putLogDebug(100113, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100115, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             if (!ret)
@@ -3526,7 +3551,7 @@ namespace l7vs
                                                             "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                                             "size_t& datalen) : return_value = %d. thread id : %d.");
                                     formatter % FINALIZE % boost::this_thread::get_id();
-                                    putLogDebug(100114, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100116, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 return FINALIZE;
@@ -3555,7 +3580,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_sorryserver_connect() : Copy data loop start. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100115, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100117, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 while (true)
@@ -3585,7 +3610,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (it->send_offset + it->send_end_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100116, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100118, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
@@ -3602,7 +3627,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (send_buffer_end_size - send_buffer_remian_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100117, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100119, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 it->send_end_size += copy_size;
@@ -3625,7 +3650,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (it->send_offset + it->send_end_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100118, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100120, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //copy data from recive_buffer to sendbuffer by send buffer rest size
@@ -3644,7 +3669,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (send_buffer_end_size - send_buffer_remian_size)
                                     % copy_size % datadump;
-                                    putLogDebug(100119, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100121, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 it->send_end_size += copy_size;
@@ -3679,7 +3704,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(100120, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100122, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
@@ -3696,7 +3721,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(100121, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100123, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += copy_size;
@@ -3717,7 +3742,7 @@ namespace l7vs
                                         "handle_sorryserver_connect() : before memcpy (data dump) : "
                                         "data begin = 0, data_size = %d, data = %s");
                                     formatter % edit_min->data_size % datadump;
-                                    putLogDebug(100122, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100124, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //copy X-Forwarded-For/uri
@@ -3736,7 +3761,7 @@ namespace l7vs
                                         "data begin = %d, data_size = %d, data = %s");
                                     formatter % (send_buffer_end_size - send_buffer_remian_size)
                                     % edit_min->data_size % datadump;
-                                    putLogDebug(100123, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100125, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 it->send_end_size += edit_min->replace_size;
@@ -3767,7 +3792,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (it->send_offset + it->send_end_size)
                                 % copy_size % datadump;
-                                putLogDebug(100124, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100126, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //copy data as large as possible
@@ -3786,7 +3811,7 @@ namespace l7vs
                                     "data begin = %d, data_size = %d, data = %s");
                                 formatter % (send_buffer_end_size - send_buffer_remian_size)
                                 % copy_size % datadump;
-                                putLogDebug(100125, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100127, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             it->send_end_size += copy_size;
@@ -3802,7 +3827,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_sorryserver_connect() : Copy data loop end. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100126, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100128, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
             }
@@ -3826,7 +3851,7 @@ namespace l7vs
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % it->send_offset
                         % copy_size % datadump;
-                        putLogDebug(100127, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100129, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by send_possible size
@@ -3843,7 +3868,7 @@ namespace l7vs
                             "handle_sorryserver_connect() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % copy_size % datadump;
-                        putLogDebug(100128, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100130, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     it->send_end_size = it->send_possible_size;
@@ -3865,7 +3890,7 @@ namespace l7vs
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % it->send_offset
                         % send_buffer_remian_size % datadump;
-                        putLogDebug(100129, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100131, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by buffer rest size
@@ -3882,7 +3907,7 @@ namespace l7vs
                             "handle_sorryserver_connect() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % send_buffer_remian_size % datadump;
-                        putLogDebug(100130, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100132, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     it->send_end_size = send_buffer_remian_size;
@@ -3905,7 +3930,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_connect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100131, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100133, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -3937,7 +3962,7 @@ namespace l7vs
                                     "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                     "size_t& datalen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100132, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100134, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3959,7 +3984,7 @@ namespace l7vs
                                     "const boost::asio::ip::tcp::endpoint & sorry_endpoint) : "
                                     "thread_id = %d, sorry_endpoint = [%s]:%d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-            putLogDebug(100133, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100135, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3990,7 +4015,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_connection_fail() : END_FLAG_ON. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(100134, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100136, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4004,7 +4029,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_connection_fail() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100135, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100137, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -4037,7 +4062,7 @@ namespace l7vs
                 "handle_sorryserver_connection_fail( const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & sorry_endpoint) : return_value = %d."
                 " thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100136, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100138, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -4056,7 +4081,7 @@ namespace l7vs
                                     "handle_sorryserver_send(const boost::thread::id thread_id) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100137, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100139, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -4175,7 +4200,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_send() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100138, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100140, formatter.str(), __FILE__, __LINE__ );
             }
             status = FINALIZE;
             /*------DEBUG LOG END------*/
@@ -4206,7 +4231,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorryserver_send(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100139, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100141, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4233,7 +4258,7 @@ namespace l7vs
                                     "const size_t recvlen) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(100140, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100142, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -4262,7 +4287,7 @@ namespace l7vs
                                     "const size_t recvlen) : thread_id = %d, rs_endpoint = [%s]:%d, recvbuffer = %s, recvlen = %d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port()
             % buffer % recvlen;
-            putLogDebug(100141, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100143, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4305,7 +4330,7 @@ namespace l7vs
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(100142, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100144, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return FINALIZE;
@@ -4386,7 +4411,7 @@ namespace l7vs
                                 "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100143, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100145, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             it = recv_data.send_status_list.begin();
@@ -4439,7 +4464,7 @@ namespace l7vs
                                 "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100144, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100146, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //recive buffer process
@@ -4467,7 +4492,7 @@ namespace l7vs
                                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
                             formatter % FINALIZE % boost::this_thread::get_id();
-                            putLogDebug(100145, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100147, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -4481,7 +4506,7 @@ namespace l7vs
                     {
                         boost::format formatter("new : address = &(%d), size = %lu.");
                         formatter % static_cast<void*>(buffer1) % buffer_size;
-                        putLogDebug(100146, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100148, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*-------- DEBUG LOG --------*/
                     memset(buffer1, 0, buffer_size);
@@ -4492,7 +4517,7 @@ namespace l7vs
                     {
                         boost::format formatter("new : address = &(%d), size = %lu.");
                         formatter % static_cast<void*>(buffer2) % buffer_size;
-                        putLogDebug(100147, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100149, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*-------- DEBUG LOG END--------*/
                     memset(buffer2, 0, buffer_size);
@@ -4508,7 +4533,7 @@ namespace l7vs
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(100148, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100150, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from old buffer to new buffer
@@ -4524,7 +4549,7 @@ namespace l7vs
                             "handle_realserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % data_remain_size % datadump;
-                        putLogDebug(100149, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100151, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -4538,7 +4563,7 @@ namespace l7vs
                             "handle_realserver_recv() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % recvlen % datadump;
-                        putLogDebug(100150, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100152, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -4552,7 +4577,7 @@ namespace l7vs
                             "handle_realserver_recv() : after memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(100151, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100153, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //free old buffer1 and old buffer2
@@ -4563,7 +4588,7 @@ namespace l7vs
                         {
                             boost::format formatter("delete : address = &(%d).");
                             formatter % static_cast<void*>(recv_data.recive_buffer1);
-                            putLogDebug(100152, formatter.str(), __FILE__,
+                            putLogDebug(100154, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -4578,7 +4603,7 @@ namespace l7vs
                         {
                             boost::format formatter("delete : address = &(%d).");
                             formatter % static_cast<void*>(recv_data.recive_buffer2);
-                            putLogDebug(100153, formatter.str(), __FILE__,
+                            putLogDebug(100155, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -4620,7 +4645,7 @@ namespace l7vs
                                 "handle_realserver_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_start % data_remain_size % datadump;
-                            putLogDebug(100154, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100156, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer1 to buffer2
@@ -4635,7 +4660,7 @@ namespace l7vs
                                 "handle_realserver_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(100155, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100157, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         /*-------- DEBUG LOG --------*/
@@ -4648,7 +4673,7 @@ namespace l7vs
                                 "handle_realserver_recv() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(100156, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100158, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
@@ -4663,7 +4688,7 @@ namespace l7vs
                                 "handle_realserver_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(100157, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100159, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer2 as using buffer
@@ -4685,7 +4710,7 @@ namespace l7vs
                                 "handle_realserver_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_start % data_remain_size % datadump;
-                            putLogDebug(100158, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100160, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer2 to buffer1
@@ -4701,7 +4726,7 @@ namespace l7vs
                                 "handle_realserver_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(100159, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100161, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         /*-------- DEBUG LOG --------*/
@@ -4715,7 +4740,7 @@ namespace l7vs
                                 "handle_realserver_recv() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % recvlen % datadump;
-                            putLogDebug(100160, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100162, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -4730,7 +4755,7 @@ namespace l7vs
                                 "handle_realserver_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(100161, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100163, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer1 as using buffer
@@ -4773,7 +4798,7 @@ namespace l7vs
                                             "handle_realserver_recv() : before memcpy (data dump) : "
                                             "data begin = 0, data_size = %d, data = %s");
                     formatter % recvlen % datadump;
-                    putLogDebug(100162, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100164, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -4791,7 +4816,7 @@ namespace l7vs
                                             "data begin = %d, data_size = %d, data = %s");
                     formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size )
                     % recvlen % datadump;
-                    putLogDebug(100163, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100165, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //buffer's rest size recalc
@@ -4849,7 +4874,7 @@ namespace l7vs
                                                 "handle_realserver_recv() : call check_http_method : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100164, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100166, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //check http method result is OK
@@ -4864,7 +4889,7 @@ namespace l7vs
                                                     "handle_realserver_recv() : call check_http_version : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100165, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100167, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -4881,7 +4906,7 @@ namespace l7vs
                                                     "handle_realserver_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100166, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100168, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //search http header result is OK
@@ -4897,7 +4922,7 @@ namespace l7vs
                                                         "handle_realserver_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                putLogDebug(100167, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100169, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //search Content_Length result is OK
@@ -5020,7 +5045,7 @@ namespace l7vs
                                 "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100168, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100170, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //there are still rest data need to process
@@ -5054,7 +5079,7 @@ namespace l7vs
                                             "handle_realserver_recv() : call check_http_method : "
                                             "return_value = %d. thread id : %d.");
                     formatter % check_result % boost::this_thread::get_id();
-                    putLogDebug(100169, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100171, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //check http method result is OK
@@ -5070,7 +5095,7 @@ namespace l7vs
                                                 "handle_realserver_recv() : call check_http_version : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100170, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100172, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -5087,7 +5112,7 @@ namespace l7vs
                                                 "handle_realserver_recv() : call find_http_header : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                        putLogDebug(100171, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100173, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //searched whole http header
@@ -5103,7 +5128,7 @@ namespace l7vs
                                                     "handle_realserver_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100172, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100174, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5217,7 +5242,7 @@ namespace l7vs
                                 "handle_realserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100173, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100175, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5243,7 +5268,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_recv() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100174, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100176, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -5294,7 +5319,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100175, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100177, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5326,7 +5351,7 @@ namespace l7vs
                                     "const size_t recvlen) : thread_id = %d, sorry_endpoint = [%s]:%d, recvbuffer = %s, recvlen = %d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port()
             % buffer % recvlen;
-            putLogDebug(100176, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100178, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5370,7 +5395,7 @@ namespace l7vs
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(100177, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100179, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return FINALIZE;
@@ -5449,7 +5474,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100178, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100180, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5503,7 +5528,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100179, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100181, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             //recive buffer process
@@ -5530,7 +5555,7 @@ namespace l7vs
                                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
                             formatter % FINALIZE % boost::this_thread::get_id();
-                            putLogDebug(100180, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100182, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         return FINALIZE;
@@ -5543,7 +5568,7 @@ namespace l7vs
                     {
                         boost::format formatter("new : address = &(%d), size = %lu.");
                         formatter % static_cast<void*>(buffer1) % buffer_size;
-                        putLogDebug(100181, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100183, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*-------- DEBUG LOG END--------*/
                     memset(buffer1, 0, buffer_size);
@@ -5554,7 +5579,7 @@ namespace l7vs
                     {
                         boost::format formatter("new : address = &(%d), size = %lu.");
                         formatter % static_cast<void*>(buffer2) % buffer_size;
-                        putLogDebug(100182, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100184, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*-------- DEBUG LOG END--------*/
                     memset(buffer2, 0, buffer_size);
@@ -5569,7 +5594,7 @@ namespace l7vs
                             "handle_sorryserver_recv() : before memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % data_remain_start % data_remain_size % datadump;
-                        putLogDebug(100183, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100185, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from old buffer to new buffer
@@ -5584,7 +5609,7 @@ namespace l7vs
                             "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % data_remain_size % datadump;
-                        putLogDebug(100184, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100186, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5598,7 +5623,7 @@ namespace l7vs
                             "handle_sorryserver_recv() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % recvlen % datadump;
-                        putLogDebug(100185, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100187, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     memcpy(buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -5612,7 +5637,7 @@ namespace l7vs
                             "handle_sorryserver_recv() : after memcpy (data dump) : "
                             "data begin = %d, data_size = %d, data = %s");
                         formatter % data_remain_size % recvlen % datadump;
-                        putLogDebug(100186, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100188, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //free old buffer1 and old buffer2
@@ -5623,7 +5648,7 @@ namespace l7vs
                         {
                             boost::format formatter("delete : address = &(%d).");
                             formatter % static_cast<void*>(recv_data.recive_buffer1);
-                            putLogDebug(100187, formatter.str(), __FILE__,
+                            putLogDebug(100189, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -5638,7 +5663,7 @@ namespace l7vs
                         {
                             boost::format formatter("delete : address = &(%d).");
                             formatter % static_cast<void*>(recv_data.recive_buffer2);
-                            putLogDebug(100188, formatter.str(), __FILE__,
+                            putLogDebug(100190, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
@@ -5680,7 +5705,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_start % data_remain_size % datadump;
-                            putLogDebug(100189, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100191, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer1 to buffer2
@@ -5695,7 +5720,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(100190, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100192, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         /*-------- DEBUG LOG --------*/
@@ -5708,7 +5733,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % recvlen % datadump;
-                            putLogDebug(100191, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100193, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
@@ -5722,7 +5747,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(100192, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100194, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer2 as using buffer
@@ -5743,7 +5768,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : before memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_start % data_remain_size % datadump;
-                            putLogDebug(100193, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100195, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer2 to buffer1
@@ -5758,7 +5783,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % data_remain_size % datadump;
-                            putLogDebug(100194, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100196, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5772,7 +5797,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % recvlen % datadump;
-                            putLogDebug(100195, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100197, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
@@ -5786,7 +5811,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
                                 "data begin = %d, data_size = %d, data = %s");
                             formatter % data_remain_size % recvlen % datadump;
-                            putLogDebug(100196, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100198, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer1 as using buffer
@@ -5830,7 +5855,7 @@ namespace l7vs
                         "handle_sorryserver_recv() : before memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % recvlen % datadump;
-                    putLogDebug(100197, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100199, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -5847,7 +5872,7 @@ namespace l7vs
                         "handle_sorryserver_recv() : after memcpy (data dump) : "
                         "data begin = %d, data_size = %d, data = %s");
                     formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size) % recvlen % datadump;
-                    putLogDebug(100198, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100200, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //buffer's rest size recalc
@@ -5897,7 +5922,7 @@ namespace l7vs
                                                 "handle_sorryserver_recv() : call check_status_code : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100199, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100201, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //check http method result is OK
@@ -5912,7 +5937,7 @@ namespace l7vs
                                                     "handle_sorryserver_recv() : call check_http_version : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100200, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100202, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -5929,7 +5954,7 @@ namespace l7vs
                                                     "handle_sorryserver_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100201, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100203, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //search http header result is OK
@@ -5945,7 +5970,7 @@ namespace l7vs
                                                         "handle_sorryserver_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(bret) %boost::this_thread::get_id();
-                                putLogDebug(100202, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100204, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             //search Content_Length result is OK
@@ -6066,7 +6091,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100203, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100205, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -6101,7 +6126,7 @@ namespace l7vs
                                             "handle_sorryserver_recv() : call check_status_code : "
                                             "return_value = %d. thread id : %d.");
                     formatter % check_result % boost::this_thread::get_id();
-                    putLogDebug(100204, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100206, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //check http method result is OK
@@ -6117,7 +6142,7 @@ namespace l7vs
                                                 "handle_sorryserver_recv() : call check_http_version : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100205, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100207, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -6134,7 +6159,7 @@ namespace l7vs
                                                 "handle_sorryserver_recv() : call find_http_header : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                        putLogDebug(100206, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100208, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //searched whole http header
@@ -6150,7 +6175,7 @@ namespace l7vs
                                                     "handle_sorryserver_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100207, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100209, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -6262,7 +6287,7 @@ namespace l7vs
                                 "handle_sorryserver_recv() : send status list dump : send status list size = %d.%s");
 
                 formatter % recv_data.send_status_list.size() % datadump;
-                putLogDebug(100208, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100210, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -6288,7 +6313,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_recv() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100209, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100211, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -6339,7 +6364,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100210, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100212, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6359,7 +6384,7 @@ namespace l7vs
                                     "handle_response_send_inform(const boost::thread::id thread_id) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(100211, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100213, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -6382,7 +6407,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100212, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100214, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6445,7 +6470,7 @@ namespace l7vs
                         "handle_client_connection_check() : before memcpy (data dump) : "
                         "data begin = %d, data_size = %d, data = %s");
                     formatter % it->send_offset % (it->send_possible_size) % datadump;
-                    putLogDebug(100213, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100215, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy data from recive_buffer to sendbuffer by sending_possible size
@@ -6461,7 +6486,7 @@ namespace l7vs
                         "handle_client_connection_check() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % (it->send_possible_size) % datadump;
-                    putLogDebug(100214, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100216, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //send_end_size recalc
@@ -6485,7 +6510,7 @@ namespace l7vs
                         "handle_client_connection_check() : before memcpy (data dump) : "
                         "data begin = %d, data_size = %d, data = %s");
                     formatter % it->send_offset % send_buffer_size % datadump;
-                    putLogDebug(100215, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100217, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //copy data from recive_buffer to sendbuffer by buffer size
@@ -6501,7 +6526,7 @@ namespace l7vs
                         "handle_client_connection_check() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % send_buffer_size % datadump;
-                    putLogDebug(100216, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100218, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //send_end_size recalc
@@ -6522,7 +6547,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_client_connection_check() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100217, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100219, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -6554,7 +6579,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen)"
                                     " : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100218, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100220, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -6580,7 +6605,7 @@ namespace l7vs
                                     "size_t& datalen) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(100219, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100221, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -6599,7 +6624,7 @@ namespace l7vs
                                     "handle_client_send(const boost::thread::id thread_id) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100220, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100222, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -6723,7 +6748,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_client_send() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100221, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100223, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -6753,7 +6778,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_send(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100222, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100224, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6772,7 +6797,7 @@ namespace l7vs
             boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_disconnect(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % FINALIZE % boost::this_thread::get_id();
-            putLogDebug(100223, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100225, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return FINALIZE;
@@ -6791,7 +6816,7 @@ namespace l7vs
                                     "handle_sorry_enable(const boost::thread::id thread_id) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100224, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100226, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6841,7 +6866,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_sorry_enable() : SORRY_FLAG_ON. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100225, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100227, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 status = SORRYSERVER_RECV;
@@ -6884,7 +6909,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorry_enable() : SORRY_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100226, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100228, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = ACCEPT;
@@ -6919,7 +6944,7 @@ namespace l7vs
                                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                             "handle_sorry_enable() : END_FLAG_ON. thread id : %d.");
                                     formatter % boost::this_thread::get_id();
-                                    putLogDebug(100227, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100229, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 status = REALSERVER_DISCONNECT;
@@ -6935,7 +6960,7 @@ namespace l7vs
                                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                             "handle_sorry_enable() : SORRYSERVER_SWITCH_FLAG_ON. thread id : %d.");
                                     formatter % boost::this_thread::get_id();
-                                    putLogDebug(100228, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100230, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //set sorry_flag on
@@ -6946,7 +6971,7 @@ namespace l7vs
                                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                             "handle_sorry_enable() : SORRY_FLAG_ON. thread id : %d.");
                                     formatter % boost::this_thread::get_id();
-                                    putLogDebug(100229, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100231, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 status = REALSERVER_DISCONNECT;
@@ -6982,7 +7007,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorry_enable() : SORRY_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100230, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100232, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         session_data->sorryserver_switch_flag = SORRYSERVER_SWITCH_FLAG_ON;
@@ -6992,7 +7017,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorry_enable() : SORRYSERVER_SWITCH_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100231, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100233, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -7007,7 +7032,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                         "handle_sorry_enable() : END_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(100232, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100234, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             status = REALSERVER_DISCONNECT;
@@ -7038,7 +7063,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_enable() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100233, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100235, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -7068,7 +7093,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_enable(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100234, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100236, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -7088,7 +7113,7 @@ namespace l7vs
                                     "handle_sorry_disable(const boost::thread::id thread_id) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(100235, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100237, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -7136,7 +7161,7 @@ namespace l7vs
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_sorry_disable() : SORRY_FLAG_OFF. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(100236, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(100238, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 status = REALSERVER_RECV;
@@ -7181,7 +7206,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorry_disable() : SORRY_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100237, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100239, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -7204,7 +7229,7 @@ namespace l7vs
                                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                             "handle_sorry_disable() : END_FLAG_ON. thread id : %d.");
                                     formatter % boost::this_thread::get_id();
-                                    putLogDebug(100238, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100240, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 status = SORRYSERVER_DISCONNECT;
@@ -7220,7 +7245,7 @@ namespace l7vs
                                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                             "handle_sorry_disable() : REALSERVER_SWITCH_FLAG_ON. thread id : %d.");
                                     formatter % boost::this_thread::get_id();
-                                    putLogDebug(100239, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100241, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 //set sorry_flag off
@@ -7231,7 +7256,7 @@ namespace l7vs
                                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                             "handle_sorry_disable() : SORRY_FLAG_OFF. thread id : %d.");
                                     formatter % boost::this_thread::get_id();
-                                    putLogDebug(100240, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100242, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
                                 status = SORRYSERVER_DISCONNECT;
@@ -7265,7 +7290,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorry_disable() : SORRY_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100241, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100243, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         session_data->realserver_switch_flag = REALSERVER_SWITCH_FLAG_ON;
@@ -7275,7 +7300,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorry_disable() : REALSERVER_SWITCH_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100242, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100244, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         //sending ng data is exist or send_rest_size > 0
@@ -7289,7 +7314,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                         "handle_sorry_disable() : END_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(100243, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100245, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                             status = SORRYSERVER_DISCONNECT;
@@ -7336,7 +7361,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorry_disable() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100244, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100246, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -7366,7 +7391,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_sorry_disable(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100245, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100247, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -7387,7 +7412,7 @@ namespace l7vs
                                     "handle_realserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint & rs_endpoint) : "
                                     "thread_id = %d, rs_endpoint = [%s]:%d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(100246, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100248, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -7454,7 +7479,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_realserver_disconnect() : SORRYSERVER_SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100247, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100249, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -7472,7 +7497,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_realserver_disconnect() : END_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100248, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100250, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = CLIENT_RECV;
@@ -7497,7 +7522,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_realserver_disconnect() : SORRYSERVER_SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100249, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100251, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = SORRYSERVER_RECV;
@@ -7512,7 +7537,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_realserver_disconnect() : END_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100250, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100252, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = CLIENT_DISCONNECT;
@@ -7534,7 +7559,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_realserver_disconnect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100251, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100253, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -7565,7 +7590,7 @@ namespace l7vs
                                     "handle_realserver_disconnect(const boost::thread::id thread_id, "
                                     "const boost::asio::ip::tcp::endpoint & rs_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100252, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100254, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -7590,7 +7615,7 @@ namespace l7vs
                 "const boost::asio::ip::tcp::endpoint & sorry_endpoint) : "
                 "thread_id = %d, sorry_endpoint = [%s]:%d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port() ;
-            putLogDebug(100253, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100255, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = FINALIZE;
@@ -7657,7 +7682,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorryserver_disconnect() : REALSERVER_SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100254, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100256, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = REALSERVER_SELECT;
@@ -7673,7 +7698,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorryserver_disconnect() : END_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100255, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100257, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = CLIENT_RECV;
@@ -7698,7 +7723,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorryserver_disconnect() : REALSERVER_SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100256, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100258, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = REALSERVER_RECV;
@@ -7712,7 +7737,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                     "handle_sorryserver_disconnect() : END_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(100257, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100259, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                         status = CLIENT_DISCONNECT;
@@ -7734,7 +7759,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                         "handle_sorryserver_disconnect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(100258, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(100260, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -7767,7 +7792,7 @@ namespace l7vs
                 "handle_sorryserver_disconnect(const boost::thread::id thread_id, "
                 "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(100259, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100261, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -7789,7 +7814,7 @@ namespace l7vs
                                     "const boost::asio::ip::udp::endpoint & rs_endpoint) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(100260, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(100262, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
