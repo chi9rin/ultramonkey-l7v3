@@ -1,9 +1,12 @@
 // Dummy Class define
 
-#define    VIRTUALSERVICE_H
-#define    TCP_SOCKET_H
+#define VIRTUALSERVICE_H
+#define TCP_SOCKET_H
+#define TCP_SSL_SOCKET_H
 #define MODULE_BASE_H
 #define REALSERVER_H
+
+#include <boost/asio/ssl.hpp>
 
 namespace l7vs{
 
@@ -22,6 +25,9 @@ namespace l7vs{
 }
 
 #include "protocol_module_base.h"
+#include "tcp_socket_option.h"
+
+typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket>  ssl_socket;
 
 namespace l7vs{
     class    tcp_session;
@@ -643,21 +649,21 @@ namespace l7vs{
             static bool is_connect;
             
             
-            //! tcp_socket_option
-            struct tcp_socket_option_info{
-                //! TCP_NODELAY   (false:not set,true:set option)
-                bool nodelay_opt;
-                //! TCP_NODELAY option value  (false:off,true:on)
-                bool nodelay_val;
-                //! TCP_CORK      (false:not set,true:set option)
-                bool cork_opt;
-                //! TCP_CORK option value     (false:off,true:on)
-                bool cork_val;
-                //! TCP_QUICKACK  (false:not set,true:set option)
-                bool quickack_opt;
-                //! TCP_QUICKACK option value (false:off,true:on)
-                bool quickack_val;
-            };
+//            //! tcp_socket_option
+//            struct tcp_socket_option_info{
+//                //! TCP_NODELAY   (false:not set,true:set option)
+//                bool nodelay_opt;
+//                //! TCP_NODELAY option value  (false:off,true:on)
+//                bool nodelay_val;
+//                //! TCP_CORK      (false:not set,true:set option)
+//                bool cork_opt;
+//                //! TCP_CORK option value     (false:off,true:on)
+//                bool cork_val;
+//                //! TCP_QUICKACK  (false:not set,true:set option)
+//                bool quickack_opt;
+//                //! TCP_QUICKACK option value (false:off,true:on)
+//                bool quickack_val;
+//            };
             
             tcp_socket(boost::asio::io_service& io) : 
                     my_socket(io){
@@ -771,4 +777,141 @@ namespace l7vs{
     bool tcp_socket::set_non_blocking_mode_res = true;;
     boost::system::error_code tcp_socket::set_non_blocking_mode_ec;
     bool tcp_socket::is_connect = false;
+
+    // Dummy tcp_ssl_socket Class
+    class    tcp_ssl_socket{
+        public:
+//            static bool connect_res;
+//            static boost::asio::ip::tcp::endpoint connect_connect_endpoint;
+//            static boost::system::error_code* connect_ec;
+//            static bool connect_call_check;
+            static bool set_non_blocking_mode_res;
+            static boost::system::error_code set_non_blocking_mode_ec;
+            static bool is_connect;
+/*
+            tcp_ssl_socket(boost::asio::io_service& io) :
+                    my_socket(io){
+                opt_info.nodelay_opt = false;
+                opt_info.cork_opt = false;
+                opt_info.quickack_opt = false;
+            };
+*/
+
+            boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
+            tcp_socket_option_info opt_info;
+
+            tcp_ssl_socket(boost::asio::io_service& io,boost::asio::ssl::context& context,const tcp_socket_option_info set_option) :
+                my_socket(io,context),
+                opt_info(set_option){
+            };
+            ~tcp_ssl_socket(){};
+
+//            boost::asio::ip::tcp::socket& get_socket(){
+            boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& get_socket(){
+                return my_socket;
+            };
+
+//            boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
+//            tcp_socket_option_info opt_info;
+
+            //! accept
+            void accept(){};
+/*
+            //! @param[in]        connect_endpoint is connection endpoint
+            //! @param[out]        ec is reference error code object
+            bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec){
+                tcp_socket::connect_call_check = true;
+                tcp_socket::connect_connect_endpoint = connect_endpoint;
+                tcp_socket::connect_ec = &ec;
+                if(tcp_socket::is_connect){
+                    my_socket.connect(connect_endpoint,ec);
+                }
+                return tcp_socket::connect_res;
+            };
+*/
+
+            //! close socket
+            //! @param[out]        ec is reference error code object
+            //! @return         true is socket close
+            //! @return         false is not open socket
+            bool close(boost::system::error_code& ec){
+                close_call_check = true;
+                ec = close_out_ec;
+                return close_res;
+            };
+
+            bool close_res;
+            boost::system::error_code close_out_ec;
+            bool close_call_check;
+
+            //! set non blocking mode of the socket
+            //! @return            ec is reference error code object
+            bool set_non_blocking_mode(boost::system::error_code& ec){
+                ec = tcp_socket::set_non_blocking_mode_ec;
+                return tcp_socket::set_non_blocking_mode_res;
+            };
+
+            //! write socket
+            //! @param[in]        buffers is wite data buffer
+            //! @param[out]        ec is reference error code object
+            //! @return            write data size
+            std::size_t write_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec){
+                write_some_call_check = true;
+                write_some_buffers_size_in = boost::asio::buffer_size(*buffers.begin());
+                write_some_buffers_in = boost::asio::detail::buffer_cast_helper(*buffers.begin());
+                ec = write_some_ec;
+                return write_some_res;
+            };
+
+            std::size_t write_some_res;
+            boost::system::error_code write_some_ec;
+            void* write_some_buffers_in;
+            std::size_t write_some_buffers_size_in;
+            bool write_some_call_check;
+
+            //! read socket
+            //! @param[out]        buffers is read data buffer
+            //! @param[out]        ec is reference error code object
+            //! @return            read data size
+            std::size_t read_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec){
+                read_some_call_check = true;
+                read_some_buffers_size_in = boost::asio::buffer_size(*buffers.begin());
+                boost::array<char,MAX_BUFFER_SIZE>* pBuf = (boost::array<char,MAX_BUFFER_SIZE>*)boost::asio::detail::buffer_cast_helper(*buffers.begin());
+                for(int i = 0 ; i < (int)read_some_buffers_size_in ;i++){
+                    if(i >= MAX_BUFFER_SIZE) break;
+                    (*pBuf)[i] = read_some_buffers_out[i];
+                }
+                ec = read_some_ec;
+                return read_some_res;
+            };
+
+            std::size_t read_some_res;
+            boost::system::error_code read_some_ec;
+            boost::array<char,MAX_BUFFER_SIZE> read_some_buffers_out;
+            std::size_t read_some_buffers_size_in;
+            bool read_some_call_check;
+
+            bool is_open(){
+                return is_open_res;
+            };
+            bool is_open_res;
+
+
+        //! handshake socket
+        //! @param[in]        handshake_type is handshaking as a server or client
+        //! @return         true is handshaked
+        //! @return         false is handshake failure
+        bool handshake(boost::asio::ssl::stream_base::handshake_type type){
+		return true;
+        }
+    };
+
+//    bool tcp_ssl_socket::connect_res;
+//    boost::asio::ip::tcp::endpoint tcp_ssl_socket::connect_connect_endpoint;
+//    boost::system::error_code* tcp_ssl_socket::connect_ec;
+//    bool tcp_ssl_socket::connect_call_check;
+    bool tcp_ssl_socket::set_non_blocking_mode_res = true;
+    boost::system::error_code tcp_ssl_socket::set_non_blocking_mode_ec;
+    bool tcp_ssl_socket::is_connect = false;
+
 }
