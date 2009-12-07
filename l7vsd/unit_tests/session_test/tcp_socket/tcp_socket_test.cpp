@@ -158,7 +158,7 @@ class test_socket_class : public l7vs::tcp_socket{
         
 //    test_socket_class(boost::asio::io_service& io) : l7vs::tcp_socket(io){
 //    };
-    test_socket_class(boost::asio::io_service& io,const tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
+    test_socket_class(boost::asio::io_service& io,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
     };
     ~test_socket_class(){};
     
@@ -184,7 +184,7 @@ class test_socket_class : public l7vs::tcp_socket{
         return &my_socket;
     }
     
-    l7vs::tcp_socket::tcp_socket_option_info* get_opt_info(){
+    l7vs::tcp_socket_option_info* get_opt_info(){
         return &opt_info;
     }
         
@@ -200,7 +200,7 @@ void construcor_test(){
     
     boost::asio::io_service io;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = true;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -279,7 +279,7 @@ void connect_test(){
     boost::asio::io_service io;
     boost::system::error_code ec;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = true;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -390,7 +390,7 @@ void set_non_blocking_mode_test(){
     boost::asio::io_service io;
     boost::system::error_code ec;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -459,7 +459,7 @@ void write_some_read_some_test(){
     boost::asio::io_service io;
     boost::system::error_code ec;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = true;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -681,7 +681,7 @@ void close_test(){
     boost::asio::io_service io;
     boost::system::error_code ec;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -733,7 +733,7 @@ void get_socket_test(){
     BOOST_MESSAGE( "----- get_socket test start -----" );
     
     boost::asio::io_service io;
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -766,7 +766,7 @@ class connect_lock_test_class : public l7vs::tcp_socket{
         boost::thread::id befor_thread_id;
         boost::thread::id after_thread_id;
         
-        connect_lock_test_class(boost::asio::io_service& io,const tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
+        connect_lock_test_class(boost::asio::io_service& io,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
         };
         
         ~connect_lock_test_class(){
@@ -803,7 +803,7 @@ void connect_lock_test(){
         
     boost::asio::io_service io;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -861,7 +861,7 @@ class close_lock_test_class : public l7vs::tcp_socket{
         boost::thread::id befor_thread_id;
         boost::thread::id after_thread_id;
         
-        close_lock_test_class(boost::asio::io_service& io,const tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
+        close_lock_test_class(boost::asio::io_service& io,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
         };
         
         ~close_lock_test_class(){
@@ -895,7 +895,7 @@ void close_lock_test(){
     BOOST_MESSAGE( "----- close lock test start -----" );
         
     boost::asio::io_service io;
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -977,7 +977,7 @@ void is_open_test(){
     boost::asio::io_service io;
     boost::system::error_code ec;
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
