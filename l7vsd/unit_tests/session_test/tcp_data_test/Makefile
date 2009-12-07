@@ -7,7 +7,6 @@ TARGET		= tcp_data_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=	-I../logger_stb \
-				-I../../../parameter \
 				-I./ \
 				-I../../../src \
 				-I../../../include
@@ -19,7 +18,6 @@ LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
 			../logger_stb/logger.cpp \
-			../../../src/tcp_data.cpp \
 			tcp_data_test.cpp 
 
 .SUFFIX:	.cpp .o
