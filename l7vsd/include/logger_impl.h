@@ -38,6 +38,7 @@
 #include <boost/foreach.hpp>
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
+#include "appender_property.h"
 
 #if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
 #define LOGGER_PROCESS_VSD
@@ -498,30 +499,6 @@ protected:
     //! log_category -> category string hash map
     category_name_map_type    category_name_map;
 
-    struct appender_property{
-        std::string     log_filename_key;            //!< parameter logfile key
-        std::string        log_filename_value;            //!< parameter logfile value
-        std::string     rotation_key;                //!< parameter rotation kind key
-        LOG_ROTATION_TAG
-                        rotation_value;                //!< parameter rotation kind value
-        std::string     max_backup_index_key;        //!< parameter backup maximam number key
-        unsigned int    max_backup_index_value;        //!< parameter backup maximam number value
-        std::string     max_file_size_key;            //!< parameter maximam backup size key
-        unsigned long long
-                             max_file_size_value;    //!< parameter maximam backup size value
-        std::string        rotation_timing_key;        //!< parameter rotation timing key
-        LOG_ROTATION_TIMING_TAG
-                        rotation_timing_value;        //!< parameter rotation timing value
-
-        std::string        rotation_timing_value_key;    //!< parameter rotation timing value key
-        std::string        rotation_timing_value_value;    //!< parameter rotation timing value value
-        appender_property() :                            //!< constractor
-            rotation_value(LOG_ROT_SIZE),
-            max_backup_index_value(0),
-            max_file_size_value(0),
-            rotation_timing_value(LOG_TIM_YEAR)
-        {}
-    };
     appender_property    normal_log_property;
     appender_property    access_log_property;
 
