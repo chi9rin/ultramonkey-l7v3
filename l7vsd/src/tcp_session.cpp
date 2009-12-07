@@ -37,6 +37,7 @@
 #define DOWN_THREAD_LOCK     std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020)
 
 namespace l7vs{
+/*
     //! construcor
     //! @param[in/out]    vs is parent virtualservice object
     //! @param[in/out]    io is session use io service object
@@ -233,7 +234,7 @@ namespace l7vs{
         virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
         
     }
-    
+*/    
     //! construcor
     //! @param[in/out]    vs is parent virtualservice object
     //! @param[in/out]    io is session use io service object
@@ -528,7 +529,7 @@ namespace l7vs{
                     Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
                 }
                 // do flush cached sessions
-                parent_service.flush_ssl_session();
+//                parent_service.flush_ssl_session();
             } else {
                 if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
                     Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
@@ -538,12 +539,12 @@ namespace l7vs{
 //            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 // print ssl session cache information
                 // Need ssl_context lock?
-                std::stringstream buf;
-                buf << "session_result_message tcp_session::initialize() : ";
-                parent_service.get_ssl_session_cache_info(buf);
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                            buf.str(),
-                            __FILE__, __LINE__ );
+//                std::stringstream buf;
+//                buf << "session_result_message tcp_session::initialize() : ";
+//                parent_service.get_ssl_session_cache_info(buf);
+//                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+//                            buf.str(),
+//                            __FILE__, __LINE__ );
 //            }
             //----Debug log----------------------------------------------------------------------
         }

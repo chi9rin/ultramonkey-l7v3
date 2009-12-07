@@ -72,7 +72,7 @@ namespace l7vs{
                 SESSION_PAUSE_ON,
                 SESSION_PAUSE_OFF
             };
-
+/*
             //! construcor
             //! @param[in/out]    vs is parent virtualservice object
             //! @param[in/out]    io is session use io service object
@@ -85,7 +85,7 @@ namespace l7vs{
                     boost::asio::ssl::context& context,
                     int timeout,
                     bool is_cache_use);
-
+*/
             //! construcor
             //! @param[in/out]    vs is parent virtualservice object
             //! @param[in/out]    io is session use io service object
