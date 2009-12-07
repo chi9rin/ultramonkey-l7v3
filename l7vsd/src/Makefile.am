@@ -66,6 +66,7 @@ libl7vsd_logger_a_SOURCES	= \
 			../include/logger_rotation_enum.h \
 			../include/logger.h \
 			../include/logger_impl.h \
+			../include/appender_property.h \
 			logger.cpp \
 			logger_impl.cpp \
 			../include/strict_time_based_rolling_policy.h \
@@ -83,6 +84,7 @@ libl7vsadm_logger_a_SOURCES	= \
 			../include/logger_rotation_enum.h \
 			../include/logger.h \
 			../include/logger_impl.h \
+			../include/appender_property.h \
 			logger.cpp \
 			logger_impl.cpp \
 			../include/strict_time_based_rolling_policy.h \
@@ -99,6 +101,7 @@ libsnmpagent_logger_a_SOURCES	= \
 			../include/logger_enum.h \
 			../include/logger_rotation_enum.h \
 			../include/logger.h \
+			../include/appender_property.h \
 			logger_impl.h \
 			logger.cpp \
 			logger_impl.cpp \
@@ -117,6 +120,7 @@ libsslproxy_logger_a_SOURCES	= \
 			../include/logger_rotation_enum.h \
 			../include/logger.h \
 			../include/logger_impl.h \
+			../include/appender_property.h \
 			logger.cpp \
 			logger_impl.cpp \
 			../include/strict_time_based_rolling_policy.h \
