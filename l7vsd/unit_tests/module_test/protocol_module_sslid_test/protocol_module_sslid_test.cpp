@@ -2039,7 +2039,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_UP_STREAM);
         BOOST_CHECK_EQUAL(itr->second->pair_thread_id, down_thread.get_id());
         BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
-        BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
         BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
@@ -2050,7 +2049,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_DOWN_STREAM);
         BOOST_CHECK_EQUAL(itr->second->pair_thread_id, boost::this_thread::get_id());
         BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
-        BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
         BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
@@ -2088,7 +2086,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_UP_STREAM);
         BOOST_CHECK_EQUAL(itr->second->pair_thread_id, down_thread.get_id());
         BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
-        BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
         BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
@@ -2105,7 +2102,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(itr->second->thread_division, THREAD_DIVISION_DOWN_STREAM);
         BOOST_CHECK_EQUAL(itr->second->pair_thread_id, boost::this_thread::get_id());
         BOOST_CHECK_EQUAL(itr->second->end_flag, END_FLAG_OFF);
-        BOOST_CHECK_EQUAL(itr->second->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(itr->second->data_begain_offset, 0u);
         BOOST_CHECK_EQUAL(itr->second->data_size, 0u);
         BOOST_CHECK_EQUAL(itr->second->current_record_rest_size, 0u);
@@ -2186,7 +2182,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         boost::asio::ip::tcp::endpoint ep;
         session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
         thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
-        thread_up_data_value->realserver_connect_failed_count=0;
         thread_up_data_value->data_begain_offset=0;
         thread_up_data_value->data_size=0;
         thread_up_data_value->current_record_rest_size=0;
@@ -2204,7 +2199,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         boost::asio::ip::tcp::endpoint ep;
         session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
         thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
-        thread_up_data_value->realserver_connect_failed_count=0;
         thread_up_data_value->data_begain_offset=0;
         thread_up_data_value->data_size=0;
         thread_up_data_value->current_record_rest_size=0;
@@ -3017,95 +3011,94 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->rs_list_unlock = rslist_unlock_func;
 
 
-        cout << "[150]--------------------------------------------- " << endl;
-        // unit_test[150] realserver接続回数が最大回数の場合、戻り値がCLIENT_DISCONNECTで設定する。
-        {
-        thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count;
-        this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-        status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-        this->session_thread_data_map.clear();
-        }
-
-        cout << "[151]--------------------------------------------- " << endl;
-        // unit_test[151] realserver接続回数が最大回数を越える場合、戻り値がCLIENT_DISCONNECTで設定する。
-        {
-        thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count + 1;
-        this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-        status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-        this->session_thread_data_map.clear();
-        }
-
-        cout << "[152]--------------------------------------------- " << endl;
-        // unit_test[152] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが決定の場合
-        // unit_test[152] 戻り値が REALSERVER_CONNECTで設定する。
-        {
-        this->schedule_tcp = schedule_tcp_func1;
-        thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count - 1;
-        this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-        this->reschedule = 1;
-        status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
-        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
-        this->session_thread_data_map.clear();
-        }
-
-        cout << "[153]--------------------------------------------- " << endl;
-        // unit_test[153] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが未決定の場合
-        // unit_test[153] 戻り値が CLIENT_DISCONNECTで設定する。
-        {
-        this->schedule_tcp = schedule_tcp_func2;
-        thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count - 1;
-        this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-        this->reschedule = 1;
-        status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-        this->session_thread_data_map.clear();
-        }
-
-        cout << "[154]--------------------------------------------- " << endl;
-        // unit_test[154] realserver接続回数が最大回数に未満で, 且つreschedule が 0 (OFF)の場合
-        // unit_test[154] 戻り値が CLIENT_DISCONNECTで設定する。
-        {
-        thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count
-            = this->realserver_connect_failed_max_count - 1;
-        this->session_thread_data_map[boost::this_thread::get_id()]
-            = up_thread_data;
-        this->reschedule = 0;
-        status = this->handle_realserver_select(boost::this_thread::get_id(),
-            rs_endpoint);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
-        this->session_thread_data_map.clear();
-        }
+//        cout << "[150]--------------------------------------------- " << endl;
+//        // unit_test[150] realserver接続回数が最大回数の場合、戻り値がCLIENT_DISCONNECTで設定する。
+//        {
+//        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+//        up_thread_data->realserver_connect_failed_count
+//            = this->realserver_connect_failed_max_count;
+//        this->session_thread_data_map[boost::this_thread::get_id()]
+//            = up_thread_data;
+//        status = this->handle_realserver_select(boost::this_thread::get_id(),
+//            rs_endpoint);
+//        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+//        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+//        this->session_thread_data_map.clear();
+//        }
+//
+//        cout << "[151]--------------------------------------------- " << endl;
+//        // unit_test[151] realserver接続回数が最大回数を越える場合、戻り値がCLIENT_DISCONNECTで設定する。
+//        {
+//        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+//        up_thread_data->realserver_connect_failed_count
+//            = this->realserver_connect_failed_max_count + 1;
+//        this->session_thread_data_map[boost::this_thread::get_id()]
+//            = up_thread_data;
+//        status = this->handle_realserver_select(boost::this_thread::get_id(),
+//            rs_endpoint);
+//        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+//        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+//        this->session_thread_data_map.clear();
+//        }
+//
+//        cout << "[152]--------------------------------------------- " << endl;
+//        // unit_test[152] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが決定の場合
+//        // unit_test[152] 戻り値が REALSERVER_CONNECTで設定する。
+//        {
+//        this->schedule_tcp = schedule_tcp_func1;
+//        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+//        up_thread_data->realserver_connect_failed_count
+//            = this->realserver_connect_failed_max_count - 1;
+//        this->session_thread_data_map[boost::this_thread::get_id()]
+//            = up_thread_data;
+//        this->reschedule = 1;
+//        status = this->handle_realserver_select(boost::this_thread::get_id(),
+//            rs_endpoint);
+//        BOOST_CHECK(this->session_thread_data_map[boost::this_thread::get_id()]->selected_realserver != comp_endpoint);
+//        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
+//        this->session_thread_data_map.clear();
+//        }
+//
+//        cout << "[153]--------------------------------------------- " << endl;
+//        // unit_test[153] realserver接続回数が最大回数に未満で, reschedule が 1(ON)、endpointが未決定の場合
+//        // unit_test[153] 戻り値が CLIENT_DISCONNECTで設定する。
+//        {
+//        this->schedule_tcp = schedule_tcp_func2;
+//        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+//        up_thread_data->realserver_connect_failed_count
+//            = this->realserver_connect_failed_max_count - 1;
+//        this->session_thread_data_map[boost::this_thread::get_id()]
+//            = up_thread_data;
+//        this->reschedule = 1;
+//        status = this->handle_realserver_select(boost::this_thread::get_id(),
+//            rs_endpoint);
+//        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+//        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+//        this->session_thread_data_map.clear();
+//        }
+//
+//        cout << "[154]--------------------------------------------- " << endl;
+//        // unit_test[154] realserver接続回数が最大回数に未満で, 且つreschedule が 0 (OFF)の場合
+//        // unit_test[154] 戻り値が CLIENT_DISCONNECTで設定する。
+//        {
+//        thread_data_ptr up_thread_data(new session_thread_data_sslid);
+//        up_thread_data->realserver_connect_failed_count
+//            = this->realserver_connect_failed_max_count - 1;
+//        this->session_thread_data_map[boost::this_thread::get_id()]
+//            = up_thread_data;
+//        this->reschedule = 0;
+//        status = this->handle_realserver_select(boost::this_thread::get_id(),
+//            rs_endpoint);
+//        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
+//        BOOST_CHECK_EQUAL(status, CLIENT_DISCONNECT);
+//        this->session_thread_data_map.clear();
+//        }
 
         cout << "[155]--------------------------------------------- " << endl;
-        // unit_test[155] realserverの接続失敗回数が0, 且つselected_realserver が NULLでない場合
+        // unit_test[155] selected_realserver が NULLでない場合
         // unit_test[155] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep1;
         this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
@@ -3116,11 +3109,10 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[156]--------------------------------------------- " << endl;
-        // unit_test[156] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがfalseの場合
+        // unit_test[156] selected_realserver が NULLで、 且つhello_message_flagがfalseの場合
         // unit_test[156] 戻り値がFINALIZEで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = false;
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -3134,12 +3126,11 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[157]--------------------------------------------- " << endl;
-        // unit_test[157] realserverの接続失敗回数が0, 且つselected_realserver が NULLで、 且つhello_message_flagがtrueで
+        // unit_test[157] selected_realserver が NULLで、 且つhello_message_flagがtrueで
         // unit_test[157] 且つendpointが決定の場合
         // unit_test[157] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x00;
@@ -3156,12 +3147,11 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[158]--------------------------------------------- " << endl;
-        // unit_test[158] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[158] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[158] 且つセッションIDがなくで、且つendpointが未決定の場合
         // unit_test[158] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x00;
@@ -3179,14 +3169,13 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[159]--------------------------------------------- " << endl;
-        // unit_test[159] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[159] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[159] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[159] rsリストを検索し、realserver endpoint が存在する場合
         // unit_test[159] endpointでselected_realserverを設定する
         // unit_test[159] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3227,7 +3216,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[160]--------------------------------------------- " << endl;
-        // unit_test[160] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[160] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[160] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[160] rsリストを検索し、realserver endpoint が存在しない場合
         // unit_test[160] rescheduleモード
@@ -3236,7 +3225,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         // unit_test[160] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3275,7 +3263,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[161]--------------------------------------------- " << endl;
-        // unit_test[161] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[161] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[161] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[161] rsリストを検索し、realserver endpoint が存在しない場合
         // unit_test[161] rescheduleモード
@@ -3284,7 +3272,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         // unit_test[161] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3324,7 +3311,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[162]--------------------------------------------- " << endl;
-        // unit_test[162] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[162] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[162] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[162] rsリストを検索し、realserver endpoint が存在しない場合
         // unit_test[162] no rescheduleモード
@@ -3332,7 +3319,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         // unit_test[162] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3372,13 +3358,12 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[163]--------------------------------------------- " << endl;
-        // unit_test[163] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[163] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[163] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointが決定の場合
         // unit_test[163] 戻り値がREALSERVER_CONNECTで設定する。
         {
         this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3404,13 +3389,12 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[164]--------------------------------------------- " << endl;
-        // unit_test[164] realserver接続失敗回数が0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[164] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[164] 且つセッションIDがあり, endpointが未決定で、reschedule後、endpointも未決定の場合
         // unit_test[164] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         this->schedule_tcp = schedule_tcp_func2;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3436,12 +3420,11 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[165]--------------------------------------------- " << endl;
-        // unit_test[165] realserver接続失敗回数が0で, 且つselected_realserverがNULLで, 且つhello_message_flagがtrueで
+        // unit_test[165] selected_realserverがNULLで, 且つhello_message_flagがtrueで
         // unit_test[165] 且つセッションIDがあり, endpointが未決定で、且つ no rescheduleの場合
         // unit_test[165] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = 0;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3466,11 +3449,10 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[166]--------------------------------------------- " << endl;
-        // unit_test[166] realserver接続失敗回数が0で, 且つselected_realserver が NULLないの場合
+        // unit_test[166] selected_realserver が NULLないの場合
         // unit_test[166] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep1;
         this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
@@ -3481,11 +3463,10 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[167]--------------------------------------------- " << endl;
-        // unit_test[167] realserver接続失敗回数が0で, 且つselected_realserver が　NULLで, 且つhello_message_flag が falseの場合
+        // unit_test[167] selected_realserver が　NULLで, 且つhello_message_flag が falseの場合
         // unit_test[167] 戻り値がFINALIZEで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = false;
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -3499,12 +3480,11 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[168]--------------------------------------------- " << endl;
-        // unit_test[168] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+        // unit_test[168] selected_realserver が NULLで, 且つhello_message_flag が trueで
         // unit_test[168] 且つセッションIDがなくで、且つendpointが決定の場合
         // unit_test[168] 戻り値がREALSERVER_CONNECT設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x00;
@@ -3521,12 +3501,11 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[169]--------------------------------------------- " << endl;
-        // unit_test[169] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+        // unit_test[169] selected_realserver が NULLで, 且つhello_message_flag が trueで
         // unit_test[169] 且つセッションIDがなくで、且つendpointが未決定の場合
         // unit_test[169] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x00;
@@ -3544,14 +3523,13 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[170]--------------------------------------------- " << endl;
-        // unit_test[170] realserver接続失敗回数< 0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[170] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[170] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[170] rsリストを検索し、realserver endpoint が存在する場合
         // unit_test[170] endpointでselected_realserverを設定する
         // unit_test[170] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3592,7 +3570,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[171]--------------------------------------------- " << endl;
-        // unit_test[171] realserver接続失敗回数< 0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[171] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[171] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[171] rsリストを検索し、realserver endpoint が存在しない場合
         // unit_test[171] rescheduleモード
@@ -3601,7 +3579,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         // unit_test[171] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3640,7 +3617,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[172]--------------------------------------------- " << endl;
-        // unit_test[172] realserver接続失敗回数< 0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[172] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[172] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[172] rsリストを検索し、realserver endpoint が存在しない場合
         // unit_test[172] rescheduleモード
@@ -3649,7 +3626,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         // unit_test[172] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3689,7 +3665,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map.clear();
         }
         cout << "[173]--------------------------------------------- " << endl;
-        // unit_test[173] realserver接続失敗回数< 0で, 且つselected_realserverがNULLで、且つhello_message_flagがtrueで
+        // unit_test[173] selected_realserverがNULLで、且つhello_message_flagがtrueで
         // unit_test[173] 且つセッションIDがあるで, 且つendpointが決定の場合
         // unit_test[173] rsリストを検索し、realserver endpoint が存在しない場合
         // unit_test[173] no rescheduleモード
@@ -3697,7 +3673,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         // unit_test[173] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3738,13 +3713,12 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[174]--------------------------------------------- " << endl;
-        // unit_test[174] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+        // unit_test[174] selected_realserver が NULLで, 且つhello_message_flag が trueで
         // unit_test[174] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointが決定の場合
         // unit_test[174] 戻り値がREALSERVER_CONNECTで設定する。
         {
         this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3770,13 +3744,12 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[175]--------------------------------------------- " << endl;
-        // unit_test[175] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+        // unit_test[175] selected_realserver が NULLで, 且つhello_message_flag が trueで
         // unit_test[175] 且つセッションIDがあるで, endpointが未決定で、reschedule後、endpointも未決定の場合
         // unit_test[175] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         this->schedule_tcp = schedule_tcp_func2;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3802,12 +3775,11 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         }
 
         cout << "[176]--------------------------------------------- " << endl;
-        // unit_test[176] realserver接続失敗回数 < 0で, 且つselected_realserver が NULLで, 且つhello_message_flag が trueで
+        // unit_test[176] selected_realserver が NULLで, 且つhello_message_flag が trueで
         // unit_test[176] セッションIDがあり、endpointが未決定でrescheduleしない場合
         // unit_test[176] 戻り値がCLIENT_DISCONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3851,7 +3823,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         {
         //this->schedule_tcp = schedule_tcp_func1;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
-        up_thread_data->realserver_connect_failed_count = -1;
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = true;
         up_thread_data->data_buffer[43] = 0x20;
@@ -3922,7 +3893,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, 10u);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -3954,7 +3924,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 1u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -3986,7 +3955,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, 10u);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4018,7 +3986,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 0u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4050,7 +4017,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 5u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4082,7 +4048,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4114,7 +4079,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, 10u);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4146,7 +4110,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4178,7 +4141,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 10u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 20u);
         BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
         BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -4226,7 +4188,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_record_rest_size, 0u);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 10u);
             BOOST_CHECK_EQUAL(status, REALSERVER_SEND);
-            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->realserver_connect_failed_count, 0);
             BOOST_CHECK_EQUAL(datalen, static_cast<size_t>(MAX_BUFFER_SIZE));
         }
         }
@@ -4237,7 +4198,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         boost::asio::ip::tcp::endpoint ep;
         session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
         thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
-        thread_up_data_value->realserver_connect_failed_count=0;
         thread_up_data_value->data_begain_offset=0;
         thread_up_data_value->data_size=0;
         thread_up_data_value->current_record_rest_size=0;
@@ -4250,78 +4210,75 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[189]--------------------------------------------- " << endl;
         //unit_test[189] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-        //unit_test[189] test data:no rescheduleモード、初めて失敗するの場合
         this->reschedule=0;
         EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
         BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
         BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
 
-        cout << "[190]--------------------------------------------- " << endl;
-        //unit_test[190] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
-        //unit_test[190] test data:rescheduleモード、初めて失敗するの場合
-        this->reschedule=1;
-        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,1);
-        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
-
-        cout << "[191]--------------------------------------------- " << endl;
-        //unit_test[191] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-        //unit_test[191] test data:rescheduleモード、３目失敗するの場合
-        this->reschedule=1;
-        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
-        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
-
-        cout << "[192]--------------------------------------------- " << endl;
-        //unit_test[192] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
-        //unit_test[192] test data:no rescheduleモード、４目失敗するの場合
-        this->reschedule=0;
-        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
-        BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
+//        cout << "[190]--------------------------------------------- " << endl;
+//        //unit_test[190] realserver_connect_failed_count で1を加算する,遷移先ステータスを設定する,status = REALSERVER_SELECT
+//        //unit_test[190] test data:rescheduleモード、初めて失敗するの場合
+//        this->reschedule=1;
+//        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,1);
+//        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
+//
+//        cout << "[191]--------------------------------------------- " << endl;
+//        //unit_test[191] realserver_connect_failed_count で1を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+//        //unit_test[191] test data:rescheduleモード、３目失敗するの場合
+//        this->reschedule=1;
+//        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
+//        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
+//
+//        cout << "[192]--------------------------------------------- " << endl;
+//        //unit_test[192] 終了フラグをON,遷移先ステータスにCLIENT_DISCONNECTを設定する
+//        //unit_test[192] test data:no rescheduleモード、４目失敗するの場合
+//        this->reschedule=0;
+//        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        BOOST_CHECK_EQUAL(data->end_flag,END_FLAG_ON);
+//        BOOST_CHECK_EQUAL(schedule, protocol_module_base::CLIENT_DISCONNECT);
 
         this->session_thread_data_map.clear();
     }
 
-    void handle_realserver_connection_fail_test_thread_reschedule(){
-        boost::asio::ip::tcp::endpoint ep;
-        session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
-        thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
-        thread_up_data_value->realserver_connect_failed_count=0;
-        thread_up_data_value->data_begain_offset=0;
-        thread_up_data_value->data_size=0;
-        thread_up_data_value->current_record_rest_size=0;
-        thread_up_data_value->hello_message_flag=false;
-        thread_data_ptr thread_data(thread_up_data_value);
-        thread_data_ptr data;
-        {
-        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
-        this->session_thread_data_map[boost::this_thread::get_id()]=thread_data;
-        std::map<const boost::thread::id,thread_data_ptr>::iterator iter;
-        iter=this->session_thread_data_map.find(boost::this_thread::get_id());
-        data=iter->second;
-        this->reschedule=1;
-        }
-
-        cout << "[193]--------------------------------------------- " << endl;
-        //unit_test[193] realserver_connect_failed_count で3を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
-        //unit_test[193] test data:rescheduleモード、３目失敗する、マルチスレッドの場合
-        EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
-        {
-        boost::mutex::scoped_lock sclock(check_mutex);
-        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
-        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
-        }
-    }
+//    void handle_realserver_connection_fail_test_thread_reschedule(){
+//        boost::asio::ip::tcp::endpoint ep;
+//        session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
+//        thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
+//        thread_up_data_value->data_begain_offset=0;
+//        thread_up_data_value->data_size=0;
+//        thread_up_data_value->current_record_rest_size=0;
+//        thread_up_data_value->hello_message_flag=false;
+//        thread_data_ptr thread_data(thread_up_data_value);
+//        thread_data_ptr data;
+//        {
+//        boost::mutex::scoped_lock sclock(this->session_thread_data_map_mutex);
+//        this->session_thread_data_map[boost::this_thread::get_id()]=thread_data;
+//        std::map<const boost::thread::id,thread_data_ptr>::iterator iter;
+//        iter=this->session_thread_data_map.find(boost::this_thread::get_id());
+//        data=iter->second;
+//        this->reschedule=1;
+//        }
+//
+//        cout << "[193]--------------------------------------------- " << endl;
+//        //unit_test[193] realserver_connect_failed_count で3を加算する,遷移先ステータスにREALSERVER_SELECTを設定する
+//        //unit_test[193] test data:rescheduleモード、３目失敗する、マルチスレッドの場合
+//        EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
+//        {
+//        boost::mutex::scoped_lock sclock(check_mutex);
+//        BOOST_CHECK_EQUAL(data->realserver_connect_failed_count,3);
+//        BOOST_CHECK_EQUAL(schedule, protocol_module_base::REALSERVER_SELECT);
+//        }
+//    }
 
     void handle_realserver_connection_fail_test_thread_noreschedule(){
         boost::asio::ip::tcp::endpoint ep;
         session_thread_data_sslid* thread_up_data_value = new session_thread_data_sslid;
         thread_up_data_value->thread_division=THREAD_DIVISION_UP_STREAM;
-        thread_up_data_value->realserver_connect_failed_count=0;
         thread_up_data_value->data_begain_offset=0;
         thread_up_data_value->data_size=0;
         thread_up_data_value->current_record_rest_size=0;
@@ -4339,7 +4296,6 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[194]--------------------------------------------- " << endl;
         //unit_test[194] 終了フラグをON,遷移先ステータスを設定する,status = CLIENT_DISCONNECT
-        //unit_test[194] test data:no rescheduleモード、マルチスレッドの場合
         EVENT_TAG schedule=this->handle_realserver_connection_fail(boost::this_thread::get_id(), ep);
         {
         boost::mutex::scoped_lock sclock(check_mutex);
@@ -6031,7 +5987,28 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(this->realserver_selected(ep), false);
     }
 
-
+    void get_option_info_test(){
+        {
+            cout << "[273]--------------------------------------------- " << endl;
+            //unit_test[273] timeoutが0、maxlistが0、rescheduleが0の場合。
+            this->timeout = 0;
+            this->maxlist = 0;
+            this->reschedule = 0;
+            std::string option;
+            this->get_option_info(option);
+            BOOST_CHECK_EQUAL(strcmp(option.c_str(), "--timeout 0 --maxlist 0 --no-reschedule"), 0);
+        }
+        {
+            cout << "[274]--------------------------------------------- " << endl;
+            //unit_test[274] timeoutが3600、maxlistが256 rescheduleが1の場合
+            this->timeout = 3600;
+            this->maxlist = 256;
+            this->reschedule = 1;
+            std::string option;
+            this->get_option_info(option);
+            BOOST_CHECK_EQUAL(strcmp(option.c_str(), "--timeout 3600 --maxlist 256 --reschedule"), 0);
+        }
+    }
 };
 
 
@@ -6196,15 +6173,15 @@ void handle_realserver_connection_fail_test(){
     protocol_module_sslid_test_class obj;
     obj.handle_realserver_connection_fail_test();
 }
-void handle_realserver_connection_fail_test_thread_reschedule(){
-    protocol_module_sslid_test_class obj;
-    boost::thread_group threads;
-    for(int i=0; i<THREAD_COUNT; i++)
-    {
-    threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_connection_fail_test_thread_reschedule,&obj));
-    }
-    threads.join_all();
-}
+//void handle_realserver_connection_fail_test_thread_reschedule(){
+//    protocol_module_sslid_test_class obj;
+//    boost::thread_group threads;
+//    for(int i=0; i<THREAD_COUNT; i++)
+//    {
+//    threads.create_thread(bind(&protocol_module_sslid_test_class::handle_realserver_connection_fail_test_thread_reschedule,&obj));
+//    }
+//    threads.join_all();
+//}
 void handle_realserver_connection_fail_test_thread_noreschedule(){
     protocol_module_sslid_test_class obj;
     boost::thread_group threads;
@@ -6334,6 +6311,10 @@ void realserver_selected_test(){
     protocol_module_sslid_test_class obj;
     obj.realserver_selected_test();
 }
+void get_option_info_test(){
+    protocol_module_sslid_test_class obj;
+    obj.get_option_info_test();
+}
 
 
 void protocol_module_sslid_test_main() {
@@ -6366,7 +6347,7 @@ void protocol_module_sslid_test_main() {
     ts->add(BOOST_TEST_CASE( &handle_realserver_connect_test ));
     ts->add(BOOST_TEST_CASE( &handle_realserver_connect_test_thread ));
     ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test ));
-    ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test_thread_reschedule ));
+    //ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test_thread_reschedule ));
     ts->add(BOOST_TEST_CASE( &handle_realserver_connection_fail_test_thread_noreschedule ));
     ts->add(BOOST_TEST_CASE( &handle_realserver_send_test ));
     ts->add(BOOST_TEST_CASE( &handle_realserver_send_test_thread ));
@@ -6393,6 +6374,7 @@ void protocol_module_sslid_test_main() {
     ts->add(BOOST_TEST_CASE( &put_data_to_sendbuffer_test ));
     ts->add(BOOST_TEST_CASE( &put_data_to_sendbuffer_test_thread ));
     ts->add(BOOST_TEST_CASE( &realserver_selected_test ));
+    ts->add(BOOST_TEST_CASE( &get_option_info_test ));
     framework::master_test_suite().add(ts);
 }
 
