@@ -304,7 +304,7 @@ namespace l7vs{
 
             
             //! handshake timer handler
-            void handle_handshake_timer(const boost::system::error_code& error);
+            void handle_ssl_handshake_timer();
             //! reset ssl object for reuse
             int ssl_clear_keep_cache(SSL *s);
 

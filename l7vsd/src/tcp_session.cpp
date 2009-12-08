@@ -39,43 +39,6 @@
 
 namespace l7vs{
 
-/*
-//以下削除予定
-    //! construcor
-    //! @param[in/out]    vs is parent virtualservice object
-    //! @param[in/out]    io is session use io service object
-    //! @param[in]        flag is session use SSL flag
-    //! @param[in]        context is session use SSL context object
-    //! @param[in]        timeout is session use SSL handshake timeout
-    //! @param[in]        set socket option info
-    tcp_session::tcp_session(virtualservice_tcp& vs,
-                 boost::asio::io_service& session_io,
-                 bool flag,
-                 boost::asio::ssl::context& context,
-                 int timeout,
-                 bool is_cache_use,
-                 tcp_socket_option_info set_option)
-        :
-        io(session_io),
-        parent_service(vs),
-        exit_flag(false),
-        thread_state(0),
-        protocol_module(NULL),
-        session_pause_flag(false),
-        client_socket(session_io, set_option),
-        client_ssl_socket(session_io, context, set_option),
-//        ssl_sess_flag(flag),
-//        handshake_timeout(timeout),
-//        sess_cache_flag(is_cache_use),
-        upstream_buffer_size(8192),
-        downstream_buffer_size(8192),
-        socket_opt_info(set_option){
-
-
-    }
-
-//削除対象ここまで
-*/
     //! construcor
     //! @param[in/out]    vs is parent virtualservice object
     //! @param[in/out]    session_io is session use io service object
@@ -1251,7 +1214,7 @@ namespace l7vs{
             return;
         }
 
-        // Handshake start
+/*        // Handshake start
         if (ssl_flag) {
             //----Debug log----------------------------------------------------------------------
             if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1298,7 +1261,7 @@ namespace l7vs{
             }
             //----Debug log----------------------------------------------------------------------
         }
-
+*/
         up_thread_function_pair    func    = up_thread_function_array[func_type->second];
         if(unlikely( !func.second )){
             //Error not find function map
@@ -1316,61 +1279,19 @@ namespace l7vs{
 
     //! handshake timer handler
     //! @param[in]        error is timer operation result error code
-    void tcp_session::handle_handshake_timer(const boost::system::error_code& error) {
+    void tcp_session::handle_ssl_handshake_timer() {
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_session::handle_handshake_timer", __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
 
-        if (!error) {
-/*            if (ssl_handshake_flag) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] handshake timer timeout ";
-                    buf << ssl_handshake_timeout;
-                    buf << " sec : handshaking normal end";
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                }
-                //----Debug log----------------------------------------------------------------------
-            } else {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] handshake timer timeout ";
-                buf << ssl_handshake_timeout;
-                buf << " sec : handshaking not end";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(LOCAL_PROC);
-            }*/
-        } else {
-            if (error.value() == ECANCELED) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] handshake timer operation cancel : ";
-                    buf << "handshaking normal end";
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                }
-                //----Debug log----------------------------------------------------------------------
-            } else {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] handshake timer operation failed : ";
-                buf << error.message();
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-            }
-        }
+        rw_scoped_lock scoped_lock(ssl_handshake_time_out_flag_mutex);
+        ssl_handshake_time_out_flag = true;
 
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_session::handle_handshake_timer", __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
     }
