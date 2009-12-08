@@ -365,10 +365,10 @@ void l7vs::LoggerImpl::logic_error( const unsigned int logno, const std::string&
     putLogError( l7vs::LOG_CAT_L7VSADM_LOGGER,logno, str, file, line );
 #elif defined(LOGGER_PROCESS_SNM)
     putLogError( l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line );
-#else
+#endif
+
     throw std::logic_error( str );
 
-#endif
 }
 
 /*!
@@ -583,7 +583,12 @@ void l7vs::LoggerImpl::loadConf(){
         if( ec )    logic_error( 4, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
 
         std::string size_val;
-        std::string last_str = maxFileSizeStr.substr(maxFileSizeStr.length() - 1, 1);
+        int maxFileSizeStr_length = maxFileSizeStr.length();
+        if( maxFileSizeStr_length <= 0 ) {
+            logic_error( 5, "Invalid FileSize Value.", __FILE__, __LINE__ );
+        }
+
+        std::string last_str = maxFileSizeStr.substr(maxFileSizeStr_length - 1, 1);
         // when unit was specified
         if (("K" == last_str) || ("M" == last_str) || ("G" == last_str))
             size_val = maxFileSizeStr.substr(0, maxFileSizeStr.length() - 1);
