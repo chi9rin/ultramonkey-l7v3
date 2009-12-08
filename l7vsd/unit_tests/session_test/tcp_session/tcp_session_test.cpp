@@ -286,7 +286,18 @@ class mutex_lock_test : public l7vs::tcp_session{
             l7vs::tcp_session::thread_state_update(UP_THREAD_ALIVE,true);
             after_thread_id = boost::this_thread::get_id();
         };
-        
+
+        //-------------handle_ssl_handshake_timer test---------------------------------
+        void set_handle_ssl_handshake_timer_test(){
+            pTest_mutex = &ssl_handshake_time_out_flag_mutex;
+            test_func = boost::bind(&mutex_lock_test::handle_ssl_handshake_timer,this);
+        };
+
+        void handle_ssl_handshake_timer(){
+            befor_thread_id = boost::this_thread::get_id();
+            l7vs::tcp_session::handle_ssl_handshake_timer();
+            after_thread_id = boost::this_thread::get_id();
+        };
 };
 
 // dummy mirror server
@@ -2200,6 +2211,124 @@ void get_client_socket_test(){
 
     BOOST_MESSAGE( "----- get_client_socket test end -----" );
 }
+
+
+// handle_ssl_handshake_timer test
+// handle_ssl_handshake_timer test class
+class handle_ssl_handshake_timer_test_class : public l7vs::tcp_session{
+    public:
+//        handle_ssl_handshake_timer_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       handle_ssl_handshake_timer_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+        ~handle_ssl_handshake_timer_class(){};
+        bool& get_ssl_handshake_time_out_flag(){
+            return ssl_handshake_time_out_flag;
+        };
+        void test_call(){
+            l7vs::tcp_session::handle_ssl_handshake_timer();
+        };
+};
+void handle_ssl_handshake_timer_test(){
+    
+    BOOST_MESSAGE( "----- handle_ssl_handshake_timer test start -----" );
+    
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_exit_test_class test_obj(vs,io);
+
+    l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    handle_ssl_handshake_timer_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    // unit_test [1] ssl_handshake_time_out_flag  update check
+    std::cout << "[1] ssl_handshake_time_out_flag update check" << std::endl;
+
+    bool& ref_flag = test_obj.get_ssl_handshake_time_out_flag();
+
+    ref_flag = false;
+
+    test_obj.test_call();
+
+    BOOST_CHECK(ref_flag);
+
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    test_lock_obj.set_handle_ssl_handshake_timer_test();
+
+    test_lock_obj.test_thread_wait.lock();
+    boost::thread::id proc_id = boost::this_thread::get_id();
+    test_lock_obj.befor_thread_id = proc_id;
+    test_lock_obj.after_thread_id = proc_id;
+    test_lock_obj.mutex_lock();
+
+    boost::thread test_thread(boost::bind(&mutex_lock_test::test_run,&test_lock_obj));
+ 
+    BOOST_CHECK(test_lock_obj.befor_thread_id == proc_id);
+    BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
+    
+    boost::thread::id test_id = test_thread.get_id();
+    
+    BOOST_CHECK(test_id != proc_id);
+    
+    // test start
+    test_lock_obj.test_thread_wait.unlock();
+    sleep(1);
+
+    // unit_test [2] set_handle_ssl_handshake_timer_test thread block test (mutex lock)
+    std::cout << "[2] set_handle_ssl_handshake_timer_test thread block test (mutex lock)" << std::endl;
+    BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
+    BOOST_CHECK(test_lock_obj.after_thread_id == proc_id);
+
+    test_lock_obj.mutex_unlock();
+    sleep(1);
+
+    // unit_test [3] set_handle_ssl_handshake_timer_test thread run test (mutex unlock)
+    std::cout << "[3] set_handle_ssl_handshake_timer_test thread run test (mutex unlock)" << std::endl;
+    BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
+    BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
+
+    BOOST_MESSAGE( "----- handle_ssl_handshake_timer test end -----" );
+}
+
 
 // is_thread_wait test
 // is_thread_wait test class
@@ -10148,7 +10277,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
 //    ts->add( BOOST_TEST_CASE( &constructer_test ) );
 //NG    ts->add( BOOST_TEST_CASE( &initialize_test ) );
-    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+//    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+    ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
 //    ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
 //    ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
