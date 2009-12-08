@@ -569,6 +569,36 @@ namespace l7vs{
                 }
                 //----Debug log----------------------------------------------------------------------
                 return;
+            case ACCESS_LOG_ON:
+                {
+                    rw_scoped_lock scope_lock(accesslog_flag_mutex);
+                    accesslog_flag = true;
+                }
+                //----Debug log----------------------------------------------------------------------
+                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] set_virtual_service_message message:[ACCESS_LOG_ON]";
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 99, buf.str(), __FILE__, __LINE__ );
+                }
+                //----Debug log----------------------------------------------------------------------
+                return;
+            case ACCESS_LOG_OFF:
+                {
+                    rw_scoped_lock scope_lock(accesslog_flag_mutex);
+                    accesslog_flag = false;
+                }
+                //----Debug log----------------------------------------------------------------------
+                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] set_virtual_service_message message:[ACCESS_LOG_OFF]";
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 99, buf.str(), __FILE__, __LINE__ );
+                }
+                //----Debug log----------------------------------------------------------------------
+                return;
             case SORRY_STATE_ENABLE:
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){

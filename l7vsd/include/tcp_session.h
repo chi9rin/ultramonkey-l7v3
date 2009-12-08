@@ -74,26 +74,11 @@ namespace l7vs{
                 SORRY_STATE_DISABLE,
                 SESSION_END,
                 SESSION_PAUSE_ON,
-                SESSION_PAUSE_OFF
+                SESSION_PAUSE_OFF,
+                ACCESS_LOG_ON,
+                ACCESS_LOG_OFF
             };
-/*
-//ここより下削除対象
-            //! construcor
-            //! @param[in/out]    vs is parent virtualservice object
-            //! @param[in/out]    io is session use io service object
-            //! @param[in]        flag is session use SSL flag
-            //! @param[in]        context is session use SSL context object
-            //! @param[in]        timeout is session use SSL handshake timeout
-            //! @param[in]        set socket option info
-            tcp_session(virtualservice_tcp& vs,
-                    boost::asio::io_service& session_io,
-                    bool flag,
-                    boost::asio::ssl::context& context,
-                    int timeout,
-                    bool is_cache_use,
-                    const tcp_socket_option_info set_option);
-//ここより上削除対象
-*/
+
             //! construcor
             //! @param[in/out]    vs is parent virtualservice object
             //! @param[in/out]    io is session use io service object
