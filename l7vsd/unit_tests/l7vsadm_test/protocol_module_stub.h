@@ -48,6 +48,7 @@ public:
         res.flag = true;
         return res;
     }
+    void get_option_info(std::string& option) {}
     void handle_rslist_update() {}
     void register_schedule(tcp_schedule_func_type inschedule) {}
     void register_schedule(udp_schedule_func_type inschedule) {}

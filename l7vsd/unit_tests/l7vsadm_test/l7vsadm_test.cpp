@@ -1,6 +1,7 @@
 #define    UNIT_TEST
 
 #include <boost/test/included/unit_test.hpp>
+#include <boost/algorithm/string.hpp>
 
 //#include "error_code.h"
 
@@ -176,9 +177,13 @@ void    server_thread(){
 //util
 template< typename InternetProtocol >
 boost::asio::ip::basic_endpoint< InternetProtocol > string_to_endpoint( std::string str ){
-    std::string::size_type pos = str.find( ":" );
+    std::string::size_type pos = str.rfind( ":" );
     std::string    hostname = str.substr( 0, pos );
     std::string    portname = str.substr( pos+1, str.length() );
+    //remove "[","]"
+    boost::algorithm::erase_first( hostname, "[" );
+    boost::algorithm::erase_last( hostname, "]" );
+
     boost::asio::io_service        io_service;
     typename InternetProtocol::resolver                resolver(io_service);
     typename InternetProtocol::resolver::query        query( hostname, portname );
@@ -310,6 +315,75 @@ void    parse_opt_vs_target_func_test(){
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, ep );
     }
 
+// ramiel_ipv6 add
+    // parse_opt_vs_target_func normal case 4 (any address)
+    {
+        l7vsadm_test    adm;
+        int        pos        = 2;
+        int        argc    = 4;
+        char*    argv[]    = { "l7vsadm_test", "-A", "-t", "0.0.0.0:8080" };
+
+        bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+        // unit_test[xx] parse_opt_vs_target_func normal case 4 (any address) return value check
+        BOOST_CHECK_EQUAL( ret, true );    
+        // unit_test[xx] parse_opt_vs_target_func normal case 4 (any address) endpoint check
+        boost::asio::ip::tcp::endpoint    ep = string_to_endpoint<boost::asio::ip::tcp>( "0.0.0.0:8080" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, ep );
+    }
+
+// ramiel_ipv6 add
+    // parse_opt_vs_target_func normal case 5 (tcp endpoint(ipv6))
+    {
+        l7vsadm_test    adm;
+        int        pos        = 2;
+        int        argc    = 4;
+        char*    argv[]    = { "l7vsadm_test", "-A", "-t", "[2001::11]:8080" };
+
+        bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+        // unit_test[xx] parse_opt_vs_target_func normal case 4 (tcp endpoint(ipv6)) return value check
+        BOOST_CHECK_EQUAL( ret, true );    
+        // unit_test[xx] parse_opt_vs_target_func normal case 4 (tcp endpoint(ipv6)) endpoint check
+        boost::asio::ip::tcp::endpoint    ep = string_to_endpoint<boost::asio::ip::tcp>( "[2001::11]:8080" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, ep );
+    }
+
+// ramiel_ipv6 add
+    // parse_opt_vs_target_func normal case 6 (udp endpoint(ipv6))
+    {
+        l7vsadm_test    adm;
+        int        pos        = 2;
+        int        argc    = 4;
+        char*    argv[]    = { "l7vsadm_test", "-A", "-t", "[2001::11]:8080" };
+        adm.get_request().vs_element.udpmode = true;
+
+        bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+        // unit_test[xx] parse_opt_vs_target_func normal case 6 (udp endpoint(ipv6)) return value check
+        BOOST_CHECK_EQUAL( ret, true );    
+        // unit_test[xx] parse_opt_vs_target_func normal case 6 (udp endpoint(ipv6)) endpoint check
+        boost::asio::ip::udp::endpoint    ep = string_to_endpoint<boost::asio::ip::udp>( "[2001::11]:8080" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.udp_recv_endpoint, ep );
+    }
+
+// ramiel_ipv6 add
+    // parse_opt_vs_target_func normal case 5 (any address(ipv6))
+    {
+        l7vsadm_test    adm;
+        int        pos        = 2;
+        int        argc    = 4;
+        char*    argv[]    = { "l7vsadm_test", "-A", "-t", "[::]:8080" };
+
+        bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+
+        // unit_test[xx] parse_opt_vs_target_func normal case 4 (any address(ipv6)) return value check
+        BOOST_CHECK_EQUAL( ret, true );    
+        // unit_test[xx] parse_opt_vs_target_func normal case 4 (any address(ipv6)) endpoint check
+        boost::asio::ip::tcp::endpoint    ep = string_to_endpoint<boost::asio::ip::tcp>( "[::]:8080" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, ep );
+    }
+
     // parse_opt_vs_target_func error case 1 (invalid endpoint)
     {
         l7vsadm_test    adm;
@@ -336,18 +410,19 @@ void    parse_opt_vs_target_func_test(){
         BOOST_CHECK_EQUAL( ret, false );    
     }
 
-    // parse_opt_vs_target_func error case 3 (0.0.0.0 address)
-    {
-        l7vsadm_test    adm;
-        int        pos        = 2;
-        int        argc    = 4;
-        char*    argv[]    = { "l7vsadm_test", "-A", "-t", "0.0.0.0:8080" };
-
-        bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
-
-        // unit_test[18] parse_opt_vs_target_func error case 3 (0.0.0.0 address) return value check
-        BOOST_CHECK_EQUAL( ret, false );    
-    }
+// ramiel_ipv6 delete
+//    // parse_opt_vs_target_func error case 3 (0.0.0.0 address)
+//    {
+//        l7vsadm_test    adm;
+//        int        pos        = 2;
+//        int        argc    = 4;
+//        char*    argv[]    = { "l7vsadm_test", "-A", "-t", "0.0.0.0:8080" };
+//
+//        bool ret = adm.parse_opt_vs_target_func_wp( pos, argc, argv );
+//
+//        // unit_test[18] parse_opt_vs_target_func error case 3 (0.0.0.0 address) return value check
+//        BOOST_CHECK_EQUAL( ret, false );    
+//    }
 
     // parse_opt_vs_target_func error case 4 (0 port)
     {
@@ -777,6 +852,23 @@ void    parse_opt_vs_bypass_func_test(){
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, ep );
     }
 
+//ramiel_ipv6 add
+    // parse_opt_vs_bypass_func normal case 4 (ipv6)
+    {
+        l7vsadm_test    adm;
+        int        pos        = 2;
+        int        argc    = 4;
+        char*    argv[]    = { "l7vsadm_test", "-A", "-b", "[2001::10]:8080" };
+    
+        bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+        // unit_test[xx] parse_opt_vs_bypass_func normal case 4 (ipv6) return value check
+        BOOST_CHECK_EQUAL( ret, true );    
+        // unit_test[xx] parse_opt_vs_bypass_func normal case 4 (ipv6) sorry_endpoint check
+        boost::asio::ip::tcp::endpoint    ep = string_to_endpoint<boost::asio::ip::tcp>( "[2001::10]:8080" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, ep );
+    }
+
     // parse_opt_vs_bypass_func error case 1 (invalid endpoint)
     {
         l7vsadm_test    adm;
@@ -865,6 +957,20 @@ void    parse_opt_vs_bypass_func_test(){
         bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
 
         // unit_test[66] parse_opt_vs_bypass_func error case 7 (port omitted) return value check
+        BOOST_CHECK_EQUAL( ret, false );    
+    }
+
+//ramiel_ipv6 add
+    // parse_opt_vs_bypass_func error case 8 (ipv6 any address)
+    {
+        l7vsadm_test    adm;
+        int        pos        = 2;
+        int        argc    = 4;
+        char*    argv[]    = { "l7vsadm_test", "-A", "-b", "[::]:8080" };
+
+        bool ret = adm.parse_opt_vs_bypass_func_wp( pos, argc, argv );
+
+        // unit_test[xx] parse_opt_vs_bypass_func error case 8 (ipv6 any address) return value check
         BOOST_CHECK_EQUAL( ret, false );    
     }
 
@@ -2290,6 +2396,45 @@ void    parse_rs_func_test(){
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
     }
 
+//ramiel_ipv6 add
+    // parse_rs_func normal case 7 (CMD_ADD_RS ipv6 )
+    {
+        l7vsadm_test    adm;
+        l7vs::l7vsadm_request::COMMAND_CODE_TAG    cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+        int        argc    = 11;
+        char*    argv[]    = {    "l7vsadm_test",
+                            "-a",
+                            "-t",
+                            "10.144.169.87:22100",
+                            "-m",
+                            "cinsert",
+                            "mod_arg",
+                            "-r",
+                            "[2001::10]:8080",
+                            "-w",
+                            "10"
+                            };
+    
+        bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) return value check
+        BOOST_CHECK_EQUAL( ret, true );    
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) request check
+        BOOST_CHECK_EQUAL( adm.get_request().command, l7vs::l7vsadm_request::CMD_ADD_RS );
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) tcp_accept_endpoint check
+        boost::asio::ip::tcp::endpoint    tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:22100" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) protocol module name check
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) protocol module arg check
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) realserver endpoint check
+        boost::asio::ip::tcp::endpoint    rs_ep = string_to_endpoint<boost::asio::ip::tcp>( "[2001::10]:8080" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, rs_ep );
+        // unit_test[xx] parse_rs_func normal case 7 (CMD_ADD_RS ipv6) weight check
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().weight, 10 );
+    }
+
     // parse_rs_func error case 1 (CMD_ADD_RS protocol module not specified)
     {
         l7vsadm_test    adm;
@@ -2346,6 +2491,56 @@ void    parse_rs_func_test(){
         bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
 
         // unit_test[253] parse_rs_func error case 3 (CMD_ADD_RS realserver address not specified) return value check
+        BOOST_CHECK_EQUAL( ret, false );
+    }
+
+//ramiel_ipv6 add
+    // parse_rs_func error case 4 (CMD_ADD_RS realserver any address ipv4 )
+    {
+        l7vsadm_test    adm;
+        l7vs::l7vsadm_request::COMMAND_CODE_TAG    cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+        int        argc    = 11;
+        char*    argv[]    = {    "l7vsadm_test",
+                            "-a",
+                            "-t",
+                            "10.144.169.87:22100",
+                            "-m",
+                            "cinsert",
+                            "mod_arg",
+                            "-r",
+                            "0.0.0.0:8080",
+                            "-w",
+                            "10"
+                            };
+    
+        bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+        // unit_test[xx] parse_rs_func error case 4 (CMD_ADD_RS realserver any address ipv4) return value check
+        BOOST_CHECK_EQUAL( ret, false );
+    }
+
+//ramiel_ipv6 add
+    // parse_rs_func error case 5 (CMD_ADD_RS realserver any address ipv6 )
+    {
+        l7vsadm_test    adm;
+        l7vs::l7vsadm_request::COMMAND_CODE_TAG    cmd = l7vs::l7vsadm_request::CMD_ADD_RS;
+        int        argc    = 11;
+        char*    argv[]    = {    "l7vsadm_test",
+                            "-a",
+                            "-t",
+                            "10.144.169.87:22100",
+                            "-m",
+                            "cinsert",
+                            "mod_arg",
+                            "-r",
+                            "[::]:8080",
+                            "-w",
+                            "10"
+                            };
+    
+        bool ret = adm.parse_rs_func_wp( cmd, argc, argv );
+
+        // unit_test[xx] parse_rs_func error case 5 (CMD_ADD_RS realserver any address ipv6) return value check
         BOOST_CHECK_EQUAL( ret, false );
     }
 
@@ -4293,18 +4488,18 @@ void    parse_opt_vs_module_func_socket_option_test(){
         // unit_test[461] parse_opt_vs_module_func normal case 18 (end with module option) module name check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
         
-        // unit_test[462] parse_opt_vs_module_func normal case 18 (sorry-uri) module arg check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-S" );
-        adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
-        // unit_test[463] parse_opt_vs_module_func normal case 18 (sorry-uri value) module arg check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
-        adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
-        
-        // unit_test[464] parse_opt_vs_module_func normal case 18 (socket option) module arg check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
-        adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
-        // unit_test[465] parse_opt_vs_module_func normal case 18 (socket option value) module arg check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
+//        // unit_test[462] parse_opt_vs_module_func normal case 18 (sorry-uri) module arg check
+//        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-S" );
+//        adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+//        // unit_test[463] parse_opt_vs_module_func normal case 18 (sorry-uri value) module arg check
+//        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "ABCDEFG" );
+//        adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+//        
+//        // unit_test[464] parse_opt_vs_module_func normal case 18 (socket option) module arg check
+//        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "-O" );
+//        adm.get_request().vs_element.protocol_args.erase(adm.get_request().vs_element.protocol_args.begin());
+//        // unit_test[465] parse_opt_vs_module_func normal case 18 (socket option value) module arg check
+//        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "da:on,nd:on,ck:on,qa:on" );
         
     }
     

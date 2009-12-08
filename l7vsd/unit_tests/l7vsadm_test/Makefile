@@ -6,9 +6,7 @@
 TARGET		= l7vsadm_ut
 CPP			= g++
 CPPFLAGS	= -Wall -O0 -g -Werror -pthread -DPARAMETER_FILE='"./l7vs.cf"' -DLOGGER_PROCESS_ADM -DL7VS_CONFIG_SOCK_PATH='"."' -DMAX_BUFFER_SIZE='(65535)' -DVERSION=\"3.0.0-0\"
-INCLUDES	=	-I../../logger \
-				-I../../parameter \
-				-I../../include
+INCLUDES	= 	-I../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_serialization-gcc41-mt \
@@ -29,14 +27,14 @@ SRCS		=	\
 			l7vsadm_test.cpp
 
 PARAMETER_SRCS	=	\
-			../../parameter/parameter.cpp \
-			../../parameter/parameter_impl.cpp
+			../../src/parameter.cpp \
+			../../src/parameter_impl.cpp
 
 LOGGER_SRCS	=	\
-			../../logger/logger.cpp \
-			../../logger/logger_impl.cpp \
-			../../logger/strict_time_based_rolling_policy.cpp \
-			../../logger/time_and_size_based_rolling_policy.cpp
+			../../src/logger.cpp \
+			../../src/logger_impl.cpp \
+			../../src/strict_time_based_rolling_policy.cpp \
+			../../src/time_and_size_based_rolling_policy.cpp
 
 .SUFFIXES:	.o .cpp
 .cpp.o:
