@@ -26,6 +26,7 @@
 #include "tcp_thread_message.h"
 #include "virtualservice.h"
 #include "logger.h"
+#include "logger_implement_access.h"
 #include "parameter.h"
 #include "utility.h"
 
@@ -37,211 +38,16 @@
 #define DOWN_THREAD_LOCK     std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020)
 
 namespace l7vs{
+
 /*
+//以下削除予定
     //! construcor
     //! @param[in/out]    vs is parent virtualservice object
     //! @param[in/out]    io is session use io service object
     //! @param[in]        flag is session use SSL flag
     //! @param[in]        context is session use SSL context object
     //! @param[in]        timeout is session use SSL handshake timeout
-    tcp_session::tcp_session(virtualservice_tcp& vs,
-                 boost::asio::io_service& session_io,
-                 bool flag,
-                 boost::asio::ssl::context& context,
-                 int timeout,
-                 bool is_cache_use)
-        :
-        io(session_io),
-        parent_service(vs),
-        exit_flag(false),
-        thread_state(0),
-        protocol_module(NULL),
-        session_pause_flag(false),
-        client_socket(session_io),
-        client_ssl_socket(session_io, context),
-        ssl_sess_flag(flag),
-        handshake_timeout(timeout),
-        sess_cache_flag(is_cache_use),
-        upstream_buffer_size(8192),
-        downstream_buffer_size(8192){
-            
-        socket_opt_info.nodelay_opt = false;
-        socket_opt_info.cork_opt = false;
-        socket_opt_info.quickack_opt = false;
-        
-        // sorryserver socket
-        tcp_socket_ptr sorry_socket(new tcp_socket(session_io,socket_opt_info));
-        sorryserver_socket.second = sorry_socket;
-        
-        // set up_thread_module_event_map
-        std::pair<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG> add_up_thread_event;
-        add_up_thread_event.first = protocol_module_base::ACCEPT;
-        add_up_thread_event.second = UP_FUNC_CLIENT_ACCEPT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::CLIENT_DISCONNECT;
-        add_up_thread_event.second = UP_FUNC_CLIENT_DISCONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::CLIENT_RECV;
-        add_up_thread_event.second = UP_FUNC_CLIENT_RECEIVE;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::CLIENT_RESPONSE_SEND;
-        add_up_thread_event.second = UP_FUNC_CLIENT_RESPOND_SEND;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_SELECT;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_GET_DEST_EVENT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_CONNECT;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_CONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_SEND;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_SEND;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_DISCONNECT;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_ALL_DISCONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_SELECT;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_GET_DEST;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_CONNECT;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_CONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_SEND;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_SEND;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_DISCONNECT;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_MOD_DISCONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::FINALIZE;
-        add_up_thread_event.second = UP_FUNC_EXIT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        
-        // set up_thread_function_array
-        up_thread_function_array[UP_FUNC_CLIENT_ACCEPT]            = std::make_pair(UP_FUNC_CLIENT_ACCEPT,  boost::bind(&tcp_session::up_thread_client_accept_event,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT]        = std::make_pair(UP_FUNC_CLIENT_DISCONNECT, boost::bind(&tcp_session::up_thread_client_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT]    = std::make_pair(UP_FUNC_CLIENT_DISCONNECT_EVENT,  boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_RECEIVE]        = std::make_pair(UP_FUNC_CLIENT_RECEIVE, boost::bind(&tcp_session::up_thread_client_receive,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND]    = std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND, boost::bind(&tcp_session::up_thread_client_respond,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT]    = std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND_EVENT, boost::bind(&tcp_session::up_thread_client_respond_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_GET_DEST_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_GET_DEST_EVENT, boost::bind(&tcp_session::up_thread_realserver_get_destination_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT]    = std::make_pair(UP_FUNC_REALSERVER_CONNECT, boost::bind(&tcp_session::up_thread_realserver_connect,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_connect_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_realserver_connection_fail_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_SEND]    = std::make_pair(UP_FUNC_REALSERVER_SEND, boost::bind(&tcp_session::up_thread_realserver_send,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT]    = std::make_pair(UP_FUNC_REALSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_realserver_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_ALL_DISCONNECT]    = std::make_pair(UP_FUNC_REALSERVER_ALL_DISCONNECT, boost::bind(&tcp_session::up_thread_all_realserver_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_GET_DEST]    = std::make_pair(UP_FUNC_SORRYSERVER_GET_DEST, boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT]    = std::make_pair(UP_FUNC_SORRYSERVER_CONNECT, boost::bind(&tcp_session::up_thread_sorryserver_connect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT]    = std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connect_event,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT]    = std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_SEND]    = std::make_pair(UP_FUNC_SORRYSERVER_SEND, boost::bind(&tcp_session::up_thread_sorryserver_send,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT]    = std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_MOD_DISCONNECT]    = std::make_pair(UP_FUNC_SORRYSERVER_MOD_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT]    = std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1));
-        up_thread_function_array[UP_FUNC_EXIT]    = std::make_pair(UP_FUNC_EXIT, boost::bind(&tcp_session::up_thread_exit,this,_1));
-
-        // set up_thread_message_down_thread_function_map
-        std::pair<DOWN_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_up_thread_message_func;
-        add_up_thread_message_func.first = DOWN_FUNC_CLIENT_DISCONNECT_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_client_disconnect_event,this,_1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_client_respond_event,this,_1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_REALSERVER_DISCONNECT_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_realserver_disconnect_event,this,_1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        
-        // set down_thread_module_event_map
-        std::pair<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG> add_down_thread_event;
-        add_down_thread_event.first = protocol_module_base::CLIENT_SEND;
-        add_down_thread_event.second = DOWN_FUNC_CLIENT_SEND;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::CLIENT_DISCONNECT;
-        add_down_thread_event.second = DOWN_FUNC_CLIENT_DISCONNECT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::CLIENT_CONNECTION_CHECK;
-        add_down_thread_event.second = DOWN_FUNC_CLIENT_CONNECTION_CHK;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::REALSERVER_RECV;
-        add_down_thread_event.second = DOWN_FUNC_REALSERVER_RECEIVE;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::REALSERVER_DISCONNECT;
-        add_down_thread_event.second = DOWN_FUNC_REALSERVER_ALL_DISCONNECT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::SORRYSERVER_RECV;
-        add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_RECEIVE;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::SORRYSERVER_DISCONNECT;
-        add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::FINALIZE;
-        add_down_thread_event.second = DOWN_FUNC_EXIT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-
-        // set down_thread_function_array
-        down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT]    = std::make_pair(DOWN_FUNC_CLIENT_DISCONNECT, boost::bind(&tcp_session::down_thread_client_disconnect,this,_1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT]    = std::make_pair(DOWN_FUNC_CLIENT_DISCONNECT_EVENT, boost::bind(&tcp_session::down_thread_client_disconnect_event,this,_1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_CONNECTION_CHK]    = std::make_pair(DOWN_FUNC_CLIENT_CONNECTION_CHK, boost::bind(&tcp_session::down_thread_client_connection_chk_event,this,_1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_SEND]    = std::make_pair(DOWN_FUNC_CLIENT_SEND, boost::bind(&tcp_session::down_thread_client_send,this,_1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE]    = std::make_pair(DOWN_FUNC_REALSERVER_RECEIVE, boost::bind(&tcp_session::down_thread_realserver_receive,this,_1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT]    = std::make_pair(DOWN_FUNC_REALSERVER_DISCONNECT, boost::bind(&tcp_session::down_thread_realserver_disconnect,this,_1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT]    = std::make_pair(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::down_thread_realserver_disconnect_event,this,_1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_ALL_DISCONNECT]    = std::make_pair(DOWN_FUNC_REALSERVER_ALL_DISCONNECT, boost::bind(&tcp_session::down_thread_all_realserver_disconnect,this,_1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE]    = std::make_pair(DOWN_FUNC_SORRYSERVER_RECEIVE, boost::bind(&tcp_session::down_thread_sorryserver_receive,this,_1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT]    = std::make_pair(DOWN_FUNC_SORRYSERVER_DISCONNECT, boost::bind(&tcp_session::down_thread_sorryserver_disconnect,this,_1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT]    = std::make_pair(DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT, boost::bind(&tcp_session::down_thread_sorryserver_mod_disconnect,this,_1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT]    = std::make_pair(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1));
-        down_thread_function_array[DOWN_FUNC_EXIT]    = std::make_pair(DOWN_FUNC_EXIT, boost::bind(&tcp_session::down_thread_exit,this,_1));
-
-        // set down_thread_message_up_thread_function_map
-        std::pair<UP_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_down_thread_message_func;
-        add_down_thread_message_func.first = UP_FUNC_CLIENT_DISCONNECT_EVENT;
-        add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1);
-        down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
-        add_down_thread_message_func.first = UP_FUNC_REALSERVER_DISCONNECT_EVENT;
-        add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1);
-        down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
-        add_down_thread_message_func.first = UP_FUNC_SORRYSERVER_DISCONNECT_EVENT;
-        add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1);
-        down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
-        
-        // set virtual_service_message_up_thread_function_map
-        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG , tcp_session_func > add_up_thread_vs_message_func;
-        add_up_thread_vs_message_func.first = SORRY_STATE_ENABLE;
-        add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_sorry_enable_event,this,_1);
-        virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
-        add_up_thread_vs_message_func.first = SORRY_STATE_DISABLE;
-        add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_sorry_disable_event,this,_1);
-        virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
-        add_up_thread_vs_message_func.first = SESSION_END;
-        add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_exit,this,_1);
-        virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
-        
-        // set virtual_service_message_down_thread_function_map
-        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG , tcp_session_func > add_down_thread_vs_message_func;
-        add_down_thread_vs_message_func.first = SORRY_STATE_ENABLE;
-        add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_sorry_enable_event,this,_1);
-        virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-        add_down_thread_vs_message_func.first = SORRY_STATE_DISABLE;
-        add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_sorry_disable_event,this,_1);
-        virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-        add_down_thread_vs_message_func.first = SESSION_END;
-        add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_exit,this,_1);
-        virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-        
-    }
-*/    
-    //! construcor
-    //! @param[in/out]    vs is parent virtualservice object
-    //! @param[in/out]    io is session use io service object
-    //! @param[in]        flag is session use SSL flag
-    //! @param[in]        context is session use SSL context object
-    //! @param[in]        timeout is session use SSL handshake timeout
-    //! @param[in]        set socket option info 
+    //! @param[in]        set socket option info
     tcp_session::tcp_session(virtualservice_tcp& vs,
                  boost::asio::io_service& session_io,
                  bool flag,
@@ -258,18 +64,69 @@ namespace l7vs{
         session_pause_flag(false),
         client_socket(session_io, set_option),
         client_ssl_socket(session_io, context, set_option),
-        ssl_sess_flag(flag),
-        handshake_timeout(timeout),
-        sess_cache_flag(is_cache_use),
+//        ssl_sess_flag(flag),
+//        handshake_timeout(timeout),
+//        sess_cache_flag(is_cache_use),
         upstream_buffer_size(8192),
         downstream_buffer_size(8192),
         socket_opt_info(set_option){
-        
+
+
+    }
+
+//削除対象ここまで
+*/
+    //! construcor
+    //! @param[in/out]    vs is parent virtualservice object
+    //! @param[in/out]    session_io is session use io service object
+    //! @param[in]        set_option is
+    //!                     session use set socket option info
+    //! @param[in]        listen_endpoint is
+    //!                     virtualservice listen endpoint
+    //! @param[in]        ssl_mode is session use SSL flag
+    //! @param[in]        set_ssl_context is
+    //!                     session use SSL context object
+    //! @param[in]        set_ssl_cache_flag is
+    //!                     session use SSL session cache
+    //! @param[in]        set_ssl_handshake_time_out is
+    //!                     session use SSL handshake timeout
+    //! @param[in]        set_access_logger is
+    //!                     session use access logger
+    tcp_session::tcp_session(virtualservice_tcp& vs,
+            boost::asio::io_service& session_io,
+            const tcp_socket_option_info set_option,
+            const boost::asio::ip::tcp::endpoint listen_endpoint,
+            const bool ssl_mode,
+            boost::asio::ssl::context& set_ssl_context,
+            const bool set_ssl_cache_flag,
+            const int set_ssl_handshake_time_out,
+            logger_implement_access* set_access_logger)
+        :
+        io(session_io),
+        parent_service(vs),
+        exit_flag(false),
+        thread_state(0),
+        protocol_module(NULL),
+        session_pause_flag(false),
+        client_socket(session_io,set_option),
+        upstream_buffer_size(8192),
+        downstream_buffer_size(8192),
+        virtualservice_endpoint(listen_endpoint),
+        accesslog_flag(false),
+        access_logger(set_access_logger),
+        ssl_flag(ssl_mode),
+        client_ssl_socket(session_io, set_ssl_context,set_option),
+        ssl_context(set_ssl_context),
+        ssl_cache_flag(set_ssl_cache_flag),
+        ssl_handshake_timer_flag(false),
+        ssl_handshake_time_out(set_ssl_handshake_time_out),
+        ssl_handshake_time_out_flag(false),
+        socket_opt_info(set_option){
+
         // sorryserver socket
-//        tcp_socket_ptr sorry_socket(new tcp_socket(session_io));
         tcp_socket_ptr sorry_socket(new tcp_socket(session_io,socket_opt_info));
         sorryserver_socket.second = sorry_socket;
-        
+
         // set up_thread_module_event_map
         std::pair<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG> add_up_thread_event;
         add_up_thread_event.first = protocol_module_base::ACCEPT;
@@ -311,31 +168,58 @@ namespace l7vs{
         add_up_thread_event.first = protocol_module_base::FINALIZE;
         add_up_thread_event.second = UP_FUNC_EXIT;
         up_thread_module_event_map.insert(add_up_thread_event);
-        
+
         // set up_thread_function_array
-        up_thread_function_array[UP_FUNC_CLIENT_ACCEPT]            = std::make_pair(UP_FUNC_CLIENT_ACCEPT,  boost::bind(&tcp_session::up_thread_client_accept_event,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT]        = std::make_pair(UP_FUNC_CLIENT_DISCONNECT, boost::bind(&tcp_session::up_thread_client_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT]    = std::make_pair(UP_FUNC_CLIENT_DISCONNECT_EVENT,  boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_RECEIVE]        = std::make_pair(UP_FUNC_CLIENT_RECEIVE, boost::bind(&tcp_session::up_thread_client_receive,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND]    = std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND, boost::bind(&tcp_session::up_thread_client_respond,this,_1));
-        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT]    = std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND_EVENT, boost::bind(&tcp_session::up_thread_client_respond_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_GET_DEST_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_GET_DEST_EVENT, boost::bind(&tcp_session::up_thread_realserver_get_destination_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT]    = std::make_pair(UP_FUNC_REALSERVER_CONNECT, boost::bind(&tcp_session::up_thread_realserver_connect,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_connect_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_realserver_connection_fail_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_SEND]    = std::make_pair(UP_FUNC_REALSERVER_SEND, boost::bind(&tcp_session::up_thread_realserver_send,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT]    = std::make_pair(UP_FUNC_REALSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_realserver_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT]    = std::make_pair(UP_FUNC_REALSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1));
-        up_thread_function_array[UP_FUNC_REALSERVER_ALL_DISCONNECT]    = std::make_pair(UP_FUNC_REALSERVER_ALL_DISCONNECT, boost::bind(&tcp_session::up_thread_all_realserver_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_GET_DEST]    = std::make_pair(UP_FUNC_SORRYSERVER_GET_DEST, boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT]    = std::make_pair(UP_FUNC_SORRYSERVER_CONNECT, boost::bind(&tcp_session::up_thread_sorryserver_connect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT]    = std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connect_event,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT]    = std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_SEND]    = std::make_pair(UP_FUNC_SORRYSERVER_SEND, boost::bind(&tcp_session::up_thread_sorryserver_send,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT]    = std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_MOD_DISCONNECT]    = std::make_pair(UP_FUNC_SORRYSERVER_MOD_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT]    = std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1));
-        up_thread_function_array[UP_FUNC_EXIT]    = std::make_pair(UP_FUNC_EXIT, boost::bind(&tcp_session::up_thread_exit,this,_1));
+
+
+        up_thread_function_array[UP_FUNC_CLIENT_ACCEPT] =
+            std::make_pair(UP_FUNC_CLIENT_ACCEPT,  boost::bind(&tcp_session::up_thread_client_accept,this,_1));
+        up_thread_function_array[UP_FUNC_CLIENT_ACCEPT_EVENT] =
+            std::make_pair(UP_FUNC_CLIENT_ACCEPT_EVENT,  boost::bind(&tcp_session::up_thread_client_accept_event,this,_1));
+        up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT] =
+            std::make_pair(UP_FUNC_CLIENT_DISCONNECT, boost::bind(&tcp_session::up_thread_client_disconnect,this,_1));
+        up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT] =
+            std::make_pair(UP_FUNC_CLIENT_DISCONNECT_EVENT,  boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1));
+        up_thread_function_array[UP_FUNC_CLIENT_RECEIVE] =
+            std::make_pair(UP_FUNC_CLIENT_RECEIVE, boost::bind(&tcp_session::up_thread_client_receive,this,_1));
+        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND] =
+            std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND, boost::bind(&tcp_session::up_thread_client_respond,this,_1));
+        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT] =
+            std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND_EVENT, boost::bind(&tcp_session::up_thread_client_respond_event,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_GET_DEST_EVENT] =
+            std::make_pair(UP_FUNC_REALSERVER_GET_DEST_EVENT, boost::bind(&tcp_session::up_thread_realserver_get_destination_event,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT] =
+            std::make_pair(UP_FUNC_REALSERVER_CONNECT, boost::bind(&tcp_session::up_thread_realserver_connect,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT] =
+            std::make_pair(UP_FUNC_REALSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_connect_event,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT] =
+            std::make_pair(UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_realserver_connection_fail_event,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_SEND] =
+            std::make_pair(UP_FUNC_REALSERVER_SEND, boost::bind(&tcp_session::up_thread_realserver_send,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT] =
+            std::make_pair(UP_FUNC_REALSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_realserver_disconnect,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT] =
+            std::make_pair(UP_FUNC_REALSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_ALL_DISCONNECT] =
+            std::make_pair(UP_FUNC_REALSERVER_ALL_DISCONNECT, boost::bind(&tcp_session::up_thread_all_realserver_disconnect,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_GET_DEST] =
+            std::make_pair(UP_FUNC_SORRYSERVER_GET_DEST, boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT] =
+            std::make_pair(UP_FUNC_SORRYSERVER_CONNECT, boost::bind(&tcp_session::up_thread_sorryserver_connect,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT] =
+            std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connect_event,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT] =
+            std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_SEND] =
+            std::make_pair(UP_FUNC_SORRYSERVER_SEND, boost::bind(&tcp_session::up_thread_sorryserver_send,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT] =
+            std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_MOD_DISCONNECT] =
+            std::make_pair(UP_FUNC_SORRYSERVER_MOD_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1));
+        up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT] =
+            std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1));
+        up_thread_function_array[UP_FUNC_EXIT] =
+            std::make_pair(UP_FUNC_EXIT, boost::bind(&tcp_session::up_thread_exit,this,_1));
 
         // set up_thread_message_down_thread_function_map
         std::pair<DOWN_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_up_thread_message_func;
@@ -351,7 +235,7 @@ namespace l7vs{
         add_up_thread_message_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT;
         add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1);
         up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        
+
         // set down_thread_module_event_map
         std::pair<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG> add_down_thread_event;
         add_down_thread_event.first = protocol_module_base::CLIENT_SEND;
@@ -405,7 +289,7 @@ namespace l7vs{
         add_down_thread_message_func.first = UP_FUNC_SORRYSERVER_DISCONNECT_EVENT;
         add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1);
         down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
-        
+
         // set virtual_service_message_up_thread_function_map
         std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG , tcp_session_func > add_up_thread_vs_message_func;
         add_up_thread_vs_message_func.first = SORRY_STATE_ENABLE;
@@ -417,7 +301,7 @@ namespace l7vs{
         add_up_thread_vs_message_func.first = SESSION_END;
         add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_exit,this,_1);
         virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
-        
+
         // set virtual_service_message_down_thread_function_map
         std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG , tcp_session_func > add_down_thread_vs_message_func;
         add_down_thread_vs_message_func.first = SORRY_STATE_ENABLE;
@@ -429,9 +313,8 @@ namespace l7vs{
         add_down_thread_vs_message_func.first = SESSION_END;
         add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_exit,this,_1);
         virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-        
-    }    
-    
+
+    }
     //! destructor
     tcp_session::~tcp_session(){
         // up_thread_module_event_map
@@ -523,8 +406,8 @@ namespace l7vs{
         }
 
         // Reset SSL structure to allow another connection.
-        if (ssl_sess_flag) {
-            if (sess_cache_flag) {
+        if (ssl_flag) {
+            if (ssl_cache_flag) {
                 if (ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0) {
                     Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
                 }
@@ -537,8 +420,8 @@ namespace l7vs{
             }
             //----Debug log----------------------------------------------------------------------
 //            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                // print ssl session cache information
-                // Need ssl_context lock?
+//                // print ssl session cache information
+//                // Need ssl_context lock?
 //                std::stringstream buf;
 //                buf << "session_result_message tcp_session::initialize() : ";
 //                parent_service.get_ssl_session_cache_info(buf);
@@ -812,7 +695,7 @@ namespace l7vs{
         }
         if(likely( !is_exit )){
             bool bres;
-            if (!ssl_sess_flag) {
+            if (!ssl_flag) {
                 bres = client_socket.get_socket().lowest_layer().is_open();
             } else {
                 bres = client_ssl_socket.get_socket().lowest_layer().is_open();
@@ -832,7 +715,7 @@ namespace l7vs{
         }
         
         boost::system::error_code ec;
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             client_socket.accept();
         } else {
             client_ssl_socket.accept();
@@ -843,7 +726,7 @@ namespace l7vs{
             is_exit = exit_flag;
         }
         if(likely( !is_exit )){
-            if (!ssl_sess_flag) {
+            if (!ssl_flag) {
                 cl_end = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
             } else {
                 cl_end = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
@@ -868,7 +751,7 @@ namespace l7vs{
         }
         if(likely( !is_exit )){
             bool bres;
-            if (!ssl_sess_flag) {
+            if (!ssl_flag) {
                 bres = client_socket.set_non_blocking_mode(ec);
             } else {
                 bres = client_ssl_socket.set_non_blocking_mode(ec);
@@ -895,7 +778,7 @@ namespace l7vs{
         if(likely( !is_exit )){
             //set client_socket options(recieve buffer size)
             boost::asio::socket_base::receive_buffer_size    opt1( upstream_buffer_size );
-            if (!ssl_sess_flag) {
+            if (!ssl_flag) {
                 client_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
             } else {
                 client_ssl_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
@@ -922,7 +805,7 @@ namespace l7vs{
         if(likely( !is_exit )){
             //set client_socket options(send buffer size)
             boost::asio::socket_base::send_buffer_size        opt2( downstream_buffer_size );
-            if (!ssl_sess_flag) {
+            if (!ssl_flag) {
                 client_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
             } else {
                 client_ssl_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
@@ -1311,6 +1194,14 @@ namespace l7vs{
         }
         //----Debug log----------------------------------------------------------------------
     }
+
+    //! up thread accept client side
+    //! @param[in]        process_type is prosecess type
+    void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type){
+        //仮実装
+        up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_ACCEPT_EVENT];
+    }
+
     //! up thread raise module event of handle_accept and do handshake
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type){
@@ -1331,7 +1222,7 @@ namespace l7vs{
         }
 
         // Handshake start
-        if (ssl_sess_flag) {
+        if (ssl_flag) {
             //----Debug log----------------------------------------------------------------------
             if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
@@ -1339,22 +1230,22 @@ namespace l7vs{
                 buf << boost::this_thread::get_id();
                 buf << "] ssl session handshaking start : ";
                 buf << "set handshake timer [";
-                buf << handshake_timeout;
+                buf << ssl_handshake_time_out;
                 buf << "]";
                 Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
             }
             //----Debug log----------------------------------------------------------------------
-            handshaked = false;
+//            ssl_handshake_flag = false;
             //regist handshake timer event handler
-            handshake_timer.reset(new boost::asio::deadline_timer(io));
-            handshake_timer->expires_from_now(boost::posix_time::seconds(handshake_timeout));
-            handshake_timer->async_wait(boost::bind(&tcp_session::handle_handshake_timer, 
+            ssl_handshake_timer.reset(new boost::asio::deadline_timer(io));
+            ssl_handshake_timer->expires_from_now(boost::posix_time::seconds(ssl_handshake_time_out));
+            ssl_handshake_timer->async_wait(boost::bind(&tcp_session::handle_handshake_timer, 
                                    this,
                                    boost::asio::placeholders::error));
             // do handshake.
             bool bres = client_ssl_socket.handshake(boost::asio::ssl::stream_base::server);
             // handshke timer operation cancel.
-            handshake_timer->cancel();
+            ssl_handshake_timer->cancel();
             if (unlikely(!bres)) {
                 //Error handshake failed
                 std::stringstream buf;
@@ -1366,7 +1257,7 @@ namespace l7vs{
                 return;
             }
             // set handshaked flag.
-            handshaked = true;
+//            handshaked = true;
             //----Debug log----------------------------------------------------------------------
             if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
@@ -1403,14 +1294,14 @@ namespace l7vs{
         //----Debug log----------------------------------------------------------------------
 
         if (!error) {
-            if (handshaked) {
+/*            if (ssl_handshake_flag) {
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                     std::stringstream buf;
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
                     buf << "] handshake timer timeout ";
-                    buf << handshake_timeout;
+                    buf << ssl_handshake_timeout;
                     buf << " sec : handshaking normal end";
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
                 }
@@ -1420,11 +1311,11 @@ namespace l7vs{
                 buf << "Thread ID[";
                 buf << boost::this_thread::get_id();
                 buf << "] handshake timer timeout ";
-                buf << handshake_timeout;
+                buf << ssl_handshake_timeout;
                 buf << " sec : handshaking not end";
                 Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
                 up_thread_exit(LOCAL_PROC);
-            }
+            }*/
         } else {
             if (error.value() == ECANCELED) {
                 //----Debug log----------------------------------------------------------------------
@@ -1474,7 +1365,7 @@ namespace l7vs{
         boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_client_side.get_data();
         boost::system::error_code ec;
         std::size_t recv_size;
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
         } else {
             recv_size = client_ssl_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
@@ -1485,7 +1376,7 @@ namespace l7vs{
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
                     boost::asio::ip::tcp::endpoint client_endpoint;
-                    if (!ssl_sess_flag) {
+                    if (!ssl_flag) {
                         client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
                     } else {
                         client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
@@ -1615,7 +1506,7 @@ namespace l7vs{
     void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
         boost::system::error_code ec;
         bool bres;
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             bres = client_socket.close(ec);
         } else {
             bres = client_ssl_socket.close(ec);
@@ -2515,7 +2406,7 @@ namespace l7vs{
         }
         up_thread_send_realserver_socket_map.clear();
         down_thread_connect_socket_list.clear();
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             client_socket.close(ec);
         } else {
             client_ssl_socket.close(ec);
@@ -2852,7 +2743,7 @@ namespace l7vs{
         std::size_t data_size = down_thread_data_client_side.get_size();
         std::size_t send_data_size = down_thread_data_client_side.get_send_size();
         std::size_t send_size;
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
         } else {
             send_size = client_ssl_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
@@ -2865,7 +2756,7 @@ namespace l7vs{
             //----Debug log----------------------------------------------------------------------
             if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
                 boost::asio::ip::tcp::endpoint client_endpoint;
-                if (!ssl_sess_flag) {
+                if (!ssl_flag) {
                     client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
                 } else {
                     client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
@@ -2926,7 +2817,7 @@ namespace l7vs{
     void tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
         boost::system::error_code ec;
         bool bres;
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             bres = client_socket.close(ec);
         } else {
             bres = client_ssl_socket.close(ec);
@@ -3283,7 +3174,7 @@ namespace l7vs{
             close_socket++;
         }
         down_thread_receive_realserver_socket_list.clear();
-        if (!ssl_sess_flag) {
+        if (!ssl_flag) {
             client_socket.close(ec);
         } else {
             client_ssl_socket.close(ec);

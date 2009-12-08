@@ -27,6 +27,7 @@
 
 #include <bitset>
 #include <boost/asio.hpp>
+//#include <boost/asio/ssl.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -37,7 +38,6 @@
 #include "tcp_ssl_socket.h"
 #include "tcp_realserver_connect_socket_list.h"
 #include "tcp_data.h"
-//#include "tcp_thread_message_que.h"
 #include "lockfree_queue.h"
 
 #define TCP_SESSION_THREAD_STATE_BIT 8
@@ -54,6 +54,10 @@ namespace l7vs{
 //!    @class    tcp_thread_message
 //! @brief    tcp_thread_message class name define.
     class tcp_thread_message;
+
+//!    @class    loger_implement_access
+//! @brief    logger_implement_access class name define.
+    class logger_implement_access;
 
 //!    @class    tcp_session
 //! @brief    this class is tcp session class.
@@ -73,26 +77,14 @@ namespace l7vs{
                 SESSION_PAUSE_OFF
             };
 /*
+//ここより下削除対象
             //! construcor
             //! @param[in/out]    vs is parent virtualservice object
             //! @param[in/out]    io is session use io service object
             //! @param[in]        flag is session use SSL flag
             //! @param[in]        context is session use SSL context object
             //! @param[in]        timeout is session use SSL handshake timeout
-            tcp_session(virtualservice_tcp& vs,
-                    boost::asio::io_service& session_io,
-                    bool flag,
-                    boost::asio::ssl::context& context,
-                    int timeout,
-                    bool is_cache_use);
-*/
-            //! construcor
-            //! @param[in/out]    vs is parent virtualservice object
-            //! @param[in/out]    io is session use io service object
-            //! @param[in]        flag is session use SSL flag
-            //! @param[in]        context is session use SSL context object
-            //! @param[in]        timeout is session use SSL handshake timeout
-            //! @param[in]        set socket option info 
+            //! @param[in]        set socket option info
             tcp_session(virtualservice_tcp& vs,
                     boost::asio::io_service& session_io,
                     bool flag,
@@ -100,6 +92,33 @@ namespace l7vs{
                     int timeout,
                     bool is_cache_use,
                     const tcp_socket_option_info set_option);
+//ここより上削除対象
+*/
+            //! construcor
+            //! @param[in/out]    vs is parent virtualservice object
+            //! @param[in/out]    io is session use io service object
+            //! @param[in]        set_option is
+            //!                     session use set socket option info
+            //! @param[in]        listen_endpoint is
+            //!                     virtualservice listen endpoint
+            //! @param[in]        ssl_mode is session use SSL flag
+            //! @param[in]        set_ssl_context is
+            //!                     session use SSL context object
+            //! @param[in]        set_ssl_cache_flag is
+            //!                     session use SSL session cache
+            //! @param[in]        set_ssl_handshake_time_out is
+            //!                     session use SSL handshake timeout
+            //! @param[in]        set_access_logger is
+            //!                     session use access logger
+            tcp_session(virtualservice_tcp& vs,
+                    boost::asio::io_service& session_io,
+                    const tcp_socket_option_info set_option,
+                    const boost::asio::ip::tcp::endpoint listen_endpoint,
+                    const bool ssl_mode,
+                    boost::asio::ssl::context& set_ssl_context,
+                    const bool set_ssl_cache_flag,
+                    const int set_ssl_handshake_time_out,
+                    logger_implement_access* set_access_logger);
 
             //! destructor
             virtual ~tcp_session();
@@ -130,7 +149,8 @@ namespace l7vs{
             typedef boost::function< void(TCP_PROCESS_TYPE_TAG) > tcp_session_func;
             //! up thread call function type
             enum UP_THREAD_FUNC_TYPE_TAG{
-                UP_FUNC_CLIENT_ACCEPT = 0,                //! up_thread_client_accept_event function
+                UP_FUNC_CLIENT_ACCEPT = 0,                //! up_thread_client_accept function
+                UP_FUNC_CLIENT_ACCEPT_EVENT,                //! up_thread_client_accept_event function
                 UP_FUNC_CLIENT_DISCONNECT,                //! up_thread_client_disconnect function
                 UP_FUNC_CLIENT_DISCONNECT_EVENT,            //! up_thread_client_disconnect_event function
                 UP_FUNC_CLIENT_RECEIVE,                    //! up_thread_client_receive function
@@ -181,7 +201,6 @@ namespace l7vs{
             boost::asio::io_service& io;
             //! parent virtualservice
             virtualservice_tcp& parent_service;
-            
             //! thread main loop exit flag
             bool exit_flag;
             //! thread main loop exit flag update mutex
@@ -202,24 +221,6 @@ namespace l7vs{
             wr_mutex session_pause_flag_mutex;
             //! client socket
             tcp_socket client_socket;
-            //! client ssl socket
-            tcp_ssl_socket client_ssl_socket;
-            //! ssl session flag
-            bool ssl_sess_flag;
-            //! handshake timer
-            typedef boost::shared_ptr<boost::asio::deadline_timer>  deadline_timer_ptr_type;
-            deadline_timer_ptr_type handshake_timer;
-            //! handshake timer handler
-            void handle_handshake_timer(const boost::system::error_code& error);
-            //! handshake timeout
-            int handshake_timeout;
-            //! handshaked flag
-            bool handshaked;
-            //! ssl session cache flag
-            bool sess_cache_flag;
-            //! reset ssl object for reuse
-            int ssl_clear_keep_cache(SSL *s);
-
             //! sorryserver socket
             socket_element sorryserver_socket;
             //! up thread use realserver socket map
@@ -255,7 +256,6 @@ namespace l7vs{
             //! up thread use destination side buffer
             tcp_data up_thread_data_dest_side;
             //! message data queue for up thread
-//            tcp_thread_message_que up_thread_message_que;
             lockfree_queue< tcp_thread_message >        up_thread_message_que;
             //! up thread use message data
             tcp_data up_thread_message_data;
@@ -272,29 +272,66 @@ namespace l7vs{
             //! down thread use destination side buffer
             tcp_data down_thread_data_dest_side;
             //! message data queue for down thread
-//            tcp_thread_message_que down_thread_message_que;
-            lockfree_queue< tcp_thread_message >        down_thread_message_que;
+            lockfree_queue< tcp_thread_message > down_thread_message_que;
             //! up thread use message data
             tcp_data down_thread_message_data;
-
             //! upstream socket buffer size
-            int        upstream_buffer_size;
+            int upstream_buffer_size;
             //! downstream socket buffer size
-            int        downstream_buffer_size;
-            
+            int downstream_buffer_size;
             //! virtual service message convert to up thread function object map
             std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_up_thread_function_map;
             //! virtual service message convert to down thread function object map
             std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>  virtual_service_message_down_thread_function_map;
-            
+            //! client conection src endpoint
+            boost::asio::ip::tcp::endpoint client_endpoint;
+            //! virtualservice accept endpoint
+            boost::asio::ip::tcp::endpoint virtualservice_endpoint;
+            //! access log out put flag
+            bool accesslog_flag;
+            //! access log out put flag mutex
+            wr_mutex accesslog_flag_mutex;
+            //! access logger
+            logger_implement_access* access_logger;
+            //! ssl mode flag
+            bool ssl_flag;
+            //! client ssl socket
+            tcp_ssl_socket client_ssl_socket;
+            //! ssl context
+            boost::asio::ssl::context& ssl_context;
+            //! ssl session cache flag
+            bool ssl_cache_flag;
+            //! handshake timer
+            typedef boost::shared_ptr<boost::asio::deadline_timer>  deadline_timer_ptr_type;
+            deadline_timer_ptr_type ssl_handshake_timer;
+            //! handshake timer flag
+            bool ssl_handshake_timer_flag;
+            //! handshake timeout
+            int ssl_handshake_time_out;
+            //! handshake timeout flag
+            bool ssl_handshake_time_out_flag;
+            //! handshake timeout flag mutex
+            wr_mutex ssl_handshake_time_out_flag_mutex;
             //! socket option 
             tcp_socket_option_info socket_opt_info;
+
+
+
+            
+            //! handshake timer handler
+            void handle_handshake_timer(const boost::system::error_code& error);
+            //! reset ssl object for reuse
+            int ssl_clear_keep_cache(SSL *s);
+
             
             //! up and down thread state update
             //! @param[in]        thread_flag is regist or unregist bitset
             //! @param[in]        regist is regist or unregist flag
             virtual void thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist);
 
+            //! up thread accept client side
+            //! @param[in]        process_type is prosecess type
+            virtual void up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type);
             //! up thread raise module event of handle_accept
             //! @param[in]        process_type is prosecess type
             virtual void up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type);
