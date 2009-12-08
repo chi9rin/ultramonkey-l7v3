@@ -2140,6 +2140,10 @@ class get_client_socket_test_class : public l7vs::tcp_session{
         l7vs::tcp_socket& get_client_tcp_socket(){
             return client_socket;
         };
+        l7vs::tcp_ssl_socket& get_client_ssl_tcp_socket(){
+            return client_ssl_socket;
+        };
+
 };
 
 void get_client_socket_test(){
@@ -2181,9 +2185,18 @@ void get_client_socket_test(){
     boost::asio::ip::tcp::socket& ref_socket = ref_tcp_socket.my_socket;
     boost::asio::ip::tcp::socket& chk_socket = test_obj.get_client_socket();
 
-    // unit_test [1] get_client_socket pointer check
-    std::cout << "[1] get_client_socket pointer check" << std::endl;
+    // unit_test [1] get_client_socket check
+    std::cout << "[1] get_client_socket check" << std::endl;
     BOOST_CHECK_EQUAL(&ref_socket,&chk_socket);
+
+
+    l7vs::tcp_ssl_socket& ref_tcp_ssl_socket = test_obj.get_client_ssl_tcp_socket();
+    ssl_socket& ref_ssl_socket = ref_tcp_ssl_socket.get_socket();
+    ssl_socket& chk_ssl_socket = test_obj.get_client_ssl_socket();
+
+    // unit_test [2] get_client_ssl_socket check
+    std::cout << "[2] get_client_ssl_socket check" << std::endl;
+    BOOST_CHECK_EQUAL(&ref_ssl_socket,&chk_ssl_socket);
 
     BOOST_MESSAGE( "----- get_client_socket test end -----" );
 }
@@ -10134,12 +10147,12 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 
 //    ts->add( BOOST_TEST_CASE( &constructer_test ) );
-//    ts->add( BOOST_TEST_CASE( &initialize_test ) );
-//    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+//NG    ts->add( BOOST_TEST_CASE( &initialize_test ) );
+    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
 //    ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
-    ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
+//    ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
+//NG    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
+//NG    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
 //    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
