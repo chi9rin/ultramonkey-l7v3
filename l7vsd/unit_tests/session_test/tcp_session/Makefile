@@ -28,6 +28,7 @@ PARAMETER_SRCS	=	\
 
 SRCS		=	\
 			../logger_stb/logger.cpp \
+			../logger_stb/logger_implement_access.cpp \
 			../../../src/data_buff_base.cpp \
 			../../../src/tcp_data.cpp \
 			../../../src/tcp_realserver_connect_socket_list.cpp \

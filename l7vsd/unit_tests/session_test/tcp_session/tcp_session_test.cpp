@@ -6,12 +6,13 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "dummyclass.h"
-
+#include "logger_implement_access.h"
+#include "logger.h"
 #include "tcp_socket_option.h"
 #include "tcp_session.h"
 #include "tcp_session.cpp"
 #include "lockfree_queue.h"
-//#include "logger_implement_access.h"
+
 
 using namespace boost::unit_test_framework;
 
@@ -916,36 +917,54 @@ class constructer_test_class : public l7vs::tcp_session{
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
         };
-	l7vs::tcp_ssl_socket& get_client_ssl_socket(){
-	    return client_ssl_socket;
-	};
-
         boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
             return sorryserver_socket.second;
         };
-        
+        //! ssl context
+        l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+            return client_ssl_socket;
+        };
+        //! socket option 
         l7vs::tcp_socket_option_info* get_socket_opt_info(){
             return &socket_opt_info;
         };
+        //! virtualservice accept endpoint
+        boost::asio::ip::tcp::endpoint& get_virtualservice_endpoint(){
+            return virtualservice_endpoint;
+        };
+	//! access log out put flag
+        bool get_accesslog_flag(){
+            return accesslog_flag;
+        };
+	//! access logger
+        l7vs::logger_implement_access* get_access_logger(){
+            return access_logger;
+        };
+        //! ssl mode flag
+        bool get_ssl_flag(){
+            return ssl_flag;
+        };
+        //! ssl context
+        boost::asio::ssl::context& get_ssl_context(){
+            return ssl_context;
+        };
+        //! ssl session cache flag
+        bool get_ssl_cache_flag(){
+            return ssl_cache_flag;
+        };
+        //! handshake timer flag
+        bool get_ssl_handshake_timer_flag(){
+            return ssl_handshake_timer_flag;
+        };
+        //! handshake timeout
+        int get_ssl_handshake_time_out(){
+            return ssl_handshake_time_out;
+        };
+        //! handshake timeout flag
+        bool get_ssl_handshake_timeout_flag(){
+            return ssl_handshake_time_out_flag;
+        };
 
-
-/*
-        virtualservice_endpoint(listen_endpoint),
-        accesslog_flag(false),
-        access_logger(set_access_logger),
-        ssl_flag(ssl_mode),
-        client_ssl_socket(session_io, set_ssl_context),
-        ssl_context(set_ssl_context),
-        ssl_cache_flag(set_ssl_cache_flag),
-        ssl_handshake_timer_flag(false),
-        ssl_handshake_time_out(set_ssl_handshake_time_out),
-        ssl_handshake_time_out_flag(false),
-        sess_cache_flag(is_cache_use),
-        socket_opt_info(set_option){
-*/      
-
-
- 
         //! up thread raise module event of handle_accept
         //! @param[in]        process_type is prosecess type
         void up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type){
@@ -1789,6 +1808,7 @@ class constructer_test_class : public l7vs::tcp_session{
 };
 void constructer_test(){
     BOOST_MESSAGE( "----- constructer test start -----" );
+
     
 //        constructer_test_class(
 //                                l7vs::virtualservice_tcp& vs,
@@ -1817,20 +1837,16 @@ void constructer_test(){
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = true;
     //
-    boost::asio::ip::tcp::endpoint listen_endpoint;
-    bool set_mode(false);
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(true);
     boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
-    bool set_ssl_cache_flag(false);
-    int set_ssl_handshake_time_out = 0;
-    l7vs::logger_implement_access* plogger = NULL;  
-
+    bool set_ssl_cache_flag(true);
+    int set_ssl_handshake_time_out = 111;
+    std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = new l7vs::logger_implement_access(access_log_file_name);
     
-//    constructer_test_class test_obj(vs,io);
-//    constructer_test_class test_obj(vs,io,set_option);
     constructer_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
-
-
-    
+   
     // unit_test [1] constructer initialize member check
     std::cout << "[1] constructer initialize member check" << std::endl;
     BOOST_CHECK_EQUAL(&io , &test_obj.get_io());
@@ -1920,10 +1936,45 @@ void constructer_test(){
     BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.quickack_opt , set_option.quickack_opt);
     BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.quickack_val , set_option.quickack_val);
 
+    // unit_test [16] virtualservice_endpoint initialize check
+    std::cout << "[16] virtualservice_endpoint initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_virtualservice_endpoint() , listen_endpoint);
 
+    // unit_test [17] accesslog_flag initialize check
+    std::cout << "[17] accesslog_flag initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_accesslog_flag() , false); 
+    
+    // unit_test [18] access_loger initialize check
+    std::cout << "[18] access_loger initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_access_logger() , plogger);
 
+    // unit_test [19] ssl_flag initialize check
+    std::cout << "[18] ssl_flag initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_ssl_flag() , set_mode);
+
+    // unit_test [20] ssl_context initialize check
+    std::cout << "[20] ssl_context initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(&(test_obj.get_ssl_context()) , &set_context);
+
+    // unit_test [21] ssl_cache_flag initialize check
+    std::cout << "[21] ssl_cache_flag initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_ssl_cache_flag() , set_ssl_cache_flag);
     
+    // unit_test [22] ssl_handshake_timer_flag initialize check
+    std::cout << "[21] ssl_handshake_timer_flag initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_ssl_handshake_timer_flag() , false);
     
+    // unit_test [23] ssl_handshake_time_out initialize check
+    std::cout << "[23] ssl_handshake_time_out initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_ssl_handshake_time_out() , set_ssl_handshake_time_out);
+    
+    // unit_test [23] ssl_handshake_timeout_flag initialize check
+    std::cout << "[23] ssl_handshake_timeout_flag initialize check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_ssl_handshake_timeout_flag() , false);
+
+    delete plogger;
+    plogger = NULL;
+
     BOOST_MESSAGE( "----- constructer test end -----" );
 }
 /*
