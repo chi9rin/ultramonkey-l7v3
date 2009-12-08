@@ -205,7 +205,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 10, buf.str(), __FILE__, __LINE__ );
             return false;
         }
-        check_endpoint<boost::asio::ip::udp>( request.vs_element.udp_recv_endpoint, err );
+        check_endpoint<boost::asio::ip::udp>( request.vs_element.udp_recv_endpoint, true, err );
         if ( err ){
             std::stringstream buf;
             buf << "target endpoint parse error:" << err.get_message() << src_str;
@@ -224,7 +224,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 12, buf.str(), __FILE__, __LINE__ );
             return false;
         }
-        check_endpoint<boost::asio::ip::tcp>( request.vs_element.tcp_accept_endpoint, err );
+        check_endpoint<boost::asio::ip::tcp>( request.vs_element.tcp_accept_endpoint, true, err );
         if ( err ){
             std::stringstream buf;
             buf << "target endpoint parse error:" << err.get_message() << src_str;
@@ -669,8 +669,8 @@ bool    l7vs::l7vsadm::parse_opt_vs_bypass_func( int& pos, int argc, char* argv[
         }
     }
     else{
-        check_endpoint<boost::asio::ip::tcp>( request.vs_element.sorry_endpoint, err );
-        if ( err ){
+        check_endpoint<boost::asio::ip::tcp>( request.vs_element.sorry_endpoint, false, err );
+        if( err ){
             std::stringstream buf;
             buf << "sorryserver endpoint parse error:" << err.get_message() << sorry_endpoint;
             l7vsadm_err.setter( true, buf.str() );
@@ -1058,7 +1058,7 @@ bool    l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* a
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 55, buf.str(), __FILE__, __LINE__ );
             return false;
         }
-        check_endpoint<boost::asio::ip::udp>( request.vs_element.realserver_vector.front().udp_endpoint, err );
+        check_endpoint<boost::asio::ip::udp>( request.vs_element.realserver_vector.front().udp_endpoint, false, err );
         if ( err ){
             std::stringstream buf;
             buf << "realserver endpoint parse error:" << err.get_message() << src_str;
@@ -1078,7 +1078,7 @@ bool    l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* a
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 57, buf.str(), __FILE__, __LINE__ );
             return false;
         }
-        check_endpoint<boost::asio::ip::tcp>( request.vs_element.realserver_vector.front().tcp_endpoint, err );
+        check_endpoint<boost::asio::ip::tcp>( request.vs_element.realserver_vector.front().tcp_endpoint, false, err );
         if ( err ){
             std::stringstream buf;
             buf << "realserver endpoint parse error:" << err.get_message() << src_str;

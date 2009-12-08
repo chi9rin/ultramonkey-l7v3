@@ -28,41 +28,42 @@
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 #include <sstream>
 #include "error_code.h"
 #include "l7vs_command.h"
 
-#ifndef    L7VS_MODULE_PATH
-    #define    L7VS_MODULE_PATH    "./"
+#ifndef     L7VS_MODULE_PATH
+    #define L7VS_MODULE_PATH    "./"
 #endif
 
-#ifndef    COMMAND_BUFFER_SIZE
-    #define    COMMAND_BUFFER_SIZE (65535)
+#ifndef     COMMAND_BUFFER_SIZE
+    #define COMMAND_BUFFER_SIZE (65535)
 #endif
 
-#ifndef    L7VS_CONFIG_SOCK_PATH
-    #define L7VS_CONFIG_SOCK_PATH    "/var/run/l7vs"
+#ifndef     L7VS_CONFIG_SOCK_PATH
+    #define L7VS_CONFIG_SOCK_PATH   "/var/run/l7vs"
 #endif
-#define L7VS_CONFIG_SOCKNAME        L7VS_CONFIG_SOCK_PATH "/l7vs"
+#define L7VS_CONFIG_SOCKNAME    L7VS_CONFIG_SOCK_PATH   "/l7vs"
 
-#define L7VSADM_DEFAULT_SCHEDULER "rr"        //!< Default scheduler name
-#define L7VSADM_DEFAULT_WAIT_INTERVAL (1)    //!< Default wait interval
-#define L7VSADM_DEFAULT_WAIT_COUNT (10)        //!< Default wait count
-#define L7VSADM_MAX_WAIT (60)                //!< Max wait value
-#define L7VS_MODNAME_LEN (16)                //!< Module name length
-#define L7VS_FILENAME_LEN (256)                //!< File name length
+#define L7VSADM_DEFAULT_SCHEDULER       "rr"        //!< Default scheduler name
+#define L7VSADM_DEFAULT_WAIT_INTERVAL   (1)         //!< Default wait interval
+#define L7VSADM_DEFAULT_WAIT_COUNT      (10)        //!< Default wait count
+#define L7VSADM_MAX_WAIT                (60)        //!< Max wait value
+#define L7VS_MODNAME_LEN                (16)        //!< Module name length
+#define L7VS_FILENAME_LEN               (256)       //!< File name length
 
 namespace l7vs{
 
 //! endpoint string parse function
-//! @param[in]    endpoint string
-//! @param[out]    error_code
-//! @return        endpoint
+//! @param[in]      endpoint string
+//! @param[out]     error_code
+//! @return         endpoint
 template < class T >
 typename T::endpoint string_to_endpoint( std::string& str, error_code& err ){
     std::string::size_type pos = str.rfind( ":" );
-    std::string    hostname = str.substr( 0, pos );
-    std::string    portname = str.substr( pos+1, str.length() );
+    std::string hostname = str.substr( 0, pos );
+    std::string portname = str.substr( pos+1, str.length() );
     if( 0 == hostname.length() ){
         err.setter( 1, "hostname is not specified:" );
         return typename T::endpoint();
@@ -77,12 +78,16 @@ typename T::endpoint string_to_endpoint( std::string& str, error_code& err ){
             return typename T::endpoint();
         }
     }
-    boost::asio::io_service        io_service;
-    typename T::resolver                resolver(io_service);
-    typename T::resolver::query        query( hostname, portname );
-    typename T::resolver::iterator    end;
-    boost::system::error_code    ec;
-    typename T::resolver::iterator    itr = resolver.resolve( query, ec );
+    //remove "[","]"
+    boost::algorithm::erase_first( hostname, "[" );
+    boost::algorithm::erase_last( hostname, "]" );
+
+    boost::asio::io_service         io_service;
+    typename T::resolver            resolver(io_service);
+    typename T::resolver::query     query( hostname, portname );
+    typename T::resolver::iterator  end;
+    boost::system::error_code       ec;
+    typename T::resolver::iterator  itr = resolver.resolve( query, ec );
     if( ec ){
         std::stringstream buf;
         buf << "invalid endpoint:" << ec.message() << ":";
@@ -94,18 +99,16 @@ typename T::endpoint string_to_endpoint( std::string& str, error_code& err ){
 }
 
 //! check endpoint function
-//! @param[in]    endpoint
-//! @param[out]    error_code
+//! @param[in]      endpoint
+//! @param[in]      allow any_address or not
+//! @param[out]     error_code
 template < class T >
-void    check_endpoint( typename T::endpoint& ep, error_code& err ){
-    if( ep.address().is_v4() ){
-        if( ep.address().to_v4() == boost::asio::ip::address_v4::any() ){
-            err.setter( 1, "invalid address (INADDR_ANY):" );
-            return;
-        }
-    }
-    else{
-        if( ep.address().to_v6() == boost::asio::ip::address_v6::any() ){
+void    check_endpoint( typename T::endpoint& ep, bool allow_any_address, error_code& err ){
+    if( !allow_any_address ){
+        if( ( ep.address().is_v4() &&
+              ep.address().to_v4() == boost::asio::ip::address_v4::any() ) ||
+            ( ep.address().is_v6() &&
+              ep.address().to_v6() == boost::asio::ip::address_v6::any() ) ){
             err.setter( 1, "invalid address (INADDR_ANY):" );
             return;
         }
@@ -117,23 +120,29 @@ void    check_endpoint( typename T::endpoint& ep, error_code& err ){
 }
 
 //! endpoint to string function
-//! @param[in]    endpoint
-//! @param[in]    return numeric expression or not
-//! @return        endpoint string
+//! @param[in]      endpoint
+//! @param[in]      return numeric expression or not
+//! @return         endpoint string
 template < class T >
 std::string    endpoint_to_string( typename T::endpoint ep, bool numeric_flag ){
     std::stringstream    buf;
     if( !numeric_flag ){
-        boost::asio::io_service    io_service;
-        typename T::resolver    resolver(io_service);
-        boost::system::error_code    ec;
-        typename T::resolver::iterator    itr = resolver.resolve( ep, ec );
+        boost::asio::io_service         io_service;
+        typename T::resolver            resolver(io_service);
+        boost::system::error_code       ec;
+        typename T::resolver::iterator  itr = resolver.resolve( ep, ec );
         if( !ec ){
-            buf << itr->host_name() << ":" << itr->service_name();
+            if( itr->host_name() == "::" )
+                buf << "[::]:" << itr->service_name();
+            else
+                buf << itr->host_name() << ":" << itr->service_name();
             return buf.str();
         }
     }
-    buf << ep.address().to_string() << ":" << ep.port();
+    if( ep.address().is_v6() )
+        buf << "[" << ep.address().to_string() << "]:" << ep.port();
+    else
+        buf << ep.address().to_string() << ":" << ep.port();
     return buf.str();
 }
 
