@@ -114,7 +114,7 @@ namespace l7vs{
             boost::asio::ip::tcp::socket& get_client_socket(); 
             //! get reference client side ssl socket
             //! @return            reference client side ssl socket
-            ssl_socket::lowest_layer_type& get_client_ssl_socket();
+            ssl_socket& get_client_ssl_socket();
             //! is thread wait
             //! @return         true is wait
             //! @return         false is not wait

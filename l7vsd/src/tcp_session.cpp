@@ -521,9 +521,9 @@ namespace l7vs{
     }
     //! get reference client side ssl socket
     //! @return            reference client side ssl socket
-    ssl_socket::lowest_layer_type& tcp_session::get_client_ssl_socket()
+    ssl_socket& tcp_session::get_client_ssl_socket()
     {
-        return client_ssl_socket.get_socket().lowest_layer();
+        return client_ssl_socket.get_socket();
     }
     //! is thread wait
     //! @return         true is wait
