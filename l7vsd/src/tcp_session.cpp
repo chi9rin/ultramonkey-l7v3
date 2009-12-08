@@ -112,7 +112,7 @@ namespace l7vs{
         upstream_buffer_size(8192),
         downstream_buffer_size(8192),
         virtualservice_endpoint(listen_endpoint),
-        accesslog_flag(false),
+        access_log_flag(false),
         access_logger(set_access_logger),
         ssl_flag(ssl_mode),
         client_ssl_socket(session_io, set_ssl_context,set_option),
@@ -571,8 +571,8 @@ namespace l7vs{
                 return;
             case ACCESS_LOG_ON:
                 {
-                    rw_scoped_lock scope_lock(accesslog_flag_mutex);
-                    accesslog_flag = true;
+                    rw_scoped_lock scope_lock(access_log_flag_mutex);
+                    access_log_flag = true;
                 }
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -586,8 +586,8 @@ namespace l7vs{
                 return;
             case ACCESS_LOG_OFF:
                 {
-                    rw_scoped_lock scope_lock(accesslog_flag_mutex);
-                    accesslog_flag = false;
+                    rw_scoped_lock scope_lock(access_log_flag_mutex);
+                    access_log_flag = false;
                 }
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){

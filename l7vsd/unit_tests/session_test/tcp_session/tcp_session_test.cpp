@@ -937,7 +937,7 @@ class constructer_test_class : public l7vs::tcp_session{
         };
 	//! access log out put flag
         bool get_accesslog_flag(){
-            return accesslog_flag;
+            return access_log_flag;
         };
 	//! access logger
         l7vs::logger_implement_access* get_access_logger(){
@@ -2418,6 +2418,10 @@ class set_virtual_service_message_test_class : public l7vs::tcp_session{
         bool& get_session_pause_flag(){
             return session_pause_flag;
         }
+
+	bool& get_access_log_flag(){
+            return access_log_flag;
+	}
         
         l7vs::lockfree_queue<l7vs::tcp_thread_message>& get_up_thread_message_que(){
             return up_thread_message_que;
@@ -2499,6 +2503,7 @@ void set_virtual_service_message_test(){
  
    
     bool& ref_pause_flag = test_obj.get_session_pause_flag();
+    bool& ref_access_log_flag = test_obj.get_access_log_flag();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        ref_up_msg_que = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        ref_dw_msg_que = test_obj.get_down_thread_message_que();
     l7vs::tcp_thread_message*    up_msg;
@@ -2614,8 +2619,20 @@ void set_virtual_service_message_test(){
     test_obj.set_virtual_service_message(l7vs::tcp_session::SESSION_PAUSE_OFF);
     BOOST_CHECK(!ref_pause_flag);
     
-    // unit_test [6] set_virtual_service_message up thread map find not message error
-    std::cout << "[6] set_virtual_service_message up thread map find not message error" << std::endl;
+    // unit_test [6] set_virtual_service_message ACCESS_LOG_ON
+    std::cout << "[6] set_virtual_service_message ACCESS_LOG__ON" << std::endl;
+    ref_access_log_flag = false;
+    test_obj.set_virtual_service_message(l7vs::tcp_session::ACCESS_LOG_ON);
+    BOOST_CHECK(ref_access_log_flag);
+
+    // unit_test [7] set_virtual_service_message ACCESS_LOG_OFF
+    std::cout << "[7] set_virtual_service_message ACCESS_LOG_OFF" << std::endl;
+    ref_access_log_flag = true;
+    test_obj.set_virtual_service_message(l7vs::tcp_session::ACCESS_LOG_OFF);
+    BOOST_CHECK(!ref_access_log_flag);
+
+    // unit_test [8] set_virtual_service_message up thread map find not message error
+    std::cout << "[8] set_virtual_service_message up thread map find not message error" << std::endl;
     ref_vs_up_msg_map.clear();
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
     l7vs::Logger::putLogError_id = 0;
@@ -2639,8 +2656,8 @@ void set_virtual_service_message_test(){
     BOOST_CHECK_EQUAL(6,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    // unit_test [7] set_virtual_service_message up thread map find not message error
-    std::cout << "[7] set_virtual_service_message up thread map find not message error" << std::endl;
+    // unit_test [9] set_virtual_service_message up thread map find not message error
+    std::cout << "[9] set_virtual_service_message up thread map find not message error" << std::endl;
     ref_vs_dw_msg_map.clear();
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
     l7vs::Logger::putLogError_id = 0;

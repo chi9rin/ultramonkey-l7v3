@@ -273,9 +273,9 @@ namespace l7vs{
             //! virtualservice accept endpoint
             boost::asio::ip::tcp::endpoint virtualservice_endpoint;
             //! access log out put flag
-            bool accesslog_flag;
+            bool access_log_flag;
             //! access log out put flag mutex
-            wr_mutex accesslog_flag_mutex;
+            wr_mutex access_log_flag_mutex;
             //! access logger
             logger_implement_access* access_logger;
             //! ssl mode flag
