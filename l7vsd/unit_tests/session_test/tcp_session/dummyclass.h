@@ -781,21 +781,9 @@ namespace l7vs{
     // Dummy tcp_ssl_socket Class
     class    tcp_ssl_socket{
         public:
-//            static bool connect_res;
-//            static boost::asio::ip::tcp::endpoint connect_connect_endpoint;
-//            static boost::system::error_code* connect_ec;
-//            static bool connect_call_check;
             static bool set_non_blocking_mode_res;
             static boost::system::error_code set_non_blocking_mode_ec;
             static bool is_connect;
-/*
-            tcp_ssl_socket(boost::asio::io_service& io) :
-                    my_socket(io){
-                opt_info.nodelay_opt = false;
-                opt_info.cork_opt = false;
-                opt_info.quickack_opt = false;
-            };
-*/
 
             boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
             tcp_socket_option_info opt_info;
@@ -806,29 +794,9 @@ namespace l7vs{
             };
             ~tcp_ssl_socket(){};
 
-//            boost::asio::ip::tcp::socket& get_socket(){
             boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& get_socket(){
                 return my_socket;
             };
-
-//            boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
-//            tcp_socket_option_info opt_info;
-
-            //! accept
-            void accept(){};
-/*
-            //! @param[in]        connect_endpoint is connection endpoint
-            //! @param[out]        ec is reference error code object
-            bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec){
-                tcp_socket::connect_call_check = true;
-                tcp_socket::connect_connect_endpoint = connect_endpoint;
-                tcp_socket::connect_ec = &ec;
-                if(tcp_socket::is_connect){
-                    my_socket.connect(connect_endpoint,ec);
-                }
-                return tcp_socket::connect_res;
-            };
-*/
 
             //! close socket
             //! @param[out]        ec is reference error code object
@@ -850,6 +818,18 @@ namespace l7vs{
                 ec = tcp_socket::set_non_blocking_mode_ec;
                 return tcp_socket::set_non_blocking_mode_res;
             };
+
+
+            //! accept
+            bool accept(boost::system::error_code& ec){
+                tcp_ssl_socket::accept_call_check = true;
+                ec = tcp_ssl_socket::accept_ec;
+                return tcp_ssl_socket::accept_res;
+            };
+            bool tcp_ssl_socket::accept_res;
+            boost::system::error_code tcp_ssl_socket::accept_ec;
+            bool tcp_ssl_socket::accept_call_check;
+        
 
             //! write socket
             //! @param[in]        buffers is wite data buffer
@@ -906,10 +886,6 @@ namespace l7vs{
         }
     };
 
-//    bool tcp_ssl_socket::connect_res;
-//    boost::asio::ip::tcp::endpoint tcp_ssl_socket::connect_connect_endpoint;
-//    boost::system::error_code* tcp_ssl_socket::connect_ec;
-//    bool tcp_ssl_socket::connect_call_check;
     bool tcp_ssl_socket::set_non_blocking_mode_res = true;
     boost::system::error_code tcp_ssl_socket::set_non_blocking_mode_ec;
     bool tcp_ssl_socket::is_connect = false;
