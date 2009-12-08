@@ -5,13 +5,16 @@
 #include <boost/function_equal.hpp>
 #include <boost/test/included/unit_test.hpp>
 
+#include "../logger_stb/logger_implement_access.h"
+#include "../logger_stb/logger.h"
 #include "dummyclass.h"
-#include "logger_implement_access.h"
-#include "logger.h"
 #include "tcp_socket_option.h"
 #include "tcp_session.h"
 #include "tcp_session.cpp"
 #include "lockfree_queue.h"
+#include "../../../src/data_buff_base.cpp"
+#include "../../../src/tcp_data.cpp"
+#include "../../../src/tcp_realserver_connect_socket_list.cpp"
 
 
 using namespace boost::unit_test_framework;
@@ -2105,12 +2108,34 @@ void initialize_test(){
     
     BOOST_MESSAGE( "----- initialize test end -----" );
 }
+*/
 
 // get_client_socket test
 // get_client_socket test class
 class get_client_socket_test_class : public l7vs::tcp_session{
     public:
-        get_client_socket_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       // get_client_socket_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       get_client_socket_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
+
         ~get_client_socket_test_class(){};
         l7vs::tcp_socket& get_client_tcp_socket(){
             return client_socket;
@@ -2119,10 +2144,37 @@ class get_client_socket_test_class : public l7vs::tcp_session{
 
 void get_client_socket_test(){
     BOOST_MESSAGE( "----- get_client_socket test start -----" );
-    
-    boost::asio::io_service io;
+   
+
+ 
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    get_client_socket_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    get_client_socket_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    get_client_socket_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     
     
     l7vs::tcp_socket& ref_tcp_socket = test_obj.get_client_tcp_socket();
@@ -2136,12 +2188,33 @@ void get_client_socket_test(){
     BOOST_MESSAGE( "----- get_client_socket test end -----" );
 }
 
-
 // is_thread_wait test
 // is_thread_wait test class
 class is_thread_wait_test_class : public l7vs::tcp_session{
     public:
-        is_thread_wait_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+//        is_thread_wait_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       is_thread_wait_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
+
+
         ~is_thread_wait_test_class(){};
         
         std::bitset<TCP_SESSION_THREAD_STATE_BIT>& get_thread_state(){
@@ -2151,9 +2224,34 @@ class is_thread_wait_test_class : public l7vs::tcp_session{
 void is_thread_wait_test(){
     BOOST_MESSAGE( "----- is_thread_wait test start -----" );
     
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    is_thread_wait_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    is_thread_wait_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    is_thread_wait_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     
     std::bitset<TCP_SESSION_THREAD_STATE_BIT>& test_bitset = test_obj.get_thread_state();
     
@@ -2247,7 +2345,10 @@ void is_thread_wait_test(){
     test_bitset |= std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020);
     BOOST_CHECK(test_obj.is_thread_wait());
     
-    mutex_lock_test test_lock_obj(vs,io);
+    //mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger); 
+
+
     test_lock_obj.set_up_thread_exit_test();
     
     test_lock_obj.test_thread_wait.lock();
@@ -2281,13 +2382,7 @@ void is_thread_wait_test(){
     std::cout << "[3] is_thread_wait thread run test (mutex unlock)" << std::endl;
     BOOST_CHECK(test_lock_obj.befor_thread_id == test_id);
     BOOST_CHECK(test_lock_obj.after_thread_id == test_id);
-    
-    
-//    // unit_test [4] is_thread_wait thread run after mutex unlock test
-//    std::cout << "[4] is_thread_wait thread run after mutex unlock test" << std::endl;
-//    BOOST_CHECK(test_lock_obj.mutex_trylock());
-//    test_lock_obj.mutex_unlock();
-    
+   
     BOOST_MESSAGE( "----- is_thread_wait test end -----" );    
 }
 
@@ -2295,7 +2390,29 @@ void is_thread_wait_test(){
 // set_virtual_service_message test class
 class set_virtual_service_message_test_class : public l7vs::tcp_session{
     public:
-        set_virtual_service_message_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+//        set_virtual_service_message_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+        set_virtual_service_message_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
+
+
         ~set_virtual_service_message_test_class(){};
         
         bool& get_session_pause_flag(){
@@ -2351,10 +2468,36 @@ class set_virtual_service_message_test_class : public l7vs::tcp_session{
 void set_virtual_service_message_test(){
     BOOST_MESSAGE( "----- set_virtual_service_message test start -----" );
     
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    set_virtual_service_message_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    set_virtual_service_message_test_class test_obj(vs,io);
-    
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    set_virtual_service_message_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+ 
+   
     bool& ref_pause_flag = test_obj.get_session_pause_flag();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        ref_up_msg_que = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        ref_dw_msg_que = test_obj.get_down_thread_message_que();
@@ -2520,7 +2663,7 @@ void set_virtual_service_message_test(){
     
     BOOST_MESSAGE( "----- set_virtual_service_message test end -----" );
 }
-
+/*
 // up_thread_run
 // up_thread_run test class
 class up_thread_run_test_class : public l7vs::tcp_session{
@@ -9973,63 +10116,62 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 
-    ts->add( BOOST_TEST_CASE( &constructer_test ) );
-/*
-    ts->add( BOOST_TEST_CASE( &initialize_test ) );
-    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
-    ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
+//    ts->add( BOOST_TEST_CASE( &constructer_test ) );
+//    ts->add( BOOST_TEST_CASE( &initialize_test ) );
+//    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+//    ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
     ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
-    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
+//    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
 
-    ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_event_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_event_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_connection_chk_event_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_event_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_event_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_connection_chk_event_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 
-    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_all_realserver_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_all_realserver_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_all_realserver_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_all_realserver_disconnect_test) );
 
-    ts->add( BOOST_TEST_CASE( &up_thread_exit_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_exit_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_event_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_event_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_event_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_mod_disconnect_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_mod_disconnect_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_exit_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_exit_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_mod_disconnect_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_mod_disconnect_test ) );
 
-    ts->add( BOOST_TEST_CASE( &up_thread_sorry_enable_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
-*/    
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorry_enable_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
+    
     framework::master_test_suite().add( ts );
 
     return NULL;

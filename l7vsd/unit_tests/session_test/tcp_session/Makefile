@@ -8,9 +8,9 @@ CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG -D PARAMETER_FILE='"./l7vs.cf"'
 INCLUDES	=		-I/usr/include \
 				-I./ \
+				-I../logger_stb \
 				-I../../../src \
-				-I../../../include \
-				-I../logger_stb
+				-I../../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt \
@@ -29,9 +29,6 @@ PARAMETER_SRCS	=	\
 SRCS		=	\
 			../logger_stb/logger.cpp \
 			../logger_stb/logger_implement_access.cpp \
-			../../../src/data_buff_base.cpp \
-			../../../src/tcp_data.cpp \
-			../../../src/tcp_realserver_connect_socket_list.cpp \
 			tcp_session_test.cpp
 			
 .SUFFIX:	.cpp .o
