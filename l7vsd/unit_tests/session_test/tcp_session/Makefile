@@ -32,7 +32,7 @@ SRCS		=	\
 			../../../src/tcp_data.cpp \
 			../../../src/tcp_realserver_connect_socket_list.cpp \
 			tcp_session_test.cpp
-
+			
 .SUFFIX:	.cpp .o
 .cpp.o:
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@

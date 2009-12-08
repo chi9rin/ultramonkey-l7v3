@@ -11,7 +11,7 @@
 #include "tcp_session.h"
 #include "tcp_session.cpp"
 #include "lockfree_queue.h"
-
+//#include "logger_implement_access.h"
 
 using namespace boost::unit_test_framework;
 
@@ -30,22 +30,26 @@ class mutex_lock_test : public l7vs::tcp_session{
         boost::thread::id after_thread_id;
         l7vs::wr_mutex* pTest_mutex;
         boost::function< void(void) > test_func;
-//	l7vs::tcp_socket_option_info set_socket_option;
 
+        mutex_lock_test(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+				boost::asio::ip::tcp::endpoint listen_endpoint,
+				bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){
 
-        mutex_lock_test(	l7vs::virtualservice_tcp& vs,
-				boost::asio::io_service& session_io,
-				bool set_flag,
-				boost::asio::ssl::context& set_context,
-				int set_time_out,
-				bool is_cash_use,
-				l7vs::tcp_socket_option_info& set_socket_option) : l7vs::tcp_session(	vs,
-													session_io,
-													set_flag,
-													set_context,
-													set_time_out,
-													is_cash_use,
-													set_socket_option){
             pTest_mutex = NULL;
         };
         
@@ -414,23 +418,24 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
         std::pair<DOWN_THREAD_FUNC_TYPE_TAG , boost::function< void(const l7vs::tcp_session::TCP_PROCESS_TYPE_TAG) > > down_fuc_map_test_data[7];
         
 //        module_event_map_test_base_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        module_event_map_test_base_class(        l7vs::virtualservice_tcp& vs,
-                                		boost::asio::io_service& session_io,
-                                		bool set_flag,
-                                		boost::asio::ssl::context& set_context,
-                                		int set_time_out,
-                                		bool is_cash_use,
-                                		l7vs::tcp_socket_option_info& set_socket_option) : l7vs::tcp_session(   vs,
-                                                                                                        session_io,
-                                                                                                        set_flag,
-                                                                                                        set_context,
-                                                                                                        set_time_out,
-                                                                                                        is_cash_use,
-                                                                                                        set_socket_option){
-
-
-
-
+        module_event_map_test_base_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){
 
             int index;
             boost::function< void(const l7vs::tcp_session::TCP_PROCESS_TYPE_TAG) > func;
@@ -870,23 +875,24 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 class constructer_test_class : public l7vs::tcp_session{
     public:
 //        constructer_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){};
-       constructer_test_class(        l7vs::virtualservice_tcp& vs,
-                                                boost::asio::io_service& session_io,
-                                                bool set_flag,
-                                                boost::asio::ssl::context& set_context,
-                                                int set_time_out,
-                                                bool is_cash_use,
-                                                l7vs::tcp_socket_option_info& set_socket_option) : l7vs::tcp_session(   vs,
-                                                                                                        session_io,
-                                                                                                        set_flag,
-                                                                                                        set_context,
-                                                                                                        set_time_out,
-                                                                                                        is_cash_use,
-                                                                                                        set_socket_option){};
-
-
-
-
+       constructer_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
         ~constructer_test_class(){};
         boost::asio::io_service& get_io(){
             return io;
@@ -910,14 +916,43 @@ class constructer_test_class : public l7vs::tcp_session{
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
         };
+	l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+	    return client_ssl_socket;
+	};
+
         boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
             return sorryserver_socket.second;
         };
         
         l7vs::tcp_socket_option_info* get_socket_opt_info(){
             return &socket_opt_info;
+        };
+
+
+/*
+        virtualservice_endpoint(listen_endpoint),
+        accesslog_flag(false),
+        access_logger(set_access_logger),
+        ssl_flag(ssl_mode),
+        client_ssl_socket(session_io, set_ssl_context),
+        ssl_context(set_ssl_context),
+        ssl_cache_flag(set_ssl_cache_flag),
+        ssl_handshake_timer_flag(false),
+        ssl_handshake_time_out(set_ssl_handshake_time_out),
+        ssl_handshake_time_out_flag(false),
+        sess_cache_flag(is_cache_use),
+        socket_opt_info(set_option){
+*/      
+
+
+ 
+        //! up thread raise module event of handle_accept
+        //! @param[in]        process_type is prosecess type
+        void up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type){
+            up_thread_client_accept_call_check = true;
         }
-        
+        bool up_thread_client_accept_call_check;
+
         //! up thread raise module event of handle_accept
         //! @param[in]        process_type is prosecess type
         void up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type){
@@ -1215,9 +1250,17 @@ class constructer_test_class : public l7vs::tcp_session{
         
         void check_up_thread_function_map(){
             up_thread_function_pair check_it;
-            
-            // UP_FUNC_CLIENT_ACCEPT  up_thread_client_accept_event function 
+
+            // UP_FUNC_CLIENT_ACCEPT  up_thread_client_accept function
             check_it = up_thread_function_array[UP_FUNC_CLIENT_ACCEPT];
+            BOOST_CHECK(check_it.second != NULL);
+            up_thread_client_accept_call_check = false;
+            check_it.second(LOCAL_PROC);
+            BOOST_CHECK(up_thread_client_accept_call_check);
+
+
+            // UP_FUNC_CLIENT_ACCEPT_EVENT  up_thread_client_accept_event function 
+            check_it = up_thread_function_array[UP_FUNC_CLIENT_ACCEPT_EVENT];
             BOOST_CHECK(check_it.second != NULL);
             up_thread_client_accept_event_call_check = false;
             check_it.second(LOCAL_PROC);
@@ -1747,26 +1790,19 @@ class constructer_test_class : public l7vs::tcp_session{
 void constructer_test(){
     BOOST_MESSAGE( "----- constructer test start -----" );
     
-//        constructer_test_class(        l7vs::virtualservice_tcp& vs,
-//                                                boost::asio::io_service& session_io,
-//                                                bool set_flag,
-//                                                boost::asio::ssl::context& set_context,
-//                                                int set_time_out,
-//                                                bool is_cash_use,
-//                                                l7vs::tcp_socket_option_info& set_socket_option) : l7vs::tcp_session(   vs,
-//                                                                                                        session_io,
-//                                                                                                        set_flag,
-//                                                                                                        set_context,
-//                                                                                                        set_time_out,
-//                                                                                                       is_cash_use,
-//                                                                                                       set_socket_option)   
+//        constructer_test_class(
+//                                l7vs::virtualservice_tcp& vs,
+//                                boost::asio::io_service& session_io,
+//                                l7vs::tcp_socket_option_info& set_socket_option,
+//                                boost::asio::ip::tcp::endpoint listen_endpoint,
+//                                bool ssl_mode,
+//                                boost::asio::ssl::context& set_ssl_context,
+//                                bool set_ssl_cache_flag,
+//                                int set_ssl_handshake_time_out,
+//                                logger_implement_access* set_access_logger)
 
-    boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
-    bool set_flag(false);
-    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
-    int set_time_out = 0;
-    bool is_cash_use = false;  
+    boost::asio::io_service io;
     l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = true;
@@ -1780,10 +1816,18 @@ void constructer_test(){
     set_option.quickack_opt = true;
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = true;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint;
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    l7vs::logger_implement_access* plogger = NULL;  
+
     
 //    constructer_test_class test_obj(vs,io);
 //    constructer_test_class test_obj(vs,io,set_option);
-    constructer_test_class test_obj(vs,io,set_flag,set_context,set_time_out,is_cash_use,set_option);
+    constructer_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
 
     
@@ -1863,6 +1907,21 @@ void constructer_test(){
     //! TCP_QUICKACK
     BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.quickack_opt , set_option.quickack_opt);
     BOOST_CHECK_EQUAL(test_obj.get_sorry_socket()->opt_info.quickack_val , set_option.quickack_val);
+
+    // unit_test [15] constructer client ssl socket set socket option check
+    std::cout << "[15] constructer client ssl socket set socket option check" << std::endl;
+    //! TCP_NODELAY
+    BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.nodelay_opt , set_option.nodelay_opt);
+    BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.nodelay_val , set_option.nodelay_val);
+    //! TCP_CORK
+    BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.cork_opt , set_option.cork_opt);
+    BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.cork_val , set_option.cork_val);
+    //! TCP_QUICKACK
+    BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.quickack_opt , set_option.quickack_opt);
+    BOOST_CHECK_EQUAL(test_obj.get_client_ssl_socket().opt_info.quickack_val , set_option.quickack_val);
+
+
+
     
     
     BOOST_MESSAGE( "----- constructer test end -----" );
