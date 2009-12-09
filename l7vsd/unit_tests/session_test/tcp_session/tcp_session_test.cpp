@@ -7653,7 +7653,7 @@ void down_thread_all_socket_close_test(){
     BOOST_MESSAGE( "----- down_thread_all_socket_close test end -----" );
 }
 */
-/*
+
 // up_thread_client_disconnect test
 // up_thread_client_disconnect test class
 class up_thread_client_disconnect : public l7vs::tcp_session{
@@ -7719,6 +7719,9 @@ class up_thread_client_disconnect : public l7vs::tcp_session{
         
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
+        };
+        l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+            return client_ssl_socket;
         };
 
 };
@@ -7821,12 +7824,26 @@ void up_thread_client_disconnect_test(){
     BOOST_CHECK_EQUAL(26,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.up_thread_exit_call_chek);
+
+    // ----SSL Mode Test
+    up_thread_client_disconnect ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    l7vs::tcp_ssl_socket& client_ssl_socket = ssl_test_obj.get_client_socket();
+    client_ssl_socket.close_res = true;
+    client_ssl_socket.close_call_check = false;
+    
+    ssl_test_obj.test_call();
+    
+    // unit_test [7] up_thread_client_disconnect client ssl socket close call check
+    std::cout << "[7] up_thread_client_disconnect client ssl socket close call check" << std::endl;
+    BOOST_CHECK(client_ssl_socket.close_call_check);
+
     
     BOOST_MESSAGE( "----- up_thread_client_disconnect test end -----" );
 }
-*/
 
-/*
+
+
 // down_thread_client_disconnect test
 // down_thread_client_disconnect test class
 class down_thread_client_disconnect_test_class : public l7vs::tcp_session{
@@ -7893,7 +7910,9 @@ class down_thread_client_disconnect_test_class : public l7vs::tcp_session{
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
         };
-
+        l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+            return client_ssl_socket;
+        };
 };
 void down_thread_client_disconnect_test(){
     BOOST_MESSAGE( "----- down_thread_client_disconnect test start -----" );
@@ -7994,9 +8013,23 @@ void down_thread_client_disconnect_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.down_thread_exit_call_chek);
     
+
+    // ----SSL Mode Test
+    down_thread_client_disconnect ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    l7vs::tcp_ssl_socket& client_ssl_socket = ssl_test_obj.get_client_socket();
+    client_ssl_socket.close_res = true;
+    client_ssl_socket.close_call_check = false;
+    
+    ssl_test_obj.test_call();
+    
+    // unit_test [7] down_thread_client_disconnect client ssl socket close call check
+    std::cout << "[7] down_thread_client_disconnect client ssl socket close call check" << std::endl;
+    BOOST_CHECK(client_ssl_socket.close_call_check);
+
+
     BOOST_MESSAGE( "----- down_thread_client_disconnect test end -----" );
 }
-*/
 
 
 // up_thread_sorryserver_disconnect test
@@ -12214,8 +12247,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
 //NG    ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
-//NG    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
-//NG    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_event_test) );
@@ -12224,7 +12257,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 
-    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
