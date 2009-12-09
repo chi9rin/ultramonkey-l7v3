@@ -9536,7 +9536,7 @@ void up_thread_client_receive_test(){
     // socket set
     ssl_socket.read_some_res = MAX_BUFFER_SIZE;
     ssl_socket.read_some_ec.clear();
-    char set_char = CHAR_MIN;
+    set_char = CHAR_MIN;
     for(int i = 0;i < MAX_BUFFER_SIZE;i++){
         ssl_socket.read_some_buffers_out[i] = set_char;
         if(set_char == CHAR_MAX)
