@@ -6843,7 +6843,7 @@ void up_thread_client_accept_event_test(){
     BOOST_MESSAGE( "----- up_thread_client_accept_event test end -----" );
     
 }
-*/
+
 
 // up_thread_client_respond test
 // up_thread_client_respond test class
