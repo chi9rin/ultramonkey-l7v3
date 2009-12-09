@@ -6232,8 +6232,8 @@ void up_thread_sorry_enable_event_test(){
 // up_thread_sorry_disable_event test class
 class up_thread_sorry_disable_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_sorry_disable_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        up_thread_sorry_disable_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
        up_thread_sorry_disable_event_test_class(
                                 l7vs::virtualservice_tcp& vs,
                                 boost::asio::io_service& session_io,
