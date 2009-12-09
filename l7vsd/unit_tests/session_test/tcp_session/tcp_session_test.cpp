@@ -5194,7 +5194,8 @@ void down_thread_realserver_disconnect_event_test(){
     BOOST_CHECK_EQUAL(74,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_realserver_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -5328,7 +5329,8 @@ void up_thread_sorryserver_disconnect_event_test(){
     BOOST_CHECK_EQUAL(64,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_up_thread_sorryserver_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -5530,7 +5532,8 @@ void up_thread_sorryserver_mod_disconnect_test(){
     BOOST_CHECK_EQUAL(62,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_up_thread_sorryserver_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -5725,7 +5728,8 @@ void down_thread_sorryserver_mod_disconnect_test(){
     BOOST_CHECK_EQUAL(92,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_sorryserver_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -5855,7 +5859,8 @@ void down_thread_sorryserver_disconnect_event_test(){
     BOOST_CHECK_EQUAL(94,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_sorryserver_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -5978,7 +5983,8 @@ void up_thread_sorry_enable_event_test(){
     BOOST_CHECK_EQUAL(66,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_up_thread_sorry_enable_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -6101,7 +6107,8 @@ void up_thread_sorry_disable_event_test(){
     BOOST_CHECK_EQUAL(68,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_up_thread_sorry_disable_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -6219,7 +6226,8 @@ void down_thread_sorry_enable_event_test(){
     BOOST_CHECK_EQUAL(96,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_sorry_enable_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -6336,7 +6344,8 @@ void down_thread_sorry_disable_event_test(){
     BOOST_CHECK_EQUAL(98,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_sorry_disable_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -6746,7 +6755,8 @@ void up_thread_client_respond_event_test(){
     BOOST_CHECK_EQUAL(24,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_up_thread_client_respond_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -6908,7 +6918,8 @@ void down_thread_client_respond_event_test(){
     BOOST_CHECK_EQUAL(80,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_client_respond_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
