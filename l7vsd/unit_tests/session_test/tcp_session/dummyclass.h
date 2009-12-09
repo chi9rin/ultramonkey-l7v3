@@ -826,9 +826,9 @@ namespace l7vs{
                 ec = tcp_ssl_socket::accept_ec;
                 return tcp_ssl_socket::accept_res;
             };
-            bool tcp_ssl_socket::accept_res;
-            boost::system::error_code tcp_ssl_socket::accept_ec;
-            bool tcp_ssl_socket::accept_call_check;
+            bool accept_res;
+            boost::system::error_code accept_ec;
+            bool accept_call_check;
         
 
             //! write socket
