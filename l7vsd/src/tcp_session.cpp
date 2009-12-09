@@ -1214,54 +1214,6 @@ namespace l7vs{
             return;
         }
 
-/*        // Handshake start
-        if (ssl_flag) {
-            //----Debug log----------------------------------------------------------------------
-            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] ssl session handshaking start : ";
-                buf << "set handshake timer [";
-                buf << ssl_handshake_time_out;
-                buf << "]";
-                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-            }
-            //----Debug log----------------------------------------------------------------------
-//            ssl_handshake_flag = false;
-            //regist handshake timer event handler
-            ssl_handshake_timer.reset(new boost::asio::deadline_timer(io));
-            ssl_handshake_timer->expires_from_now(boost::posix_time::seconds(ssl_handshake_time_out));
-            ssl_handshake_timer->async_wait(boost::bind(&tcp_session::handle_handshake_timer, 
-                                   this,
-                                   boost::asio::placeholders::error));
-            // do handshake.
-            bool bres = client_ssl_socket.handshake(boost::asio::ssl::stream_base::server);
-            // handshke timer operation cancel.
-            ssl_handshake_timer->cancel();
-            if (unlikely(!bres)) {
-                //Error handshake failed
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] ssl session handshaking failed";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
-            // set handshaked flag.
-//            handshaked = true;
-            //----Debug log----------------------------------------------------------------------
-            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] ssl session handshaking end";
-                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-            }
-            //----Debug log----------------------------------------------------------------------
-        }
-*/
         up_thread_function_pair    func    = up_thread_function_array[func_type->second];
         if(unlikely( !func.second )){
             //Error not find function map

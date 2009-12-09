@@ -10520,7 +10520,7 @@ void up_thread_sorryserver_send_test(){
     
     BOOST_MESSAGE( "----- up_thread_sorryserver_send test end -----" );
 }
-/*
+
 // down_thread_client_send test
 void down_thread_client_send_test(){
     BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
@@ -10761,7 +10761,7 @@ void down_thread_client_send_test(){
 
     BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
 }
-*/
+
 
 //up_thread_realserver_connect test
 //up_thread_realserver_connect test class 
@@ -12247,8 +12247,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
 //NG    ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_event_test) );
@@ -12262,7 +12262,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
-//NG    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
@@ -12285,7 +12285,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
-//NG    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
     
