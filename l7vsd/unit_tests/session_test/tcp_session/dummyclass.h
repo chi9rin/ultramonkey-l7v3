@@ -63,6 +63,9 @@ namespace l7vs{
                 return true;
             };
 
+            void get_option_info(std::string&){};
+
+
             //! realserver list update event
             void    handle_rslist_update(){};
 
