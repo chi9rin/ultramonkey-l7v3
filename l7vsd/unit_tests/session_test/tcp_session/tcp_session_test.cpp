@@ -8277,7 +8277,7 @@ void down_thread_sorryserver_disconnect_test(){
     //std::string access_log_file_name = "test";
     l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
 
-    get_client_socket_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    down_thread_sorryserver_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     l7vs::lockfree_queue<l7vs::tcp_thread_message>& up_thread_message_que = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>& down_thread_message_que = test_obj.get_down_thread_message_que();
@@ -10873,7 +10873,7 @@ void up_thread_realserver_connect_test(){
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     
-    l7vs::tcp_socket::tcp_socket_option_info set_option;
+    l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = true;
     //! TCP_NODELAY option value  (false:off,true:on)
@@ -11198,8 +11198,6 @@ class up_thread_sorryserver_connect_test_class : public l7vs::tcp_session{
 void up_thread_sorryserver_connect_test(){
     BOOST_MESSAGE( "----- up_thread_sorryserver_connect test start -----" );
     
-    boost::asio::io_service io;
-    l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
     l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
