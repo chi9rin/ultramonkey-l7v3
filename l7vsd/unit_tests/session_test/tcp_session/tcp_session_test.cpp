@@ -9396,45 +9396,31 @@ void up_thread_client_receive_test(){
     std::cout << "[4] up_thread_client_receive up_thread_next_call_function update check" << std::endl;
     test_obj.next_up_function_call();
     BOOST_CHECK(test_obj.up_thread_realserver_get_destination_event_call_check);
-    
-    // unit_test [5] up_thread_client_receive receive debug log check
-    std::cout << "[5] up_thread_client_receive receive debug log check" << std::endl;
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(36,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-    // unit_test [6] up_thread_client_receive qos check
-    std::cout << "[6] up_thread_client_receive qos check" << std::endl;
+    // unit_test [5] up_thread_client_receive qos check
+    std::cout << "[5] up_thread_client_receive qos check" << std::endl;
     socket.read_some_res = 0;
      vs.get_wait_upstream_res = 1;
 
     // wait = 0 >> receive
     socket.read_some_call_check = false;
     vs.get_wait_upstream_res = 0;
-    l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-    l7vs::Logger::putLogDebug_id = 0;
     test_obj.test_call_client_receive();
     BOOST_CHECK(socket.read_some_call_check);
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
 
     // wait = 1 >> not receive
     socket.read_some_call_check = false;
     vs.get_wait_upstream_res = 1;
-    l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-    l7vs::Logger::putLogDebug_id = 0;
     test_obj.test_call_client_receive();
     BOOST_CHECK(!socket.read_some_call_check);
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(35,l7vs::Logger::putLogDebug_id);
     std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
     socket.read_some_res = MAX_BUFFER_SIZE;
     vs.get_throughput_upstream_res = 0;
     vs.get_wait_upstream_res = 0;
     
-    // unit_test [7] up_thread_client_receive receive size 0 check
-    std::cout << "[7] up_thread_client_receive receive size 0 check" << std::endl;
+    // unit_test [6] up_thread_client_receive receive size 0 check
+    std::cout << "[6] up_thread_client_receive receive size 0 check" << std::endl;
     test_obj.set_up_thread_next_function_call_exit();
     socket.read_some_res = 0;
     test_obj.test_call_client_receive();
@@ -9443,8 +9429,8 @@ void up_thread_client_receive_test(){
     BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
     socket.read_some_res = MAX_BUFFER_SIZE;
     
-    // unit_test [8] up_thread_client_receive socket error (try_again) check
-    std::cout << "[8] up_thread_client_receive socket error (try_again) check" << std::endl;
+    // unit_test [7] up_thread_client_receive socket error (try_again) check
+    std::cout << "[7] up_thread_client_receive socket error (try_again) check" << std::endl;
     test_obj.set_up_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::try_again;
     test_obj.test_call_client_receive();
@@ -9453,8 +9439,8 @@ void up_thread_client_receive_test(){
     BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [9] up_thread_client_receive socket error (eof) check
-    std::cout << "[9] up_thread_client_receive socket error (eof) check" << std::endl;
+    // unit_test [8] up_thread_client_receive socket error (eof) check
+    std::cout << "[8] up_thread_client_receive socket error (eof) check" << std::endl;
     test_obj.set_up_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::eof;
     test_obj.test_call_client_receive();
@@ -9463,8 +9449,8 @@ void up_thread_client_receive_test(){
     BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [10] up_thread_client_receive socket error (connection_reset) check
-    std::cout << "[10] up_thread_client_receive socket error (connection_reset) check" << std::endl;
+    // unit_test [9] up_thread_client_receive socket error (connection_reset) check
+    std::cout << "[9] up_thread_client_receive socket error (connection_reset) check" << std::endl;
     test_obj.set_up_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::connection_reset;
     test_obj.test_call_client_receive();
@@ -9473,8 +9459,8 @@ void up_thread_client_receive_test(){
     BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [11] up_thread_client_receive socket error (bad_descriptor) check
-    std::cout << "[11] up_thread_client_receive socket error (bad_descriptor) check" << std::endl;
+    // unit_test [10] up_thread_client_receive socket error (bad_descriptor) check
+    std::cout << "[10] up_thread_client_receive socket error (bad_descriptor) check" << std::endl;
     test_obj.set_up_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::bad_descriptor;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9487,8 +9473,8 @@ void up_thread_client_receive_test(){
     BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
     socket.read_some_ec.clear();
 
-    // unit_test [12] up_thread_client_receive closed socket error (bad_descriptor) check
-    std::cout << "[12] up_thread_client_receive closed socket error (bad_descriptor) check" << std::endl;
+    // unit_test [11] up_thread_client_receive closed socket error (bad_descriptor) check
+    std::cout << "[11] up_thread_client_receive closed socket error (bad_descriptor) check" << std::endl;
     test_obj.set_up_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::bad_descriptor;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9502,8 +9488,8 @@ void up_thread_client_receive_test(){
     BOOST_CHECK(test_obj.up_thread_client_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [13] up_thread_client_receive not fond function error check
-    std::cout << "[13] up_thread_client_receive not fond function error check" << std::endl;
+    // unit_test [12] up_thread_client_receive not fond function error check
+    std::cout << "[12] up_thread_client_receive not fond function error check" << std::endl;
     test_obj.up_thread_function_array_clear();
     test_obj.up_thread_exit_call_check = false;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9514,8 +9500,8 @@ void up_thread_client_receive_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.up_thread_exit_call_check);
     
-    // unit_test [14] up_thread_client_receive returnd illegal EVENT_TAG error check
-    std::cout << "[14] up_thread_client_receive returnd illegal EVENT_TAG error check" << std::endl;
+    // unit_test [13] up_thread_client_receive returnd illegal EVENT_TAG error check
+    std::cout << "[13] up_thread_client_receive returnd illegal EVENT_TAG error check" << std::endl;
     test_obj.up_thread_module_event_map_clear();
     test_obj.up_thread_exit_call_check = false;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9656,15 +9642,9 @@ void down_thread_realserver_receive_test(){
     std::cout << "[4] down_thread_realserver_receive down_thread_next_call_function update check" << std::endl;
     test_obj.next_down_function_call();
     BOOST_CHECK(test_obj.down_thread_client_connection_chk_event_call_check);
-    
-    // unit_test [5] down_thread_realserver_receive debug log check
-    std::cout << "[5] down_thread_realserver_receive debug log check" << std::endl;
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(43,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-    // unit_test [6] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check
-    std::cout << "[6] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check" << std::endl;
+    // unit_test [5] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check
+    std::cout << "[5] down_thread_realserver_receive realserver_recv down_thread_current_receive_realserver_socket inclement & cyclic check" << std::endl;
     std::list< std::pair< boost::asio::ip::tcp::endpoint, boost::shared_ptr< l7vs::tcp_socket > > >::iterator check_it;
     rs_cur = rs_list.begin();
     check_it = rs_list.begin();
@@ -9678,39 +9658,30 @@ void down_thread_realserver_receive_test(){
     check_it = rs_list.begin();
     BOOST_CHECK(check_it == rs_cur);
     
-    // unit_test [7] down_thread_realserver_receive qos check
-    std::cout << "[7] down_thread_realserver_receive qos check" << std::endl;
+    // unit_test [6] down_thread_realserver_receive qos check
+    std::cout << "[6] down_thread_realserver_receive qos check" << std::endl;
     socket.read_some_res = 0;
 
     // wait = 0 >> receive
     rs_cur = rs_list.begin();
     socket.read_some_call_check = false;
     vs.get_wait_downstream_res = 0;
-    l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-    l7vs::Logger::putLogDebug_id = 0;
     test_obj.test_call_realserver_receive();
     BOOST_CHECK(socket.read_some_call_check);
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_NONE,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(0,l7vs::Logger::putLogDebug_id);
 
     // wait = 1 >> not receive
     rs_cur = rs_list.begin();
     socket.read_some_call_check = false;
     vs.get_wait_downstream_res = 1;
-    l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
-    l7vs::Logger::putLogDebug_id = 0;
     test_obj.test_call_realserver_receive();
     BOOST_CHECK(!socket.read_some_call_check);
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(42,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
     socket.read_some_res = MAX_BUFFER_SIZE;
     vs.get_throughput_downstream_res = 0;
     vs.get_wait_downstream_res = 0;
     
-    // unit_test [8] down_thread_realserver_receive receive size 0 check
-    std::cout << "[8] down_thread_realserver_receive receive size 0 check" << std::endl;
+    // unit_test [7] down_thread_realserver_receive receive size 0 check
+    std::cout << "[7] down_thread_realserver_receive receive size 0 check" << std::endl;
     rs_cur = rs_list.begin();
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_res = 0;
@@ -9720,8 +9691,8 @@ void down_thread_realserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
     socket.read_some_res = MAX_BUFFER_SIZE;
     
-    // unit_test [9] down_thread_realserver_receive socket error (try_again) check
-    std::cout << "[9] down_thread_realserver_receive socket error (try_again) check" << std::endl;
+    // unit_test [8] down_thread_realserver_receive socket error (try_again) check
+    std::cout << "[8] down_thread_realserver_receive socket error (try_again) check" << std::endl;
     rs_cur = rs_list.begin();
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::try_again;
@@ -9731,8 +9702,8 @@ void down_thread_realserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [10] down_thread_realserver_receive socket error (eof) check
-    std::cout << "[10] down_thread_realserver_receive socket error (eof) check" << std::endl;
+    // unit_test [9] down_thread_realserver_receive socket error (eof) check
+    std::cout << "[9] down_thread_realserver_receive socket error (eof) check" << std::endl;
     rs_cur = rs_list.begin();
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::eof;
@@ -9742,8 +9713,8 @@ void down_thread_realserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [11] down_thread_realserver_receive socket error (connection_reset) check
-    std::cout << "[11] down_thread_realserver_receive socket error (connection_reset) check" << std::endl;
+    // unit_test [10] down_thread_realserver_receive socket error (connection_reset) check
+    std::cout << "[10] down_thread_realserver_receive socket error (connection_reset) check" << std::endl;
     rs_cur = rs_list.begin();
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::connection_reset;
@@ -9753,8 +9724,8 @@ void down_thread_realserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [12] down_thread_realserver_receive socket error (bad_descriptor) check
-    std::cout << "[12] down_thread_realserver_receive socket error (bad_descriptor) check" << std::endl;
+    // unit_test [11] down_thread_realserver_receive socket error (bad_descriptor) check
+    std::cout << "[11] down_thread_realserver_receive socket error (bad_descriptor) check" << std::endl;
     rs_cur = rs_list.begin();
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::bad_descriptor;
@@ -9769,8 +9740,8 @@ void down_thread_realserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
 
-    // unit_test [13] down_thread_realserver_receive closed socket error (bad_descriptor) check
-    std::cout << "[13] down_thread_realserver_receive closed socket error (bad_descriptor) check" << std::endl;
+    // unit_test [12] down_thread_realserver_receive closed socket error (bad_descriptor) check
+    std::cout << "[12] down_thread_realserver_receive closed socket error (bad_descriptor) check" << std::endl;
     rs_cur = rs_list.begin();
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::bad_descriptor;
@@ -9785,8 +9756,8 @@ void down_thread_realserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
         
-    // unit_test [14] down_thread_realserver_receive not fond function error check
-    std::cout << "[14] down_thread_realserver_receive not fond function error check" << std::endl;
+    // unit_test [13] down_thread_realserver_receive not fond function error check
+    std::cout << "[13] down_thread_realserver_receive not fond function error check" << std::endl;
     test_obj.down_thread_function_array_clear();
     test_obj.down_thread_exit_call_check = false;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9797,8 +9768,8 @@ void down_thread_realserver_receive_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.down_thread_exit_call_check);
     
-    // unit_test [15] down_thread_realserver_receive returnd illegal EVENT_TAG error check
-    std::cout << "[15] down_thread_realserver_receive returnd illegal EVENT_TAG error check" << std::endl;
+    // unit_test [14] down_thread_realserver_receive returnd illegal EVENT_TAG error check
+    std::cout << "[14] down_thread_realserver_receive returnd illegal EVENT_TAG error check" << std::endl;
     test_obj.down_thread_module_event_map_clear();
     test_obj.down_thread_exit_call_check = false;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9809,8 +9780,8 @@ void down_thread_realserver_receive_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.down_thread_exit_call_check);
     
-    // unit_test [16] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check
-    std::cout << "[16] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check" << std::endl;
+    // unit_test [15] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check
+    std::cout << "[15] down_thread_realserver_receive  empty down_thread_receive_realserver_socket_list check" << std::endl;
     rs_cur = rs_list.begin();
     std::pair< boost::asio::ip::tcp::endpoint, boost::shared_ptr< l7vs::tcp_socket > > sock_pair = *rs_cur;
     rs_list.clear();
@@ -9927,15 +9898,9 @@ void down_thread_sorryserver_receive_test(){
     std::cout << "[3] down_thread_sorryserver_receive down_thread_next_call_function update check" << std::endl;
     test_obj.next_down_function_call();
     BOOST_CHECK(test_obj.down_thread_client_connection_chk_event_call_check);
-    
-    // unit_test [4] down_thread_sorryserver_receive debug log check
-    std::cout << "[4] down_thread_sorryserver_receive debug log check" << std::endl;
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(46,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
 
-    // unit_test [5] down_thread_sorryserver_receive receive size 0 check
-    std::cout << "[5] down_thread_sorryserver_receive receive size 0 check" << std::endl;
+    // unit_test [4] down_thread_sorryserver_receive receive size 0 check
+    std::cout << "[4] down_thread_sorryserver_receive receive size 0 check" << std::endl;
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_res = 0;
     test_obj.test_call_sorryserver_receive();
@@ -9944,8 +9909,8 @@ void down_thread_sorryserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_sorryserver_receive_call_check);
     socket.read_some_res = MAX_BUFFER_SIZE;
     
-    // unit_test [6] down_thread_sorryserver_receive socket error (try_again) check
-    std::cout << "[6] down_thread_sorryserver_receive socket error (try_again) check" << std::endl;
+    // unit_test [5] down_thread_sorryserver_receive socket error (try_again) check
+    std::cout << "[5] down_thread_sorryserver_receive socket error (try_again) check" << std::endl;
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::try_again;
     test_obj.test_call_sorryserver_receive();
@@ -9954,8 +9919,8 @@ void down_thread_sorryserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_sorryserver_receive_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [7] down_thread_sorryserver_receive socket error (eof) check
-    std::cout << "[7] down_thread_sorryserver_receive socket error (eof) check" << std::endl;
+    // unit_test [6] down_thread_sorryserver_receive socket error (eof) check
+    std::cout << "[6] down_thread_sorryserver_receive socket error (eof) check" << std::endl;
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::eof;
     test_obj.test_call_sorryserver_receive();
@@ -9964,8 +9929,8 @@ void down_thread_sorryserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [8] down_thread_sorryserver_receive socket error (connection_reset) check
-    std::cout << "[8] down_thread_sorryserver_receive socket error (connection_reset) check" << std::endl;
+    // unit_test [7] down_thread_sorryserver_receive socket error (connection_reset) check
+    std::cout << "[7] down_thread_sorryserver_receive socket error (connection_reset) check" << std::endl;
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::connection_reset;
     test_obj.test_call_sorryserver_receive();
@@ -9974,8 +9939,8 @@ void down_thread_sorryserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [9] down_thread_sorryserver_receive socket error (bad_descriptor) check
-    std::cout << "[9] down_thread_sorryserver_receive socket error (bad_descriptor) check" << std::endl;
+    // unit_test [8] down_thread_sorryserver_receive socket error (bad_descriptor) check
+    std::cout << "[8] down_thread_sorryserver_receive socket error (bad_descriptor) check" << std::endl;
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::bad_descriptor;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -9989,8 +9954,8 @@ void down_thread_sorryserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
     socket.read_some_ec.clear();
 
-    // unit_test [10] down_thread_sorryserver_receive closed socket error (bad_descriptor) check
-    std::cout << "[10] down_thread_sorryserver_receive closed socket error (bad_descriptor) check" << std::endl;
+    // unit_test [9] down_thread_sorryserver_receive closed socket error (bad_descriptor) check
+    std::cout << "[9] down_thread_sorryserver_receive closed socket error (bad_descriptor) check" << std::endl;
     test_obj.set_down_thread_next_function_call_exit();
     socket.read_some_ec = boost::asio::error::bad_descriptor;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -10004,8 +9969,8 @@ void down_thread_sorryserver_receive_test(){
     BOOST_CHECK(test_obj.down_thread_sorryserver_disconnect_call_check);
     socket.read_some_ec.clear();
 
-    // unit_test [11] down_thread_sorryserver_receive not fond function error check
-    std::cout << "[11] down_thread_sorryserver_receive not fond function error check" << std::endl;
+    // unit_test [10] down_thread_sorryserver_receive not fond function error check
+    std::cout << "[10] down_thread_sorryserver_receive not fond function error check" << std::endl;
     test_obj.down_thread_function_array_clear();
     test_obj.down_thread_exit_call_check = false;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -10016,8 +9981,8 @@ void down_thread_sorryserver_receive_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.down_thread_exit_call_check);
 
-    // unit_test [12] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check
-    std::cout << "[12] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check" << std::endl;
+    // unit_test [11] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check
+    std::cout << "[11] down_thread_sorryserver_receive returnd illegal EVENT_TAG error check" << std::endl;
     test_obj.down_thread_module_event_map_clear();
     test_obj.down_thread_exit_call_check = false;
     l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
@@ -10134,14 +10099,8 @@ void up_thread_realserver_send_test(){
     test_obj.next_up_function_call();
     BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
 
-    // unit_test [5] up_thread_realserver_send debug log check
-    std::cout << "[5] up_thread_realserver_send debug log check" << std::endl;
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(37,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-
-    // unit_test [6] up_thread_realserver_send send size check
-    std::cout << "[6] up_thread_realserver_send send size check" << std::endl;
+    // unit_test [5] up_thread_realserver_send send size check
+    std::cout << "[5] up_thread_realserver_send send size check" << std::endl;
     send_data.set_send_size(0);
     socket.write_some_res = 0;
     test_obj.set_up_thread_next_function_call_exit();
@@ -10185,8 +10144,8 @@ void up_thread_realserver_send_test(){
     
     socket.write_some_res = MAX_BUFFER_SIZE;
     
-    // unit_test [7] up_thread_realserver_send socket error (try_again) check
-    std::cout << "[7] up_thread_realserver_send socket error (try_again) check" << std::endl;
+    // unit_test [6] up_thread_realserver_send socket error (try_again) check
+    std::cout << "[6] up_thread_realserver_send socket error (try_again) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::try_again;
@@ -10196,8 +10155,8 @@ void up_thread_realserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_realserver_send_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [8] up_thread_realserver_send socket error (eof) check
-    std::cout << "[8] up_thread_realserver_send socket error (eof) check" << std::endl;
+    // unit_test [7] up_thread_realserver_send socket error (eof) check
+    std::cout << "[7] up_thread_realserver_send socket error (eof) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::eof;
@@ -10207,8 +10166,8 @@ void up_thread_realserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [9] up_thread_realserver_send socket error (connection_reset) check
-    std::cout << "[9] up_thread_realserver_send socket error (connection_reset) check" << std::endl;
+    // unit_test [8] up_thread_realserver_send socket error (connection_reset) check
+    std::cout << "[8] up_thread_realserver_send socket error (connection_reset) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::connection_reset;
@@ -10218,8 +10177,8 @@ void up_thread_realserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [10] up_thread_realserver_send socket error (bad_descriptor) check
-    std::cout << "[10] up_thread_realserver_send socket error (bad_descriptor) check" << std::endl;
+    // unit_test [9] up_thread_realserver_send socket error (bad_descriptor) check
+    std::cout << "[9] up_thread_realserver_send socket error (bad_descriptor) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::bad_descriptor;
@@ -10233,8 +10192,8 @@ void up_thread_realserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_realserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [11] up_thread_realserver_send not fond function error check
-    std::cout << "[11] up_thread_realserver_send not fond function error check" << std::endl;
+    // unit_test [10] up_thread_realserver_send not fond function error check
+    std::cout << "[10] up_thread_realserver_send not fond function error check" << std::endl;
     send_data.set_send_size(0);
     test_obj.up_thread_function_array_clear();
     test_obj.up_thread_exit_call_check = false;
@@ -10246,8 +10205,8 @@ void up_thread_realserver_send_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.up_thread_exit_call_check);
     
-    // unit_test [12] up_thread_realserver_send returnd illegal EVENT_TAG error check
-    std::cout << "[12] up_thread_realserver_send returnd illegal EVENT_TAG error check" << std::endl;
+    // unit_test [11] up_thread_realserver_send returnd illegal EVENT_TAG error check
+    std::cout << "[11] up_thread_realserver_send returnd illegal EVENT_TAG error check" << std::endl;
     send_data.set_send_size(0);
     send_data.set_size(MAX_BUFFER_SIZE);
     socket.write_some_ec.clear();
@@ -10354,14 +10313,8 @@ void up_thread_sorryserver_send_test(){
     test_obj.next_up_function_call();
     BOOST_CHECK(test_obj.up_thread_client_receive_call_check);
 
-    // unit_test [4] up_thread_sorryserver_send debug log check
-    std::cout << "[4] up_thread_sorryserver_send debug log check" << std::endl;
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(35,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-
-    // unit_test [5] up_thread_sorryserver_send send size check
-    std::cout << "[5] up_thread_sorryserver_send send size check" << std::endl;
+    // unit_test [4] up_thread_sorryserver_send send size check
+    std::cout << "[4] up_thread_sorryserver_send send size check" << std::endl;
     send_data.set_send_size(0);
     socket.write_some_res = 0;
     test_obj.set_up_thread_next_function_call_exit();
@@ -10405,8 +10358,8 @@ void up_thread_sorryserver_send_test(){
     
     socket.write_some_res = MAX_BUFFER_SIZE;
         
-    // unit_test [6] up_thread_sorryserver_send socket error (try_again) check
-    std::cout << "[6] up_thread_sorryserver_send socket error (try_again) check" << std::endl;
+    // unit_test [5] up_thread_sorryserver_send socket error (try_again) check
+    std::cout << "[5] up_thread_sorryserver_send socket error (try_again) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::try_again;
@@ -10416,8 +10369,8 @@ void up_thread_sorryserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_sorryserver_send_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [7] up_thread_sorryserver_send socket error (eof) check
-    std::cout << "[7] up_thread_sorryserver_send socket error (eof) check" << std::endl;
+    // unit_test [6] up_thread_sorryserver_send socket error (eof) check
+    std::cout << "[6] up_thread_sorryserver_send socket error (eof) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::eof;
@@ -10427,8 +10380,8 @@ void up_thread_sorryserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [8] up_thread_sorryserver_send socket error (connection_reset) check
-    std::cout << "[8] up_thread_sorryserver_send socket error (connection_reset) check" << std::endl;
+    // unit_test [7] up_thread_sorryserver_send socket error (connection_reset) check
+    std::cout << "[7] up_thread_sorryserver_send socket error (connection_reset) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::connection_reset;
@@ -10438,8 +10391,8 @@ void up_thread_sorryserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [9] up_thread_sorryserver_send socket error (bad_descriptor) check
-    std::cout << "[9] up_thread_sorryserver_send socket error (bad_descriptor) check" << std::endl;
+    // unit_test [8] up_thread_sorryserver_send socket error (bad_descriptor) check
+    std::cout << "[8] up_thread_sorryserver_send socket error (bad_descriptor) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_up_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::bad_descriptor;
@@ -10454,8 +10407,8 @@ void up_thread_sorryserver_send_test(){
     BOOST_CHECK(test_obj.up_thread_sorryserver_disconnect_call_check);
     socket.write_some_ec.clear();
     
-    // unit_test [10] up_thread_sorryserver_send not fond function error check
-    std::cout << "[10] up_thread_sorryserver_send not fond function error check" << std::endl;
+    // unit_test [9] up_thread_sorryserver_send not fond function error check
+    std::cout << "[9] up_thread_sorryserver_send not fond function error check" << std::endl;
     send_data.set_send_size(0);
     test_obj.up_thread_function_array_clear();
     test_obj.up_thread_exit_call_check = false;
@@ -10467,8 +10420,8 @@ void up_thread_sorryserver_send_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.up_thread_exit_call_check);
     
-    // unit_test [11] up_thread_sorryserver_send returnd illegal EVENT_TAG error check
-    std::cout << "[11] up_thread_sorryserver_send returnd illegal EVENT_TAG error check" << std::endl;
+    // unit_test [10] up_thread_sorryserver_send returnd illegal EVENT_TAG error check
+    std::cout << "[10] up_thread_sorryserver_send returnd illegal EVENT_TAG error check" << std::endl;
     send_data.set_size(MAX_BUFFER_SIZE);
     send_data.set_send_size(0);
     test_obj.up_thread_module_event_map_clear();
@@ -10597,14 +10550,8 @@ void down_thread_client_send_test(){
     test_obj.next_down_function_call();
     BOOST_CHECK(test_obj.down_thread_realserver_receive_call_check);
 
-    // unit_test [4] down_thread_client_send send debug log check
-    std::cout << "[4] down_thread_client_send  send debug log check" << std::endl;
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogDebug_category);
-    BOOST_CHECK_EQUAL(45,l7vs::Logger::putLogDebug_id);
-    std::cout << l7vs::Logger::putLogDebug_message << std::endl;
-    
-    // unit_test [5] down_thread_client_send send size check
-    std::cout << "[5] down_thread_client_send send size check" << std::endl;
+    // unit_test [4] down_thread_client_send send size check
+    std::cout << "[4] down_thread_client_send send size check" << std::endl;
     send_data.set_send_size(0);
     socket.write_some_res = 0;
     test_obj.set_down_thread_next_function_call_exit();
@@ -10648,8 +10595,8 @@ void down_thread_client_send_test(){
     
     socket.write_some_res = MAX_BUFFER_SIZE;
         
-    // unit_test [6] down_thread_client_send socket error (try_again) check
-    std::cout << "[6] down_thread_client_send socket error (try_again) check" << std::endl;
+    // unit_test [5] down_thread_client_send socket error (try_again) check
+    std::cout << "[5] down_thread_client_send socket error (try_again) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_down_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::try_again;
@@ -10659,8 +10606,8 @@ void down_thread_client_send_test(){
     BOOST_CHECK(test_obj.down_thread_client_send_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [7] down_thread_client_send socket error (eof) check
-    std::cout << "[7] down_thread_client_send socket error (eof) check" << std::endl;
+    // unit_test [6] down_thread_client_send socket error (eof) check
+    std::cout << "[6] down_thread_client_send socket error (eof) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_down_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::eof;
@@ -10670,8 +10617,8 @@ void down_thread_client_send_test(){
     BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [8] down_thread_client_send socket error (connection_reset) check
-    std::cout << "[8] down_thread_client_send socket error (connection_reset) check" << std::endl;
+    // unit_test [7] down_thread_client_send socket error (connection_reset) check
+    std::cout << "[7] down_thread_client_send socket error (connection_reset) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_down_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::connection_reset;
@@ -10681,8 +10628,8 @@ void down_thread_client_send_test(){
     BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
     socket.read_some_ec.clear();
     
-    // unit_test [9] down_thread_client_send socket error (bad_descriptor) check
-    std::cout << "[9] down_thread_client_send socket error (bad_descriptor) check" << std::endl;
+    // unit_test [8] down_thread_client_send socket error (bad_descriptor) check
+    std::cout << "[8] down_thread_client_send socket error (bad_descriptor) check" << std::endl;
     send_data.set_send_size(0);
     test_obj.set_down_thread_next_function_call_exit();
     socket.write_some_ec = boost::asio::error::bad_descriptor;
@@ -10697,8 +10644,8 @@ void down_thread_client_send_test(){
     BOOST_CHECK(test_obj.down_thread_client_disconnect_call_check);
     socket.write_some_ec.clear();
     
-    // unit_test [10] down_thread_client_send not fond function error check
-    std::cout << "[10] down_thread_client_send not fond function error check" << std::endl;
+    // unit_test [9] down_thread_client_send not fond function error check
+    std::cout << "[9] down_thread_client_send not fond function error check" << std::endl;
     send_data.set_send_size(0);
     test_obj.down_thread_function_array_clear();
     test_obj.down_thread_exit_call_check = false;
@@ -10710,8 +10657,8 @@ void down_thread_client_send_test(){
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     BOOST_CHECK(test_obj.down_thread_exit_call_check);
     
-    // unit_test [11] down_thread_client_send returnd illegal EVENT_TAG error check
-    std::cout << "[11] down_thread_client_send returnd illegal EVENT_TAG error check" << std::endl;
+    // unit_test [10] down_thread_client_send returnd illegal EVENT_TAG error check
+    std::cout << "[10] down_thread_client_send returnd illegal EVENT_TAG error check" << std::endl;
     send_data.set_send_size(0);
     test_obj.down_thread_module_event_map_clear();
     test_obj.down_thread_exit_call_check = false;
