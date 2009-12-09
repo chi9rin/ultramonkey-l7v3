@@ -9115,6 +9115,9 @@ class receive_send_test_class : public l7vs::tcp_session{
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
         };
+        l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+            return client_ssl_socket;
+        };
         socket_element& get_sorryserver_socket(){
             return sorryserver_socket;
         };
