@@ -8015,7 +8015,7 @@ void down_thread_client_disconnect_test(){
     
 
     // ----SSL Mode Test
-    down_thread_client_disconnect ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    down_thread_client_disconnect_test_class ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     l7vs::tcp_ssl_socket& client_ssl_socket = ssl_test_obj.get_client_ssl_socket();
     client_ssl_socket.close_res = true;
