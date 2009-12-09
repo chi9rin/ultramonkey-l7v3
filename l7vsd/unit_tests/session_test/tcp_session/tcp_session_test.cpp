@@ -9267,6 +9267,7 @@ void up_thread_client_receive_test(){
     BOOST_MESSAGE( "----- up_thread_client_receive test end -----" );
 
     l7vs::virtualservice_tcp vs;
+    l7vs::virtualservice_tcp ssl_vs;
     boost::asio::io_service io;
     l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
@@ -9294,7 +9295,8 @@ void up_thread_client_receive_test(){
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_client_receive
     receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
-//    receive_send_test_class test_ssl_mode_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    //----ssl mode
+    receive_send_test_class test_ssl_mode_obj(ssl_vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
@@ -9319,6 +9321,10 @@ void up_thread_client_receive_test(){
         sleep(1);
     }
     
+    //-----ssl mode
+    l7vs::tcp_ssl_socket& ssl_socket = test_ssl_mode_obj.get_client_ssl_socket();
+
+
     boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
     socket.get_socket().connect(connect_end,ec);
     BOOST_CHECK(!ec);
@@ -9366,6 +9372,8 @@ void up_thread_client_receive_test(){
     l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
     l7vs::Logger::putLogDebug_id = 0;
 
+   // ----ssl
+   
     
     test_obj.test_call_client_receive();
     
@@ -12167,11 +12175,11 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 
-//NG    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
-    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
 //NG    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
