@@ -9369,9 +9369,6 @@ void up_thread_client_receive_test(){
     l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
     l7vs::Logger::putLogDebug_id = 0;
 
-   // ----ssl
-   
-    
     test_obj.test_call_client_receive();
     
     // unit_test [1] up_thread_client_receive client_socket read_some call check
@@ -9519,6 +9516,7 @@ void up_thread_client_receive_test(){
 
     //----ssl mode test
     receive_send_test_class test_ssl_mode_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    test_ssl_mode_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     l7vs::tcp_ssl_socket& ssl_socket = test_ssl_mode_obj.get_client_ssl_socket();
     l7vs::tcp_data& up_thread_data_ssl_client_side = test_ssl_mode_obj.get_up_thread_data_client_side();
 
@@ -9530,9 +9528,11 @@ void up_thread_client_receive_test(){
     test_ssl_mode_obj.up_thread_client_disconnect_call_check = false;
     test_ssl_mode_obj.up_thread_exit_call_check = false;
     test_ssl_mode_obj.up_thread_client_receive_call_check = false;
+
     // vs set
     vs.get_wait_upstream_res = 0;
     vs.update_up_recv_size_in = 0;
+
     // socket set
     ssl_socket.read_some_res = MAX_BUFFER_SIZE;
     ssl_socket.read_some_ec.clear();
@@ -9546,7 +9546,7 @@ void up_thread_client_receive_test(){
     }
     ssl_socket.read_some_buffers_size_in = 0;
     ssl_socket.read_some_call_check = false;
-/*
+
     // protocol module set
     proto_test.handle_client_recv_res_tag = l7vs::protocol_module_base::REALSERVER_SELECT;
     proto_test.handle_client_recv_in_thread_id = boost::thread::id();
@@ -9558,17 +9558,15 @@ void up_thread_client_receive_test(){
     l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
     l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
     l7vs::Logger::putLogDebug_id = 0;
-*/
-    
+
     test_ssl_mode_obj.test_call_client_receive();
     
-    // unit_test [1] up_thread_client_receive ssl mode client_ssl_socket read_some call check
-    std::cout << "[1] up_thread_client_receive ssl mode client_ssl_socket read_some call check" << std::endl;
+    // unit_test [14] up_thread_client_receive ssl mode client_ssl_socket read_some call check
+    std::cout << "[14] up_thread_client_receive ssl mode client_ssl_socket read_some call check" << std::endl;
     BOOST_CHECK(ssl_socket.read_some_call_check);
-    BOOST_CHECK(ssl_socket.read_some_buffers_out == up_thread_data_client_side.get_data());
+    BOOST_CHECK(ssl_socket.read_some_buffers_out == up_thread_data_ssl_client_side.get_data());
     BOOST_CHECK(ssl_socket.read_some_buffers_size_in == MAX_BUFFER_SIZE);
-    BOOST_CHECK(ssl_socket.read_some_res == up_thread_data_client_side.get_size());
-
+    BOOST_CHECK(ssl_socket.read_some_res == up_thread_data_ssl_client_side.get_size());
 
     BOOST_MESSAGE( "----- up_thread_client_receive test end -----" );
 }
