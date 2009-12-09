@@ -9546,6 +9546,7 @@ void up_thread_client_receive_test(){
     }
     ssl_socket.read_some_buffers_size_in = 0;
     ssl_socket.read_some_call_check = false;
+/*
     // protocol module set
     proto_test.handle_client_recv_res_tag = l7vs::protocol_module_base::REALSERVER_SELECT;
     proto_test.handle_client_recv_in_thread_id = boost::thread::id();
@@ -9557,7 +9558,7 @@ void up_thread_client_receive_test(){
     l7vs::Logger::test_loglevel = l7vs::LOG_LV_DEBUG;
     l7vs::Logger::putLogDebug_category = l7vs::LOG_CAT_NONE;
     l7vs::Logger::putLogDebug_id = 0;
-
+*/
     
     test_ssl_mode_obj.test_call_client_receive();
     
