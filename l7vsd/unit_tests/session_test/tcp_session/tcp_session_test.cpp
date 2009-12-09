@@ -4819,7 +4819,7 @@ void up_thread_realserver_disconnect_event_test(){
     //std::string access_log_file_name = "test";
     l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
 
-    up_thread_sorryserver_get_detination_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    up_thread_realserver_disconnect_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
 
 
