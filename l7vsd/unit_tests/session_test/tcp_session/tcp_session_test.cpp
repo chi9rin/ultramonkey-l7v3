@@ -10553,7 +10553,6 @@ void down_thread_client_send_test(){
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_sorryserver_send
-//    receive_send_test_class test_obj(vs,io);
     receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
@@ -10758,6 +10757,49 @@ void down_thread_client_send_test(){
     test_server.breq_close_wait_flag = false;    
     test_server.bstop_flag = true;
     server_thread.join();
+
+    // SSL mode Test
+
+    receive_send_test_class ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    ssl_test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
+
+    l7vs::tcp_data& ssl_send_data = ssl_test_obj.get_down_thread_data_client_side();
+    
+    // get client socket
+    l7vs::tcp_ssl_socket& ssl_socket = ssl_test_obj.get_client_ssl_socket();
+
+    // tcp_session set
+    ssl_send_data.initialize();
+    ssl_send_data.set_size(MAX_BUFFER_SIZE);
+    ssl_test_obj.set_up_thread_id(boost::thread::id());
+    ssl_test_obj.set_down_thread_id(proc_id);
+    ssl_test_obj.down_thread_realserver_receive_call_check = false;
+    ssl_test_obj.down_thread_client_disconnect_call_check = false;
+    ssl_test_obj.down_thread_exit_call_check = false;
+    ssl_test_obj.down_thread_client_connection_chk_event_call_check = false;
+    
+    // vs set
+    vs.update_down_send_size_in = 0;
+    // protocol module set
+    proto_test.handle_client_send_res_tag = l7vs::protocol_module_base::REALSERVER_RECV;
+    proto_test.handle_client_send_in_thread_id = boost::thread::id();
+    
+    ssl_socket.write_some_res = MAX_BUFFER_SIZE;
+    ssl_socket.write_some_ec.clear();
+    ssl_socket.write_some_buffers_in = NULL;
+    ssl_socket.write_some_buffers_size_in = 0;
+    ssl_socket.write_some_call_check = false;
+
+    ssl_test_obj.test_call_client_send();
+    
+    // unit_test [11] down_thread_client_send ssl mode socket write_some call check
+    std::cout << "[11] down_thread_client_send ssl mode socket write_some call check" << std::endl;
+    BOOST_CHECK(ssl_socket.write_some_call_check);
+    BOOST_CHECK(ssl_socket.write_some_buffers_in == (void*)&(ssl_send_data.get_data()));
+    BOOST_CHECK(ssl_socket.write_some_buffers_size_in == MAX_BUFFER_SIZE);
+    BOOST_CHECK(ssl_socket.write_some_res == ssl_send_data.get_send_size());
+
 
     BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
 }
