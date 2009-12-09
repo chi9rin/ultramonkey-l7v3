@@ -5005,7 +5005,7 @@ class down_thread_realserver_disconnect_event_test_class : public module_event_m
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -5427,7 +5427,7 @@ class up_thread_sorryserver_mod_disconnect_test_class : public module_event_map_
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -5909,7 +5909,7 @@ class down_thread_sorryserver_disconnect_event_test_class : public module_event_
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -6234,7 +6234,28 @@ class up_thread_sorry_disable_event_test_class : public module_event_map_test_ba
     public:
         up_thread_sorry_disable_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
         };
+       up_thread_sorry_disable_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
         
+
+
+
         ~up_thread_sorry_disable_event_test_class(){};
         
         void test_call(){
@@ -6247,11 +6268,34 @@ void up_thread_sorry_disable_event_test(){
     BOOST_MESSAGE( "----- up_thread_sorry_disable_event test start -----" );
     
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    up_thread_sorry_disable_event_test_class test_obj(vs,io);
-    
+    l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+//    up_thread_sorry_disable_event_test_class test_obj(vs,io);
+    up_thread_sorry_disable_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -6368,7 +6412,7 @@ class down_thread_sorry_enable_event_test_class : public module_event_map_test_b
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -6516,8 +6560,27 @@ void down_thread_sorry_enable_event_test(){
 // dwon_thread_sorry_disable_event test class
 class down_thread_sorry_disable_event_test_class : public module_event_map_test_base_class{
     public:
-        down_thread_sorry_disable_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        down_thread_sorry_disable_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       down_thread_sorry_disable_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         
         ~down_thread_sorry_disable_event_test_class(){};
         
@@ -6531,11 +6594,33 @@ void down_thread_sorry_disable_event_test(){
     BOOST_MESSAGE( "----- down_thread_sorry_disable_event test start -----" );
     
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    down_thread_sorry_disable_event_test_class test_obj(vs,io);
-    
+    l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+//    down_thread_sorry_disable_event_test_class test_obj(vs,io);
+    down_thread_sorry_disable_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -6634,8 +6719,27 @@ void down_thread_sorry_disable_event_test(){
 // up_thread_client_accept_event test class
 class up_thread_client_accept_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_client_accept_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        up_thread_client_accept_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_client_accept_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         
         ~up_thread_client_accept_event_test_class(){};
         
@@ -6647,12 +6751,33 @@ class up_thread_client_accept_event_test_class : public module_event_map_test_ba
 void up_thread_client_accept_event_test(){
     
     BOOST_MESSAGE( "----- up_thread_client_accept_event test start -----" );
-    
+
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    up_thread_client_accept_event_test_class test_obj(vs,io);
+    l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+//    up_thread_client_accept_event_test_class test_obj(vs,io);
+    up_thread_client_accept_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
@@ -6889,7 +7014,7 @@ class up_thread_client_respond_event_test_class : public module_event_map_test_b
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -7058,7 +7183,7 @@ class down_thread_client_respond_event_test_class : public module_event_map_test
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -8244,7 +8369,7 @@ class up_thread_realserver_connect_event_test_class : public module_event_map_te
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -8391,7 +8516,7 @@ class up_thread_sorryserver_connect_event_test_class : public module_event_map_t
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -8537,7 +8662,7 @@ class down_thread_client_connection_chk_event_test_class : public module_event_m
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -8674,7 +8799,7 @@ class up_thread_realserver_connection_fail_event_test_class : public module_even
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
@@ -8809,7 +8934,7 @@ class up_thread_sorryserver_connection_fail_event_test_class : public module_eve
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
-                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                l7vs::logger_implement_access* set_access_logger) : module_event_map_test_base_class(   vs,
                                                                                                    session_io,
                                                                                                    set_socket_option,
                                                                                                    listen_endpoint,
