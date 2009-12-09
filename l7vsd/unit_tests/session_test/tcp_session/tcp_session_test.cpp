@@ -9261,12 +9261,11 @@ class receive_send_test_class : public l7vs::tcp_session{
             down_thread_module_event_map.clear();
         };
 };
-/*
+
 // up_thread_client_receive test
 void up_thread_client_receive_test(){
     BOOST_MESSAGE( "----- up_thread_client_receive test end -----" );
-//    boost::asio::io_service io;
-//    l7vs::virtualservice_tcp vs;
+
     l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
     l7vs::tcp_socket_option_info set_option;
@@ -9294,17 +9293,14 @@ void up_thread_client_receive_test(){
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_client_receive
-//    receive_send_test_class test_obj(vs,io);
     receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+//    receive_send_test_class test_ssl_mode_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
-    
-    
+
     l7vs::tcp_data& up_thread_data_client_side = test_obj.get_up_thread_data_client_side();
-//    l7vs::tcp_data& up_thread_data_dest_side = test_obj.get_up_thread_data_dest_side();
-//    l7vs::tcp_data& down_thread_data_client_side = test_obj.get_up_thread_data_client_side();
-//    l7vs::tcp_data& down_thread_data_dest_side = test_obj.get_up_thread_data_dest_side();
+    
     
     // get client socket
     l7vs::tcp_socket& socket = test_obj.get_client_socket();
@@ -9343,9 +9339,7 @@ void up_thread_client_receive_test(){
     test_obj.up_thread_exit_call_check = false;
     test_obj.up_thread_client_receive_call_check = false;
     // vs set
-//    vs.get_qos_upstream_res = 104857600;
-//    vs.get_throughput_upstream_res = 0;
-     vs.get_wait_upstream_res = 0;
+    vs.get_wait_upstream_res = 0;
     vs.update_up_recv_size_in = 0;
     // socket set
     socket.read_some_res = MAX_BUFFER_SIZE;
@@ -9519,7 +9513,7 @@ void up_thread_client_receive_test(){
     
     BOOST_MESSAGE( "----- up_thread_client_receive test end -----" );
 }
-*/
+
 
 // down_thread_realserver_receive test
 void down_thread_realserver_receive_test(){
