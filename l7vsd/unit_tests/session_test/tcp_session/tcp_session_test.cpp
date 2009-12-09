@@ -39,8 +39,8 @@ class mutex_lock_test : public l7vs::tcp_session{
                                 l7vs::virtualservice_tcp& vs,
                                 boost::asio::io_service& session_io,
                                 l7vs::tcp_socket_option_info& set_socket_option,
-				boost::asio::ip::tcp::endpoint listen_endpoint,
-				bool ssl_mode,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
                                 boost::asio::ssl::context& set_ssl_context,
                                 bool set_ssl_cache_flag,
                                 int set_ssl_handshake_time_out,
@@ -56,14 +56,14 @@ class mutex_lock_test : public l7vs::tcp_session{
 
             pTest_mutex = NULL;
         };
-        
+
         ~mutex_lock_test(){
         };
-        
+
         void test(){
             test_func();
         };
-        
+ 
         void mutex_lock(){
             if(pTest_mutex == NULL){
                 std::cout << "Test code Error!! pTest_mutex = NULL" << std::endl;
@@ -71,7 +71,7 @@ class mutex_lock_test : public l7vs::tcp_session{
                 pTest_mutex->wrlock();
             }
         };
-        
+ 
         void mutex_unlock(){
             if(pTest_mutex == NULL){
                 std::cout << "Test code Error!! pTest_mutex = NULL" << std::endl;
@@ -84,24 +84,24 @@ class mutex_lock_test : public l7vs::tcp_session{
             protocol_module = test_protocol_module;
         };
 
-        
+
 /*        bool mutex_trylock(){
             return pTest_mutex->try_lock();
         };*/
-        
+
         boost::mutex test_thread_wait;
-        
+ 
         void test_run(){
             boost::mutex::scoped_lock scope_lock(test_thread_wait);
             test();
         };
-        
+
         //-------------is_thread_wait test---------------------------------
         void set_is_thread_wait_test(){
             pTest_mutex = &thread_state_update_mutex;
             test_func = boost::bind(&mutex_lock_test::down_thread_exit,this);
         };
-        
+
         void is_thread_wait(){
             befor_thread_id = boost::this_thread::get_id();
             l7vs::tcp_session::is_thread_wait();
@@ -1996,7 +1996,27 @@ void constructer_test(){
 // initialize test class
 class initialize_test_class : public l7vs::tcp_session{
     public:
-        initialize_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+//        initialize_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       initialize_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
         ~initialize_test_class(){};
         bool& get_exit_flag(){
             return exit_flag;
@@ -2036,9 +2056,35 @@ class initialize_test_class : public l7vs::tcp_session{
 void initialize_test(){
     BOOST_MESSAGE( "----- initialize test start -----" );
     
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    initialize_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    initialize_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    initialize_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
@@ -2827,7 +2873,25 @@ void set_virtual_service_message_test(){
 // up_thread_run test class
 class up_thread_run_test_class : public l7vs::tcp_session{
     public:
-        up_thread_run_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        up_thread_run_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+       up_thread_run_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){
             test_end = false;
             test_wait = true;
         };
@@ -2921,13 +2985,36 @@ void up_thread_run_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     boost::system::error_code ec;
-    
+ 
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
-    
-    up_thread_run_test_class test_obj(vs,io);
+//    up_thread_run_test_class test_obj(vs,io);
+    up_thread_run_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     bool& exit_flag = test_obj.get_exit_flag();
     bool& session_pause_flag = test_obj.get_session_pause_flag();
@@ -3245,13 +3332,32 @@ void up_thread_run_test(){
     BOOST_MESSAGE( "----- up_thread_run test end -----" );
     
 }
+*/
 
-
+/*
 // down_thread_run
 // down_thread_run test class
 class down_thread_run_test_class : public l7vs::tcp_session{
     public:
-        down_thread_run_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        down_thread_run_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+       down_thread_run_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){
             test_end = false;
             test_wait = true;
         };
@@ -3373,13 +3479,36 @@ void down_thread_run_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     boost::system::error_code ec;
-    
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
-    
-    down_thread_run_test_class test_obj(vs,io);    
+//    down_thread_run_test_class test_obj(vs,io);
+    down_thread_run_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     bool& exit_flag = test_obj.get_exit_flag();
     bool& session_pause_flag = test_obj.get_session_pause_flag();
@@ -3524,6 +3653,7 @@ void down_thread_run_test(){
     
 }
 */
+
 // thread_state_update test
 // thread_state_update test class
 class thread_state_update_test_class : public l7vs::tcp_session{
@@ -3751,13 +3881,31 @@ void thread_state_update_test(){
     
 }
 
-/*
+
 
 // up_thread_exit test
 // up_thread_exit test class
 class up_thread_exit_test_class : public l7vs::tcp_session{
     public:
-        up_thread_exit_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+//        up_thread_exit_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       up_thread_exit_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
         ~up_thread_exit_test_class(){};
         bool& get_exit_flag(){
             return exit_flag;
@@ -3770,14 +3918,38 @@ void up_thread_exit_test(){
     
     BOOST_MESSAGE( "----- up_thread_exit test start -----" );
     
-    boost::asio::io_service io;
-    
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_exit_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
     
+    up_thread_exit_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     // unit_test [1] up_thread_exit update exit_flag
     std::cout << "[1] up_thread_exit update exit_flag" << std::endl;
     
-    up_thread_exit_test_class test_obj(vs,io);
     
     bool& ref_exit_flag = test_obj.get_exit_flag();
     
@@ -3788,7 +3960,9 @@ void up_thread_exit_test(){
     BOOST_CHECK(ref_exit_flag);
     
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_lock_obj.set_up_thread_exit_test();
     
     
@@ -3837,7 +4011,26 @@ void up_thread_exit_test(){
 // down_thread_exit test class
 class down_thread_exit_test_class : public l7vs::tcp_session{
     public:
-        down_thread_exit_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+//        down_thread_exit_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
+       down_thread_exit_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~down_thread_exit_test_class(){};
         bool& get_exit_flag(){
             return exit_flag;
@@ -3850,14 +4043,38 @@ void down_thread_exit_test(){
     
     BOOST_MESSAGE( "----- down_thread_exit test start -----" );
     
-    boost::asio::io_service io;
-    
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    down_thread_exit_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    
-    // unit_test [1] down_thread_exit update exit_flag
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    down_thread_exit_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+ 
+   // unit_test [1] down_thread_exit update exit_flag
     std::cout << "[1] down_thread_exit update exit_flag" << std::endl;
     
-    down_thread_exit_test_class test_obj(vs,io);
     
     bool& ref_exit_flag = test_obj.get_exit_flag();
     
@@ -3868,7 +4085,8 @@ void down_thread_exit_test(){
     BOOST_CHECK(ref_exit_flag);
     
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_lock_obj.set_down_thread_exit_test();
     
     
@@ -3915,13 +4133,32 @@ void down_thread_exit_test(){
     BOOST_MESSAGE( "----- down_thread_exit test end -----" );
 }
 
+
 // up_thread_client_disconnect_event test
 // up_thread_client_disconnect_event test class
 class up_thread_client_disconnect_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_client_disconnect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
-        
+//        up_thread_client_disconnect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_client_disconnect_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_client_disconnect_event_test_class(){};
         
         void test_call(){
@@ -3933,12 +4170,35 @@ void up_thread_client_disconnect_event_test(){
     
     BOOST_MESSAGE( "----- up_thread_client_disconnect_event test start -----" );
     
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;    
+//    up_thread_client_disconnect_event_test_class test_obj(vs,io);
+    l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    up_thread_client_disconnect_event_test_class test_obj(vs,io);
-    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_client_disconnect_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -4000,7 +4260,9 @@ void up_thread_client_disconnect_event_test(){
     BOOST_CHECK_EQUAL(28,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_lock_obj.set_up_thread_client_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     
@@ -4043,9 +4305,27 @@ void up_thread_client_disconnect_event_test(){
 // dwon_thread_client_disconnetc_event test class
 class down_thread_client_disconnect_event_test_class : public module_event_map_test_base_class{
     public:
-        down_thread_client_disconnect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
-        
+//        down_thread_client_disconnect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       down_thread_client_disconnect_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~down_thread_client_disconnect_event_test_class(){};
         
         void test_call(){
@@ -4057,17 +4337,40 @@ void down_thread_client_disconnect_event_test(){
     
     BOOST_MESSAGE( "----- down_thread_client_disconnect_event test start -----" );
     
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    down_thread_client_disconnect_event_test_class test_obj(vs,io);
+    l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    down_thread_client_disconnect_event_test_class test_obj(vs,io);
-    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    down_thread_client_disconnect_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
-    
+
     l7vs::protocol_module_base::EVENT_TAG chek_event[7];
     chek_event[0] = l7vs::protocol_module_base::CLIENT_DISCONNECT;
     chek_event[1] = l7vs::protocol_module_base::CLIENT_CONNECTION_CHECK;
@@ -4118,7 +4421,9 @@ void down_thread_client_disconnect_event_test(){
     BOOST_CHECK_EQUAL(86,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_lock_obj.set_down_thread_client_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);    
     
@@ -4160,8 +4465,27 @@ void down_thread_client_disconnect_event_test(){
 // up_thread_realserver_get_detination_event test class
 class up_thread_realserver_get_detination_event_test_class : public l7vs::tcp_session{
     public:
-        up_thread_realserver_get_detination_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_realserver_get_detination_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_realserver_get_detination_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_realserver_get_detination_event_test_class(){};
         
         void test_call(){
@@ -4201,9 +4525,36 @@ class up_thread_realserver_get_detination_event_test_class : public l7vs::tcp_se
 void up_thread_realserver_get_detination_event_test(){
     BOOST_MESSAGE( "----- up_thread_realserver_get_detination_event test start -----" );
     
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_realserver_get_detination_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_realserver_get_detination_event_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_realserver_get_detination_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
@@ -4258,8 +4609,27 @@ void up_thread_realserver_get_detination_event_test(){
 // up_thread_sorryserver_get_detination_event test class
 class up_thread_sorryserver_get_detination_event_test_class : public l7vs::tcp_session{
     public:
-        up_thread_sorryserver_get_detination_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_sorryserver_get_detination_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_sorryserver_get_detination_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_sorryserver_get_detination_event_test_class(){};
         
         void test_call(){
@@ -4299,9 +4669,35 @@ class up_thread_sorryserver_get_detination_event_test_class : public l7vs::tcp_s
 void up_thread_sorryserver_get_detination_event_test(){
     BOOST_MESSAGE( "----- up_thread_sorryserver_get_detination_event test start -----" );
     
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_sorryserver_get_detination_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_sorryserver_get_detination_event_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_sorryserver_get_detination_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
@@ -5978,13 +6374,34 @@ void up_thread_client_accept_event_test(){
     BOOST_MESSAGE( "----- up_thread_client_accept_event test end -----" );
     
 }
+*/
 
 // up_thread_client_respond test
 // up_thread_client_respond test class
 class up_thread_client_respond_test_class : public l7vs::tcp_session{
     public:
-        up_thread_client_respond_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_client_respond_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_client_respond_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
         ~up_thread_client_respond_test_class(){};
         
         void test_call(){
@@ -6025,9 +6442,37 @@ class up_thread_client_respond_test_class : public l7vs::tcp_session{
 };
 void up_thread_client_respond_test(){
     BOOST_MESSAGE( "----- up_thread_client_respond test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_client_respond_test_class test_obj(vs,io);
+
     l7vs::virtualservice_tcp vs;
-    up_thread_client_respond_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_client_respond_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        up_thread_message_que    = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        down_thread_message_que    = test_obj.get_down_thread_message_que();
@@ -6084,13 +6529,33 @@ void up_thread_client_respond_test(){
     BOOST_MESSAGE( "----- up_thread_client_respond test end -----" );
 }
 
+
 // up_thread_client_respond_event test
 // up_thread_client_respond_event test class
 class up_thread_client_respond_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_client_respond_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
-        
+//        up_thread_client_respond_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_client_respond_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
         ~up_thread_client_respond_event_test_class(){};
         
         void test_call(){
@@ -6101,13 +6566,37 @@ class up_thread_client_respond_event_test_class : public module_event_map_test_b
 void up_thread_client_respond_event_test(){
     
     BOOST_MESSAGE( "----- up_thread_client_respond_event test start -----" );
-    
+
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_client_respond_event_test_class test_obj(vs,io);
+    l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    up_thread_client_respond_event_test_class test_obj(vs,io);
-    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_client_respond_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -6141,7 +6630,7 @@ void up_thread_client_respond_event_test(){
     boost::thread::id def_id;
     boost::thread::id proc_id = boost::this_thread::get_id();
     test_obj.set_up_thread_id(proc_id);
-    proto_test.handle_response_send_inform_thread_id = def_id;    
+    proto_test.handle_response_send_inform_thread_id = def_id;
     proto_test.handle_response_send_inform_res_tag = l7vs::protocol_module_base::FINALIZE;
     BOOST_CHECK(proto_test.handle_response_send_inform_thread_id != proc_id);
     test_obj.test_call();
@@ -6207,12 +6696,33 @@ void up_thread_client_respond_event_test(){
     BOOST_MESSAGE( "----- up_thread_client_respond_event test end -----" );
     
 }
+
+
 // down_thread_client_respond_event test
 // dwon_thread_client_respond_event test class
 class down_thread_client_respond_event_test_class : public module_event_map_test_base_class{
     public:
-        down_thread_client_respond_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        down_thread_client_respond_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       down_thread_client_respond_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         
         ~down_thread_client_respond_event_test_class(){};
         
@@ -6225,11 +6735,35 @@ void down_thread_client_respond_event_test(){
     
     BOOST_MESSAGE( "----- down_thread_client_respond_event test start -----" );
     
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;    
+//    down_thread_client_respond_event_test_class test_obj(vs,io);
+    l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
-    
-    l7vs::virtualservice_tcp vs;    
-    
-    down_thread_client_respond_event_test_class test_obj(vs,io);
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    down_thread_client_respond_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
@@ -6324,13 +6858,32 @@ void down_thread_client_respond_event_test(){
     BOOST_MESSAGE( "----- down_thread_client_respond_event test end -----" );
 }
 
-
+/*
 // up_thread_all_socket_close test
 // up_thread_all_socket_close test class
 class up_thread_all_socket_close_test_class : public l7vs::tcp_session{
     public:
-        up_thread_all_socket_close_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_all_socket_close_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_all_socket_close_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_all_socket_close_test_class(){};
         
         void test_call(){
@@ -6355,9 +6908,36 @@ class up_thread_all_socket_close_test_class : public l7vs::tcp_session{
 };
 void up_thread_all_socket_close_test(){
     BOOST_MESSAGE( "----- up_thread_all_socket_close test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_all_socket_close_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_all_socket_close_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_all_socket_close_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     l7vs::tcp_socket& client_socket = test_obj.get_client_socket();
     client_socket.close_call_check = false;
     l7vs::tcp_socket& sorry_socket = *(test_obj.get_sorry_socket());
@@ -6443,12 +7023,36 @@ void up_thread_all_socket_close_test(){
     
     BOOST_MESSAGE( "----- up_thread_all_socket_close test end -----" );
 }
+
+*/
+
+
+/*
 // down_thread_all_socket_close test
 // down_thread_all_socket_close test class
 class down_thread_all_socket_close_test_class : public l7vs::tcp_session{
     public:
-        down_thread_all_socket_close_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        down_thread_all_socket_close_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       down_thread_all_socket_close_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~down_thread_all_socket_close_test_class(){};
         
         void test_call(){
@@ -6469,9 +7073,37 @@ class down_thread_all_socket_close_test_class : public l7vs::tcp_session{
 };
 void down_thread_all_socket_close_test(){
     BOOST_MESSAGE( "----- down_thread_all_socket_close test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    down_thread_all_socket_close_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    down_thread_all_socket_close_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    down_thread_all_socket_close_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
+
     l7vs::tcp_socket& client_socket = test_obj.get_client_socket();
     client_socket.close_call_check = false;
     l7vs::tcp_socket& sorry_socket = *(test_obj.get_sorry_socket());
@@ -6549,13 +7181,33 @@ void down_thread_all_socket_close_test(){
     
     BOOST_MESSAGE( "----- down_thread_all_socket_close test end -----" );
 }
-
+*/
+/*
 // up_thread_client_disconnect test
 // up_thread_client_disconnect test class
 class up_thread_client_disconnect : public l7vs::tcp_session{
     public:
-        up_thread_client_disconnect(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_client_disconnect(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_client_disconnect(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_client_disconnect(){};
         
         void test_call(){
@@ -6601,9 +7253,35 @@ class up_thread_client_disconnect : public l7vs::tcp_session{
 };
 void up_thread_client_disconnect_test(){
     BOOST_MESSAGE( "----- up_thread_client_disconnect test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_client_disconnect test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_client_disconnect test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_client_disconnect test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        up_thread_message_que    = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        down_thread_message_que    = test_obj.get_down_thread_message_que();
@@ -6675,12 +7353,34 @@ void up_thread_client_disconnect_test(){
     
     BOOST_MESSAGE( "----- up_thread_client_disconnect test end -----" );
 }
+*/
+
+/*
 // down_thread_client_disconnect test
 // down_thread_client_disconnect test class
 class down_thread_client_disconnect_test_class : public l7vs::tcp_session{
     public:
-        down_thread_client_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        down_thread_client_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       down_thread_client_disconnect_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~down_thread_client_disconnect_test_class(){};
         
         void test_call(){
@@ -6726,10 +7426,35 @@ class down_thread_client_disconnect_test_class : public l7vs::tcp_session{
 };
 void down_thread_client_disconnect_test(){
     BOOST_MESSAGE( "----- down_thread_client_disconnect test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    down_thread_client_disconnect_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    down_thread_client_disconnect_test_class test_obj(vs,io);
-    
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    down_thread_client_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        up_thread_message_que    = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        down_thread_message_que    = test_obj.get_down_thread_message_que();
     
@@ -6800,13 +7525,34 @@ void down_thread_client_disconnect_test(){
     
     BOOST_MESSAGE( "----- down_thread_client_disconnect test end -----" );
 }
+*/
+
 
 // up_thread_sorryserver_disconnect test
 // up_thread_sorryserver_disconnect test class
 class up_thread_sorryserver_disconnect_test_class : public l7vs::tcp_session{
     public:
-        up_thread_sorryserver_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_sorryserver_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_sorryserver_disconnect_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_sorryserver_disconnect_test_class(){};
         
         void test_call(){
@@ -6854,9 +7600,36 @@ class up_thread_sorryserver_disconnect_test_class : public l7vs::tcp_session{
 };
 void up_thread_sorryserver_disconnect_test(){
     BOOST_MESSAGE( "----- up_thread_sorryserver_disconnect test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_sorryserver_disconnect_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_sorryserver_disconnect_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_sorryserver_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        up_thread_message_que    = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>&        down_thread_message_que    = test_obj.get_down_thread_message_que();
@@ -6932,12 +7705,33 @@ void up_thread_sorryserver_disconnect_test(){
     
     BOOST_MESSAGE( "----- up_thread_sorryserver_disconnect test end -----" );
 }
+
+
 // down_thread_sorryserver_disconnect test
 // down_thread_sorryserver_disconnect test class
 class down_thread_sorryserver_disconnect_test_class : public l7vs::tcp_session{
     public:
-        down_thread_sorryserver_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        down_thread_sorryserver_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       down_thread_sorryserver_disconnect_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~down_thread_sorryserver_disconnect_test_class(){};
         
         void test_call(){
@@ -6985,10 +7779,35 @@ class down_thread_sorryserver_disconnect_test_class : public l7vs::tcp_session{
 };
 void down_thread_sorryserver_disconnect_test(){
     BOOST_MESSAGE( "----- down_thread_sorryserver_disconnect test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    down_thread_sorryserver_disconnect_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    down_thread_sorryserver_disconnect_test_class test_obj(vs,io);
-    
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    get_client_socket_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     l7vs::lockfree_queue<l7vs::tcp_thread_message>& up_thread_message_que = test_obj.get_up_thread_message_que();
     l7vs::lockfree_queue<l7vs::tcp_thread_message>& down_thread_message_que = test_obj.get_down_thread_message_que();
     
@@ -7068,8 +7887,27 @@ void down_thread_sorryserver_disconnect_test(){
 // up_thread_realserver_connect_event test class
 class up_thread_realserver_connect_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_realserver_connect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        up_thread_realserver_connect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_realserver_connect_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_realserver_connect_event_test_class(){};
         
         void test_call(){
@@ -7079,9 +7917,35 @@ class up_thread_realserver_connect_event_test_class : public module_event_map_te
 };
 void up_thread_realserver_connect_event_test(){
     BOOST_MESSAGE( "----- up_thread_realserver_connect_event test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_realserver_connect_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_realserver_connect_event_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    get_client_socket_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
@@ -7170,8 +8034,27 @@ void up_thread_realserver_connect_event_test(){
 // up_thread_sorryserver_connect_event test class
 class up_thread_sorryserver_connect_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_sorryserver_connect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        up_thread_sorryserver_connect_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_sorryserver_connect_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_sorryserver_connect_event_test_class(){};
         
         void test_call(){
@@ -7181,10 +8064,36 @@ class up_thread_sorryserver_connect_event_test_class : public module_event_map_t
 };
 void up_thread_sorryserver_connect_event_test(){
     BOOST_MESSAGE( "----- up_thread_sorryserver_connect_event test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_sorryserver_connect_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_sorryserver_connect_event_test_class test_obj(vs,io);
-    
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_sorryserver_connect_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -7271,8 +8180,27 @@ void up_thread_sorryserver_connect_event_test(){
 // down_thread_client_connection_chk_event test class
 class down_thread_client_connection_chk_event_test_class : public module_event_map_test_base_class{
     public:
-        down_thread_client_connection_chk_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        down_thread_client_connection_chk_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       down_thread_client_connection_chk_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~down_thread_client_connection_chk_event_test_class(){};
         
         void test_call(){
@@ -7282,10 +8210,36 @@ class down_thread_client_connection_chk_event_test_class : public module_event_m
 };
 void down_thread_client_connection_chk_event_test(){
     BOOST_MESSAGE( "----- down_thread_client_connection_chk_event test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    down_thread_client_connection_chk_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    down_thread_client_connection_chk_event_test_class test_obj(vs,io);
-    
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    down_thread_client_connection_chk_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -7363,8 +8317,27 @@ void down_thread_client_connection_chk_event_test(){
 // up_thread_realserver_connection_fail_event test class
 class up_thread_realserver_connection_fail_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_realserver_connection_fail_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        up_thread_realserver_connection_fail_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_realserver_connection_fail_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_realserver_connection_fail_event_test_class(){};
         
         void test_call(){
@@ -7374,9 +8347,36 @@ class up_thread_realserver_connection_fail_event_test_class : public module_even
 };
 void up_thread_realserver_connection_fail_event_test(){
     BOOST_MESSAGE( "----- up_thread_realserver_connection_fail_event test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_realserver_connection_fail_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_realserver_connection_fail_event_test_class test_obj(vs,io);
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_realserver_connection_fail_event_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
@@ -7452,8 +8452,27 @@ void up_thread_realserver_connection_fail_event_test(){
 // up_thread_sorryserver_connection_fail_event test class
 class up_thread_sorryserver_connection_fail_event_test_class : public module_event_map_test_base_class{
     public:
-        up_thread_sorryserver_connection_fail_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
-        };
+//        up_thread_sorryserver_connection_fail_event_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : module_event_map_test_base_class(vs,session_io){
+//        };
+       up_thread_sorryserver_connection_fail_event_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_sorryserver_connection_fail_event_test_class(){};
         
         void test_call(){
@@ -7463,10 +8482,36 @@ class up_thread_sorryserver_connection_fail_event_test_class : public module_eve
 };
 void up_thread_sorryserver_connection_fail_event_test(){
     BOOST_MESSAGE( "----- up_thread_sorryserver_connection_fail_event test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
+//    up_thread_sorryserver_connection_fail_event_test_class test_obj(vs,io);
     l7vs::virtualservice_tcp vs;
-    up_thread_sorryserver_connection_fail_event_test_class test_obj(vs,io);
-    
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    get_client_socket_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
@@ -7540,8 +8585,27 @@ void up_thread_sorryserver_connection_fail_event_test(){
 // receive & send test class
 class receive_send_test_class : public l7vs::tcp_session{
     public:
-        receive_send_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        receive_send_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       receive_send_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~receive_send_test_class(){};
         
         void test_call_client_receive(){
@@ -7726,16 +8790,42 @@ class receive_send_test_class : public l7vs::tcp_session{
             down_thread_module_event_map.clear();
         };
 };
-
+/*
 // up_thread_client_receive test
 void up_thread_client_receive_test(){
     BOOST_MESSAGE( "----- up_thread_client_receive test end -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_client_receive
-    receive_send_test_class test_obj(vs,io);
+//    receive_send_test_class test_obj(vs,io);
+    receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -7972,15 +9062,43 @@ void up_thread_client_receive_test(){
     
     BOOST_MESSAGE( "----- up_thread_client_receive test end -----" );
 }
+*/
 
 // down_thread_realserver_receive test
 void down_thread_realserver_receive_test(){
     BOOST_MESSAGE( "----- down_thread_realserver_receive test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
-    receive_send_test_class test_obj(vs,io);
+//    receive_send_test_class test_obj(vs,io);
+    receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -8236,11 +9354,37 @@ void down_thread_realserver_receive_test(){
 // down_thread_sorryserver_receive test
 void down_thread_sorryserver_receive_test(){
     BOOST_MESSAGE( "----- down_thread_sorryserver_receive test start -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
-    receive_send_test_class test_obj(vs,io);
+//    receive_send_test_class test_obj(vs,io);
+    receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -8419,12 +9563,38 @@ void down_thread_sorryserver_receive_test(){
 // up_thread_realserver_send test
 void up_thread_realserver_send_test(){
     BOOST_MESSAGE( "----- up_thread_realserver_send test end -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_realserver_send
-    receive_send_test_class test_obj(vs,io);
+//    receive_send_test_class test_obj(vs,io);
+    receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -8626,12 +9796,38 @@ void up_thread_realserver_send_test(){
 // up_thread_sorryserver_send test
 void up_thread_sorryserver_send_test(){
     BOOST_MESSAGE( "----- up_thread_sorryserver_send test end -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_sorryserver_send
-    receive_send_test_class test_obj(vs,io);
+//    receive_send_test_class test_obj(vs,io);
+    receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -8816,16 +10012,42 @@ void up_thread_sorryserver_send_test(){
     
     BOOST_MESSAGE( "----- up_thread_sorryserver_send test end -----" );
 }
-
+/*
 // down_thread_client_send test
 void down_thread_client_send_test(){
     BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
-    boost::asio::io_service io;
+//    boost::asio::io_service io;
+//    l7vs::virtualservice_tcp vs;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_sorryserver_send
-    receive_send_test_class test_obj(vs,io);
+//    receive_send_test_class test_obj(vs,io);
+    receive_send_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -9037,13 +10259,33 @@ void down_thread_client_send_test(){
 
     BOOST_MESSAGE( "----- down_thread_client_send test end -----" );
 }
+*/
 
 //up_thread_realserver_connect test
 //up_thread_realserver_connect test class 
 class up_thread_realserver_connect_test_class : public l7vs::tcp_session{
     public:
-        up_thread_realserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){
-        };
+//        up_thread_realserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){
+//        };
+       up_thread_realserver_connect_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_realserver_connect_test_class(){};
         
         void test_call(){
@@ -9155,6 +10397,8 @@ void up_thread_realserver_connect_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     
@@ -9171,10 +10415,19 @@ void up_thread_realserver_connect_test(){
     set_option.quickack_opt = true;
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = true;
+
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
     
-    // up_thread_sorryserver_send
 //    up_thread_realserver_connect_test_class test_obj(vs,io);
-    up_thread_realserver_connect_test_class test_obj(vs,io,set_option);
+//    up_thread_realserver_connect_test_class test_obj(vs,io,set_option);
+    up_thread_realserver_connect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -9343,8 +10596,27 @@ void up_thread_realserver_connect_test(){
 //up_thread_sorryserver_connect test class 
 class up_thread_sorryserver_connect_test_class : public l7vs::tcp_session{
     public:
-        up_thread_sorryserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        up_thread_sorryserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       up_thread_sorryserver_connect_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~up_thread_sorryserver_connect_test_class(){};
         
         void test_call(){
@@ -9457,10 +10729,35 @@ void up_thread_sorryserver_connect_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
     // up_thread_sorryserver_send
-    up_thread_sorryserver_connect_test_class test_obj(vs,io);
+//    up_thread_sorryserver_connect_test_class test_obj(vs,io);
+    up_thread_sorryserver_connect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -9543,8 +10840,27 @@ void up_thread_sorryserver_connect_test(){
 //realserver_disconnect test class 
 class realserver_disconnect_test_class : public l7vs::tcp_session{
     public:
-        realserver_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
-        };
+//        realserver_disconnect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){
+//        };
+       realserver_disconnect_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
         ~realserver_disconnect_test_class(){};
         
         
@@ -9701,9 +11017,33 @@ void up_thread_realserver_disconnect_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
-    realserver_disconnect_test_class test_obj(vs,io);
+//    realserver_disconnect_test_class test_obj(vs,io);
+    realserver_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -9827,9 +11167,33 @@ void down_thread_realserver_disconnect_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
-    realserver_disconnect_test_class test_obj(vs,io);
+//    realserver_disconnect_test_class test_obj(vs,io);
+    realserver_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -9960,9 +11324,32 @@ void up_thread_all_realserver_disconnect_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
-    realserver_disconnect_test_class test_obj(vs,io);
+//    realserver_disconnect_test_class test_obj(vs,io);
+    realserver_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -10141,9 +11528,32 @@ void down_thread_all_realserver_disconnect_test(){
     
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
-    realserver_disconnect_test_class test_obj(vs,io);
+//    realserver_disconnect_test_class test_obj(vs,io);
+    realserver_disconnect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     boost::thread::id proc_id = boost::this_thread::get_id();
     
@@ -10315,7 +11725,7 @@ void down_thread_all_realserver_disconnect_test(){
     
     BOOST_MESSAGE( "----- down_thread_all_realserver_disconnect test end -----" );
 }
-*/
+
 
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
@@ -10330,8 +11740,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
 //NG    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
-    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
-//NG    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
+//    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
 
