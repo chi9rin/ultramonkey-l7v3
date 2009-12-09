@@ -4948,7 +4948,9 @@ void up_thread_realserver_disconnect_event_test(){
     BOOST_CHECK_EQUAL(45,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
     
-    mutex_lock_test test_lock_obj(vs,io);
+//    mutex_lock_test test_lock_obj(vs,io);
+    mutex_lock_test test_lock_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
     test_lock_obj.set_up_thread_realserver_disconnect_event_test();
     test_lock_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);    
     
