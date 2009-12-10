@@ -879,10 +879,10 @@ namespace l7vs{
 
 
         //! handshake socket
-        //! @param[in]        handshake_type is handshaking as a server or client
+        //! @param[out]        err code object
         //! @return         true is handshaked
         //! @return         false is handshake failure
-        bool handshake(boost::asio::ssl::stream_base::handshake_type type){
+        bool handshake(boost::system::error_code&){
 		return true;
         }
     };
