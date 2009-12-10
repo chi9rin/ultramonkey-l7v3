@@ -72,23 +72,23 @@
 //! SSL method default
 #define DEFAULT_SSL_METHOD        boost::asio::ssl::context::sslv23    //! SSLv23_method
 //! SSL context default
-#define DEFAULT_CA_DIR            "/etc/l7vs/sslproxy/"
-#define DEFAULT_CERT_CHAIN_DIR        "/etc/l7vs/sslproxy/"
-#define DEFAULT_PRIVATE_KEY_DIR        "/etc/l7vs/sslproxy/"
-#define DEFAULT_PRIVATE_KEY_FILETYPE    boost::asio::ssl::context::pem        //! SSL_FILETYPE_PEM
-#define DEFAULT_PRIVATE_KEY_PASSWD_DIR    "/etc/l7vs/sslproxy/"
-#define DEFAULT_VERIFY_OPTIONS        (SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
-#define DEFAULT_VERIFY_CERT_DEPTH    9
+#define DEFAULT_SSL_CA_DIR            "/etc/l7vs/sslproxy/"
+#define DEFAULT_SSL_CERT_CHAIN_DIR        "/etc/l7vs/sslproxy/"
+#define DEFAULT_SSL_PRIVATE_KEY_DIR        "/etc/l7vs/sslproxy/"
+#define DEFAULT_SSL_PRIVATE_KEY_FILETYPE    boost::asio::ssl::context::pem        //! SSL_FILETYPE_PEM
+#define DEFAULT_SSL_PRIVATE_KEY_PASSWD_DIR    "/etc/l7vs/sslproxy/"
+#define DEFAULT_SSL_VERIFY_OPTIONS       SSL_VERIFY_NONE 
+#define DEFAULT_SSL_VERIFY_CERT_DEPTH    9
 #define DEFAULT_SSL_OPTIONS        (SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_SINGLE_DH_USE)
-#define DEFAULT_TMP_DH_DIR        "/etc/l7vs/sslproxy/"
-#define DEFAULT_CIPHER_LIST        "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
-#define MAX_PASSWD_SIZE            256
+#define DEFAULT_SSL_TMP_DH_DIR        "/etc/l7vs/sslproxy/"
+#define DEFAULT_SSL_CIPHER_LIST        "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
+#define MAX_SSL_PASSWD_SIZE            256
 //! SSL session cache default
-#define DEFAULT_SESSION_CACHE_MODE    (SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR)    //! "on"
-#define DEFAULT_SESSION_CACHE_SIZE    SSL_SESSION_CACHE_MAX_SIZE_DEFAULT    //! 20480
-#define DEFAULT_SESSION_CACHE_TIMEOUT    300
+#define DEFAULT_SSL_SESSION_CACHE_MODE    (SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR)    //! "on"
+#define DEFAULT_SSL_SESSION_CACHE_SIZE    SSL_SESSION_CACHE_MAX_SIZE_DEFAULT    //! 20480
+#define DEFAULT_SSL_SESSION_CACHE_TIMEOUT    300
 //! SSL handshake timeout default
-#define DEFAULT_HANDSHAKE_TIMEOUT    30
+#define DEFAULT_SSL_HANDSHAKE_TIMEOUT    30
 
 namespace l7vs{
 
@@ -197,6 +197,9 @@ protected:
 
     AUUL                        wait_count_up;                    //! upstream recv wait count
     AUUL                        wait_count_down;                //! downstream recv wait count
+
+    // protocol module option string
+    std::string                 protocol_module_for_indication_options;
 
     void                        load_parameter( l7vs::error_code& );
 
@@ -323,6 +326,8 @@ public:
                                 session_queue_type;
     typedef    lockfree_hashmap< tcp_session, session_thread_control >
                                 session_map_type;
+    typedef    std::map< std::string, std::string >
+                                accesslog_argument_map_type;
 protected:
     boost::asio::ip::tcp::acceptor
                                 acceptor_;
@@ -337,8 +342,8 @@ protected:
     tcp_socket_option_info                set_sock_opt;        //! socket option for tcp_session class
 
     // SSL flag
-    bool                        ssl_vs_flag;
-    std::string                    ssl_conf_filename;
+    bool                           ssl_virtualservice_mode_flag;
+    std::string                    ssl_file_name;
     // SSL context
     boost::asio::ssl::context            sslcontext;
     // SSL context parameter
@@ -365,9 +370,12 @@ protected:
     long                        session_cache_timeout;
     // SSL handshake timer parameter
     int                        handshake_timeout;
+    std::string                        access_log_file_name;
+    accesslog_argument_map_type        access_log_rotate_arguments;
+    bool                               access_log_flag;
     // SSL functions
     std::string                    get_ssl_password();
-    int                        conv_verify_option(std::string);
+    int                         conv_verify_option(std::string);
     long int                    conv_ssl_option(std::string);
     bool                        get_ssl_parameter();
     bool                        set_ssl_config();
@@ -403,7 +411,7 @@ public:
     void                        connection_inactive( const tcp_endpoint_type& );
     void                        release_session( const tcp_session* session_ptr );
     
-    protocol_module_base::check_message_result parse_socket_option(std::vector<std::string>& args);
+    void                        set_socket_option();
 
     // SSL functions
     void                        flush_ssl_session();
