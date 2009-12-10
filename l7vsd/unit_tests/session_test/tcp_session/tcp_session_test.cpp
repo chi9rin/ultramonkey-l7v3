@@ -12292,66 +12292,70 @@ void down_thread_all_realserver_disconnect_test(){
 
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
-
+/*
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 
-//    ts->add( BOOST_TEST_CASE( &constructer_test ) );
+    ts->add( BOOST_TEST_CASE( &constructer_test ) );
+*/
 //NG    ts->add( BOOST_TEST_CASE( &initialize_test ) );
-//    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
-//    ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
-//    ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
-//    ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
+/*
+    ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
+    ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
+    ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
+    ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
+*/
 //NG    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
 //NG    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
-//    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
+/*
+    ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
 
     ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_event_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_event_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_client_connection_chk_event_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_event_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_event_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_connection_chk_event_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 
-//    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_all_realserver_disconnect_test) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_all_realserver_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_all_realserver_disconnect_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_all_realserver_disconnect_test) );
 
-//    ts->add( BOOST_TEST_CASE( &up_thread_exit_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_exit_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_mod_disconnect_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_mod_disconnect_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_exit_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_exit_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_event_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_event_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_event_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_disconnect_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_mod_disconnect_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_mod_disconnect_test ) );
 
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorry_enable_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
-//    ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
-    
+    ts->add( BOOST_TEST_CASE( &up_thread_sorry_enable_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
+    ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
+*/    
     framework::master_test_suite().add( ts );
 
     return NULL;
