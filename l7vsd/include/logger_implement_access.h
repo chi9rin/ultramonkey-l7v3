@@ -1,5 +1,28 @@
-#ifndef	LOGGER_IMPL_ACCESS_H
-#define	LOGGER_IMPL_ACCESS_H
+/*!
+ * @file  logger_implement_access.h
+ * @brief logger module implementation class For access log.
+ *
+ * L7VSD: Linux Virtual Server for Layer7 Load Balancing
+ * Copyright (C) 2009  NTT COMWARE Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *      
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **********************************************************************/
+#ifndef	LOGGER_IMPLEMENT_ACCESS_H
+#define	LOGGER_IMPLEMENT_ACCESS_H
 
 #include <sstream>
 #include <map>
@@ -25,7 +48,7 @@
 
 namespace log4cxx
 {
-	typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
+    typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
 }
 
 namespace l7vs{
@@ -38,20 +61,20 @@ public:
     logger_implement_access(const std::string &aclogFilename);
     virtual ~logger_implement_access(){};
 
-	//! initialze function
- 	virtual bool init(appender_property& access_log_default_property,const std::map<std::string,std::string>& rotate);
+    //! initialze function
+    virtual bool init(appender_property& access_log_default_property,const std::map<std::string,std::string>& rotate);
 
     /*!
-	 * output info log.
-	 *
-	 * @param   category that logging matter occured
-	 * @param   log message id
-	 * @param   log message
-	 * @param   current file
-	 * @param   current line
-	 * @retrun  void
-	 */
-	virtual inline void putLog(const std::string& vsinfo,
+     * output info log.
+     *
+     * @param   category that logging matter occured
+     * @param   log message id
+     * @param   log message
+     * @param   current file
+     * @param   current line
+     * @retrun  void
+     */
+    virtual inline void putLog(const std::string& vsinfo,
 								const std::string& cl_con_org,
 								const std::string& rs_con_org,
 								const std::string& rs_con_dest,
@@ -79,17 +102,17 @@ public:
 */
 	}
 
-    void	addRef();
+    virtual void    addRef();
 
-    void	releaseRef();
+    virtual void    releaseRef();
 
-    bool	operator<=(const int access_num );
+    virtual bool    operator<=(const int access_num );
 
-    std::string getAcLogFileName(){ return( this->acLogFileName ); }
+    virtual std::string    getAcLogFileName(){ return( this->acLogFileName ); }
 
-    bool checkRotateParameterComp(accesslog_rotate_map_type &rotatedata);
+    virtual bool    checkRotateParameterComp(accesslog_rotate_map_type &rotatedata);
     
-    bool is_rotate_default_flag();
+    virtual bool    is_rotate_default_flag();
     
 protected:
 
@@ -108,11 +131,11 @@ protected:
     
     bool rotate_default_flag;
     
-    bool setAcLoggerConf(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate);
+    virtual bool setAcLoggerConf(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate);
 
 };
 
 };
 
-#endif //	LOGGER_IMPL_ACCESS_H
+#endif //    LOGGER_IMPLEMENT_ACCESS_H	
 
