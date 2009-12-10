@@ -43,24 +43,6 @@ namespace l7vs{
 //! @brief    this class is tcp session object use socket.
     class tcp_ssl_socket : private boost::noncopyable{
         public:
-/*
-            //! construcor
-            //! @param[in/out]    socket use io service object
-            //! @param[in]        set socket option info 
-            tcp_ssl_socket(boost::asio::io_service& io,
-                       boost::asio::ssl::context& context)
-                       :
-                       my_socket(io, context),
-                       open_flag(false)
-            {
-                opt_info.nodelay_opt = false;
-                opt_info.cork_opt = false;
-                opt_info.quickack_opt = false;
-                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
-                }
-            }
-*/
             //! construcor
             //! @param[in/out]    socket use io service object
             //! @param[in]        set socket option info 

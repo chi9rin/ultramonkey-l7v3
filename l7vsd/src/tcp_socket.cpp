@@ -29,8 +29,8 @@
 namespace l7vs{
 
     //! connect socket
-    //! @param[in]        connect_endpoint is connection endpoint
-    //! @param[out]        ec is reference error code object
+    //! @param[in]      connect_endpoint is connection endpoint
+    //! @param[out]     ec is reference error code object
     //! @return         true is connect
     //! @return         false is connect failure 
     bool tcp_socket::connect(boost::asio::ip::tcp::endpoint connect_endpoint,
@@ -223,9 +223,6 @@ namespace l7vs{
                     int val = opt_info.quickack_val;
                     size_t len = sizeof(val);
                     boost::asio::detail::socket_ops::setsockopt(my_socket.native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
-                    if (unlikely(!open_flag)) {
-                        ec.clear();
-                    }
                     if(unlikely(ec)){
                         //ERROR
                         std::stringstream buf;
@@ -238,13 +235,6 @@ namespace l7vs{
                 }
                 boost::this_thread::yield();
                 res_size = my_socket.read_some(buffers,ec);
-                if(unlikely(ec)){
-                    if (unlikely(!open_flag)) {
-                        res_size = 0;
-                        ec.clear();
-                    }
-                }
-
             }
         return res_size;
     }

@@ -41,57 +41,9 @@ namespace l7vs{
         rw_scoped_lock scope_lock(close_mutex);
 
         bool bres = false;
-        bool retryed = false;
-        boost::system::error_code ec;
-        while (true) {
-            my_socket.handshake(type, ec);
-            if (ec) {
-                if (ec == boost::asio::error::try_again) {
-                    if (!retryed) {
-                        retryed = true;
-                        // retry handshake (try_again[Resource temporarily unavailable])
-                        //----Debug log----------------------------------------------------------------------
-                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                            std::stringstream buf;
-                            buf << "Thread ID[";
-                            buf << boost::this_thread::get_id();
-                            buf << "] tcp_ssl_socket::handshake : retry handshake";
-                            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 75, buf.str(), __FILE__, __LINE__);
-                        }
-                        //----Debug log----------------------------------------------------------------------
-                    }
-                } else {
-                    // handshake NG
-                    //ERROR
-                    Logger::putLogError(LOG_CAT_L7VSD_SESSION, 114, "ssl socket handshaking failed" , __FILE__, __LINE__);
-                    //----Debug log----------------------------------------------------------------------
-//                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] tcp_ssl_socket::handshake [";
-                        buf << ec.message();
-                        buf << "]";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 76, buf.str(), __FILE__, __LINE__);
-//                    }
-                    //----Debug log----------------------------------------------------------------------
-                    break;
-                }
-            } else {
-                // handshake OK
-                bres = true;
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] tcp_ssl_socket::handshake : handshake OK";
-                    Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 77, buf.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                break;
-            }
-            boost::this_thread::yield();
+        my_socket.handshake(boost::asio::ssl::stream_base::server, ec);
+        if( !ec ){
+            bres = true;
         }
 
         if (unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -230,35 +182,25 @@ namespace l7vs{
 
         rd_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
-            if(unlikely(open_flag)){
-                //set TCP_QUICKACK
-                if(opt_info.quickack_opt){
-                    int val = opt_info.quickack_val;
-                    std::size_t len = sizeof(val);
-                    boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
-                    if (unlikely(!open_flag)) {
-                        ec.clear();
-                    }
-                    if(unlikely(ec)){
-                        //ERROR
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] socket option(TCP_QUICKACK) set failed : ";
-                        buf << ec.message();
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 109, buf.str() , __FILE__, __LINE__ );
-                    }
-                }
-                boost::this_thread::yield();
-                res_size = my_socket.read_some(buffers,ec);
+        if(unlikely(open_flag)){
+            //set TCP_QUICKACK
+            if(opt_info.quickack_opt){
+                int val = opt_info.quickack_val;
+                std::size_t len = sizeof(val);
+                boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
                 if(unlikely(ec)){
-                    if (unlikely(!open_flag)) {
-                        res_size = 0;
-                        ec.clear();
-                    }
+                    //ERROR
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] socket option(TCP_QUICKACK) set failed : ";
+                    buf << ec.message();
+                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 109, buf.str() , __FILE__, __LINE__ );
                 }
-
             }
+            boost::this_thread::yield();
+            res_size = my_socket.read_some(buffers,ec);
+        }
         return res_size;
     }
 
