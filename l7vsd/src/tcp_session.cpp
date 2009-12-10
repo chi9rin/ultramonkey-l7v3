@@ -387,11 +387,10 @@ namespace l7vs{
                     //----Debug log----------------------------------------------------------------------
                     if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                         std::stringstream buf;
-                        std::stringstream buf;
                         buf << "Thread ID[";
                         buf << boost::this_thread::get_id();
                         buf << "] ssl_clear_keep_cache ok";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                        Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 81,
                                     buf.str(),
                                     __FILE__, __LINE__ );
                     }
@@ -411,11 +410,10 @@ namespace l7vs{
                     //----Debug log----------------------------------------------------------------------
                     if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                         std::stringstream buf;
-                        std::stringstream buf;
                         buf << "Thread ID[";
                         buf << boost::this_thread::get_id();
                         buf << "] SSL_clear ok";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                        Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 82,
                                     buf.str(),
                                     __FILE__, __LINE__ );
                     }
