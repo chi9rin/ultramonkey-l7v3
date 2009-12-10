@@ -43,6 +43,7 @@ namespace l7vs{
 //! @brief    this class is tcp session object use socket.
     class tcp_ssl_socket : private boost::noncopyable{
         public:
+/*
             //! construcor
             //! @param[in/out]    socket use io service object
             //! @param[in]        set socket option info 
@@ -59,6 +60,7 @@ namespace l7vs{
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
                 }
             }
+*/
             //! construcor
             //! @param[in/out]    socket use io service object
             //! @param[in]        set socket option info 
@@ -90,13 +92,9 @@ namespace l7vs{
                 return my_socket;
             }
 
-            //! connect socket
-            //! @param[in]        connect_endpoint is connection endpoint
-            //! @param[out]        ec is reference error code object
-            bool connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec);
             //! handshake socket
             //! @param[in]        handshake_type is handshaking as a server or client
-            bool handshake(boost::asio::ssl::stream_base::handshake_type type);
+            bool handshake(boost::system::error_code& ec);
             //! accept
             void accept();
             //! close socket

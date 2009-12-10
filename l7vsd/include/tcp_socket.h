@@ -40,6 +40,7 @@ namespace l7vs{
 //! @brief    this class is tcp session object use socket.
     class tcp_socket : private boost::noncopyable{
         public:
+/*
             //! construcor
             //! @param[in/out]    socket use io service object
             //! @param[in]        set socket option info 
@@ -51,6 +52,7 @@ namespace l7vs{
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, "tcp_socket::tcp_socket", __FILE__, __LINE__ );
                 }
             }
+*/
             //! construcor
             //! @param[in/out]    socket use io service object
             //! @param[in]        set socket option info 

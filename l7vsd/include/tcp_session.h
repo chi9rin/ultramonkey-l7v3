@@ -286,16 +286,16 @@ namespace l7vs{
             boost::asio::ssl::context& ssl_context;
             //! ssl session cache flag
             bool ssl_cache_flag;
-            //! handshake timer
+            //! ssl handshake timer
             typedef boost::shared_ptr<boost::asio::deadline_timer>  deadline_timer_ptr_type;
             deadline_timer_ptr_type ssl_handshake_timer;
-            //! handshake timer flag
+            //! ssl handshake timer flag
             bool ssl_handshake_timer_flag;
-            //! handshake timeout
+            //! ssl handshake timeout
             int ssl_handshake_time_out;
-            //! handshake timeout flag
+            //! ssl handshake timeout flag
             bool ssl_handshake_time_out_flag;
-            //! handshake timeout flag mutex
+            //! ssl handshake timeout flag mutex
             wr_mutex ssl_handshake_time_out_flag_mutex;
             //! socket option 
             tcp_socket_option_info socket_opt_info;

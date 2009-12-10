@@ -82,7 +82,7 @@ namespace l7vs{
             }
         }
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 4, "out_function : tcp_socket::connect", __FILE__, __LINE__ );
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 50, "out_function : tcp_socket::connect", __FILE__, __LINE__ );
         }
         return open_flag;
     }
@@ -162,7 +162,7 @@ namespace l7vs{
         my_socket.close(ec);
         
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 7, "out_function : tcp_socket::close", __FILE__, __LINE__ );
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 55, "out_function : tcp_socket::close", __FILE__, __LINE__ );
         }
         return bres;
     }
@@ -178,7 +178,7 @@ namespace l7vs{
         my_socket.io_control(cmd,ec);
         
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 9, "out_function : tcp_socket::set_non_blocking_mode", __FILE__, __LINE__ );
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 59, "out_function : tcp_socket::set_non_blocking_mode", __FILE__, __LINE__ );
         }
         return true;
     }
@@ -203,7 +203,7 @@ namespace l7vs{
         }
 
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 10, "out_function : tcp_socket::write_some", __FILE__, __LINE__ );
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 62, "out_function : tcp_socket::write_some", __FILE__, __LINE__ );
         }
         return res_size;
     }
@@ -214,9 +214,6 @@ namespace l7vs{
     //! @return            read data size
     std::size_t tcp_socket::read_some(boost::asio::mutable_buffers_1 buffers,
         boost::system::error_code& ec){
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "in_function : tcp_socket::read_some", __FILE__, __LINE__ );
-        }
 
         rd_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
@@ -249,9 +246,6 @@ namespace l7vs{
                 }
 
             }
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 11, "out_function : tcp_socket::read_some", __FILE__, __LINE__ );
-        }
         return res_size;
     }
 

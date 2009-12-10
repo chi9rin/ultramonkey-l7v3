@@ -318,6 +318,8 @@ namespace l7vs{
         exit_flag = false;
         up_thread_id = boost::thread::id();
         down_thread_id = boost::thread::id();
+        ssl_handshake_timer_flag = false;
+        ssl_handshake_time_out_flag = false;
         thread_state.reset();
         protocol_module = NULL;
         session_pause_flag = false;
@@ -336,8 +338,7 @@ namespace l7vs{
             else
                 break;
         }
-        protocol_module = parent_service.get_protocol_module();
-        
+
         //load parameter
         l7vs::Parameter        param;
         l7vs::error_code    vs_err;
@@ -356,7 +357,9 @@ namespace l7vs{
         }else{
             Logger::putLogError( LOG_CAT_L7VSD_SESSION, 4, "down buffer param error set default 8192" , __FILE__, __LINE__ );    
         }
-        
+
+        protocol_module = parent_service.get_protocol_module();
+
         if(unlikely( protocol_module == NULL )){
             //Error protocol_module NULL
             std::stringstream buf;
@@ -369,30 +372,56 @@ namespace l7vs{
         }
 
         // Reset SSL structure to allow another connection.
-        if (ssl_flag) {
-            if (ssl_cache_flag) {
-                if (ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0) {
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "ssl_clear_keep_cache failed", __FILE__, __LINE__ );
+        if ( ssl_flag ) {
+            if ( ssl_cache_flag ) {
+                if (unlikely(ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0)) {
+                    //Error ssl_clear_keep_cache
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] ssl_clear_keep_cache failed";
+                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 110, buf.str(), __FILE__, __LINE__ );
+                    msg.flag = true;
+                    msg.message = "ssl_clear_keep_cache failed";
+                } else {
+                    //----Debug log----------------------------------------------------------------------
+                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                        std::stringstream buf;
+                        std::stringstream buf;
+                        buf << "Thread ID[";
+                        buf << boost::this_thread::get_id();
+                        buf << "] ssl_clear_keep_cache ok";
+                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                                    buf.str(),
+                                    __FILE__, __LINE__ );
+                    }
+                    //----Debug log----------------------------------------------------------------------
                 }
-                // do flush cached sessions
-//                parent_service.flush_ssl_session();
             } else {
-                if (SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0) {
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, "SSL_clear failed", __FILE__, __LINE__ );
+                if (unlikely(SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0)) {
+                    //Error SSL_clear
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] SSL_clear failed";
+                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 111, buf.str(), __FILE__, __LINE__ );
+                    msg.flag = true;
+                    msg.message = "SSL_clear failed";
+                }else{
+                    //----Debug log----------------------------------------------------------------------
+                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                        std::stringstream buf;
+                        std::stringstream buf;
+                        buf << "Thread ID[";
+                        buf << boost::this_thread::get_id();
+                        buf << "] SSL_clear ok";
+                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                                    buf.str(),
+                                    __FILE__, __LINE__ );
+                    }
+                    //----Debug log----------------------------------------------------------------------
                 }
             }
-            //----Debug log----------------------------------------------------------------------
-//            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-//                // print ssl session cache information
-//                // Need ssl_context lock?
-//                std::stringstream buf;
-//                buf << "session_result_message tcp_session::initialize() : ";
-//                parent_service.get_ssl_session_cache_info(buf);
-//                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-//                            buf.str(),
-//                            __FILE__, __LINE__ );
-//            }
-            //----Debug log----------------------------------------------------------------------
         }
 
         return msg;
@@ -464,7 +493,7 @@ namespace l7vs{
         /* Check to see if we were changed into a different method, if
          * so, revert back if we are not doing session-id reuse. */
         if (!s->in_handshake && (s->session == NULL) && (s->method != s->ctx->method)) {
-//            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, "In ssl_clear_keep_cache() method changed", __FILE__, __LINE__ );
+//            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 69, "In ssl_clear_keep_cache() method changed", __FILE__, __LINE__ );
             s->method->ssl_free(s);
             s->method=s->ctx->method;
             if (!s->method->ssl_new(s)) {
@@ -543,7 +572,7 @@ namespace l7vs{
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
                     buf << "] set_virtual_service_message message:[ACCESS_LOG_ON]";
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 99, buf.str(), __FILE__, __LINE__ );
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 49, buf.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
                 return;
@@ -558,7 +587,7 @@ namespace l7vs{
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
                     buf << "] set_virtual_service_message message:[ACCESS_LOG_OFF]";
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 99, buf.str(), __FILE__, __LINE__ );
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 68, buf.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
                 return;
@@ -711,7 +740,7 @@ namespace l7vs{
         if (!ssl_flag) {
             client_socket.accept();
         } else {
-         //   client_ssl_socket.accept();
+            client_ssl_socket.accept();
         }
         endpoint cl_end;
         {
@@ -1191,8 +1220,81 @@ namespace l7vs{
     //! up thread accept client side
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type){
-        //仮実装
-        up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_ACCEPT_EVENT];
+
+        UP_THREAD_FUNC_TYPE_TAG func_tag;
+
+        if( ssl_flag ){
+            //SSL Mode
+            rd_scoped_lock scoped_lock(ssl_handshake_time_out_flag_mutex);
+            if( ssl_handshake_time_out_flag ){
+                // SSL handshake time out or timer error
+                func_type = UP_FUNC_CLIENT_DISCONNECT;
+                std::stringstream buf;
+                buf << "Thread ID[";
+                buf << boost::this_thread::get_id();
+                buf << "] handshake timer timeout ";
+                buf << ssl_handshake_time_out;
+                buf << " sec : handshaking not end";
+                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 112, buf.str(), __FILE__, __LINE__ );
+            }else{
+                if( ssl_handshake_timer_flag == false){
+                    // set handshake timer
+                    //regist handshake timer event handler
+                    ssl_handshake_timer.reset(new boost::asio::deadline_timer(io));
+                    ssl_handshake_timer->expires_from_now(boost::posix_time::seconds(ssl_handshake_time_out));
+                    ssl_handshake_timer->async_wait(boost::bind(&tcp_session::handle_ssl_handshake_timer, 
+                                                            this,
+                                                            boost::asio::placeholders::error));
+                    ssl_handshake_timer_flag = true;
+                    //----Debug log----------------------------------------------------------------------
+                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                            std::stringstream buf;
+                            buf << "Thread ID[";
+                            buf << boost::this_thread::get_id();
+                            buf << "] ssl session handshaking start : ";
+                            buf << "set handshake timer [";
+                            buf << handshake_timeout;
+                            buf << "]";
+                            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 70, buf.str(), __FILE__, __LINE__ );
+                    }
+                    //----Debug log----------------------------------------------------------------------
+                }
+                // try ssl handshake
+                boost::system::error_code ec;
+                client_ssl_socket.handshake( ec );
+                
+                if( !ec ){
+                    // handshake ok
+                    ssl_handshake_timer->cancel();
+                    func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
+                }else{
+                    // handshake fail
+                    if(ec == boost::asio::error::try_again){
+                        func_tag = UP_FUNC_CLIENT_ACCEPT;
+                        boost::this_thread::yield();
+                    }else{
+                        //ERROR
+                        ssl_handshake_timer->cancel();
+                        func_tag = UP_FUNC_CLIENT_DISCONNECT;
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 113, "ssl socket handshaking failed" , __FILE__, __LINE__);
+                        //----Debug log----------------------------------------------------------------------
+                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                            std::stringstream buf;
+                            buf << "Thread ID[";
+                            buf << boost::this_thread::get_id();
+                            buf << "] tcp_ssl_socket::handshake [";
+                            buf << ec.message();
+                            buf << "]";
+                            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 71, buf.str(), __FILE__, __LINE__);
+                        }
+                        //----Debug log----------------------------------------------------------------------
+                    }
+                }
+            }
+        }else{
+            func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
+        }
+        up_thread_next_call_function = up_thread_function_array[func_tag];
     }
 
     //! up thread raise module event of handle_accept and do handshake
@@ -1234,7 +1336,7 @@ namespace l7vs{
     void tcp_session::handle_ssl_handshake_timer() {
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "in_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 72, "in_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
 
@@ -1243,7 +1345,7 @@ namespace l7vs{
 
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, "out_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 73, "out_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
     }
