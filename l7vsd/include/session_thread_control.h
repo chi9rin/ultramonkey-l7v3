@@ -173,6 +173,16 @@ public:
     void            session_pause_on(){ session->set_virtual_service_message( tcp_session::SESSION_PAUSE_ON ); }
     void            session_pause_off(){ session->set_virtual_service_message( tcp_session::SESSION_PAUSE_OFF ); }
 
+    void session_accesslog_output_mode_on() { session->set_virtual_service_message( tcp_session::ACCESS_LOG_ON ); }
+    void session_accesslog_output_mode_off() { session->set_virtual_service_message( tcp_session::ACCESS_LOG_OFF ); }
+    void            session_access_log_output_mode_change( int accesslog_flag ){
+        if( accesslog_flag == true )
+            session->set_virtual_service_message( tcp_session::ACCESS_LOG_ON );
+        else if( accesslog_flag == false )
+            session->set_virtual_service_message( tcp_session::ACCESS_LOG_OFF );
+    }
+
+
 };
 
 }//    namespace l7vs
