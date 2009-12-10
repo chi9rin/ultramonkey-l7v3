@@ -36,6 +36,7 @@
 
 #include "utility.h"
 
+#include "logger_implement_access.h"
 
 //static int new_session_cb(SSL *ssl, SSL_SESSION *session);
 //static SSL_SESSION *get_session_cb(SSL *ssl, unsigned char *ssid, int ssid_len, int *ref);
@@ -53,8 +54,8 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd& invsd,
                          virtualservice_base( invsd, inrep, inelement ),
                          acceptor_( dispatcher ),
                          sslcontext(dispatcher, DEFAULT_SSL_METHOD)
-    {
-    }
+{
+}
 /*!
  * virtualservice_tcp class destructor.
  */
@@ -299,7 +300,20 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
     }
 
     tcp_session*    tmp_session    = stc_ptr_noconst->get_session().get();
+
+    if( is_session_cache_use == true ) {
+        long ssl_cache_num = SSL_CTX_sess_number(sslcontext.impl());
+        if ( ssl_cache_num >= session_cache_size ) {
+            flush_ssl_session();
+        }
+    }
+
+//    /* @001 virtualservice_element
+    stc_ptr_noconst->session_access_log_output_mode_change( access_log_flag );
+//    */
+
     active_sessions.insert( tmp_session, stc_ptr_noconst );
+
     //check sorry status
     if( unlikely( 0 < element.sorry_maxconnection ) ){
         if( ( ( active_sessions.size() - sorry_count.get() ) >= static_cast<size_t>( element.sorry_maxconnection ) ) ||
@@ -365,11 +379,11 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
     }
 
     //regist accept event handler
-    if (!ssl_vs_flag) {
+    if (!ssl_virtualservice_mode_flag) {
         acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_socket(),
                     boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
     } else {
-        acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_ssl_socket(),
+        acceptor_.async_accept( stc_ptr_register_accept->get_session()->get_client_ssl_socket().lowest_layer(),
                     boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr_register_accept, boost::asio::placeholders::error ) );
     }
 
@@ -441,6 +455,12 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         return;
     }
 
+    boost::asio::ip::address address_check = element.tcp_accept_endpoint.address();
+    if( likely(address_check.is_v6()) ) {
+        boost::asio::ip::v6_only option(true);
+        acceptor_.set_option(option);
+    }
+
     //read replication data
     read_replicationdata();
 
@@ -482,17 +502,6 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
     protomod->register_schedule( sched_rs_func );
 
     protocol_module_base::check_message_result pm_result;
-    pm_result = parse_socket_option(element.protocol_args);
-    if( !pm_result.flag ){
-        err.setter( true, "Protocol Module argument error." );
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-            boost::format formatter("out_function : void virtualservice_tcp::initialize( "
-                    "l7vs::error_code& err ) : err = %s, err.message = %s");
-            formatter % ( err ? "true" : "false") % err.get_message();
-            Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 115, formatter.str(), __FILE__, __LINE__ );
-        }
-        return;
-    }
     
     pm_result    =    protomod->check_parameter( element.protocol_args );
     if( !pm_result.flag ){
@@ -516,6 +525,9 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         }
         return;
     }
+
+    protomod->get_option_info(protocol_module_for_indication_options);
+    element.protocol_module_for_indication_options = protocol_module_for_indication_options;
 
     //load schedule module    
     schedmod = schedule_module_control::getInstance().load_module( element.schedule_module_name );
@@ -548,9 +560,10 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                     element.udp_recv_endpoint );
 
     // SSL setting
-    ssl_vs_flag = element.ssl_flag;
-    if (ssl_vs_flag) {
-        ssl_conf_filename = element.ssl_conf_filename;
+    ssl_virtualservice_mode_flag = false;
+    ssl_file_name = element.ssl_file_name;
+    if ( ssl_file_name == "" ) {
+        ssl_file_name = element.ssl_file_name;
         // get SSL parameter
         if(unlikely(!get_ssl_parameter())) {
             //Error
@@ -565,7 +578,37 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
             err.setter( true, "set ssl config failed" );
             return;
         }
+        ssl_virtualservice_mode_flag = true;
     }
+
+//    /* @001 virtualservice_element 
+    access_log_flag = false;
+    if ( element.access_log_flag == 1 ) {
+        access_log_flag = true;
+    }
+//    */
+
+//    // @002 getInstance().find_LoggerAccess
+//    /* @002
+    if ( element.access_log_rotate_key_info == "none" ) {
+       //element.access_log_rotate_verbose_info = getInstance().get_rotate_default_verbose_displayed_contents(); 
+    }
+    access_log_file_name = element.access_log_file_name;
+    access_log_rotate_arguments = element.access_log_rotate_arguments;
+        
+    logger_implement_access *logger_access_instance = new logger_implement_access(access_log_file_name);
+
+    if( logger_access_instance == NULL  ) {
+        boost::format formatter("access logger Instance acquisition error:%s");
+        formatter % ( err ? "true" : "false") % err.get_message();
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
+        err.setter( true, "access log class instance create failed" );
+        return;
+    }
+
+//    */
+
+    set_socket_option();
 
     //create session pool
     {
@@ -573,11 +616,13 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
             try{
                 tcp_session*    sess    = new tcp_session(*this,
                                       dispatcher,
-                                      ssl_vs_flag,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
                                       sslcontext,
-                                      handshake_timeout,
                                       is_session_cache_use,
-                                      set_sock_opt);
+                                      handshake_timeout,
+                                      NULL);
                 session_result_message    result    = sess->initialize();
                 if( result.flag == true ){
                     err.setter( result.flag, result.message );
@@ -735,6 +780,8 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
     }
 
     vsd.release_virtual_service( element );
+
+    // @002 getInstance().erase_LoggerAccess
 
     err.setter( false, "" );
 
@@ -912,6 +959,14 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
 
         active_sessions.do_all( boost::bind( &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag ) );
     }
+
+//    /* @001 virtualservice_element
+    if (element.access_log_flag==1 || access_log_flag==false ) {
+        active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
+    } else if ( element.access_log_flag==0 || access_log_flag==true ) {
+        active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
+    }
+//    */
 
     err.setter( false, "" );
 
@@ -1255,11 +1310,11 @@ void    l7vs::virtualservice_tcp::run(){
         //regist accept event handler
         waiting_sessions.insert( stc_ptr->get_session().get(), stc_ptr );
     }
-    if (!ssl_vs_flag) {
+    if (!ssl_virtualservice_mode_flag) {
         acceptor_.async_accept( stc_ptr->get_session()->get_client_socket(),
                         boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
     } else {
-        acceptor_.async_accept( stc_ptr->get_session()->get_client_ssl_socket(),
+        acceptor_.async_accept( stc_ptr->get_session()->get_client_ssl_socket().lowest_layer(),
                         boost::bind( &virtualservice_tcp::handle_accept, this, stc_ptr, boost::asio::placeholders::error ) );
     }
     //regist timer event handler
@@ -1431,14 +1486,12 @@ void    l7vs::virtualservice_tcp::release_session( const tcp_session* session_pt
 }
 
 /*!
- * parse_socket_option
+ * set_socket_option
  *
  * @param   module option
  * @return  void
  */
-l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse_socket_option(std::vector<std::string>& args){
-    
-    l7vs::protocol_module_base::check_message_result result;
+void l7vs::virtualservice_tcp::set_socket_option(){
     
     // socket option check & set
     //! is set option TCP_DEFER_ACCEPT
@@ -1458,272 +1511,57 @@ l7vs::protocol_module_base::check_message_result l7vs::virtualservice_tcp::parse
     set_sock_opt.quickack_opt = false;
         //! TCP_QUICKACK option value (false:off,true:on)
     set_sock_opt.quickack_val = false;
-    
-    result.flag = true;
-    std::vector<std::string>::iterator args_itr = args.begin();
-    bool is_fond = false;
-    
-    while( args_itr != args.end()){
-        
-        if(  *args_itr == "-C" || *args_itr == "--cookie-name" ){
-            args_itr++;
-            // next value
-            if(args_itr != args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-E" || *args_itr == "--cookie-expire" ){
-            args_itr++;
-            // next value
-            if(args_itr != args.end()){
-                args_itr++;
-            }
-//        }else if( *args_itr == "-F" || *args_itr == "--forwarded-for" ){
-//        }else if( *args_itr == "-R" || *args_itr == "--reschedule" ){
-//        }else if( *args_itr == "-N" || *args_itr == "--no-reschedule" ){
-        }else if( *args_itr == "-S" || *args_itr == "--sorry-uri" ){
-            args_itr++;
-            // next value
-            if(args_itr != args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-T" || *args_itr == "--timeout" ){
-            args_itr++;
-            // next value
-            if(args_itr != args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-M" || *args_itr == "--maxlist" ){
-            args_itr++;
-            // next value
-            if(args_itr != args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-O" || *args_itr == "--sockopt" ){
-            if(is_fond){
-                // duplication
-                result.flag = false;
-                result.message =    "'-O/--sock-opt' option value '";
-                result.message +=    *args_itr;
-                result.message +=    "' is not numeric character.";
-                break;
-            }
-            is_fond = true;
-            args_itr = args.erase(args_itr);
-            if(args_itr == args.end()){
-                // not socket opution value
-                result.flag = false;
-                result.message =    "'-O/--sock-opt' option value not socket opution value error.";
-                break;
-            }
-            
-            std::string sock_option_val = *args_itr;
-            args_itr = args.erase(args_itr);
-            
-            unsigned int hed_pos = 0;
-            bool is_fond_da = false;
-            bool is_fond_nd = false;
-            bool is_fond_ck = false;
-            bool is_fond_qa = false;
-            
-            while((hed_pos + 2) < sock_option_val.length()){
-                
-                if(sock_option_val.substr(hed_pos,2) == "da"){
-                    if(is_fond_da){
-                        // da(defer_accept option) duplication error
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value da(defer_accept option) duplication error.";
-                        break;
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_da = true;
-                        
-                        //! is set option TCP_DEFER_ACCEPT
-                        defer_accept_opt = true;
-                        //! TCP_DEFER_ACCEPT option value
-                        defer_accept_val = 1;
-                        
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                result.flag = false;
-                                result.message =    "'-O/--sock-opt' option value '";
-                                result.message +=    *args_itr;
-                                result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value '";
-                        result.message +=    *args_itr;
-                        result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                }else if(sock_option_val.substr(hed_pos,2) == "nd"){
-                    if(is_fond_nd){
-                        // nd(nodelay option) duplication error
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value nd(nodelay option) duplication error.";
-                        break;
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_nd = true;
-                        
-                        //! TCP_NODELAY   (false:not set,true:set option)
-                        set_sock_opt.nodelay_opt = true;
-                        //! TCP_NODELAY option value  (false:off,true:on)
-                        set_sock_opt.nodelay_val = true;
-                        
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                result.flag = false;
-                                result.message =    "'-O/--sock-opt' option value '";
-                                result.message +=    *args_itr;
-                                result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value '";
-                        result.message +=    *args_itr;
-                        result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                }else if(sock_option_val.substr(hed_pos,2) == "ck"){
-                    if(is_fond_ck){
-                        // ck(cork option) duplication error
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value ck(cork option) duplication error.";
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_ck = true;
-                        
-                        //! TCP_CORK      (false:not set,true:set option)
-                        set_sock_opt.cork_opt = true;
-                        //! TCP_CORK option value     (false:off,true:on)
-                        set_sock_opt.cork_val = true;
-                        
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                result.flag = false;
-                                result.message =    "'-O/--sock-opt' option value '";
-                                result.message +=    *args_itr;
-                                result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value '";
-                        result.message +=    *args_itr;
-                        result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                    
-                }else if(sock_option_val.substr(hed_pos,2) == "qa"){
-                    if(is_fond_qa){
-                        // qa(quickack option) duplication error
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value qa(quickack option) duplication error.";
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_qa = true;
-                        
-                        //! TCP_QUICKACK  (false:not set,true:set option)
-                        set_sock_opt.quickack_opt = true;
-                        //! TCP_QUICKACK option value (false:off,true:on)
-                        set_sock_opt.quickack_val = true;
-                        
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                result.flag = false;
-                                result.message =    "'-O/--sock-opt' option value '";
-                                result.message +=    *args_itr;
-                                result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else if(sock_option_val.substr(hed_pos,4) == ":off"){
-                        is_fond_qa = true;
-                        
-                        //! TCP_QUICKACK  (false:not set,true:set option)
-                        set_sock_opt.quickack_opt = true;
-                        //! TCP_QUICKACK option value (false:off,true:on)
-                        set_sock_opt.quickack_val = false;
-                        
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                result.flag = false;
-                                result.message =    "'-O/--sock-opt' option value '";
-                                result.message +=    *args_itr;
-                                result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        result.flag = false;
-                        result.message =    "'-O/--sock-opt' option value '";
-                        result.message +=    *args_itr;
-                        result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                }else{
-                    result.flag = false;
-                    result.message =    "'-O/--sock-opt' option value '";
-                    result.message +=    *args_itr;
-                    result.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                    break;
-                }
-            }
-            if(!result.flag){
-                break;
-            }
-        }else{
-            args_itr++;
+
+//    /* @003 socket option set
+
+    if ( element.socket_option_tcp_deffer_accept != 0 ) {
+        defer_accept_opt = true;
+        if ( element.socket_option_tcp_deffer_accept == 1 ) {
+            defer_accept_val = 1;
         }
     }
-    
+
+    if ( element.socket_option_tcp_nodelay != 0 ) {
+        set_sock_opt.nodelay_opt = true;
+        if ( element.socket_option_tcp_nodelay == 1 ) {
+            set_sock_opt.nodelay_val = true;
+        }
+    }
+
+    if ( element.socket_option_tcp_cork != 0 ) {
+        set_sock_opt.cork_opt = true;
+        if ( element.socket_option_tcp_cork == 1 ) {
+            set_sock_opt.cork_val = true;
+        }
+    }
+
+    if ( element.socket_option_tcp_quickack != 0  ) {
+        
+        set_sock_opt.quickack_opt = true;
+        if ( element.socket_option_tcp_quickack == 1  ) {
+            set_sock_opt.quickack_val = true;
+        }
+    }
+
+//    */    
+   
+
+ 
     //----Debug log----------------------------------------------------------------------
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-        if(result.flag){
-            boost::format formatter("parse_socket_option"
+        boost::format formatter("set_socket_option"
                     " defer_accept_opt[%s] defer_accept_val[%d]"
                     " nodelay_opt[%s] nodelay_val[%s]"
                     " cork_opt[%s] cork_val[%s]"
                     " quickack_opt[%s]" "quickack_val[%s]");
-            formatter %(defer_accept_opt ? "true" : "false") %defer_accept_val 
+        formatter %(defer_accept_opt ? "true" : "false") %defer_accept_val 
                         %(set_sock_opt.nodelay_opt ? "true" : "false") %(set_sock_opt.nodelay_val ? "true" : "false") 
                         %(set_sock_opt.cork_opt ? "true" : "false") %(set_sock_opt.cork_val ? "true" : "false") 
                         %(set_sock_opt.quickack_opt ? "true" : "false") %(set_sock_opt.quickack_val ? "true" : "false");
-            Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 120, formatter.str(), __FILE__, __LINE__ );
-        }else{
-            boost::format formatter("parse_socket_option error %s");
-            formatter %result.message;
-            Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 121, formatter.str(), __FILE__, __LINE__ );
-        }
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 120, formatter.str(), __FILE__, __LINE__ );
     }
     //----Debug log----------------------------------------------------------------------
 
-    return result;
 }
 
 /*!
@@ -1736,14 +1574,14 @@ std::string    l7vs::virtualservice_tcp::get_ssl_password()
     // Get password from file.
     std::string retstr = "";
     FILE  *fp;
-    char buf[MAX_PASSWD_SIZE + 3];
+    char buf[MAX_SSL_PASSWD_SIZE + 3];
     if ((fp = fopen((private_key_passwd_dir + private_key_passwd_file).c_str(), "r")) == NULL) {
         Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password file cannot open.", __FILE__, __LINE__ );
     } else {
-        if (fgets(buf, MAX_PASSWD_SIZE + 3, fp) == NULL) {
+        if (fgets(buf, MAX_SSL_PASSWD_SIZE + 3, fp) == NULL) {
             Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password not found in file.", __FILE__, __LINE__ );
         } else {
-            if (strlen(buf) > MAX_PASSWD_SIZE) {
+            if (strlen(buf) > MAX_SSL_PASSWD_SIZE) {
                 Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password is too long.", __FILE__, __LINE__ );
             } else {
                 buf[strlen(buf) - 1] = '\0';
@@ -1935,7 +1773,7 @@ long int l7vs::virtualservice_tcp::conv_ssl_option(std::string opt_string)
  *
  * @return get ssl parameter result
  */
-bool    l7vs::virtualservice_tcp::get_ssl_parameter()
+bool l7vs::virtualservice_tcp::get_ssl_parameter()
 {
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
@@ -1944,73 +1782,80 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
              __FILE__, __LINE__ );
     }
     /*------ DEBUG LOG END ------*/
-
-    typedef    std::multimap< std::string, std::string > multistring_map_type;
+    typedef std::vector< std::string > string_vector_type;
 
     Parameter param;
-    multistring_map_type msmap;
+    string_vector_type string_vector;
     l7vs::error_code err;
     bool retbool = false;
 
     try {
-        // Read ssl configuration file.
-        if (unlikely(!param.read_specified_file(l7vs::PARAM_COMP_SSL, ssl_conf_filename))) {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                        "SSL config file read error.",
-                        __FILE__, __LINE__ );
+        // param init ( ssl configuration file )
+        if (unlikely(!param.init(l7vs::PARAM_COMP_SSL, ssl_file_name))) {
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                                "SSL config file read error.",
+                                __FILE__, __LINE__ );
             throw -1;
         }
 
         //// SSL context parameter
         // Get parameter "ca_dir".
-        ca_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "ca_dir", msmap, err);
+        ca_dir = param.get_string(l7vs::PARAM_COMP_SSL, "ca_dir", err);
         if (unlikely(err) || ca_dir == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                       "ca_dir parameter not found. Use default value.",
-                       __FILE__, __LINE__ );
-            ca_dir = DEFAULT_CA_DIR;
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                               "ca_dir parameter not found. Use default value.",
+                               __FILE__, __LINE__ );
+            ca_dir = DEFAULT_SSL_CA_DIR;
         }
 
         // Get parameter "ca_file".
-        ca_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "ca_file", msmap, err);
+        ca_file = param.get_string(l7vs::PARAM_COMP_SSL, "ca_file", err);
         if (unlikely(err)) {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get ca_file parameter.",
                         __FILE__, __LINE__ );
             throw -1;
         }
 
         // Get parameter "cert_chain_dir".
-        cert_chain_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "cert_chain_dir", msmap, err);
+        cert_chain_dir = param.get_string(l7vs::PARAM_COMP_SSL,
+                                          "cert_chain_dir",
+                                          err);
         if (unlikely(err) || cert_chain_dir == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "cert_chain_dir parameter not found. Use default value.",
                        __FILE__, __LINE__ );
-            cert_chain_dir = DEFAULT_CERT_CHAIN_DIR;
+            cert_chain_dir = DEFAULT_SSL_CERT_CHAIN_DIR;
         }
 
         // Get parameter "cert_chain_file".
-        cert_chain_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "cert_chain_file", msmap, err);
+        cert_chain_file = param.get_string(l7vs::PARAM_COMP_SSL,
+                                           "cert_chain_file",
+                                           err);
         if (unlikely(err) || cert_chain_file == "") {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get cert_chain_file parameter.",
                         __FILE__, __LINE__ );
             throw -1;
         }
 
         // Get parameter "private_key_dir".
-        private_key_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_dir", msmap, err);
+        private_key_dir = param.get_string(l7vs::PARAM_COMP_SSL,
+                                           "private_key_dir",
+                                           err);
         if (unlikely(err) || private_key_dir == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                       "private_key_dir parameter not found. Use default value.",
-                       __FILE__, __LINE__ );
-            private_key_dir = DEFAULT_PRIVATE_KEY_DIR;
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                    "private_key_dir parameter not found. Use default value.",
+                    __FILE__, __LINE__ );
+            private_key_dir = DEFAULT_SSL_PRIVATE_KEY_DIR;
         }
 
         // Get parameter "private_key_file".
-        private_key_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_file", msmap, err);
+        private_key_file = param.get_string(l7vs::PARAM_COMP_SSL,
+                                            "private_key_file",
+                                            err);
         if (unlikely(err) || private_key_file == "") {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get private_key_file parameter.",
                         __FILE__, __LINE__ );
             throw -1;
@@ -2023,55 +1868,67 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
          * #define SSL_FILETYPE_PEM        X509_FILETYPE_PEM  ->1
          * #define SSL_FILETYPE_ASN1       X509_FILETYPE_ASN1 ->2
          */
-        std::string filetype_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_filetype", msmap, err);
+
+        std::string filetype_str = param.get_string(
+                                       l7vs::PARAM_COMP_SSL,
+                                       "private_key_filetype",
+                                       err);
         if (unlikely(err) || filetype_str == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                       "private_key_filetype parameter not found. Use default value.",
-                       __FILE__, __LINE__ );
-            private_key_filetype = DEFAULT_PRIVATE_KEY_FILETYPE;
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                "private_key_filetype parameter not found. Use default value.",
+                __FILE__, __LINE__ );
+            private_key_filetype = DEFAULT_SSL_PRIVATE_KEY_FILETYPE;
         } else if (filetype_str == "SSL_FILETYPE_PEM") {
             private_key_filetype = boost::asio::ssl::context::pem;
         } else if (filetype_str == "SSL_FILETYPE_ASN1") {
             private_key_filetype = boost::asio::ssl::context::asn1;
         } else {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "private_key_filetype convert error.",
                         __FILE__, __LINE__ );
             throw -1;
         }
 
         // Get parameter "private_key_passwd_dir".
-        private_key_passwd_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_passwd_dir", msmap, err);
+        private_key_passwd_dir = param.get_string(l7vs::PARAM_COMP_SSL,
+                                                  "private_key_passwd_dir",
+                                                  err);
         if (unlikely(err) || private_key_passwd_dir == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                       "private_key_passwd_dir parameter not found. Use default value.",
-                       __FILE__, __LINE__ );
-            private_key_passwd_dir = DEFAULT_PRIVATE_KEY_PASSWD_DIR;
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+              "private_key_passwd_dir parameter not found. Use default value.",
+              __FILE__, __LINE__ );
+            private_key_passwd_dir = DEFAULT_SSL_PRIVATE_KEY_PASSWD_DIR;
         }
 
         // Get parameter "private_key_passwd_file".
-        private_key_passwd_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "private_key_passwd_file", msmap, err);
+        private_key_passwd_file = param.get_string(l7vs::PARAM_COMP_SSL,
+                                                   "private_key_passwd_file",
+                                                   err);
         if (unlikely(err) || private_key_passwd_file == "") {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get private_key_passwd_file parameter.",
                         __FILE__, __LINE__ );
             throw -1;
         }
 
         // Get parameter "verify_options".
-        std::string verify_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "verify_options", msmap, err);
+        param.get_multistring(l7vs::PARAM_COMP_SSL,
+                              "verify_options",
+                              string_vector,
+                              err);
         if (unlikely(err)) {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "verify_options parameter not found. Use default value.",
                        __FILE__, __LINE__ );
-            verify_options = DEFAULT_VERIFY_OPTIONS;
+            verify_options = DEFAULT_SSL_VERIFY_OPTIONS;
         } else {
             // Make verify option bit data.
-            for (multistring_map_type::iterator itr = msmap.begin(); itr != msmap.end(); ++itr) {
+            for (string_vector_type::iterator itr = string_vector.begin();
+                 itr != string_vector.end(); ++itr) {
                 // Convert string to define value.
-                int int_val = conv_verify_option(itr->second);
+                int int_val = conv_verify_option(*itr);
                 if (unlikely(int_val == -1)) {
-                    Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+                    Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                                 "verify_options convert error.",
                                 __FILE__, __LINE__ );
                     throw -1;
@@ -2081,14 +1938,17 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
         }
 
         // Get parameter "verify_cert_depth".
-        verify_cert_depth = param.get_int(l7vs::PARAM_COMP_SSL, "verify_cert_depth", err);
+        verify_cert_depth = param.get_int(l7vs::PARAM_COMP_SSL,
+                                          "verify_cert_depth",
+                                          err);
         if (unlikely(err)) {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                       "verify_cert_depth parameter not found. Use default value.",
-                       __FILE__, __LINE__ );
-            verify_cert_depth = DEFAULT_VERIFY_CERT_DEPTH;
-        } else if (unlikely(verify_cert_depth < 0 || verify_cert_depth > INT_MAX)) {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                "verify_cert_depth parameter not found. Use default value.",
+                __FILE__, __LINE__ );
+            verify_cert_depth = DEFAULT_SSL_VERIFY_CERT_DEPTH;
+        } else if (unlikely(verify_cert_depth < 0 ||
+                   verify_cert_depth > INT_MAX)) {
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Invalid verify_cert_depth parameter value.",
                         __FILE__, __LINE__ );
             throw -1;
@@ -2097,20 +1957,24 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "ssl_options".
         // and Check dh parameter file use or not.
         is_tmp_dh_use = false;
-        std::string option_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "ssl_options", msmap, err);
+        param.get_multistring(l7vs::PARAM_COMP_SSL,
+                              "ssl_options",
+                              string_vector,
+                              err);
         if (unlikely(err)) {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "ssl_options parameter not found. Use default value.",
                        __FILE__, __LINE__ );
             ssl_options = DEFAULT_SSL_OPTIONS;
             is_tmp_dh_use = true;
         } else {
             // Make ssl option bit data.
-            for (multistring_map_type::iterator itr = msmap.begin(); itr != msmap.end(); ++itr) {
+            for (string_vector_type::iterator itr = string_vector.begin();
+                 itr != string_vector.end(); ++itr) {
                 // Convert string to define value.
-                long int longint_val = conv_ssl_option(itr->second);
+                long int longint_val = conv_ssl_option(*itr);
                 if (unlikely(longint_val == -1)) {
-                    Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+                    Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                                 "ssl_options convert error.",
                                 __FILE__, __LINE__ );
                     throw -1;
@@ -2123,17 +1987,21 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
 
         if (is_tmp_dh_use) {
             // Get parameter "tmp_dh_dir".
-            tmp_dh_dir = param.get_multistring(l7vs::PARAM_COMP_SSL, "tmp_dh_dir", msmap, err);
+            tmp_dh_dir = param.get_string(l7vs::PARAM_COMP_SSL,
+                                          "tmp_dh_dir",
+                                          err);
             if (unlikely(err) || tmp_dh_dir == "") {
-                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                            "tmp_dh_dir parameter not found. Use default value.",
                            __FILE__, __LINE__ );
-                tmp_dh_dir = DEFAULT_TMP_DH_DIR;
+                tmp_dh_dir = DEFAULT_SSL_TMP_DH_DIR;
             }
-            // Get parameter "tmp_dh_file".
-            tmp_dh_file = param.get_multistring(l7vs::PARAM_COMP_SSL, "tmp_dh_file", msmap, err);
+           // Get parameter "tmp_dh_file".
+            tmp_dh_file = param.get_string(l7vs::PARAM_COMP_SSL,
+                                           "tmp_dh_file",
+                                           err);
             if (unlikely(err) || tmp_dh_file == "") {
-                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                             "Cannot get tmp_dh_file parameter.",
                             __FILE__, __LINE__ );
                 throw -1;
@@ -2141,20 +2009,24 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
         }
 
         // Get parameter "cipher_list".
-        cipher_list = param.get_multistring(l7vs::PARAM_COMP_SSL, "cipher_list", msmap, err);
+        cipher_list = param.get_string(l7vs::PARAM_COMP_SSL,
+                                       "cipher_list",
+                                       err);
         if (unlikely(err) || cipher_list == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "cipher_list parameter not found. Use default value.",
                        __FILE__, __LINE__ );
-            cipher_list = DEFAULT_CIPHER_LIST;
+            cipher_list = DEFAULT_SSL_CIPHER_LIST;
         }
 
         //// SSL session cache parameter
         // Get parameter "session_cache".
         is_session_cache_use = false;
-        std::string cache_str = param.get_multistring(l7vs::PARAM_COMP_SSL, "session_cache", msmap, err);
+        std::string cache_str = param.get_string(l7vs::PARAM_COMP_SSL,
+                                                 "session_cache",
+                                                 err);
         if (unlikely(err) || cache_str == "") {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "session_cache parameter not found. Use default value.",
                        __FILE__, __LINE__ );
             is_session_cache_use = true;
@@ -2163,36 +2035,42 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
         } else if (cache_str == "off") {
             is_session_cache_use = false;
         } else {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Invalid session_cache parameter value.",
                         __FILE__, __LINE__ );
             throw -1;
         }
 
         if (is_session_cache_use) {
-            session_cache_mode = DEFAULT_SESSION_CACHE_MODE;
+            session_cache_mode = DEFAULT_SSL_SESSION_CACHE_MODE;
             // Get parameter "session_cache_size".
-            session_cache_size = param.get_int(l7vs::PARAM_COMP_SSL, "session_cache_size", err);
+            session_cache_size = param.get_int(l7vs::PARAM_COMP_SSL,
+                                               "session_cache_size",
+                                               err);
             if (unlikely(err)) {
-                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                           "session_cache_size parameter not found. Use default value.",
-                           __FILE__, __LINE__ );
-                session_cache_size = DEFAULT_SESSION_CACHE_SIZE;
-            } else if (session_cache_size < 0 || session_cache_size > LONG_MAX) {
-                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                  "session_cache_size parameter not found. Use default value.",
+                  __FILE__, __LINE__ );
+                session_cache_size = DEFAULT_SSL_SESSION_CACHE_SIZE;
+            } else if (session_cache_size < 0 ||
+                       session_cache_size > LONG_MAX) {
+                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                             "Invalid session_cache_size parameter value.",
                             __FILE__, __LINE__ );
                 throw -1;
             }
             // Get parameter "session_cache_timeout".
-            session_cache_timeout = param.get_int(l7vs::PARAM_COMP_SSL, "session_cache_timeout", err);
+            session_cache_timeout = param.get_int(l7vs::PARAM_COMP_SSL,
+                                                  "session_cache_timeout",
+                                                  err);
             if (unlikely(err)) {
-                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
-                           "session_cache_timeout parameter not found. Use default value.",
-                           __FILE__, __LINE__ );
-                session_cache_timeout = DEFAULT_SESSION_CACHE_TIMEOUT;
-            } else if (session_cache_timeout < 0 || session_cache_timeout > LONG_MAX) {
-                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                "session_cache_timeout parameter not found. Use default value.",
+                __FILE__, __LINE__ );
+                session_cache_timeout = DEFAULT_SSL_SESSION_CACHE_TIMEOUT;
+            } else if (session_cache_timeout < 0 ||
+                       session_cache_timeout > LONG_MAX) {
+                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                             "Invalid session_cache_timeout parameter value.",
                             __FILE__, __LINE__ );
                 throw -1;
@@ -2203,14 +2081,16 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
 
         //// SSL handshake timer parameter
         // Get parameter "timeout_sec".
-        handshake_timeout = param.get_int(l7vs::PARAM_COMP_SSL, "timeout_sec", err);
+        handshake_timeout = param.get_int(l7vs::PARAM_COMP_SSL,
+                                          "timeout_sec",
+                                          err);
         if (unlikely(err)) {
-            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "timeout_sec parameter not found. Use default value.",
                        __FILE__, __LINE__ );
-            handshake_timeout = DEFAULT_HANDSHAKE_TIMEOUT;
+            handshake_timeout = DEFAULT_SSL_HANDSHAKE_TIMEOUT;
         } else if (handshake_timeout <= 0 || handshake_timeout > INT_MAX) {
-            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, 
+            Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Invalid timeout_sec parameter value.",
                         __FILE__, __LINE__ );
             throw -1;
@@ -2221,37 +2101,38 @@ bool    l7vs::virtualservice_tcp::get_ssl_parameter()
     } catch (int e) {
         retbool = false;
     }
+
     /*-------- DEBUG LOG --------*/
-//    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "out_function : bool virtualservice_tcp::get_ssl_parameter() : ";
-        buf << "ca_dir = "                << ca_dir            << ", ";
-        buf << "ca_file = "                << ca_file            << ", ";
-        buf << "cert_chain_dir = "            << cert_chain_dir        << ", ";
-        buf << "cert_chain_file = "            << cert_chain_file        << ", ";
-        buf << "private_key_dir = "            << private_key_dir        << ", ";
-        buf << "private_key_file = "            << private_key_file        << ", ";
-        buf << "private_key_filetype = "        << private_key_filetype        << ", ";
-        buf << "private_key_passwd_dir = "        << private_key_passwd_dir    << ", ";
-        buf << "private_key_passwd_file = "        << private_key_passwd_file    << ", ";
-        buf << "verify_options = "            << verify_options        << ", ";
-        buf << "verify_cert_depth = "            << verify_cert_depth        << ", ";
-        buf << "ssl_options = "                << ssl_options            << ", ";
+        buf<<"out_function : bool virtualservice_tcp::get_ssl_parameter() : ";
+        buf<<"ca_dir = "                 << ca_dir                  << ", ";
+        buf<<"ca_file = "                << ca_file                 << ", ";
+        buf<<"cert_chain_dir = "         << cert_chain_dir          << ", ";
+        buf<<"cert_chain_file = "        << cert_chain_file         << ", ";
+        buf<<"private_key_dir = "        << private_key_dir         << ", ";
+        buf<<"private_key_file = "       << private_key_file        << ", ";
+        buf<<"private_key_filetype = "   << private_key_filetype    << ", ";
+        buf<<"private_key_passwd_dir = " << private_key_passwd_dir  << ", ";
+        buf<<"private_key_passwd_file = "<< private_key_passwd_file << ", ";
+        buf<<"verify_options = "         << verify_options          << ", ";
+        buf<<"verify_cert_depth = "      << verify_cert_depth       << ", ";
+        buf<<"ssl_options = "            << ssl_options             << ", ";
         if (is_tmp_dh_use) {
-            buf << "tmp_dh_dir = "            << tmp_dh_dir            << ", ";
-            buf << "tmp_dh_file = "            << tmp_dh_file            << ", ";
+            buf<< "tmp_dh_dir = "        << tmp_dh_dir              << ", ";
+            buf<< "tmp_dh_file = "       << tmp_dh_file             << ", ";
         }
-        buf << "cipher_list = "                << cipher_list            << ", ";
-        buf << "session_cache_mode = "            << session_cache_mode        << ", ";
+        buf<<"cipher_list = "            << cipher_list             << ", ";
+        buf<<"session_cache_mode = "     << session_cache_mode      << ", ";
         if (is_session_cache_use) {
-            buf << "session_cache_size = "        << session_cache_size        << ", ";
-            buf << "session_cache_timeout = "    << session_cache_timeout    << ", ";
+            buf<<"session_cache_size = " << session_cache_size      << ", ";
+            buf<<"session_cache_timeout = "<< session_cache_timeout << ", ";
         }
-        buf << "handshake_timeout = "            << handshake_timeout;
+        buf<<"handshake_timeout = "      << handshake_timeout;
         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
-//    }
+                            buf.str(),
+                            __FILE__, __LINE__ );
+    }
     /*------ DEBUG LOG END ------*/
     return retbool;
 }
