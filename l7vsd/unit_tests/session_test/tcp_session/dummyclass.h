@@ -824,13 +824,11 @@ namespace l7vs{
 
 
             //! accept
-            bool accept(boost::system::error_code& ec){
+            bool accept(){
                 tcp_ssl_socket::accept_call_check = true;
-                ec = tcp_ssl_socket::accept_ec;
                 return tcp_ssl_socket::accept_res;
             };
             bool accept_res;
-            boost::system::error_code accept_ec;
             bool accept_call_check;
         
 
