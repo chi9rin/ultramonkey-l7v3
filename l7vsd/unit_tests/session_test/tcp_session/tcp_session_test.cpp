@@ -290,7 +290,7 @@ class mutex_lock_test : public l7vs::tcp_session{
         //-------------handle_ssl_handshake_timer test---------------------------------
         void set_handle_ssl_handshake_timer_test(){
             pTest_mutex = &ssl_handshake_time_out_flag_mutex;
-            test_func = boost::bind(&mutex_lock_test::handle_ssl_handshake_timer,this);
+            test_func = boost::bind(&mutex_lock_test::handle_ssl_handshake_timer,this,boost::asio::placeholders::error);
         };
 
         void handle_ssl_handshake_timer(){
@@ -2287,8 +2287,8 @@ class handle_ssl_handshake_timer_test_class : public l7vs::tcp_session{
         bool& get_ssl_handshake_time_out_flag(){
             return ssl_handshake_time_out_flag;
         };
-        void test_call(){
-            l7vs::tcp_session::handle_ssl_handshake_timer();
+        void test_call(const boost::system::error_code& error){
+            l7vs::tcp_session::handle_ssl_handshake_timer(error);
         };
 };
 void handle_ssl_handshake_timer_test(){
@@ -2332,7 +2332,7 @@ void handle_ssl_handshake_timer_test(){
 
     ref_flag = false;
 
-    test_obj.test_call();
+    test_obj.test_call(boost::asio::placeholders::error);
 
     BOOST_CHECK(ref_flag);
 

@@ -1251,7 +1251,7 @@ namespace l7vs{
                             buf << boost::this_thread::get_id();
                             buf << "] ssl session handshaking start : ";
                             buf << "set handshake timer [";
-                            buf << handshake_timeout;
+                            buf << ssl_handshake_time_out;
                             buf << "]";
                             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 70, buf.str(), __FILE__, __LINE__ );
                     }
