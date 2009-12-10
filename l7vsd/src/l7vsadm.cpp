@@ -36,6 +36,7 @@
 #include "parameter.h"
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
+#include "virtualservice_element.h"
 
 // global function prototype
 static void    sig_exit_handler(int sig);
@@ -300,238 +301,8 @@ bool    l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[
         }
         module_args.push_back( argv[pos] );
     }
-    //>> socket option 
-    std::vector< std::string > chk_module_args;
-    
-    BOOST_FOREACH( std::string str,    module_args ){
-        chk_module_args.push_back( str );
-    }
-    
-    protocol_module_base::check_message_result socket_option_message;
-    socket_option_message.flag = true;
-    std::vector<std::string>::iterator args_itr = chk_module_args.begin();
-    bool is_fond = false;
-    
-    while( args_itr != chk_module_args.end()){
-        
-        if(  *args_itr == "-C" || *args_itr == "--cookie-name" ){
-            args_itr++;
-            // next value
-            if(args_itr != chk_module_args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-E" || *args_itr == "--cookie-expire" ){
-            args_itr++;
-            // next value
-            if(args_itr != chk_module_args.end()){
-                args_itr++;
-            }
-//        }else if( *args_itr == "-F" || *args_itr == "--forwarded-for" ){
-//        }else if( *args_itr == "-R" || *args_itr == "--reschedule" ){
-//        }else if( *args_itr == "-N" || *args_itr == "--no-reschedule" ){
-        }else if( *args_itr == "-S" || *args_itr == "--sorry-uri" ){
-            args_itr++;
-            // next value
-            if(args_itr != chk_module_args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-T" || *args_itr == "--timeout" ){
-            args_itr++;
-            // next value
-            if(args_itr != chk_module_args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-M" || *args_itr == "--maxlist" ){
-            args_itr++;
-            // next value
-            if(args_itr != chk_module_args.end()){
-                args_itr++;
-            }
-        }else if( *args_itr == "-O" || *args_itr == "--sockopt" ){
-            if(is_fond){
-                // duplication
-                socket_option_message.flag = false;
-                socket_option_message.message =    "'-O/--sock-opt' option value '";
-                socket_option_message.message +=    *args_itr;
-                socket_option_message.message +=    "' is not numeric character.";
-                break;
-            }
-            is_fond = true;
-            args_itr = chk_module_args.erase(args_itr);
-            if(args_itr == chk_module_args.end()){
-                // not socket opution value
-                socket_option_message.flag = false;
-                socket_option_message.message =    "'-O/--sock-opt' option value not socket opution value error.";
-                break;
-            }
-            
-            std::string sock_option_val = *args_itr;
-            args_itr = chk_module_args.erase(args_itr);
-            
-            unsigned int hed_pos = 0;
-            bool is_fond_da = false;
-            bool is_fond_nd = false;
-            bool is_fond_ck = false;
-            bool is_fond_qa = false;
-            
-            while((hed_pos + 2) < sock_option_val.length()){
-                
-                if(sock_option_val.substr(hed_pos,2) == "da"){
-                    if(is_fond_da){
-                        // da(defer_accept option) duplication error
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value da(defer_accept option) duplication error.";
-                        break;
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_da = true;
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                socket_option_message.flag = false;
-                                socket_option_message.message =    "'-O/--sock-opt' option value '";
-                                socket_option_message.message +=    *args_itr;
-                                socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value '";
-                        socket_option_message.message +=    *args_itr;
-                        socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                }else if(sock_option_val.substr(hed_pos,2) == "nd"){
-                    if(is_fond_nd){
-                        // nd(nodelay option) duplication error
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value nd(nodelay option) duplication error.";
-                        break;
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_nd = true;
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                socket_option_message.flag = false;
-                                socket_option_message.message =    "'-O/--sock-opt' option value '";
-                                socket_option_message.message +=    *args_itr;
-                                socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value '";
-                        socket_option_message.message +=    *args_itr;
-                        socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                }else if(sock_option_val.substr(hed_pos,2) == "ck"){
-                    if(is_fond_ck){
-                        // ck(cork option) duplication error
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value ck(cork option) duplication error.";
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_ck = true;
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                socket_option_message.flag = false;
-                                socket_option_message.message =    "'-O/--sock-opt' option value '";
-                                socket_option_message.message +=    *args_itr;
-                                socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value '";
-                        socket_option_message.message +=    *args_itr;
-                        socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                    
-                }else if(sock_option_val.substr(hed_pos,2) == "qa"){
-                    if(is_fond_qa){
-                        // qa(quickack option) duplication error
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value qa(quickack option) duplication error.";
-                    }
-                    hed_pos += 2;
-                    if(sock_option_val.substr(hed_pos,3) == ":on"){
-                        is_fond_qa = true;
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                socket_option_message.flag = false;
-                                socket_option_message.message =    "'-O/--sock-opt' option value '";
-                                socket_option_message.message +=    *args_itr;
-                                socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else if(sock_option_val.substr(hed_pos,4) == ":off"){
-                        is_fond_qa = true;
-                        hed_pos += 3;
-                        if((hed_pos + 1) < sock_option_val.length()){
-                            if( sock_option_val.substr(hed_pos,1) == ",") {
-                                hed_pos += 1;
-                            }else{
-                                socket_option_message.flag = false;
-                                socket_option_message.message =    "'-O/--sock-opt' option value '";
-                                socket_option_message.message +=    *args_itr;
-                                socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                                break;
-                            }
-                        }
-                    }else{
-                        socket_option_message.flag = false;
-                        socket_option_message.message =    "'-O/--sock-opt' option value '";
-                        socket_option_message.message +=    *args_itr;
-                        socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                        break;
-                    }
-                }else{
-                    socket_option_message.flag = false;
-                    socket_option_message.message =    "'-O/--sock-opt' option value '";
-                    socket_option_message.message +=    *args_itr;
-                    socket_option_message.message +=    "' wrong value ex. da:on,nd:on,ck:on,qa:on";
-                    break;
-                }
-            }
-            if(!socket_option_message.flag){
-                break;
-            }
-        }else{
-            args_itr++;
-        }
-    }
-    
-    if( !socket_option_message.flag ){
-        // args is not supported.
-        std::stringstream    buf;
-        buf << "protocol module argument error: " << socket_option_message.message;
-        l7vsadm_err.setter( true, buf.str() );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 100, buf.str(), __FILE__, __LINE__ );
-        return false;
-    }
-//    protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
-    protocol_module_base::check_message_result module_message = module->check_parameter( chk_module_args );
-    //<< socket option
+    protocol_module_base::check_message_result module_message = module->check_parameter( module_args );
+
     if( !module_message.flag ){
         // args is not supported.
         std::stringstream    buf;
@@ -908,24 +679,157 @@ bool    l7vs::l7vsadm::parse_opt_vs_ssl_func( int& pos, int argc, char* argv[] )
         return false;
     }
     // ssl config file check.
-    std::string conf_filename = argv[pos];
-    if( L7VS_FILENAME_LEN < conf_filename.length() ){
+    std::string conf_file_name = argv[pos];
+    if( L7VS_FILENAME_LEN < conf_file_name.length() ){
         std::string buf("ssl config filename is too long.");
         l7vsadm_err.setter( true, buf );
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
         return false;
     }
     FILE  *fp;
-    if ((fp = fopen(conf_filename.c_str(), "r")) == NULL) {
+    if ((fp = fopen(conf_file_name.c_str(), "r")) == NULL) {
         std::string buf("ssl config file cannot open.");
         l7vsadm_err.setter( true, buf );
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
         return false;
     }
     fclose(fp);
-    request.vs_element.ssl_conf_filename = conf_filename;
-    request.vs_element.ssl_flag = 1;
+    request.vs_element.ssl_file_name = conf_file_name;
     return true;
+}
+
+//! virtualservice option access_log_logrotate function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int argc, char* argv[] ){
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_accesslog_logrotate_func", __FILE__, __LINE__ );
+
+    if( ++pos >= argc ){
+        std::string    buf("access log filename is not specified.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+    }
+    // access log file check.
+    std::string access_log_file_name = argv[pos];
+    if( L7VS_FILENAME_LEN < access_log_file_name.length() ){
+        std::string buf("access log filename is too long.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+    }
+    if( "/" != access_log_file_name.substr(0, 1) ){
+        std::string buf("please specify access log filename in fullpath.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+    }
+    
+    // create access log  args.
+    std::vector< std::string > arguments_vector;
+    virtualservice_element::access_log_rotate_arguments_map_type arguments_map;
+    while( true ){
+        if( ++pos == argc ) break; //access log arguments end.
+        parse_opt_map_type::iterator vsitr = vs_option_dic.find( argv[pos] );
+        if( vsitr != vs_option_dic.end() ){
+            --pos;    // back for next option
+            break;    // module option end.
+        }
+        arguments_vector.push_back( argv[pos] );
+    }
+    if( 0 < arguments_vector.size() ){
+        if( 0 == ( arguments_vector.size() % 2 ) ){
+            for( unsigned int i = 0; i < ( arguments_vector.size() - 1 ); ++i ){
+                std::pair< virtualservice_element::access_log_rotate_arguments_map_type::iterator, bool > ret =
+                arguments_map.insert( virtualservice_element::access_log_rotate_arguments_pair_type( arguments_vector[i], arguments_vector[i+1] ) );
+                if( !ret.second ){
+                    std::string buf("access log rotation argument is duplicated.");
+                    l7vsadm_err.setter( true, buf );
+                    Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+                    return false;
+                }
+            }
+        }
+        else{
+            std::string buf("access log rotation argument error.");
+            l7vsadm_err.setter( true, buf );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+            return false;
+        }
+        //bool ret = logger_access_manager::getInstance().access_log_logrotate_parameter_check( arguments_map );
+        bool ret = true;
+        if( !ret ){
+            std::string buf("access log rotation argument error.");
+            l7vsadm_err.setter( true, buf );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+            return false;
+        }
+    }
+    
+    request.vs_element.access_log_file_name = access_log_file_name;
+    request.vs_element.access_log_rotate_arguments.clear();
+    BOOST_FOREACH( virtualservice_element::access_log_rotate_arguments_pair_type pair, arguments_map ){
+        request.vs_element.access_log_rotate_arguments.insert( pair );
+    }
+
+    return true;
+}
+
+//! virtualservice option socket option function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_vs_socket_option_func( int& pos, int argc, char* argv[] ){
+
+    if( ++pos >= argc ){
+        std::string    buf("socket_option is not specified.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+    }
+
+    bool is_set_defer_accept = false;
+
+    request.vs_element.socket_option_tcp_defer_accept = 0;
+    request.vs_element.socket_option_tcp_nodelay = 0;
+    request.vs_element.socket_option_tcp_cork = 0;
+    request.vs_element.socket_option_tcp_quickack = 0;
+
+    std::string socket_option_str = argv[pos];
+    std::vector< std::string > socket_options;
+    boost::split( socket_options, socket_option_str, boost::algorithm::is_any_of( "," ) );
+
+    BOOST_FOREACH( std::string option, socket_options ){
+        if( option == "deferaccept" ){
+            if( !is_set_defer_accept ){
+                is_set_defer_accept = true;
+                request.vs_element.socket_option_tcp_defer_accept = 1;
+            }
+            else{
+                // defer_accept is duplicated
+                std::stringstream buf;
+                buf << "socket option deferaccept is duplicated.";
+                l7vsadm_err.setter( true, buf.str() );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 0, buf.str(), __FILE__, __LINE__ );
+                return false;
+            }
+        }
+        else if(option == "" ) {
+
+        }
+        else{
+            // unknown socket option
+            std::stringstream buf;
+            buf << "unknown socket option.";
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 0, buf.str(), __FILE__, __LINE__ );
+            return false;
+        }
+    }
+
+    return true;
+
 }
 //! realserver command parsing.
 //! @param[in]    request command
@@ -1515,26 +1419,29 @@ bool    l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG 
 
     std::cout <<
     "Options:\n"
-    "  --tcp-service   -t service-address     service-address is host:port\n"
-    "  --proto-module  -m proto-module        protocol module name and module argment\n"
-    "                     [module-args]\n"
-    "  --scheduler     -s scheduler           one of rr,lc,wrr\n"
-    "  --upper         -u connection-count    maximum number of connections\n"
-    "  --bypass        -b sorry-server        sorry server address is host:port\n"
-    "  --flag          -f sorry-flag          sorry status set to virtual service\n"
-    "  --qos-up        -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
-    "  --qos-down      -q QoSval-down         QoS Threshold(bps) set to client direction\n"
-    "  --udp           -p                     VirtualService UDP mode on\n"
-    "  --ssl           -S ssl-config-file     SSL configuration file(Use SSL)\n"
-    "  --real-server   -r server-address      server-address is host:port\n"
-    "  --weight        -w weight              scheduling weight set to real server\n"
-    "  --switch        -s replication-switch  start or stop replication\n"
-    "  --force         -f                     force replication start\n"
-    "  --dump          -d                     dump replication memory\n"
-    "  --category      -c log-category        set log category for l7vsd or SNMP Agent\n"
-    "  --level         -l log-level           set log level for l7vsd or SNMP Agent\n"
-    "  --reload        -r reload-parameter    reload specified config parameter\n"
-    "  --numeric       -n                     list the table in numeric\n"
+    "  --tcp-service      -t service-address     service-address is host:port\n"
+    "  --proto-module     -m proto-module        protocol module name and module argment\n"
+    "                        [module-args]\n"
+    "  --scheduler        -s scheduler           one of rr,lc,wrr\n"
+    "  --upper            -u connection-count    maximum number of connections\n"
+    "  --bypass           -b sorry-server        sorry server address is host:port\n"
+    "  --flag             -f sorry-flag          sorry status set to virtual service\n"
+    "  --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
+    "  --qos-down         -q QoSval-down         QoS Threshold(bps) set to client direction\n"
+    "  --ssl-proxy        -z ssl-config-file     SSL configuration file(Use SSL)\n"
+    "  --sockopt          -O socket-option       deferaccept,nodelay,cork,quickackon or quickackoff set to socket option\n"
+    "  --access-log       -L access-log-flag     access log flag 0(none) or 1(output)\n"
+    "  --access-log-name  -L access-log-file     access log file\n"
+    "                        [logrotate-args]\n"
+    "  --real-server      -r server-address      server-address is host:port\n"
+    "  --weight           -w weight              scheduling weight set to real server\n"
+    "  --switch           -s replication-switch  start or stop replication\n"
+    "  --force            -f                     force replication start\n"
+    "  --dump             -d                     dump replication memory\n"
+    "  --category         -c log-category        set log category for l7vsd or SNMP Agent\n"
+    "  --level            -l log-level           set log level for l7vsd or SNMP Agent\n"
+    "  --reload           -r reload-parameter    reload specified config parameter\n"
+    "  --numeric          -n                     list the table in numeric\n"
     << std::endl;
 
     return true;
@@ -1547,10 +1454,13 @@ std::string    l7vs::l7vsadm::usage(){
     std::stringstream    stream;
     stream <<
     "Usage: \n"
-    "  l7vsadm -A|E -t service-address -m proto-module [module-args]\n"
+    "  l7vsadm -A -t service-address -m proto-module [module-args]\n"
     "          [-s scheduler] [-u connection-count] [-b sorry-server]\n"
-    "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down]\n"
-    "          [-p ] [-S ssl-config-file]\n"
+    "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-z ssl-config-file]\n"
+    "          [-O socket-option] [-L access-log-lfag] [-a access-log-file [logrotate-args]]\n"
+    "  l7vsadm -E -t service-address -m proto-module [module-args]\n"
+    "          [-s scheduler] [-u connection-count] [-b sorry-server]\n"
+    "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-L access-log-flag]\n"
     "  l7vsadm -D -t service-address -m proto-module [module-args]\n"
     "  l7vsadm -C\n"
     "  l7vsadm -a|e -t service-address -m proto-module [module-args] [-u]\n"
@@ -1614,6 +1524,11 @@ void    l7vs::l7vsadm::disp_list_key(){
     std::stringstream buf;
     buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % VERSION;
     buf << "Prot LocalAddress:Port ProtoMod Scheduler\n";
+    buf << "     SSL_config_file\n";
+    buf << "     Socket option\n";
+    buf << "     Access_log_flag\n";
+    buf << "     Access_log_file\n";
+    buf << "     Access_log_rotate option\n";
     buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
     BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
         std::string    vsepstr;
@@ -1626,6 +1541,15 @@ void    l7vs::l7vsadm::disp_list_key(){
             % vsepstr
             % vse.protocol_module_name
             % vse.schedule_module_name;
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.ssl_file_name.length() ) ? "none": vse.ssl_file_name );
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.socket_option_string.length() ) ? "none": vse.socket_option_string );
+        buf << boost::format( "    %d\n" ) % vse.access_log_flag;
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.access_log_file_name.length() ) ? "none": vse.access_log_file_name );
+        buf << boost::format( "    %s\n" ) % vse.access_log_rotate_key_info;
+        
         BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
             std::string    rsepstr;
             if(vse.udpmode)
@@ -1689,7 +1613,12 @@ void    l7vs::l7vsadm::disp_list_verbose(){
     buf << "     SorryAddress:Port Sorry_cc Sorry_flag\n";
     buf << "     QoS-up   Throughput-up\n";
     buf << "     QoS-down Throughput-down\n";
-    buf << "     SSL_flag SSL_config_file\n";
+    buf << "     SSL_config_file\n";
+    buf << "     Socket option\n";
+    buf << "     Access_log_flag\n";
+    buf << "     Access_log_file\n";
+    buf << "     Access_log_rotate option\n";
+    buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
     buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
     BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
         std::string    vsepstr;
@@ -1697,13 +1626,12 @@ void    l7vs::l7vsadm::disp_list_verbose(){
             vsepstr = endpoint_to_string<boost::asio::ip::udp>( vse.udp_recv_endpoint, numeric_flag );
         else
             vsepstr = endpoint_to_string<boost::asio::ip::tcp>( vse.tcp_accept_endpoint, numeric_flag );
-        std::string    args = boost::algorithm::join( vse.protocol_args, " " );
         buf << boost::format( "%s %s %s %s %s\n" )
             % ( vse.udpmode ? "UDP" : "TCP" )
             % vsepstr
             % vse.protocol_module_name
             % vse.schedule_module_name
-            % args;
+            % vse.protocol_module_for_indication_options;
         if( !vse.udpmode ){
             std::string    sorryepstr;
             boost::asio::ip::tcp::endpoint    zeropoint;
@@ -1725,9 +1653,15 @@ void    l7vs::l7vsadm::disp_list_verbose(){
         buf << boost::format( "    %lld %lld\n" )
             % (vse.qos_downstream * 8)
             % (vse.throughput_downstream * 8);
-        buf << boost::format( "    %d %s\n" )
-            % vse.ssl_flag
-            % vse.ssl_conf_filename;
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.ssl_file_name.length() ) ? "none": vse.ssl_file_name );
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.socket_option_string.length() ) ? "none": vse.socket_option_string );
+        buf << boost::format( "    %d\n" ) % vse.access_log_flag;
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.access_log_file_name.length() ) ? "none": vse.access_log_file_name );
+        buf << boost::format( "    %s\n" ) % vse.access_log_rotate_verbose_info;
+
         BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
             std::string    rsepstr;
             if( vse.udpmode )
@@ -1747,7 +1681,7 @@ void    l7vs::l7vsadm::disp_list_verbose(){
 //! l7vsadm constractor.
 //! create including all dictionary.
 l7vs::l7vsadm::l7vsadm()
-                :    numeric_flag(false),
+                :   numeric_flag(false),
                     command_wait_interval( L7VSADM_DEFAULT_WAIT_INTERVAL ),
                     command_wait_count( L7VSADM_DEFAULT_WAIT_COUNT ),
                     connect_wait_interval( L7VSADM_DEFAULT_WAIT_INTERVAL ),
@@ -1755,72 +1689,72 @@ l7vs::l7vsadm::l7vsadm()
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 35, "l7vsadm::l7vsadm(constructor)", __FILE__, __LINE__ );
 
     // create command dictionary.
-    command_dic["-l"]                = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
-    command_dic["--list"]            = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
-    command_dic["-V"]                = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _1, _2 );
+    command_dic["-l"]               = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
+    command_dic["--list"]           = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2 );
+    command_dic["-V"]               = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _1, _2 );
     command_dic["--verbose"]        = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_VERBOSE, _1, _2 );
-    command_dic["-K"]                = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _1, _2 );
+    command_dic["-K"]               = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _1, _2 );
     command_dic["--key"]            = boost::bind( &l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST_KEY, _1, _2 );
-    command_dic["-A"]                 = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_ADD_VS, _1, _2 );
+    command_dic["-A"]               = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_ADD_VS, _1, _2 );
     command_dic["--add-service"]    = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_ADD_VS, _1, _2 );
-    command_dic["-D"]                = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_DEL_VS, _1, _2 );
-    command_dic["--delete-service"]    = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_DEL_VS, _1, _2 );
-    command_dic["-E"]                = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_EDIT_VS, _1, _2 );
-    command_dic["--edit-service"]    = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_EDIT_VS, _1, _2 );
-    command_dic["-C"]                = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_FLUSH_VS, _1, _2 );
-    command_dic["--flush"]            = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_FLUSH_VS, _1, _2 );
-    command_dic["-a"]                = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_ADD_RS, _1, _2 );
-    command_dic["--add-server"]        = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_ADD_RS, _1, _2 );
-    command_dic["-d"]                = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_DEL_RS, _1, _2 );
-    command_dic["--delete-server"]    = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_DEL_RS, _1, _2 );
-    command_dic["-e"]                = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_EDIT_RS, _1, _2 );
+    command_dic["-D"]               = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_DEL_VS, _1, _2 );
+    command_dic["--delete-service"] = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_DEL_VS, _1, _2 );
+    command_dic["-E"]               = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_EDIT_VS, _1, _2 );
+    command_dic["--edit-service"]   = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_EDIT_VS, _1, _2 );
+    command_dic["-C"]               = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_FLUSH_VS, _1, _2 );
+    command_dic["--flush"]          = boost::bind( &l7vsadm::parse_vs_func, this, l7vsadm_request::CMD_FLUSH_VS, _1, _2 );
+    command_dic["-a"]               = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_ADD_RS, _1, _2 );
+    command_dic["--add-server"]     = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_ADD_RS, _1, _2 );
+    command_dic["-d"]               = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_DEL_RS, _1, _2 );
+    command_dic["--delete-server"]  = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_DEL_RS, _1, _2 );
+    command_dic["-e"]               = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_EDIT_RS, _1, _2 );
     command_dic["--edit-server"]    = boost::bind( &l7vsadm::parse_rs_func, this, l7vsadm_request::CMD_EDIT_RS, _1, _2 );
-    command_dic["-R"]                = boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION, _1, _2 );
+    command_dic["-R"]               = boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION, _1, _2 );
     command_dic["--replication"]    = boost::bind( &l7vsadm::parse_replication_func, this, l7vsadm_request::CMD_REPLICATION, _1, _2 );
-    command_dic["-L"]                = boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _1, _2 );
+    command_dic["-L"]               = boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _1, _2 );
     command_dic["--log"]            = boost::bind( &l7vsadm::parse_log_func, this, l7vsadm_request::CMD_LOG, _1, _2 );
-    command_dic["-S"]                = boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _1, _2 );
-    command_dic["--snmp"]            = boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _1, _2 );
-    command_dic["-P"]                = boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _1, _2 );
-    command_dic["--parameter"]        = boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _1, _2 );
-    command_dic["-h"]                = boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _1, _2 );
-    command_dic["--help"]            = boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _1, _2 );
+    command_dic["-S"]               = boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _1, _2 );
+    command_dic["--snmp"]           = boost::bind( &l7vsadm::parse_snmp_func, this, l7vsadm_request::CMD_SNMP, _1, _2 );
+    command_dic["-P"]               = boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _1, _2 );
+    command_dic["--parameter"]      = boost::bind( &l7vsadm::parse_parameter_func, this, l7vsadm_request::CMD_PARAMETER, _1, _2 );
+    command_dic["-h"]               = boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _1, _2 );
+    command_dic["--help"]           = boost::bind( &l7vsadm::parse_help_func, this, l7vsadm_request::CMD_HELP, _1, _2 );
 
     // create list option dictionary.
-    list_option_dic["-n"]            = boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _1, _2, _3 );
+    list_option_dic["-n"]           = boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _1, _2, _3 );
     list_option_dic["--numeric"]    = boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _1, _2, _3 );
     // create virtualservice option dictionary
-    vs_option_dic["-t"]                = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
-    vs_option_dic["--target"]        = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
-    vs_option_dic["-m"]                = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
-    vs_option_dic["--module"]        = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
-    vs_option_dic["-s"]                = boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
+    vs_option_dic["-t"]             = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+    vs_option_dic["--target"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+    vs_option_dic["-m"]             = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+    vs_option_dic["--module"]       = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+    vs_option_dic["-s"]             = boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
     vs_option_dic["--scheduler"]    = boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
-    vs_option_dic["-u"]                = boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3 );
+    vs_option_dic["-u"]             = boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3 );
     vs_option_dic["--upper"]        = boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3 );
-    vs_option_dic["-b"]                = boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3 );
-    vs_option_dic["--bypass"]        = boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3 );
-    vs_option_dic["-f"]                = boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3 );
-    vs_option_dic["--flag"]            = boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3 );
-    vs_option_dic["-Q"]                = boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _1, _2, _3 );
-    vs_option_dic["--qos-up"]        = boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _1, _2, _3 );
-    vs_option_dic["-q"]                = boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
-    vs_option_dic["--qos-down"]        = boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
-    vs_option_dic["-p"]                = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
-    vs_option_dic["--udp"]            = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
-    vs_option_dic["-S"]                = boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
-    vs_option_dic["--ssl"]            = boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
+    vs_option_dic["-b"]             = boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3 );
+    vs_option_dic["--bypass"]       = boost::bind( &l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3 );
+    vs_option_dic["-f"]             = boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3 );
+    vs_option_dic["--flag"]         = boost::bind( &l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3 );
+    vs_option_dic["-Q"]             = boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _1, _2, _3 );
+    vs_option_dic["--qos-up"]       = boost::bind( &l7vsadm::parse_opt_vs_qosup_func, this, _1, _2, _3 );
+    vs_option_dic["-q"]             = boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
+    vs_option_dic["--qos-down"]     = boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
+    vs_option_dic["-p"]             = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+    vs_option_dic["--udp"]          = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+    vs_option_dic["-z"]             = boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
+    vs_option_dic["--ssl-proxy"]    = boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
     // create realserver option dictionary
-    rs_option_dic["-t"]                = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
-    rs_option_dic["--target"]        = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
-    rs_option_dic["-w"]                = boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
-    rs_option_dic["--weight"]        = boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
-    rs_option_dic["-m"]                = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
-    rs_option_dic["--module"]        = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
-    rs_option_dic["-p"]                = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
-    rs_option_dic["--udp"]            = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
-    rs_option_dic["-r"]                = boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
-    rs_option_dic["--real-server"]    = boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
+    rs_option_dic["-t"]             = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+    rs_option_dic["--target"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+    rs_option_dic["-w"]             = boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
+    rs_option_dic["--weight"]       = boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
+    rs_option_dic["-m"]             = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+    rs_option_dic["--module"]       = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+    rs_option_dic["-p"]             = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+    rs_option_dic["--udp"]          = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
+    rs_option_dic["-r"]             = boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
+    rs_option_dic["--real-server"]  = boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
     // create replication option dictionary
     replication_option_dic["-s"]    = boost::bind( &l7vsadm::parse_opt_replication_switch_func, this, _1, _2, _3 );
     replication_option_dic["--switch"]
@@ -1839,176 +1773,175 @@ l7vs::l7vsadm::l7vsadm()
     log_option_dic["-c"]            = boost::bind( &l7vsadm::parse_opt_log_category_func, this, _1, _2, _3 );
     log_option_dic["--category"]    = boost::bind( &l7vsadm::parse_opt_log_category_func, this, _1, _2, _3 );
     log_option_dic["-l"]            = boost::bind( &l7vsadm::parse_opt_log_level_func, this, _1, _2, _3 );
-    log_option_dic["--level"]        = boost::bind( &l7vsadm::parse_opt_log_level_func, this, _1, _2, _3 );
+    log_option_dic["--level"]       = boost::bind( &l7vsadm::parse_opt_log_level_func, this, _1, _2, _3 );
     // snmp agent option function dictionary create
-    snmp_option_dic["-c"]            = boost::bind( &l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3 );
-    snmp_option_dic["--category"]    = boost::bind( &l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3 );
-    snmp_option_dic["-l"]            = boost::bind( &l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3 );
-    snmp_option_dic["--level"]        = boost::bind( &l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3 );
+    snmp_option_dic["-c"]           = boost::bind( &l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3 );
+    snmp_option_dic["--category"]   = boost::bind( &l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3 );
+    snmp_option_dic["-l"]           = boost::bind( &l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3 );
+    snmp_option_dic["--level"]      = boost::bind( &l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3 );
     // parameter option function dictionary create
-    parameter_option_dic["-r"]        = boost::bind( &l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3 );
+    parameter_option_dic["-r"]      = boost::bind( &l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3 );
     parameter_option_dic["--reload"]
                                     = boost::bind( &l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3 );
 
     // string logcategory dictionary create
-    string_logcategory_dic["l7vsd_network"]                    = LOG_CAT_L7VSD_NETWORK;
+    string_logcategory_dic["l7vsd_network"]                 = LOG_CAT_L7VSD_NETWORK;
     string_logcategory_dic["nw"]                            = LOG_CAT_L7VSD_NETWORK;
-    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK]            = "l7vsd_network";
-    string_logcategory_dic["l7vsd_network_qos"]                = LOG_CAT_L7VSD_NETWORK_QOS;
+    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK]           = "l7vsd_network";
+    string_logcategory_dic["l7vsd_network_qos"]             = LOG_CAT_L7VSD_NETWORK_QOS;
     string_logcategory_dic["nw_qos"]                        = LOG_CAT_L7VSD_NETWORK_QOS;
-    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_QOS]        = "l7vsd_network_qos";
-    string_logcategory_dic["l7vsd_network_bandwidth"]        = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
-    string_logcategory_dic["nw_bw"]                            = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
-    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_BANDWIDTH]    = "l7vsd_network_bandwidth";
-    string_logcategory_dic["l7vsd_network_num_connection"]    = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
-    string_logcategory_dic["nw_conn"]                        = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
+    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_QOS]       = "l7vsd_network_qos";
+    string_logcategory_dic["l7vsd_network_bandwidth"]       = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
+    string_logcategory_dic["nw_bw"]                         = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
+    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = "l7vsd_network_bandwidth";
+    string_logcategory_dic["l7vsd_network_num_connection"]  = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
+    string_logcategory_dic["nw_conn"]                       = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
     logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION]
                                                             = "l7vsd_network_num_connection";
-    string_logcategory_dic["l7vsd_network_access"]            = LOG_CAT_L7VSD_NETWORK_ACCESS;
+    string_logcategory_dic["l7vsd_network_access"]          = LOG_CAT_L7VSD_NETWORK_ACCESS;
     string_logcategory_dic["nw_acc"]                        = LOG_CAT_L7VSD_NETWORK_ACCESS;
-    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_ACCESS]        = "l7vsd_network_access";
-    string_logcategory_dic["l7vsd_mainthread"]                = LOG_CAT_L7VSD_MAINTHREAD;
-    string_logcategory_dic["mth"]                            = LOG_CAT_L7VSD_MAINTHREAD;
+    logcategory_string_dic[LOG_CAT_L7VSD_NETWORK_ACCESS]    = "l7vsd_network_access";
+    string_logcategory_dic["l7vsd_mainthread"]              = LOG_CAT_L7VSD_MAINTHREAD;
+    string_logcategory_dic["mth"]                           = LOG_CAT_L7VSD_MAINTHREAD;
     logcategory_string_dic[LOG_CAT_L7VSD_MAINTHREAD]        = "l7vsd_mainthread";
-    string_logcategory_dic["l7vsd_virtualservice"]            = LOG_CAT_L7VSD_VIRTUALSERVICE;
+    string_logcategory_dic["l7vsd_virtualservice"]          = LOG_CAT_L7VSD_VIRTUALSERVICE;
     string_logcategory_dic["vs"]                            = LOG_CAT_L7VSD_VIRTUALSERVICE;
     logcategory_string_dic[LOG_CAT_L7VSD_VIRTUALSERVICE]    = "l7vsd_virtualservice";
-    string_logcategory_dic["l7vsd_virtualservice_thread"]    = LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
-    string_logcategory_dic["vs_th"]                            = LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
+    string_logcategory_dic["l7vsd_virtualservice_thread"]   = LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
+    string_logcategory_dic["vs_th"]                         = LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
     logcategory_string_dic[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD]
                                                             = "l7vsd_virtualservice_thread";
-    string_logcategory_dic["l7vsd_session"]                    = LOG_CAT_L7VSD_SESSION;
+    string_logcategory_dic["l7vsd_session"]                 = LOG_CAT_L7VSD_SESSION;
     string_logcategory_dic["ss"]                            = LOG_CAT_L7VSD_SESSION;
-    logcategory_string_dic[LOG_CAT_L7VSD_SESSION]            = "l7vsd_session";
-    string_logcategory_dic["l7vsd_session_thread"]            = LOG_CAT_L7VSD_SESSION_THREAD;
-    string_logcategory_dic["ss_th"]                            = LOG_CAT_L7VSD_SESSION_THREAD;
+    logcategory_string_dic[LOG_CAT_L7VSD_SESSION]           = "l7vsd_session";
+    string_logcategory_dic["l7vsd_session_thread"]          = LOG_CAT_L7VSD_SESSION_THREAD;
+    string_logcategory_dic["ss_th"]                         = LOG_CAT_L7VSD_SESSION_THREAD;
     logcategory_string_dic[LOG_CAT_L7VSD_SESSION_THREAD]    = "l7vsd_session_thread";
-    string_logcategory_dic["l7vsd_realserver"]                = LOG_CAT_L7VSD_REALSERVER;
+    string_logcategory_dic["l7vsd_realserver"]              = LOG_CAT_L7VSD_REALSERVER;
     string_logcategory_dic["rs"]                            = LOG_CAT_L7VSD_REALSERVER;
     logcategory_string_dic[LOG_CAT_L7VSD_REALSERVER]        = "l7vsd_realserver";
-    string_logcategory_dic["l7vsd_sorryserver"]                = LOG_CAT_L7VSD_SORRYSERVER;
-    string_logcategory_dic["sorry"]                            = LOG_CAT_L7VSD_SORRYSERVER;
-    logcategory_string_dic[LOG_CAT_L7VSD_SORRYSERVER]        = "l7vsd_sorryserver";
-    string_logcategory_dic["l7vsd_module"]                    = LOG_CAT_L7VSD_MODULE;
-    string_logcategory_dic["mod"]                            = LOG_CAT_L7VSD_MODULE;
+    string_logcategory_dic["l7vsd_sorryserver"]             = LOG_CAT_L7VSD_SORRYSERVER;
+    string_logcategory_dic["sorry"]                         = LOG_CAT_L7VSD_SORRYSERVER;
+    logcategory_string_dic[LOG_CAT_L7VSD_SORRYSERVER]       = "l7vsd_sorryserver";
+    string_logcategory_dic["l7vsd_module"]                  = LOG_CAT_L7VSD_MODULE;
+    string_logcategory_dic["mod"]                           = LOG_CAT_L7VSD_MODULE;
     logcategory_string_dic[LOG_CAT_L7VSD_MODULE]            = "l7vsd_module";
-    string_logcategory_dic["l7vsd_replication"]                = LOG_CAT_L7VSD_REPLICATION;
-    string_logcategory_dic["rep"]                            = LOG_CAT_L7VSD_REPLICATION;
-    logcategory_string_dic[LOG_CAT_L7VSD_REPLICATION]        = "l7vsd_replication";
-    string_logcategory_dic["l7vsd_replication_sendthread"]    = LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
-    string_logcategory_dic["rep_sth"]                        = LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
+    string_logcategory_dic["l7vsd_replication"]             = LOG_CAT_L7VSD_REPLICATION;
+    string_logcategory_dic["rep"]                           = LOG_CAT_L7VSD_REPLICATION;
+    logcategory_string_dic[LOG_CAT_L7VSD_REPLICATION]       = "l7vsd_replication";
+    string_logcategory_dic["l7vsd_replication_sendthread"]  = LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
+    string_logcategory_dic["rep_sth"]                       = LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
     logcategory_string_dic[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD]
                                                             = "l7vsd_replication_sendthread";
-    string_logcategory_dic["l7vsd_parameter"]                = LOG_CAT_L7VSD_PARAMETER;
-    string_logcategory_dic["para"]                            = LOG_CAT_L7VSD_PARAMETER;
-    logcategory_string_dic[LOG_CAT_L7VSD_PARAMETER]            = "l7vsd_parameter";
-    string_logcategory_dic["l7vsd_logger"]                    = LOG_CAT_L7VSD_LOGGER;
+    string_logcategory_dic["l7vsd_parameter"]               = LOG_CAT_L7VSD_PARAMETER;
+    string_logcategory_dic["para"]                          = LOG_CAT_L7VSD_PARAMETER;
+    logcategory_string_dic[LOG_CAT_L7VSD_PARAMETER]         = "l7vsd_parameter";
+    string_logcategory_dic["l7vsd_logger"]                  = LOG_CAT_L7VSD_LOGGER;
     string_logcategory_dic["logger"]                        = LOG_CAT_L7VSD_LOGGER;
     logcategory_string_dic[LOG_CAT_L7VSD_LOGGER]            = "l7vsd_logger";
-    string_logcategory_dic["l7vsd_command"]                    = LOG_CAT_L7VSD_COMMAND;
-    string_logcategory_dic["cmd"]                            = LOG_CAT_L7VSD_COMMAND;
-    logcategory_string_dic[LOG_CAT_L7VSD_COMMAND]            = "l7vsd_command";
-    string_logcategory_dic["l7vsd_start_stop"]                = LOG_CAT_L7VSD_START_STOP;
+    string_logcategory_dic["l7vsd_command"]                 = LOG_CAT_L7VSD_COMMAND;
+    string_logcategory_dic["cmd"]                           = LOG_CAT_L7VSD_COMMAND;
+    logcategory_string_dic[LOG_CAT_L7VSD_COMMAND]           = "l7vsd_command";
+    string_logcategory_dic["l7vsd_start_stop"]              = LOG_CAT_L7VSD_START_STOP;
     string_logcategory_dic["stastp"]                        = LOG_CAT_L7VSD_START_STOP;
     logcategory_string_dic[LOG_CAT_L7VSD_START_STOP]        = "l7vsd_start_stop";
-    string_logcategory_dic["l7vsd_system"]                    = LOG_CAT_L7VSD_SYSTEM;
-    string_logcategory_dic["sys"]                            = LOG_CAT_L7VSD_SYSTEM;
+    string_logcategory_dic["l7vsd_system"]                  = LOG_CAT_L7VSD_SYSTEM;
+    string_logcategory_dic["sys"]                           = LOG_CAT_L7VSD_SYSTEM;
     logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM]            = "l7vsd_system";
-    string_logcategory_dic["l7vsd_system_memory"]            = LOG_CAT_L7VSD_SYSTEM_MEMORY;
-    string_logcategory_dic["sys_mem"]                        = LOG_CAT_L7VSD_SYSTEM_MEMORY;
-    logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_MEMORY]        = "l7vsd_system_memory";
-    string_logcategory_dic["l7vsd_system_endpoint"]            = LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
+    string_logcategory_dic["l7vsd_system_memory"]           = LOG_CAT_L7VSD_SYSTEM_MEMORY;
+    string_logcategory_dic["sys_mem"]                       = LOG_CAT_L7VSD_SYSTEM_MEMORY;
+    logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_MEMORY]     = "l7vsd_system_memory";
+    string_logcategory_dic["l7vsd_system_endpoint"]         = LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
     string_logcategory_dic["sys_ep"]                        = LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
-    logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENDPOINT]    = "l7vsd_system_endpoint";
-    string_logcategory_dic["l7vsd_system_signal"]            = LOG_CAT_L7VSD_SYSTEM_SIGNAL;
-    string_logcategory_dic["sys_sig"]                        = LOG_CAT_L7VSD_SYSTEM_SIGNAL;
-    logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_SIGNAL]        = "l7vsd_system_signal";
-    string_logcategory_dic["l7vsd_system_environment"]        = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
-    string_logcategory_dic["sys_env"]                        = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
+    logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENDPOINT]   = "l7vsd_system_endpoint";
+    string_logcategory_dic["l7vsd_system_signal"]           = LOG_CAT_L7VSD_SYSTEM_SIGNAL;
+    string_logcategory_dic["sys_sig"]                       = LOG_CAT_L7VSD_SYSTEM_SIGNAL;
+    logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_SIGNAL]     = "l7vsd_system_signal";
+    string_logcategory_dic["l7vsd_system_environment"]      = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
+    string_logcategory_dic["sys_env"]                       = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
     logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT]
                                                             = "l7vsd_system_environment";
-    string_logcategory_dic["l7vsd_snmpbridge"]                = LOG_CAT_L7VSD_SNMPBRIDGE;
+    string_logcategory_dic["l7vsd_snmpbridge"]              = LOG_CAT_L7VSD_SNMPBRIDGE;
     string_logcategory_dic["bridge"]                        = LOG_CAT_L7VSD_SNMPBRIDGE;
     logcategory_string_dic[LOG_CAT_L7VSD_SNMPBRIDGE]
                                                             = "l7vsd_snmpbridge";
     string_logcategory_dic["l7vsd_protocol"]                = LOG_CAT_PROTOCOL;
-    string_logcategory_dic["prot"]                            = LOG_CAT_PROTOCOL;
+    string_logcategory_dic["prot"]                          = LOG_CAT_PROTOCOL;
     logcategory_string_dic[LOG_CAT_PROTOCOL]                = "l7vsd_protocol";
     string_logcategory_dic["l7vsd_schedule"]                = LOG_CAT_SCHEDULE;
-    string_logcategory_dic["sched"]                            = LOG_CAT_SCHEDULE;
+    string_logcategory_dic["sched"]                         = LOG_CAT_SCHEDULE;
     logcategory_string_dic[LOG_CAT_SCHEDULE]                = "l7vsd_schedule";
-    string_logcategory_dic["all"]                            = LOG_CAT_END;
+    string_logcategory_dic["all"]                           = LOG_CAT_END;
 
     // string snmp logcategory dictionary create 
-    string_snmp_logcategory_dic["snmpagent_start_stop"]            = LOG_CAT_SNMPAGENT_START_STOP;
-    string_snmp_logcategory_dic["snmp_stastp"]                    = LOG_CAT_SNMPAGENT_START_STOP;
-    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_START_STOP]    = "snmpagent_start_stop";
+    string_snmp_logcategory_dic["snmpagent_start_stop"]         = LOG_CAT_SNMPAGENT_START_STOP;
+    string_snmp_logcategory_dic["snmp_stastp"]                  = LOG_CAT_SNMPAGENT_START_STOP;
+    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_START_STOP]   = "snmpagent_start_stop";
     string_snmp_logcategory_dic["snmpagent_manager_receive"]    = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
-    string_snmp_logcategory_dic["snmp_mngrcv"]                    = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
+    string_snmp_logcategory_dic["snmp_mngrcv"]                  = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE]
                                                                 = "snmpagent_manager_receive";
-    string_snmp_logcategory_dic["snmpagent_manager_send"]        = LOG_CAT_SNMPAGENT_MANAGER_SEND;
-    string_snmp_logcategory_dic["snmp_mngsnd"]                    = LOG_CAT_SNMPAGENT_MANAGER_SEND;
-    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_MANAGER_SEND]    = "snmpagent_manager_send";
-    string_snmp_logcategory_dic["snmpagent_l7vsd_receive"]        = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
-    string_snmp_logcategory_dic["snmp_vsdrcv"]                    = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
+    string_snmp_logcategory_dic["snmpagent_manager_send"]       = LOG_CAT_SNMPAGENT_MANAGER_SEND;
+    string_snmp_logcategory_dic["snmp_mngsnd"]                  = LOG_CAT_SNMPAGENT_MANAGER_SEND;
+    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_MANAGER_SEND] = "snmpagent_manager_send";
+    string_snmp_logcategory_dic["snmpagent_l7vsd_receive"]      = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
+    string_snmp_logcategory_dic["snmp_vsdrcv"]                  = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE]
                                                                 = "snmpagent_l7vsd_receive";
-    string_snmp_logcategory_dic["snmpagent_l7vsd_send"]            = LOG_CAT_SNMPAGENT_L7VSD_SEND;
-    string_snmp_logcategory_dic["snmp_vsdsnd"]                    = LOG_CAT_SNMPAGENT_L7VSD_SEND;
-    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_L7VSD_SEND]    = "snmpagent_l7vsd_send";
-    string_snmp_logcategory_dic["snmpagent_logger"]                = LOG_CAT_SNMPAGENT_LOGGER;
-    string_snmp_logcategory_dic["snmp_logger"]                    = LOG_CAT_SNMPAGENT_LOGGER;
-    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_LOGGER]        = "snmpagent_logger";
-    string_snmp_logcategory_dic["snmpagent_parameter"]            = LOG_CAT_SNMPAGENT_PARAMETER;
+    string_snmp_logcategory_dic["snmpagent_l7vsd_send"]         = LOG_CAT_SNMPAGENT_L7VSD_SEND;
+    string_snmp_logcategory_dic["snmp_vsdsnd"]                  = LOG_CAT_SNMPAGENT_L7VSD_SEND;
+    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_L7VSD_SEND]   = "snmpagent_l7vsd_send";
+    string_snmp_logcategory_dic["snmpagent_logger"]             = LOG_CAT_SNMPAGENT_LOGGER;
+    string_snmp_logcategory_dic["snmp_logger"]                  = LOG_CAT_SNMPAGENT_LOGGER;
+    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_LOGGER]       = "snmpagent_logger";
+    string_snmp_logcategory_dic["snmpagent_parameter"]          = LOG_CAT_SNMPAGENT_PARAMETER;
     string_snmp_logcategory_dic["snmp_para"]                    = LOG_CAT_SNMPAGENT_PARAMETER;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_PARAMETER]    = "snmpagent_parameter";
-    string_snmp_logcategory_dic["snmpagent_system"]                = LOG_CAT_SNMPAGENT_SYSTEM;
-    string_snmp_logcategory_dic["snmp_sys"]                        = LOG_CAT_SNMPAGENT_SYSTEM;
-    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM]        = "snmpagent_system";
-    string_snmp_logcategory_dic["snmpagent_system_memory"]        = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
-    string_snmp_logcategory_dic["snmp_sys_mem"]                    = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
+    string_snmp_logcategory_dic["snmpagent_system"]             = LOG_CAT_SNMPAGENT_SYSTEM;
+    string_snmp_logcategory_dic["snmp_sys"]                     = LOG_CAT_SNMPAGENT_SYSTEM;
+    snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM]       = "snmpagent_system";
+    string_snmp_logcategory_dic["snmpagent_system_memory"]      = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
+    string_snmp_logcategory_dic["snmp_sys_mem"]                 = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY]
                                                                 = "snmpagent_system_memory";
     string_snmp_logcategory_dic["snmpagent_system_endpoint"]    = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
-    string_snmp_logcategory_dic["snmp_sys_ep"]                    = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
+    string_snmp_logcategory_dic["snmp_sys_ep"]                  = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT]
                                                                 = "snmpagent_system_endpoint";
-    string_snmp_logcategory_dic["snmpagent_system_signal"]        = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
-    string_snmp_logcategory_dic["snmp_sys_sig"]                    = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
+    string_snmp_logcategory_dic["snmpagent_system_signal"]      = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
+    string_snmp_logcategory_dic["snmp_sys_sig"]                 = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL]
                                                                 = "snmpagent_system_signal";
-    string_snmp_logcategory_dic["snmpagent_system_environment"]    = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
-    string_snmp_logcategory_dic["snmp_sys_env"]                    = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
+    string_snmp_logcategory_dic["snmpagent_system_environment"] = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
+    string_snmp_logcategory_dic["snmp_sys_env"]                 = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
     snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT]
                                                                 = "snmpagent_system_environment";
-    string_snmp_logcategory_dic["all"]                            = LOG_CAT_END;
+    string_snmp_logcategory_dic["all"]                          = LOG_CAT_END;
 
     // string log level dictionary create.
     string_loglevel_dic["debug"]        = LOG_LV_DEBUG;
-    loglevel_string_dic[LOG_LV_DEBUG]    = "debug";
-    string_loglevel_dic["info"]            = LOG_LV_INFO;
+    loglevel_string_dic[LOG_LV_DEBUG]   = "debug";
+    string_loglevel_dic["info"]         = LOG_LV_INFO;
     loglevel_string_dic[LOG_LV_INFO]    = "info";
-    string_loglevel_dic["warn"]            = LOG_LV_WARN;
+    string_loglevel_dic["warn"]         = LOG_LV_WARN;
     loglevel_string_dic[LOG_LV_WARN]    = "warn";
     string_loglevel_dic["error"]        = LOG_LV_ERROR;
-    loglevel_string_dic[LOG_LV_ERROR]    = "error";
+    loglevel_string_dic[LOG_LV_ERROR]   = "error";
     string_loglevel_dic["fatal"]        = LOG_LV_FATAL;
-    loglevel_string_dic[LOG_LV_FATAL]    = "fatal";
+    loglevel_string_dic[LOG_LV_FATAL]   = "fatal";
 
     // parameter category dictionary create
-    string_parameter_dic["all"]                = PARAM_COMP_ALL;
-    string_parameter_dic["l7vsd"]            = PARAM_COMP_L7VSD;
-    string_parameter_dic["command"]            = PARAM_COMP_COMMAND;
-    string_parameter_dic["session"]            = PARAM_COMP_SESSION;
-    string_parameter_dic["virtualservice"]    = PARAM_COMP_VIRTUALSERVICE;
-    string_parameter_dic["module"]            = PARAM_COMP_MODULE;
-    string_parameter_dic["replication"]        = PARAM_COMP_REPLICATION;
-    string_parameter_dic["logger"]            = PARAM_COMP_LOGGER;
-    string_parameter_dic["l7vsadm"]            = PARAM_COMP_L7VSADM;
-    string_parameter_dic["snmpagent"]        = PARAM_COMP_SNMPAGENT;
-    string_parameter_dic["sslproxy"]        = PARAM_COMP_SSLPROXY;
-    string_parameter_dic["ssl"]            = PARAM_COMP_SSL;
+    string_parameter_dic["all"]             = PARAM_COMP_ALL;
+    string_parameter_dic["l7vsd"]           = PARAM_COMP_L7VSD;
+    string_parameter_dic["command"]         = PARAM_COMP_COMMAND;
+    string_parameter_dic["session"]         = PARAM_COMP_SESSION;
+    string_parameter_dic["virtualservice"]  = PARAM_COMP_VIRTUALSERVICE;
+    string_parameter_dic["module"]          = PARAM_COMP_MODULE;
+    string_parameter_dic["replication"]     = PARAM_COMP_REPLICATION;
+    string_parameter_dic["logger"]          = PARAM_COMP_LOGGER;
+    string_parameter_dic["l7vsadm"]         = PARAM_COMP_L7VSADM;
+    string_parameter_dic["snmpagent"]       = PARAM_COMP_SNMPAGENT;
+    string_parameter_dic["ssl"]             = PARAM_COMP_SSL;
 
     // create disp_result dictionary.
     disp_result_dic[l7vsadm_request::CMD_LIST]            = boost::bind( &l7vsadm::disp_list, this );
@@ -2016,28 +1949,28 @@ l7vs::l7vsadm::l7vsadm()
     disp_result_dic[l7vsadm_request::CMD_LIST_VERBOSE]    = boost::bind( &l7vsadm::disp_list_verbose, this );
 
     // response_message_dic create
-    response_error_message_dic[l7vsd_response::RESPONSE_ERROR]                = "command error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_LIST_ERROR]            = "list command error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_LIST_VERBOSE_ERROR]    = "list verbose error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_LIST_KEY_ERROR]        = "list key error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_ADD_VS_ERROR]        = "add vs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_DEL_VS_ERROR]        = "del vs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_EDIT_VS_ERROR]        = "edit vs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_FLUSH_VS_ERROR]        = "flush vs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_ADD_RS_ERROR]        = "add rs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_DEL_RS_ERROR]        = "del rs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_EDIT_RS_ERROR]        = "edit rs error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_REPLICATION_ERROR]    = "replication command error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_LOG_ERROR]            = "log command error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_SNMP_ERROR]            = "snmp command error : ";
-    response_error_message_dic[l7vsd_response::RESPONSE_PARAMETER_ERROR]    = "parameter error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_ERROR]                  = "command error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_LIST_ERROR]             = "list command error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_LIST_VERBOSE_ERROR]     = "list verbose error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_LIST_KEY_ERROR]         = "list key error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_ADD_VS_ERROR]           = "add vs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_DEL_VS_ERROR]           = "del vs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_EDIT_VS_ERROR]          = "edit vs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_FLUSH_VS_ERROR]         = "flush vs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_ADD_RS_ERROR]           = "add rs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_DEL_RS_ERROR]           = "del rs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_EDIT_RS_ERROR]          = "edit rs error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_REPLICATION_ERROR]      = "replication command error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_LOG_ERROR]              = "log command error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_SNMP_ERROR]             = "snmp command error : ";
+    response_error_message_dic[l7vsd_response::RESPONSE_PARAMETER_ERROR]        = "parameter error : ";
 
-    replication_mode_string_dic[replication::REPLICATION_OUT]            = "OUT";
-    replication_mode_string_dic[replication::REPLICATION_SINGLE]        = "SINGLE";
-    replication_mode_string_dic[replication::REPLICATION_MASTER]        = "MASTER";
-    replication_mode_string_dic[replication::REPLICATION_SLAVE]            = "SLAVE";
-    replication_mode_string_dic[replication::REPLICATION_MASTER_STOP]    = "MASTER_STOP";
-    replication_mode_string_dic[replication::REPLICATION_SLAVE_STOP]    = "SLAVE_STOP";
+    replication_mode_string_dic[replication::REPLICATION_OUT]               = "OUT";
+    replication_mode_string_dic[replication::REPLICATION_SINGLE]            = "SINGLE";
+    replication_mode_string_dic[replication::REPLICATION_MASTER]            = "MASTER";
+    replication_mode_string_dic[replication::REPLICATION_SLAVE]             = "SLAVE";
+    replication_mode_string_dic[replication::REPLICATION_MASTER_STOP]       = "MASTER_STOP";
+    replication_mode_string_dic[replication::REPLICATION_SLAVE_STOP]        = "SLAVE_STOP";
 
 }
 
@@ -2256,7 +2189,16 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
                 s.connect(stream_protocol::endpoint( L7VS_CONFIG_SOCKNAME ), err );
                 if( !err ){
                     break;
+                }else{
+                    //connect_retry_count was to be unused.
+                    //must be delete below "waiting" code!
+                    std::stringstream   buf;
+                    buf << boost::format( "connect() failed: %s.") % err.message();
+                    l7vsadm_err.setter( true, buf.str() );
+                    Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 0, buf.str(), __FILE__, __LINE__ );
+                    break;
                 }
+
                 connect_retry_count++;
                 if (connect_retry_count > connect_wait_count) {
                     std::stringstream    buf;
