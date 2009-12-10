@@ -7329,7 +7329,7 @@ void down_thread_client_respond_event_test(){
     BOOST_MESSAGE( "----- down_thread_client_respond_event test end -----" );
 }
 
-/*
+
 // up_thread_all_socket_close test
 // up_thread_all_socket_close test class
 class up_thread_all_socket_close_test_class : public l7vs::tcp_session{
@@ -7364,7 +7364,10 @@ class up_thread_all_socket_close_test_class : public l7vs::tcp_session{
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
         };
-        
+        l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+            return client_ssl_socket;
+        };
+       
         boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
             return sorryserver_socket.second;
         };
@@ -7491,14 +7494,21 @@ void up_thread_all_socket_close_test(){
     // unit_test [7] up_thread_all_socket_close closed socket parent virtual service connection incactive not call check
     std::cout << "[7] up_thread_all_socket_close closed socket parent virtual service connection incactive not call check" << std::endl;
     BOOST_CHECK(vs.connection_inactive_list.empty());
+
+    // SSL mode test
+    up_thread_all_socket_close_test_class ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    l7vs::tcp_ssl_socket& client_ssl_socket = ssl_test_obj.get_client_ssl_socket();
+    client_ssl_socket.close_call_check = false;
+
+    ssl_test_obj.test_call();
+
+    // unit_test [8] up_thread_all_socket_close client ssl socket close call check
+    std::cout << "[8] up_thread_all_socket_close client ssl socket close call check" << std::endl;
+    BOOST_CHECK(client_ssl_socket.close_call_check);
     
     BOOST_MESSAGE( "----- up_thread_all_socket_close test end -----" );
 }
 
-*/
-
-
-/*
 // down_thread_all_socket_close test
 // down_thread_all_socket_close test class
 class down_thread_all_socket_close_test_class : public l7vs::tcp_session{
@@ -7525,19 +7535,18 @@ class down_thread_all_socket_close_test_class : public l7vs::tcp_session{
                                                                                                    set_access_logger){};
 
         ~down_thread_all_socket_close_test_class(){};
-        
         void test_call(){
             tcp_session::down_thread_all_socket_close();
         };
-        
         l7vs::tcp_socket& get_client_socket(){
             return client_socket;
         };
-        
+        l7vs::tcp_ssl_socket& get_client_ssl_socket(){
+            return client_ssl_socket;
+        };
         boost::shared_ptr< l7vs::tcp_socket > get_sorry_socket(){
             return sorryserver_socket.second;
         };
-        
         std::list<socket_element>& get_down_thread_receive_realserver_socket_list(){
             return down_thread_receive_realserver_socket_list;
         };
@@ -7649,10 +7658,20 @@ void down_thread_all_socket_close_test(){
     // unit_test [6] down_thread_all_socket_close closed socket parent virtual service connection incactive not call check
     std::cout << "[6] down_thread_all_socket_close closed socket parent virtual service connection incactive not call check" << std::endl;
     BOOST_CHECK(vs.connection_inactive_list.empty());
-    
+
+    // SSL mode test
+    down_thread_all_socket_close_test_class ssl_test_obj(vs,io,set_option,listen_endpoint,true,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    l7vs::tcp_ssl_socket& client_ssl_socket = ssl_test_obj.get_client_ssl_socket();
+    client_ssl_socket.close_call_check = false;
+
+    ssl_test_obj.test_call();
+
+    // unit_test [7] up_thread_all_socket_close client ssl socket close call check
+    std::cout << "[7] up_thread_all_socket_close client ssl socket close call check" << std::endl;
+    BOOST_CHECK(client_ssl_socket.close_call_check);
+
     BOOST_MESSAGE( "----- down_thread_all_socket_close test end -----" );
 }
-*/
 
 // up_thread_client_disconnect test
 // up_thread_client_disconnect test class
@@ -12287,8 +12306,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_get_detination_event_test) );
 
-//NG    ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
-//NG    ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_all_socket_close_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_all_socket_close_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_client_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_client_disconnect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_disconnect_test) );
@@ -12304,7 +12323,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
-    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
+//    ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
@@ -12327,7 +12346,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &up_thread_sorry_disable_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorry_enable_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_sorry_disable_event_test ) );
-    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
 //    ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
     
