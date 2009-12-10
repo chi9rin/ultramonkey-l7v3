@@ -293,9 +293,9 @@ class mutex_lock_test : public l7vs::tcp_session{
             test_func = boost::bind(&mutex_lock_test::handle_ssl_handshake_timer,this,boost::asio::placeholders::error);
         };
 
-        void handle_ssl_handshake_timer(){
+        void handle_ssl_handshake_timer(const boost::system::error_code& error){
             befor_thread_id = boost::this_thread::get_id();
-            l7vs::tcp_session::handle_ssl_handshake_timer();
+            l7vs::tcp_session::handle_ssl_handshake_timer(error);
             after_thread_id = boost::this_thread::get_id();
         };
 };
