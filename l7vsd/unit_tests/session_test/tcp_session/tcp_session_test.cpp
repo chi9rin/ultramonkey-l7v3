@@ -2332,7 +2332,8 @@ void handle_ssl_handshake_timer_test(){
 
     ref_flag = false;
 
-    test_obj.test_call(boost::asio::placeholders::error);
+    boost::system::error_code test_call_ec;
+    test_obj.test_call(test_call_ec);
 
     BOOST_CHECK(ref_flag);
 
