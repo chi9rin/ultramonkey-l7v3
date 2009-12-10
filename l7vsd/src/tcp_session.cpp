@@ -1331,7 +1331,7 @@ namespace l7vs{
 
     //! handshake timer handler
     //! @param[in]        error is timer operation result error code
-    void tcp_session::handle_ssl_handshake_timer() {
+    void tcp_session::handle_ssl_handshake_timer(const boost::system::error_code& error) {
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
             Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 72, "in_function : tcp_session::handle_ssl_handshake_timer", __FILE__, __LINE__ );
