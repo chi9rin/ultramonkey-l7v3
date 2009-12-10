@@ -1226,7 +1226,7 @@ namespace l7vs{
             rd_scoped_lock scoped_lock(ssl_handshake_time_out_flag_mutex);
             if( ssl_handshake_time_out_flag ){
                 // SSL handshake time out or timer error
-                func_type = UP_FUNC_CLIENT_DISCONNECT;
+                func_tag = UP_FUNC_CLIENT_DISCONNECT;
                 std::stringstream buf;
                 buf << "Thread ID[";
                 buf << boost::this_thread::get_id();
