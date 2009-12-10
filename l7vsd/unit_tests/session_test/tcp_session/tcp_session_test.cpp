@@ -1992,7 +1992,7 @@ void constructer_test(){
 
     BOOST_MESSAGE( "----- constructer test end -----" );
 }
-/*
+
 // initialize test
 // initialize test class
 class initialize_test_class : public l7vs::tcp_session{
@@ -2166,7 +2166,7 @@ void initialize_test(){
     
     BOOST_MESSAGE( "----- initialize test end -----" );
 }
-*/
+
 
 // get_client_socket test
 // get_client_socket test class
@@ -2870,7 +2870,7 @@ void set_virtual_service_message_test(){
     
     BOOST_MESSAGE( "----- set_virtual_service_message test end -----" );
 }
-/*
+
 // up_thread_run
 // up_thread_run test class
 class up_thread_run_test_class : public l7vs::tcp_session{
@@ -3334,9 +3334,9 @@ void up_thread_run_test(){
     BOOST_MESSAGE( "----- up_thread_run test end -----" );
     
 }
-*/
 
-/*
+
+
 // down_thread_run
 // down_thread_run test class
 class down_thread_run_test_class : public l7vs::tcp_session{
@@ -3654,7 +3654,7 @@ void down_thread_run_test(){
     BOOST_MESSAGE( "----- down_thread_run test end -----" );
     
 }
-*/
+
 
 // thread_state_update test
 // thread_state_update test class
@@ -12297,15 +12297,15 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     ts->add( BOOST_TEST_CASE( &constructer_test ) );
 */
-//NG    ts->add( BOOST_TEST_CASE( &initialize_test ) );
+    ts->add( BOOST_TEST_CASE( &initialize_test ) );
 /*
     ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
     ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
     ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
     ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
 */
-//NG    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
-//NG    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
+    ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
 /*
     ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
