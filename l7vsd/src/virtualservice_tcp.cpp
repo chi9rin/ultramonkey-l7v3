@@ -596,15 +596,15 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
     access_log_file_name = element.access_log_file_name;
     access_log_rotate_arguments = element.access_log_rotate_arguments;
         
-    logger_implement_access *logger_access_instance = new logger_implement_access(access_log_file_name);
+    //logger_implement_access *logger_access_instance = new logger_implement_access(access_log_file_name);
 
-    if( logger_access_instance == NULL  ) {
+    //if( logger_access_instance == NULL  ) {
         boost::format formatter("access logger Instance acquisition error:%s");
         formatter % ( err ? "true" : "false") % err.get_message();
         Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
         err.setter( true, "access log class instance create failed" );
         return;
-    }
+    //}
 
 //    */
 
@@ -888,7 +888,7 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         }
         element.schedule_module_name = elem.schedule_module_name;
     }
-
+/*
     //additional PM options(for protomod_url)
     protocol_module_base::check_message_result result;
     if( NULL != protomod ){
@@ -921,7 +921,7 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         }
         return;
     }
-
+*/
     //update values
     //qos_upstream;
     if( ULLONG_MAX == elem.qos_upstream )
@@ -961,10 +961,13 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
     }
 
 //    /* @001 virtualservice_element
-    if (element.access_log_flag==1 || access_log_flag==false ) {
+    element.access_log_flag = elem.access_log_flag;
+    if (elem.access_log_flag==1 || access_log_flag==false ) {
         active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
-    } else if ( element.access_log_flag==0 || access_log_flag==true ) {
+        access_log_flag = true;
+    } else if ( elem.access_log_flag==0 || access_log_flag==true ) {
         active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
+        access_log_flag = false;
     }
 //    */
 
@@ -1492,7 +1495,12 @@ void    l7vs::virtualservice_tcp::release_session( const tcp_session* session_pt
  * @return  void
  */
 void l7vs::virtualservice_tcp::set_socket_option(){
-    
+
+    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+        boost::format funclog_fmt("in_function : void virtualservice_tcp::et_socket_option");
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, funclog_fmt.str(), __FILE__, __LINE__ );
+    }
+ 
     // socket option check & set
     //! is set option TCP_DEFER_ACCEPT
     defer_accept_opt = false;
@@ -1512,11 +1520,10 @@ void l7vs::virtualservice_tcp::set_socket_option(){
         //! TCP_QUICKACK option value (false:off,true:on)
     set_sock_opt.quickack_val = false;
 
-//    /* @003 socket option set
-
-    if ( element.socket_option_tcp_deffer_accept != 0 ) {
+    // set socket option
+    if ( element.socket_option_tcp_defer_accept != 0 ) {
         defer_accept_opt = true;
-        if ( element.socket_option_tcp_deffer_accept == 1 ) {
+        if ( element.socket_option_tcp_defer_accept == 1 ) {
             defer_accept_val = 1;
         }
     }
@@ -1543,10 +1550,6 @@ void l7vs::virtualservice_tcp::set_socket_option(){
         }
     }
 
-//    */    
-   
-
- 
     //----Debug log----------------------------------------------------------------------
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format formatter("set_socket_option"
@@ -1558,7 +1561,7 @@ void l7vs::virtualservice_tcp::set_socket_option(){
                         %(set_sock_opt.nodelay_opt ? "true" : "false") %(set_sock_opt.nodelay_val ? "true" : "false") 
                         %(set_sock_opt.cork_opt ? "true" : "false") %(set_sock_opt.cork_val ? "true" : "false") 
                         %(set_sock_opt.quickack_opt ? "true" : "false") %(set_sock_opt.quickack_val ? "true" : "false");
-        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 120, formatter.str(), __FILE__, __LINE__ );
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
     }
     //----Debug log----------------------------------------------------------------------
 
