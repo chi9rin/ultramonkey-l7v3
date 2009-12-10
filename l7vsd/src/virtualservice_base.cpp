@@ -402,13 +402,13 @@ l7vs::virtualservice_element&        l7vs::virtualservice_base::get_element(){
                                  "protocol_args.size = %d, sorry_maxconnection = %d, "
                                  "sorry_endpoint = %s, sorry_flag = %d, qos_upstream = %d, "
                                  "qos_downstream = %d, throughput_upstream = %d, throughput_downstream = %d, "
-                                 "ssl_flag = %d, ssl_conf_filename = %s" );
+                                 "ssl_file_name = %s" );
         element_dump % ( ( element.udpmode == 0 ) ? "TCP" : "UDP" ) % element.tcp_accept_endpoint \
                         % element.udp_recv_endpoint % element.realserver_vector.size() % element.protocol_module_name \
                         % element.schedule_module_name % element.protocol_args.size() % element.sorry_maxconnection \
                         % element.sorry_endpoint % element.sorry_flag % element.qos_upstream % element.qos_downstream \
                         % element.throughput_upstream % element.throughput_downstream \
-                        % element.ssl_flag % element.ssl_conf_filename;
+                        % element.ssl_file_name;
         l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 17, element_dump.str(), __FILE__, __LINE__ );
         l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 18, "out_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
     }
