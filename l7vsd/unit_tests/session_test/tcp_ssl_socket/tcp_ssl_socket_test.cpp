@@ -93,6 +93,7 @@ class test_client{
             if(ec){
                 //receive error
                 std::cout << "dummy client connect Error!" << std::endl;
+                std::cout << ec.message() << std::endl;
                 return false;
             }
             std::cout << "dummy client connect OK" << std::endl;
@@ -106,6 +107,7 @@ class test_client{
             if(ec){
                 //receive error
                 std::cout << "dummy client handshake Error!" << std::endl;
+                std::cout << ec.message() << std::endl;
                 return false;
             }
             std::cout << "dummy client handshake OK" << std::endl;
@@ -119,6 +121,7 @@ class test_client{
             if(ec){
                 //receive error
                 std::cout << "dummy client send Error!" << std::endl;
+                std::cout << ec.message() << std::endl;
                 return false;
             }
             std::cout << "dummy client send OK" << std::endl;
@@ -131,6 +134,7 @@ class test_client{
             if(ec){
                 //receive error
                 std::cout << "dummy client receive Error!" << std::endl;
+                std::cout << ec.message() << std::endl;
                 return false;
             }
             std::cout << "dummy client receive OK" << std::endl;
@@ -143,6 +147,7 @@ class test_client{
             if(ec){
                 //close error
                 std::cout << "dummy client close Error!" << std::endl;
+                std::cout << ec.message() << std::endl;
                 return;
             }
             std::cout << "dummy client close OK" << std::endl;
@@ -335,6 +340,7 @@ std::cout << "DEBUG TEST H" << std::endl;
     test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
     if(ec){
         std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec.message() << std::endl;
     }else{
         std::cout << "server side client connect OK" << std::endl;
     }
@@ -346,6 +352,7 @@ std::cout << "DEBUG TEST I" << std::endl;
     test_obj.handshake(ec);
     if(ec){
         std::cout << "server side client handshake ERROR" << std::endl;
+        std::cout << ec.message() << std::endl;
     }else{
         std::cout << "server side handshake OK" << std::endl;
     }
