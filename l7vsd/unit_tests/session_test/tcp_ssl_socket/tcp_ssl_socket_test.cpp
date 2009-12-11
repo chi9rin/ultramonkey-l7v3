@@ -27,7 +27,7 @@ class test_client{
             // dummy client start
 
             // connect
-            if(!connet_test()){
+            if(!connect_test()){
                 return;
             }
 
@@ -56,7 +56,7 @@ class test_client{
         bool connect_test(){
             boost::system::error_code ec;
             boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-            my_socket.connect(connect_end,ec);
+            my_socket.lowest_layer().connect(connect_end,ec);
             if(ec){
                 //receive error
                 std::cout << "dummy client connect Error!" << std::endl;
@@ -102,7 +102,7 @@ class test_client{
         };
         void close_test(){
             boost::system::error_code ec;
-            my_socket.close(ec);
+            my_socket.lowest_layer().close(ec);
             if(ec){
                 //close error
                 std::cout << "dummy client close Error!" << std::endl;
@@ -120,7 +120,7 @@ class test_client{
 class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
     public:
 
-    test_ssl_socket_class(boost::asio::io_service& io,boost::asio::ssl::context& context,const l7vs::tcp_ssl_socket_option_info set_option) : l7vs::tcp_ssl_socket(io,set_option){
+    test_ssl_socket_class(boost::asio::io_service& io,boost::asio::ssl::context& context,const l7vs::tcp_ssl_socket_option_info set_option) : l7vs::tcp_ssl_socket(io,context,set_option){
     };
     ~test_ssl_socket_class(){};
 
@@ -146,7 +146,7 @@ class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
         return &my_socket;
     }
 
-    l7vs::tcp_ssl_socket_option_info* get_opt_info(){
+    l7vs::tcp_socket_option_info* get_opt_info(){
         return &opt_info;
     }
 
@@ -1355,6 +1355,4 @@ void is_open_test(){
     server_thread.join();    
     BOOST_MESSAGE( "----- is_open test end -----" );    
 }
-
-
 */
