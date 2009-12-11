@@ -641,6 +641,9 @@ void write_some_read_some_test(){
     }
     BOOST_CHECK(!ec);
 
+    test_obj.get_open_flag() = true;
+
+
     // handshake
     dummy_cl.handshake_mutex.unlock();
     test_obj.handshake(ec);
@@ -760,7 +763,7 @@ void write_some_read_some_test(){
     receve_data_size = 0;
 
 
-    dummy_cl.read_mutex.unlock();
+  //  dummy_cl.read_mutex.unlock();
     while(true){
         if(send_data_size == MAX_BUFFER_SIZE){
             break;
@@ -786,7 +789,7 @@ void write_some_read_some_test(){
     std::cout << "[11] write_some & read_some test size MAX_BUFFER_SIZE write size" << std::endl;        
     BOOST_CHECK_EQUAL(send_data_size, send_size);
 
-    dummy_cl.write_mutex.unlock();
+//    dummy_cl.write_mutex.unlock();
     
     while(true){
         if(receve_data_size == MAX_BUFFER_SIZE){
