@@ -22,38 +22,70 @@ class test_client{
 
         ~test_client(){
         };
+        void all_lock(){
+            
+            //! socket connect mutex
+            connect_mutex.wrlock();
+            //! socket handshake mutex
+            hadshake_mutex.wrlock();
+            //! socket read mutex
+            read_mutex.wrlock();
+            //! socket write mutex
+            write_mutex.wrlock();
+            //! socket close mutex
+            close_mutex.wrlock();
 
-        void run(){
+        }
+
+
+        void handshake_test_run(){
             // dummy client start
 
             // connect
-            if(!connect_test()){
-                return;
-            }
+            {
+                rw_scoped_lock scope_lock(connect_mutex);
 
+                if(!connect_test()){
+                    return;
+                }
+            }
+/*
             // handshake
-            if(!handshake_test()){
-                return;
+            {
+                rw_scoped_lock scope_lock(hadshake_mutex);
+
+                if(!handshake_test()){
+                    return;
+                }
             }
 
             // send
-            if(!send_test()){
-                close_test();
-                return;
+            {
+                rw_scoped_lock scope_lock(write_mutex);
+                if(!send_test()){
+                    close_test();
+                    return;
+                }
             }
-
             // receive
-            if(!receive_test()){
-                close_test();
-                return;
+            {
+                rw_scoped_lock scope_lock(read_mutex);
+                if(!receive_test()){
+                    close_test();
+                    return;
+                }
             }
-
+*/
             // close 
-            close_test();
+            {
+                rw_scoped_lock scope_lock(close_mutex);
+                close_test();
+            }
 
         };
 
         bool connect_test(){
+            sleep(1);
             boost::system::error_code ec;
             boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
             my_socket.lowest_layer().connect(connect_end,ec);
@@ -67,6 +99,7 @@ class test_client{
         };
 
         bool handshake_test(){
+            sleep(1);
             boost::system::error_code ec;
             my_socket.handshake(boost::asio::ssl::stream_base::server, ec);
             if(ec){
@@ -79,6 +112,7 @@ class test_client{
         };
 
         bool send_test(){
+            sleep(1);
             boost::system::error_code ec;
             my_socket.write_some(boost::asio::buffer(request,MAX_BUFFER_SIZE), ec);
             if(ec){
@@ -90,6 +124,7 @@ class test_client{
             return true;
         };
         bool receive_test(){
+            sleep(1);
             boost::system::error_code ec;
             my_socket.read_some(boost::asio::buffer(response,MAX_BUFFER_SIZE), ec);
             if(ec){
@@ -101,6 +136,7 @@ class test_client{
             return true;
         };
         void close_test(){
+            sleep(1);
             boost::system::error_code ec;
             my_socket.lowest_layer().close(ec);
             if(ec){
@@ -114,6 +150,17 @@ class test_client{
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
         boost::array<char,MAX_BUFFER_SIZE> request;
         boost::array<char,MAX_BUFFER_SIZE> response;
+
+        //! socket connect mutex
+        wr_mutex connect_mutex;
+        //! socket handshake mutex
+        wr_mutex hadshake_mutex;
+        //! socket read mutex
+        wr_mutex read_mutex;
+        //! socket write mutex
+        wr_mutex write_mutex;
+        //! socket close mutex
+        wr_mutex close_mutex;
 };
 
 // 
@@ -149,6 +196,11 @@ class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
     l7vs::tcp_socket_option_info* get_opt_info(){
         return &opt_info;
     };
+
+    std::string get_password() const
+    {
+        return "test";
+    }
 
 };
 
@@ -216,39 +268,12 @@ void construcor_test(){
     BOOST_MESSAGE( "----- construcor test end -----" );
 }
 
+// handshake test
+void handshake_test(){
 
-
-
-
-/*
-// is_open test
-void is_open_test(){
     
-    BOOST_MESSAGE( "----- is_open test start -----" );
+    BOOST_MESSAGE( "----- handshake test start -----" );
     
-    test_mirror_server test_server;
-    
-    // accept req
-    test_server.breq_acc_flag = true;
-    // close wait req
-    test_server.breq_close_wait_flag = true;
-        
-    // recv cont
-    test_server.req_recv_cnt = 1;
-    test_server.data_size = 1;
-        
-    // test server start
-    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
-    
-    while( !test_server.brun_flag ){
-        sleep(1);
-    }
-    
-    std::cout << "ready dummy mirror server" << std::endl;
-    
-    
-    
-    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
     boost::asio::io_service io;
     boost::system::error_code ec;
     
@@ -265,49 +290,54 @@ void is_open_test(){
     set_option.quickack_opt = false;
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = false;
-    
-    test_socket_class test_obj(io,set_option);
 
-    // unit_test [1] is_open before connect check
-    std::cout << "[1] is_open before connect check" << std::endl;
-    BOOST_CHECK(!test_obj.is_open());
+    // Client context
+    boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+    client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+    client_ctx.load_verify_file("ca.pem");
 
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(!ec);
 
-    // unit_test [2] is_open after connect check
-    std::cout << "[2] is_open after connect check" << std::endl;
-    BOOST_CHECK(test_obj.is_open());
-    
-    while(!test_server.bconnect_flag){
-        sleep(1);
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    test_ssl_socket_class test_obj(io,server_ctx,set_option);
+
+    server_ctx.set_options(
+        boost::asio::ssl::context::default_workarounds
+        | boost::asio::ssl::context::no_sslv2
+        | boost::asio::ssl::context::single_dh_use);
+    server_ctx.set_password_callback(boost::bind(&test_ssl_socket_class::get_password, &test_obj));
+    server_ctx.use_certificate_chain_file("server.pem");
+    server_ctx.use_private_key_file("server.pem", boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file("dh512.pem");
+
+    boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
+
+    test_client dummy_cl(io,client_ctx);
+
+    dummy_cl.all_lock();
+
+    // test client start
+    boost::thread server_thread(boost::bind(&dummy_cl::handshake_test_run,&dummy_cl));
+
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
+    if(ec){
+        std::cout << "dummy client connect OK" << std::endl;
+    }else{
+        std::cout << "dummy client connect ERROR" << std::endl;
     }
-    
-    BOOST_CHECK(test_obj.get_open_flag());
-    
-    BOOST_CHECK(!test_server.bdisconnect_flag);
-    
-    test_obj.close(ec);
     BOOST_CHECK(!ec);
+ 
+    // dummy client close
+    dummy_cl.close_mutex.unlock();
 
-    // unit_test [3] is_open close after check
-    std::cout << "[3] is_open close after check" << std::endl;
-    BOOST_CHECK(!test_obj.is_open());
-    
-    test_server.brecv_triger = true;
-    sleep(1);
-    
-    test_server.breq_close_wait_flag = false;    
-    test_server.bstop_flag = true;
-    server_thread.join();    
-    BOOST_MESSAGE( "----- is_open test end -----" );    
+    // Close
+    test_obj.get_socket().lowest_layer().close();
+
+
+    BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
-*/
-
-
-
-
-
 
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
