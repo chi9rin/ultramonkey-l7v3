@@ -292,16 +292,20 @@ void handshake_test(){
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = false;
 
+std::cout << "DEBUG TEST A" << std::endl;
+
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
     client_ctx.load_verify_file("ca.pem");
 
+std::cout << "DEBUG TEST B" << std::endl;
 
     // Server context
     boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
     test_ssl_socket_class test_obj(io,server_ctx,set_option);
 
+std::cout << "DEBUG TEST C" << std::endl;
     server_ctx.set_options(
         boost::asio::ssl::context::default_workarounds
         | boost::asio::ssl::context::no_sslv2
@@ -311,15 +315,20 @@ void handshake_test(){
     server_ctx.use_private_key_file("server.pem", boost::asio::ssl::context::pem);
     server_ctx.use_tmp_dh_file("dh512.pem");
 
+std::cout << "DEBUG TEST D" << std::endl;
     boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
     boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
 
+std::cout << "DEBUG TEST E" << std::endl;
     test_client dummy_cl(io,client_ctx);
+std::cout << "DEBUG TEST F" << std::endl;
 
     dummy_cl.all_lock();
+std::cout << "DEBUG TEST G" << std::endl;
 
     // test client start
     boost::thread server_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
+std::cout << "DEBUG TEST H" << std::endl;
 
     dummy_cl.connect_mutex.unlock();
     test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
@@ -330,12 +339,14 @@ void handshake_test(){
     }
     BOOST_CHECK(!ec);
  
+std::cout << "DEBUG TEST I" << std::endl;
     // dummy client close
     dummy_cl.close_mutex.unlock();
 
     // Close
     test_obj.get_socket().lowest_layer().close();
 
+std::cout << "DEBUG TEST J" << std::endl;
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
