@@ -101,7 +101,7 @@ class test_client{
         };
 
         bool handshake_test(){
-            sleep(1);
+//            sleep(1);
             boost::system::error_code ec;
             my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
             if(ec){
