@@ -5,6 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "tcp_ssl_socket.h"
+#include "wrlock.h"
 #include "logger.h"
 
 #define DUMMI_SERVER_IP     "127.0.0.1"
@@ -43,7 +44,7 @@ class test_client{
 
             // connect
             {
-                rw_scoped_lock scope_lock(connect_mutex);
+                l7vs::rw_scoped_lock scope_lock(connect_mutex);
 
                 if(!connect_test()){
                     return;
@@ -52,7 +53,7 @@ class test_client{
 /*
             // handshake
             {
-                rw_scoped_lock scope_lock(hadshake_mutex);
+                l7vs::rw_scoped_lock scope_lock(hadshake_mutex);
 
                 if(!handshake_test()){
                     return;
@@ -61,7 +62,7 @@ class test_client{
 
             // send
             {
-                rw_scoped_lock scope_lock(write_mutex);
+                l7vs::rw_scoped_lock scope_lock(write_mutex);
                 if(!send_test()){
                     close_test();
                     return;
@@ -69,7 +70,7 @@ class test_client{
             }
             // receive
             {
-                rw_scoped_lock scope_lock(read_mutex);
+                l7vs::rw_scoped_lock scope_lock(read_mutex);
                 if(!receive_test()){
                     close_test();
                     return;
@@ -78,7 +79,7 @@ class test_client{
 */
             // close 
             {
-                rw_scoped_lock scope_lock(close_mutex);
+                l7vs::rw_scoped_lock scope_lock(close_mutex);
                 close_test();
             }
 
@@ -152,15 +153,15 @@ class test_client{
         boost::array<char,MAX_BUFFER_SIZE> response;
 
         //! socket connect mutex
-        wr_mutex connect_mutex;
+        l7vs::wr_mutex connect_mutex;
         //! socket handshake mutex
-        wr_mutex hadshake_mutex;
+        l7vs::wr_mutex hadshake_mutex;
         //! socket read mutex
-        wr_mutex read_mutex;
+        l7vs::wr_mutex read_mutex;
         //! socket write mutex
-        wr_mutex write_mutex;
+        l7vs::wr_mutex write_mutex;
         //! socket close mutex
-        wr_mutex close_mutex;
+        l7vs::wr_mutex close_mutex;
 };
 
 // 
@@ -318,7 +319,7 @@ void handshake_test(){
     dummy_cl.all_lock();
 
     // test client start
-    boost::thread server_thread(boost::bind(&dummy_cl::handshake_test_run,&dummy_cl));
+    boost::thread server_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
 
     dummy_cl.connect_mutex.unlock();
     test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
@@ -345,7 +346,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_ssl_socket class test" );
 
     ts->add( BOOST_TEST_CASE( &construcor_test ) );
-//    ts->add( BOOST_TEST_CASE( &handshake_test ) );
+    ts->add( BOOST_TEST_CASE( &handshake_test ) );
 //    ts->add( BOOST_TEST_CASE( &accept_test ) );
 //    ts->add( BOOST_TEST_CASE( &get_ssl_socket_test ) );
 //    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
