@@ -737,7 +737,6 @@ void write_some_read_some_test(){
 
     // size MAX_BUFFER_SIZE    
     send_size = MAX_BUFFER_SIZE;
-    test_server.data_size = send_size;
     for(int i = 0;i < (int)send_size;i++)
         send_buff[i] = 'A';
     
@@ -746,7 +745,6 @@ void write_some_read_some_test(){
         
     send_data_size = 0;
     receve_data_size = 0;
-    test_server.brecv_triger = true;
 
 
     dummy_cl.read_mutex.unlock();
