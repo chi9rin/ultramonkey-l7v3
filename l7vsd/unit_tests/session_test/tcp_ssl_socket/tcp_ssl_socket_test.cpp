@@ -487,6 +487,41 @@ void handshake_test(){
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
+void get_socket_test(){
+    BOOST_MESSAGE( "----- get_socket test start -----" );
+
+    boost::asio::io_service io;
+    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = true;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = true;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = true;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = true;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = true;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = true;
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+
+   test_ssl_socket_class test_obj(io,server_ctx,set_option);
+    
+    // unit_test [1] get_socket socket check
+    std::cout << "[1] get_socket socket check" << std::endl;
+    
+    boost::asio::ip::tcp::socket& chk_socket = test_obj.get_socket();
+    boost::asio::ip::tcp::socket* pref_pointer = test_obj.get_socket_pointer();
+    
+    BOOST_CHECK_EQUAL(&chk_socket,pref_pointer);
+    
+    BOOST_MESSAGE( "----- get_socket test end -----" );    
+}
+
 
 void set_non_blocking_mode_test(){
     BOOST_MESSAGE( "----- set_non_blocking_mode test start -----" );
@@ -559,7 +594,7 @@ void set_non_blocking_mode_test(){
     dummy_cl.close_mutex.unlock();
     cl_thread.join();
 
-    error_test_obj.get_socket().lowest_layer().close();
+    test_obj.get_socket().lowest_layer().close();
 
     
     // unit_test [2] set_non_blocking_mode test set non blocking mode faile error_code object
@@ -573,8 +608,89 @@ void set_non_blocking_mode_test(){
     
     BOOST_MESSAGE( "----- set_non_blocking_mode test end -----" );
 }
+/*
+void is_open_test(){
+    
+    BOOST_MESSAGE( "----- is_open test start -----" );
+    
+    test_mirror_server test_server;
+    
+    // accept req
+    test_server.breq_acc_flag = true;
+    // close wait req
+    test_server.breq_close_wait_flag = true;
+        
+    // recv cont
+    test_server.req_recv_cnt = 1;
+    test_server.data_size = 1;
+        
+    // test server start
+    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+    
+    while( !test_server.brun_flag ){
+        sleep(1);
+    }
+    
+    std::cout << "ready dummy mirror server" << std::endl;
+    
+    
+    
+    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    
+    test_socket_class test_obj(io,set_option);
 
+    // unit_test [1] is_open before connect check
+    std::cout << "[1] is_open before connect check" << std::endl;
+    BOOST_CHECK(!test_obj.is_open());
 
+    test_obj.connect(connect_end,ec);
+    BOOST_CHECK(!ec);
+
+    // unit_test [2] is_open after connect check
+    std::cout << "[2] is_open after connect check" << std::endl;
+    BOOST_CHECK(test_obj.is_open());
+    
+    while(!test_server.bconnect_flag){
+        sleep(1);
+    }
+    
+    BOOST_CHECK(test_obj.get_open_flag());
+    
+    BOOST_CHECK(!test_server.bdisconnect_flag);
+    
+    test_obj.close(ec);
+    BOOST_CHECK(!ec);
+
+    // unit_test [3] is_open close after check
+    std::cout << "[3] is_open close after check" << std::endl;
+    BOOST_CHECK(!test_obj.is_open());
+    
+    test_server.brecv_triger = true;
+    sleep(1);
+    
+    test_server.breq_close_wait_flag = false;    
+    test_server.bstop_flag = true;
+    server_thread.join();    
+    BOOST_MESSAGE( "----- is_open test end -----" );    
+}
+
+*/
 
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
@@ -584,12 +700,12 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &construcor_test ) );
 //    ts->add( BOOST_TEST_CASE( &accept_test ) );
     ts->add( BOOST_TEST_CASE( &handshake_test ) );
-//    ts->add( BOOST_TEST_CASE( &get_ssl_socket_test ) );
+    ts->add( BOOST_TEST_CASE( &get_ssl_socket_test ) );
     ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
 //    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
-//    ts->add( BOOST_TEST_CASE( &is_open_test ) );
+    ts->add( BOOST_TEST_CASE( &is_open_test ) );
 
     framework::master_test_suite().add( ts );
 
@@ -905,37 +1021,6 @@ void close_test(){
     BOOST_MESSAGE( "----- close test end -----" );    
 }
 
-void get_socket_test(){
-    BOOST_MESSAGE( "----- get_socket test start -----" );
-    
-    boost::asio::io_service io;
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = false;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = false;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = false;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = false;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = false;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = false;
-    
-    test_socket_class test_obj(io,set_option);
-    
-    // unit_test [1] get_socket socket check
-    std::cout << "[1] get_socket socket check" << std::endl;
-    
-    boost::asio::ip::tcp::socket& chk_socket = test_obj.get_socket();
-    boost::asio::ip::tcp::socket* pref_pointer = test_obj.get_socket_pointer();
-    
-    BOOST_CHECK_EQUAL(&chk_socket,pref_pointer);
-    
-    BOOST_MESSAGE( "----- get_socket test end -----" );    
-}
-
 
 class connect_lock_test_class : public l7vs::tcp_socket{
     public:
@@ -1123,84 +1208,4 @@ void close_lock_test(){
     
 }
 
-void is_open_test(){
-    
-    BOOST_MESSAGE( "----- is_open test start -----" );
-    
-    test_mirror_server test_server;
-    
-    // accept req
-    test_server.breq_acc_flag = true;
-    // close wait req
-    test_server.breq_close_wait_flag = true;
-        
-    // recv cont
-    test_server.req_recv_cnt = 1;
-    test_server.data_size = 1;
-        
-    // test server start
-    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
-    
-    while( !test_server.brun_flag ){
-        sleep(1);
-    }
-    
-    std::cout << "ready dummy mirror server" << std::endl;
-    
-    
-    
-    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-    boost::asio::io_service io;
-    boost::system::error_code ec;
-    
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = false;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = false;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = false;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = false;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = false;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = false;
-    
-    test_socket_class test_obj(io,set_option);
-
-    // unit_test [1] is_open before connect check
-    std::cout << "[1] is_open before connect check" << std::endl;
-    BOOST_CHECK(!test_obj.is_open());
-
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(!ec);
-
-    // unit_test [2] is_open after connect check
-    std::cout << "[2] is_open after connect check" << std::endl;
-    BOOST_CHECK(test_obj.is_open());
-    
-    while(!test_server.bconnect_flag){
-        sleep(1);
-    }
-    
-    BOOST_CHECK(test_obj.get_open_flag());
-    
-    BOOST_CHECK(!test_server.bdisconnect_flag);
-    
-    test_obj.close(ec);
-    BOOST_CHECK(!ec);
-
-    // unit_test [3] is_open close after check
-    std::cout << "[3] is_open close after check" << std::endl;
-    BOOST_CHECK(!test_obj.is_open());
-    
-    test_server.brecv_triger = true;
-    sleep(1);
-    
-    test_server.breq_close_wait_flag = false;    
-    test_server.bstop_flag = true;
-    server_thread.join();    
-    BOOST_MESSAGE( "----- is_open test end -----" );    
-}
 */
