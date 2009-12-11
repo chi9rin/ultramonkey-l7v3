@@ -39,6 +39,7 @@
 #include <boost/thread.hpp>
 #include "appender_property.h"
 #include "logger_implement_access.h"
+#include "wrlock.h"
 
 namespace l7vs{
 
@@ -60,7 +61,7 @@ public:
         const std::string &aclogFilename, 
         error_code& err);
 
-    bool acccess_log_logrotate_parameter_check(
+    bool access_log_logrotate_parameter_check(
         std::map<std::string,std::string>& rotatedata)
     {
         return(true);
