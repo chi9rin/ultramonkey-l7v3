@@ -13,9 +13,9 @@
 
 
 #define CLIENT_CTX_LOAD_VERIFY_FILE         "ca.pem"
-#defien SERVER_CTX_CERTIFICATE_CHAIN_FILE   "server.pem"
-#defien SERVER_CTX_PRIVATE_KEY_FILE         "server.pem"
-#defien SERVER_CTX_TMP_DH_FILE              "dh512.pem"
+#define SERVER_CTX_CERTIFICATE_CHAIN_FILE   "server.pem"
+#define SERVER_CTX_PRIVATE_KEY_FILE         "server.pem"
+#define SERVER_CTX_TMP_DH_FILE              "dh512.pem"
 
 
 
