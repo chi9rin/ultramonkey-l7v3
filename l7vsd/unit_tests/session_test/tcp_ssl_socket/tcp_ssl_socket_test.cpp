@@ -28,7 +28,7 @@ class test_client{
             //! socket connect mutex
             connect_mutex.wrlock();
             //! socket handshake mutex
-            hadshake_mutex.wrlock();
+            handshake_mutex.wrlock();
             //! socket read mutex
             read_mutex.wrlock();
             //! socket write mutex
@@ -53,7 +53,7 @@ class test_client{
 
             // handshake
             {
-                l7vs::rw_scoped_lock scope_lock(hadshake_mutex);
+                l7vs::rw_scoped_lock scope_lock(handshake_mutex);
 
                 if(!handshake_test()){
                     return;
