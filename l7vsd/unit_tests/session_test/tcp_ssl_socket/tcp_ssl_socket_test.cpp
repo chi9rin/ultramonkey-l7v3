@@ -50,7 +50,7 @@ class test_client{
                     return;
                 }
             }
-/*
+
             // handshake
             {
                 l7vs::rw_scoped_lock scope_lock(hadshake_mutex);
@@ -59,7 +59,7 @@ class test_client{
                     return;
                 }
             }
-
+/*
             // send
             {
                 l7vs::rw_scoped_lock scope_lock(write_mutex);
@@ -296,16 +296,13 @@ std::cout << "DEBUG TEST A" << std::endl;
 
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
-std::cout << "DEBUG TEST A-1" << std::endl;
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
-std::cout << "DEBUG TEST A-2" << std::endl;
     client_ctx.load_verify_file("ca.pem");
 
 
     // Server context
 std::cout << "DEBUG TEST B" << std::endl;
     boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
-std::cout << "DEBUG TEST B-1" << std::endl;
     test_ssl_socket_class test_obj(io,server_ctx,set_option);
 
 std::cout << "DEBUG TEST C" << std::endl;
@@ -313,13 +310,9 @@ std::cout << "DEBUG TEST C" << std::endl;
         boost::asio::ssl::context::default_workarounds
         | boost::asio::ssl::context::no_sslv2
         | boost::asio::ssl::context::single_dh_use);
-std::cout << "DEBUG TEST C-1" << std::endl;
     server_ctx.set_password_callback(boost::bind(&test_ssl_socket_class::get_password, &test_obj));
-std::cout << "DEBUG TEST C-2" << std::endl;
     server_ctx.use_certificate_chain_file("server.pem");
-std::cout << "DEBUG TEST C-3" << std::endl;
     server_ctx.use_private_key_file("server.pem", boost::asio::ssl::context::pem);
-std::cout << "DEBUG TEST C-4" << std::endl;
     server_ctx.use_tmp_dh_file("dh512.pem");
 
 std::cout << "DEBUG TEST D" << std::endl;
@@ -333,27 +326,35 @@ std::cout << "DEBUG TEST F" << std::endl;
     dummy_cl.all_lock();
 std::cout << "DEBUG TEST G" << std::endl;
 
-    // test client start
+    // client start
     boost::thread server_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
 std::cout << "DEBUG TEST H" << std::endl;
 
+    // accept
     dummy_cl.connect_mutex.unlock();
     test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
     if(ec){
-        std::cout << "dummy client connect OK" << std::endl;
-    }else{
         std::cout << "dummy client connect ERROR" << std::endl;
+    }else{
+        std::cout << "dummy client connect OK" << std::endl;
     }
     BOOST_CHECK(!ec);
- 
+
+    // handshake
 std::cout << "DEBUG TEST I" << std::endl;
-    // dummy client close
-    dummy_cl.close_mutex.unlock();
+    dummy_cl.handshake_mutex.unlock();
+    test_obj.handshake(ec);
+    if(ec){
+        std::cout << "dummy client handshake ERROR" << std::endl;
+    }else{
+        std::cout << "dummy client handshake OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
 
-    // Close
-    test_obj.get_socket().lowest_layer().close();
-
+    // close
 std::cout << "DEBUG TEST J" << std::endl;
+    dummy_cl.close_mutex.unlock();
+    test_obj.get_socket().lowest_layer().close();
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
