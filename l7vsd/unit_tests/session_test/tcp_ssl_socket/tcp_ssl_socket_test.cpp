@@ -155,7 +155,7 @@ class test_client{
         //! socket connect mutex
         l7vs::wr_mutex connect_mutex;
         //! socket handshake mutex
-        l7vs::wr_mutex hadshake_mutex;
+        l7vs::wr_mutex handshake_mutex;
         //! socket read mutex
         l7vs::wr_mutex read_mutex;
         //! socket write mutex
