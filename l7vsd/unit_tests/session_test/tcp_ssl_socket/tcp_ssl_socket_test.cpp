@@ -208,8 +208,8 @@ class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
         return &opt_info;
     };
 
-    std::string get_password() const
-    {
+    std::string get_password() const{
+        std::cout << "call get_password" << std::endl;
         return "test";
     }
 
@@ -307,7 +307,6 @@ std::cout << "DEBUG TEST A" << std::endl;
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
-//    client_ctx.set_verify_mode(SSL_VERIFY_NONE);
     client_ctx.load_verify_file("ca.pem");
 
 
@@ -324,7 +323,6 @@ std::cout << "DEBUG TEST C" << std::endl;
     server_ctx.set_password_callback(boost::bind(&test_ssl_socket_class::get_password, &test_obj));
     server_ctx.use_certificate_chain_file("server.pem");
     server_ctx.use_private_key_file("server.pem", boost::asio::ssl::context::pem);
-//    server_ctx.set_verify_mode(SSL_VERIFY_NONE);
     server_ctx.use_tmp_dh_file("dh512.pem");
 
 
@@ -345,6 +343,7 @@ std::cout << "DEBUG TEST H" << std::endl;
 
     // accept
     dummy_cl.connect_mutex.unlock();
+    sleep(1);
     test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
     if(ec){
         std::cout << "server side client connect ERROR" << std::endl;
