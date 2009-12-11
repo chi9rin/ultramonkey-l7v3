@@ -301,6 +301,7 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
 
     tcp_session*    tmp_session    = stc_ptr_noconst->get_session().get();
 
+    // ssl session cache flush
     if( is_session_cache_use == true ) {
         long ssl_cache_num = SSL_CTX_sess_number(sslcontext.impl());
         if ( ssl_cache_num >= session_cache_size ) {
@@ -308,9 +309,8 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
         }
     }
 
-//    /* @001 virtualservice_element
+    // send access log output ON or OFF message to tcp_session
     stc_ptr_noconst->session_access_log_output_mode_change( access_log_flag );
-//    */
 
     active_sessions.insert( tmp_session, stc_ptr_noconst );
 
@@ -581,17 +581,20 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         ssl_virtualservice_mode_flag = true;
     }
 
-//    /* @001 virtualservice_element 
+    // access log flag set 
     access_log_flag = false;
     if ( element.access_log_flag == 1 ) {
         access_log_flag = true;
     }
-//    */
 
 //    // @002 getInstance().find_LoggerAccess
-//    /* @002
-    if ( element.access_log_rotate_key_info == "none" ) {
+//    /* @002 add start
+    if ( element.access_log_rotate_key_info == "" ) {
+       element.access_log_rotate_key_info = "none";
+       element.access_log_rotate_verbose_info = "--ac-rotate-type size --ac-rotate-max-backup-index 5 --ac-rotate-max-filesize 10M";
        //element.access_log_rotate_verbose_info = getInstance().get_rotate_default_verbose_displayed_contents(); 
+    } else {
+        element.access_log_rotate_verbose_info = element.access_log_rotate_key_info;
     }
     access_log_file_name = element.access_log_file_name;
     access_log_rotate_arguments = element.access_log_rotate_arguments;
@@ -606,7 +609,7 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         return;
     //}
 
-//    */
+//    */ @002 add end
 
     set_socket_option();
 
@@ -960,7 +963,7 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         active_sessions.do_all( boost::bind( &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag ) );
     }
 
-//    /* @001 virtualservice_element
+    // access log flag check and send access log output ON or OFF message to tcp_session
     element.access_log_flag = elem.access_log_flag;
     if (elem.access_log_flag==1 || access_log_flag==false ) {
         active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
@@ -969,7 +972,6 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
         access_log_flag = false;
     }
-//    */
 
     err.setter( false, "" );
 
@@ -1429,7 +1431,7 @@ void    l7vs::virtualservice_tcp::connection_inactive( const boost::asio::ip::tc
 /*!
  * release_session
  *
- * @param   session_ptr
+ * @param   void
  * @return  void
  */
 void    l7vs::virtualservice_tcp::release_session( const tcp_session* session_ptr ){
@@ -1574,6 +1576,16 @@ void l7vs::virtualservice_tcp::set_socket_option(){
  */
 std::string    l7vs::virtualservice_tcp::get_ssl_password()
 {
+    /*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+        std::stringstream buf;
+        buf << "in_function : td::string    l7vs::virtualservice_tcp::get_ssl_password()";
+        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                    buf.str(),
+                    __FILE__, __LINE__ );
+    }
+    /*------ DEBUG LOG END ------*/
+
     // Get password from file.
     std::string retstr = "";
     FILE  *fp;
@@ -1593,6 +1605,18 @@ std::string    l7vs::virtualservice_tcp::get_ssl_password()
         }
         fclose(fp);
     }
+
+    /*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+        std::stringstream buf;
+        buf << "out_function : std::string    l7vs::virtualservice_tcp::get_ssl_password() : ";
+        buf << "retstr = " << retstr;
+        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                    buf.str(),
+                    __FILE__, __LINE__ );
+    }
+    /*------ DEBUG LOG END ------*/
+
     return retstr;
 }
 
