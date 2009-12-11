@@ -102,7 +102,7 @@ class test_client{
         bool handshake_test(){
             sleep(1);
             boost::system::error_code ec;
-            my_socket.handshake(boost::asio::ssl::stream_base::server, ec);
+            my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
             if(ec){
                 //receive error
                 std::cout << "dummy client handshake Error!" << std::endl;
@@ -334,9 +334,9 @@ std::cout << "DEBUG TEST H" << std::endl;
     dummy_cl.connect_mutex.unlock();
     test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
     if(ec){
-        std::cout << "dummy client connect ERROR" << std::endl;
+        std::cout << "server side client connect ERROR" << std::endl;
     }else{
-        std::cout << "dummy client connect OK" << std::endl;
+        std::cout << "server side client connect OK" << std::endl;
     }
     BOOST_CHECK(!ec);
 
@@ -345,9 +345,9 @@ std::cout << "DEBUG TEST I" << std::endl;
     dummy_cl.handshake_mutex.unlock();
     test_obj.handshake(ec);
     if(ec){
-        std::cout << "dummy client handshake ERROR" << std::endl;
+        std::cout << "server side client handshake ERROR" << std::endl;
     }else{
-        std::cout << "dummy client handshake OK" << std::endl;
+        std::cout << "server side handshake OK" << std::endl;
     }
     BOOST_CHECK(!ec);
 
