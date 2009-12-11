@@ -37,14 +37,11 @@ namespace l7vs{
 
 class ParameterImpl : private boost::noncopyable {
 protected:
-    typedef    std::map< std::string, int >            int_map_type;
-    typedef    std::map< std::string, std::string >        string_map_type;
-    typedef    std::multimap< std::string, std::string >    multistring_map_type;
+    typedef    std::map< std::string, int >               int_map_type;
+    typedef    std::multimap< std::string, std::string >  multistring_map_type;
 
-    //! parameter data of string
-    string_map_type                            stringMap;
     //! parameter data of multi string
-    multistring_map_type                        multistringMap;
+    multistring_map_type                    multistringMap;
     //! parameter data of int
     int_map_type                            intMap;
     //! create mutex
@@ -65,46 +62,55 @@ public:
         static ParameterImpl instance;
         return instance;
     }
+
     //! initialize
     //! @return true success
     //! @return false failer
-    bool    init();
+    bool init();
+
+    //! initialize(file designation)
+    //! @param[in]    component tag
+    //! @param[in]    file name
+    //! @return true success
+    //! @return false failer
+    bool init( const PARAMETER_COMPONENT_TAG, const std::string& );
 
     //! target component read
-    //!    @param[in]    component tag
+    //! @param[in]    component tag
+    //! @param[in]    file name
     //! @return false failer
     //! @return true success
-    bool    read_file( const PARAMETER_COMPONENT_TAG );
-
-    //! target component read specified filename
-    //!    @param[in]    component tag
-    //!    @param[in]    file name
-    //! @return false failer
-    //! @return true success
-    bool    read_specified_file( const PARAMETER_COMPONENT_TAG, const std::string& filename );
+    bool    read_file( const PARAMETER_COMPONENT_TAG, const std::string& );
 
     //! int value getter
     //! @param[in]    component tag
     //! @param[in]    keystring
-    //! @param[out]    errorcode
-    //! @return        int value
-    int    get_int( const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
+    //! @param[out]   errorcode
+    //! @return int value
+    int get_int( const PARAMETER_COMPONENT_TAG,
+                 const std::string&,
+                 error_code& );
 
     //! string value getter
     //! @param[in]    component tag
     //! @param[in]    keystring
-    //! @param[out]    errorcode
-    //! @return        string value
-    std::string    get_string( const PARAMETER_COMPONENT_TAG, const std::string&, error_code& );
+    //! @param[out]   errorcode
+    //! @return string value
+    std::string get_string( const PARAMETER_COMPONENT_TAG,
+                            const std::string&,
+                            error_code& );
 
     //! multistring value getter
     //! @param[in]    component tag
     //! @param[in]    keystring
-    //! @param[inout]    multistring map
-    //! @param[out]    errorcode
-    //! @return    last foundstring value
-    std::string    get_multistring( const PARAMETER_COMPONENT_TAG, const std::string&, multistring_map_type&, error_code& );
+    //! @param[inout] string vector
+    //! @param[out]   errorcode
+    //! @return       void
+    void get_multistring( const PARAMETER_COMPONENT_TAG,
+                          const std::string&,
+                          std::vector<std::string>&,
+                          error_code& );
 };
 
 }
-#endif    //__PARAMETER_IMPL_H__
+#endif //__PARAMETER_IMPL_H__
