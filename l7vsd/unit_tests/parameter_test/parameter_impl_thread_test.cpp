@@ -1,7 +1,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <boost/test/included/unit_test.hpp>
-#include "../../parameter/parameter_impl.cpp"
+#include "../../src/parameter_impl.cpp"
 
 using namespace boost::unit_test;
 
@@ -68,6 +68,10 @@ void    thread_test2(){
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
+    // Logger initialize
+    l7vs::Logger        logger_instance;
+    logger_instance.loadConf();
+
     // create unit test suite
     test_suite* ts = BOOST_TEST_SUITE( "parameter_impl_thread" );
     unlink( PARAMETER_FILE );
@@ -75,7 +79,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     l7vs::ParameterImpl&    impl = l7vs::ParameterImpl::get_instance();
     impl.init();
 
-     ts->add( BOOST_TEST_CASE( &thread_test1 ) );
+    ts->add( BOOST_TEST_CASE( &thread_test1 ) );
     ts->add( BOOST_TEST_CASE( &thread_test2 ) );
 
     framework::master_test_suite().add( ts );
