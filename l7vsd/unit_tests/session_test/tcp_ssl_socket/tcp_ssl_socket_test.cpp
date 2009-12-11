@@ -514,8 +514,8 @@ void get_socket_test(){
     // unit_test [1] get_socket socket check
     std::cout << "[1] get_socket socket check" << std::endl;
     
-    boost::asio::ip::tcp::socket& chk_socket = test_obj.get_socket();
-    boost::asio::ip::tcp::socket* pref_pointer = test_obj.get_socket_pointer();
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& chk_socket = test_obj.get_socket();
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket>* pref_pointer = test_obj.get_socket_pointer();
     
     BOOST_CHECK_EQUAL(&chk_socket,pref_pointer);
     
@@ -700,12 +700,12 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &construcor_test ) );
 //    ts->add( BOOST_TEST_CASE( &accept_test ) );
     ts->add( BOOST_TEST_CASE( &handshake_test ) );
-    ts->add( BOOST_TEST_CASE( &get_ssl_socket_test ) );
+    ts->add( BOOST_TEST_CASE( &get_socket_test ) );
     ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
 //    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
-    ts->add( BOOST_TEST_CASE( &is_open_test ) );
+//    ts->add( BOOST_TEST_CASE( &is_open_test ) );
 
     framework::master_test_suite().add( ts );
 
