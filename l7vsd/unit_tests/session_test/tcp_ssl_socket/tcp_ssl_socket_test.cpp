@@ -394,8 +394,11 @@ void handshake_test(){
         std::cout << "server side handshake OK" << std::endl;
     }
     // unit_test [1] handshake test no error check
+    std::cout << "[1] handshake test no error check" << std::endl;
+
     BOOST_CHECK(!ec);
     // unit_test [2] handshake test return value check
+    std::cout << "[2] handshake test return value check" << std::endl;
     BOOST_CHECK(bres);
 
     // close
@@ -440,8 +443,10 @@ void handshake_test(){
         std::cout << "server side handshake OK" << std::endl;
     }
     // unit_test [3] handshake test error check
+    std::cout << "[3] handshake test error check" << std::endl;
     BOOST_CHECK(ec);
     // unit_test [4] handshake test return value check
+    std::cout << "[4] handshake test return value check" << std::endl;
     BOOST_CHECK(!bres);
 
     error_test_obj.get_socket().lowest_layer().close();
