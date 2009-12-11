@@ -960,7 +960,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &handshake_test ) );
     ts->add( BOOST_TEST_CASE( &get_socket_test ) );
     ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
-    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
+//    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
     ts->add( BOOST_TEST_CASE( &close_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
     ts->add( BOOST_TEST_CASE( &is_open_test ) );
