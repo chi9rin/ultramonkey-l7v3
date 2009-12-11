@@ -119,6 +119,16 @@ our %VIRTUAL = (
     realdowncallback    => undef,
     realrecovercallback => undef,
     customcheck         => undef,
+    sslconfigfile       => undef,
+    accesslog           => undef,
+    accesslogfile       => undef,
+    socketoption        => undef,
+    accesslog_rotate_type                  => undef,
+    accesslog_rotate_max_backup_index      => undef,
+    accesslog_rotate_max_filesize          => undef,
+    accesslog_rotate_rotation_timing       => undef,
+    accesslog_rotate_rotation_timing_value => undef,
+    other_virtual_key                      => undef,
     # can override
     checkcount          => undef,
     checkinterval       => undef,
@@ -910,7 +920,8 @@ sub validate_config {
             my $fallback = parse_fallback($line, $value, $config);
             $value = {tcp => $fallback};
         }
-        elsif ($name eq 'quiescent') {
+        elsif ( $name eq 'quiescent'
+             || $name eq 'accesslog') {
             $value = defined $value && $value =~ /^yes$/i ? 1
                    : defined $value && $value =~ /^no$/i  ? 0
                    :                                     undef
@@ -920,8 +931,8 @@ sub validate_config {
             }
         }
         elsif ($name eq 'module') {
+            ## V3  Un-offering (url,pfileter).
             my %key_option = ( url         => ['--pattern-match', '--uri-pattern-match', '--host-pattern-match'],
-                               pfilter     => ['--pattern-match'],
                                sessionless => [],
                                ip          => [],
                                sslid       => [],
@@ -945,8 +956,8 @@ sub validate_config {
             }
             if ( !$key && @{$key_option{$module}} ) {
                 # when omit cookie module key option
-		my $key_opt = join q{' or `}, @{$key_option{$module}};
-		config_error($line, 'ERR0112', $module, $key_opt, $config);
+                my $key_opt = join q{' or `}, @{$key_option{$module}};
+                config_error($line, 'ERR0112', $module, $key_opt, $config);
             }
             $value = {name => $module, option => $option, key => $key};
         }
@@ -970,6 +981,81 @@ sub validate_config {
                 config_error($line, 'ERR0117', $config);
             }
         }
+        elsif ( $name eq 'socketoption') {
+            $value = lc $value;
+            # socketoption=OPTION,OPTION,OPTION
+            if (!defined $value) {
+                config_error($line, 'ERR0124', $config);
+            }
+            my @option_value = split /,/, $value;
+            # OPTION:deferaccept,nodelay,cork,quickackon|quickackoff
+            for my $option (@option_value) {
+                if($option !~ /deferaccept|nodelay|cork|quickackon|quickackoff/) {
+                    config_error($line, 'ERR0124', $config);
+                }
+            }
+        }
+        elsif ($name eq 'sslconfigfile'
+            || $name eq 'accesslogfile') {
+            if (!defined $value || !-f $value) {
+                config_error($line, 'ERR0116', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_type') {
+            $value = lc $value;
+            my $valid_rotate_type = qr{date|size|datesize};
+            if (!defined $value || $value !~ /^(?:$valid_rotate_type)$/) {
+                config_error($line, 'ERR0124', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_max_backup_index') {
+            if (!defined $value || $value !~ /^\d+$/ || $value <= 0 || $value >= 13) {
+                config_error($line, 'ERR0126', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_max_filesize') {
+            $value = uc $value;
+            if ( !defined $value || ($value ne '0' && $value !~ /^([1-9]\d{0,2}[KMG]|\d)$/) ) {
+                config_error($line, 'ERR0127', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_rotation_timing') {
+            $value = lc $value;
+            my $valid_rotation_timing = qr{year|month|week|date|hour};
+            if (!defined $value || $value !~ /^(?:$valid_rotation_timing)$/) {
+                config_error($line, 'ERR0128', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_rotation_timing_value') {
+            my $check = undef;
+            $value =~ s/["']//g;
+            if (!defined $value ) {
+                config_error($line, 'ERR0129', $config);
+            }
+            if ($value =~ /^[1-9]\d{0,1}\/[1-9]\d{0,1}\s\d{1,2}:\d{1,2}$/i) {
+                ## MM/dd hh:mm Check
+                $check = 1;
+            }
+            elsif ($value =~ /^[1-9]\d{0,1}\s\d{1,2}:\d{1,2}$/i) {
+                ## dd hh:mm Check
+                $check = 1;
+            }
+            elsif ($value =~ /^(sun|mon|tue|wed|thu|fri|sat)\s\d{1,2}:\d{1,2}$/i) {
+                ## <week> hh:mm Check
+                $check = 1;
+            }
+            elsif ($value =~ /^\d{1,2}:\d{1,2}$/i) {
+                ## hh:mm        Check
+                $check = 1;
+            }
+            elsif ($value =~ /^\d{1,2}$/i) {
+                ## mm           Check
+                $check = 1;
+            }
+            if ( !defined $check ) {
+                config_error($line, 'ERR0129', $config);
+            }
+        }
     }
 
     return ($name, $value);
@@ -990,9 +1076,9 @@ sub check_require_module {
         dns     => [ qw( Net::DNS ) ],
         mysql   => [ qw( DBI DBD::mysql ) ],
         pgsql   => [ qw( DBI DBD::Pg ) ],
-        sip     => [ qw( IO::Socket::INET ) ],
+        sip     => [ qw( IO::Socket::INET IO::Socket::INET6 ) ],
         ping    => [ qw( Net::Ping ) ],
-        connect => [ qw( IO::Socket::INET ) ],
+        connect => [ qw( IO::Socket::INET IO::Socket::INET6 ) ],
     );
             
     for my $v ( @{ $CONFIG{virtual} } ) {
@@ -1094,7 +1180,7 @@ sub parse_fallback {
 sub parse_real {
     my ($line, $real, $config_line) = @_;
     
-    my $ip_host = qr{\d+\.\d+\.\d+\.\d+|[a-z0-9.-]+};
+    my $ip_host = qr{\d+\.\d+\.\d+\.\d+|[a-z0-9.-]+|\[[a-zA-Z0-9:]+\]};
     my $port_service = qr{\d+|[a-z0-9-]+};
     if (    !defined $real
          || $real !~ /^
@@ -1113,7 +1199,6 @@ sub parse_real {
     }
     my ($ip1, $ip2, $port, $forward, $weight, $request, $receive)
      = (  $1,   $2,    $3,       $4,      $5,       $6,       $7);
-
     # set forward, weight and request-receive pair.
     my %real = %REAL;
     if (defined $forward) {
@@ -1154,18 +1239,27 @@ sub parse_real {
         }
     }
 
-    my $int_ip1 = ip_to_int($resolved_ip1);
-    my $int_ip2 = ip_to_int($resolved_ip2);
-    if ($int_ip1 > $int_ip2) {
-        config_error($line, 'ERR0115', $resolved_ip1, $resolved_ip2, $config_line);
-    }
-
+    my ($ip_version , $int_ip1, $int_ip1_prefix ) = ip_to_int($resolved_ip1);
+    my ($ip_version2, $int_ip2, $int_ip2_prefix ) = ip_to_int($resolved_ip2);
     my @reals = ();
-    for (my $int_ip = $int_ip1; $int_ip <= $int_ip2; $int_ip++) {
-        my %new_real = %real;
-        $new_real{server}{ip  } = int_to_ip($int_ip);
-        $new_real{server}{port} = $resolved_port;
-        push @reals, \%new_real;
+    if ( defined $int_ip1 && defined $int_ip2 ) {
+        if ($int_ip1 > $int_ip2) {
+            config_error($line, 'ERR0115', $resolved_ip1, $resolved_ip2, $config_line);
+        }
+        elsif ($int_ip1 eq $int_ip2) {
+            my %new_real = %real;
+            $new_real{server}{ip  } = $resolved_ip1;
+            $new_real{server}{port} = $resolved_port;
+            push @reals, \%new_real;
+        }
+        else {
+            for (my $int_ip = $int_ip1; $int_ip <= $int_ip2; $int_ip++) {
+                my %new_real = %real;
+                $new_real{server}{ip  } = int_to_ip($ip_version, $int_ip, $int_ip1_prefix);
+                $new_real{server}{port} = $resolved_port;
+                push @reals, \%new_real;
+            }
+        }
     }
     return \@reals;
 }
@@ -1229,6 +1323,77 @@ sub ld_setup {
                 }
                 if ( defined $v->{qosdown} ) {
                     $v->{option}{flags} .= ' -q ' . $v->{qosdown};
+                }
+                if ( defined $v->{sslconfigfile} ) {
+                    $v->{option}{flags} .= ' -S ' . $v->{sslconfigfile};
+                    $v->{other_virtual_key} .= ' ' . $v->{sslconfigfile};
+                }
+                else {
+                    $v->{other_virtual_key} .= ' none';
+                }
+                if ( defined $v->{socketoption} ) {
+                    $v->{option}{flags} .= ' -O ' . $v->{socketoption};
+                    $v->{other_virtual_key} .= ' ' . $v->{socketoption};
+                }
+                else {
+                    $v->{other_virtual_key} .= ' none';
+                }
+                if ( defined $v->{accesslog} ) {
+                    $v->{option}{flags} .= ' -L ' . $v->{accesslog};
+                }
+                if ( defined $v->{accesslogfile} ) {
+                    $v->{option}{flags} .= ' -a ' . $v->{accesslogfile};
+                    $v->{other_virtual_key} .=  ' ' . $v->{accesslogfile};
+                }
+                else {
+                    $v->{other_virtual_key} .= ' none';
+                }
+                my $option_key_flag = 0;
+                if ( defined $v->{accesslog_rotate_type} ) {
+                    $v->{option}{flags} 
+                       .= ' --ac-rotate-type ' . $v->{accesslog_rotate_type};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-type ' . $v->{accesslog_rotate_type};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_max_backup_index} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-max-backup-index ' 
+                             . $v->{accesslog_rotate_max_backup_index};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-max-backup-index ' 
+                             . $v->{accesslog_rotate_max_backup_index};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_max_filesize} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-max-filesize '
+                             . $v->{accesslog_rotate_max_filesize};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-max-filesize '
+                             . $v->{accesslog_rotate_max_filesize};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_rotation_timing} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-rotation-timing '
+                             . $v->{accesslog_rotate_rotation_timing};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-rotation-timing '
+                             . $v->{accesslog_rotate_rotation_timing};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_rotation_timing_value} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-rotation-timing-value '
+                             . $v->{accesslog_rotate_rotation_timing_value};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-rotation-timing-value '
+                             . $v->{accesslog_rotate_rotation_timing_value};
+                    $option_key_flag = 1;
+                }
+                if ( $option_key_flag == 0 ) {
+                    $v->{other_virtual_key} .= ' none ';
                 }
             }
     
@@ -1379,6 +1544,9 @@ sub ld_read_l7vsadm {
     my $list_command = $PROC_ENV{l7vsadm} . " -K -n";
     my $cmd_result = qx{$list_command};
     my @list_line = split /\n/, $cmd_result;
+    my $other_virtual_flag = 'off';
+    my $other_virtual_count = 0;
+    my $other_virtual_option = undef;
 
     # skip below header
     # [cf] Layer-7 Virtual Server version 2.0.0-0
@@ -1388,29 +1556,43 @@ sub ld_read_l7vsadm {
 
     for my $line (@list_line) {
         # check virtual service line format
-        # [cf] TCP 192.168.0.4:12121 cinsert rr 0 --cookie-name CookieName
-        if ($line =~ /
+        # [cf] TCP 192.168.0.4:12121 sessionless rr
+        #      TCP [2031:130f:876a::130b]:1231 sessionless rr
+       ####         ((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|\[[0-9a-fA-F:])(%.+)?\]:\d{1,5}) \s+ # ip port
+        if (($line =~ /
                 ^           # top
                 (\w+) \s+   # 'TCP'
                 (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}) \s+ # ip port
                 (\w+) \s+   # protocol module
-                \w+ \s+     # scheduler
-                (?:0|1) \s+ # reschedule flag
-                (.*)        # module key
+                \w+         # scheduler
                 $           # end
                 /x
-            ) {
-            my ($proto, $ip_port, $module, $key) = ($1, $2, $3, $4);
+          
+            )
+           ||($line =~ /
+                ^           # top
+                (\w+) \s+   # 'TCP'
+                (\[[0-9a-fA-F:]+(?:%.+)?\]:\d{1,5}) \s+ # ip port
+                (\w+) \s+   # protocol module
+                \w+         # scheduler
+                $           # end
+                /x
+          
+            )) {
+            my ($proto, $ip_port, $module) = ($1, $2, $3);
             # vip_id MUST be same format as get_virtual_id_str
             $proto = lc $proto;
-            $vip_id = "$proto:$ip_port:$module $key";
+            $vip_id = "$proto:$ip_port:$module";
             $vip_id =~ s/\s+$//;
             $current_service->{$vip_id} = undef;
+            $other_virtual_flag = 'on';
+            $other_virtual_option = undef;
+            $other_virtual_count = 0;
             next;
         }
         # check real server line format
         # [cf] -> 192.168.0.4:7780             Masq    1     10     123456      
-        if (defined $vip_id && $line =~ /
+        if ((defined $vip_id && $line =~ /
                 ^           # top
                 \s+ -> \s+  # arrow
                 (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5}) \s+ # ip port
@@ -1420,7 +1602,18 @@ sub ld_read_l7vsadm {
                 \d+ \s*     # inactive connections
                 $           # end
                 /x
-            ) {
+            )
+          ||(defined $vip_id && $line =~ /
+                ^           # top
+                \s+ -> \s+  # arrow
+                (\[[0-9a-fA-F:]+(?:%.+)?\]):(\d{1,5}) \s+ # ip port
+                (\w+) \s+   # 'Masq'
+                (\d+) \s+   # weight
+                \d+ \s+     # active connections
+                \d+ \s*     # inactive connections
+                $           # end
+                /x
+            )) {
             my ($ip, $port, $forward, $weight) = ($1, $2, $3, $4);
             my $ip_port = "$ip:$port";
             my $real = {
@@ -1432,10 +1625,24 @@ sub ld_read_l7vsadm {
                                 forward => get_forward_flag($forward),
                                 },
             };
+            $other_virtual_flag = 'off';
             $current_service->{$vip_id}{$ip_port} = $real;
         }
+        elsif ($other_virtual_flag eq 'on'){
+            ##  SSL_config_file  value set          D->A Command
+            ##  Socket option    value set          D->A Command
+            ##  Access_log_flag  value set          E    Command
+            ##  Access_log_file  value set          D->A Command
+            ##  Access_log_rotate option value set  D->A Command
+            if ($other_virtual_count != 2 ) {
+                $line =~ s/\s+/ /g;
+                $other_virtual_option .= $line;
+                $current_service->{$vip_id}{other_virtual_option}
+                                        = $other_virtual_option;
+            }
+            $other_virtual_count++;
+        }
     }
-
     return $current_service;
 }
 
@@ -1552,7 +1759,7 @@ sub ld_delete_real {
 sub ld_start {
     # read status of current l7vsadm -K -n
     my $current_service = ld_read_l7vsadm();
-    if (!defined $current_service) {
+    if (!defined $current_service ) {
         ld_log( _message('FTL0201') );
         return;
     }
@@ -1569,11 +1776,17 @@ sub ld_start {
                 return;
             }
     
-            if ( exists( $current_service->{$vip_id} ) ) {
+            if ( exists( $current_service->{$vip_id} )
+             && (defined $current_service->{$vip_id}{other_virtual_option} 
+               && defined $nv->{other_virtual_key}
+               && $current_service->{$vip_id}{other_virtual_option}
+                eq  $nv->{other_virtual_key} )) {
                 # service already exists, modify it
                 ld_edit_virtual($nv);
             }
             else {
+                # no such service, create a new one
+                ld_delete_virtual($nv);
                 # no such service, create a new one
                 ld_add_virtual($nv);
             }
@@ -2748,10 +2961,26 @@ sub check_ping {
 
     ld_debug( 2, qq(Checking ping: host="$r->{server}{ip}" checktimeout="$v->{checktimeout}"\n) );
 
-    my $p = Net::Ping->new('icmp', 1, 64);
-    if ( !$p->ping( $r->{server}{ip}, $v->{checktimeout} ) ) {
-        ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
-        return $SERVICE_DOWN;
+    if ( is_ip( $r->{server}{ip})) {
+        ## IPv4 PingCheck
+
+        my $p = Net::Ping->new('icmp', 1);
+        if ( !$p->ping( $r->{server}{ip}, $v->{checktimeout} ) ) {
+            ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+    }
+    else {
+    ## IPv6 PingCheck
+        my $command
+            = sprintf "ping6 %s -w %d > /dev/null 2>&1",
+                                     $r->{server}{ip},
+                                     $v->{checktimeout};
+
+        if( system_wrapper( $command )) {
+            ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
     }
 
     ld_log( _message('WRN0214', $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
@@ -3490,6 +3719,60 @@ sub is_ip {
     return 1;
 }
 
+# is_ip6
+# Check that a given string is an IPv6 address
+# pre: alleged_ip6: string representing ip address
+# post: alleged_ip6 is checked to see if it is valid
+# return: 1 if alleged_ip is a valid ipv6 address
+#         0 otherwise
+sub is_ip6 {
+    my $alleged_ip = shift;
+    my @return_array = (0, undef);
+
+    # If we don't have four, . delimited numbers then we have no hope
+    if (!defined $alleged_ip ) {
+        ld_log( _message('ERR0501') );
+        return 0;
+    }
+
+    ## Change IPv6 Address 
+    $alleged_ip =~ s/[\[\]]//g;
+    ## get LinkLocal 
+    my ($work, $link_local) = split /%/, $alleged_ip;
+    my @address;
+    if ( $alleged_ip =~ /::/ ){
+        my ($adr_a, $adr_b) = split /::/, $alleged_ip;
+        my @adr_a           = split /:/ , $adr_a;
+        my @adr_b           = split /:/ , $adr_b;
+        for(scalar @adr_a .. 7 - scalar @adr_b){
+            push @adr_a,0; 
+        }
+        @address = (@adr_a, @adr_b);
+    }
+    else {
+        @address = split /:/, $alleged_ip;
+    }
+    $alleged_ip  = join ":", @address;
+    if ( defined $link_local ){
+        $alleged_ip .= '%' . $link_local;
+    }
+    if (!defined $alleged_ip || 
+            $alleged_ip !~ m/^([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4})(%.+)?$/x) {
+        ld_log( _message('ERR0501') );
+        return 0;
+    }
+    @return_array = (1, @address);
+    return @return_array;
+}
+
+
 # ip_to_int
 # Turn an IP address given as a dotted quad into an integer
 # pre: ip_address: string representing IP address
@@ -3498,15 +3781,31 @@ sub is_ip {
 #         integer representation of IP address otherwise
 sub ip_to_int {
     my $ip_address = shift;
+    my $ip_version = 'ipv4';
+    my @result = undef;
+    my @result2 = undef;
+    my @return_array = (undef, -1);
 
-    if ( !is_ip($ip_address) ) {
-        return -1;
+
+    if ( is_ip($ip_address) ) {
+        my ($oct1, $oct2, $oct3, $oct4)
+            = $ip_address =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+        @result = (($oct1 << 24) + ($oct2 << 16) + ($oct3 << 8) + $oct4);
     }
-    my ($oct1, $oct2, $oct3, $oct4)
-        = $ip_address =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
-
-    my $result = ($oct1 << 24) + ($oct2 << 16) + ($oct3 << 8) + $oct4;
-    return $result;
+    else {
+        my ( $ret, @address ) = is_ip6($ip_address);
+        if ( $ret == 1 ) {
+            my ( $hex1, $hex2, $hex3, $hex4, $hex5, $hex6, $hex7, $hex8, $linklocal) = @address;
+            @result = ((hex($hex5) << 48)  + (hex($hex6) << 32) + (hex($hex7) << 16)  + hex($hex8));
+            @result2 = ((hex($hex1) << 48)  + (hex($hex2) << 32) + (hex($hex3) << 16)  + hex($hex4));                      
+            $ip_version = 'ipv6';
+        }
+        else {
+            return @return_array;
+        }
+    }
+    @return_array = ($ip_version, @result, @result2);
+    return @return_array;
 }
 
 # int_to_ip
@@ -3515,17 +3814,43 @@ sub ip_to_int {
 # post: Decimal is converted to a dotted quad
 # return: string representing IP address
 sub int_to_ip {
-    my $ip_address = shift;
-    if (!defined $ip_address || $ip_address !~ /^\d+$/) {
+    my ($ip_version, $ip_address,$ip_address2) = @_;
+    if (!defined $ip_address || $ip_address !~ /^\d+$/ ) {
+     ##|| !defined $ip_version || $ip_version !~ /ipv[46]/ ) {
         ld_log( _message('ERR0501') );
         return;
     }
 
-    my $result = sprintf "%d.%d.%d.%d",
-                     ($ip_address >> 24) & 255,
-                     ($ip_address >> 16) & 255,
-                     ($ip_address >> 8 ) & 255,
-                     ($ip_address      ) & 255;
+    my $result = undef;
+    if ($ip_version eq 'ipv6') {
+    ## IPv6 Address Change
+        $result = sprintf "%0x:%0x:%0x:%0x:%0x:%0x:%0x:%0x",
+                         ($ip_address2 >>  48) & 0xffff,
+                         ($ip_address2 >>  32) & 0xffff,
+                         ($ip_address2 >>  16) & 0xffff,
+                         ($ip_address2   ) & 0xffff,
+                         ($ip_address >>  48) & 0xffff,
+                         ($ip_address >>  32) & 0xffff,
+                         ($ip_address >>  16) & 0xffff,
+                         ($ip_address       ) & 0xffff;
+
+##                         ($ip_address >> 112) & 0xffff,
+##                         ($ip_address >>  96) & 0xffff,
+##                         ($ip_address >>  80) & 0xffff,
+##                         ($ip_address >>  64) & 0xffff,
+##                         ($ip_address >>  48) & 0xffff,
+##                         ($ip_address >>  32) & 0xffff,
+##                         ($ip_address >>  16) & 0xffff,
+##                         ($ip_address       ) & 0xffff;
+    }
+    else {
+    ## IPv4 Address Change
+        $result = sprintf "%d.%d.%d.%d",
+                         ($ip_address >> 24) & 255,
+                         ($ip_address >> 16) & 255,
+                         ($ip_address >> 8 ) & 255,
+                         ($ip_address      ) & 255;
+    }
     return $result;
 }
 
@@ -3573,6 +3898,7 @@ sub get_health_check_id_str {
     my $login        = defined $v->{login       } ? $v->{login       } : q{};
     my $password     = defined $v->{passwd      } ? $v->{passwd      } : q{};
     my $database     = defined $v->{database    } ? $v->{database    } : q{};
+    ## fumei
     my $customcheck  = defined $v->{customcheck } ? $v->{customcheck } : q{};
     my $checkinterval    = defined $v->{checkinterval    } ? $v->{checkinterval    } : q{};
     my $checkcount       = defined $v->{checkcount       } ? $v->{checkcount       } : q{};
@@ -3653,10 +3979,9 @@ sub ld_exit {
 # post: A Socket connection is opened to the remote host
 # return: Open socket
 sub ld_open_socket {
-    require IO::Socket::INET;
+    require IO::Socket::INET6;
     my ($remote, $port, $protocol, $timeout) = @_;
-
-    my $sock_handle = IO::Socket::INET->new(
+    my $sock_handle = IO::Socket::INET6->new(
             PeerAddr => $remote,
             PeerPort => $port,
             Proto    => $protocol,
@@ -3771,6 +4096,8 @@ sub ld_getservbyname {
 #         undef on error
 sub ld_gethostservbyname {
     my ($hostserv, $protocol) = @_;
+    my $ip   = undef;
+    my $port = undef;
 
     if (!defined $hostserv || $hostserv !~ /
             ^
@@ -3779,10 +4106,24 @@ sub ld_gethostservbyname {
             (\d+|[a-z0-9-]+)                 # serv or port
             $
         /ix) {
-        return;
+        if ( !defined $hostserv || $hostserv !~ /
+                 ^
+                 (\[[a-z0-9.-:]+\])           # host or ip
+                 :                           # colon
+                 (\d+|[a-z0-9-]+)            # serv or port
+                 $
+             /ix) {
+            return;
+        }
+        $ip   = $1;
+        $port = $2;
+
     }
-    my $ip   = $1;
-    my $port = $2;
+    else {
+        $ip   = $1;
+        $port = $2;
+    }
+
     $ip   = ld_gethostbyname($ip) or return;
     $port = ld_getservbyname($port, $protocol);
     return if !defined $port;
@@ -3838,6 +4179,12 @@ sub _message_only {
         ERR0122 => "Caught exception during re-read config file and re-setup l7vsd. (message: %s) "
                  . "So config setting will be rollbacked.",
         ERR0123 => "`%s' is a required module for checking %s service.",
+        ERR0124 => "Invalid value `%s'.",
+        ERR0125 => "Invalid accesslog rotate type (set 'date', 'size' or 'datesize') `%s'.",
+        ERR0126 => "Invalid accesslog rotate max backup index number  `%s'.",
+        ERR0127 => "Invalid accesslog rotate max filesize value (set 0 or 1-999[KMG]. must specify unit(KMG)) `%s'.",
+        ERR0128 => "Invalid accesslog rotate rotation timing (set 'year','month','week','date', or 'hour') `%s'.",
+        ERR0129 => "Invalid accesslog rotate rotation timing value `%s'.",
         # operate l7vsd error
         ERR0201 => "Failed to add virtual service to l7vsd: `%s %s', output: `%s'",
         ERR0202 => "Failed to edit virtual service on l7vsd: `%s %s', output: `%s'",
@@ -4447,6 +4794,72 @@ Change to real server IP address.
 Change to real server port number.
 
 =back
+
+=item B<sslconfigfile = ">I</path/to/sslconfigfile>B<">
+
+When communication with Client is SSL, the file name for SSL setting is
+designated.
+
+
+=item B<socketoption = ">I<OPTION,OPTION, ...>B<">
+
+An option of the socket used in VirtualService (TCP) is designated.
+The setting possible value is described.
+
+1.deferaccept
+           In a listener socket of VirtualService, TCP_DEFER_ACCEPT setting.
+
+2.nodelay
+           In a socket for communication with Client in Session and RealServer, TCP_NODELAY setting.
+
+3.cork
+           In a socket for communication with Client in Session and RealServer, TCP_CORK setting.
+
+4.quickackon or quickackoff
+           In a socket for communication with Client in Session and RealServer, TCP_QUICKACK setting.
+
+example:
+       socketoption=deferaccept nodelay quickackoff
+
+=item B<accesslog = ">I<ACCESSLOG_ROTATE_TYPE>B<">
+
+A presence of access log output is established.
+yes: outputs/no: doesn't output.
+
+=item B<accesslog_rotate_type = date>|B<size>|B<datesize>
+
+The rotation type designates "date" "size" "datesize".
+
+=item B<accesslog_rotate_max_backup_index = I<n>
+
+The maximum number of back-up file is designated.
+
+=item B<accesslog_rotate_max_filesize = > I<n>[B<K>|B<M>|B<G>]
+
+The most large size of log is designated.
+When "size" and "datesize" are set as accesslog_rotate_type, it becomes indispensable. K(kilo), M(mega) and G(giga) unit are available.
+
+=item B<accesslog_rotate_rotation_timing = year>|B<month>|B<week>|B<date>|B<hour>
+
+It's designated at the timing of a rotation.
+When "date" and "datesize" are set as accesslog_rotate_type, it becomes indispensable.
+
+=item B<accesslog_rotate_rotation_timing_value = ">I<rotation_timing_value>B<">
+
+When "year" was designated as accesslog_rotate_rotation_timing.
+  FORMAT: "MM/dd hh:mm" MM(month) dd(day) hh(hour):mm(minute)
+
+When "month" was designated as accesslog_rotate_rotation_timing.
+  FORMAT: "dd hh:mm" dd(day) hh(hour):mm(minute)
+
+When "week" was designated as accesslog_rotate_rotation_timing.
+  FORMAT: "<week> hh:mm" sun|mon|tue|wed|thu|fri|sat(week) hh(hour):mm(minute)"
+
+When "date" was designated as accesslog_rotate_rotation_timing.
+  FORMAT: "hh:mm" hh(hour):mm(minute)
+
+When "hour" was designated as accesslog_rotate_rotation_timing.
+  FORMAT: "mm" mm(minute)
 
 =back
 
