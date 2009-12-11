@@ -11,6 +11,14 @@
 #define DUMMI_SERVER_IP     "127.0.0.1"
 #define DUMMI_SERVER_PORT     7000
 
+
+#define CLIENT_CTX_LOAD_VERIFY_FILE         "ca.pem"
+#defien SERVER_CTX_CERTIFICATE_CHAIN_FILE   "server.pem"
+#defien SERVER_CTX_PRIVATE_KEY_FILE         "server.pem"
+#defien SERVER_CTX_TMP_DH_FILE              "dh512.pem"
+
+
+
 using namespace boost::unit_test_framework;
 
 // dummy client
@@ -24,7 +32,7 @@ class test_client{
         ~test_client(){
         };
         void all_lock(){
-            
+
             //! socket connect mutex
             connect_mutex.wrlock();
             //! socket handshake mutex
@@ -211,9 +219,22 @@ class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
     std::string get_password() const{
         std::cout << "call get_password" << std::endl;
         return "test";
-    }
+    };
 
 };
+
+class authority{
+    public:
+        authority(){
+        };
+        ~authority(){
+        };
+        std::string get_password() const{
+            std::cout << "call get_password" << std::endl;
+            return "test";
+        };
+};
+
 
 //--test case--
 // construcor test
@@ -287,7 +308,8 @@ void handshake_test(){
     
     boost::asio::io_service io;
     boost::system::error_code ec;
-    
+    authority test_auth;
+
     l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
     set_option.nodelay_opt = false;
@@ -307,24 +329,23 @@ std::cout << "DEBUG TEST A" << std::endl;
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
-    client_ctx.load_verify_file("ca.pem");
-
+    client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
 
     // Server context
 std::cout << "DEBUG TEST B" << std::endl;
     boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
-    test_ssl_socket_class test_obj(io,server_ctx,set_option);
 
 std::cout << "DEBUG TEST C" << std::endl;
     server_ctx.set_options(
         boost::asio::ssl::context::default_workarounds
         | boost::asio::ssl::context::no_sslv2
         | boost::asio::ssl::context::single_dh_use);
-    server_ctx.set_password_callback(boost::bind(&test_ssl_socket_class::get_password, &test_obj));
-    server_ctx.use_certificate_chain_file("server.pem");
-    server_ctx.use_private_key_file("server.pem", boost::asio::ssl::context::pem);
-    server_ctx.use_tmp_dh_file("dh512.pem");
+    server_ctx.set_password_callback(boost::bind(&authority::get_password, &test_auth));
+    server_ctx.use_certificate_chain_file(SERVER_CTX_CERTIFICATE_CHAIN_FILE);
+    server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
 
+    test_ssl_socket_class test_obj(io,server_ctx,set_option);
 
 std::cout << "DEBUG TEST D" << std::endl;
     boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
