@@ -126,31 +126,31 @@ class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
 
     boost::asio::ip::tcp::endpoint get_local_end(){
         return my_socket.lowest_layer().local_endpoint();
-    }
+    };
     boost::asio::ip::tcp::endpoint get_remote_end(){
         return my_socket.lowest_layer().remote_endpoint();
-    }
+    };
     boost::asio::io_service& get_io(){
         return my_socket.lowest_layer().get_io_service();
-    }
+    };
 
     void test_close(boost::system::error_code& ec){
         my_socket.lowest_layer().close(ec);
-    }
+    };
 
     bool& get_open_flag(){
         return open_flag;
-    }
+    };
 
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket>* get_socket_pointer(){
         return &my_socket;
-    }
+    };
 
     l7vs::tcp_socket_option_info* get_opt_info(){
         return &opt_info;
-    }
+    };
 
-};
+}
 
 //--test case--
 // construcor test
@@ -322,7 +322,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 //    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
-    ts->add( BOOST_TEST_CASE( &is_open_test ) );
+//    ts->add( BOOST_TEST_CASE( &is_open_test ) );
 
     framework::master_test_suite().add( ts );
 
