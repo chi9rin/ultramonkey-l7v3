@@ -55,7 +55,7 @@ ip_session_data_processor::ip_session_data_processor(
                                 "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
                                 "timeout = %d, replication_data_processor = &(%d).");
         formatter % timeout % static_cast<void*>(replication_data_processor);
-        putLogDebug(600185, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600187, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -65,7 +65,7 @@ ip_session_data_processor::ip_session_data_processor(
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600186, "out_function : Constructor ip_session_data_processor::"
+            putLogDebug(600188, "out_function : Constructor ip_session_data_processor::"
                                 "ip_session_data_processor(int timeout, "
                                 "ip_replication_data_processor* replication_data_processor, "
                                 "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
@@ -81,7 +81,7 @@ ip_session_data_processor::ip_session_data_processor(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600187, "out_function : Constructor ip_session_data_processor::"
+        putLogDebug(600189, "out_function : Constructor ip_session_data_processor::"
                     "ip_session_data_processor(int timeout, "
                     "ip_replication_data_processor* replication_data_processor, "
                     "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
@@ -99,7 +99,7 @@ ip_session_data_processor::~ip_session_data_processor()
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600188, "in/out_function : Destructor ip_session_data_processor::"
+        putLogDebug(600190, "in/out_function : Destructor ip_session_data_processor::"
                     "~ip_session_data_processor().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -123,7 +123,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
                                  "boost::asio::ip::tcp::endpoint& endpoint) : "
                                  "ip_hash = %d.");
         formatter % ip_hash;
-        putLogDebug(600189, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600191, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -143,7 +143,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
                  boost::format formatter("out_function : int ip_session_data_processor::"
                                          "get_endpoint_from_ip_data(int ip_hash, "
                                          "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.");
-                putLogDebug(600190, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600192, formatter.str(), __FILE__, __LINE__);
            }
             /*------DEBUG LOG END------*/
             return 1;
@@ -192,7 +192,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
                                 "get_endpoint_from_ip_data(int ip_hash, "
                                 "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
         formatter % ret;
-        putLogDebug(600191, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600193, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -219,7 +219,7 @@ int ip_session_data_processor::write_session_data(
                                          "const boost::asio::ip::tcp::endpoint& endpoint, "
                                          "time_t now_time) : ip_hash = %d, now_time = %d.");
     formatter % ip_hash % now_time;
-        putLogDebug(600192, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -239,7 +239,7 @@ int ip_session_data_processor::write_session_data(
                                          "write_session_data(int ip_hash,"
                                          "const boost::asio::ip::tcp::endpoint& endpoint, "
                                          "time_t now_time) : return_value = 1.");
-                putLogDebug(600193, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600195, formatter.str(), __FILE__, __LINE__);
            }
             /*------DEBUG LOG END------*/
             return 1;
@@ -272,7 +272,7 @@ int ip_session_data_processor::write_session_data(
                                          "write_session_data() : put_into_temp_list() "
                                         "--add item ip_hash = %d -- end.");
                 formatter % ip_hash;
-                putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600196, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
     }
@@ -287,7 +287,7 @@ int ip_session_data_processor::write_session_data(
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600195, "out_function : int ip_session_data_processor::"
+            putLogDebug(600197, "out_function : int ip_session_data_processor::"
                         "write_session_data(int hash, "
                         "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                         "return_value = -1.", __FILE__, __LINE__);
@@ -300,7 +300,7 @@ int ip_session_data_processor::write_session_data(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600196, "out_function : int ip_session_data_processor::"
+        putLogDebug(600198, "out_function : int ip_session_data_processor::"
                     "write_ip_data(const std::string& ip, "
                     "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
                     "return_value = 0.", __FILE__, __LINE__);
@@ -324,7 +324,7 @@ int ip_session_data_processor::read_session_data_from_replication_area(
                                 "read_session_data_from_replication_area(ip_replication_data* replication_area) : "
                                 "replication_area = &(%d).");
         formatter % static_cast<void*>(replication_area);
-        putLogDebug(600197, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600199, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -335,7 +335,7 @@ int ip_session_data_processor::read_session_data_from_replication_area(
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600198, "out_function : int ip_session_data_processor::"
+            putLogDebug(600200, "out_function : int ip_session_data_processor::"
                                 "read_session_data_from_replication_area("
                                 "ip_replication_data* replication_area) : return_value = -1.", __FILE__, __LINE__);
         }
@@ -378,7 +378,7 @@ int ip_session_data_processor::read_session_data_from_replication_area(
                                 "read_session_data_from_replication_area(ip_replication_data* replication_area) : "
                                 "return_value = %d.");
         formatter % ret;
-        putLogDebug(600199, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600201, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 

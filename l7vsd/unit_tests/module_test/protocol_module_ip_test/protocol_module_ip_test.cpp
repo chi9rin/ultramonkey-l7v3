@@ -2751,7 +2751,7 @@ public:
         cout << "[133]--------------------------------------------- " << endl;
         //unit_test[133] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[133] schedule_moduleにて振り分け先realserverを未決定
-        //unit_test[133] status = CLIENT_DISCONNECT
+        //unit_test[133] status = SORRYSERVER_SELECT, sorryフラグをON
         {
             this->session_thread_data_map.clear();
             thread_data_ptr data_ptr(new session_thread_data_ip);
@@ -2772,8 +2772,9 @@ public:
             ret = this->handle_realserver_select(boost::this_thread::get_id(),
                                                  rs_endpoint);
 
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+            BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, SORRYSERVER_SELECT);
+			BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
             this->session_thread_data_map.clear();
             delete this->replication_data_processor;
             delete this->ip_data_processor;
@@ -3136,7 +3137,7 @@ public:
         //unit_test[143] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在しない場合
         //unit_test[143] rescheduleモード
         //unit_test[143] schedule_moduleにて振り分け先realserverを未決定する
-        //unit_test[143] status = CLIENT_DISCONNECT
+        //unit_test[143] status = SORRYSERVER_SELECT, sorryフラグをON
         {
             this->session_thread_data_map.clear();
             thread_data_ptr data_ptr(new session_thread_data_ip);
@@ -3159,8 +3160,9 @@ public:
             rs_list.clear();
             ret = this->handle_realserver_select(boost::this_thread::get_id(),
                                                  rs_endpoint);
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+            BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, SORRYSERVER_SELECT);
+            BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
             this->session_thread_data_map.clear();
             delete this->replication_data_processor;
             delete this->ip_data_processor;
@@ -4183,7 +4185,8 @@ public:
         cout << "[170]--------------------------------------------- " << endl;
         //unit_test[170] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[170] schedule_moduleにて振り分け先realserverを未決定
-        //unit_test[170] status = CLIENT_DISCONNECT
+        //unit_test[170] status = SORRYSERVER_SELECT, sorryフラグをON
+
 
         {
             thread_data_ptr data_ptr(new session_thread_data_ip);
@@ -4198,10 +4201,10 @@ public:
 
             ret = this->handle_realserver_select(boost::this_thread::get_id(),
                                                  rs_endpoint);
-            BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+            BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, SORRYSERVER_SELECT);
             BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_DISCONNECT);
+			BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
 
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);

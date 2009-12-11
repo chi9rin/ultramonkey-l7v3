@@ -58,7 +58,7 @@ ip_replication_data_processor::ip_replication_data_processor(
         formatter % static_cast<void*>(ip_replication_area_begin)
         % ip_replication_area_size % virtual_service_endpoint.address().to_string()
         % virtual_service_endpoint.port();
-        putLogDebug(600200, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600202, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -75,7 +75,7 @@ ip_replication_data_processor::ip_replication_data_processor(
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600201, "out_function : Constructor ip_replication_data_processor::"
+            putLogDebug(600203, "out_function : Constructor ip_replication_data_processor::"
                          "ip_replication_data_processor("
                          "char* ip_replication_area_begin, int ip_replication_area_size, "
                          "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
@@ -95,7 +95,7 @@ ip_replication_data_processor::ip_replication_data_processor(
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600202, "function : ip_replication_data_processor::"
+            putLogDebug(600204, "function : ip_replication_data_processor::"
                          "ip_replication_data_processor() : Replication area is null.",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -118,10 +118,10 @@ ip_replication_data_processor::ip_replication_data_processor(
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
-                    putLogDebug(600203, "function : ip_replication_data_processor::"
+                    putLogDebug(600205, "function : ip_replication_data_processor::"
                                  "ip_replication_data_processor() : Over replication area.",
                                  __FILE__, __LINE__);
-                    putLogDebug(600204, "out_function : Constructor ip_replication_data_processor::"
+                    putLogDebug(600206, "out_function : Constructor ip_replication_data_processor::"
                                  "ip_replication_data_processor(int maxlist, "
                                  "char* ip_replication_area_begin, int ip_replication_area_size, "
                                  "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
@@ -175,7 +175,7 @@ ip_replication_data_processor::ip_replication_data_processor(
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
-                        putLogDebug(600205, "function : ip_replication_data_processor::"
+                        putLogDebug(600207, "function : ip_replication_data_processor::"
                                      "ip_replication_data_processor() : Replication area is full.",
                                      __FILE__, __LINE__);
                     }
@@ -201,7 +201,7 @@ ip_replication_data_processor::ip_replication_data_processor(
                                                  "size = %d, offset = %d).");
                         formatter % pick->virtualserver_ip % pick->virtualserver_port
                         % pick->size % pick->offset;
-                        putLogDebug(600206, formatter.str(), __FILE__, __LINE__);
+                        putLogDebug(600208, formatter.str(), __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
                 }
@@ -213,7 +213,7 @@ ip_replication_data_processor::ip_replication_data_processor(
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
-                    putLogDebug(600207, "function : ip_replication_data_processor::"
+                    putLogDebug(600209, "function : ip_replication_data_processor::"
                                  "ip_replication_data_processor() : Replication area is full.",
                                  __FILE__, __LINE__);
                 }
@@ -225,7 +225,7 @@ ip_replication_data_processor::ip_replication_data_processor(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600208, "out_function : Constructor ip_replication_data_processor::"
+        putLogDebug(600210, "out_function : Constructor ip_replication_data_processor::"
                      "ip_replication_data_processor("
                      "char* ip_replication_area_begin, int ip_replication_area_size, "
                      "const boost::asio::ip::tcp::endpoint& virtual_service_endpoint, "
@@ -244,7 +244,7 @@ ip_replication_data_processor::~ip_replication_data_processor()
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600209, "in/out_function : Destructor ip_replication_data_processor::"
+        putLogDebug(600211, "in/out_function : Destructor ip_replication_data_processor::"
                      "~ip_replication_data_processor().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -263,7 +263,7 @@ void ip_replication_data_processor::put_into_temp_list(
                                  "data.ip_hash = %d, data.last_time = %lu, data.rs_endpoint = [%s]:%d.");
         formatter % data.op_code % data.ip_hash % data.last_time % data.rs_endpoint.address().to_string()
         % data.rs_endpoint.port();
-        putLogDebug(600210, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600212, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -283,7 +283,7 @@ void ip_replication_data_processor::put_into_temp_list(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600211, "out_function : void ip_replication_data_processor::"
+        putLogDebug(600213, "out_function : void ip_replication_data_processor::"
                      "put_into_temp_list(const ip_replication_temp_data& data).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -295,7 +295,7 @@ void ip_replication_data_processor::write_replication_area()
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600212, "in_function : void ip_replication_data_processor::"
+        putLogDebug(600214, "in_function : void ip_replication_data_processor::"
                      "write_replicaion_area().", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -306,7 +306,7 @@ void ip_replication_data_processor::write_replication_area()
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600213, "out_function : void ip_replication_data_processor::"
+            putLogDebug(600215, "out_function : void ip_replication_data_processor::"
                          "write_replicaion_area().", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -347,7 +347,7 @@ void ip_replication_data_processor::write_replication_area()
                                              "realserver_prot = %d, last_time = %d.");
                     formatter % replication_area[temp_data.ip_hash].realserver_ip % replication_area[temp_data.ip_hash].realserver_port %
                      replication_area[temp_data.ip_hash].last_time;
-                    putLogDebug(600214, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(600216, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -363,7 +363,7 @@ void ip_replication_data_processor::write_replication_area()
                     boost::format formatter("function : void ip_replication_data_processor::"
                                              "write_replicaion_area() : 'U' : last_time = %d.");
                     formatter % replication_area[temp_data.ip_hash].last_time;
-                    putLogDebug(600215, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(600217, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -412,7 +412,7 @@ void ip_replication_data_processor::write_replication_area()
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600216, "out_function : void ip_replication_data_processor::"
+        putLogDebug(600218, "out_function : void ip_replication_data_processor::"
                      "write_replicaion_area().",  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -429,7 +429,7 @@ ip_replication_data* ip_replication_data_processor::get_replication_area()
                                  "ip_replication_data_processor::"
                                  "get_replication_area() : return_value = &(%d).");
         formatter % static_cast<void*>(replication_area);
-        putLogDebug(600217, formatter.str(),  __FILE__, __LINE__);
+        putLogDebug(600219, formatter.str(),  __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 
@@ -444,7 +444,7 @@ void ip_replication_data_processor::register_replication_area_lock(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600218, "in_function : void ip_replication_data_processor::"
+        putLogDebug(600220, "in_function : void ip_replication_data_processor::"
                      "register_replication_area_lock(boost::function<void(void)> intable_lock).",
                      __FILE__, __LINE__);
     }
@@ -455,7 +455,7 @@ void ip_replication_data_processor::register_replication_area_lock(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600219, "out_function : void ip_replication_data_processor::"
+        putLogDebug(600221, "out_function : void ip_replication_data_processor::"
                      "register_replication_area_lock(boost::function<void(void)> intable_lock).",
                      __FILE__, __LINE__);
     }
@@ -470,7 +470,7 @@ void ip_replication_data_processor::register_replication_area_unlock(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600220, "in_function : void ip_replication_data_processor::"
+        putLogDebug(600222, "in_function : void ip_replication_data_processor::"
                      "register_replication_area_unlock(boost::function<void(void)> intable_unlock).",
                      __FILE__, __LINE__);
     }
@@ -481,7 +481,7 @@ void ip_replication_data_processor::register_replication_area_unlock(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600221, "out_function : void ip_replication_data_processor::"
+        putLogDebug(600223, "out_function : void ip_replication_data_processor::"
                      "register_replication_area_unlock(boost::function<void(void)> intable_unlock).",
                      __FILE__, __LINE__);
     }
@@ -498,7 +498,7 @@ int ip_replication_data_processor::get_from_temp_list(
     /*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == getloglevel()))
     {
-        putLogDebug(600222, "in_function : void ip_replication_data_processor::"
+        putLogDebug(600224, "in_function : void ip_replication_data_processor::"
                      "get_from_temp_list(ip_replication_temp_data& data).", __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -526,7 +526,7 @@ int ip_replication_data_processor::get_from_temp_list(
                                 "data.last_time = %lu, data.rs_endpoint = [%s]:%d.");
         formatter % ret % data.op_code % data.ip_hash % data.last_time %
         data.rs_endpoint.address().to_string() % data.rs_endpoint.port();
-        putLogDebug(600223, formatter.str(), __FILE__, __LINE__);
+        putLogDebug(600225, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
 

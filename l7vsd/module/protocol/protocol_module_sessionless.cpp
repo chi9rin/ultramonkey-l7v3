@@ -2320,17 +2320,17 @@ namespace l7vs
             else
             {
                 //set end flag on
-                session_data->end_flag = END_FLAG_ON;
+                session_data->sorry_flag = SORRY_FLAG_ON;
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_realserver_select() : END_FLAG_ON. thread id : %d.");
+                                            "handle_realserver_select() : SORRY_FLAG_ON. thread id : %d.");
                     formatter % boost::this_thread::get_id();
                     putLogDebug(100076, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
-                status = CLIENT_DISCONNECT;
+                status = SORRYSERVER_SELECT;
             }
         }
         catch (int e)

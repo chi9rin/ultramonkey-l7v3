@@ -3221,10 +3221,10 @@ void handle_realserver_select_tcp_test(){
 
     //endpoint = 未決定
     BOOST_CHECK_EQUAL(ep_chk2, ep2);
-    //終了フラグをONにする
-    BOOST_CHECK_EQUAL(dataup2->end_flag, END_FLAG_ON);
-    //遷移先ステータスを設定する status = CLIENT_DISCONNECT
-    BOOST_CHECK_EQUAL(ret, CLIENT_DISCONNECT);
+    //sorryフラグをONにする
+    BOOST_CHECK_EQUAL(dataup2->sorry_flag, SORRY_FLAG_ON);
+    //遷移先ステータスを設定する status = SORRYSERVER_SELECT
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);
 }
 
 //handle_realserver_select(tcp)_thread 馮家純

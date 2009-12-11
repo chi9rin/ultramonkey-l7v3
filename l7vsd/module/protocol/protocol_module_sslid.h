@@ -41,13 +41,15 @@ struct session_thread_data_sslid
         int thread_division;
         boost::thread::id pair_thread_id;
         int end_flag;
-        int realserver_connect_failed_count;
+        int accept_flag;
+        int sorry_flag;
         boost::asio::ip::tcp::endpoint selected_realserver;
         boost::array<char, MAX_SSLID_BUFFER_SIZE> data_buffer;
         size_t data_begain_offset;
         size_t data_size;
         size_t current_record_rest_size;
         bool hello_message_flag;
+        protocol_module_base::EVENT_TAG last_status;
 };
 
 class protocol_module_sslid : public ssl_protocol_module_base
@@ -76,6 +78,8 @@ class protocol_module_sslid : public ssl_protocol_module_base
         check_message_result set_parameter( const std::vector<std::string>& args );
 
         check_message_result add_parameter( const std::vector<std::string>& args );
+
+    void get_option_info( std::string& option );
 
         void handle_rslist_update();
 
@@ -214,6 +218,10 @@ class protocol_module_sslid : public ssl_protocol_module_base
         static const int THREAD_DIVISION_DOWN_STREAM;    // down thread
         static const int END_FLAG_ON;                    // end flag ON
         static const int END_FLAG_OFF;                   // end flag OFF
+        static const int ACCEPT_END_FLAG_OFF;            // accept flag off
+        static const int ACCEPT_END_FLAG_ON;             // accept flag on
+        static const int SORRY_FLAG_ON;                  // sorry flag on
+        static const int SORRY_FLAG_OFF;                 // sorry flag off
 };
 
 }
