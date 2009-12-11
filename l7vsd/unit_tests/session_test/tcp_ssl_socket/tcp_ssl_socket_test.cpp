@@ -120,7 +120,7 @@ class test_client{
 class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
     public:
 
-    test_ssl_socket_class(boost::asio::io_service& io,boost::asio::ssl::context& context,const l7vs::tcp_ssl_socket_option_info set_option) : l7vs::tcp_ssl_socket(io,context,set_option){
+    test_ssl_socket_class(boost::asio::io_service& io,boost::asio::ssl::context& context,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_ssl_socket(io,context,set_option){
     };
     ~test_ssl_socket_class(){};
 
