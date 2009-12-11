@@ -36,7 +36,7 @@
 
 #include "utility.h"
 
-#include "logger_implement_access.h"
+//#include "logger_implement_access.h"
 
 //static int new_session_cb(SSL *ssl, SSL_SESSION *session);
 //static SSL_SESSION *get_session_cb(SSL *ssl, unsigned char *ssid, int ssid_len, int *ref);
@@ -562,7 +562,7 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
     // SSL setting
     ssl_virtualservice_mode_flag = false;
     ssl_file_name = element.ssl_file_name;
-    if ( ssl_file_name == "" ) {
+    if ( ssl_file_name != "" ) {
         ssl_file_name = element.ssl_file_name;
         // get SSL parameter
         if(unlikely(!get_ssl_parameter())) {
@@ -602,13 +602,12 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
     //logger_implement_access *logger_access_instance = new logger_implement_access(access_log_file_name);
 
     //if( logger_access_instance == NULL  ) {
-        boost::format formatter("access logger Instance acquisition error:%s");
-        formatter % ( err ? "true" : "false") % err.get_message();
-        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
-        err.setter( true, "access log class instance create failed" );
-        return;
+    //    boost::format formatter("access logger Instance acquisition error:%s");
+    //    formatter % ( err ? "true" : "false") % err.get_message();
+    //    Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
+    //    err.setter( true, "access log class instance create failed" );
+    //    return;
     //}
-
 //    */ @002 add end
 
     set_socket_option();
