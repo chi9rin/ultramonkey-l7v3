@@ -115,7 +115,7 @@ class test_client{
                     return;
                 }
             }
-
+/*
             // 1st
             receive_data_size = 0;
             send_data_size = 0;
@@ -138,7 +138,8 @@ class test_client{
                 }
             }
             write_mutex.wrlock();
-
+*/
+std::cout << "DEBUG TEST 1" << std::endl;
             //2nd
             receive_data_size = 0;
             send_data_size = 0;
@@ -151,7 +152,7 @@ class test_client{
                 }
             }
             read_mutex.wrlock();
-
+std::cout << "DEBUG TEST 2" << std::endl;
             // send
             {
                 l7vs::rw_scoped_lock scope_lock(write_mutex);
@@ -161,12 +162,12 @@ class test_client{
                 }
             }
             write_mutex.wrlock();
-
+std::cout << "DEBUG_TEST 3" << std::endl;
             //3rd
             receive_data_size = 0;
             send_data_size = 0;
             while(receive_data_size < MAX_BUFFER_SIZE){
-                l7vs::rw_scoped_lock scope_lock(read_mutex);
+//                l7vs::rw_scoped_lock scope_lock(read_mutex);
                 // receive
                 {
                     if(!receive_test()){
@@ -175,9 +176,9 @@ class test_client{
                     }
                 }
             }
-
+std::cout << "DEBUG_TEST 4" << std::endl;
             while(send_data_size < receive_data_size){
-                l7vs::rw_scoped_lock scope_lock(write_mutex);
+//                l7vs::rw_scoped_lock scope_lock(write_mutex);
                 // send
                 {
                     if(!send_test()){
@@ -240,7 +241,7 @@ class test_client{
                 return false;
             }
             send_data_size += write_size;
-            std::cout << "dummy client send OK" << std::endl;
+            std::cout << "dummy client send OK [" << send_data_size << "]" << std::endl;
             return true;
         };
         bool receive_test(){
@@ -255,7 +256,7 @@ class test_client{
                 return false;
             }
             receive_data_size += read_size;
-            std::cout << "dummy client receive OK" << std::endl;
+            std::cout << "dummy client receive OK [" << receive_data_size << "]" << std::endl;
             return true;
         };
         void close_test(){
@@ -660,7 +661,7 @@ void write_some_read_some_test(){
     size_t res_size;
     size_t send_data_size;
     size_t receve_data_size;
-
+/*
     //size 0
     // ## write some read some test [1] size 0 
     dummy_cl.read_mutex.unlock();
@@ -681,7 +682,7 @@ void write_some_read_some_test(){
     // unit_test [2] write_some & read_some test size 0 write size
     std::cout << "[2] write_some & read_some test size 0 write size" << std::endl;
     BOOST_CHECK_EQUAL(res_size, send_size);
-
+   sleep(1);
 
     dummy_cl.write_mutex.unlock();
     res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
@@ -693,8 +694,8 @@ void write_some_read_some_test(){
     // unit_test [4] write_some & read_some test size 0 read size
     std::cout << "[4] write_some & read_some test size 0 read size" << std::endl;
     BOOST_CHECK_EQUAL(res_size,0UL);
-
-        
+    sleep(1);
+*/        
     // size 1    
     send_size = 1;
     send_buff[0] = 'A';
@@ -721,7 +722,7 @@ void write_some_read_some_test(){
     BOOST_CHECK_EQUAL(res_size, send_size);
 
     dummy_cl.write_mutex.unlock();
-
+    sleep(1);
     while(true){
         res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
         if(ec){
@@ -729,6 +730,7 @@ void write_some_read_some_test(){
                 continue;
             }
         }
+        sleep(1);
         break;
     }
 
@@ -768,6 +770,7 @@ void write_some_read_some_test(){
             send_data_size += res_size;
             std::cout << send_data_size;
             std::cout << " sending data" << std::endl;
+            sleep(1);
         }else{
             if(ec != boost::asio::error::try_again){
                 break;
@@ -794,6 +797,7 @@ void write_some_read_some_test(){
             receve_data_size += res_size;
             std::cout << receve_data_size;
             std::cout << " receiving data" << std::endl;
+            sleep(1);
         }else{
             if(ec != boost::asio::error::try_again){
                 break;
