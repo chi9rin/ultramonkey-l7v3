@@ -631,7 +631,7 @@ void write_some_read_some_test(){
 
     // handshake
     dummy_cl.handshake_mutex.unlock();
-    bool bres = test_obj.handshake(ec);
+    test_obj.handshake(ec);
     if(ec){
         std::cout << "server side client handshake ERROR" << std::endl;
         std::cout << ec << std::endl;
@@ -652,7 +652,7 @@ void write_some_read_some_test(){
 
     //size 0
     // ## write some read some test [1] size 0 
-    read_mutex.unlock();
+    dummy_cl.read_mutex.unlock();
     send_size = 0;
     while(true){
         res_size = test_obj.write_some(boost::asio::buffer(send_buff, send_size),ec);
@@ -672,7 +672,7 @@ void write_some_read_some_test(){
     BOOST_CHECK_EQUAL(res_size, send_size);
 
 
-    write_mutex.unlock();
+    dummy_cl.write_mutex.unlock();
     res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
     
     // unit_test [3] write_some & read_some test size 0 read error_code object
@@ -689,7 +689,7 @@ void write_some_read_some_test(){
     send_buff[0] = 'A';
     recv_buff[0] = 'B';
 
-    read_mutex.unlock();
+    dummy_cl.read_mutex.unlock();
 
     while(true){
         res_size = test_obj.write_some(boost::asio::buffer(send_buff, send_size),ec);
@@ -709,7 +709,7 @@ void write_some_read_some_test(){
     std::cout << "[6] write_some & read_some test size 1 write send size" << std::endl;
     BOOST_CHECK_EQUAL(res_size, send_size);
 
-    write_mutex.unlock();
+    dummy_cl.write_mutex.unlock();
 
     while(true){
         res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
@@ -749,7 +749,7 @@ void write_some_read_some_test(){
     test_server.brecv_triger = true;
 
 
-    read_mutex.unlock();
+    dummy_cl.read_mutex.unlock();
     while(true){
         if(send_data_size == MAX_BUFFER_SIZE){
             break;
@@ -774,7 +774,7 @@ void write_some_read_some_test(){
     std::cout << "[11] write_some & read_some test size MAX_BUFFER_SIZE write size" << std::endl;        
     BOOST_CHECK_EQUAL(send_data_size, send_size);
 
-    write_mutex.unlock();
+    dummy_cl.write_mutex.unlock();
     
     while(true){
         if(receve_data_size == MAX_BUFFER_SIZE){
