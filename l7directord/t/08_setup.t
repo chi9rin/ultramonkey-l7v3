@@ -5,7 +5,7 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 38;
+use Test::More tests => 45;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -74,6 +74,7 @@ our @get_forward_flag_returns = ();
     $main::CONFIG{virtual} = [ undef, undef, {
         option => { protocol => '-t' },
         module => { name => 'cinsert' },
+        other_virtual_key => undef,
                                              } ];
     $expected{virtual}     = [ undef, undef, {
         option => {
@@ -82,6 +83,7 @@ our @get_forward_flag_returns = ();
             flags => '-t ip:port -m cinsert',
         },
         module => { name => 'cinsert' },
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -116,6 +118,7 @@ our @get_forward_flag_returns = ();
             name => 'cinsert',
             option => '--cookie-name cookie',
         },
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -152,6 +155,7 @@ our @get_forward_flag_returns = ();
             option => '--cookie-name cookie',
         },
         scheduler => 'rr',
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -190,6 +194,7 @@ our @get_forward_flag_returns = ();
         },
         scheduler => 'rr',
         maxconn => 1000,
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -230,6 +235,7 @@ our @get_forward_flag_returns = ();
         scheduler => 'rr',
         maxconn => 1000,
         sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -272,6 +278,7 @@ our @get_forward_flag_returns = ();
         maxconn => 1000,
         sorryserver => { ip => 'sorryip', port => 'sorryport' },
         qosup => '100M',
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -316,6 +323,7 @@ our @get_forward_flag_returns = ();
         sorryserver => { ip => 'sorryip', port => 'sorryport' },
         qosup => '100M',
         qosdown => '100K',
+        other_virtual_key => ' none none none none ',
         checkcount => $main::CONFIG{checkcount},
         checktimeout => $main::CONFIG{checktimeout},
         negotiatetimeout => $main::CONFIG{negotiatetimeout},
@@ -326,6 +334,389 @@ our @get_forward_flag_returns = ();
     ld_setup();
     is_deeply \%main::CONFIG, \%expected, 'ld_setup - qosdown setup ok';
 }
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'sessionless',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+                                             } ];
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m sessionless',
+            flags => '-t ip:port -m sessionless -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K',
+        },
+        module => {
+            name => 'sessionless',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        other_virtual_key => ' none none none none ',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - sessionless setup ok';
+}
+########################################################################################################
+### sslconfigfile Check
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        sslconfigfile => '/etc/ha.d/conf/ssl_config.cf',
+        other_virtual_key => undef,
+                                             } ];
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m ip',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -S /etc/ha.d/conf/ssl_config.cf',
+        },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        sslconfigfile => '/etc/ha.d/conf/ssl_config.cf',
+        other_virtual_key => ' /etc/ha.d/conf/ssl_config.cf none none none ',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - ipmodule sslconfigfile ok';
+}
+########################################################################################################
+### socketoption Check(deferaccept,nodelay,cork,quickackon)
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        socketoption => 'deferaccept,nodelay,cork,quickackon',
+                                             } ];
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m ip',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -O deferaccept,nodelay,cork,quickackon',
+        },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        socketoption => 'deferaccept,nodelay,cork,quickackon',
+        other_virtual_key => ' none deferaccept,nodelay,cork,quickackon none none ',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - socketoption setup ok';
+}
+########################################################################################################
+### socketoption Check(deferaccept,nodelay,cork,quickackoff)
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        socketoption => 'deferaccept,nodelay,cork,quickackoff',
+        other_virtual_key => undef,
+                                             } ];
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m ip',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -O deferaccept,nodelay,cork,quickackoff',
+        },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        socketoption => 'deferaccept,nodelay,cork,quickackoff',
+        other_virtual_key => ' none deferaccept,nodelay,cork,quickackoff none none ',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - socketoption setup ok';
+}
+########################################################################################################
+### accesslog Check( = 0 )
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        socketoption => 'deferaccept,nodelay,cork,quickackoff',
+        other_virtual_key => undef,
+        accesslog => 0,
+        accesslogfile => '/tmp/work.log',
+        accesslog_rotate_type => 'datesize',
+        accesslog_rotate_max_backup_index => '12',
+        accesslog_rotate_max_filesize => '29G',
+        accesslog_rotate_rotation_timing => 'week',
+        accesslog_rotate_rotation_timing_value => 'sun 23:59',
+                                             } ];
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m ip',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -O deferaccept,nodelay,cork,quickackoff -L 0 -a /tmp/work.log --ac-rotate-type datesize --ac-rotate-max-backup-index 12 --ac-rotate-max-filesize 29G --ac-rotate-rotation-timing week --ac-rotate-rotation-timing-value sun 23:59',
+        },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        socketoption => 'deferaccept,nodelay,cork,quickackoff',
+        other_virtual_key => ' none deferaccept,nodelay,cork,quickackoff /tmp/work.log --ac-rotate-type datesize --ac-rotate-max-backup-index 12 --ac-rotate-max-filesize 29G --ac-rotate-rotation-timing week --ac-rotate-rotation-timing-value sun 23:59',
+        accesslog => 0,
+        accesslogfile => '/tmp/work.log',
+        accesslog_rotate_type => 'datesize',
+        accesslog_rotate_max_backup_index => '12',
+        accesslog_rotate_max_filesize => '29G',
+        accesslog_rotate_rotation_timing => 'week',
+        accesslog_rotate_rotation_timing_value => 'sun 23:59',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - accesslog setup ok';
+}
+########################################################################################################
+### accesslog Check( = 1 )
+###     accesslog => '1',
+###     accesslog_rotate_type => 'datesize',
+###     accesslog_rotate_max_backup_index => '12',
+###     accesslog_rotate_max_filesize => '29G',
+###     accesslog_rotate_rotation_timing => 'week',
+###     accesslog_rotate_rotation_timing_value => 'sun 23:59'
+###     
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        accesslog => 1,
+        accesslogfile => '/tmp/work.log',
+        accesslog_rotate_type => 'datesize',
+        accesslog_rotate_max_backup_index => '12',
+        accesslog_rotate_max_filesize => '29G',
+        accesslog_rotate_rotation_timing => 'week',
+        accesslog_rotate_rotation_timing_value => 'sun 23:59',
+        other_virtual_key => undef,
+                                             } ];
+
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m ip',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -L 1 -a /tmp/work.log --ac-rotate-type datesize --ac-rotate-max-backup-index 12 --ac-rotate-max-filesize 29G --ac-rotate-rotation-timing week --ac-rotate-rotation-timing-value sun 23:59',
+        },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        accesslog => '1',
+        accesslogfile => '/tmp/work.log',
+        accesslog_rotate_type => 'datesize',
+        accesslog_rotate_max_backup_index => '12',
+        accesslog_rotate_max_filesize => '29G',
+        accesslog_rotate_rotation_timing => 'week',
+        accesslog_rotate_rotation_timing_value => 'sun 23:59',
+        other_virtual_key => ' none none /tmp/work.log --ac-rotate-type datesize --ac-rotate-max-backup-index 12 --ac-rotate-max-filesize 29G --ac-rotate-rotation-timing week --ac-rotate-rotation-timing-value sun 23:59',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - accesslog setup ok';
+}
+########################################################################################################
+########################################################################################################
+### accesslog Check( = 1 )
+###     accesslog => '1',
+###     accesslog_rotate_type => 'date',
+###     accesslog_rotate_max_backup_index => '2',
+###     accesslog_rotate_rotation_timing => 'week',
+###     accesslog_rotate_rotation_timing_value => 'sun 23:59'
+###     
+{
+    set_default();
+    local @get_ip_port_args = ();
+    local @get_ip_port_returns = ('ip:port');
+    local @get_forward_flag_args = ();
+    local @get_forward_flag_returns = ();
+    my %expected = %main::GLOBAL;
+    $main::CONFIG{virtual} = [ undef, undef, {
+        option => { protocol => '-t' },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        accesslog => '1',
+        accesslogfile => '/tmp/work.log',
+        accesslog_rotate_type => 'date',
+        accesslog_rotate_max_backup_index => '2',
+        accesslog_rotate_rotation_timing => 'year',
+        accesslog_rotate_rotation_timing_value => '12/31 23:59',
+        other_virtual_key => undef,
+                                             } ];
+    $expected{virtual}     = [ undef, undef, {
+        option => {
+            protocol => '-t',
+            main  => '-t ip:port -m ip',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -L 1 -a /tmp/work.log --ac-rotate-type date --ac-rotate-max-backup-index 2 --ac-rotate-rotation-timing year --ac-rotate-rotation-timing-value 12/31 23:59',
+        },
+        module => {
+            name => 'ip',
+        },
+        scheduler => 'rr',
+        maxconn => 1000,
+        sorryserver => { ip => 'sorryip', port => 'sorryport' },
+        qosup => '100M',
+        qosdown => '100K',
+        accesslog => '1',
+        accesslogfile => '/tmp/work.log',
+        accesslog_rotate_type => 'date',
+        accesslog_rotate_max_backup_index => '2',
+        accesslog_rotate_rotation_timing => 'year',
+        accesslog_rotate_rotation_timing_value => '12/31 23:59',
+        other_virtual_key => ' none none /tmp/work.log --ac-rotate-type date --ac-rotate-max-backup-index 2 --ac-rotate-rotation-timing year --ac-rotate-rotation-timing-value 12/31 23:59',
+        checkcount => $main::CONFIG{checkcount},
+        checktimeout => $main::CONFIG{checktimeout},
+        negotiatetimeout => $main::CONFIG{negotiatetimeout},
+        checkinterval => $main::CONFIG{checkinterval},
+        retryinterval => $main::CONFIG{retryinterval},
+        quiescent => $main::CONFIG{quiescent},
+                                             } ];
+    ld_setup();
+    is_deeply \%main::CONFIG, \%expected, 'ld_setup - accesslog setup ok';
+}
+########################################################################################################
+
 {
     set_default();
     local @get_ip_port_args = ();
@@ -1081,3 +1472,4 @@ sub __get_forward_flag {
 }
 sub __ld_log {
 }
+

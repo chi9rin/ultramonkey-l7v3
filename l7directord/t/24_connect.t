@@ -23,6 +23,7 @@ SKIP: {
     set_default();
     my $v = { checktimeout => 3, protocol => 'tcp' };
     my $r = { server => {ip => '127.0.0.1', port => $port }, fail_counts => 0 };
+##    my $r = { server => {ip => '192.168.0.11', port => $port }, fail_counts => 0 };
     my $got = check_connect($v, $r);
     is $got, $main::SERVICE_UP, 'check_connect - connect ok';
     close $sock;
@@ -102,6 +103,19 @@ TODO: {
     my $r = { server => {ip => '127.0.0.1', port => 10000 }, fail_counts => 0 };
     my $got = check_connect($v, $r);
     is $got, $main::SERVICE_DOWN, 'check_connect - connect error (udp)';
+}
+##################################################
+### IPv6 ld_open_socket Check
+SKIP: {
+    my $port = 63334;
+    my $sock = create_sock($port);
+    skip 'cannot create socket', 1 if !$sock;
+    set_default();
+    my $v = { checktimeout => 3, protocol => 'tcp' };
+    my $r = { server => {ip => '::1', port => $port }, fail_counts => 0 };
+    my $got = check_connect($v, $r);
+    is $got, $main::SERVICE_UP, 'check_connect(IPv6) - connect ok';
+    close $sock;
 }
 # test end
 #...............................................

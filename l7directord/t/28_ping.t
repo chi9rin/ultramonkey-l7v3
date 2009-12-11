@@ -5,7 +5,7 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 2;
+use Test::More tests => 4;
 use IO::Socket::INET;
 
 L7lib::chdir();
@@ -16,6 +16,23 @@ override();
 #...............................................
 # test start
 #   - check_ping
+#### IPv6 Ping
+SKIP: {
+    skip 'icmp ping requires root privilege', 1 if $< != 0;
+    set_default();
+    my $v = { checktimeout => 1 };
+    my $r = { server => {ip => '2001::11'} , fail_counts => 0 };
+    my $got = check_ping($v, $r);
+    is $got, $main::SERVICE_UP, 'check_ping - ping ok';
+}
+SKIP: {
+    skip 'icmp ping requires root privilege', 1 if $< != 0;
+    set_default();
+    my $v = { checktimeout => 2 };
+    my $r = { server => {ip => '2001::19'} , fail_counts => 0 };
+    my $got = check_ping($v, $r);
+    is $got, $main::SERVICE_DOWN, 'check_ping - timeout';
+}
 SKIP: {
     skip 'icmp ping requires root privilege', 1 if $< != 0;
     set_default();

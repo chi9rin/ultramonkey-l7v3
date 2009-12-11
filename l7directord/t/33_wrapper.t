@@ -157,6 +157,12 @@ open  *STDERR, '>', '/dev/null';
 }
 #   - ld_getservhostbyname
 {
+    my $hostserv = '127.0.0.1:80';
+    my $protocol = 'tcp';
+    my $got = ld_gethostservbyname($hostserv, $protocol);
+    is_deeply $got, { ip => '127.0.0.1', port => 80 }, 'ld_getservhostbyname - resolve localhost:www tcp';
+}
+{
     my $hostserv = 'localhost:www';
     my $protocol = 'tcp';
     my $got = ld_gethostservbyname($hostserv, $protocol);
@@ -203,6 +209,39 @@ open  *STDERR, '>', '/dev/null';
     my $protocol = 'tcp';
     my $got = ld_gethostservbyname($hostserv, $protocol);
     is $got, undef, 'ld_getservhostbyname - hostserv is invalid format';
+}
+##########################################################
+### IPv6 
+#   - ld_getservhostbyname
+{
+    my $hostserv = '[2001::11]:80';
+    my $protocol = 'tcp';
+    my $got = ld_gethostservbyname($hostserv, $protocol);
+    is_deeply $got, { ip => '[2001::11]', port => 80 }, 'ld_getservhostbyname - [2001::11]:80 tcp';
+}
+{
+    my $hostserv = '[2001::11]:www';
+    my $protocol = 'udp';
+    my $got = ld_gethostservbyname($hostserv, $protocol);
+    is_deeply $got, { ip => '[2001::11]', port => 80 }, 'ld_getservhostbyname - resolve localhost:www udp';
+}
+{
+    my $hostserv = 'um08_eth1_ipv6:www';
+    my $protocol = undef;
+    my $got = ld_gethostservbyname($hostserv, $protocol);
+    is_deeply $got, { ip => '[2001::11]', port => 80 }, 'ld_getservhostbyname - protocol is undef';
+}
+{
+    my $hostserv = '10.144.169.222:www';
+    my $protocol = 'foo';
+    my $got = ld_gethostservbyname($hostserv, $protocol);
+    is $got, undef, 'ld_getservhostbyname - no such protocol';
+}
+{
+    my $hostserv = 'localhost6:80';
+    my $protocol = 'tcp';
+    my $got = ld_gethostservbyname($hostserv, $protocol);
+    is $got, undef, 'ld_getservhostbyname - invalid host address';
 }
 # test end
 #...............................................

@@ -93,13 +93,13 @@ our @int_to_ip_returns = ();
 #   - parse_real
 {
     local @ld_gethostbyname_args = ();
-    local @ld_gethostbyname_returns = ('1.1.1.1', '3.3.3.3');
+    local @ld_gethostbyname_returns = ('1.1.1.1', '1.1.1.2');
     local $ld_getservbyname_arg = undef;
     local $ld_getservbyname_return = 80;
     local @ip_to_int_args = ();
-    local @ip_to_int_returns = (1, 3);
+    local @ip_to_int_returns = (1,2);
     local @int_to_ip_args = ();
-    local @int_to_ip_returns = ('1.1.1.1', '2.2.2.2', '3.3.3.3');
+    local @int_to_ip_returns = ('1.1.1.1', '1.1.1.2');
     my %real = %main::REAL;
     $real{forward} = 'masq';
     $real{weight} = 100;
@@ -123,8 +123,8 @@ our @int_to_ip_returns = ();
     is_deeply $ret, \@expected, 'parse_real - full parse ok';
     is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(1)';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com', 'hoge.huga.com'], 'parse_real - ld_gethostbyname arg(1)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
 }
 {
     local @ld_gethostbyname_args = ();
@@ -158,8 +158,8 @@ our @int_to_ip_returns = ();
     is_deeply $ret, \@expected, 'parse_real - same range ok';
     is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(2)';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com', 'hoge.huga.com'], 'parse_real - ld_gethostbyname arg(2)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(2)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(2)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(2)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(2)';
 }
 {
     local @ld_gethostbyname_args = ();
@@ -193,8 +193,8 @@ our @int_to_ip_returns = ();
     is_deeply $ret, \@expected, 'parse_real - no range ok';
     is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(3)';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com'], 'parse_real - ld_gethostbyname arg(3)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(3)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(3)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(3)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(3)';
 }
 {
     local @ld_gethostbyname_args = ();
@@ -225,8 +225,8 @@ our @int_to_ip_returns = ();
     my $ret = parse_real($line, $real, $config_line);
     is_deeply $ret, \@expected, 'parse_real - no port ok';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com'], 'parse_real - ld_gethostbyname arg(4)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(4)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(4)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(4)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(4)';
 }
 {
     local @ld_gethostbyname_args = ();
@@ -256,8 +256,8 @@ our @int_to_ip_returns = ();
     my $ret = parse_real($line, $real, $config_line);
     is_deeply $ret, \@expected, 'parse_real - no forward mode ok';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com'], 'parse_real - ld_gethostbyname arg(5)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(5)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(5)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(5)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(5)';
 }
 {
     local @ld_gethostbyname_args = ();
@@ -286,8 +286,8 @@ our @int_to_ip_returns = ();
     my $ret = parse_real($line, $real, $config_line);
     is_deeply $ret, \@expected, 'parse_real - no weight ok';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com'], 'parse_real - ld_gethostbyname arg(6)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(6)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(6)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(6)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(6)';
 }
 {
     local @ld_gethostbyname_args = ();
@@ -314,8 +314,8 @@ our @int_to_ip_returns = ();
     my $ret = parse_real($line, $real, $config_line);
     is_deeply $ret, \@expected, 'parse_real - no request, receive ok';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com'], 'parse_real - ld_gethostbyname arg(7)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(7)';
-    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(7)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(7)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(7)';
 }
 {
     local @config_error_args = ();
@@ -392,7 +392,7 @@ our @int_to_ip_returns = ();
     local $ld_getservbyname_arg = undef;
     local $ld_getservbyname_return = 80;
     local @ld_gethostbyname_args = ();
-    local @ld_gethostbyname_returns = ('1.1.1.1', '2.2.2.2');
+    local @ld_gethostbyname_returns = ( '2.2.2.2','1.1.1.1');
     local @ip_to_int_args = ();
     local @ip_to_int_returns = (2, 1);
     my $line = 1;
@@ -403,10 +403,118 @@ our @int_to_ip_returns = ();
         my $ret = parse_real($line, $real, $config_line);
     };
     is $@, "config_error\n", 'parse_real - second ld_gethostbyname error';
-    is_deeply \@config_error_args, [1, 'ERR0115', '1.1.1.1', '2.2.2.2', 'configline'], 'parse_real - config_error args(5)';
+    is_deeply \@config_error_args, [1, 'ERR0115', '2.2.2.2', '1.1.1.1', 'configline'], 'parse_real - config_error args(5)';
     is $ld_getservbyname_arg, 'bad', 'parse_real - ld_getservbyname args(6)';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com', 'hoge.huga.com'], 'parse_real - ld_gethostbyname args(6)';
-    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(8)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(8)';
+}
+###################################################################
+##  - parse_real (IPv6)
+{
+    local @ld_gethostbyname_args = ();
+    local @ld_gethostbyname_returns = ('[2001::1]', '[2001::2]');
+    local $ld_getservbyname_arg = undef;
+    local $ld_getservbyname_return = 80;
+    local @ip_to_int_args = ();
+    local @ip_to_int_returns = (1,2);
+    local @int_to_ip_args = ();
+    local @int_to_ip_returns = ('[2001::1]', '[2001::2]');
+    my %real = %main::REAL;
+    $real{forward} = 'masq';
+    $real{weight} = 100;
+    $real{request} = 'request';
+    $real{receive} = 'receive';
+    my @expected;
+    my $c = 0;
+    for ($ip_to_int_returns[0] .. $ip_to_int_returns[1]) {
+        my %r = %real;
+        push @expected, \%r;
+        $expected[$c]->{server}{ip}   = $int_to_ip_returns[$c];
+        $expected[$c]->{server}{port} = $ld_getservbyname_return;
+        $c++;
+    }
+    my @gethost_r =  @ld_gethostbyname_returns;
+    my @ip_to_r   =  @ip_to_int_returns;
+    my $line = 1;
+    my $real = q{foo.bar.com->hoge.huga.com:serv  Masq  100  "request" , 'receive'};
+    my $config_line = 'configline';
+    my $ret = parse_real($line, $real, $config_line);
+    is_deeply $ret, \@expected, 'parse_real - full parse ok';
+    is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(1)';
+    is_deeply \@ld_gethostbyname_args, ['foo.bar.com', 'hoge.huga.com'], 'parse_real - ld_gethostbyname arg(1)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
+}
+##  - parse_real (IPv6)
+{
+    local @ld_gethostbyname_args = ();
+    local @ld_gethostbyname_returns = ('[2001::1]', '[2001::1]');
+    local $ld_getservbyname_arg = undef;
+    local $ld_getservbyname_return = 80;
+    local @ip_to_int_args = ();
+    local @ip_to_int_returns = (1,1);
+    local @int_to_ip_args = ();
+    local @int_to_ip_returns = ('[2001::1]', '[2001::1]');
+    my %real = %main::REAL;
+    $real{forward} = 'masq';
+    $real{weight} = 100;
+    $real{request} = 'request';
+    $real{receive} = 'receive';
+    my @expected;
+    my $c = 0;
+    for ($ip_to_int_returns[0] .. $ip_to_int_returns[1]) {
+        my %r = %real;
+        push @expected, \%r;
+        $expected[$c]->{server}{ip}   = $int_to_ip_returns[$c];
+        $expected[$c]->{server}{port} = $ld_getservbyname_return;
+        $c++;
+    }
+    my @gethost_r =  @ld_gethostbyname_returns;
+    my @ip_to_r   =  @ip_to_int_returns;
+    my $line = 1;
+    my $real = q{foo.bar.com->hoge.huga.com:serv  Masq  100  "request" , 'receive'};
+    my $config_line = 'configline';
+    my $ret = parse_real($line, $real, $config_line);
+    is_deeply $ret, \@expected, 'parse_real - full parse ok';
+    is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(1)';
+    is_deeply \@ld_gethostbyname_args, ['foo.bar.com', 'hoge.huga.com'], 'parse_real - ld_gethostbyname arg(1)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
+}
+{
+    local @ld_gethostbyname_args = ();
+    local @ld_gethostbyname_returns = ('[2001::1]', '[2001::2]');
+    local $ld_getservbyname_arg = undef;
+    local $ld_getservbyname_return = 80;
+    local @ip_to_int_args = ();
+    local @ip_to_int_returns = (1,2);
+    local @int_to_ip_args = ();
+    local @int_to_ip_returns = ('[2001::1]', '[2001::2]');
+    my %real = %main::REAL;
+    $real{forward} = 'masq';
+    $real{weight} = 100;
+    $real{request} = 'request';
+    $real{receive} = 'receive';
+    my @expected;
+    my $c = 0;
+    for ($ip_to_int_returns[0] .. $ip_to_int_returns[1]) {
+        my %r = %real;
+        push @expected, \%r;
+        $expected[$c]->{server}{ip}   = $int_to_ip_returns[$c];
+        $expected[$c]->{server}{port} = $ld_getservbyname_return;
+        $c++;
+    }
+    my @gethost_r =  @ld_gethostbyname_returns;
+    my @ip_to_r   =  @ip_to_int_returns;
+    my $line = 1;
+    my $real = q{[ffff:1:2:3:4:5:6:7:8]->[ffff:1:2:3:4:5:6:7:9]:serv  Masq  100  "request" , 'receive'};
+    my $config_line = 'configline';
+    my $ret = parse_real($line, $real, $config_line);
+    is_deeply $ret, \@expected, 'parse_real - full parse ok';
+    is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(1)';
+    is_deeply \@ld_gethostbyname_args, ['[ffff:1:2:3:4:5:6:7:8]', '[ffff:1:2:3:4:5:6:7:9]'], 'parse_real - ld_gethostbyname arg(1)';
+##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
+##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
 }
 # test end
 #...............................................
@@ -418,7 +526,7 @@ sub override {
     *ld_gethostservbyname = \&__ld_gethostservbyname;
     *ld_gethostbyname = \&__ld_gethostbyname;
     *ld_getservbyname = \&__ld_getservbyname;
-    *ip_to_int = \&__ip_to_int;
+##    *ip_to_int = \&__ip_to_int;
     *int_to_ip = \&__int_to_ip;
     *ld_log = \&__ld_log;
 }

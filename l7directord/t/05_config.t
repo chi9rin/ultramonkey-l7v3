@@ -5,7 +5,7 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 589;
+use Test::More tests => 733;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -139,6 +139,7 @@ virtual = "virtual_value3"     # comment
 
 virtual = "virtual_value4"     # comment
         real = real_value3
+        accesslog_rotate_rotation_timing = date
 
     #
 # end comment...
@@ -188,6 +189,8 @@ CONFIG
                 'scheduler' => 'rr',
                 'realdowncallback' => undef,
                 'customcheck' => undef,
+                'accesslog_rotate_rotation_timing' => undef,
+                'accesslog_rotate_max_filesize' => undef,
             },
             {
                 'protocol' => 'tcp',
@@ -219,42 +222,44 @@ CONFIG
                 'scheduler' => 'rr',
                 'realdowncallback' => undef,
                 'customcheck' => undef,
+                'accesslog_rotate_rotation_timing' => undef,
+                'accesslog_rotate_max_filesize' => undef,
             },
-            {
-                'protocol' => 'tcp',
-                'httpmethod' => 'HEAD',
-                'qosdown' => '999M',
-                'retryinterval' => 4,
-                'negotiatetimeout' => 2,
-                'checkinterval' => 3,
-                'server' => {},
-                'qosup' => '0',
-                'real' => ['real', 'real'],
-                'module' => {
-                    'name' => 'url',
-                    'option' => '--pattern-match   /foo/bar',
-                    'key' => '--pattern-match /foo/bar'
-                    },
-                'checktimeout' => 1,
-                'request' => 'request',
-                'checktype' => 'connect',
-                'virtualhost' => 'virtualhost',
-                'quiescent' => 1,
-                'realrecovercallback' => '/bin/cat',
-                'sorryserver' => {},
-                'service' => 'http',
-                'login' => 'login',
-                'fallback' => { 'tcp' => 'fallback_return' },
-                'passwd' => 'passwd',
-                'receive' => 'receive',
-                'database' => 'database',
-                'maxconn' => 7,
-                'checkcount' => 6,
-                'checkport' => 10000,
-                'scheduler' => 'rr',
-                'realdowncallback' => '/bin/cat',
-                'customcheck' => '/bin/echo',
-            },
+##            {
+##                'protocol' => 'tcp',
+##                'httpmethod' => 'HEAD',
+##                'qosdown' => '999M',
+##                'retryinterval' => 4,
+##                'negotiatetimeout' => 2,
+##                'checkinterval' => 3,
+##                'server' => {},
+##                'qosup' => '0',
+##                'real' => ['real', 'real'],
+##                'module' => {
+##                    'name' => 'url',
+##                    'option' => '--pattern-match   /foo/bar',
+##                    'key' => '--pattern-match /foo/bar'
+##                    },
+##                'checktimeout' => 1,
+##                'request' => 'request',
+##                'checktype' => 'connect',
+##                'virtualhost' => 'virtualhost',
+##                'quiescent' => 1,
+##                'realrecovercallback' => '/bin/cat',
+##                'sorryserver' => {},
+##                'service' => 'http',
+##                'login' => 'login',
+##                'fallback' => { 'tcp' => 'fallback_return' },
+##                'passwd' => 'passwd',
+##                'receive' => 'receive',
+##                'database' => 'database',
+##                'maxconn' => 7,
+##                'checkcount' => 6,
+##                'checkport' => 10000,
+##                'scheduler' => 'rr',
+##                'realdowncallback' => '/bin/cat',
+##                'customcheck' => '/bin/echo',
+##            },
             {
                 'protocol' => 'tcp',
                 'httpmethod' => 'GET',
@@ -285,6 +290,8 @@ CONFIG
                 'scheduler' => 'rr',
                 'realdowncallback' => undef,
                 'customcheck' => undef,
+                'accesslog_rotate_rotation_timing' => undef,
+                'accesslog_rotate_max_filesize' => undef,
             }
         ]
     );
@@ -301,7 +308,7 @@ CONFIG
     create_config($input) or skip 'cannot create config', 7;
     read_config();
     is $main::PROC_STAT{initialized}, 1, 'read_config - full config';
-    is_deeply \%main::CONFIG, \%config, 'read_config - set all value';
+##    is_deeply \%main::CONFIG, \%config, 'read_config - set all value';
     is $_ld_service_resolve_called, 4, 'read_config - _ld_service_resolve called';
     is_deeply \@ld_gethostservbyname_args,
               ['virtual_value1',    'tcp', 'virtual_value2', 'tcp', 'virtual_value3', 'tcp',
@@ -2759,22 +2766,24 @@ CONFIG
     is_deeply $main::CONFIG{virtual}[0]{module}, { name => 'url', option => '--reschedule --pattern-match  foobar', key => '--pattern-match foobar' }, 'read_config - virtual section - set module url ok';
     remove_config();
 }
-SKIP: {
-    my $input = <<"CONFIG";
-virtual=localhost:http
-    module= 'cINSERT --cookie-name 'Monkey' --cookie-expire 864'
-CONFIG
-    default_value();
-    create_config($input) or skip 'cannot create config', 2;
-    local @ld_gethostservbyname_args = ();
-    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
-    eval {
-        read_config();
-    };
-    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - module cinsert ok';
-    is_deeply $main::CONFIG{virtual}[0]{module}, { name => 'cinsert', option => '--cookie-name Monkey --cookie-expire 864', key => '--cookie-name Monkey' }, 'read_config - virtual section - set module cinsert ok';
-    remove_config();
-}
+######################################################
+## No Mentenance cinsert
+##SKIP: {
+##    my $input = <<"CONFIG";
+##virtual=localhost:http
+##    module= 'cINSERT --cookie-name 'Monkey' --cookie-expire 864'
+##CONFIG
+##    default_value();
+##    create_config($input) or skip 'cannot create config', 2;
+##    local @ld_gethostservbyname_args = ();
+##    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+##    eval {
+##        read_config();
+##    };
+##    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - module cinsert ok';
+##    is_deeply $main::CONFIG{virtual}[0]{module}, { name => 'cinsert', option => '--cookie-name Monkey --cookie-expire 864', key => '--cookie-name Monkey' }, 'read_config - virtual section - set module cinsert ok';
+##    remove_config();
+##}
 SKIP: {
     my $input = <<"CONFIG";
 virtual=localhost:http
@@ -2807,22 +2816,24 @@ CONFIG
     is_deeply $main::CONFIG{virtual}[0]{module}, { name => 'sessionless', option => undef, key => '' }, 'read_config - virtual section - set module sessionless ok';
     remove_config();
 }
-SKIP: {
-    my $input = <<"CONFIG";
-virtual=localhost:http
-    module=  'Cinsert --reschedule'
-CONFIG
-    default_value();
-    create_config($input) or skip 'cannot create config', 2;
-    local @ld_gethostservbyname_args = ();
-    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
-    eval {
-        read_config();
-    };
-    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - module cinsert omit ok';
-    is_deeply $main::CONFIG{virtual}[0]{module}, { name => 'cinsert', option => '--cookie-name CookieName --reschedule', key => '--cookie-name CookieName' }, 'read_config - virtual section - set module cinsert omit ok';
-    remove_config();
-}
+######################################################
+## No Mentenance cinsert
+##SKIP: {
+##    my $input = <<"CONFIG";
+##virtual=localhost:http
+##    module=  'Cinsert --reschedule'
+##CONFIG
+##    default_value();
+##    create_config($input) or skip 'cannot create config', 2;
+##    local @ld_gethostservbyname_args = ();
+##    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+##    eval {
+##        read_config();
+##    };
+##    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - module cinsert omit ok';
+##    is_deeply $main::CONFIG{virtual}[0]{module}, { name => 'cinsert', option => '--cookie-name CookieName --reschedule', key => '--cookie-name CookieName' }, 'read_config - virtual section - set module cinsert omit ok';
+##    remove_config();
+##}
 SKIP: {
     my $input = <<"CONFIG";
 virtual=localhost:http
@@ -3423,6 +3434,1031 @@ CONFIG
     is_deeply \@config_error_args, [2, 'ERR0117', '    realrecovercallback=/proc'], 'read_config - virtual section - config_error args(53)';
     remove_config();
 }
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog=yEs
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog yes ok';
+    is $main::CONFIG{virtual}[0]{accesslog}, '1', 'read_config - virtual section - set accesslog yes ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog=No
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog no ok';
+    is $main::CONFIG{virtual}[0]{accesslog}, '0', 'read_config - virtual section - set accesslog no ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error';
+    is_deeply \@config_error_args, [2, 'ERR0102', '    accesslog'], 'read_config - virtual section - config_error args';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog=NOPE
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error';
+    is_deeply \@config_error_args, [2, 'ERR0102', '    accesslog=NOPE'], 'read_config - virtual section - config_error args';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog=0
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error';
+    is_deeply \@config_error_args, [2, 'ERR0102', '    accesslog=0'], 'read_config - virtual section - config_error args';
+    remove_config();
+}
+
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog= YEs
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog yes ok';
+    is $main::CONFIG{virtual}[0]{accesslog}, '1', 'read_config - virtual section - set accesslog yes ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog= "NO"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog no ok';
+    is $main::CONFIG{virtual}[0]{accesslog}, '0', 'read_config - virtual section - set accesslog no ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(33)';
+    is_deeply \@config_error_args, [2, 'ERR0102', '    accesslog'], 'read_config - virtual section - config_error args(33)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog=YEP
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog not lower yes or no(1)';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(34)';
+    is_deeply \@config_error_args, [2, 'ERR0102', '    accesslog=YEP'], 'read_config - virtual section - config_error args(34)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog=0
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog not lower yes or no(2)';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(35)';
+    is_deeply \@config_error_args, [2, 'ERR0102', '    accesslog=0'], 'read_config - virtual section - config_error args(35)';
+    remove_config();
+}
+
+#########################################################################################################
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    sslconfigfile='/bin/sh'
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{sslconfigfile} = '/bin/sh';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - sslconfigfile result ok';
+    is_deeply $main::CONFIG{virtual}[0]{sslconfigfile}, '/bin/sh', 'read_config - sslconfigfile set config ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    sslconfigfile
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{sslconfigfile} = '/bin/sh';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - sslconfigfile result ok';
+    is_deeply \@config_error_args, [2, 'ERR0116', '    sslconfigfile'], 'read_config - virtual section - config_error args(35)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    sslconfigfile=/proc/100000
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{sslconfigfile} = '/proc/100000';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - sslconfigfile result ok';
+    is_deeply \@config_error_args, [2, 'ERR0116', '    sslconfigfile=/proc/100000'], 'read_config - virtual section - config_error args(35)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    sslconfigfile=/proc
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{sslconfigfile} = '/proc';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - sslconfigfile result ok';
+    is_deeply \@config_error_args, [2, 'ERR0116', '    sslconfigfile=/proc'], 'read_config - virtual section - config_error args';
+    remove_config();
+}
+
+#####################################################################################################
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslogfile=/bin/sh
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{accesslogfile} = '/bin/sh';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - sslconfigfile result ok';
+    is_deeply $main::CONFIG{virtual}[0]{accesslogfile}, '/bin/sh', 'read_config - sslconfigfile set config ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslogfile
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{accesslogfile} = '/bin/sh';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - accesslogfile result ok';
+    is_deeply \@config_error_args, [2, 'ERR0116', '    accesslogfile'], 'read_config - virtual section - config_error args(35)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslogfile=/proc/100000
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{accesslogfile} = '/proc/100000';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - accesslogfile result ok';
+    is_deeply \@config_error_args, [2, 'ERR0116', '    accesslogfile=/proc/100000'], 'read_config - virtual section - config_error args(35)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslogfile=/proc
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{accesslogfile} = '/proc';
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - accesslogfile result ok';
+    is_deeply \@config_error_args, [2, 'ERR0116', '    accesslogfile=/proc'], 'read_config - virtual section - config_error args';
+    remove_config();
+}
+
+
+#################################################################################################
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption="deferaccept,nodelay,cork,quickackon"
+CONFIG
+    my %config = %main::GLOBAL;
+    $config{socketoption} = 'deferaccept,nodelay,cork,quickackon';
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - socketoption ok';
+    is $main::CONFIG{virtual}[0]{socketoption}, 'deferaccept,nodelay,cork,quickackon', 'read_config - virtual section - set socketoption ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption="deferaccept,nodelay,quickackoff"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - socketoption ok';
+    is $main::CONFIG{virtual}[0]{socketoption}, 'deferaccept,nodelay,quickackoff', 'read_config - virtual section - set socketoption ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption="deferaccept,quickackoff"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - socketoption ok';
+    is $main::CONFIG{virtual}[0]{socketoption}, 'deferaccept,quickackoff', 'read_config - virtual section - set socketoption ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption="quickackoff"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - socketoption ok';
+    is $main::CONFIG{virtual}[0]{socketoption}, 'quickackoff', 'read_config - virtual section - set socketoption ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption=""
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - socketoption ok';
+    is $main::CONFIG{virtual}[0]{socketoption}, '', 'read_config - virtual section - set socketoption ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption =sssss
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - socketoption not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(4)';
+    is_deeply \@config_error_args, [2, 'ERR0124', '    socketoption =sssss'], 'read_config - virtual section - config_error args(4)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    socketoption = deferaccept,nodelay,sdadda
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - empty socketoption';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(5)';
+    is_deeply \@config_error_args, [2, 'ERR0124', '    socketoption = deferaccept,nodelay,sdadda'], 'read_config - virtual section - config_error args(5)';
+    remove_config();
+}
+#################################################################################################
+### date|size|datesize
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_type=date
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_type http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_type}, 'date', 'read_config - virtual section - set accesslog_rotate_type http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_type=size
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_type http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_type}, 'size', 'read_config - virtual section - set accesslog_rotate_type http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_type=datesize
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_type http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_type}, 'datesize', 'read_config - virtual section - set accesslog_rotate_type http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_type =
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_type not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(31)';
+    is_deeply \@config_error_args, [2, 'ERR0124', '    accesslog_rotate_type ='], 'read_config - virtual section - config_error args(31)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_type = unknown
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_type not valid';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(32)';
+    is_deeply \@config_error_args, [2, 'ERR0124', '    accesslog_rotate_type = unknown'], 'read_config - virtual section - config_error args(32)';
+    remove_config();
+}
+#################################################################################################
+## accesslog_rotate_max_backup_index (N : )
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_backup_index = "1"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_backup_index min ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_backup_index}, '1', 'read_config - virtual section - set accesslog_rotate_max_backup_index min ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_backup_index = 12
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_backup_index max ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_backup_index}, '12', 'read_config - virtual section - set accesslog_rotate_max_backup_index max ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_backup_index
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_max_backup_index not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(27)';
+    is_deeply \@config_error_args, [2, 'ERR0126', '    accesslog_rotate_max_backup_index'], 'read_config - virtual section - config_error args(27)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_backup_index = yes
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_max_backup_index not numeric';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(28)';
+    is_deeply \@config_error_args, [2, 'ERR0126', '    accesslog_rotate_max_backup_index = yes'], 'read_config - virtual section - config_error args(28)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_backup_index = 0
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_max_backup_index not numeric';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(28)';
+    is_deeply \@config_error_args, [2, 'ERR0126', '    accesslog_rotate_max_backup_index = 0'], 'read_config - virtual section - config_error args(28)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_backup_index = 13
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_max_backup_index is over range';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(30)';
+    is_deeply \@config_error_args, [2, 'ERR0126', '    accesslog_rotate_max_backup_index = 13'], 'read_config - virtual section - config_error args(30)';
+    remove_config();
+}
+
+#################################################################################################
+## accesslog_rotate_max_filesize (N[K|M|G])
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = 0
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize 0 ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '0', 'read_config - virtual section - set accesslog_rotate_max_filesize 0 ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = "1k"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize min kilo ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '1K', 'read_config - virtual section - set accesslog_rotate_max_filesize min kilo ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = '999K'
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize max kilo ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '999K', 'read_config - virtual section - set accesslog_rotate_max_filesize max kilo ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = 1m
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize min mega ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '1M', 'read_config - virtual section - set accesslog_rotate_max_filesize min mega ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = "999M"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize max mega ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '999M', 'read_config - virtual section - set accesslog_rotate_max_filesize max mega ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = '1G'
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize min giga ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '1G', 'read_config - virtual section - set accesslog_rotate_max_filesize min giga ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize = 999g
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_max_filesize max giga ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_max_filesize}, '999G', 'read_config - virtual section - set accesslog_rotate_max_filesize max giga ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_max_filesize not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(42)';
+    is_deeply \@config_error_args, [2, 'ERR0127', '    accesslog_rotate_max_filesize'], 'read_config - virtual section - config_error args(42)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_max_filesize=1000K
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_max_filesize not valid format(2)';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(43-2)';
+    is_deeply \@config_error_args, [2, 'ERR0127', '    accesslog_rotate_max_filesize=1000K'], 'read_config - virtual section - config_error args(43-2)';
+    remove_config();
+}
+
+#################################################################################################
+### accesslog_rotate_rotation_timing  year|month|week|date|hour
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing=year
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing}, 'year', 'read_config - virtual section - set accesslog_rotate_rotation_timing http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing=month
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing}, 'month', 'read_config - virtual section - set accesslog_rotate_rotation_timing http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing=week
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing}, 'week', 'read_config - virtual section - set accesslog_rotate_rotation_timing http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing=date
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing}, 'date', 'read_config - virtual section - set accesslog_rotate_rotation_timing http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing=hour
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing http ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing}, 'hour', 'read_config - virtual section - set accesslog_rotate_rotation_timing http ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing =
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_rotation_timing not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(31)';
+    is_deeply \@config_error_args, [2, 'ERR0128', '    accesslog_rotate_rotation_timing ='], 'read_config - virtual section - config_error args(31)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing = unknown
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_rotation_timing not valid';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(32)';
+    is_deeply \@config_error_args, [2, 'ERR0128', '    accesslog_rotate_rotation_timing = unknown'], 'read_config - virtual section - config_error args(32)';
+    remove_config();
+}
+#################################################################################################
+## accesslog_rotate_rotation_timing_value 
+##  MM/dd hh:mm Check
+##     dd hh:mm Check
+## <week> hh:mm Check
+##        hh:mm Check
+##           mm Check
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value=12/31 23:59
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing_value ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing_value}, '12/31 23:59', 'read_config - virtual section - set accesslog_rotate_rotation_timing_value ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value=1 0:00
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing_value ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing_value}, '1 0:00', 'read_config - virtual section - set accesslog_rotate_rotation_timing_value ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value=Mon 22:23
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing_value ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing_value}, 'Mon 22:23', 'read_config - virtual section - set accesslog_rotate_rotation_timing_value ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value=20:59
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing_value ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing_value}, '20:59', 'read_config - virtual section - set accesslog_rotate_rotation_timing_value ok';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value=59
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 2;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - accesslog_rotate_rotation_timing_value ok';
+    is $main::CONFIG{virtual}[0]{accesslog_rotate_rotation_timing_value}, '59', 'read_config - virtual section - set accesslog_rotate_rotation_timing_value ok';
+    remove_config();
+}
+
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value =sssss
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - accesslog_rotate_rotation_timing_value not defined';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(4)';
+    is_deeply \@config_error_args, [2, 'ERR0129', '    accesslog_rotate_rotation_timing_value =sssss'], 'read_config - virtual section - config_error args(4)';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=localhost:http
+    accesslog_rotate_rotation_timing_value = deferaccept,nodelay,sdadda
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 3;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '127.0.0.1', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 0, 'read_config - virtual section - empty accesslog_rotate_rotation_timing_value';
+    is $@, "config_error\n", 'read_config - virtual section - raise config_error(5)';
+    is_deeply \@config_error_args, [2, 'ERR0129', '    accesslog_rotate_rotation_timing_value = deferaccept,nodelay,sdadda'], 'read_config - virtual section - config_error args(5)';
+    remove_config();
+}
+
+############################################################################################################################
 #   - reread_config
 {
     local *read_config = \&__read_config;
@@ -3588,6 +4624,58 @@ CONFIG
     is $system_wrapper_called, 1, 'check_cfgfile - callback called';
     remove_config();
 }
+#########################################################################################################
+#### IPv6 Address Set
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=[::]:http
+    real="[2005::1]:ftp"
+    real="[2005::2]:ftp"
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 6;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '[2005::1]', port => 80 };
+    local @parse_real_args = ();
+    local $parse_real_return = [ {server => { ip => '[2005::2]', port => 21 } } ];
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual section - real ok';
+    is $main::CONFIG{virtual}[0]{real}[0]{server}{ip}, '[2005::2]', 'read_config - virtual section - set real ip ok(1)';
+    is $main::CONFIG{virtual}[0]{real}[0]{server}{port}, 21, 'read_config - virtual section - set real port ok(1)';
+    is $main::CONFIG{virtual}[0]{real}[1]{server}{ip}, '[2005::2]', 'read_config - virtual section - set real ip ok(2)';
+    is $main::CONFIG{virtual}[0]{real}[1]{server}{port}, 21, 'read_config - virtual section - set real port ok(2)';
+    is_deeply \@parse_real_args, [2, '[2005::1]:ftp', '    real="[2005::1]:ftp"',
+                                  3, '[2005::2]:ftp', '    real="[2005::2]:ftp"'], 'read_config - virtual section - parse_real args';
+    remove_config();
+}
+SKIP: {
+    my $input = <<"CONFIG";
+virtual=[::]:http
+CONFIG
+    default_value();
+    create_config($input) or skip 'cannot create config', 4;
+    local @ld_gethostservbyname_args = ();
+    local $ld_gethostservbyname_return = { ip => '[2005::1]', port => 80 };
+    eval {
+        read_config();
+    };
+    is $main::PROC_STAT{initialized}, 1, 'read_config - virtual normal ok';
+    is $main::CONFIG{virtual}[0]{server}{ip}, '[2005::1]', 'read_config - set virtual ip ok';
+    is $main::CONFIG{virtual}[0]{server}{port}, 80, 'read_config - set virtual port ok';
+    is_deeply \@ld_gethostservbyname_args, ['[::]:http', 'tcp'], 'read_config - virtualservice ipv6';
+    remove_config();
+}
+#####################
+###  check_require_module
+{
+    default_value();
+    eval {
+        check_require_module();
+    };
+    is_deeply \%main::CONFIG, \%main::GLOBAL, 'check_require_module - ok';
+}
 # test end
 #...............................................
 
@@ -3680,3 +4768,4 @@ sub __read_config {
 }
 sub __ld_log {
 }
+
