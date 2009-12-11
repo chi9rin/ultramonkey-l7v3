@@ -37,6 +37,7 @@
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
 #include "virtualservice_element.h"
+#include "logger_access_manager.h"
 
 // global function prototype
 static void    sig_exit_handler(int sig);
@@ -174,6 +175,15 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         l7vsadm_err.setter( true, buf );
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 8, buf, __FILE__, __LINE__ );
         return false;
+    }
+
+    if( ( l7vsadm_request::CMD_ADD_VS == cmd ) &&
+        ( request.vs_element.access_log_flag == 1 ) && ( request.vs_element.access_log_file_name.length() == 0 ) ){
+        std::string    buf("access log file is not specified.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+        
     }
     return true;
 }
@@ -665,12 +675,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] )
     }
     return true;
 }
-//! virtualservice option ssl function
+//! virtualservice option ssl_file function
 //! @param[in]    argument position
 //! @param[in]    argument count
 //! @param[in]    argument value
-bool    l7vs::l7vsadm::parse_opt_vs_ssl_func( int& pos, int argc, char* argv[] ){
-    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_ssl_func", __FILE__, __LINE__ );
+bool    l7vs::l7vsadm::parse_opt_vs_ssl_file_func( int& pos, int argc, char* argv[] ){
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_ssl_file_func", __FILE__, __LINE__ );
 
     if( ++pos >= argc ){
         std::string    buf("ssl config filename is not specified.");
@@ -696,6 +706,43 @@ bool    l7vs::l7vsadm::parse_opt_vs_ssl_func( int& pos, int argc, char* argv[] )
     fclose(fp);
     request.vs_element.ssl_file_name = conf_file_name;
     return true;
+}
+
+//! virtualservice option access log function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_vs_access_log_func( int& pos, int argc, char* argv[] ){
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_access_log_func", __FILE__, __LINE__ );
+
+    if( ++pos >= argc ){
+        //don't target access log flag
+        std::string    buf("access log flag value is not specified.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+    }
+    try{
+        int    tmp = boost::lexical_cast< int >( argv[pos] );
+        if( ( 0 != tmp ) && ( 1 != tmp ) ){
+            std::string    buf("invalid access log flag value.");
+            l7vsadm_err.setter( true, buf );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+            return false;
+        }
+        if( 0 == tmp )
+            request.vs_element.access_log_flag = INT_MAX;    // clear value
+        else
+            request.vs_element.access_log_flag = 1;
+    }
+    catch( boost::bad_lexical_cast& e ){
+        // don't convert argv[pos] is
+        std::string    buf("invalid access log flag value.");
+        l7vsadm_err.setter( true, buf );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        return false;
+    }
+    return true;    //
 }
 
 //! virtualservice option access_log_logrotate function
@@ -742,7 +789,9 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
         if( 0 == ( arguments_vector.size() % 2 ) ){
             for( unsigned int i = 0; i < ( arguments_vector.size() - 1 ); ++i ){
                 std::pair< virtualservice_element::access_log_rotate_arguments_map_type::iterator, bool > ret =
-                arguments_map.insert( virtualservice_element::access_log_rotate_arguments_pair_type( arguments_vector[i], arguments_vector[i+1] ) );
+                arguments_map.insert(
+                    virtualservice_element::access_log_rotate_arguments_pair_type(
+                        arguments_vector[i], arguments_vector[i+1] ) );
                 if( !ret.second ){
                     std::string buf("access log rotation argument is duplicated.");
                     l7vsadm_err.setter( true, buf );
@@ -757,8 +806,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
             return false;
         }
-        //bool ret = logger_access_manager::getInstance().access_log_logrotate_parameter_check( arguments_map );
-        bool ret = true;
+        bool ret = logger_access_manager::getInstance().access_log_logrotate_parameter_check( arguments_map );
         if( !ret ){
             std::string buf("access log rotation argument error.");
             l7vsadm_err.setter( true, buf );
@@ -776,11 +824,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
     return true;
 }
 
-//! virtualservice option socket option function
+//! virtualservice option socket function
 //! @param[in]    argument position
 //! @param[in]    argument count
 //! @param[in]    argument value
-bool    l7vs::l7vsadm::parse_opt_vs_socket_option_func( int& pos, int argc, char* argv[] ){
+bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[] ){
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_socket_func", __FILE__, __LINE__ );
 
     if( ++pos >= argc ){
         std::string    buf("socket_option is not specified.");
@@ -790,15 +839,18 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_option_func( int& pos, int argc, char
     }
 
     bool is_set_defer_accept = false;
+    bool is_set_nodelay = false;
+    bool is_set_cork = false;
+    bool is_set_quickack = false;
 
     request.vs_element.socket_option_tcp_defer_accept = 0;
     request.vs_element.socket_option_tcp_nodelay = 0;
     request.vs_element.socket_option_tcp_cork = 0;
     request.vs_element.socket_option_tcp_quickack = 0;
 
-    std::string socket_option_str = argv[pos];
+    std::string socket_option_string = argv[pos];
     std::vector< std::string > socket_options;
-    boost::split( socket_options, socket_option_str, boost::algorithm::is_any_of( "," ) );
+    boost::split( socket_options, socket_option_string, boost::algorithm::is_any_of( "," ) );
 
     BOOST_FOREACH( std::string option, socket_options ){
         if( option == "deferaccept" ){
@@ -811,23 +863,63 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_option_func( int& pos, int argc, char
                 std::stringstream buf;
                 buf << "socket option deferaccept is duplicated.";
                 l7vsadm_err.setter( true, buf.str() );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 0, buf.str(), __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
                 return false;
             }
         }
-        else if(option == "" ) {
-
+        else if(option == "nodelay" ) {
+            if( !is_set_nodelay ){
+                is_set_nodelay = true;
+                request.vs_element.socket_option_tcp_nodelay = 1;
+            }
+            else{
+                // nodelay is duplicated
+                std::stringstream buf;
+                buf << "socket option nodelay is duplicated.";
+                l7vsadm_err.setter( true, buf.str() );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                return false;
+            }
+        }
+        else if(option == "cork" ) {
+            if( !is_set_cork ){
+                is_set_cork = true;
+                request.vs_element.socket_option_tcp_cork = 1;
+            }
+            else{
+                // cork is duplicated
+                std::stringstream buf;
+                buf << "socket option cork is duplicated.";
+                l7vsadm_err.setter( true, buf.str() );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                return false;
+            }
+        }
+        else if( option == "quickackon" || option == "quickackoff" ) {
+            if( !is_set_quickack ){
+                is_set_quickack = true;
+                request.vs_element.socket_option_tcp_quickack = ( ( option == "quickackon" ) ? 1 : 2 );
+            }
+            else{
+                // quickack is duplicated
+                std::stringstream buf;
+                buf << "socket option quickack is duplicated.";
+                l7vsadm_err.setter( true, buf.str() );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                return false;
+            }
         }
         else{
             // unknown socket option
             std::stringstream buf;
             buf << "unknown socket option.";
             l7vsadm_err.setter( true, buf.str() );
-            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 0, buf.str(), __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
             return false;
         }
     }
 
+    request.vs_element.socket_option_string = socket_option_string;
     return true;
 
 }
@@ -1400,21 +1492,21 @@ bool    l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG 
 
     std::cout <<
     "Commands:\n"
-    "  --add-service     -A        add virtual service with options\n"
-    "  --edit-service    -E        edit virtual service with options\n"
-    "  --delete-service  -D        delete virtual service with options\n"
-    "  --flush           -C        flush virtual service\n"
-    "  --add-server      -a        add real server with options\n"
-    "  --edit-server     -e        edit real server with options\n"
-    "  --delete-server   -d        delete real server with options\n"
-    "  --replication     -R        control replication-function\n"
-    "  --log             -L        control logger-function\n"
-    "  --snmp            -S        control SNMP Agent-function\n"
-    "  --parameter       -P        control parameter-function\n"
-    "  --list            -l        list the table\n"
-    "  --verbose         -V        list the table in verbose format\n"
-    "  --key             -K        list the table in key setting format\n"
-    "  --help            -h        show usage\n"
+    "  --add-service      -A        add virtual service with options\n"
+    "  --edit-service     -E        edit virtual service with options\n"
+    "  --delete-service   -D        delete virtual service with options\n"
+    "  --flush            -C        flush virtual service\n"
+    "  --add-server       -a        add real server with options\n"
+    "  --edit-server      -e        edit real server with options\n"
+    "  --delete-server    -d        delete real server with options\n"
+    "  --replication      -R        control replication-function\n"
+    "  --log              -L        control logger-function\n"
+    "  --snmp             -S        control SNMP Agent-function\n"
+    "  --parameter        -P        control parameter-function\n"
+    "  --list             -l        list the table\n"
+    "  --verbose          -V        list the table in verbose format\n"
+    "  --key              -K        list the table in key setting format\n"
+    "  --help             -h        show usage\n"
     << std::endl;
 
     std::cout <<
@@ -1619,7 +1711,6 @@ void    l7vs::l7vsadm::disp_list_verbose(){
     buf << "     Access_log_file\n";
     buf << "     Access_log_rotate option\n";
     buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
-    buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
     BOOST_FOREACH( virtualservice_element vse, response.virtualservice_status_list ){
         std::string    vsepstr;
         if( vse.udpmode )
@@ -1742,8 +1833,15 @@ l7vs::l7vsadm::l7vsadm()
     vs_option_dic["--qos-down"]     = boost::bind( &l7vsadm::parse_opt_vs_qosdown_func, this, _1, _2, _3 );
     vs_option_dic["-p"]             = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
     vs_option_dic["--udp"]          = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
-    vs_option_dic["-z"]             = boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
-    vs_option_dic["--ssl-proxy"]    = boost::bind( &l7vsadm::parse_opt_vs_ssl_func, this, _1, _2, _3 );
+    vs_option_dic["-z"]             = boost::bind( &l7vsadm::parse_opt_vs_ssl_file_func, this, _1, _2, _3 );
+    vs_option_dic["--ssl-proxy"]    = boost::bind( &l7vsadm::parse_opt_vs_ssl_file_func, this, _1, _2, _3 );
+    vs_option_dic["-O"]             = boost::bind( &l7vsadm::parse_opt_vs_socket_func, this, _1, _2, _3 );
+    vs_option_dic["--sockopt"]      = boost::bind( &l7vsadm::parse_opt_vs_socket_func, this, _1, _2, _3 );
+    vs_option_dic["-L"]             = boost::bind( &l7vsadm::parse_opt_vs_access_log_func, this, _1, _2, _3 );
+    vs_option_dic["--access-log"]   = boost::bind( &l7vsadm::parse_opt_vs_access_log_func, this, _1, _2, _3 );
+    vs_option_dic["-a"]             = boost::bind( &l7vsadm::parse_opt_vs_access_log_logrotate_func, this, _1, _2, _3 );
+    vs_option_dic["--access-log-name"]
+                                    = boost::bind( &l7vsadm::parse_opt_vs_access_log_logrotate_func, this, _1, _2, _3 );
     // create realserver option dictionary
     rs_option_dic["-t"]             = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
     rs_option_dic["--target"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
@@ -2195,7 +2293,7 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
                     std::stringstream   buf;
                     buf << boost::format( "connect() failed: %s.") % err.message();
                     l7vsadm_err.setter( true, buf.str() );
-                    Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 0, buf.str(), __FILE__, __LINE__ );
+                    Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 999, buf.str(), __FILE__, __LINE__ );
                     break;
                 }
 

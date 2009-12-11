@@ -238,12 +238,14 @@ protected:
     bool    parse_opt_vs_qosdown_func( int&, int, char*[] );
     //! virtualservice option udp func.
     bool    parse_opt_vs_udp_func( int&, int, char*[] );
-    //! virtualservice option ssl function
-    bool    parse_opt_vs_ssl_func( int&, int, char*[] );
+    //! virtualservice option ssl file function
+    bool    parse_opt_vs_ssl_file_func( int&, int, char*[] );
+    //! virtualservice option access log function
+    bool    parse_opt_vs_access_log_func( int&, int, char*[] );
     //! virtualservice option access log logrotate function
     bool    parse_opt_vs_access_log_logrotate_func( int&, int, char*[] );
     //! virtualservice option socket option function
-    bool    parse_opt_vs_socket_option_func( int&, int, char*[] );
+    bool    parse_opt_vs_socket_func( int&, int, char*[] );
     // realserver option function
     //! realserver weight set
     bool    parse_opt_rs_weight_func( int&, int, char*[] );
