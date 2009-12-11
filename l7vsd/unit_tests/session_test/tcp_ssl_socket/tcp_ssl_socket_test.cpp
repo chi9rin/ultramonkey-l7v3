@@ -76,7 +76,7 @@ class test_client{
             }
             std::cout << "dummy client handshake OK" << std::endl;
             return true;
-        }
+        };
 
         bool send_test(){
             boost::system::error_code ec;
