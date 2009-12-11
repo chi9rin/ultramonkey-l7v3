@@ -93,6 +93,27 @@ class test_client{
 
         };
 
+        void handshake_error_test_run(){
+            // dummy client start
+
+            // connect
+            {
+                l7vs::rw_scoped_lock scope_lock(connect_mutex);
+
+                if(!connect_test()){
+                    return;
+                }
+            }
+
+            // close 
+            {
+                l7vs::rw_scoped_lock scope_lock(close_mutex);
+                close_test();
+            }
+
+        };
+
+
         bool connect_test(){
             sleep(1);
             boost::system::error_code ec;
@@ -354,7 +375,7 @@ void handshake_test(){
 
     // accept
     dummy_cl.connect_mutex.unlock();
-    bool bres = test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
+    test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
     if(ec){
         std::cout << "server side client connect ERROR" << std::endl;
         std::cout << ec << std::endl;
@@ -362,31 +383,71 @@ void handshake_test(){
         std::cout << "server side client connect OK" << std::endl;
     }
     BOOST_CHECK(!ec);
-    BOOST_CHECK(!bres);
 
     // handshake
     dummy_cl.handshake_mutex.unlock();
-    test_obj.handshake(ec);
+    bool bres = test_obj.handshake(ec);
     if(ec){
         std::cout << "server side client handshake ERROR" << std::endl;
         std::cout << ec << std::endl;
     }else{
         std::cout << "server side handshake OK" << std::endl;
     }
+    // unit_test [1] handshake test no error check
     BOOST_CHECK(!ec);
+    // unit_test [2] handshake test return value check
+    BOOST_CHECK(bres);
 
     // close
-std::cout << "TEST A" << std::endl;
     dummy_cl.close_mutex.unlock();
     cl_thread.join();
-std::cout << "TEST B" << std::endl;
 
     test_obj.get_socket().lowest_layer().close();
 
-std::cout << "TEST C" << std::endl;
+
+
+    // error test socket
+    test_ssl_socket_class error_test_obj(io,server_ctx,set_option);
+
+    // test client
+    dummy_cl.all_lock();
+
+    // client start
+    boost::thread cl_thread2(boost::bind(&test_client::handshake_error_test_run,&dummy_cl));
+
+    // accept
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(error_test_obj.get_socket().lowest_layer(),ec);
+    if(ec){
+        std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side client connect OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread2.join();
+
+    // handshake
+    bres = error_test_obj.handshake(ec);
+    if(ec){
+        std::cout << "server side client handshake ERROR" << std::endl;
+        std::cout << ec << std::endl;
+
+    }else{
+        std::cout << "server side handshake OK" << std::endl;
+    }
+    // unit_test [3] handshake test error check
+    BOOST_CHECK(ec);
+    // unit_test [4] handshake test return value check
+    BOOST_CHECK(!bres);
+
+    error_test_obj.get_socket().lowest_layer().close();
+
     // accepter close
     test_acceptor.close();
-std::cout << "TEST D" << std::endl;
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
