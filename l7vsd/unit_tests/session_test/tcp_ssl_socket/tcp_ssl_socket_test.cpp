@@ -46,6 +46,25 @@ class test_client{
 
         }
 
+        void connect_close_only_test_run(){
+            // dummy client start
+
+            // connect
+            {
+                l7vs::rw_scoped_lock scope_lock(connect_mutex);
+
+                if(!connect_test()){
+                    return;
+                }
+            }
+
+            // close 
+            {
+                l7vs::rw_scoped_lock scope_lock(close_mutex);
+                close_test();
+            }
+
+        };
 
         void handshake_test_run(){
             // dummy client start
@@ -67,24 +86,7 @@ class test_client{
                     return;
                 }
             }
-/*
-            // send
-            {
-                l7vs::rw_scoped_lock scope_lock(write_mutex);
-                if(!send_test()){
-                    close_test();
-                    return;
-                }
-            }
-            // receive
-            {
-                l7vs::rw_scoped_lock scope_lock(read_mutex);
-                if(!receive_test()){
-                    close_test();
-                    return;
-                }
-            }
-*/
+
             // close 
             {
                 l7vs::rw_scoped_lock scope_lock(close_mutex);
@@ -93,7 +95,7 @@ class test_client{
 
         };
 
-        void handshake_error_test_run(){
+        void receive_send_test_run(){
             // dummy client start
 
             // connect
@@ -105,6 +107,33 @@ class test_client{
                 }
             }
 
+            // handshake
+            {
+                l7vs::rw_scoped_lock scope_lock(handshake_mutex);
+
+                if(!handshake_test()){
+                    return;
+                }
+            }
+
+            // send
+            {
+                l7vs::rw_scoped_lock scope_lock(write_mutex);
+                if(!send_test()){
+                    close_test();
+                    return;
+                }
+            }
+
+            // receive
+            {
+                l7vs::rw_scoped_lock scope_lock(read_mutex);
+                if(!receive_test()){
+                    close_test();
+                    return;
+                }
+            }
+
             // close 
             {
                 l7vs::rw_scoped_lock scope_lock(close_mutex);
@@ -112,6 +141,8 @@ class test_client{
             }
 
         };
+
+
 
 
         bool connect_test(){
@@ -416,7 +447,7 @@ void handshake_test(){
     dummy_cl.all_lock();
 
     // client start
-    boost::thread cl_thread2(boost::bind(&test_client::handshake_error_test_run,&dummy_cl));
+    boost::thread cl_thread2(boost::bind(&test_client::connect_close_only_test_run,&dummy_cl));
 
     // accept
     dummy_cl.connect_mutex.unlock();
@@ -457,16 +488,104 @@ void handshake_test(){
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
 
+void set_non_blocking_mode_test(){
+    BOOST_MESSAGE( "----- set_non_blocking_mode test start -----" );
+    
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+    authority test_auth;
+
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+
+    // Client context
+    boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+    client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+    client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    server_ctx.set_options(
+        boost::asio::ssl::context::default_workarounds
+        | boost::asio::ssl::context::no_sslv2
+        | boost::asio::ssl::context::single_dh_use);
+    server_ctx.set_password_callback(boost::bind(&authority::get_password, &test_auth));
+    server_ctx.use_certificate_chain_file(SERVER_CTX_CERTIFICATE_CHAIN_FILE);
+    server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
+
+    // test socket
+    test_ssl_socket_class test_obj(io,server_ctx,set_option);
+
+    // test acceptor
+    boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
+
+    // test client
+    test_client dummy_cl(io,client_ctx);
+    dummy_cl.all_lock();
+
+    // client start
+    boost::thread cl_thread(boost::bind(&test_client::connect_close_only_test_run,&dummy_cl));
+
+    // accept
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
+    if(ec){
+        std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side client connect OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    // unit_test [1] set_non_blocking_mode test set non blocking mode success error_code object
+    std::cout << "[1] set_non_blocking_mode test set non blocking mode success error_code object" << std::endl;
+    test_obj.set_non_blocking_mode(ec);
+    BOOST_CHECK(!ec);
+    
+    // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+
+    error_test_obj.get_socket().lowest_layer().close();
+
+    
+    // unit_test [2] set_non_blocking_mode test set non blocking mode faile error_code object
+    std::cout << "[2] set_non_blocking_mode test set non blocking mode faile error_code object" << std::endl;
+    test_obj.set_non_blocking_mode(ec);
+    BOOST_CHECK(ec);
+
+    // accepter close
+    test_acceptor.close();
+
+    
+    BOOST_MESSAGE( "----- set_non_blocking_mode test end -----" );
+}
+
+
+
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_ssl_socket class test" );
 
     ts->add( BOOST_TEST_CASE( &construcor_test ) );
-    ts->add( BOOST_TEST_CASE( &handshake_test ) );
 //    ts->add( BOOST_TEST_CASE( &accept_test ) );
+    ts->add( BOOST_TEST_CASE( &handshake_test ) );
 //    ts->add( BOOST_TEST_CASE( &get_ssl_socket_test ) );
-//    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
+    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
 //    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_test ) );
 //    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
@@ -487,425 +606,6 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
 
 /*
-
-// dummy mirror server
-class test_mirror_server{
-    
-    public:
-        bool bstop_flag;
-        bool brun_flag;
-        bool breq_acc_flag;
-        bool breq_close_wait_flag;
-        bool bconnect_flag;
-        bool bdisconnect_flag;
-        boost::asio::ip::tcp::endpoint accept_end;
-        boost::asio::ip::tcp::endpoint connect_end;
-        size_t receive_size;
-        int req_recv_cnt;
-        bool brecv_triger;
-        size_t data_size;
-        
-        test_mirror_server() : 
-                bstop_flag(false),
-                brun_flag(false),
-                breq_acc_flag(false),
-                breq_close_wait_flag(false),
-                bconnect_flag(false),
-                bdisconnect_flag(false),
-                accept_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT),
-                connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT),
-                receive_size(0),
-                req_recv_cnt(0),
-                brecv_triger(false),
-                data_size(0){
-        };
-        
-        ~test_mirror_server(){
-            bstop_flag = true;
-            
-            while(brun_flag){
-                sleep(1);
-            }
-            
-        };
-        
-        void run(){
-            std::cout << "dummy mirror server run start!" << std::endl;
-            
-            brun_flag = true;
-            bconnect_flag = false;
-            bdisconnect_flag = false;
-            boost::asio::io_service io;
-            boost::asio::ip::tcp::acceptor acc(io,accept_end);
-            boost::system::error_code ec;
-            
-            boost::array<char,MAX_BUFFER_SIZE> buf;
-            receive_size = 0;
-            size_t send_size = 0;
-            
-            
-            while(!bstop_flag){
-                if(!breq_acc_flag){
-                    continue;
-                }
-                
-                boost::asio::ip::tcp::socket con(io);
-                
-                // accept
-                acc.accept(con,ec);
-                if(ec){
-                    std::cout << "dummy mirror server accept NG!" << std::endl;
-                    break;
-                }else{
-                    connect_end = con.remote_endpoint();
-                    std::cout << "dummy mirror server accept OK! from " << connect_end << std::endl;
-                    
-                    breq_acc_flag = false;
-                    // client chk
-                    
-                    bconnect_flag = true;
-                    
-                    for(int i = 0; i < req_recv_cnt ;i++){
-                        while(!brecv_triger){
-                            if(bstop_flag)
-                                break;
-                        }
-                        brecv_triger = false;
-                        if(bstop_flag)
-                            break;
-                            
-                        // receive
-                        receive_size = 0;
-                        while(receive_size < data_size){
-                            size_t ret_size = con.read_some(boost::asio::buffer(buf.data() + receive_size,data_size - receive_size),ec);
-                            if(ec){
-                                if(ec == boost::asio::error::eof || ec == boost::asio::error::connection_reset){
-                                    std::cout << "dummy mirror server detect client disconnect!" << std::endl;
-                                    bdisconnect_flag = true;
-                                    break;
-                                }else{
-                                    std::cout << "dummy mirror server receive NG!" << std::endl;
-                                    break;
-                                }
-                            }else if(ret_size > 0){
-                                receive_size += ret_size;
-                                std::cout << "dummy mirror server receive " << receive_size << "Byte" << std::endl;
-                            }
-                        }
-                        if(!ec){
-                            if(receive_size > 0){
-                                // send
-                                send_size = 0;
-                                while(send_size < receive_size){
-                                    size_t ret_size = con.write_some(boost::asio::buffer(buf.data() + send_size,receive_size - send_size),ec);
-                                    if(ec){
-                                        std::cout << "dummy mirror server send NG!" << std::endl;
-                                        break;
-                                    }else if(ret_size > 0){
-                                        send_size += ret_size;
-                                        std::cout << "dummy mirror server send " << send_size << "Byte" << std::endl;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    std::cout << "dummy mirror server connection close wait start" << std::endl;
-                    while(breq_close_wait_flag){
-                        sleep(1);
-                    }
-                    std::cout << "dummy mirror server connection close wait end" << std::endl;
-                    // close
-                    con.close(ec);
-                }
-            }
-            
-            acc.close(ec);
-            
-            brun_flag = false;
-            
-            std::cout << "dummy mirror server run end!" << std::endl;
-        };
-};
-
-// 
-class test_socket_class : public l7vs::tcp_socket{
-    public:
-        
-//    test_socket_class(boost::asio::io_service& io) : l7vs::tcp_socket(io){
-//    };
-    test_socket_class(boost::asio::io_service& io,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
-    };
-    ~test_socket_class(){};
-    
-    boost::asio::ip::tcp::endpoint get_local_end(){
-        return my_socket.local_endpoint();
-    }
-    boost::asio::ip::tcp::endpoint get_remote_end(){
-        return my_socket.remote_endpoint();
-    }
-    boost::asio::io_service& get_io(){
-        return my_socket.get_io_service();
-    }
-    
-    void test_close(boost::system::error_code& ec){
-        my_socket.close(ec);
-    }
-    
-    bool& get_open_flag(){
-        return open_flag;
-    }
-    
-    boost::asio::ip::tcp::socket* get_socket_pointer(){
-        return &my_socket;
-    }
-    
-    l7vs::tcp_socket_option_info* get_opt_info(){
-        return &opt_info;
-    }
-        
-};
-
-
-//--test case--
-// construcor test
-void construcor_test(){
-
-    
-    BOOST_MESSAGE( "----- construcor test start -----" );
-    
-    boost::asio::io_service io;
-    
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = true;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = true;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = true;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = true;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = true;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = true;
-            
-    test_socket_class test_obj(io,set_option);
-    
-    // unit_test [1] construcor test set io object
-    std::cout << "[1] construcor test set io object" << std::endl;
-    boost::asio::io_service& set_io = test_obj.get_io();
-    BOOST_CHECK_EQUAL(&io , &set_io);
-    
-    // unit_test [2] construcor test init open_flag
-    std::cout << "[2] construcor test init open_flag" << std::endl;
-    BOOST_CHECK(!test_obj.get_open_flag());
-
-    // unit_test [3] construcor test set socket option nodelay_opt
-    std::cout << "[3] construcor test set socket option nodelay_opt" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->nodelay_opt , set_option.nodelay_opt);
-    
-    // unit_test [4] construcor test set socket option nodelay_val
-    std::cout << "[4] construcor test set socket option nodelay_val" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->nodelay_val , set_option.nodelay_val);
-    
-    // unit_test [5] construcor test set socket option cork_opt
-    std::cout << "[5] construcor test set socket option cork_opt" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->cork_opt , set_option.cork_opt);
-    
-    // unit_test [6] construcor test set socket option cork_val
-    std::cout << "[6] construcor test set socket option cork_val" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->cork_val , set_option.cork_val);
-    
-    // unit_test [7] construcor test set socket option quickack_opt
-    std::cout << "[7] construcor test set socket option quickack_opt" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->quickack_opt , set_option.quickack_opt);
-    
-    // unit_test [8] construcor test set socket option quickack_val
-    std::cout << "[8] construcor test set socket option quickack_val" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->quickack_val , set_option.quickack_val);
-    
-    BOOST_MESSAGE( "----- construcor test end -----" );
-}
-
-void connect_test(){
-    
-    BOOST_MESSAGE( "----- connect test start -----" );
-    
-    
-    test_mirror_server test_server;
-    
-    // accept req
-    test_server.breq_acc_flag = true;
-    // close wait req
-    test_server.breq_close_wait_flag = true;
-        
-    // test server start
-    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
-    
-    while( !test_server.brun_flag ){
-        sleep(1);
-    }
-    
-    std::cout << "ready dummy mirror server" << std::endl;
-    
-    // unit_test [1] connect test connection success error_code object
-    std::cout << "[1] connect test connection success error_code object" << std::endl;
-    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-    boost::asio::io_service io;
-    boost::system::error_code ec;
-    
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = true;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = true;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = true;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = true;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = true;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = true;
-    
-    test_socket_class test_obj(io,set_option);
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(!ec);
-    
-    // unit_test [2] connect test connection success open_flag
-    std::cout << "[2] connect test connection success open_flag" << std::endl;
-    BOOST_CHECK(test_obj.get_open_flag());
-    
-    // TCP_NODELAY check!!
-    // unit_test [3] connect test set socket option TCP_NODELAY
-    std::cout << "[3] connect test set socket option TCP_NODELAY" << std::endl;
-    boost::asio::ip::tcp::no_delay get_option;
-    test_obj.get_socket_pointer()->get_option(get_option,ec);
-    BOOST_CHECK(!ec);
-    BOOST_CHECK(get_option == set_option.nodelay_val);
-    
-    // TCP_CORK check!!
-    // unit_test [4] connect test set socket option TCP_CORK
-    std::cout << "[4] connect test set socket option TCP_CORK" << std::endl;
-    int val;
-    size_t len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
-    BOOST_CHECK(!ec);
-    BOOST_CHECK((bool)val == set_option.cork_val);
-    
-    
-    while(!test_server.bconnect_flag){
-        sleep(1);
-    }
-    
-    boost::asio::ip::tcp::endpoint chk_end;
-    boost::asio::ip::tcp::endpoint ref_end;
-    
-    // unit_test [5] connect test connect local endpoint
-    std::cout << "[5] connect test connect local endpoint" << std::endl;    
-    chk_end = test_obj.get_local_end();
-    ref_end = test_server.connect_end;
-    BOOST_CHECK_EQUAL(chk_end , ref_end);
-    
-    
-    // unit_test [6] connect test connect remote endpoint
-    std::cout << "[6] connect test connect remote endpoint" << std::endl;
-    chk_end = test_obj.get_remote_end();
-    ref_end = connect_end;
-    BOOST_CHECK_EQUAL(chk_end , ref_end);
-
-    // unit_test [7] connect test connect recall check
-    std::cout << "[7] connect test connect recall check" << std::endl;
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(!ec);
-    BOOST_CHECK(test_obj.get_open_flag());
-    
-    test_obj.test_close(ec);
-    test_obj.get_open_flag() = false;
-    
-    test_server.breq_close_wait_flag = false;    
-    test_server.bstop_flag = true;
-    server_thread.join();
-        
-    // unit_test [8] connect test connection faile error_code object
-    std::cout << "[8] connect test connection faile error_code object" << std::endl;
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(ec);
-        
-    // unit_test [9] connect test connection faile open_flag
-    std::cout << "[9] connect test connection faile open_flag" << std::endl;
-    BOOST_CHECK(!test_obj.get_open_flag());
-    
-    BOOST_MESSAGE( "----- connect test end -----" );
-    
-}
-
-void set_non_blocking_mode_test(){
-    BOOST_MESSAGE( "----- set_non_blocking_mode test start -----" );
-    
-    test_mirror_server test_server;
-    
-    // accept req
-    test_server.breq_acc_flag = true;
-    // close wait req
-    test_server.breq_close_wait_flag = true;
-        
-    // test server start
-    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
-    
-    while( !test_server.brun_flag ){
-        sleep(1);
-    }
-    
-    std::cout << "ready dummy mirror server" << std::endl;
-    
-    
-    
-    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-    boost::asio::io_service io;
-    boost::system::error_code ec;
-    
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = false;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = false;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = false;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = false;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = false;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = false;
-    
-    test_socket_class test_obj(io,set_option);
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(!ec);
-    
-    while(!test_server.bconnect_flag){
-        sleep(1);
-    }
-
-    // unit_test [1] set_non_blocking_mode test set non blocking mode success error_code object
-    std::cout << "[1] set_non_blocking_mode test set non blocking mode success error_code object" << std::endl;
-    test_obj.set_non_blocking_mode(ec);
-    BOOST_CHECK(!ec);
-    
-    test_obj.test_close(ec);
-    
-    test_server.breq_close_wait_flag = false;    
-    test_server.bstop_flag = true;
-    server_thread.join();
-    
-    // unit_test [2] set_non_blocking_mode test set non blocking mode faile error_code object
-    std::cout << "[2] set_non_blocking_mode test set non blocking mode faile error_code object" << std::endl;
-    test_obj.set_non_blocking_mode(ec);
-    BOOST_CHECK(ec);
-    
-    BOOST_MESSAGE( "----- set_non_blocking_mode test end -----" );
-}
 
 
 void write_some_read_some_test(){
