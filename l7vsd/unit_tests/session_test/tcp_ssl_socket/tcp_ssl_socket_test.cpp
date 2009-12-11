@@ -296,13 +296,16 @@ std::cout << "DEBUG TEST A" << std::endl;
 
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+std::cout << "DEBUG TEST A-1" << std::endl;
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+std::cout << "DEBUG TEST A-2" << std::endl;
     client_ctx.load_verify_file("ca.pem");
 
-std::cout << "DEBUG TEST B" << std::endl;
 
     // Server context
+std::cout << "DEBUG TEST B" << std::endl;
     boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+std::cout << "DEBUG TEST B-1" << std::endl;
     test_ssl_socket_class test_obj(io,server_ctx,set_option);
 
 std::cout << "DEBUG TEST C" << std::endl;
@@ -310,9 +313,13 @@ std::cout << "DEBUG TEST C" << std::endl;
         boost::asio::ssl::context::default_workarounds
         | boost::asio::ssl::context::no_sslv2
         | boost::asio::ssl::context::single_dh_use);
+std::cout << "DEBUG TEST C-1" << std::endl;
     server_ctx.set_password_callback(boost::bind(&test_ssl_socket_class::get_password, &test_obj));
+std::cout << "DEBUG TEST C-2" << std::endl;
     server_ctx.use_certificate_chain_file("server.pem");
+std::cout << "DEBUG TEST C-3" << std::endl;
     server_ctx.use_private_key_file("server.pem", boost::asio::ssl::context::pem);
+std::cout << "DEBUG TEST C-4" << std::endl;
     server_ctx.use_tmp_dh_file("dh512.pem");
 
 std::cout << "DEBUG TEST D" << std::endl;
