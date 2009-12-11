@@ -110,7 +110,6 @@ class test_client{
         };
 
         bool handshake_test(){
-//            sleep(1);
             boost::system::error_code ec;
             std::cout << "dummy client handshake try" << std::endl;
             my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
@@ -303,9 +302,8 @@ void construcor_test(){
 // handshake test
 void handshake_test(){
 
-    
     BOOST_MESSAGE( "----- handshake test start -----" );
-    
+
     boost::asio::io_service io;
     boost::system::error_code ec;
     authority test_auth;
@@ -324,18 +322,13 @@ void handshake_test(){
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = false;
 
-std::cout << "DEBUG TEST A" << std::endl;
-
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
     client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
 
     // Server context
-std::cout << "DEBUG TEST B" << std::endl;
     boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
-
-std::cout << "DEBUG TEST C" << std::endl;
     server_ctx.set_options(
         boost::asio::ssl::context::default_workarounds
         | boost::asio::ssl::context::no_sslv2
@@ -345,27 +338,23 @@ std::cout << "DEBUG TEST C" << std::endl;
     server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
     server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
 
+    // test socket
     test_ssl_socket_class test_obj(io,server_ctx,set_option);
 
-std::cout << "DEBUG TEST D" << std::endl;
+    // test acceptor
     boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
     boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
 
-std::cout << "DEBUG TEST E" << std::endl;
+    // test client
     test_client dummy_cl(io,client_ctx);
-std::cout << "DEBUG TEST F" << std::endl;
-
     dummy_cl.all_lock();
-std::cout << "DEBUG TEST G" << std::endl;
 
     // client start
     boost::thread server_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
-std::cout << "DEBUG TEST H" << std::endl;
 
     // accept
     dummy_cl.connect_mutex.unlock();
-    sleep(1);
-    test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
+    bool bres = test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
     if(ec){
         std::cout << "server side client connect ERROR" << std::endl;
         std::cout << ec << std::endl;
@@ -373,10 +362,9 @@ std::cout << "DEBUG TEST H" << std::endl;
         std::cout << "server side client connect OK" << std::endl;
     }
     BOOST_CHECK(!ec);
-    sleep(1);
+    BOOST_CHECK(!bres);
 
     // handshake
-std::cout << "DEBUG TEST I" << std::endl;
     dummy_cl.handshake_mutex.unlock();
     test_obj.handshake(ec);
     if(ec){
@@ -388,9 +376,11 @@ std::cout << "DEBUG TEST I" << std::endl;
     BOOST_CHECK(!ec);
 
     // close
-std::cout << "DEBUG TEST J" << std::endl;
     dummy_cl.close_mutex.unlock();
     test_obj.get_socket().lowest_layer().close();
+
+    // accepter close
+    test_acceptor.close();
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
