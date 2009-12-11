@@ -117,6 +117,8 @@ class test_client{
             }
 
             // 1st
+            receive_data_size = 0;
+            send_data_size = 0;
             // receive
             {
                 l7vs::rw_scoped_lock scope_lock(read_mutex);
@@ -138,6 +140,8 @@ class test_client{
             write_mutex.wrlock();
 
             //2nd
+            receive_data_size = 0;
+            send_data_size = 0;
             // receive
             {
                 l7vs::rw_scoped_lock scope_lock(read_mutex);
@@ -159,25 +163,29 @@ class test_client{
             write_mutex.wrlock();
 
             //3rd
-            // receive
-            {
+            receive_data_size = 0;
+            send_data_size = 0;
+            while(receive_data_size < MAX_BUFFER_SIZE){
                 l7vs::rw_scoped_lock scope_lock(read_mutex);
-                if(!receive_test()){
-                    close_test();
-                    return;
+                // receive
+                {
+                    if(!receive_test()){
+                        close_test();
+                        return;
+                    }
                 }
             }
-            read_mutex.wrlock();
 
-            // send
-            {
+            while(send_data_size < receive_data_size){
                 l7vs::rw_scoped_lock scope_lock(write_mutex);
-                if(!send_test()){
-                    close_test();
-                    return;
+                // send
+                {
+                    if(!send_test()){
+                        close_test();
+                        return;
+                    }
                 }
             }
-            write_mutex.wrlock();
 
             // close 
             {
@@ -224,13 +232,14 @@ class test_client{
             sleep(1);
             boost::system::error_code ec;
             std::cout << "dummy client write try" << std::endl;
-            my_socket.write_some(boost::asio::buffer(data_buff,data_size), ec);
+            std::size_t write_size = my_socket.write_some(boost::asio::buffer(data_buff.data() + send_data_size,receive_data_size - send_data_size), ec);
             if(ec){
                 //receive error
                 std::cout << "dummy client send Error!" << std::endl;
                 std::cout << ec << std::endl;
                 return false;
             }
+            send_data_size += write_size;
             std::cout << "dummy client send OK" << std::endl;
             return true;
         };
@@ -238,13 +247,14 @@ class test_client{
             sleep(1);
             boost::system::error_code ec;
             std::cout << "dummy client read try" << std::endl;
-            data_size = my_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
+            std::size_t read_size = my_socket.read_some(boost::asio::buffer(data_buff.data() + receive_data_size,MAX_BUFFER_SIZE), ec);
             if(ec){
                 //receive error
                 std::cout << "dummy client receive Error!" << std::endl;
                 std::cout << ec << std::endl;
                 return false;
             }
+            receive_data_size += read_size;
             std::cout << "dummy client receive OK" << std::endl;
             return true;
         };
@@ -264,7 +274,8 @@ class test_client{
 
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
         boost::array<char,MAX_BUFFER_SIZE> data_buff;
-        std::size_t data_size;
+        std::size_t receive_data_size;
+        std::size_t send_data_size;
 
         //! socket connect mutex
         l7vs::wr_mutex connect_mutex;
@@ -783,7 +794,6 @@ void write_some_read_some_test(){
             receve_data_size += res_size;
             std::cout << receve_data_size;
             std::cout << " receiving data" << std::endl;
-return;
         }else{
             if(ec != boost::asio::error::try_again){
                 break;
