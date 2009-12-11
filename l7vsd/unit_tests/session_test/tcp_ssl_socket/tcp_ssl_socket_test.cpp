@@ -4,13 +4,341 @@
 #include <boost/thread/thread.hpp>
 #include <boost/test/included/unit_test.hpp>
 
-#include "tcp_socket.h"
+#include "tcp_ssl_socket.h"
 #include "logger.h"
 
 #define DUMMI_SERVER_IP     "127.0.0.1"
 #define DUMMI_SERVER_PORT     7000
 
 using namespace boost::unit_test_framework;
+
+// dummy client
+class test_client{
+    public:
+        // 
+        test_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context) :
+            my_socket(io_service,context){
+        };
+
+        ~test_client(){
+        };
+
+        void run(){
+            // dummy client start
+
+            // connect
+            if(!connet_test()){
+                return;
+            }
+
+            // handshake
+            if(!handshake_test()){
+                return;
+            }
+
+            // send
+            if(!send_test()){
+                close_test();
+                return;
+            }
+
+            // receive
+            if(!receive_test()){
+                close_test();
+                return;
+            }
+
+            // close 
+            close_test();
+
+        };
+
+        bool connect_test(){
+            boost::system::error_code ec;
+            boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+            my_socket.connect(connect_end,ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client connect Error!" << std::endl;
+                return false;
+            }
+            std::cout << "dummy client connect OK" << std::endl;
+            return true;
+        };
+
+        bool handshake_test(){
+            boost::system::error_code ec;
+            my_socket.handshake(boost::asio::ssl::stream_base::server, ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client handshake Error!" << std::endl;
+                return false;
+            }
+            std::cout << "dummy client handshake OK" << std::endl;
+            return true;
+        }
+
+        bool send_test(){
+            boost::system::error_code ec;
+            my_socket.write_some(boost::asio::buffer(request,MAX_BUFFER_SIZE), ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client send Error!" << std::endl;
+                return false;
+            }
+            std::cout << "dummy client send OK" << std::endl;
+            return true;
+        };
+        bool receive_test(){
+            boost::system::error_code ec;
+            my_socket.read_some(boost::asio::buffer(response,MAX_BUFFER_SIZE), ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client receive Error!" << std::endl;
+                return false;
+            }
+            std::cout << "dummy client receive OK" << std::endl;
+            return true;
+        };
+        void close_test(){
+            boost::system::error_code ec;
+            my_socket.close(ec);
+            if(ec){
+                //close error
+                std::cout << "dummy client close Error!" << std::endl;
+                return;
+            }
+            std::cout << "dummy client close OK" << std::endl;
+        };
+
+        boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
+        boost::array<char,MAX_BUFFER_SIZE> request;
+        boost::array<char,MAX_BUFFER_SIZE> response;
+}
+
+// 
+class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
+    public:
+
+    test_ssl_socket_class(boost::asio::io_service& io,boost::asio::ssl::context& context,const l7vs::tcp_ssl_socket_option_info set_option) : l7vs::tcp_ssl_socket(io,set_option){
+    };
+    ~test_ssl_socket_class(){};
+
+    boost::asio::ip::tcp::endpoint get_local_end(){
+        return my_socket.lowest_layer().local_endpoint();
+    }
+    boost::asio::ip::tcp::endpoint get_remote_end(){
+        return my_socket.lowest_layer().remote_endpoint();
+    }
+    boost::asio::io_service& get_io(){
+        return my_socket.lowest_layer().get_io_service();
+    }
+
+    void test_close(boost::system::error_code& ec){
+        my_socket.lowest_layer().close(ec);
+    }
+
+    bool& get_open_flag(){
+        return open_flag;
+    }
+
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket>* get_socket_pointer(){
+        return &my_socket;
+    }
+
+    l7vs::tcp_ssl_socket_option_info* get_opt_info(){
+        return &opt_info;
+    }
+
+};
+
+//--test case--
+// construcor test
+void construcor_test(){
+
+    
+    BOOST_MESSAGE( "----- construcor test start -----" );
+    
+    boost::asio::io_service io;
+    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = true;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = true;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = true;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = true;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = true;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = true;
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+
+   test_ssl_socket_class test_obj(io,server_ctx,set_option);
+    
+    // unit_test [1] construcor test set io object
+    std::cout << "[1] construcor test set io object" << std::endl;
+    boost::asio::io_service& set_io = test_obj.get_io();
+    BOOST_CHECK_EQUAL(&io , &set_io);
+    
+    // unit_test [2] construcor test init open_flag
+    std::cout << "[2] construcor test init open_flag" << std::endl;
+    BOOST_CHECK(!test_obj.get_open_flag());
+
+    // unit_test [3] construcor test set socket option nodelay_opt
+    std::cout << "[3] construcor test set socket option nodelay_opt" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->nodelay_opt , set_option.nodelay_opt);
+    
+    // unit_test [4] construcor test set socket option nodelay_val
+    std::cout << "[4] construcor test set socket option nodelay_val" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->nodelay_val , set_option.nodelay_val);
+    
+    // unit_test [5] construcor test set socket option cork_opt
+    std::cout << "[5] construcor test set socket option cork_opt" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->cork_opt , set_option.cork_opt);
+    
+    // unit_test [6] construcor test set socket option cork_val
+    std::cout << "[6] construcor test set socket option cork_val" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->cork_val , set_option.cork_val);
+    
+    // unit_test [7] construcor test set socket option quickack_opt
+    std::cout << "[7] construcor test set socket option quickack_opt" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->quickack_opt , set_option.quickack_opt);
+    
+    // unit_test [8] construcor test set socket option quickack_val
+    std::cout << "[8] construcor test set socket option quickack_val" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_opt_info()->quickack_val , set_option.quickack_val);
+    
+    BOOST_MESSAGE( "----- construcor test end -----" );
+}
+
+
+
+
+
+/*
+// is_open test
+void is_open_test(){
+    
+    BOOST_MESSAGE( "----- is_open test start -----" );
+    
+    test_mirror_server test_server;
+    
+    // accept req
+    test_server.breq_acc_flag = true;
+    // close wait req
+    test_server.breq_close_wait_flag = true;
+        
+    // recv cont
+    test_server.req_recv_cnt = 1;
+    test_server.data_size = 1;
+        
+    // test server start
+    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+    
+    while( !test_server.brun_flag ){
+        sleep(1);
+    }
+    
+    std::cout << "ready dummy mirror server" << std::endl;
+    
+    
+    
+    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    
+    test_socket_class test_obj(io,set_option);
+
+    // unit_test [1] is_open before connect check
+    std::cout << "[1] is_open before connect check" << std::endl;
+    BOOST_CHECK(!test_obj.is_open());
+
+    test_obj.connect(connect_end,ec);
+    BOOST_CHECK(!ec);
+
+    // unit_test [2] is_open after connect check
+    std::cout << "[2] is_open after connect check" << std::endl;
+    BOOST_CHECK(test_obj.is_open());
+    
+    while(!test_server.bconnect_flag){
+        sleep(1);
+    }
+    
+    BOOST_CHECK(test_obj.get_open_flag());
+    
+    BOOST_CHECK(!test_server.bdisconnect_flag);
+    
+    test_obj.close(ec);
+    BOOST_CHECK(!ec);
+
+    // unit_test [3] is_open close after check
+    std::cout << "[3] is_open close after check" << std::endl;
+    BOOST_CHECK(!test_obj.is_open());
+    
+    test_server.brecv_triger = true;
+    sleep(1);
+    
+    test_server.breq_close_wait_flag = false;    
+    test_server.bstop_flag = true;
+    server_thread.join();    
+    BOOST_MESSAGE( "----- is_open test end -----" );    
+}
+*/
+
+
+
+
+
+
+
+test_suite*    init_unit_test_suite( int argc, char* argv[] ){
+
+    test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_ssl_socket class test" );
+
+    ts->add( BOOST_TEST_CASE( &construcor_test ) );
+//    ts->add( BOOST_TEST_CASE( &handshake_test ) );
+//    ts->add( BOOST_TEST_CASE( &accept_test ) );
+//    ts->add( BOOST_TEST_CASE( &get_ssl_socket_test ) );
+//    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
+//    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
+//    ts->add( BOOST_TEST_CASE( &close_test ) );
+//    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
+    ts->add( BOOST_TEST_CASE( &is_open_test ) );
+
+    framework::master_test_suite().add( ts );
+
+    return NULL;
+}
+
+
+
+
+
+
+
+
+
+
+/*
 
 // dummy mirror server
 class test_mirror_server{
@@ -1029,21 +1357,4 @@ void is_open_test(){
 }
 
 
-test_suite*    init_unit_test_suite( int argc, char* argv[] ){
-
-    test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
-
-    ts->add( BOOST_TEST_CASE( &construcor_test ) );
-    ts->add( BOOST_TEST_CASE( &get_socket_test ) );
-    ts->add( BOOST_TEST_CASE( &connect_test ) );
-    ts->add( BOOST_TEST_CASE( &connect_lock_test ) );
-    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
-    ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
-    ts->add( BOOST_TEST_CASE( &close_test ) );
-    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
-    ts->add( BOOST_TEST_CASE( &is_open_test ) );
-
-    framework::master_test_suite().add( ts );
-
-    return NULL;
-}
+*/

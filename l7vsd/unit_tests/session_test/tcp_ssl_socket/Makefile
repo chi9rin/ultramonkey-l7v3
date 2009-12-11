@@ -1,6 +1,6 @@
 #
 #
-#	Makefile for tcp_socket_test Class unit test frameworks.
+#	Makefile for tcp_ssl_socket_test Class unit test frameworks.
 #
 #
 TARGET		= tcp_socket_test_ut
@@ -18,8 +18,8 @@ LDFLAGS		= -lrt -ldl
 
 SRCS		=	\
 			../logger_stb/logger.cpp \
-			../../../src/tcp_socket.cpp \
-			tcp_socket_test.cpp
+			../../../src/tcp_ssl_socket.cpp \
+			tcp_ssl_socket_test.cpp
 
 .SUFFIX:	.cpp .o
 .cpp.o:
