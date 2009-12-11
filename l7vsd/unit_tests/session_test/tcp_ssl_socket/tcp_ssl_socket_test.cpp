@@ -114,7 +114,7 @@ class test_client{
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
         boost::array<char,MAX_BUFFER_SIZE> request;
         boost::array<char,MAX_BUFFER_SIZE> response;
-}
+};
 
 // 
 class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
@@ -150,7 +150,7 @@ class test_ssl_socket_class : public l7vs::tcp_ssl_socket{
         return &opt_info;
     };
 
-}
+};
 
 //--test case--
 // construcor test
