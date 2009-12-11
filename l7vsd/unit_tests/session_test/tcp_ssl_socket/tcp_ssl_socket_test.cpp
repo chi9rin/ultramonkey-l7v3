@@ -88,6 +88,7 @@ class test_client{
         bool connect_test(){
             sleep(1);
             boost::system::error_code ec;
+            std::cout << "dummy client connect try" << std::endl;
             boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
             my_socket.lowest_layer().connect(connect_end,ec);
             if(ec){
@@ -103,6 +104,7 @@ class test_client{
         bool handshake_test(){
 //            sleep(1);
             boost::system::error_code ec;
+            std::cout << "dummy client handshake try" << std::endl;
             my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
             if(ec){
                 //receive error
@@ -117,6 +119,7 @@ class test_client{
         bool send_test(){
             sleep(1);
             boost::system::error_code ec;
+            std::cout << "dummy client write try" << std::endl;
             my_socket.write_some(boost::asio::buffer(request,MAX_BUFFER_SIZE), ec);
             if(ec){
                 //receive error
@@ -130,6 +133,7 @@ class test_client{
         bool receive_test(){
             sleep(1);
             boost::system::error_code ec;
+            std::cout << "dummy client read try" << std::endl;
             my_socket.read_some(boost::asio::buffer(response,MAX_BUFFER_SIZE), ec);
             if(ec){
                 //receive error
@@ -143,6 +147,7 @@ class test_client{
         void close_test(){
             sleep(1);
             boost::system::error_code ec;
+            std::cout << "dummy client close try" << std::endl;
             my_socket.lowest_layer().close(ec);
             if(ec){
                 //close error
