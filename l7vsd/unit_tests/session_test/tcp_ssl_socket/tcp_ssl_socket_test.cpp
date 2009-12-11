@@ -352,6 +352,7 @@ std::cout << "DEBUG TEST H" << std::endl;
         std::cout << "server side client connect OK" << std::endl;
     }
     BOOST_CHECK(!ec);
+    sleep(1);
 
     // handshake
 std::cout << "DEBUG TEST I" << std::endl;
