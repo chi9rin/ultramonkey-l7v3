@@ -939,12 +939,12 @@ void is_open_test(){
 
     // unit_test [1] is_open open check
     std::cout << "[1] is_open open check" << std::endl;
-    BOOST_CHECK(!test_obj.is_open());
+    BOOST_CHECK(test_obj.is_open());
 
     test_obj.get_open_flag() = false;
     // unit_test [2] is_open close check
     std::cout << "[2] is_open close check" << std::endl;
-    BOOST_CHECK(test_obj.is_open());
+    BOOST_CHECK(!test_obj.is_open());
     
     BOOST_MESSAGE( "----- is_open test end -----" );    
 }
