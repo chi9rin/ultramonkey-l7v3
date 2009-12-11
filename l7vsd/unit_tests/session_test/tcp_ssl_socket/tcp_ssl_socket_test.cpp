@@ -116,15 +116,7 @@ class test_client{
                 }
             }
 
-            // send
-            {
-                l7vs::rw_scoped_lock scope_lock(write_mutex);
-                if(!send_test()){
-                    close_test();
-                    return;
-                }
-            }
-
+            // 1st
             // receive
             {
                 l7vs::rw_scoped_lock scope_lock(read_mutex);
@@ -133,6 +125,59 @@ class test_client{
                     return;
                 }
             }
+            read_mutex.wrlock();
+
+            // send
+            {
+                l7vs::rw_scoped_lock scope_lock(write_mutex);
+                if(!send_test()){
+                    close_test();
+                    return;
+                }
+            }
+            write_mutex.wrlock();
+
+            //2nd
+            // receive
+            {
+                l7vs::rw_scoped_lock scope_lock(read_mutex);
+                if(!receive_test()){
+                    close_test();
+                    return;
+                }
+            }
+            read_mutex.wrlock();
+
+            // send
+            {
+                l7vs::rw_scoped_lock scope_lock(write_mutex);
+                if(!send_test()){
+                    close_test();
+                    return;
+                }
+            }
+            write_mutex.wrlock();
+
+            //3rd
+            // receive
+            {
+                l7vs::rw_scoped_lock scope_lock(read_mutex);
+                if(!receive_test()){
+                    close_test();
+                    return;
+                }
+            }
+            read_mutex.wrlock();
+
+            // send
+            {
+                l7vs::rw_scoped_lock scope_lock(write_mutex);
+                if(!send_test()){
+                    close_test();
+                    return;
+                }
+            }
+            write_mutex.wrlock();
 
             // close 
             {
@@ -179,7 +224,7 @@ class test_client{
             sleep(1);
             boost::system::error_code ec;
             std::cout << "dummy client write try" << std::endl;
-            my_socket.write_some(boost::asio::buffer(request,MAX_BUFFER_SIZE), ec);
+            my_socket.write_some(boost::asio::buffer(data_buff,data_size), ec);
             if(ec){
                 //receive error
                 std::cout << "dummy client send Error!" << std::endl;
@@ -193,7 +238,7 @@ class test_client{
             sleep(1);
             boost::system::error_code ec;
             std::cout << "dummy client read try" << std::endl;
-            my_socket.read_some(boost::asio::buffer(response,MAX_BUFFER_SIZE), ec);
+            data_size = my_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
             if(ec){
                 //receive error
                 std::cout << "dummy client receive Error!" << std::endl;
@@ -218,8 +263,8 @@ class test_client{
         };
 
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
-        boost::array<char,MAX_BUFFER_SIZE> request;
-        boost::array<char,MAX_BUFFER_SIZE> response;
+        boost::array<char,MAX_BUFFER_SIZE> data_buff;
+        std::size_t data_size;
 
         //! socket connect mutex
         l7vs::wr_mutex connect_mutex;
@@ -521,71 +566,94 @@ void get_socket_test(){
     
     BOOST_MESSAGE( "----- get_socket test end -----" );    
 }
-/*
+
 void write_some_read_some_test(){
     BOOST_MESSAGE( "----- write_some read_some test start -----" );
-    
-    test_mirror_server test_server;
-    
-    // accept req
-    test_server.breq_acc_flag = true;
-    // close wait req
-    test_server.breq_close_wait_flag = true;
-    // recv cont
-    test_server.req_recv_cnt = 513;
-        
-    
-    // test server start
-    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
-    
-    while( !test_server.brun_flag ){
-        sleep(1);
-    }
-    
-    std::cout << "ready dummy mirror server" << std::endl;
-    
-    // connect
-    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+
     boost::asio::io_service io;
     boost::system::error_code ec;
-    
+    authority test_auth;
+
     l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = true;
+    set_option.nodelay_opt = false;
     //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = true;
+    set_option.nodelay_val = false;
     //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = true;
+    set_option.cork_opt = false;
     //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = true;
+    set_option.cork_val = false;
     //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = true;
+    set_option.quickack_opt = false;
     //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = true;
-    
-    test_socket_class test_obj(io,set_option);
-    test_obj.connect(connect_end,ec);
-    BOOST_CHECK(!ec);
-    
-    while(!test_server.bconnect_flag){
-        sleep(1);
+    set_option.quickack_val = false;
+
+    // Client context
+    boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+    client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+    client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    server_ctx.set_options(
+        boost::asio::ssl::context::default_workarounds
+        | boost::asio::ssl::context::no_sslv2
+        | boost::asio::ssl::context::single_dh_use);
+    server_ctx.set_password_callback(boost::bind(&authority::get_password, &test_auth));
+    server_ctx.use_certificate_chain_file(SERVER_CTX_CERTIFICATE_CHAIN_FILE);
+    server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
+
+    // test socket
+    test_ssl_socket_class test_obj(io,server_ctx,set_option);
+
+    // test acceptor
+    boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
+
+    // test client
+    test_client dummy_cl(io,client_ctx);
+    dummy_cl.all_lock();
+
+    // client start
+    boost::thread cl_thread(boost::bind(&test_client::receive_send_test_run,&dummy_cl));
+
+    // accept
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
+    if(ec){
+        std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side client connect OK" << std::endl;
     }
-    
+    BOOST_CHECK(!ec);
+
+    // handshake
+    dummy_cl.handshake_mutex.unlock();
+    bool bres = test_obj.handshake(ec);
+    if(ec){
+        std::cout << "server side client handshake ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side handshake OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
     test_obj.set_non_blocking_mode(ec);
     BOOST_CHECK(!ec);
-    
+
     boost::array<char,MAX_BUFFER_SIZE> send_buff;
     boost::array<char,MAX_BUFFER_SIZE> recv_buff;
     size_t send_size;
     size_t res_size;
     size_t send_data_size;
     size_t receve_data_size;
-    
+
     //size 0
     // ## write some read some test [1] size 0 
+    read_mutex.unlock();
     send_size = 0;
-    test_server.brecv_triger = true;
-    test_server.data_size = send_size;
     while(true){
         res_size = test_obj.write_some(boost::asio::buffer(send_buff, send_size),ec);
         if(ec){
@@ -602,9 +670,9 @@ void write_some_read_some_test(){
     // unit_test [2] write_some & read_some test size 0 write size
     std::cout << "[2] write_some & read_some test size 0 write size" << std::endl;
     BOOST_CHECK_EQUAL(res_size, send_size);
-    
-    sleep(1);
-    
+
+
+    write_mutex.unlock();
     res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
     
     // unit_test [3] write_some & read_some test size 0 read error_code object
@@ -614,14 +682,15 @@ void write_some_read_some_test(){
     // unit_test [4] write_some & read_some test size 0 read size
     std::cout << "[4] write_some & read_some test size 0 read size" << std::endl;
     BOOST_CHECK_EQUAL(res_size,0UL);
+
         
     // size 1    
     send_size = 1;
-    test_server.data_size = send_size;
     send_buff[0] = 'A';
     recv_buff[0] = 'B';
-    
-    test_server.brecv_triger = true;
+
+    read_mutex.unlock();
+
     while(true){
         res_size = test_obj.write_some(boost::asio::buffer(send_buff, send_size),ec);
         if(ec){
@@ -639,6 +708,8 @@ void write_some_read_some_test(){
     // unit_test [6] write_some & read_some test size 1 write send size
     std::cout << "[6] write_some & read_some test size 1 write send size" << std::endl;
     BOOST_CHECK_EQUAL(res_size, send_size);
+
+    write_mutex.unlock();
 
     while(true){
         res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
@@ -662,7 +733,8 @@ void write_some_read_some_test(){
     std::cout << "[9] write_some & read_some test size 1 data check" << std::endl;
     BOOST_CHECK_EQUAL(send_buff[0],recv_buff[0]);
     
-        
+
+
     // size MAX_BUFFER_SIZE    
     send_size = MAX_BUFFER_SIZE;
     test_server.data_size = send_size;
@@ -675,7 +747,9 @@ void write_some_read_some_test(){
     send_data_size = 0;
     receve_data_size = 0;
     test_server.brecv_triger = true;
-    
+
+
+    read_mutex.unlock();
     while(true){
         if(send_data_size == MAX_BUFFER_SIZE){
             break;
@@ -700,6 +774,7 @@ void write_some_read_some_test(){
     std::cout << "[11] write_some & read_some test size MAX_BUFFER_SIZE write size" << std::endl;        
     BOOST_CHECK_EQUAL(send_data_size, send_size);
 
+    write_mutex.unlock();
     
     while(true){
         if(receve_data_size == MAX_BUFFER_SIZE){
@@ -732,15 +807,16 @@ void write_some_read_some_test(){
         if(send_buff[i] != recv_buff[i]) break;
     }
     
+    // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+
     test_obj.test_close(ec);
-    
-    test_server.breq_close_wait_flag = false;    
-    test_server.bstop_flag = true;
-    server_thread.join();
-    
+
+    test_acceptor.close();
+
     BOOST_MESSAGE( "----- write_some & read_some test end -----" );
 }
-*/
 
 void close_test(){
     
@@ -819,6 +895,8 @@ void close_test(){
     // close
     dummy_cl.close_mutex.unlock();
     cl_thread.join();
+
+    test_acceptor.close();
 
     BOOST_MESSAGE( "----- close test end -----" );    
 }
