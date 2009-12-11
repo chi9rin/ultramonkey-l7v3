@@ -350,7 +350,7 @@ void handshake_test(){
     dummy_cl.all_lock();
 
     // client start
-    boost::thread server_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
+    boost::thread cl_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
 
     // accept
     dummy_cl.connect_mutex.unlock();
@@ -376,11 +376,17 @@ void handshake_test(){
     BOOST_CHECK(!ec);
 
     // close
+std::cout << "TEST A" << std::endl;
     dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+std::cout << "TEST B" << std::endl;
+
     test_obj.get_socket().lowest_layer().close();
 
+std::cout << "TEST C" << std::endl;
     // accepter close
     test_acceptor.close();
+std::cout << "TEST D" << std::endl;
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
