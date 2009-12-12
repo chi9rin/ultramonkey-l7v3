@@ -12621,8 +12621,8 @@ void ssl_clear_keep_cache_test(){
     BOOST_CHECK(test_sock.impl()->ssl->error == 0);                                  //0;
     BOOST_CHECK(test_sock.impl()->ssl->hit == 0);                                    //0;
     BOOST_CHECK(test_sock.impl()->ssl->shutdown == 0);                               //0;
-    BOOST_CHECK(test_sock.impl()->ssl->version == test_sock.impl()->ssl->method->version);       // clear_ssl->method->version;
-    BOOST_CHECK(test_sock.impl()->ssl->client_version == 6);                         // clear_ssl->version;
+    BOOST_CHECK(test_sock.impl()->ssl->version == test_sock.impl()->ssl->method->version);          // clear_ssl->method->version;
+    BOOST_CHECK(test_sock.impl()->ssl->client_version == test_sock.impl()->ssl->method->version);   // clear_ssl->version;
     BOOST_CHECK(test_sock.impl()->ssl->rwstate == SSL_NOTHING);                      // SSL_NOTHING;
     BOOST_CHECK(test_sock.impl()->ssl->rstate == SSL_ST_READ_HEADER);  // SSL_ST_READ_HEADER;
     BOOST_CHECK(test_sock.impl()->ssl->state == SSL_ST_BEFORE | SSL_ST_ACCEPT);      // SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
