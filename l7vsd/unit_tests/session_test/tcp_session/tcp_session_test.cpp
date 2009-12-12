@@ -12560,7 +12560,7 @@ void ssl_clear_keep_cache_test(){
     }
     BOOST_CHECK(!ec);
 
-    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl() == 1));
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 1);
 
 
     // close
@@ -12618,11 +12618,11 @@ void ssl_clear_keep_cache_test(){
     ssl_clear_keep_cache_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
 
-    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl() == 1));
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 1);
 
     bool bres = test_obj.test_call(test_sock.impl()->ssl);
 
-    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl() == 0));
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 0);
 
 
     BOOST_CHECK(test_sock.impl()->ssl->init_buf == NULL);
