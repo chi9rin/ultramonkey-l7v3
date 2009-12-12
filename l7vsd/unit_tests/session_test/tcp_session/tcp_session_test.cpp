@@ -12554,27 +12554,27 @@ void ssl_clear_keep_cache_test(){
 
     test_sock.lowest_layer().close();
 
-    BOOST_CHECK(test_sock.impl()->clear_ssl->method != NULL);
-    BOOST_CHECK(test_sock.impl()->new_session);
-    BOOST_CHECK(test_sock.impl()->init_buf != NULL);
-    BOOST_CHECK(test_sock.impl()->enc_read_ctx != NULL);
-    BOOST_CHECK(test_sock.impl()->enc_write_ctx != NULL);
-    BOOST_CHECK(test_sock.impl()->expand != NULL);
-    BOOST_CHECK(test_sock.impl()->compress != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->clear_ssl->method != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->new_session);
+    BOOST_CHECK(test_sock.impl()->ssl->init_buf != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->enc_read_ctx != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->enc_write_ctx != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->expand != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->compress != NULL);
 
-    test_sock.impl()->first_packet = 1;  //0
-    test_sock.impl()->session = this;    //NULL;
-    test_sock.impl()->type = 2;          //0;
-    test_sock.impl()->error = 3;         //0;
-    test_sock.impl()->hit = 4;           //0;
-    test_sock.impl()->shutdown = 5;      //0;
-    test_sock.impl()->version = 6;       // clear_ssl->method->version;
-    test_sock.impl()->client_version = 0;//clear_ssl->version;
-    test_sock.impl()->rwstate = 0;       //SSL_NOTHING;
-    test_sock.impl().impl()ear_ssl->rstate = 0;  //SSL_ST_READ_HEADER;
-    test_sock.impl()->state = 0; //SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
+    test_sock.impl()->ssl->first_packet = 1;  //0
+    test_sock.impl()->ssl->session = this;    //NULL;
+    test_sock.impl()->ssl->type = 2;          //0;
+    test_sock.impl()->ssl->error = 3;         //0;
+    test_sock.impl()->ssl->hit = 4;           //0;
+    test_sock.impl()->ssl->shutdown = 5;      //0;
+    test_sock.impl()->ssl->version = 6;       // clear_ssl->method->version;
+    test_sock.impl()->ssl->client_version = 0;//clear_ssl->version;
+    test_sock.impl()->ssl->rwstate = 0;       //SSL_NOTHING;
+    test_sock.impl()->ssl->rstate = 0;  //SSL_ST_READ_HEADER;
+    test_sock.impl()->ssl->state = 0; //SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
 
-    BOOST_CHECK( clear_ssl->in_handshake || ( clear_ssl->method == clear_ssl->ctx->method ));
+    BOOST_CHECK( test_sock.impl()->ssl->in_handshake || ( test_sock.impl()->ssl->method == test_sock.impl()->ssl->ctx->method ));
    // if ( !clear_ssl->in_handshake && ( clear_ssl->method != clear_ssl->ctx->method )) 
 
     l7vs::virtualservice_tcp vs;
@@ -12602,28 +12602,28 @@ void ssl_clear_keep_cache_test(){
     
     ssl_clear_keep_cache_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
-    test_obj.ssl_clear_keep_cache(test_sock.impl());
+    test_obj.ssl_clear_keep_cache(test_sock.impl()->ssl);
 
 
-    BOOST_CHECK(test_sock.impl()->clear_ssl->method == NULL);
-    BOOST_CHECK(test_sock.impl()->new_session);
-    BOOST_CHECK(test_sock.impl()->init_buf == NULL);
-    BOOST_CHECK(test_sock.impl()->enc_read_ctx == NULL);
-    BOOST_CHECK(test_sock.impl()->enc_write_ctx == NULL);
-    BOOST_CHECK(test_sock.impl()->expand == NULL);
-    BOOST_CHECK(test_sock.impl()->compress == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->clear_ssl->method == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->new_session);
+    BOOST_CHECK(test_sock.impl()->ssl->init_buf == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->enc_read_ctx == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->enc_write_ctx == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->expand == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->compress == NULL);
 
-    BOOST_CHECK(test_sock.impl()->first_packet == 0);                           //0
-    BOOST_CHECK(test_sock.impl()->session == NULL);                             //NULL;
-    BOOST_CHECK(test_sock.impl()->type == 0);                                   //0;
-    BOOST_CHECK(test_sock.impl()->error == 0);                                  //0;
-    BOOST_CHECK(test_sock.impl()->hit == 0);                                    //0;
-    BOOST_CHECK(test_sock.impl()->shutdown == 0);                               //0;
-    BOOST_CHECK(test_sock.impl()->version == clear_ssl->method->version);       // clear_ssl->method->version;
-    BOOST_CHECK(test_sock.impl()->client_version == 6);                         // clear_ssl->version;
-    BOOST_CHECK(test_sock.impl()->rwstate == SSL_NOTHING);                      // SSL_NOTHING;
-    BOOST_CHECK(test_sock.impl().impl()ear_ssl->rstate == SSL_ST_READ_HEADER);  // SSL_ST_READ_HEADER;
-    BOOST_CHECK(test_sock.impl()->state == SSL_ST_BEFORE | SSL_ST_ACCEPT);      // SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
+    BOOST_CHECK(test_sock.impl()->ssl->first_packet == 0);                           //0
+    BOOST_CHECK(test_sock.impl()->ssl->session == NULL);                             //NULL;
+    BOOST_CHECK(test_sock.impl()->ssl->type == 0);                                   //0;
+    BOOST_CHECK(test_sock.impl()->ssl->error == 0);                                  //0;
+    BOOST_CHECK(test_sock.impl()->ssl->hit == 0);                                    //0;
+    BOOST_CHECK(test_sock.impl()->ssl->shutdown == 0);                               //0;
+    BOOST_CHECK(test_sock.impl()->ssl->version == test_sock.impl()->ssl->method->version);       // clear_ssl->method->version;
+    BOOST_CHECK(test_sock.impl()->ssl->client_version == 6);                         // clear_ssl->version;
+    BOOST_CHECK(test_sock.impl()->ssl->rwstate == SSL_NOTHING);                      // SSL_NOTHING;
+    BOOST_CHECK(test_sock.impl()->ssl->rstate == SSL_ST_READ_HEADER);  // SSL_ST_READ_HEADER;
+    BOOST_CHECK(test_sock.impl()->ssl->state == SSL_ST_BEFORE | SSL_ST_ACCEPT);      // SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
 
 
     // accepter close
