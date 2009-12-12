@@ -374,7 +374,7 @@ namespace l7vs{
         // Reset SSL structure to allow another connection.
         if ( ssl_flag ) {
             if ( ssl_cache_flag ) {
-                if (unlikely(ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == 0)) {
+                if (unlikely(ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == false)) {
                     //Error ssl_clear_keep_cache
                     std::stringstream buf;
                     buf << "Thread ID[";
@@ -425,82 +425,120 @@ namespace l7vs{
         return msg;
     }
 
-    //! reset ssl object for reuse (keep SSL session cache)
-    //! this function based from SSL_clear(SSL *s) in OpenSSL.
-    //! keeping SSL session cache it by not executing ssl_clear_bad_session(s). 
-    //! OpenSSL ssl_lib.c code is GNU Public Licence.
+    //! ssl clear keep cache
     //! @param[in]        ssl object
-    //! @return         1 is clear OK
-    //! @return         0 is clear NG
-    int tcp_session::ssl_clear_keep_cache(SSL *s)
-    {
-        if (s->method == NULL) {
-            SSLerr(SSL_F_SSL_CLEAR,SSL_R_NO_METHOD_SPECIFIED);
-            return(0);
+    //! @return         true is clear OK.
+    //! @return         false is not clear
+    bool tcp_session::ssl_clear_keep_cache(SSL *clear_ssl){
+
+        if (clear_ssl->method == NULL) {
+            //----Debug log----------------------------------------------------------------------
+            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                std::stringstream buf;
+                buf << "Thread ID[";
+                buf << boost::this_thread::get_id();
+                buf << "] clear ssl method is NULL";
+                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 83,
+                            buf.str(),
+                            __FILE__, __LINE__ );
+            }
+            //----Debug log----------------------------------------------------------------------
+            return (false);
         }
 
-        // not execute ssl_clear_bad_session(s) and SSL_SESSION_free(s->session)
-        // set NULL only
-        s->session=NULL;
-
-        s->error=0;
-        s->hit=0;
-        s->shutdown=0;
-
-        if (s->new_session) {
-            SSLerr(SSL_F_SSL_CLEAR,ERR_R_INTERNAL_ERROR);
-            return 0;
+        if (clear_ssl->new_session) {
+            //----Debug log----------------------------------------------------------------------
+            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                std::stringstream buf;
+                buf << "Thread ID[";
+                buf << boost::this_thread::get_id();
+                buf << "] clear ssl new_session is not NULL";
+                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 84,
+                            buf.str(),
+                            __FILE__, __LINE__ );
+            }
+            //----Debug log----------------------------------------------------------------------
+            return (false);
         }
 
-        s->type=0;
+        // init member
+        clear_ssl->session = NULL;
+        clear_ssl->type=0;
+        clear_ssl->error=0;
+        clear_ssl->hit=0;
+        clear_ssl->shutdown=0;
+        clear_ssl->version=s->method->version;
+        clear_ssl->client_version=s->version;
+        clear_ssl->rwstate=SSL_NOTHING;
+        clear_ssl->rstate=SSL_ST_READ_HEADER;
+        clear_ssl->state = SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
 
-        s->state=SSL_ST_BEFORE|((s->server)?SSL_ST_ACCEPT:SSL_ST_CONNECT);
-
-        s->version=s->method->version;
-        s->client_version=s->version;
-        s->rwstate=SSL_NOTHING;
-        s->rstate=SSL_ST_READ_HEADER;
-
-        if (s->init_buf != NULL) {
-            BUF_MEM_free(s->init_buf);
-            s->init_buf=NULL;
+        // init_buf free
+        if ( clear_ssl->init_buf != NULL ) {
+            BUF_MEM_free( clear_ssl->init_buf );
+            clear_ssl->init_buf = NULL;
         }
 
-        // ssl_clear_cipher_ctx(SSL *s)
-        if (s->enc_read_ctx != NULL) {
-            EVP_CIPHER_CTX_cleanup(s->enc_read_ctx);
-            OPENSSL_free(s->enc_read_ctx);
-            s->enc_read_ctx=NULL;
-        }
-        if (s->enc_write_ctx != NULL) {
-            EVP_CIPHER_CTX_cleanup(s->enc_write_ctx);
-            OPENSSL_free(s->enc_write_ctx);
-            s->enc_write_ctx=NULL;
-        }
-        if (s->expand != NULL) {
-            COMP_CTX_free(s->expand);
-            s->expand=NULL;
-        }
-        if (s->compress != NULL) {
-            COMP_CTX_free(s->compress);
-            s->compress=NULL;
+        // enc_read_ctx free
+        if ( clear_ssl->enc_read_ctx != NULL ) {
+            EVP_CIPHER_CTX_cleanup( clear_ssl->enc_read_ctx );
+            OPENSSL_free( clear_ssl->enc_read_ctx );
+            clear_ssl->enc_read_ctx = NULL;
         }
 
-        s->first_packet=0;
+        // enc_write_ctx free
+        if ( clear_ssl->enc_write_ctx != NULL ) {
+            EVP_CIPHER_CTX_cleanup(clear_ssl->enc_write_ctx);
+            OPENSSL_free(clear_ssl->enc_write_ctx);
+            clear_ssl->enc_write_ctx = NULL;
+        }
 
-        /* Check to see if we were changed into a different method, if
-         * so, revert back if we are not doing session-id reuse. */
-        if (!s->in_handshake && (s->session == NULL) && (s->method != s->ctx->method)) {
-//            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 69, "In ssl_clear_keep_cache() method changed", __FILE__, __LINE__ );
-            s->method->ssl_free(s);
-            s->method=s->ctx->method;
-            if (!s->method->ssl_new(s)) {
-                return(0);
+        // expand free
+        if (clear_ssl->expand != NULL) {
+            COMP_CTX_free( clear_ssl->expand );
+            clear_ssl->expand = NULL;
+        }
+
+        // >compress free
+        if ( clear_ssl->compress != NULL ) {
+            COMP_CTX_free( clear_ssl->compress );
+            clear_ssl->compress = NULL;
+        }
+
+        clear_ssl->first_packet = 0;
+
+        if ( !clear_ssl->in_handshake && ( clear_ssl->method != clear_ssl->ctx->method )) {
+            //----Debug log----------------------------------------------------------------------
+            if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                std::stringstream buf;
+                buf << "Thread ID[";
+                buf << boost::this_thread::get_id();
+                buf << "] In ssl_clear_keep_cache() method changed";
+                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 86,
+                            buf.str(),
+                            __FILE__, __LINE__ );
+            }
+            //----Debug log----------------------------------------------------------------------
+            clear_ssl->method->ssl_free( clear_ssl );
+            clear_ssl->method = clear_ssl->ctx->method;
+            if ( !clear_ssl->method->ssl_new( clear_ssl ) ) {
+                //----Debug log----------------------------------------------------------------------
+                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] clear ssl method ssl_new error";
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 85,
+                                buf.str(),
+                                __FILE__, __LINE__ );
+                }
+                //----Debug log----------------------------------------------------------------------
+                return (false);
             }
         } else {
-            s->method->ssl_clear(s);
+            clear_ssl->method->ssl_clear( clear_ssl );
         }
-        return(1);
+        return (true);
     }
 
     //! get reference client side socket
