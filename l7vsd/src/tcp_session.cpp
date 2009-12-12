@@ -463,10 +463,10 @@ namespace l7vs{
 
         // init member
         clear_ssl->session = NULL;
-        clear_ssl->type=0;
-        clear_ssl->error=0;
+        clear_ssl->type = 0;
+        clear_ssl->error = 0;
         clear_ssl->hit=0;
-        clear_ssl->shutdown=0;
+        clear_ssl->shutdown = 0;
         clear_ssl->version = clear_ssl->method->version;
         clear_ssl->client_version = clear_ssl->version;
         clear_ssl->rwstate = SSL_NOTHING;
