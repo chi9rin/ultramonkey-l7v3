@@ -12634,51 +12634,51 @@ void ssl_clear_keep_cache_test(){
     // unit_test [3] ssl_clear_keep_cache init_buf initialize check
     std::cout << "[3] ssl_clear_keep_cache init_buf initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->init_buf == NULL);
-    // unit_test [4] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[4] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [4] ssl_clear_keep_cache enc_read_ctx initialize check
+    std::cout << "[4] ssl_clear_keep_cache enc_read_ctx initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->enc_read_ctx == NULL);
-    // unit_test [5] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[5] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [5] ssl_clear_keep_cache enc_write_ctx initialize check
+    std::cout << "[5] ssl_clear_keep_cache enc_write_ctx initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->enc_write_ctx == NULL);
-    // unit_test [6] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[6] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [6] ssl_clear_keep_cache expand initialize check
+    std::cout << "[6] ssl_clear_keep_cache expand initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->expand == NULL);
-    // unit_test [7] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[7] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [7] ssl_clear_keep_cache compress initialize check
+    std::cout << "[7] ssl_clear_keep_cache compress initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->compress == NULL);
 
-    // unit_test [8] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[8] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [8] ssl_clear_keep_cache first_packet initialize check
+    std::cout << "[8] ssl_clear_keep_cache first_packet initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->first_packet == 0);                           //0
-    // unit_test [9] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[9] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [9] ssl_clear_keep_cache session initialize check
+    std::cout << "[9] ssl_clear_keep_cache session initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->session == NULL);                             //NULL;
-    // unit_test [10] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[10] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [10] ssl_clear_keep_cache type initialize check
+    std::cout << "[10] ssl_clear_keep_cache type initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->type == 0);                                   //0;
-    // unit_test [11] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[11] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [11] ssl_clear_keep_cache error initialize check
+    std::cout << "[11] ssl_clear_keep_cache error initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->error == 0);                                  //0;
-    // unit_test [12] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[12] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [12] ssl_clear_keep_cache hit initialize check
+    std::cout << "[12] ssl_clear_keep_cache hit initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->hit == 0);                                    //0;
-    // unit_test [13] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[13] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [13] ssl_clear_keep_cache shutdown initialize check
+    std::cout << "[13] ssl_clear_keep_cache shutdown initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->shutdown == 0);                               //0;
-    // unit_test [14] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[14] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [14] ssl_clear_keep_cache version initialize check
+    std::cout << "[14] ssl_clear_keep_cache version initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->version == test_sock.impl()->ssl->method->version);          // clear_ssl->method->version;
-    // unit_test [15] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[15] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [15] ssl_clear_keep_cache client_version initialize check
+    std::cout << "[15] ssl_clear_keep_cache client_version initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->client_version == test_sock.impl()->ssl->method->version);   // clear_ssl->version;
-    // unit_test [16] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[16] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [16] ssl_clear_keep_cache rwstate initialize check
+    std::cout << "[16] ssl_clear_keep_cache rwstate initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->rwstate == SSL_NOTHING);                      // SSL_NOTHING;
-    // unit_test [17] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[17] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [17] ssl_clear_keep_cache rstate initialize check
+    std::cout << "[17] ssl_clear_keep_cache rstate initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->rstate == SSL_ST_READ_HEADER);  // SSL_ST_READ_HEADER;
-    // unit_test [18] ssl_clear_keep_cache init_buf initialize check
-    std::cout << "[18] ssl_clear_keep_cache init_buf initialize check" << std::endl;
+    // unit_test [18] ssl_clear_keep_cache state initialize check
+    std::cout << "[18] ssl_clear_keep_cache state initialize check" << std::endl;
     BOOST_CHECK(test_sock.impl()->ssl->state == SSL_ST_BEFORE | SSL_ST_ACCEPT);      // SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
 
 
