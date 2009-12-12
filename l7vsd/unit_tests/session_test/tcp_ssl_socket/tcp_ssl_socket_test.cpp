@@ -937,6 +937,91 @@ void set_non_blocking_mode_test(){
     BOOST_MESSAGE( "----- set_non_blocking_mode test end -----" );
 }
 
+class close_lock_test_class : public l7vs::tcp_socket{
+    public:
+        boost::thread::id befor_thread_id;
+        boost::thread::id after_thread_id;
+        
+        close_lock_test_class(boost::asio::io_service& io,boost::asio::ssl::context& context,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_ssl_socket(io,context,set_option){
+        };
+        
+        ~close_lock_test_class(){
+        };
+        
+        void close(boost::system::error_code& ec){
+            befor_thread_id = boost::this_thread::get_id();
+            l7vs::tcp_ssl_socket::close(ec);
+            after_thread_id = boost::this_thread::get_id();
+            
+        };
+        void mutex_lock(){
+            close_mutex.wrlock();
+        };
+        void mutex_unlock(){
+            close_mutex.unlock();
+        };
+        
+        boost::mutex test_thread_wait;
+        
+        void test_run(){
+            boost::mutex::scoped_lock scope_lock(test_thread_wait);
+            boost::system::error_code ec;
+            close(ec);
+        };
+    
+};
+
+
+void close_lock_test(){
+    BOOST_MESSAGE( "----- close lock test start -----" );
+        
+    boost::asio::io_service io;
+    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = true;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = true;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = true;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = true;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = true;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = true;
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    close_lock_test_class test_obj(io,server_ctx,set_option);
+
+    BOOST_CHECK(test_obj.befor_thread_id == proc_id);
+    BOOST_CHECK(test_obj.after_thread_id == proc_id);
+
+    boost::thread::id test_id = test_thread.get_id();
+
+    BOOST_CHECK(test_id != proc_id);
+
+    // test start
+    test_obj.test_thread_wait.unlock();
+    sleep(1);
+
+    // unit_test [1] close lock test thread block test (mutex lock)
+    std::cout << "[1] close lock test thread block test (mutex lock)" << std::endl;
+    BOOST_CHECK(test_obj.befor_thread_id == test_id);
+    BOOST_CHECK(test_obj.after_thread_id == proc_id);
+
+    test_obj.mutex_unlock();
+    sleep(1);
+
+    // unit_test [2] close lock test thread run test (mutex unlock)
+    std::cout << "[2] close lock test  thread run test (mutex unlock)" << std::endl;
+    BOOST_CHECK(test_obj.befor_thread_id == test_id);
+    BOOST_CHECK(test_obj.after_thread_id == test_id);
+
+    BOOST_MESSAGE( "----- close lock test end -----" );
+}
+
 void is_open_test(){
     
     BOOST_MESSAGE( "----- is_open test start -----" );
@@ -983,221 +1068,17 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_ssl_socket class test" );
 
-//    ts->add( BOOST_TEST_CASE( &construcor_test ) );
+    ts->add( BOOST_TEST_CASE( &construcor_test ) );
 //NG    ts->add( BOOST_TEST_CASE( &accept_test ) );
-//    ts->add( BOOST_TEST_CASE( &handshake_test ) );
-//    ts->add( BOOST_TEST_CASE( &get_socket_test ) );
-//    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
+    ts->add( BOOST_TEST_CASE( &handshake_test ) );
+    ts->add( BOOST_TEST_CASE( &get_socket_test ) );
+    ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
     ts->add( BOOST_TEST_CASE( &write_some_read_some_test ) );
-//    ts->add( BOOST_TEST_CASE( &close_test ) );
-//NG    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
-//    ts->add( BOOST_TEST_CASE( &is_open_test ) );
+    ts->add( BOOST_TEST_CASE( &close_test ) );
+    ts->add( BOOST_TEST_CASE( &close_lock_test ) );
+    ts->add( BOOST_TEST_CASE( &is_open_test ) );
 
     framework::master_test_suite().add( ts );
 
     return NULL;
 }
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-class connect_lock_test_class : public l7vs::tcp_socket{
-    public:
-        boost::thread::id befor_thread_id;
-        boost::thread::id after_thread_id;
-        
-        connect_lock_test_class(boost::asio::io_service& io,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
-        };
-        
-        ~connect_lock_test_class(){
-        };
-        
-        void connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec){
-            befor_thread_id = boost::this_thread::get_id();
-            l7vs::tcp_socket::connect(connect_endpoint,ec);
-            after_thread_id = boost::this_thread::get_id();
-            
-        };
-        void mutex_lock(){
-            close_mutex.wrlock();
-        };
-        void mutex_unlock(){
-            close_mutex.unlock();
-        };
-        
-        boost::mutex test_thread_wait;
-        
-        void test_run(){
-            boost::mutex::scoped_lock scope_lock(test_thread_wait);
-            boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-            boost::system::error_code ec;
-            connect(connect_end,ec);
-        };
-    
-};
-
-
-
-void connect_lock_test(){
-    BOOST_MESSAGE( "----- connetc lock test start -----" );
-        
-    boost::asio::io_service io;
-    
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = false;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = false;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = false;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = false;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = false;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = false;
-    
-    connect_lock_test_class test_obj(io,set_option);
-    
-    test_obj.test_thread_wait.lock();
-    boost::thread::id proc_id = boost::this_thread::get_id();
-    test_obj.befor_thread_id = proc_id;
-    test_obj.after_thread_id = proc_id;
-    test_obj.mutex_lock();
-    
-    boost::thread test_thread(boost::bind(&connect_lock_test_class::test_run,&test_obj));
-    
-    BOOST_CHECK(test_obj.befor_thread_id == proc_id);
-    BOOST_CHECK(test_obj.after_thread_id == proc_id);
-    
-    boost::thread::id test_id = test_thread.get_id();
-    
-    BOOST_CHECK(test_id != proc_id);
-    
-    // test start
-    test_obj.test_thread_wait.unlock();
-    sleep(1);
-    
-    // unit_test [1] connect lock test thread block test (mutex lock)
-    std::cout << "[1] connect lock test thread block test (mutex lock)" << std::endl;
-    BOOST_CHECK(test_obj.befor_thread_id == test_id);
-    BOOST_CHECK(test_obj.after_thread_id == proc_id);
-    
-    test_obj.mutex_unlock();
-    sleep(1);
-    
-    // unit_test [2] connect lock test thread run test (mutex unlock)
-    std::cout << "[2] connect lock test thread run test (mutex unlock)" << std::endl;
-    BOOST_CHECK(test_obj.befor_thread_id == test_id);
-    BOOST_CHECK(test_obj.after_thread_id == test_id);
-    
-    
-    BOOST_MESSAGE( "----- connetc lock test end -----" );
-    
-}
-
-class close_lock_test_class : public l7vs::tcp_socket{
-    public:
-        boost::thread::id befor_thread_id;
-        boost::thread::id after_thread_id;
-        
-        close_lock_test_class(boost::asio::io_service& io,const l7vs::tcp_socket_option_info set_option) : l7vs::tcp_socket(io,set_option){
-        };
-        
-        ~close_lock_test_class(){
-        };
-        
-        void close(boost::system::error_code& ec){
-            befor_thread_id = boost::this_thread::get_id();
-            l7vs::tcp_socket::close(ec);
-            after_thread_id = boost::this_thread::get_id();
-            
-        };
-        void mutex_lock(){
-            close_mutex.wrlock();
-        };
-        void mutex_unlock(){
-            close_mutex.unlock();
-        };
-        
-        boost::mutex test_thread_wait;
-        
-        void test_run(){
-            boost::mutex::scoped_lock scope_lock(test_thread_wait);
-            boost::system::error_code ec;
-            close(ec);
-        };
-    
-};
-
-
-void close_lock_test(){
-    BOOST_MESSAGE( "----- close lock test start -----" );
-        
-    boost::asio::io_service io;
-    l7vs::tcp_socket_option_info set_option;
-    //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = false;
-    //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = false;
-    //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = false;
-    //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = false;
-    //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = false;
-    //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = false;
-        
-    close_lock_test_class test_obj(io,set_option);
-    
-    test_obj.test_thread_wait.lock();
-    boost::thread::id proc_id = boost::this_thread::get_id();
-    test_obj.befor_thread_id = proc_id;
-    test_obj.after_thread_id = proc_id;
-    test_obj.mutex_lock();
-    
-    boost::thread test_thread(boost::bind(&close_lock_test_class::test_run,&test_obj));
-    
-    BOOST_CHECK(test_obj.befor_thread_id == proc_id);
-    BOOST_CHECK(test_obj.after_thread_id == proc_id);
-    
-    boost::thread::id test_id = test_thread.get_id();
-    
-    BOOST_CHECK(test_id != proc_id);
-    
-    // test start
-    test_obj.test_thread_wait.unlock();
-    sleep(1);
-    
-    // unit_test [1] close lock test thread block test (mutex lock)
-    std::cout << "[1] close lock test thread block test (mutex lock)" << std::endl;
-    BOOST_CHECK(test_obj.befor_thread_id == test_id);
-    BOOST_CHECK(test_obj.after_thread_id == proc_id);
-    
-    test_obj.mutex_unlock();
-    sleep(1);
-    
-    // unit_test [2] close lock test thread run test (mutex unlock)
-    std::cout << "[2] close lock test  thread run test (mutex unlock)" << std::endl;
-    BOOST_CHECK(test_obj.befor_thread_id == test_id);
-    BOOST_CHECK(test_obj.after_thread_id == test_id);
-    
-    BOOST_MESSAGE( "----- close lock test end -----" );
-    
-}
-
-*/
