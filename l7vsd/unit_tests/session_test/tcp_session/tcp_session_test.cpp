@@ -12609,7 +12609,7 @@ void ssl_clear_keep_cache_test(){
     test_obj.test_call(test_sock.impl()->ssl);
 
 
-    BOOST_CHECK(test_sock.impl()->ssl->clear_ssl->method == NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->method == NULL);
     BOOST_CHECK(test_sock.impl()->ssl->new_session);
     BOOST_CHECK(test_sock.impl()->ssl->init_buf == NULL);
     BOOST_CHECK(test_sock.impl()->ssl->enc_read_ctx == NULL);
