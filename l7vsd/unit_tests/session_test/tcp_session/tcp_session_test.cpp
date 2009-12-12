@@ -27,6 +27,15 @@ using namespace boost::unit_test_framework;
 #define DOWN_THREAD_LOCK     std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020)
 
 
+#define DUMMI_SERVER_IP     "127.0.0.1"
+#define DUMMI_SERVER_PORT     7000
+
+#define CLIENT_CTX_LOAD_VERIFY_FILE         "ca.pem"
+#define SERVER_CTX_CERTIFICATE_CHAIN_FILE   "server.pem"
+#define SERVER_CTX_PRIVATE_KEY_FILE         "server.pem"
+#define SERVER_CTX_TMP_DH_FILE              "dh512.pem"
+
+
 // mutex lock test class
 class mutex_lock_test : public l7vs::tcp_session{
     public:
@@ -12291,22 +12300,353 @@ void down_thread_all_realserver_disconnect_test(){
 
 
 
+
+// dummy client
+class test_client{
+    public:
+        // 
+        test_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context) :
+            my_socket(io_service,context){
+        };
+
+        ~test_client(){
+        };
+        void all_lock(){
+
+            //! socket connect mutex
+            connect_mutex.wrlock();
+            //! socket handshake mutex
+            handshake_mutex.wrlock();
+            //! socket read mutex
+            read_mutex.wrlock();
+            //! socket write mutex
+            write_mutex.wrlock();
+            //! socket close mutex
+            close_mutex.wrlock();
+
+        }
+
+        void handshake_test_run(){
+            // dummy client start
+
+            // connect
+            {
+                l7vs::rw_scoped_lock scope_lock(connect_mutex);
+
+                if(!connect_test()){
+                    return;
+                }
+            }
+
+            // handshake
+            {
+                l7vs::rw_scoped_lock scope_lock(handshake_mutex);
+
+                if(!handshake_test()){
+                    return;
+                }
+            }
+
+            // close 
+            {
+                l7vs::rw_scoped_lock scope_lock(close_mutex);
+                close_test();
+            }
+
+        };
+
+        bool connect_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client connect try" << std::endl;
+            boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+            my_socket.lowest_layer().connect(connect_end,ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client connect Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            std::cout << "dummy client connect OK" << std::endl;
+            return true;
+        };
+
+        bool handshake_test(){
+            boost::system::error_code ec;
+            std::cout << "dummy client handshake try" << std::endl;
+            my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client handshake Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            std::cout << "dummy client handshake OK" << std::endl;
+            return true;
+        };
+
+        bool send_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client write try" << std::endl;
+            std::size_t write_size = my_socket.write_some(boost::asio::buffer(data_buff.data() + send_data_size,receive_data_size - send_data_size), ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client send Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            send_data_size += write_size;
+            std::cout << "dummy client send OK [" << send_data_size << "]" << std::endl;
+            return true;
+        };
+        bool receive_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client read try" << std::endl;
+            std::size_t read_size = my_socket.read_some(boost::asio::buffer(data_buff.data() + receive_data_size,MAX_BUFFER_SIZE), ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client receive Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            receive_data_size += read_size;
+            std::cout << "dummy client receive OK [" << receive_data_size << "]" << std::endl;
+            return true;
+        };
+        void close_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client close try" << std::endl;
+            my_socket.lowest_layer().close(ec);
+            if(ec){
+                //close error
+                std::cout << "dummy client close Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return;
+            }
+            std::cout << "dummy client close OK" << std::endl;
+        };
+
+        boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
+        boost::array<char,MAX_BUFFER_SIZE> data_buff;
+        std::size_t receive_data_size;
+        std::size_t send_data_size;
+
+        //! socket connect mutex
+        l7vs::wr_mutex connect_mutex;
+        //! socket handshake mutex
+        l7vs::wr_mutex handshake_mutex;
+        //! socket read mutex
+        l7vs::wr_mutex read_mutex;
+        //! socket write mutex
+        l7vs::wr_mutex write_mutex;
+        //! socket close mutex
+        l7vs::wr_mutex close_mutex;
+};
+
+class authority{
+    public:
+        authority(){
+        };
+        ~authority(){
+        };
+        std::string get_password() const{
+            std::cout << "call get_password" << std::endl;
+            return "test";
+        };
+};
+
+
+// ssl_clear_keep_cache test class
+class ssl_clear_keep_cache_test_class : public l7vs::tcp_session{
+    public:
+       ssl_clear_keep_cache_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+
+        ~ssl_clear_keep_cache_test_class(){};
+        bool& get_exit_flag(){
+            return exit_flag;
+        };
+};
+
+//ssl_clear_keep_cache_test test
+void ssl_clear_keep_cache_test(){
+    BOOST_MESSAGE( "----- ssl_clear_keep_cache test start -----" );
+
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+    authority test_auth;
+
+    // Client context
+    boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+    client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+    client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    server_ctx.set_options(
+        boost::asio::ssl::context::default_workarounds
+        | boost::asio::ssl::context::no_sslv2
+        | boost::asio::ssl::context::single_dh_use);
+    server_ctx.set_password_callback(boost::bind(&authority::get_password, &test_auth));
+    server_ctx.use_certificate_chain_file(SERVER_CTX_CERTIFICATE_CHAIN_FILE);
+    server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
+
+    // test socket
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> test_sock(io,server_ctx);
+
+    // test acceptor
+    boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
+
+    // test client
+    test_client dummy_cl(io,client_ctx);
+    dummy_cl.all_lock();
+
+    // client start
+    boost::thread cl_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
+
+    // accept
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(test_sock.lowest_layer(),ec);
+    if(ec){
+        std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side client connect OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    // handshake
+    dummy_cl.handshake_mutex.unlock();
+    bool bres = test_sock.handshake(boost::asio::ssl::stream_base::server,ec);
+    if(ec){
+        std::cout << "server side client handshake ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side handshake OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+
+    test_sock.lowest_layer().close();
+
+    BOOST_CHECK(test_sock.impl()->clear_ssl->method != NULL);
+    BOOST_CHECK(test_sock.impl()->new_session);
+    BOOST_CHECK(test_sock.impl()->init_buf != NULL);
+    BOOST_CHECK(test_sock.impl()->enc_read_ctx != NULL);
+    BOOST_CHECK(test_sock.impl()->enc_write_ctx != NULL);
+    BOOST_CHECK(test_sock.impl()->expand != NULL);
+    BOOST_CHECK(test_sock.impl()->compress != NULL);
+
+    test_sock.impl()->first_packet = 1;  //0
+    test_sock.impl()->session = this;    //NULL;
+    test_sock.impl()->type = 2;          //0;
+    test_sock.impl()->error = 3;         //0;
+    test_sock.impl()->hit = 4;           //0;
+    test_sock.impl()->shutdown = 5;      //0;
+    test_sock.impl()->version = 6;       // clear_ssl->method->version;
+    test_sock.impl()->client_version = 0;//clear_ssl->version;
+    test_sock.impl()->rwstate = 0;       //SSL_NOTHING;
+    test_sock.impl().impl()ear_ssl->rstate = 0;  //SSL_ST_READ_HEADER;
+    test_sock.impl()->state = 0; //SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
+
+    BOOST_CHECK( clear_ssl->in_handshake || ( clear_ssl->method == clear_ssl->ctx->method ));
+   // if ( !clear_ssl->in_handshake && ( clear_ssl->method != clear_ssl->ctx->method )) 
+
+    l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = true;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = true;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = true;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = true;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = true;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = true;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(true);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(true);
+    int set_ssl_handshake_time_out = 111;
+    std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = new l7vs::logger_implement_access(access_log_file_name);
+    
+    ssl_clear_keep_cache_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    test_obj.ssl_clear_keep_cache(test_sock.impl());
+
+
+    BOOST_CHECK(test_sock.impl()->clear_ssl->method == NULL);
+    BOOST_CHECK(test_sock.impl()->new_session);
+    BOOST_CHECK(test_sock.impl()->init_buf == NULL);
+    BOOST_CHECK(test_sock.impl()->enc_read_ctx == NULL);
+    BOOST_CHECK(test_sock.impl()->enc_write_ctx == NULL);
+    BOOST_CHECK(test_sock.impl()->expand == NULL);
+    BOOST_CHECK(test_sock.impl()->compress == NULL);
+
+    BOOST_CHECK(test_sock.impl()->first_packet == 0);                           //0
+    BOOST_CHECK(test_sock.impl()->session == NULL);                             //NULL;
+    BOOST_CHECK(test_sock.impl()->type == 0);                                   //0;
+    BOOST_CHECK(test_sock.impl()->error == 0);                                  //0;
+    BOOST_CHECK(test_sock.impl()->hit == 0);                                    //0;
+    BOOST_CHECK(test_sock.impl()->shutdown == 0);                               //0;
+    BOOST_CHECK(test_sock.impl()->version == clear_ssl->method->version);       // clear_ssl->method->version;
+    BOOST_CHECK(test_sock.impl()->client_version == 6);                         // clear_ssl->version;
+    BOOST_CHECK(test_sock.impl()->rwstate == SSL_NOTHING);                      // SSL_NOTHING;
+    BOOST_CHECK(test_sock.impl().impl()ear_ssl->rstate == SSL_ST_READ_HEADER);  // SSL_ST_READ_HEADER;
+    BOOST_CHECK(test_sock.impl()->state == SSL_ST_BEFORE | SSL_ST_ACCEPT);      // SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
+
+
+    // accepter close
+    test_acceptor.close();
+
+    BOOST_MESSAGE( "----- ssl_clear_keep_cache test end -----" );
+}
+
+
+
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 /*
     ts->add( BOOST_TEST_CASE( &constructer_test ) );
-*/
     ts->add( BOOST_TEST_CASE( &initialize_test ) );
-/*
     ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
     ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
     ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
     ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
-*/
+
     ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
-/*
     ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_get_detination_event_test) );
@@ -12355,7 +12695,13 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
-*/    
+*/
+
+//    ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
+//    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test) );
+    ts->add( BOOST_TEST_CASE( &ssl_clear_keep_cache_test ) );
+
+
     framework::master_test_suite().add( ts );
 
     return NULL;
