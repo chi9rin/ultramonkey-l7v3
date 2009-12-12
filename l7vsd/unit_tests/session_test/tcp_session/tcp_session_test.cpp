@@ -12623,7 +12623,7 @@ void ssl_clear_keep_cache_test(){
     bool bres = test_obj.test_call(test_sock.impl()->ssl);
 
     BOOST_CHECK( bres == true);
-    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 0);
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 1);
 
 
     BOOST_CHECK(test_sock.impl()->ssl->init_buf == NULL);
