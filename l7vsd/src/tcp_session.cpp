@@ -467,10 +467,10 @@ namespace l7vs{
         clear_ssl->error=0;
         clear_ssl->hit=0;
         clear_ssl->shutdown=0;
-        clear_ssl->version=s->method->version;
-        clear_ssl->client_version=s->version;
-        clear_ssl->rwstate=SSL_NOTHING;
-        clear_ssl->rstate=SSL_ST_READ_HEADER;
+        clear_ssl->version = clear_ssl->method->version;
+        clear_ssl->client_version = clear_ssl->version;
+        clear_ssl->rwstate = SSL_NOTHING;
+        clear_ssl->rstate = SSL_ST_READ_HEADER;
         clear_ssl->state = SSL_ST_BEFORE | ( ( clear_ssl->server ) ? SSL_ST_ACCEPT : SSL_ST_CONNECT);
 
         // init_buf free
