@@ -3,7 +3,7 @@
 #	Makefile for tcp_ssl_socket_test Class unit test frameworks.
 #
 #
-TARGET		= tcp_socket_test_ut
+TARGET		= tcp_ssl_socket_test_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Werror -Wall -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 INCLUDES	=		-I/usr/include \

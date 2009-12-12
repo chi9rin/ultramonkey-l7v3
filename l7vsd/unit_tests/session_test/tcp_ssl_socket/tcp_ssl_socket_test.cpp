@@ -63,7 +63,6 @@ class test_client{
                 l7vs::rw_scoped_lock scope_lock(close_mutex);
                 close_test();
             }
-
         };
 
         void handshake_test_run(){
@@ -941,6 +940,10 @@ void close_test(){
 
     test_obj.get_open_flag() = true;
 
+  // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+
     // unit_test [1] close test close success error_code object
     std::cout << "[1] close test close success error_code object" << std::endl;
     test_obj.close(ec);
@@ -949,10 +952,6 @@ void close_test(){
     // unit_test [2] close test open_flag set false
     std::cout << "[2] close test open_flag set false" << std::endl;
     BOOST_CHECK(!test_obj.get_open_flag());
-
-    // close
-    dummy_cl.close_mutex.unlock();
-    cl_thread.join();
 
     test_acceptor.close();
 
