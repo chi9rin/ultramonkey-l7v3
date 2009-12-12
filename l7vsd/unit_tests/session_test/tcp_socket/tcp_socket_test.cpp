@@ -252,6 +252,88 @@ void construcor_test(){
     BOOST_MESSAGE( "----- construcor test end -----" );
 }
 
+void accept_test(){
+    
+    BOOST_MESSAGE( "----- accept test start -----" );
+    
+    
+    test_mirror_server test_server;
+    
+    // accept req
+    test_server.breq_acc_flag = true;
+    // close wait req
+    test_server.breq_close_wait_flag = true;
+        
+    // test server start
+    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+    
+    while( !test_server.brun_flag ){
+        sleep(1);
+    }
+    
+    std::cout << "ready dummy mirror server" << std::endl;
+    
+    // unit_test [1] accept test connection success error_code object
+    std::cout << "[1] accept test connection success error_code object" << std::endl;
+    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+    
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = true;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = true;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = true;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = true;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = true;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = true;
+    
+    test_socket_class test_obj(io,set_option);
+    test_obj.get_socket_pointer()->connect(connect_end,ec);
+    BOOST_CHECK(!ec);
+
+    BOOST_CHECK(!test_obj.get_open_flag());
+
+    test_obj.accept();
+    
+    // unit_test [2] accept test connection success open_flag
+    std::cout << "[2] accept test connection success open_flag" << std::endl;
+    BOOST_CHECK(test_obj.get_open_flag());
+    
+    // TCP_NODELAY check!!
+    // unit_test [3] accept test set socket option TCP_NODELAY
+    std::cout << "[3] accept test set socket option TCP_NODELAY" << std::endl;
+    boost::asio::ip::tcp::no_delay get_option;
+    test_obj.get_socket_pointer()->get_option(get_option,ec);
+    BOOST_CHECK(!ec);
+    BOOST_CHECK(get_option == set_option.nodelay_val);
+    
+    // TCP_CORK check!!
+    // unit_test [4] accept test set socket option TCP_CORK
+    std::cout << "[4] accept test set socket option TCP_CORK" << std::endl;
+    int val;
+    size_t len = sizeof(val);
+    boost::asio::detail::socket_ops::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
+    BOOST_CHECK(!ec);
+    BOOST_CHECK((bool)val == set_option.cork_val);
+
+    test_obj.test_close(ec);
+    test_obj.get_open_flag() = false;
+
+    test_server.breq_close_wait_flag = false;    
+    test_server.bstop_flag = true;
+    server_thread.join();
+
+    BOOST_MESSAGE( "----- accept test end -----" );
+}
+
+
+
 void connect_test(){
     
     BOOST_MESSAGE( "----- connect test start -----" );
@@ -1034,6 +1116,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
 
     ts->add( BOOST_TEST_CASE( &construcor_test ) );
+    ts->add( BOOST_TEST_CASE( &accept_test ) );
     ts->add( BOOST_TEST_CASE( &get_socket_test ) );
     ts->add( BOOST_TEST_CASE( &connect_test ) );
     ts->add( BOOST_TEST_CASE( &connect_lock_test ) );
