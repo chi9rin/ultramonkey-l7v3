@@ -115,7 +115,7 @@ class test_client{
                     return;
                 }
             }
-/*
+
             // 1st
             receive_data_size = 0;
             send_data_size = 0;
@@ -138,7 +138,7 @@ class test_client{
                 }
             }
             write_mutex.wrlock();
-*/
+
 std::cout << "DEBUG TEST 1" << std::endl;
             //2nd
             receive_data_size = 0;
@@ -167,7 +167,7 @@ std::cout << "DEBUG_TEST 3" << std::endl;
             receive_data_size = 0;
             send_data_size = 0;
             while(receive_data_size < MAX_BUFFER_SIZE){
-//                l7vs::rw_scoped_lock scope_lock(read_mutex);
+                l7vs::rw_scoped_lock scope_lock(read_mutex);
                 // receive
                 {
                     if(!receive_test()){
@@ -178,7 +178,7 @@ std::cout << "DEBUG_TEST 3" << std::endl;
             }
 std::cout << "DEBUG_TEST 4" << std::endl;
             while(send_data_size < receive_data_size){
-//                l7vs::rw_scoped_lock scope_lock(write_mutex);
+                l7vs::rw_scoped_lock scope_lock(write_mutex);
                 // send
                 {
                     if(!send_test()){
@@ -676,6 +676,7 @@ void write_some_read_some_test(){
                 continue;
             }
         }
+        sleep(1);
         break;
     }
     // unit_test [1] write_some & read_some test size 0 write error_code object
@@ -713,6 +714,7 @@ void write_some_read_some_test(){
                 continue;
             }
         }
+        sleep(1);
         break;
     }
 
