@@ -76,7 +76,7 @@ namespace l7vs{
             boost::asio::ip::tcp::no_delay set_option(opt_info.nodelay_val);
             my_socket.lowest_layer().set_option(set_option,ec);
             if(unlikely(ec)){
-                        //ERROR
+                //ERROR
                 Logger::putLogError( LOG_CAT_L7VSD_SESSION, 107, "socket option(TCP_NODELAY) set failed" , __FILE__, __LINE__ );
             }
         }
@@ -88,7 +88,7 @@ namespace l7vs{
             size_t len = sizeof(val);
             boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
             if(unlikely(ec)){
-                        //ERROR
+                //ERROR
                 Logger::putLogError( LOG_CAT_L7VSD_SESSION, 108, "socket option(TCP_CORK) set failed" , __FILE__, __LINE__ );
             }
         }
