@@ -558,17 +558,17 @@ void write_some_read_some_test(){
 
     l7vs::tcp_socket_option_info set_option;
     //! TCP_NODELAY   (false:not set,true:set option)
-    set_option.nodelay_opt = false;
+    set_option.nodelay_opt = true;
     //! TCP_NODELAY option value  (false:off,true:on)
-    set_option.nodelay_val = false;
+    set_option.nodelay_val = true;
     //! TCP_CORK      (false:not set,true:set option)
-    set_option.cork_opt = false;
+    set_option.cork_opt = true;
     //! TCP_CORK option value     (false:off,true:on)
-    set_option.cork_val = false;
+    set_option.cork_val = true;
     //! TCP_QUICKACK  (false:not set,true:set option)
-    set_option.quickack_opt = false;
+    set_option.quickack_opt = true;
     //! TCP_QUICKACK option value (false:off,true:on)
-    set_option.quickack_val = false;
+    set_option.quickack_val = true;
 
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
