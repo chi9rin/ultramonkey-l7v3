@@ -12539,7 +12539,7 @@ void ssl_clear_keep_cache_test(){
 
     // handshake
     dummy_cl.handshake_mutex.unlock();
-    bool bres = test_sock.handshake(boost::asio::ssl::stream_base::server,ec);
+    test_sock.handshake(boost::asio::ssl::stream_base::server,ec);
     if(ec){
         std::cout << "server side client handshake ERROR" << std::endl;
         std::cout << ec << std::endl;
@@ -12554,7 +12554,7 @@ void ssl_clear_keep_cache_test(){
 
     test_sock.lowest_layer().close();
 
-    BOOST_CHECK(test_sock.impl()->ssl->clear_ssl->method != NULL);
+    BOOST_CHECK(test_sock.impl()->ssl->method != NULL);
     BOOST_CHECK(test_sock.impl()->ssl->new_session);
     BOOST_CHECK(test_sock.impl()->ssl->init_buf != NULL);
     BOOST_CHECK(test_sock.impl()->ssl->enc_read_ctx != NULL);
@@ -12563,7 +12563,7 @@ void ssl_clear_keep_cache_test(){
     BOOST_CHECK(test_sock.impl()->ssl->compress != NULL);
 
     test_sock.impl()->ssl->first_packet = 1;  //0
-    test_sock.impl()->ssl->session = this;    //NULL;
+    test_sock.impl()->ssl->session = 99;      //NULL;
     test_sock.impl()->ssl->type = 2;          //0;
     test_sock.impl()->ssl->error = 3;         //0;
     test_sock.impl()->ssl->hit = 4;           //0;
