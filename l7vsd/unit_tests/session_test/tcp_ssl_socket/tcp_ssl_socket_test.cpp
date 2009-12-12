@@ -664,7 +664,7 @@ void write_some_read_some_test(){
     size_t res_size;
     size_t send_data_size;
     size_t receve_data_size;
-/*
+
     //size 0
     // ## write some read some test [1] size 0 
     dummy_cl.read_mutex.unlock();
@@ -689,16 +689,16 @@ void write_some_read_some_test(){
 
     dummy_cl.write_mutex.unlock();
     res_size = test_obj.read_some(boost::asio::buffer(recv_buff, MAX_BUFFER_SIZE),ec);
-    
+
     // unit_test [3] write_some & read_some test size 0 read error_code object
     std::cout << "[3] write_some & read_some test size 0 read error_code object" << std::endl;
     BOOST_CHECK_EQUAL(ec,boost::asio::error::try_again);
-    
+
     // unit_test [4] write_some & read_some test size 0 read size
     std::cout << "[4] write_some & read_some test size 0 read size" << std::endl;
     BOOST_CHECK_EQUAL(res_size,0UL);
     sleep(1);
-*/        
+
     // size 1    
     send_size = 1;
     send_buff[0] = 'A';
@@ -763,7 +763,7 @@ void write_some_read_some_test(){
     receve_data_size = 0;
 
 
-  //  dummy_cl.read_mutex.unlock();
+    dummy_cl.read_mutex.unlock();
     while(true){
         if(send_data_size == MAX_BUFFER_SIZE){
             break;
@@ -789,8 +789,7 @@ void write_some_read_some_test(){
     std::cout << "[11] write_some & read_some test size MAX_BUFFER_SIZE write size" << std::endl;        
     BOOST_CHECK_EQUAL(send_data_size, send_size);
 
-//    dummy_cl.write_mutex.unlock();
-    
+    dummy_cl.write_mutex.unlock();
     while(true){
         if(receve_data_size == MAX_BUFFER_SIZE){
             break;
