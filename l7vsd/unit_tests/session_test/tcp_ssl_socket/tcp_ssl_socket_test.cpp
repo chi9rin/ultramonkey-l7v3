@@ -378,6 +378,112 @@ void construcor_test(){
     BOOST_MESSAGE( "----- construcor test end -----" );
 }
 
+// accept test
+void accept_test(){
+
+    BOOST_MESSAGE( "----- accept test start -----" );
+
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+    authority test_auth;
+
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = true;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = true;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = true;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = true;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+
+    // Client context
+    boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+    client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+    client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
+
+    // Server context
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    server_ctx.set_options(
+        boost::asio::ssl::context::default_workarounds
+        | boost::asio::ssl::context::no_sslv2
+        | boost::asio::ssl::context::single_dh_use);
+    server_ctx.set_password_callback(boost::bind(&authority::get_password, &test_auth));
+    server_ctx.use_certificate_chain_file(SERVER_CTX_CERTIFICATE_CHAIN_FILE);
+    server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
+
+    // test socket
+    test_ssl_socket_class test_obj(io,server_ctx,set_option);
+
+    // test acceptor
+    boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
+
+    // test client
+    test_client dummy_cl(io,client_ctx);
+    dummy_cl.all_lock();
+
+    // client start
+    boost::thread cl_thread(boost::bind(&test_client::connect_close_only_test_run,&dummy_cl));
+
+    // accept
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(test_obj.get_socket().lowest_layer(),ec);
+    if(ec){
+        std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side client connect OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    // test call
+    test_obj.accept();
+
+    // unit_test [1] accept test open flag check
+    std::cout << "[1] accept test open flag check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_open_flag(),true);
+
+
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket>* pSocket = test_obj.get_socket_pointer();
+
+    int val;
+    size_t len;
+
+    // unit_test [2] accept test set TCP_CORK check
+    std::cout << "[2] accept test set TCP_CORK check" << std::endl;
+    val = 0;
+    len = sizeof(val);
+    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+    BOOST_CHECK_EQUAL(val,1);
+
+    // unit_test [3] accept test set TCP_NODELAY check
+    std::cout << "[3] accept test set TCP_NODELAY check" << std::endl;
+    val = 0;
+    len = sizeof(val);
+    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_NODELAY,&val,len,ec);
+    BOOST_CHECK_EQUAL(val,1);
+
+    // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+
+    test_obj.get_socket().lowest_layer().close();
+
+    // test call
+    test_obj.accept();
+
+    // accepter close
+    test_acceptor.close();
+
+    BOOST_MESSAGE( "----- accept test end -----" );
+}
+
 // handshake test
 void handshake_test(){
 
@@ -514,6 +620,8 @@ void handshake_test(){
 
     BOOST_MESSAGE( "----- handshake_test test end -----" );
 }
+
+
 void get_socket_test(){
     BOOST_MESSAGE( "----- get_socket test start -----" );
 
@@ -1077,7 +1185,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_ssl_socket class test" );
 
     ts->add( BOOST_TEST_CASE( &construcor_test ) );
-//NG    ts->add( BOOST_TEST_CASE( &accept_test ) );
+    ts->add( BOOST_TEST_CASE( &accept_test ) );
     ts->add( BOOST_TEST_CASE( &handshake_test ) );
     ts->add( BOOST_TEST_CASE( &get_socket_test ) );
     ts->add( BOOST_TEST_CASE( &set_non_blocking_mode_test ) );
@@ -1090,3 +1198,5 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     return NULL;
 }
+
+
