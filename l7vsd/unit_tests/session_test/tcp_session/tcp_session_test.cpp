@@ -12486,6 +12486,10 @@ class ssl_clear_keep_cache_test_class : public l7vs::tcp_session{
         bool& get_exit_flag(){
             return exit_flag;
         };
+
+        bool test_call(SSL *clear_ssl){
+            return ssl_clear_keep_cache(clear_ssl);
+        };
 };
 
 //ssl_clear_keep_cache_test test
@@ -12563,7 +12567,7 @@ void ssl_clear_keep_cache_test(){
     BOOST_CHECK(test_sock.impl()->ssl->compress != NULL);
 
     test_sock.impl()->ssl->first_packet = 1;  //0
-    test_sock.impl()->ssl->session = 99;      //NULL;
+    test_sock.impl()->ssl->session = (SSL_SESSION*)99;      //NULL;
     test_sock.impl()->ssl->type = 2;          //0;
     test_sock.impl()->ssl->error = 3;         //0;
     test_sock.impl()->ssl->hit = 4;           //0;
@@ -12602,7 +12606,7 @@ void ssl_clear_keep_cache_test(){
     
     ssl_clear_keep_cache_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
-    test_obj.ssl_clear_keep_cache(test_sock.impl()->ssl);
+    test_obj.test_call(test_sock.impl()->ssl);
 
 
     BOOST_CHECK(test_sock.impl()->ssl->clear_ssl->method == NULL);
