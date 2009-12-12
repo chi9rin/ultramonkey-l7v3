@@ -459,14 +459,14 @@ void accept_test(){
     std::cout << "[2] accept test set TCP_CORK check" << std::endl;
     val = 0;
     len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
     BOOST_CHECK_EQUAL(val,1);
 
     // unit_test [3] accept test set TCP_NODELAY check
     std::cout << "[3] accept test set TCP_NODELAY check" << std::endl;
     val = 0;
     len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_NODELAY,&val,len,ec);
+    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_NODELAY,&val,&len,ec);
     BOOST_CHECK_EQUAL(val,1);
 
     // close
