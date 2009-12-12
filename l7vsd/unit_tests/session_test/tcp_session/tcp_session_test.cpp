@@ -12516,6 +12516,14 @@ void ssl_clear_keep_cache_test(){
     server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
     server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
 
+    // Set session cache mode on the context.
+    SSL_CTX_set_session_cache_mode(server_ctx.impl(), (SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR));
+    // Set session cache size on the context.
+    SSL_CTX_sess_set_cache_size(server_ctx.impl(), 10);
+    // Set session cache timeout on the context.
+    SSL_CTX_set_timeout(server_ctx.impl(), 60);
+
+
     // test socket
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket> test_sock(io,server_ctx);
 
@@ -12551,6 +12559,9 @@ void ssl_clear_keep_cache_test(){
         std::cout << "server side handshake OK" << std::endl;
     }
     BOOST_CHECK(!ec);
+
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl() == 1));
+
 
     // close
     dummy_cl.close_mutex.unlock();
@@ -12606,7 +12617,12 @@ void ssl_clear_keep_cache_test(){
     
     ssl_clear_keep_cache_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
-    test_obj.test_call(test_sock.impl()->ssl);
+
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl() == 1));
+
+    bool bres = test_obj.test_call(test_sock.impl()->ssl);
+
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl() == 0));
 
 
     BOOST_CHECK(test_sock.impl()->ssl->init_buf == NULL);
