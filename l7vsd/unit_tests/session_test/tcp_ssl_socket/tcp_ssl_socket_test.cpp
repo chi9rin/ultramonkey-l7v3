@@ -937,7 +937,7 @@ void set_non_blocking_mode_test(){
     BOOST_MESSAGE( "----- set_non_blocking_mode test end -----" );
 }
 
-class close_lock_test_class : public l7vs::tcp_socket{
+class close_lock_test_class : public l7vs::tcp_ssl_socket{
     public:
         boost::thread::id befor_thread_id;
         boost::thread::id after_thread_id;
