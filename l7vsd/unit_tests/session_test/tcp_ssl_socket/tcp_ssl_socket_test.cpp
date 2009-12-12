@@ -995,6 +995,14 @@ void close_lock_test(){
     boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
     close_lock_test_class test_obj(io,server_ctx,set_option);
 
+    test_obj.test_thread_wait.lock();
+    boost::thread::id proc_id = boost::this_thread::get_id();
+    test_obj.befor_thread_id = proc_id;
+    test_obj.after_thread_id = proc_id;
+    test_obj.mutex_lock();
+    
+    boost::thread test_thread(boost::bind(&close_lock_test_class::test_run,&test_obj));
+
     BOOST_CHECK(test_obj.befor_thread_id == proc_id);
     BOOST_CHECK(test_obj.after_thread_id == proc_id);
 
