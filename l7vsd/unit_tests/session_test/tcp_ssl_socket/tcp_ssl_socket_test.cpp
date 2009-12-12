@@ -140,7 +140,6 @@ class test_client{
             receive_data_size = 0;
             send_data_size = 0;
             while(receive_data_size < MAX_BUFFER_SIZE){
-                l7vs::rw_scoped_lock scope_lock(read_mutex);
                 // receive
                 {
                     if(!receive_test()){
@@ -150,7 +149,6 @@ class test_client{
                 }
             }
             while(send_data_size < receive_data_size){
-                l7vs::rw_scoped_lock scope_lock(write_mutex);
                 // send
                 {
                     if(!send_test()){
@@ -702,7 +700,6 @@ void write_some_read_some_test(){
     receve_data_size = 0;
 
 
-    dummy_cl.read_mutex.unlock();
     while(true){
         if(send_data_size == MAX_BUFFER_SIZE){
             break;
@@ -728,7 +725,6 @@ void write_some_read_some_test(){
     std::cout << "[7] write_some & read_some test size MAX_BUFFER_SIZE write size" << std::endl;        
     BOOST_CHECK_EQUAL(send_data_size, send_size);
 
-    dummy_cl.write_mutex.unlock();
     while(true){
         if(receve_data_size == MAX_BUFFER_SIZE){
             break;
