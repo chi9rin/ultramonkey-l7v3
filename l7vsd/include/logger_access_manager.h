@@ -38,6 +38,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include "appender_property.h"
+#include "error_code.h"
 #include "logger_implement_access.h"
 #include "wrlock.h"
 
@@ -55,11 +56,11 @@ public:
     logger_implement_access *find_logger_implement_access(
         const std::string &aclogFilename, 
         std::map< std::string , std::string > rotate, 
-        error_code& err);
+        l7vs::error_code& err);
 
-    bool erase_logger_access(
+    bool erase_logger_implement_access(
         const std::string &aclogFilename, 
-        error_code& err);
+        l7vs::error_code& err);
 
     bool access_log_logrotate_parameter_check(
         std::map<std::string,std::string>& rotatedata)
