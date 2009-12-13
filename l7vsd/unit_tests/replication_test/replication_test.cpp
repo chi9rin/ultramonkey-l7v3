@@ -5,17 +5,23 @@
 #include    "parameter.h"
 #include    <malloc.h>
 
+#define     TARGET_IP_V4        "10.144.169.71"
+#define     TARGET_IP_V6        "fe80::213:21ff:feb5:95fb%eth0"
+#define     TARGET_HOSTNAME     "um08"
+
 int get_string_stubmode = 0;
 int get_int_stubmode = 0;
+char    target_ip[256] = TARGET_IP_V4;
 
-char    *get_string_table[] = {
-    "10.144.169.86",                //    "ip_addr"
+char    get_string_table[][ 256 ] = {
+    TARGET_IP_V4,                //    "ip_addr"
     "40000",                    //    "service_name"
     "eth0",                        //    "nic"
     "virtualservice",            //    "cmponent_id_00"
     "chash",                    //    "cmponent_id_01"
     "sslid",                    //    "cmponent_id_02"
 };
+
 int        get_int_table[] = {
     10000,                        //    "interval"
     64,                            //    "cmponent_size_00"
@@ -194,7 +200,7 @@ boost::asio::io_service global_receive_io;
 boost::asio::io_service global_send_io;
 
 void receiver_thread(){
-    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
+    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( target_ip ), 40000 );
     boost::asio::ip::udp::socket    receiver_socket( global_receive_io, udp_endpoint );
 
     char    *recv_memory;
@@ -435,7 +441,7 @@ void    sender_thread(){
 }
 
 void    sender2_thread(){
-    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( "10.144.169.86" ), 40000 );
+    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( target_ip ), 40000 );
 //    boost::asio::ip::udp::socket    sender_socket( global_send_io, udp_endpoint );
     boost::asio::ip::udp::socket    sender_socket( global_send_io );
 
@@ -543,19 +549,23 @@ void lock_thread( l7vs::replication_fake* p_repliX, const char* name ){
 //test case1.
 void    replication_initialize_test(){
 //    int    loop;
+    std::cout << "test111" << std::endl;
+
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
     get_int_table[3] = 200;                            //    "cmponent_size_02"
     get_int_table[4] = 10;                            //    "compulsorily_interval"
+
+    std::cout << "test222!" << std::endl;
 
     // unit_test[1]  コンストラクタのテスト
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -758,14 +768,14 @@ void    replication_initialize_test(){
     get_int_table[0] = 10000;                        //    "interval"
     // unit_test[28]  check_parameterのテスト(component_idが重複)
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
-    get_string_table[4] = "virtualservice";            //    "cmponent_id_01"
-    get_string_table[5] = "virtualservice";            //    "cmponent_id_02"
+    strcpy( get_string_table[4], "virtualservice" );            //    "cmponent_id_01"
+    strcpy( get_string_table[5], "virtualservice" );            //    "cmponent_id_02"
     repli1.finalize();
     BOOST_CHECK_EQUAL( repli1.initialize(), -1 );
     BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SINGLE );
 
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
 
     // unit_test[29]  check_parameterのテスト(total_blockが上限以上)
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -825,12 +835,12 @@ void    replication_initialize_test(){
 void    replication_switch_to_master_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -891,12 +901,12 @@ void    replication_switch_to_master_test(){
 void    replication_switch_to_slave_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip);            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -964,12 +974,12 @@ void    replication_pay_memory_test(){
 
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1151,12 +1161,12 @@ void    replication_pay_memory_test(){
 void    replication_dump_memory_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1223,12 +1233,12 @@ void    replication_dump_memory_test(){
 void    replication_start_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1291,12 +1301,12 @@ void    replication_start_test(){
 void    replication_stop_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1357,12 +1367,12 @@ void    replication_stop_test(){
 void    replication_force_replicate_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1492,12 +1502,12 @@ void    replication_force_replicate_test(){
 void    replication_reset_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1593,12 +1603,12 @@ void    replication_reset_test(){
 void    replication_get_status_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1648,12 +1658,12 @@ void    replication_get_status_test(){
 void    replication_lock_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1770,12 +1780,12 @@ void    replication_lock_test(){
 void    replication_unlock_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1850,12 +1860,12 @@ void    replication_unlock_test(){
 void    replication_refer_lock_mutex_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -1936,12 +1946,12 @@ void    replication_refer_lock_mutex_test(){
 void    replication_handle_send_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2011,12 +2021,12 @@ void    replication_handle_send_test(){
 void    replication_set_master_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2040,7 +2050,7 @@ void    replication_set_master_test(){
     // unit_test[143]  set_masterのテスト(ip_adrが不正)
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
-    get_string_table[0] = "192:168:0:20";            //    "ip_addr"
+    strcpy( get_string_table[0], "192:168:0:20" );            //    "ip_addr"
 
     repli1.finalize();
     BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_OUT );
@@ -2049,7 +2059,7 @@ void    replication_set_master_test(){
 
     BOOST_CHECK_EQUAL( repli1.set_master_wrapper(), 0 );                            // set_masterの時点ではendpointを使用していない
 
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
 
     repli1.finalize();
 }
@@ -2058,12 +2068,12 @@ void    replication_set_master_test(){
 void    replication_set_slave_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2089,7 +2099,7 @@ void    replication_set_slave_test(){
     // unit_test[145]  set_slaveのテスト(ip_adrが不正)
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
-    get_string_table[0] = "192:168:0:20";            //    "ip_addr"
+    strcpy( get_string_table[0], "192:168:0:20" );            //    "ip_addr"
 //    get_string_table[0] = "10.144.169.87";            //    "ip_addr"                        作成失敗だと0.0.0.0:0でbind成功してしまうので使えないIPで
 
     repli1.finalize();
@@ -2099,7 +2109,7 @@ void    replication_set_slave_test(){
 
 //    BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), -1 );                                // 無理？
 
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
 
     repli1.finalize();
 }
@@ -2108,12 +2118,12 @@ void    replication_set_slave_test(){
 void    replication_check_parameter_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2138,12 +2148,12 @@ void    replication_check_parameter_test(){
 void    replication_getrpl_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2171,12 +2181,12 @@ void    replication_getrpl_test(){
 void    replication_getcmp_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2204,12 +2214,12 @@ void    replication_getcmp_test(){
 void    replication_getsrf_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2237,12 +2247,12 @@ void    replication_getsrf_test(){
 void    replication_make_serial_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2272,12 +2282,12 @@ void    replication_make_serial_test(){
 void    replication_releaserpl_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2305,12 +2315,12 @@ void    replication_releaserpl_test(){
 void    replication_releasecmp_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2338,12 +2348,12 @@ void    replication_releasecmp_test(){
 void    replication_releasesrf_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2371,12 +2381,12 @@ void    replication_releasesrf_test(){
 void    replication_finalize_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2445,12 +2455,12 @@ void    replication_finalize_test(){
 void    replication_handle_receive_test(){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    get_string_table[0] = "10.144.169.86";            //    "ip_addr"
-    get_string_table[1] = "40000";                    //    "service_name"
-    get_string_table[2] = "eth0";                    //    "nic"
-    get_string_table[3] = "virtualservice";            //    "cmponent_id_00"
-    get_string_table[4] = "chash";                    //    "cmponent_id_01"
-    get_string_table[5] = "sslid";                    //    "cmponent_id_02"
+    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[1], "40000" );                    //    "service_name"
+    strcpy( get_string_table[2], "eth0" );                    //    "nic"
+    strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
+    strcpy( get_string_table[4], "chash" );                    //    "cmponent_id_01"
+    strcpy( get_string_table[5], "sslid" );                    //    "cmponent_id_02"
     get_int_table[0] = 10000;                        //    "interval"
     get_int_table[1] = 64;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
@@ -2459,7 +2469,8 @@ void    replication_handle_receive_test(){
 
     l7vs::replication    repli1;
 
-    get_string_table[0] = "um05";                    //    "ip_addr"
+    //get_string_table[0] = TARGET_HOSTNAME;                    //    "ip_addr"
+    strcpy( get_string_table[0], target_ip);                    //    "ip_addr"
     get_int_table[1] = 1;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
     get_int_table[3] = 1;                            //    "cmponent_size_02"
@@ -2556,6 +2567,10 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     l7vs::Parameter    parameter;
 
     logger.loadConf();
+
+    //IPV4 test
+    strcpy( target_ip, TARGET_IP_V4);
+
     // create unit test suite
     test_suite* ts = BOOST_TEST_SUITE( "replication_test" );
 
@@ -2592,6 +2607,46 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
 
     framework::master_test_suite().add( ts );
+
+    //IPV6 TEST
+    strcpy( target_ip, TARGET_IP_V6);
+
+    // create unit test suite
+    test_suite* ts2 = BOOST_TEST_SUITE( "replication_test" );
+
+    // add test case to test suite
+    ts2->add( BOOST_TEST_CASE( &replication_initialize_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_switch_to_master_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_switch_to_slave_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_pay_memory_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_dump_memory_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_start_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_stop_test ) );
+
+    ts2->add( BOOST_TEST_CASE( &replication_force_replicate_test ) );
+
+    ts2->add( BOOST_TEST_CASE( &replication_reset_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_get_status_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_lock_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_unlock_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_refer_lock_mutex_test ) );
+
+    ts2->add( BOOST_TEST_CASE( &replication_handle_send_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_set_master_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_set_slave_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_check_parameter_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_getrpl_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_getcmp_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_getsrf_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_make_serial_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_releaserpl_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_releasecmp_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_releasesrf_test ) );
+    ts2->add( BOOST_TEST_CASE( &replication_finalize_test ) );
+
+    ts2->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
+
+    framework::master_test_suite().add( ts2 );
 
     return 0;
 }
