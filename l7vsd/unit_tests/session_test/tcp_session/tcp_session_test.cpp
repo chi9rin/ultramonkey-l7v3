@@ -13004,6 +13004,7 @@ void up_thread_client_accept_test(){
 
     // unit_test [3] up_thread_client_accept set timer check
     std::cout << "[3] up_thread_client_accept set timer check" << std::endl;
+    BOOST_CHECK( test_obj.get_ssl_handshake_timer_flag() == true);
     // after 1 second
     sleep(1);
     std::cout << "1 sec" << std::endl;
