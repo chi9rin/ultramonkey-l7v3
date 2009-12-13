@@ -12796,6 +12796,9 @@ void initialize_ssl_mode_test(){
     bool set_ssl_cache_flag2(false);
     initialize_ssl_mode_test_class test_obj2(vs,io,set_option,listen_endpoint,set_mode,set_context2,set_ssl_cache_flag2,set_ssl_handshake_time_out,plogger);
 
+    SSL* pRet = test_obj1.get_client_ssl_socket().impl()->ssl;
+    test_obj1.get_client_ssl_socket().impl()->ssl = NULL;
+
     // test call
     msg = test_obj2.initialize();
 
@@ -12803,6 +12806,8 @@ void initialize_ssl_mode_test(){
     std::cout << "[3] initialize SSL_clear Error case" << std::endl;
     BOOST_CHECK(msg.flag == true);
 
+    test_obj1.get_client_ssl_socket().impl()->ssl = pRet;
+    
 
 
 
