@@ -882,9 +882,13 @@ namespace l7vs{
         //! @param[out]        err code object
         //! @return         true is handshaked
         //! @return         false is handshake failure
-        bool handshake(boost::system::error_code&){
-		return true;
+        bool handshake(boost::system::error_code& ec){
+                ec = handshake_set_ec;
+		return handshake_res;
         }
+        bool handshake_res;
+        boost::system::error_code handshake_set_ec;
+
     };
 
     bool tcp_ssl_socket::set_non_blocking_mode_res = true;

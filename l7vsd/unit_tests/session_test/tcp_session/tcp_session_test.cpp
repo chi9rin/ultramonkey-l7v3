@@ -899,7 +899,6 @@ class module_event_map_test_base_class : public l7vs::tcp_session{
 // constructer test class
 class constructer_test_class : public l7vs::tcp_session{
     public:
-//        constructer_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){};
        constructer_test_class(
                                 l7vs::virtualservice_tcp& vs,
                                 boost::asio::io_service& session_io,
@@ -1833,18 +1832,6 @@ class constructer_test_class : public l7vs::tcp_session{
 void constructer_test(){
     BOOST_MESSAGE( "----- constructer test start -----" );
 
-    
-//        constructer_test_class(
-//                                l7vs::virtualservice_tcp& vs,
-//                                boost::asio::io_service& session_io,
-//                                l7vs::tcp_socket_option_info& set_socket_option,
-//                                boost::asio::ip::tcp::endpoint listen_endpoint,
-//                                bool ssl_mode,
-//                                boost::asio::ssl::context& set_ssl_context,
-//                                bool set_ssl_cache_flag,
-//                                int set_ssl_handshake_time_out,
-//                                logger_implement_access* set_access_logger)
-
     l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
     l7vs::tcp_socket_option_info set_option;
@@ -2006,7 +1993,6 @@ void constructer_test(){
 // initialize test class
 class initialize_test_class : public l7vs::tcp_session{
     public:
-//        initialize_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io) : l7vs::tcp_session(vs,session_io){};
        initialize_test_class(
                                 l7vs::virtualservice_tcp& vs,
                                 boost::asio::io_service& session_io,
@@ -2065,10 +2051,7 @@ class initialize_test_class : public l7vs::tcp_session{
 };
 void initialize_test(){
     BOOST_MESSAGE( "----- initialize test start -----" );
-    
-//    boost::asio::io_service io;
-//    l7vs::virtualservice_tcp vs;
-//    initialize_test_class test_obj(vs,io);
+
     l7vs::virtualservice_tcp vs;
     boost::asio::io_service io;
     l7vs::tcp_socket_option_info set_option;
@@ -3023,7 +3006,6 @@ void up_thread_run_test(){
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
-//    up_thread_run_test_class test_obj(vs,io);
     up_thread_run_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
@@ -12809,9 +12791,6 @@ void initialize_ssl_mode_test(){
 
     test_obj2.get_client_ssl_socket().impl()->ssl->method = pRet;
 
-
-   
-
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
     client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
@@ -12894,6 +12873,96 @@ void initialize_ssl_mode_test(){
     BOOST_MESSAGE( "----- initialize_ssl_mode test end -----" );
 }
 
+// up_thread_client_accept test
+// up_thread_client_accept test class
+class up_thread_client_accept_test_class : public l7vs::tcp_session{
+    public:
+       up_thread_client_accept_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+        ~up_thread_client_accept_test_class(){};
+
+        void test_call(){
+            up_thread_client_accept(LOCAL_PROC);
+        }
+
+        bool handle_ssl_handshake_timer(const boost::system::error_code& error){
+            ssl_clear_keep_cache_call_chk = true;
+            return ssl_clear_keep_cache_res;
+        };
+
+        bool handle_ssl_handshake_timer_call_chk;
+        bool handle_ssl_handshake_timer_res;
+
+        up_thread_function_pair& get_up_thread_next_call_function(){
+            return up_thread_next_call_function;
+        };
+        
+        bool& get_ssl_flag(){
+            return ssl_flag;
+        };
+
+        bool& get_ssl_handshake_time_out_flag(){
+            return ssl_handshake_time_out_flag;
+        };
+
+};
+void up_thread_client_accept_test(){
+    BOOST_MESSAGE( "----- up_thread_client_accept test start -----" );
+
+    l7vs::virtualservice_tcp vs;
+    boost::asio::io_service io;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    up_thread_client_accept_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    // test case 1 not ssl mode
+    test_obj.test_call();
+
+    BOOST_CHECK( get_up_thread_next_call_function().first == l7vs::tcp_session::UP_FUNC_CLIENT_ACCEPT_EVENT);
+
+    
+
+
+
+
+    BOOST_MESSAGE( "----- up_thread_client_accept test end -----" );
+}
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
@@ -12901,6 +12970,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 /*
     ts->add( BOOST_TEST_CASE( &constructer_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_test ) );
+    ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
+    ts->add( BOOST_TEST_CASE( &ssl_clear_keep_cache_test ) );
     ts->add( BOOST_TEST_CASE( &get_client_socket_test) );
     ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
     ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
@@ -12958,9 +13029,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
 */
 
-    ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
+    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_test ) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test) );
-//    ts->add( BOOST_TEST_CASE( &ssl_clear_keep_cache_test ) );
 
 
     framework::master_test_suite().add( ts );
