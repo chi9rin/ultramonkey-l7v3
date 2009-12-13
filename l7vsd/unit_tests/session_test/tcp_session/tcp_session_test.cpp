@@ -12920,10 +12920,10 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
         };
 
         bool next_func_chk_accept_event(){
-            return up_thread_next_call_function().first == UP_FUNC_CLIENT_ACCEPT_EVENT;
+            return up_thread_next_call_function.first == UP_FUNC_CLIENT_ACCEPT_EVENT;
         };
         bool next_func_chk_accept(){
-            return up_thread_next_call_function().first == UP_FUNC_CLIENT_ACCEPT;
+            return up_thread_next_call_function.first == UP_FUNC_CLIENT_ACCEPT;
         };
 
 };
