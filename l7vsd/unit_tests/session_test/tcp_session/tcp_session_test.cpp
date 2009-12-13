@@ -13272,7 +13272,7 @@ void up_thread_run_ssl_mode_test(){
     thread_state[4] = 0;    // UP_THREAD_LOCK
     thread_state[5] = 0;    // DOWN_THREAD_LOCK
     up_thread_id = boost::thread::id();
-    boost::thread test_thread(boost::bind(&up_thread_run_test_class::test_run,&test_obj));
+    boost::thread test_thread(boost::bind(&up_thread_run_ssl_mode_test_class::test_run,&test_obj));
     sleep(1);
     boost::thread::id test_id = test_thread.get_id();
     boost::thread::id proc_id = boost::this_thread::get_id();
@@ -13286,7 +13286,7 @@ void up_thread_run_ssl_mode_test(){
     BOOST_CHECK(up_thread_id != test_id);
     test_obj.test_thread_wait.unlock();
     sleep(1);
-    /*
+   
     // unit_test [1] up_thread_run thread id update check
     std::cout << "[1] up_thread_run thread id update check" << std::endl;
     BOOST_CHECK(up_thread_id == test_id);
