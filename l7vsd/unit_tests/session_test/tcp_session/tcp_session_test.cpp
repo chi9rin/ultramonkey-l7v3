@@ -13287,12 +13287,12 @@ void up_thread_run_ssl_mode_test(){
     test_obj.test_thread_wait.unlock();
     sleep(1);
    
-    // unit_test [1] up_thread_run thread id update check
-    std::cout << "[1] up_thread_run thread id update check" << std::endl;
+    // unit_test [1] up_thread_run ssl mode test thread id update check
+    std::cout << "[1] up_thread_run ssl mode test thread id update check" << std::endl;
     BOOST_CHECK(up_thread_id == test_id);
     
-    // unit_test [2] up_thread_run down thread wait check
-    std::cout << "[2] up_thread_run down thread wait check" << std::endl;
+    // unit_test [2] up_thread_run ssl mode test down thread wait check
+    std::cout << "[2] up_thread_run ssl mode test down thread wait check" << std::endl;
     BOOST_CHECK(thread_state.test(0));    // UP_THREAD_ALIVE
     BOOST_CHECK(!thread_state.test(1)); // DOWN_THREAD_ALIVE
     BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
@@ -13317,19 +13317,19 @@ void up_thread_run_ssl_mode_test(){
     thread_state[1] = 1;
     sleep(1);
     
-    // unit_test [3] up_thread_run handle_session_initialize call check
-    std::cout << "[3] up_thread_run handle_session_initialize call check" << std::endl;
+    // unit_test [3] up_thread_run ssl mode test handle_session_initialize call check
+    std::cout << "[3] up_thread_run ssl mode test handle_session_initialize call check" << std::endl;
     BOOST_CHECK(proto_test.handle_session_initialize_in_up_thread_id == test_id);
     BOOST_CHECK(proto_test.handle_session_initialize_in_down_thread_id == proc_id);
     BOOST_CHECK(proto_test.handle_session_initialize_in_client_endpoint_tcp == connect_end);
     BOOST_CHECK(proto_test.handle_session_initialize_in_client_endpoint_udp == boost::asio::ip::udp::endpoint());
     
-    // unit_test [4] up_thread_run state update(UP_THREAD_ACTIVE) check
-    std::cout << "[4] up_thread_run state update(UP_THREAD_ACTIVE) check" << std::endl;
+    // unit_test [4] up_thread_run ssl mode test state update(UP_THREAD_ACTIVE) check
+    std::cout << "[4] up_thread_run ssl mode test state update(UP_THREAD_ACTIVE) check" << std::endl;
     BOOST_CHECK(thread_state.test(2)); // UP_THREAD_ACTIVE
     
-    // unit_test [5] up_thread_run pause check
-    std::cout << "[5] up_thread_run  pause check" << std::endl;
+    // unit_test [5] up_thread_run ssl mode test pause check
+    std::cout << "[5] up_thread_run ssl mode test  pause check" << std::endl;
     BOOST_CHECK(thread_state.test(4)); // UP_THREAD_LOCK
     
     test_obj.up_thread_exit_process_type = l7vs::tcp_session::MESSAGE_PROC;
@@ -13339,27 +13339,27 @@ void up_thread_run_ssl_mode_test(){
     session_pause_flag = false;
     sleep(1);
     
-    // unit_test [6] up_thread_run restart check
-    std::cout << "[6] up_thread_run  restart check" << std::endl;
+    // unit_test [6] up_thread_run ssl mode test restart check
+    std::cout << "[6] up_thread_run ssl mode test  restart check" << std::endl;
     BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
     
-    // unit_test [7] up_thread_run up_thread_next_call_function call (up_thread_exit) check
-    std::cout << "[7] up_thread_run up_thread_next_call_function call (up_thread_exit) check" << std::endl;
+    // unit_test [7] up_thread_run ssl mode test up_thread_next_call_function call (up_thread_exit) check
+    std::cout << "[7] up_thread_run ssl mode test up_thread_next_call_function call (up_thread_exit) check" << std::endl;
     BOOST_CHECK(test_obj.up_thread_exit_call_check);
     BOOST_CHECK(test_obj.up_thread_exit_process_type == l7vs::tcp_session::LOCAL_PROC);
     
-    // unit_test [8] up_thread_run main loop exit check
-    std::cout << "[8] up_thread_run main loop exit check" << std::endl;
+    // unit_test [8] up_thread_run ssl mode test main loop exit check
+    std::cout << "[8] up_thread_run ssl mode test main loop exit check" << std::endl;
     BOOST_CHECK(exit_flag);
     BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
     
     
-    // unit_test [9] up_thread_run up_thread_all_socket_close_call_check call check
-    std::cout << "[9] up_thread_run up_thread_all_socket_close_call_check call check" << std::endl;
+    // unit_test [9] up_thread_run ssl mode test up_thread_all_socket_close_call_check call check
+    std::cout << "[9] up_thread_run ssl mode test up_thread_all_socket_close_call_check call check" << std::endl;
     BOOST_CHECK(test_obj.up_thread_all_socket_close_call_check);
     
-    // unit_test [10] up_thread_run down thread end wait check
-    std::cout << "[10] up_thread_run down thread wait check" << std::endl;
+    // unit_test [10] up_thread_run ssl mode test down thread end wait check
+    std::cout << "[10] up_thread_run ssl mode test down thread wait check" << std::endl;
     BOOST_CHECK(thread_state.test(0));    // UP_THREAD_ALIVE
     BOOST_CHECK(thread_state.test(1)); // DOWN_THREAD_ALIVE
     BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
@@ -13378,16 +13378,16 @@ void up_thread_run_ssl_mode_test(){
     thread_state[1] = 0;
     sleep(1);
     
-    // unit_test [11] up_thread_run handle_session_finalize call check
-    std::cout << "[11] up_thread_run handle_session_finalize call check" << std::endl;
+    // unit_test [11] up_thread_run ssl mode test handle_session_finalize call check
+    std::cout << "[11] up_thread_run ssl mode test handle_session_finalize call check" << std::endl;
     BOOST_CHECK(proto_test.handle_session_finalize_in_up_thread_id == test_id);
     BOOST_CHECK(proto_test.handle_session_finalize_in_down_thread_id == proc_id);
     
-    // unit_test [12] up_thread_run release_session_id call check
-    std::cout << "[12] up_thread_run release_session_id call check" << std::endl;
+    // unit_test [12] up_thread_run ssl mode test release_session_id call check
+    std::cout << "[12] up_thread_run ssl mode test release_session_id call check" << std::endl;
 //     BOOST_CHECK(vs.release_session_id == test_id);
     
-    // unit_test [13] up_thread_run state update(UP_THREAD_ACTIVE) check
+    // unit_test [13] up_thread_run ssl mode test state update(UP_THREAD_ACTIVE) check
     std::cout << "[13] up_thread_run state update(UP_THREAD_ACTIVE) check" << std::endl;
     BOOST_CHECK(!thread_state.test(0)); // UP_THREAD_ACTIVE
     
@@ -13417,8 +13417,8 @@ void up_thread_run_ssl_mode_test(){
     BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
     BOOST_CHECK(!thread_state.test(5)); // DOWN_THREAD_LOCK
     
-    // unit_test [14] up_thread_run message call check
-    std::cout << "[14] up_thread_run message call check" << std::endl;
+    // unit_test [14] up_thread_run ssl mode test message call check
+    std::cout << "[14] up_thread_run ssl mode test message call check" << std::endl;
     BOOST_CHECK(test_obj.up_thread_exit_call_check);
     BOOST_CHECK(test_obj.up_thread_exit_process_type == l7vs::tcp_session::MESSAGE_PROC);
     
@@ -13438,8 +13438,8 @@ void up_thread_run_ssl_mode_test(){
     test_obj.test_wait = false;
     sleep(1);
     
-    // unit_test [15] up_thread_run not find function map error test
-    std::cout << "[15] up_thread_run not find function map error test" << std::endl;
+    // unit_test [15] up_thread_run ssl mode test not find function map error test
+    std::cout << "[15] up_thread_run ssl mode test not find function map error test" << std::endl;
     BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
     BOOST_CHECK_EQUAL(15,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
@@ -13459,8 +13459,8 @@ void up_thread_run_ssl_mode_test(){
     test_obj.test_wait = false;
     sleep(1);
     
-    // unit_test [16] up_thread_run protocol_module returnd illegal EVENT_TAG error test
-    std::cout << "[16] up_thread_run protocol_module returnd illegal EVENT_TAG error test" << std::endl;
+    // unit_test [16] up_thread_run ssl mode test protocol_module returnd illegal EVENT_TAG error test
+    std::cout << "[16] up_thread_run ssl mode test protocol_module returnd illegal EVENT_TAG error test" << std::endl;
     BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
     BOOST_CHECK_EQUAL(14,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
@@ -13469,8 +13469,8 @@ void up_thread_run_ssl_mode_test(){
     sleep(1);
     
     
-    // unit_test [17] up_thread_run set non blocking fail check
-    std::cout << "[17] up_thread_run set non blocking fail check" << std::endl;
+    // unit_test [17] up_thread_run ssl mode test set non blocking fail check
+    std::cout << "[17] up_thread_run ssl mode test set non blocking fail check" << std::endl;
     exit_flag = false;
     session_pause_flag = false;
     thread_state[1] = 1;
@@ -13504,8 +13504,8 @@ void up_thread_run_ssl_mode_test(){
     test_obj.test_wait = false;
     sleep(1);
     
-    // unit_test [18] up_thread_run client endpoint get error test
-    std::cout << "[18] up_thread_run client endpoint get error test" << std::endl;
+    // unit_test [18] up_thread_run ssl mode test client endpoint get error test
+    std::cout << "[18] up_thread_run ssl mode test client endpoint get error test" << std::endl;
     BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
     BOOST_CHECK_EQUAL(9,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
@@ -13525,8 +13525,8 @@ void up_thread_run_ssl_mode_test(){
     test_obj.test_wait = false;
     sleep(1);
     
-    // unit_test [19] up_thread_run protocol module null error test
-    std::cout << "[19] up_thread_run protocol module null error test" << std::endl;
+    // unit_test [19] up_thread_run ssl mode test protocol module null error test
+    std::cout << "[19] up_thread_run ssl mode test protocol module null error test" << std::endl;
     BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
     BOOST_CHECK_EQUAL(8,l7vs::Logger::putLogError_id);
     std::cout << l7vs::Logger::putLogError_message << std::endl;
@@ -13557,7 +13557,7 @@ void up_thread_run_ssl_mode_test(){
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
-/*
+
     ts->add( BOOST_TEST_CASE( &constructer_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
@@ -13568,6 +13568,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
 
     ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
     ts->add( BOOST_TEST_CASE( &thread_state_update_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_test) );
@@ -13618,10 +13619,6 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
-*/
-
-    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test ) );
-
 
     framework::master_test_suite().add( ts );
 
