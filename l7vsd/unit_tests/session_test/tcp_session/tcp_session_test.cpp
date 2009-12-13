@@ -13145,7 +13145,7 @@ class up_thread_run_ssl_mode_test_class : public l7vs::tcp_session{
         };
         
         l7vs::tcp_socket& get_client_socket(){
-            return client_ssl_socket->get_socket().lowest_layer();
+            return client_ssl_socket.get_socket().lowest_layer();
         };
 
         
