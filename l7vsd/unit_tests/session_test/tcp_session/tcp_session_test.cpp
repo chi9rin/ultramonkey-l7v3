@@ -12712,7 +12712,7 @@ class initialize_ssl_mode_test_class : public l7vs::tcp_session{
                                                                                                    set_access_logger){};
         ~initialize_ssl_mode_test_class(){};
         
-        bool tcp_session::ssl_clear_keep_cache(SSL *clear_ssl){
+        bool ssl_clear_keep_cache(SSL *clear_ssl){
             ssl_clear_keep_cache_call_chk = true;
             ssl_clear_keep_cache_set_clear_ssl = clear_ssl;
             return ssl_clear_keep_cache_res;
