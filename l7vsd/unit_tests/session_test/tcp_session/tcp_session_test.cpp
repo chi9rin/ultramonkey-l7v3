@@ -13258,7 +13258,7 @@ void up_thread_run_ssl_mode_test(){
     }
     
     boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-    client_ssl_socket.get_socket().connect(connect_end,ec);
+    client_socket.get_socket().connect(connect_end,ec);
     BOOST_CHECK(!ec);
     while(!test_server.bconnect_flag){
         sleep(1);
