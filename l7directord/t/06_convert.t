@@ -7,6 +7,8 @@ use Cwd;
 use L7lib;
 use Test::More tests => 83;
 use Config;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -275,6 +277,7 @@ override();
 }
 ## IPv6 Function
 {
+print "IPv6 Start\n";
     my @got = ip_to_int('::');
     my ($ipver, $addr ) = @got;
     is $addr, 0, 'ip_to_int - [::] is ok';

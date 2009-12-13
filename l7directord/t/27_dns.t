@@ -6,8 +6,10 @@ use subs qw(print);
 use Cwd;
 use L7lib;
 use Test::More tests => 6;
+use Socket;
+use Socket6;
 use IO::Socket::INET;
-
+use IO::Socket::INET6;
 L7lib::chdir();
 L7lib::comment_out();
 require './l7directord';
@@ -122,6 +124,15 @@ sub create_sock {
     my $port = shift;
     my $sock = IO::Socket::INET->new(
         LocalAddr => 'localhost',
+        LocalPort => $port,
+        ReuseAddr => 1,
+        Proto => 'udp');
+    return $sock;
+}
+sub create_sock6 {
+    my $port = shift;
+    my $sock = IO::Socket::INET6->new(
+        LocalAddr => 'localhost6',
         LocalPort => $port,
         ReuseAddr => 1,
         Proto => 'udp');

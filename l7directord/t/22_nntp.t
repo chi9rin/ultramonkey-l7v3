@@ -5,8 +5,10 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 5;
+use Test::More tests => 9;
 use IO::Socket::INET;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -76,6 +78,62 @@ SKIP: {
     my $got = check_nntp($v, $r);
     is $got, $main::SERVICE_DOWN, 'check_nntp - connect error';
 }
+###################################
+### IPv6 TestPattern
+SKIP: {
+    my $port = 63334;
+    my $sock = create_sock6($port);
+    skip 'cannot create socket', 1 if !$sock;
+    my $pid = prepare_child($sock, ["200\n"]);
+    set_default();
+    my $v = { negotiatetimeout => 3};
+    my $r = { server => {ip => '[::1]', port => $port }, fail_counts => 0 };
+    my $got = check_nntp($v, $r);
+    is $got, $main::SERVICE_UP, 'check_nntp - IPv6  - response ok';
+    close_child($pid);
+    close $sock;
+}
+SKIP: {
+    my $port = 63334;
+    my $sock = create_sock6($port);
+    skip 'cannot create socket', 1 if !$sock;
+    my $pid = prepare_child($sock, ["200\n"]);
+    set_default();
+    my $v = { negotiatetimeout => 3, checkport => $port };
+    my $r = { server => {ip => '[::1]', port => 10000 }, fail_counts => 0 };
+    my $got = check_nntp($v, $r);
+    is $got, $main::SERVICE_UP, 'check_nntp - IPv6  - checkport response ok';
+    close_child($pid);
+    close $sock;
+}
+SKIP: {
+    my $port = 63334;
+    my $sock = create_sock6($port);
+    skip 'cannot create socket', 1 if !$sock;
+    my $pid = prepare_child($sock, ["200\n"], 2);
+    set_default();
+    my $v = {negotiatetimeout => 1};
+    my $r = { server => {ip => '[::1]', port => $port } , fail_counts => 0 };
+    my $got = check_nntp($v, $r);
+    is $got, $main::SERVICE_DOWN, 'check_nntp - IPv6  - timeout';
+    close_child($pid);
+    close $sock;
+}
+SKIP: {
+    my $port = 63334;
+    my $sock = create_sock6($port);
+    skip 'cannot create socket', 1 if !$sock;
+    my $pid = prepare_child($sock, ["500\n"]);
+    set_default();
+    my $v = {negotiatetimeout => 1};
+    my $r = { server => {ip => '[::1]', port => $port } , fail_counts => 0 };
+    my $got = check_nntp($v, $r);
+    is $got, $main::SERVICE_DOWN, 'check_nntp - IPv6 - response error';
+    close_child($pid);
+    close $sock;
+}
+
+
 # test end
 #...............................................
 
@@ -91,6 +149,18 @@ sub create_sock {
         Proto => 'tcp');
     return $sock;
 }
+
+sub create_sock6 {
+    my $port = shift;
+    my $sock = IO::Socket::INET6->new(
+        Listen => 5,
+        LocalAddr => '::1',
+        LocalPort => $port,
+        ReuseAddr => 1,
+        Proto => 'tcp');
+    return $sock;
+}
+
 sub prepare_child {
     my $sock = shift;
     my $res = shift;

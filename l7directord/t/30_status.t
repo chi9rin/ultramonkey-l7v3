@@ -6,6 +6,8 @@ use subs qw(print);
 use Cwd;
 use L7lib;
 use Test::More tests => 21;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();

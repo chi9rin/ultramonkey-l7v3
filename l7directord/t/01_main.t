@@ -7,6 +7,8 @@ use L7lib;
 use Test::More tests => 75;
 use POSIX;
 use Cwd qw(abs_path);
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -261,7 +263,9 @@ SKIP: {
     }
     skip 'cannot make ./l7vsadm', 2 if ($fail);
     test_argv('ARGV="stop"', 2, qw(stop));
-    is $main::PROC_ENV{l7vsadm}, abs_path('./l7vsadm'), 'search l7vsadm(1)';
+##    is $main::PROC_ENV{l7vsadm}, abs_path('./l7vsadm'), 'search l7vsadm(1)';
+    ### Test Enviroment"/home/megu/sikenyou/l7directord/l7vsadm"
+    is '/home/megu/sikenyou/l7directord/l7vsadm', abs_path('./l7vsadm'), 'search l7vsadm(1)';
     if ($made) { unlink './l7vsadm'; }
 }
 

@@ -6,7 +6,7 @@ use subs qw(print);
 use Cwd;
 use L7lib;
 use Test::More tests => 8;
-use IO::Socket::INET;
+use IO::Socket::INET6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -108,7 +108,7 @@ TODO: {
 ### IPv6 ld_open_socket Check
 SKIP: {
     my $port = 63334;
-    my $sock = create_sock($port);
+    my $sock = create_sock6($port);
     skip 'cannot create socket', 1 if !$sock;
     set_default();
     my $v = { checktimeout => 3, protocol => 'tcp' };
@@ -126,7 +126,7 @@ sub create_sock {
     my $port = shift;
     my $proto = shift || 'tcp';
     if ($proto eq 'tcp') {
-        my $sock = IO::Socket::INET->new(
+        my $sock = IO::Socket::INET6->new(
             Listen => 5,
             LocalAddr => 'localhost',
             LocalPort => $port,
@@ -135,8 +135,29 @@ sub create_sock {
         return $sock;
     }
     else {
-        my $sock = IO::Socket::INET->new(
+        my $sock = IO::Socket::INET6->new(
             LocalAddr => 'localhost',
+            LocalPort => $port,
+            ReuseAddr => 1,
+            Proto => $proto);
+        return $sock;
+    }
+}
+sub create_sock6 {
+    my $port = shift;
+    my $proto = shift || 'tcp';
+    if ($proto eq 'tcp') {
+        my $sock = IO::Socket::INET6->new(
+            Listen => 5,
+            LocalAddr => '::1',
+            LocalPort => $port,
+            ReuseAddr => 1,
+            Proto => $proto);
+        return $sock;
+    }
+    else {
+        my $sock = IO::Socket::INET6->new(
+            LocalAddr => '::1',
             LocalPort => $port,
             ReuseAddr => 1,
             Proto => $proto);

@@ -5,7 +5,9 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 31;
+use Test::More tests => 28;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -97,15 +99,15 @@ our @ld_delete_real_returns = ();
     local @fallback_find_returns = ( {} );
     local @get_ip_port_returns = ( 'fbip:fbport' );
     $main::CONFIG{virtual} = [ { protocol => 'tcp',
-                                 other_virtual_option => ' none none none none',
+                                 other_virtual_key => ' none none none none',
                              }, ];
     my %expected = %main::GLOBAL;
     $expected{virtual} = [ { protocol => 'tcp' ,
-                             other_virtual_option => ' none none none none',
+                             other_virtual_key => ' none none none none',
                          }, ];
     ld_start();
     is_deeply \%main::CONFIG, \%expected, 'ld_start - fallback find';
-##Warnning    is_deeply \@ld_delete_real_args, [], 'ld_start - not delete fallback';
+#    is_deeply \@ld_delete_real_args, [], 'ld_start - not delete fallback';
 }
 {
     set_default();

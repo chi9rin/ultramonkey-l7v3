@@ -5,8 +5,10 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 33;
+use Test::More tests => 39;
 use Config;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -217,19 +219,19 @@ open  *STDERR, '>', '/dev/null';
     my $hostserv = '[2001::11]:80';
     my $protocol = 'tcp';
     my $got = ld_gethostservbyname($hostserv, $protocol);
-    is_deeply $got, { ip => '[2001::11]', port => 80 }, 'ld_getservhostbyname - [2001::11]:80 tcp';
+    is_deeply $got, { ip => '2001::11', port => 80 }, 'ld_getservhostbyname - [2001::11]:80 tcp';
 }
 {
     my $hostserv = '[2001::11]:www';
     my $protocol = 'udp';
     my $got = ld_gethostservbyname($hostserv, $protocol);
-    is_deeply $got, { ip => '[2001::11]', port => 80 }, 'ld_getservhostbyname - resolve localhost:www udp';
+    is_deeply $got, { ip => '2001::11', port => 80 }, 'ld_getservhostbyname - resolve localhost:www udp';
 }
 {
-    my $hostserv = 'um08_eth1_ipv6:www';
+    my $hostserv = 'um08eth1ipv6:www';
     my $protocol = undef;
     my $got = ld_gethostservbyname($hostserv, $protocol);
-    is_deeply $got, { ip => '[2001::11]', port => 80 }, 'ld_getservhostbyname - protocol is undef';
+    is_deeply $got, { ip => '2001::11', port => 80 }, 'ld_getservhostbyname - protocol is undef';
 }
 {
     my $hostserv = '10.144.169.222:www';
@@ -241,7 +243,7 @@ open  *STDERR, '>', '/dev/null';
     my $hostserv = 'localhost6:80';
     my $protocol = 'tcp';
     my $got = ld_gethostservbyname($hostserv, $protocol);
-    is $got, undef, 'ld_getservhostbyname - invalid host address';
+    is_deeply $got, { ip => '::1'     , port => 80 }, 'ld_getservhostbyname - invalid host address';
 }
 # test end
 #...............................................

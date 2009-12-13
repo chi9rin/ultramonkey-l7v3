@@ -5,7 +5,9 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;    
 use L7lib;  
-use Test::More tests => 63;
+use Test::More tests => 57;
+use Socket;
+use Socket6;
             
 L7lib::chdir();
 L7lib::comment_out();
@@ -415,9 +417,9 @@ our @int_to_ip_returns = ();
     local @ld_gethostbyname_returns = ('[2001::1]', '[2001::2]');
     local $ld_getservbyname_arg = undef;
     local $ld_getservbyname_return = 80;
-    local @ip_to_int_args = ();
-    local @ip_to_int_returns = (1,2);
-    local @int_to_ip_args = ();
+    local @ip_to_int_args = ('[2001::1]', '[2001::2]');
+    local @ip_to_int_returns = (2306124484190404608,2306124484190404609);
+    local @int_to_ip_args = (2306124484190404608,2306124484190404609);
     local @int_to_ip_returns = ('[2001::1]', '[2001::2]');
     my %real = %main::REAL;
     $real{forward} = 'masq';
@@ -442,8 +444,8 @@ our @int_to_ip_returns = ();
     is_deeply $ret, \@expected, 'parse_real - full parse ok';
     is $ld_getservbyname_arg, 'serv', 'parse_real - ld_getservbyname arg(1)';
     is_deeply \@ld_gethostbyname_args, ['foo.bar.com', 'hoge.huga.com'], 'parse_real - ld_gethostbyname arg(1)';
-##    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
-##    is_deeply \@int_to_ip_args, [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
+    is_deeply \@ip_to_int_args, \@gethost_r, 'parse_real - ip_to_int arg(1)';
+    is_deeply [$int_to_ip_args[0] .. $int_to_ip_args[1] ], [ $ip_to_r[0] .. $ip_to_r[1] ], 'parse_real - int_to_ip arg(1)';
 }
 ##  - parse_real (IPv6)
 {

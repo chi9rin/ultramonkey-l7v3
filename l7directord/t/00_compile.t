@@ -3,6 +3,8 @@ use warnings;
 use lib qw(t/lib lib);
 use L7lib;
 use Test::More tests => 1;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();

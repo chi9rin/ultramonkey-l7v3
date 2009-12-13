@@ -73,6 +73,8 @@ use Cwd qw(abs_path);
 use Data::Dumper;
 use Time::HiRes qw(sleep);
 use IO::Handle;
+use Socket;
+use Socket6;
 
 # current version
 our $VERSION     = '2.1.2-0';
@@ -1072,7 +1074,7 @@ sub check_require_module {
         pop     => [ qw( Net::POP3 ) ],
         imap    => [ qw( Mail::IMAPClient ) ],
         ldap    => [ qw( Net::LDAP ) ],
-        nntp    => [ qw( IO::Socket IO::Select ) ],
+        nntp    => [ qw( IO::Socket IO::Select6 ) ],
         dns     => [ qw( Net::DNS ) ],
         mysql   => [ qw( DBI DBD::mysql ) ],
         pgsql   => [ qw( DBI DBD::Pg ) ],
@@ -1195,6 +1197,7 @@ sub parse_real {
                          (\S+)               #  receive"
                       )?                     # (optional)
                       $/ix) {
+	print "real:" . $real. "\n";
         config_error($line, 'ERR0114', $config_line);
     }
     my ($ip1, $ip2, $port, $forward, $weight, $request, $receive)
@@ -2707,6 +2710,7 @@ sub check_connect {
     my $sock = ld_open_socket( $r->{server}{ip}, $port, $v->{protocol}, $v->{checktimeout} );
     if (!defined $sock) {
         ld_log( _message('WRN3201', $ERRNO, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+sleep 1;
         return $SERVICE_DOWN;
     }
     close($sock);
@@ -3987,6 +3991,7 @@ sub ld_open_socket {
             Proto    => $protocol,
             Timeout  => $timeout,
         );
+
     return $sock_handle;
 }
 
@@ -4054,10 +4059,19 @@ sub ld_daemon_become_child {
 # return: IP address
 #         undef on error
 sub ld_gethostbyname {
+    require IO::Socket::INET6;
     my $name = shift;
     $name = q{} if !defined $name;
-    my $addrs = ( gethostbyname($name) )[4] or return;
-    return Socket::inet_ntoa($addrs);
+    my $addrs = ( gethostbyname($name) )[4];
+    if ( defined $addrs && $addrs ){
+        return Socket::inet_ntoa($addrs);
+    }
+    else {
+        $name =~ s/\[|\]//g;
+        my $addrs = ( gethostbyname2($name, AF_INET6) )[4] or return;
+        return inet_ntop(AF_INET6,$addrs);
+    }
+    return;
 }
 
 # ld_getservbyname
@@ -4117,6 +4131,7 @@ sub ld_gethostservbyname {
         }
         $ip   = $1;
         $port = $2;
+        $ip   =~ s/\[|\]//g;
 
     }
     else {
@@ -4126,6 +4141,7 @@ sub ld_gethostservbyname {
 
     $ip   = ld_gethostbyname($ip) or return;
     $port = ld_getservbyname($port, $protocol);
+
     return if !defined $port;
 
     return {ip => $ip, port => $port};

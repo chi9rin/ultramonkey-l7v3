@@ -7,6 +7,8 @@ use Cwd;
 use L7lib;
 use subs qw(fork chdir);
 use Test::More tests => 29;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();

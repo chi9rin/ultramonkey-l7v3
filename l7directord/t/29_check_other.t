@@ -5,8 +5,10 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 3;
+use Test::More tests => 6;
 use IO::Socket::INET;
+use Socket;
+use Socket6;
 
 L7lib::chdir();
 L7lib::comment_out();
@@ -39,6 +41,32 @@ override();
     my $got = check_on($v, $r);
     is $got, $main::SERVICE_UP, 'check_on - ok';
 }
+#############################################################
+### IPv6 
+{
+    set_default();
+    my $v = { checktimeout => 3 };
+    my $r = { server => {ip => '[::1]'} , fail_counts => 0 };
+    my $got = check_none($v, $r);
+    is $got, $main::SERVICE_UP, 'check_none - ok';
+}
+#   - check_off
+{
+    set_default();
+    my $v = { checktimeout => 3 };
+    my $r = { server => {ip => '[::1]'} , fail_counts => 0 };
+    my $got = check_off($v, $r);
+    is $got, $main::SERVICE_DOWN, 'check_off - ok';
+}
+#   - check_on
+{
+    set_default();
+    my $v = { checktimeout => 3 };
+    my $r = { server => {ip => '[::1]'} , fail_counts => 0 };
+    my $got = check_on($v, $r);
+    is $got, $main::SERVICE_UP, 'check_on - ok';
+}
+
 # test end
 #...............................................
 
