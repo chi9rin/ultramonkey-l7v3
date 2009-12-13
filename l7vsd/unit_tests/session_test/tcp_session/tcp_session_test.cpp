@@ -13143,9 +13143,9 @@ class up_thread_run_ssl_mode_test_class : public l7vs::tcp_session{
         void set_protocol_module(l7vs::protocol_module_base* set_proto){
             protocol_module = set_proto;
         };
-        
-        l7vs::tcp_socket& get_client_socket(){
-            return client_ssl_socket.get_socket().lowest_layer();
+
+        boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& get_client_socket(){
+            return client_ssl_socket.get_socket();
         };
 
         
@@ -13242,7 +13242,7 @@ void up_thread_run_ssl_mode_test(){
 
     
     std::bitset<TCP_SESSION_THREAD_STATE_BIT>& thread_state = test_obj.get_thread_state();
-    l7vs::tcp_socket& client_socket = test_obj.get_client_socket();
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& client_socket = test_obj.get_client_socket();
     
     test_mirror_server test_server;
     // accept req
@@ -13258,7 +13258,7 @@ void up_thread_run_ssl_mode_test(){
     }
     
     boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-    client_socket.get_socket().connect(connect_end,ec);
+    client_socket.lowest_layer().connect(connect_end,ec);
     BOOST_CHECK(!ec);
     while(!test_server.bconnect_flag){
         sleep(1);
@@ -13493,7 +13493,7 @@ void up_thread_run_ssl_mode_test(){
     sleep(1);
     
     //error test client endpoint get error 
-    client_socket.get_socket().close(ec);
+    client_socket.lowest_layer().close(ec);
     exit_flag = false;
     session_pause_flag = false;
     thread_state[1] = 1;
