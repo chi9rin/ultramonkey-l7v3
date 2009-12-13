@@ -13202,7 +13202,7 @@ class up_thread_run_ssl_mode_test_class : public l7vs::tcp_session{
 void up_thread_run_ssl_mode_test(){
     
     BOOST_MESSAGE( "----- up_thread_run ssl mode test start -----" );
-    /*
+ 
     boost::asio::io_service io;
     l7vs::virtualservice_tcp vs;
     l7vs::tcp_socket_option_info set_option;
@@ -13263,7 +13263,7 @@ void up_thread_run_ssl_mode_test(){
     while(!test_server.bconnect_flag){
         sleep(1);
     }
-        
+/*        
     test_obj.test_thread_wait.lock();
     thread_state[0] = 0;    // UP_THREAD_ALIVE
     thread_state[1] = 0;    // DOWN_THREAD_ALIVE
