@@ -12885,8 +12885,8 @@ void initialize_ssl_mode_test(){
     // test call
     msg = test_obj3.initialize();
 
-    // unit_test [3] initialize SSL_clear call check
-    std::cout << "[3] initialize SSL_clear call check" << std::endl;
+    // unit_test [4] initialize SSL_clear call check
+    std::cout << "[4] initialize SSL_clear call check" << std::endl;
 
     BOOST_CHECK(msg.flag == false);
     BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 0);
