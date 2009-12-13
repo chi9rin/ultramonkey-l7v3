@@ -12919,6 +12919,13 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
             return ssl_handshake_time_out_flag;
         };
 
+        bool next_func_chk_accept_event(){
+            return up_thread_next_call_function().first == UP_FUNC_CLIENT_ACCEPT_EVENT;
+        };
+        bool next_func_chk_accept(){
+            return up_thread_next_call_function().first == UP_FUNC_CLIENT_ACCEPT;
+        };
+
 };
 void up_thread_client_accept_test(){
     BOOST_MESSAGE( "----- up_thread_client_accept test start -----" );
@@ -12952,7 +12959,7 @@ void up_thread_client_accept_test(){
     // test case 1 not ssl mode
     test_obj.test_call();
 
-    BOOST_CHECK( test_obj.get_up_thread_next_call_function().first == l7vs::tcp_session::UP_FUNC_CLIENT_ACCEPT_EVENT);
+    BOOST_CHECK( test_obj.next_func_chk_accept_event() );
 
     
 
