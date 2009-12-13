@@ -12993,11 +12993,15 @@ void up_thread_client_accept_test(){
     test_obj.get_ssl_flag() = true;                      //SSL mode
     test_obj.get_ssl_handshake_time_out_flag() = false;  //handshake time out
     test_obj.get_ssl_handshake_timer_flag() = false;     //timer not set
-    test_obj.get_ssl_handshake_time_out() = 3;          //timer set second
+    test_obj.get_ssl_handshake_time_out() = 1;          //timer set second
     test_obj.handle_ssl_handshake_timer_call_chk = false;
     test_obj.get_tcp_client_ssl_socket().handshake_call_check = false;
     test_obj.get_tcp_client_ssl_socket().handshake_res = false;
     test_obj.get_tcp_client_ssl_socket().handshake_set_ec = boost::asio::error::try_again;
+
+    // client start
+    boost::thread timer_thread(boost::bind(&boost::asio::io_service::run,&io));
+
 
     test_obj.test_call();
     
@@ -13025,6 +13029,10 @@ void up_thread_client_accept_test(){
     sleep(1);
     std::cout << "5 sec" << std::endl;
     BOOST_CHECK( test_obj.get_ssl_handshake_time_out_flag() == false );
+
+
+    timer_thread.join();
+
     
 /*
     // after 4 second
