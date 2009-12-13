@@ -52,7 +52,18 @@ our @ld_delete_real_returns = ();
 }
 {
     set_default();
-    local @ld_read_l7vsadm_returns = ( {} );
+    local @ld_read_l7vsadm_returns = ( {
+        'tcp:[2001::1]:8080:sessionless' => {
+            '192.168.0.2:80' => {
+                server => { ip => '192.168.0.2', port => 80 },
+                weight => 1,
+                forward => 'Masq',
+                option => { flags => '-r 192.168.0.2:80',
+                            forward => '-m' },
+            },
+            'other_virtual_option' => ' none none none none',
+        },
+                                       } );
     local @get_virtual_id_str_returns = ();
     $main::CONFIG{virtual} = [ { protocol => 'tcp' } ];
     my %expected = %main::GLOBAL;

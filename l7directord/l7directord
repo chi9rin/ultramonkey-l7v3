@@ -1197,7 +1197,6 @@ sub parse_real {
                          (\S+)               #  receive"
                       )?                     # (optional)
                       $/ix) {
-	print "real:" . $real. "\n";
         config_error($line, 'ERR0114', $config_line);
     }
     my ($ip1, $ip2, $port, $forward, $weight, $request, $receive)
@@ -2710,7 +2709,7 @@ sub check_connect {
     my $sock = ld_open_socket( $r->{server}{ip}, $port, $v->{protocol}, $v->{checktimeout} );
     if (!defined $sock) {
         ld_log( _message('WRN3201', $ERRNO, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
-sleep 1;
+
         return $SERVICE_DOWN;
     }
     close($sock);
