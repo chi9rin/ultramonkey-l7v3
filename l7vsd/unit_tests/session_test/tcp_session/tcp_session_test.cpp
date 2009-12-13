@@ -13004,14 +13004,32 @@ void up_thread_client_accept_test(){
 
     // unit_test [3] up_thread_client_accept set timer check
     std::cout << "[3] up_thread_client_accept set timer check" << std::endl;
+    // after 1 second
+    sleep(1);
+    std::cout << "1 sec" << std::endl;
+    BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
     // after 2 second
-    sleep(2);
+    sleep(1);
+    std::cout << "2 sec" << std::endl;
+    BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
+    // after 3 second
+    sleep(1);
+    std::cout << "3 sec" << std::endl;
+    BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
+    // after 4 second
+    sleep(1);
+    std::cout << "4 sec" << std::endl;
+    BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
+    // after 5 second
+    sleep(1);
+    std::cout << "5 sec" << std::endl;
     BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
     
+/*
     // after 4 second
     sleep(4);
     BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == true );
-
+*/
     // unit_test [4] up_thread_client_accept socket handshake call check
     std::cout << "[4] up_thread_client_accept socket handshake call check" << std::endl;
     BOOST_CHECK( test_obj.get_tcp_client_ssl_socket().handshake_call_check == true );
