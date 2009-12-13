@@ -12779,7 +12779,7 @@ void initialize_ssl_mode_test(){
     // ssl_clear_keep_cache call NG
     test_obj1.ssl_clear_keep_cache_call_chk = false;
     test_obj1.ssl_clear_keep_cache_set_clear_ssl = NULL;
-    test_obj1.ssl_clear_keep_cache_res = true;
+    test_obj1.ssl_clear_keep_cache_res = false;
 
     // test call
     msg = test_obj1.initialize();
