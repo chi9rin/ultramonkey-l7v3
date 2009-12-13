@@ -13012,7 +13012,7 @@ void up_thread_client_accept_test(){
     std::cout << "1 sec" << std::endl;
     BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
     // after 2 second
-    sleep(2);
+    sleep(1);
     std::cout << "2 sec" << std::endl;
     BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
     // after 3 second
