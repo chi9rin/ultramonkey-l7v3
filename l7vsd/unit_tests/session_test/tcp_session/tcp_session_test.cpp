@@ -12915,6 +12915,14 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
             return ssl_flag;
         };
 
+        bool& get_ssl_handshake_timer_flag(){
+            return ssl_handshake_timer_flag;
+        };
+
+        int& get_ssl_handshake_time_out(){
+            return ssl_handshake_time_out;
+        };
+
         bool& get_ssl_handshake_time_out_flag(){
             return ssl_handshake_time_out_flag;
         };
@@ -12924,6 +12932,13 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
         };
         bool next_func_chk_accept(){
             return up_thread_next_call_function.first == UP_FUNC_CLIENT_ACCEPT;
+        };
+        bool next_func_chk_client_disconnect(){
+            return up_thread_next_call_function.first == UP_FUNC_CLIENT_DISCONNECT;
+        };
+
+        tcp_ssl_socket& get_tcp_client_ssl_socket(){
+            return client_ssl_socket;
         };
 
 };
@@ -12959,9 +12974,52 @@ void up_thread_client_accept_test(){
     // test case 1 not ssl mode
     test_obj.test_call();
 
+    // unit_test [1] up_thread_client_accept no ssl mode next func check
+    std::cout << "[1] up_thread_client_accept no ssl mode next func check" << std::endl;
     BOOST_CHECK( test_obj.next_func_chk_accept_event() );
 
+    // tset case 2 ssl mode and handshaek time out
+    test_obj.get_ssl_flag() = true;                     //SSL mode
+    test_obj.get_ssl_handshake_time_out_flag = true;    //handshake time out
+
+    test_obj.test_call();
+
+    // unit_test [2] up_thread_client_accept ssl mode time out case next func check
+    std::cout << "[2] up_thread_client_accept ssl mode time out case next func check" << std::endl;
+    BOOST_CHECK( test_obj.next_func_chk_client_disconnect() );
+
+
+    // tset case 3 ssl mode and set timer snd handshake try_again error case check
+    test_obj.get_ssl_flag() = true;                      //SSL mode
+    test_obj.get_ssl_handshake_time_out_flag() = false;  //handshake time out
+    test_obj.get_ssl_handshake_timer_flag() = false;     //timer not set
+    test_obj.get_ssl_handshake_time_out() = 3;          //timer set second
+    test_obj.handle_ssl_handshake_timer_call_chk = false;
+    test_obj.get_tcp_client_ssl_socket().handshake_call_check = false;
+    test_obj.get_tcp_client_ssl_socket().handshake_res = false;
+    test_obj.get_tcp_client_ssl_socket().handshake_set_ec = boost::asio::error::try_again;
+
+    test_obj.test_call();
     
+
+    // unit_test [3] up_thread_client_accept set timer check
+    std::cout << "[3] up_thread_client_accept set timer check" << std::endl;
+    // after 2 second
+    sleep(2);
+    BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == false );
+    
+    // after 4 second
+    sleep(4);
+    BOOST_CHECK( test_obj.handle_ssl_handshake_timer_call_chk == true );
+
+    // unit_test [4] up_thread_client_accept socket handshake call check
+    std::cout << "[4] up_thread_client_accept socket handshake call check" << std::endl;
+    BOOST_CHECK( test_obj.get_tcp_client_ssl_socket().handshake_call_check == true );
+
+    // unit_test [5] up_thread_client_accept socket handshake try_again error next func check
+    std::cout << "[5] up_thread_client_accept socket handshake try_again error next func check" << std::endl;
+    BOOST_CHECK( test_obj.next_func_chk_accept() );
+
 
 
 

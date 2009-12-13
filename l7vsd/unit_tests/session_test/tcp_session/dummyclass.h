@@ -883,9 +883,11 @@ namespace l7vs{
         //! @return         true is handshaked
         //! @return         false is handshake failure
         bool handshake(boost::system::error_code& ec){
+                handshake_call_check = true;
                 ec = handshake_set_ec;
 		return handshake_res;
         }
+        bool handshake_call_check;
         bool handshake_res;
         boost::system::error_code handshake_set_ec;
 
