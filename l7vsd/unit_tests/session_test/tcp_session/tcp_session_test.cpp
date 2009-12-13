@@ -13059,8 +13059,10 @@ void up_thread_client_accept_test(){
     test_obj.get_tcp_client_ssl_socket().handshake_res = false;
     test_obj.get_tcp_client_ssl_socket().handshake_set_ec =  boost::asio::error::eof;
 
-    // unit_test [6] up_thread_client_accept socket handshake no error next func check
-    std::cout << "[6] up_thread_client_accept socket handshake no error next func check" << std::endl;
+    test_obj.test_call();
+
+    // unit_test [7] up_thread_client_accept socket handshake no error next func check
+    std::cout << "[7] up_thread_client_accept socket handshake no error next func check" << std::endl;
     BOOST_CHECK( test_obj.next_func_chk_client_disconnect() );
 
     BOOST_MESSAGE( "----- up_thread_client_accept test end -----" );
