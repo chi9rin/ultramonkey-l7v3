@@ -12937,7 +12937,7 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
             return up_thread_next_call_function.first == UP_FUNC_CLIENT_DISCONNECT;
         };
 
-        tcp_ssl_socket& get_tcp_client_ssl_socket(){
+        l7vs::tcp_ssl_socket& get_tcp_client_ssl_socket(){
             return client_ssl_socket;
         };
 
@@ -12980,7 +12980,7 @@ void up_thread_client_accept_test(){
 
     // tset case 2 ssl mode and handshaek time out
     test_obj.get_ssl_flag() = true;                     //SSL mode
-    test_obj.get_ssl_handshake_time_out_flag = true;    //handshake time out
+    test_obj.get_ssl_handshake_time_out_flag() = true;    //handshake time out
 
     test_obj.test_call();
 
