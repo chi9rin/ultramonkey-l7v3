@@ -12688,6 +12688,280 @@ void ssl_clear_keep_cache_test(){
     BOOST_MESSAGE( "----- ssl_clear_keep_cache test end -----" );
 }
 
+// initialize_ssl_mode test
+// initialize_ssl_mode test class
+class initialize_ssl_mode_test_class : public l7vs::tcp_session{
+    public:
+       initialize_ssl_mode_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+        ~initialize_ssl_mode_class(){};
+        
+        bool tcp_session::ssl_clear_keep_cache(SSL *clear_ssl){
+            ssl_clear_keep_cache_call_chk = true;
+            ssl_clear_keep_cache_set_clear_ssl = clear_ssl;
+            return ssl_clear_keep_cache_res;
+        }
+        bool ssl_clear_keep_cache_call_chk;
+        SSL* ssl_clear_keep_cache_set_clear_ssl;
+        bool ssl_clear_keep_cache_res;
+
+
+};
+void initialize_ssl_mode_test(){
+    BOOST_MESSAGE( "----- initialize_ssl_mode test start -----" );
+    
+    boost::asio::io_service io;
+    boost::system::error_code ec;
+
+    //vs set protocol module
+    l7vs::virtualservice_tcp vs;
+    std::string test_protocol_name("test protocol");
+    l7vs::test_protocol_module proto_test(test_protocol_name);
+    vs.get_protocol_module_res = &proto_test;
+
+    // socket option
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(true);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    //tset case 1 ssl_cache_flag on 
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(true);
+    initialize_ssl_mode_test_class test_obj1(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    // ssl_clear_keep_cache call OK
+    test_obj1.ssl_clear_keep_cache_call_chk = false;
+    test_obj1.ssl_clear_keep_cache_set_clear_ssl = NULL;
+    test_obj1.ssl_clear_keep_cache_res = true;
+
+    // test call
+    session_result_message msg = test_obj1.initialize();
+
+    // unit_test [1] initialize ssl_clear_keep_cache call check
+    std::cout << "[1] initialize ssl_clear_keep_cache call check" << std::endl;
+    BOOST_CHECK(test_obj1.ssl_clear_keep_cache_call_chk);
+    BOOST_CHECK(test_obj1.ssl_clear_keep_cache_set_clear_ssl == test_obj1.get_client_ssl_socket().impl()->ssl);
+    BOOST_CHECK(msg.flag == false);
+
+
+    // ssl_clear_keep_cache call NG
+    test_obj1.ssl_clear_keep_cache_call_chk = false;
+    test_obj1.ssl_clear_keep_cache_set_clear_ssl = NULL;
+    test_obj1.ssl_clear_keep_cache_res = true;
+
+    // test call
+    session_result_message msg = test_obj1.initialize();
+
+    // unit_test [2] initialize ssl_clear_keep_cache call check Error case
+    std::cout << "[2] initialize ssl_clear_keep_cache call check Error case" << std::endl;
+    BOOST_CHECK(test_obj1.ssl_clear_keep_cache_call_chk);
+    BOOST_CHECK(test_obj1.ssl_clear_keep_cache_set_clear_ssl == test_obj1.get_client_ssl_socket().impl()->ssl);
+    BOOST_CHECK(msg.flag == true);
+
+/*
+
+
+
+
+
+
+    // Client context
+    boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
+    client_ctx.set_verify_mode(boost::asio::ssl::context::verify_peer);
+    client_ctx.load_verify_file(CLIENT_CTX_LOAD_VERIFY_FILE);
+
+    // Server context
+    authority test_auth;
+    boost::asio::ssl::context server_ctx(io,boost::asio::ssl::context::sslv23);
+    server_ctx.set_options(
+        boost::asio::ssl::context::default_workarounds
+        | boost::asio::ssl::context::no_sslv2
+        | boost::asio::ssl::context::single_dh_use);
+    server_ctx.set_password_callback(boost::bind(&authority::get_password, &test_auth));
+    server_ctx.use_certificate_chain_file(SERVER_CTX_CERTIFICATE_CHAIN_FILE);
+    server_ctx.use_private_key_file(SERVER_CTX_PRIVATE_KEY_FILE, boost::asio::ssl::context::pem);
+    server_ctx.use_tmp_dh_file(SERVER_CTX_TMP_DH_FILE);
+
+    // Set session cache mode on the context.
+    SSL_CTX_set_session_cache_mode(server_ctx.impl(), (SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_AUTO_CLEAR));
+    // Set session cache size on the context.
+    SSL_CTX_sess_set_cache_size(server_ctx.impl(), 10);
+    // Set session cache timeout on the context.
+    SSL_CTX_set_timeout(server_ctx.impl(), 60);
+
+
+    // test socket
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> test_sock(io,server_ctx);
+
+    // test acceptor
+    boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    boost::asio::ip::tcp::acceptor test_acceptor(io,listen_end,ec);
+
+    // test client
+    test_client dummy_cl(io,client_ctx);
+    dummy_cl.all_lock();
+
+    // client start
+    boost::thread cl_thread(boost::bind(&test_client::handshake_test_run,&dummy_cl));
+
+    // accept
+    dummy_cl.connect_mutex.unlock();
+    test_acceptor.accept(test_sock.lowest_layer(),ec);
+    if(ec){
+        std::cout << "server side client connect ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side client connect OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    // handshake
+    dummy_cl.handshake_mutex.unlock();
+    test_sock.handshake(boost::asio::ssl::stream_base::server,ec);
+    if(ec){
+        std::cout << "server side client handshake ERROR" << std::endl;
+        std::cout << ec << std::endl;
+    }else{
+        std::cout << "server side handshake OK" << std::endl;
+    }
+    BOOST_CHECK(!ec);
+
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //
+
+    
+    test_obj.get_exit_flag() = true;
+    test_obj.get_up_thread_id() = boost::this_thread::get_id();
+    test_obj.get_down_thread_id() = boost::this_thread::get_id();
+    test_obj.get_thread_state().set();
+    BOOST_CHECK(test_obj.get_protocol_module() != &proto_test);    
+    test_obj.get_session_pause_flag() = true;
+    l7vs::tcp_thread_message*    test_msg_up    = new l7vs::tcp_thread_message;
+    l7vs::tcp_thread_message*    test_msg_dw    = new l7vs::tcp_thread_message;
+    test_obj.get_up_thread_message_que().push(test_msg_up);
+    BOOST_CHECK(!test_obj.get_up_thread_message_que().empty());
+    test_obj.get_down_thread_message_que().push(test_msg_dw);
+    BOOST_CHECK(!test_obj.get_down_thread_message_que().empty());
+    
+    l7vs::session_result_message res_msg = test_obj.initialize();
+    
+    // unit_test [1] initialize exit flag check
+    std::cout << "[1] initialize exit flag check" << std::endl;
+    BOOST_CHECK(!test_obj.get_exit_flag());
+    
+    // unit_test [2] initialize up thread id check
+    std::cout << "[2] initialize up thread id check" << std::endl;
+    BOOST_CHECK(test_obj.get_up_thread_id() == boost::thread::id());
+    
+    // unit_test [3] initialize down thread id check
+    std::cout << "[3] initialize down thread id check" << std::endl;
+    BOOST_CHECK(test_obj.get_down_thread_id() == boost::thread::id());
+    
+    // unit_test [4] initialize thread state check
+    std::cout << "[4] initialize thread state check" << std::endl;
+    BOOST_CHECK(test_obj.get_thread_state().none());
+    
+    // unit_test [5] initialize session pause flag check
+    std::cout << "[5] initialize session pause flag check" << std::endl;
+    BOOST_CHECK(!test_obj.get_session_pause_flag());
+    
+    // unit_test [6] initialize up thread message que check
+    std::cout << "[6] initialize up thread message que check" << std::endl;
+    BOOST_CHECK(test_obj.get_up_thread_message_que().empty());
+        test_msg_up = NULL;
+    
+    // unit_test [7] initialize down thread message que check
+    std::cout << "[7] initialize down thread message que check" << std::endl;
+    BOOST_CHECK(test_obj.get_down_thread_message_que().empty());
+        test_msg_dw = NULL;
+    
+    // unit_test [8] initialize get protocol module pointer check
+    std::cout << "[8] initialize get protocol module pointer check" << std::endl;
+    BOOST_CHECK(test_obj.get_protocol_module() == &proto_test);
+    
+    // unit_test [9] initialize session_result_message flag check
+    std::cout << "[9] initialize session_result_message flag check" << std::endl;
+    BOOST_CHECK(!res_msg.flag);
+    
+    // unit_test [10] initialize upstream_buffer_size load cf check
+    std::cout << "[10] initialize upstream_buffer_size load cf check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_upstream_buffer_size() , 7777);
+
+    // unit_test [11] initialize downstream_buffer_size load cf check
+    std::cout << "[11] initialize downstream_buffer_size load cf check" << std::endl;
+    BOOST_CHECK_EQUAL(test_obj.get_downstream_buffer_size() , 8888);
+
+    // unit_test [12] initialize protocol_module NULL error check
+    std::cout << "[12] initialize protocol_module NULL error check" << std::endl;
+    vs.get_protocol_module_res = NULL;
+    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+    l7vs::Logger::putLogError_id = 0;
+    res_msg = test_obj.initialize();
+    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+    BOOST_CHECK_EQUAL(5,l7vs::Logger::putLogError_id);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
+    BOOST_CHECK(res_msg.flag);
+    std::cout << res_msg.message << std::endl;
+*/
+
+
+    BOOST_MESSAGE( "----- initialize_ssl_mode test end -----" );
+}
 
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
@@ -12753,9 +13027,9 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
 */
 
-//    ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
+    ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
 //    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test) );
-    ts->add( BOOST_TEST_CASE( &ssl_clear_keep_cache_test ) );
+//    ts->add( BOOST_TEST_CASE( &ssl_clear_keep_cache_test ) );
 
 
     framework::master_test_suite().add( ts );
