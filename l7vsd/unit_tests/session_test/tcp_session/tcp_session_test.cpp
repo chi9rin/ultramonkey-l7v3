@@ -12999,12 +12999,10 @@ void up_thread_client_accept_test(){
     test_obj.get_tcp_client_ssl_socket().handshake_res = false;
     test_obj.get_tcp_client_ssl_socket().handshake_set_ec = boost::asio::error::try_again;
 
-    // client start
-    boost::thread timer_thread(boost::bind(&boost::asio::io_service::run,&io));
-
-
     test_obj.test_call();
     
+    // timer thread start
+    boost::thread timer_thread(boost::bind(&boost::asio::io_service::run,&io));
 
     // unit_test [3] up_thread_client_accept set timer check
     std::cout << "[3] up_thread_client_accept set timer check" << std::endl;
