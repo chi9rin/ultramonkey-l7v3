@@ -12902,8 +12902,8 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
         }
 
         bool handle_ssl_handshake_timer(const boost::system::error_code& error){
-            ssl_clear_keep_cache_call_chk = true;
-            return ssl_clear_keep_cache_res;
+            handle_ssl_handshake_timer_call_chk = true;
+            return handle_ssl_handshake_timer_res;
         };
 
         bool handle_ssl_handshake_timer_call_chk;
