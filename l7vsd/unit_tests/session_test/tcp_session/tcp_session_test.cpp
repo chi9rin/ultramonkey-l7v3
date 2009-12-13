@@ -12767,7 +12767,7 @@ void initialize_ssl_mode_test(){
     test_obj1.ssl_clear_keep_cache_res = true;
 
     // test call
-    session_result_message msg = test_obj1.initialize();
+    l7vs::session_result_message msg = test_obj1.initialize();
 
     // unit_test [1] initialize ssl_clear_keep_cache call check
     std::cout << "[1] initialize ssl_clear_keep_cache call check" << std::endl;
