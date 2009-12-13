@@ -12903,11 +12903,9 @@ class up_thread_client_accept_test_class : public l7vs::tcp_session{
 
         void handle_ssl_handshake_timer(const boost::system::error_code&){
             handle_ssl_handshake_timer_call_chk = true;
-            return handle_ssl_handshake_timer_res;
         };
 
         bool handle_ssl_handshake_timer_call_chk;
-        bool handle_ssl_handshake_timer_res;
 
         up_thread_function_pair& get_up_thread_next_call_function(){
             return up_thread_next_call_function;
