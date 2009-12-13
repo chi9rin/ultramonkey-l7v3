@@ -13232,7 +13232,7 @@ void up_thread_run_ssl_mode_test(){
     std::string test_protocol_name("test protocol");
     l7vs::test_protocol_module proto_test(test_protocol_name);
 
-    up_thread_run_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    up_thread_run_ssl_mode_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
     bool& exit_flag = test_obj.get_exit_flag();
