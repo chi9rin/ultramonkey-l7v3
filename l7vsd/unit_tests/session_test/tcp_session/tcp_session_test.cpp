@@ -13547,7 +13547,7 @@ void up_thread_run_ssl_mode_test(){
     server_thread.join();
     std::cout << "server_thread.join ok" << std::endl;
     
-  */
+  
     BOOST_MESSAGE( "----- up_thread_run ssl mode test end -----" );
     
 }
