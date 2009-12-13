@@ -12808,16 +12808,9 @@ void initialize_ssl_mode_test(){
     BOOST_CHECK(msg.flag == true);
 
     test_obj2.get_client_ssl_socket().impl()->ssl->method = pRet;
-    
 
 
-
-/*
-
-
-
-
-
+   
 
     // Client context
     boost::asio::ssl::context client_ctx(io,boost::asio::ssl::context::sslv23);
@@ -12843,9 +12836,10 @@ void initialize_ssl_mode_test(){
     // Set session cache timeout on the context.
     SSL_CTX_set_timeout(server_ctx.impl(), 60);
 
+    // test object
+    bool set_ssl_cache_flag3(false);
+    initialize_ssl_mode_test_class test_obj3(vs,io,set_option,listen_endpoint,set_mode,server_ctx,set_ssl_cache_flag3,set_ssl_handshake_time_out,plogger);
 
-    // test socket
-    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> test_sock(io,server_ctx);
 
     // test acceptor
     boost::asio::ip::tcp::endpoint listen_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
@@ -12860,7 +12854,7 @@ void initialize_ssl_mode_test(){
 
     // accept
     dummy_cl.connect_mutex.unlock();
-    test_acceptor.accept(test_sock.lowest_layer(),ec);
+    test_acceptor.accept(test_obj3.get_client_ssl_socket().lowest_layer(),ec);
     if(ec){
         std::cout << "server side client connect ERROR" << std::endl;
         std::cout << ec << std::endl;
@@ -12871,7 +12865,7 @@ void initialize_ssl_mode_test(){
 
     // handshake
     dummy_cl.handshake_mutex.unlock();
-    test_sock.handshake(boost::asio::ssl::stream_base::server,ec);
+    test_obj3.get_client_ssl_socket().handshake(boost::asio::ssl::stream_base::server,ec);
     if(ec){
         std::cout << "server side client handshake ERROR" << std::endl;
         std::cout << ec << std::endl;
@@ -12880,107 +12874,22 @@ void initialize_ssl_mode_test(){
     }
     BOOST_CHECK(!ec);
 
+    // close
+    dummy_cl.close_mutex.unlock();
+    cl_thread.join();
+
+    test_obj3.get_client_ssl_socket().lowest_layer().close();
+
     BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 1);
 
+    // test call
+    msg = test_obj3.initialize();
 
+    // unit_test [3] initialize SSL_clear call check
+    std::cout << "[3] initialize SSL_clear call check" << std::endl;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //
-
-    
-    test_obj.get_exit_flag() = true;
-    test_obj.get_up_thread_id() = boost::this_thread::get_id();
-    test_obj.get_down_thread_id() = boost::this_thread::get_id();
-    test_obj.get_thread_state().set();
-    BOOST_CHECK(test_obj.get_protocol_module() != &proto_test);    
-    test_obj.get_session_pause_flag() = true;
-    l7vs::tcp_thread_message*    test_msg_up    = new l7vs::tcp_thread_message;
-    l7vs::tcp_thread_message*    test_msg_dw    = new l7vs::tcp_thread_message;
-    test_obj.get_up_thread_message_que().push(test_msg_up);
-    BOOST_CHECK(!test_obj.get_up_thread_message_que().empty());
-    test_obj.get_down_thread_message_que().push(test_msg_dw);
-    BOOST_CHECK(!test_obj.get_down_thread_message_que().empty());
-    
-    l7vs::session_result_message res_msg = test_obj.initialize();
-    
-    // unit_test [1] initialize exit flag check
-    std::cout << "[1] initialize exit flag check" << std::endl;
-    BOOST_CHECK(!test_obj.get_exit_flag());
-    
-    // unit_test [2] initialize up thread id check
-    std::cout << "[2] initialize up thread id check" << std::endl;
-    BOOST_CHECK(test_obj.get_up_thread_id() == boost::thread::id());
-    
-    // unit_test [3] initialize down thread id check
-    std::cout << "[3] initialize down thread id check" << std::endl;
-    BOOST_CHECK(test_obj.get_down_thread_id() == boost::thread::id());
-    
-    // unit_test [4] initialize thread state check
-    std::cout << "[4] initialize thread state check" << std::endl;
-    BOOST_CHECK(test_obj.get_thread_state().none());
-    
-    // unit_test [5] initialize session pause flag check
-    std::cout << "[5] initialize session pause flag check" << std::endl;
-    BOOST_CHECK(!test_obj.get_session_pause_flag());
-    
-    // unit_test [6] initialize up thread message que check
-    std::cout << "[6] initialize up thread message que check" << std::endl;
-    BOOST_CHECK(test_obj.get_up_thread_message_que().empty());
-        test_msg_up = NULL;
-    
-    // unit_test [7] initialize down thread message que check
-    std::cout << "[7] initialize down thread message que check" << std::endl;
-    BOOST_CHECK(test_obj.get_down_thread_message_que().empty());
-        test_msg_dw = NULL;
-    
-    // unit_test [8] initialize get protocol module pointer check
-    std::cout << "[8] initialize get protocol module pointer check" << std::endl;
-    BOOST_CHECK(test_obj.get_protocol_module() == &proto_test);
-    
-    // unit_test [9] initialize session_result_message flag check
-    std::cout << "[9] initialize session_result_message flag check" << std::endl;
-    BOOST_CHECK(!res_msg.flag);
-    
-    // unit_test [10] initialize upstream_buffer_size load cf check
-    std::cout << "[10] initialize upstream_buffer_size load cf check" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_upstream_buffer_size() , 7777);
-
-    // unit_test [11] initialize downstream_buffer_size load cf check
-    std::cout << "[11] initialize downstream_buffer_size load cf check" << std::endl;
-    BOOST_CHECK_EQUAL(test_obj.get_downstream_buffer_size() , 8888);
-
-    // unit_test [12] initialize protocol_module NULL error check
-    std::cout << "[12] initialize protocol_module NULL error check" << std::endl;
-    vs.get_protocol_module_res = NULL;
-    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
-    l7vs::Logger::putLogError_id = 0;
-    res_msg = test_obj.initialize();
-    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
-    BOOST_CHECK_EQUAL(5,l7vs::Logger::putLogError_id);
-    std::cout << l7vs::Logger::putLogError_message << std::endl;
-    BOOST_CHECK(res_msg.flag);
-    std::cout << res_msg.message << std::endl;
-*/
-
+    BOOST_CHECK(msg.flag == false);
+    BOOST_CHECK( SSL_CTX_sess_number(server_ctx.impl()) == 0);
 
     BOOST_MESSAGE( "----- initialize_ssl_mode test end -----" );
 }
