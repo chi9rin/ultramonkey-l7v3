@@ -12954,7 +12954,7 @@ void up_thread_client_accept_test(){
     // test case 1 not ssl mode
     test_obj.test_call();
 
-    BOOST_CHECK( get_up_thread_next_call_function().first == l7vs::tcp_session::UP_FUNC_CLIENT_ACCEPT_EVENT);
+    BOOST_CHECK( test_obj.get_up_thread_next_call_function().first == l7vs::tcp_session::UP_FUNC_CLIENT_ACCEPT_EVENT);
 
     
 
