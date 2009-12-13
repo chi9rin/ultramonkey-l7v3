@@ -433,6 +433,183 @@ class test_mirror_server{
         };
 };
 
+// dummy client
+class test_client{
+    public:
+        // 
+        test_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context) :
+            my_socket(io_service,context){
+        };
+
+        ~test_client(){
+        };
+        void all_lock(){
+
+            //! socket connect mutex
+            connect_mutex.wrlock();
+            //! socket handshake mutex
+            handshake_mutex.wrlock();
+            //! socket read mutex
+            read_mutex.wrlock();
+            //! socket write mutex
+            write_mutex.wrlock();
+            //! socket close mutex
+            close_mutex.wrlock();
+
+        }
+
+        void connect_close_only_test_run(){
+            // dummy client start
+
+            // connect
+            {
+                l7vs::rw_scoped_lock scope_lock(connect_mutex);
+
+                if(!connect_test()){
+                    return;
+                }
+            }
+
+            // close 
+            {
+                l7vs::rw_scoped_lock scope_lock(close_mutex);
+                close_test();
+            }
+        };
+
+        void handshake_test_run(){
+            // dummy client start
+
+            // connect
+            {
+                l7vs::rw_scoped_lock scope_lock(connect_mutex);
+
+                if(!connect_test()){
+                    return;
+                }
+            }
+
+            // handshake
+            {
+                l7vs::rw_scoped_lock scope_lock(handshake_mutex);
+
+                if(!handshake_test()){
+                    return;
+                }
+            }
+
+            // close 
+            {
+                l7vs::rw_scoped_lock scope_lock(close_mutex);
+                close_test();
+            }
+
+        };
+
+        bool connect_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client connect try" << std::endl;
+            boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+            my_socket.lowest_layer().connect(connect_end,ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client connect Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            std::cout << "dummy client connect OK" << std::endl;
+            return true;
+        };
+
+        bool handshake_test(){
+            boost::system::error_code ec;
+            std::cout << "dummy client handshake try" << std::endl;
+            my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client handshake Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            std::cout << "dummy client handshake OK" << std::endl;
+            return true;
+        };
+
+        bool send_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client write try" << std::endl;
+            std::size_t write_size = my_socket.write_some(boost::asio::buffer(data_buff.data() + send_data_size,receive_data_size - send_data_size), ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client send Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            send_data_size += write_size;
+            std::cout << "dummy client send OK [" << send_data_size << "]" << std::endl;
+            return true;
+        };
+        bool receive_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client read try" << std::endl;
+            std::size_t read_size = my_socket.read_some(boost::asio::buffer(data_buff.data() + receive_data_size,MAX_BUFFER_SIZE), ec);
+            if(ec){
+                //receive error
+                std::cout << "dummy client receive Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return false;
+            }
+            receive_data_size += read_size;
+            std::cout << "dummy client receive OK [" << receive_data_size << "]" << std::endl;
+            return true;
+        };
+        void close_test(){
+            sleep(1);
+            boost::system::error_code ec;
+            std::cout << "dummy client close try" << std::endl;
+            my_socket.lowest_layer().close(ec);
+            if(ec){
+                //close error
+                std::cout << "dummy client close Error!" << std::endl;
+                std::cout << ec << std::endl;
+                return;
+            }
+            std::cout << "dummy client close OK" << std::endl;
+        };
+
+        boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
+        boost::array<char,MAX_BUFFER_SIZE> data_buff;
+        std::size_t receive_data_size;
+        std::size_t send_data_size;
+
+        //! socket connect mutex
+        l7vs::wr_mutex connect_mutex;
+        //! socket handshake mutex
+        l7vs::wr_mutex handshake_mutex;
+        //! socket read mutex
+        l7vs::wr_mutex read_mutex;
+        //! socket write mutex
+        l7vs::wr_mutex write_mutex;
+        //! socket close mutex
+        l7vs::wr_mutex close_mutex;
+};
+
+class authority{
+    public:
+        authority(){
+        };
+        ~authority(){
+        };
+        std::string get_password() const{
+            std::cout << "call get_password" << std::endl;
+            return "test";
+        };
+};
+
+
 // module event map test base class
 class module_event_map_test_base_class : public l7vs::tcp_session{
     public:
@@ -12283,162 +12460,6 @@ void down_thread_all_realserver_disconnect_test(){
 
 
 
-// dummy client
-class test_client{
-    public:
-        // 
-        test_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context) :
-            my_socket(io_service,context){
-        };
-
-        ~test_client(){
-        };
-        void all_lock(){
-
-            //! socket connect mutex
-            connect_mutex.wrlock();
-            //! socket handshake mutex
-            handshake_mutex.wrlock();
-            //! socket read mutex
-            read_mutex.wrlock();
-            //! socket write mutex
-            write_mutex.wrlock();
-            //! socket close mutex
-            close_mutex.wrlock();
-
-        }
-
-        void handshake_test_run(){
-            // dummy client start
-
-            // connect
-            {
-                l7vs::rw_scoped_lock scope_lock(connect_mutex);
-
-                if(!connect_test()){
-                    return;
-                }
-            }
-
-            // handshake
-            {
-                l7vs::rw_scoped_lock scope_lock(handshake_mutex);
-
-                if(!handshake_test()){
-                    return;
-                }
-            }
-
-            // close 
-            {
-                l7vs::rw_scoped_lock scope_lock(close_mutex);
-                close_test();
-            }
-
-        };
-
-        bool connect_test(){
-            sleep(1);
-            boost::system::error_code ec;
-            std::cout << "dummy client connect try" << std::endl;
-            boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
-            my_socket.lowest_layer().connect(connect_end,ec);
-            if(ec){
-                //receive error
-                std::cout << "dummy client connect Error!" << std::endl;
-                std::cout << ec << std::endl;
-                return false;
-            }
-            std::cout << "dummy client connect OK" << std::endl;
-            return true;
-        };
-
-        bool handshake_test(){
-            boost::system::error_code ec;
-            std::cout << "dummy client handshake try" << std::endl;
-            my_socket.handshake(boost::asio::ssl::stream_base::client, ec);
-            if(ec){
-                //receive error
-                std::cout << "dummy client handshake Error!" << std::endl;
-                std::cout << ec << std::endl;
-                return false;
-            }
-            std::cout << "dummy client handshake OK" << std::endl;
-            return true;
-        };
-
-        bool send_test(){
-            sleep(1);
-            boost::system::error_code ec;
-            std::cout << "dummy client write try" << std::endl;
-            std::size_t write_size = my_socket.write_some(boost::asio::buffer(data_buff.data() + send_data_size,receive_data_size - send_data_size), ec);
-            if(ec){
-                //receive error
-                std::cout << "dummy client send Error!" << std::endl;
-                std::cout << ec << std::endl;
-                return false;
-            }
-            send_data_size += write_size;
-            std::cout << "dummy client send OK [" << send_data_size << "]" << std::endl;
-            return true;
-        };
-        bool receive_test(){
-            sleep(1);
-            boost::system::error_code ec;
-            std::cout << "dummy client read try" << std::endl;
-            std::size_t read_size = my_socket.read_some(boost::asio::buffer(data_buff.data() + receive_data_size,MAX_BUFFER_SIZE), ec);
-            if(ec){
-                //receive error
-                std::cout << "dummy client receive Error!" << std::endl;
-                std::cout << ec << std::endl;
-                return false;
-            }
-            receive_data_size += read_size;
-            std::cout << "dummy client receive OK [" << receive_data_size << "]" << std::endl;
-            return true;
-        };
-        void close_test(){
-            sleep(1);
-            boost::system::error_code ec;
-            std::cout << "dummy client close try" << std::endl;
-            my_socket.lowest_layer().close(ec);
-            if(ec){
-                //close error
-                std::cout << "dummy client close Error!" << std::endl;
-                std::cout << ec << std::endl;
-                return;
-            }
-            std::cout << "dummy client close OK" << std::endl;
-        };
-
-        boost::asio::ssl::stream<boost::asio::ip::tcp::socket> my_socket;
-        boost::array<char,MAX_BUFFER_SIZE> data_buff;
-        std::size_t receive_data_size;
-        std::size_t send_data_size;
-
-        //! socket connect mutex
-        l7vs::wr_mutex connect_mutex;
-        //! socket handshake mutex
-        l7vs::wr_mutex handshake_mutex;
-        //! socket read mutex
-        l7vs::wr_mutex read_mutex;
-        //! socket write mutex
-        l7vs::wr_mutex write_mutex;
-        //! socket close mutex
-        l7vs::wr_mutex close_mutex;
-};
-
-class authority{
-    public:
-        authority(){
-        };
-        ~authority(){
-        };
-        std::string get_password() const{
-            std::cout << "call get_password" << std::endl;
-            return "test";
-        };
-};
 
 
 // ssl_clear_keep_cache test class
@@ -13068,6 +13089,471 @@ void up_thread_client_accept_test(){
     BOOST_MESSAGE( "----- up_thread_client_accept test end -----" );
 }
 
+// up_thread_run ssl mode
+// up_thread_run ssl mode test class
+class up_thread_run_ssl_mode_test_class : public l7vs::tcp_session{
+    public:
+       up_thread_run_ssl_mode_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){
+            test_end = false;
+            test_wait = true;
+        };
+        ~up_thread_run_ssl_mode_test_class(){};
+        bool& get_exit_flag(){
+            return exit_flag;
+        };
+        
+        bool& get_session_pause_flag(){
+            return session_pause_flag;
+        };
+        
+        std::bitset<TCP_SESSION_THREAD_STATE_BIT>& get_thread_state(){
+            return thread_state;
+        };
+        
+        boost::mutex test_thread_wait;
+        void test_run(){
+            boost::mutex::scoped_lock scope_lock(test_thread_wait);
+            while(!test_end){
+                std::cout << "up_thread_run test call" << std::endl;
+                test_wait = true;
+                up_thread_run();
+                while(test_wait){};
+            }
+        };
+        bool test_end;
+        bool test_wait;
+                
+        void set_protocol_module(l7vs::protocol_module_base* set_proto){
+            protocol_module = set_proto;
+        };
+        
+        l7vs::tcp_socket& get_client_socket(){
+            return client_ssl_socket->get_socket().lowest_layer();
+        };
+
+        
+        boost::thread::id& get_up_thread_id(){
+            return up_thread_id;
+        };
+        
+        boost::thread::id& get_down_thread_id(){
+            return down_thread_id;
+        };
+        
+        void up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
+            up_thread_exit_process_type = process_type;
+            l7vs::tcp_session::up_thread_exit(process_type);
+            up_thread_exit_call_check = true;
+        };
+        TCP_PROCESS_TYPE_TAG up_thread_exit_process_type;
+        bool up_thread_exit_call_check;
+        
+        void up_thread_all_socket_close(void){
+            up_thread_all_socket_close_call_check = true;
+        }
+        bool up_thread_all_socket_close_call_check;
+        
+        void test_message_set(boost::asio::ip::tcp::endpoint set_endpoint){
+            l7vs::tcp_thread_message*    chk_msg    = new l7vs::tcp_thread_message;
+            up_thread_message_que.push(chk_msg);
+            chk_msg->endpoint_info = set_endpoint;
+            up_thread_function_pair func = up_thread_function_array[UP_FUNC_EXIT];
+            chk_msg->message = func.second;
+        };
+        
+        l7vs::tcp_data& get_up_thread_message_data(){
+            return up_thread_message_data;
+        }
+        
+        void clear_function_array(){
+            for(int i = 0;i <= UP_FUNC_EXIT;i++){
+                up_thread_function_array[i].second = NULL;
+            }
+        }
+        void clear_event_map(){
+            up_thread_module_event_map.clear();
+        }
+        
+        void set_up_thread_next_call_function_client_disconnect(){
+            up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+        }
+        void set_up_thread_next_call_function_exit(){
+            up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+        }
+        
+};
+void up_thread_run_ssl_mode_test(){
+    
+    BOOST_MESSAGE( "----- up_thread_run ssl mode test start -----" );
+    
+    boost::asio::io_service io;
+    l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(true);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    boost::system::error_code ec;
+ 
+    std::string test_protocol_name("test protocol");
+    l7vs::test_protocol_module proto_test(test_protocol_name);
+
+    up_thread_run_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
+    bool& exit_flag = test_obj.get_exit_flag();
+    bool& session_pause_flag = test_obj.get_session_pause_flag();
+    boost::thread::id& up_thread_id = test_obj.get_up_thread_id();
+    boost::thread::id& down_thread_id = test_obj.get_down_thread_id();
+
+    
+    std::bitset<TCP_SESSION_THREAD_STATE_BIT>& thread_state = test_obj.get_thread_state();
+    l7vs::tcp_socket& client_socket = test_obj.get_client_socket();
+    
+    test_mirror_server test_server;
+    // accept req
+    test_server.breq_acc_flag = true;
+    // close wait req
+    test_server.breq_close_wait_flag = true;
+    // recv cont
+    test_server.req_recv_cnt = 0;
+    // test server start
+    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+    while( !test_server.brun_flag ){
+        sleep(1);
+    }
+    
+    boost::asio::ip::tcp::endpoint connect_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    client_ssl_socket.get_socket().connect(connect_end,ec);
+    BOOST_CHECK(!ec);
+    while(!test_server.bconnect_flag){
+        sleep(1);
+    }
+        
+    test_obj.test_thread_wait.lock();
+    thread_state[0] = 0;    // UP_THREAD_ALIVE
+    thread_state[1] = 0;    // DOWN_THREAD_ALIVE
+    thread_state[2] = 0;    // UP_THREAD_ACTIVE
+    thread_state[3] = 0;    // DOWN_THREAD_ACTIVE
+    thread_state[4] = 0;    // UP_THREAD_LOCK
+    thread_state[5] = 0;    // DOWN_THREAD_LOCK
+    up_thread_id = boost::thread::id();
+    boost::thread test_thread(boost::bind(&up_thread_run_test_class::test_run,&test_obj));
+    sleep(1);
+    boost::thread::id test_id = test_thread.get_id();
+    boost::thread::id proc_id = boost::this_thread::get_id();
+    
+    BOOST_CHECK(!thread_state.test(0));    // UP_THREAD_ALIVE
+    BOOST_CHECK(!thread_state.test(1)); // DOWN_THREAD_ALIVE
+    BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(3)); // DOWN_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
+    BOOST_CHECK(!thread_state.test(5)); // DOWN_THREAD_LOCK
+    BOOST_CHECK(up_thread_id != test_id);
+    test_obj.test_thread_wait.unlock();
+    sleep(1);
+    
+    // unit_test [1] up_thread_run thread id update check
+    std::cout << "[1] up_thread_run thread id update check" << std::endl;
+    BOOST_CHECK(up_thread_id == test_id);
+    
+    // unit_test [2] up_thread_run down thread wait check
+    std::cout << "[2] up_thread_run down thread wait check" << std::endl;
+    BOOST_CHECK(thread_state.test(0));    // UP_THREAD_ALIVE
+    BOOST_CHECK(!thread_state.test(1)); // DOWN_THREAD_ALIVE
+    BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(3)); // DOWN_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
+    BOOST_CHECK(!thread_state.test(5)); // DOWN_THREAD_LOCK
+    
+    proto_test.handle_session_initialize_res_tag = l7vs::protocol_module_base::FINALIZE;
+    proto_test.handle_session_initialize_in_up_thread_id = boost::thread::id();
+    proto_test.handle_session_initialize_in_down_thread_id = boost::thread::id();
+    proto_test.handle_session_initialize_in_client_endpoint_tcp = boost::asio::ip::tcp::endpoint();
+    proto_test.handle_session_initialize_in_client_endpoint_udp.address(boost::asio::ip::address::from_string("255.255.255.255"));
+    proto_test.handle_session_initialize_in_client_endpoint_udp.port(65535);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_up_thread_id != test_id);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_down_thread_id != proc_id);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_client_endpoint_tcp != connect_end);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_client_endpoint_udp != boost::asio::ip::udp::endpoint());
+    down_thread_id = proc_id;
+    session_pause_flag = true;
+    
+    // DOWN_THREAD_ALIVE
+    thread_state[1] = 1;
+    sleep(1);
+    
+    // unit_test [3] up_thread_run handle_session_initialize call check
+    std::cout << "[3] up_thread_run handle_session_initialize call check" << std::endl;
+    BOOST_CHECK(proto_test.handle_session_initialize_in_up_thread_id == test_id);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_down_thread_id == proc_id);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_client_endpoint_tcp == connect_end);
+    BOOST_CHECK(proto_test.handle_session_initialize_in_client_endpoint_udp == boost::asio::ip::udp::endpoint());
+    
+    // unit_test [4] up_thread_run state update(UP_THREAD_ACTIVE) check
+    std::cout << "[4] up_thread_run state update(UP_THREAD_ACTIVE) check" << std::endl;
+    BOOST_CHECK(thread_state.test(2)); // UP_THREAD_ACTIVE
+    
+    // unit_test [5] up_thread_run pause check
+    std::cout << "[5] up_thread_run  pause check" << std::endl;
+    BOOST_CHECK(thread_state.test(4)); // UP_THREAD_LOCK
+    
+    test_obj.up_thread_exit_process_type = l7vs::tcp_session::MESSAGE_PROC;
+    test_obj.up_thread_exit_call_check = false;
+    test_obj.up_thread_all_socket_close_call_check = false;
+    
+    session_pause_flag = false;
+    sleep(1);
+    
+    // unit_test [6] up_thread_run restart check
+    std::cout << "[6] up_thread_run  restart check" << std::endl;
+    BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
+    
+    // unit_test [7] up_thread_run up_thread_next_call_function call (up_thread_exit) check
+    std::cout << "[7] up_thread_run up_thread_next_call_function call (up_thread_exit) check" << std::endl;
+    BOOST_CHECK(test_obj.up_thread_exit_call_check);
+    BOOST_CHECK(test_obj.up_thread_exit_process_type == l7vs::tcp_session::LOCAL_PROC);
+    
+    // unit_test [8] up_thread_run main loop exit check
+    std::cout << "[8] up_thread_run main loop exit check" << std::endl;
+    BOOST_CHECK(exit_flag);
+    BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
+    
+    
+    // unit_test [9] up_thread_run up_thread_all_socket_close_call_check call check
+    std::cout << "[9] up_thread_run up_thread_all_socket_close_call_check call check" << std::endl;
+    BOOST_CHECK(test_obj.up_thread_all_socket_close_call_check);
+    
+    // unit_test [10] up_thread_run down thread end wait check
+    std::cout << "[10] up_thread_run down thread wait check" << std::endl;
+    BOOST_CHECK(thread_state.test(0));    // UP_THREAD_ALIVE
+    BOOST_CHECK(thread_state.test(1)); // DOWN_THREAD_ALIVE
+    BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(3)); // DOWN_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
+    BOOST_CHECK(!thread_state.test(5)); // DOWN_THREAD_LOCK
+    
+    
+//     proto_test.handle_session_finalize_in_up_thread_id = boost::thread::id();
+//     proto_test.handle_session_finalize_in_down_thread_id = boost::thread::id();
+//     BOOST_CHECK(proto_test.handle_session_finalize_in_up_thread_id != test_id);
+//     BOOST_CHECK(proto_test.handle_session_finalize_in_down_thread_id != proc_id);
+//     vs.release_session_ptr = NULL;
+//     BOOST_CHECK(vs.release_session_ptr != test_id);
+    
+    thread_state[1] = 0;
+    sleep(1);
+    
+    // unit_test [11] up_thread_run handle_session_finalize call check
+    std::cout << "[11] up_thread_run handle_session_finalize call check" << std::endl;
+    BOOST_CHECK(proto_test.handle_session_finalize_in_up_thread_id == test_id);
+    BOOST_CHECK(proto_test.handle_session_finalize_in_down_thread_id == proc_id);
+    
+    // unit_test [12] up_thread_run release_session_id call check
+    std::cout << "[12] up_thread_run release_session_id call check" << std::endl;
+//     BOOST_CHECK(vs.release_session_id == test_id);
+    
+    // unit_test [13] up_thread_run state update(UP_THREAD_ACTIVE) check
+    std::cout << "[13] up_thread_run state update(UP_THREAD_ACTIVE) check" << std::endl;
+    BOOST_CHECK(!thread_state.test(0)); // UP_THREAD_ACTIVE
+    
+    // message call test
+    exit_flag = false;
+    session_pause_flag = false;
+    l7vs::tcp_data& msg_data = test_obj.get_up_thread_message_data();
+    test_obj.test_message_set(connect_end);
+    thread_state[0] = 0;    // UP_THREAD_ALIVE
+    thread_state[1] = 1;    // DOWN_THREAD_ALIVE
+    thread_state[2] = 0;    // UP_THREAD_ACTIVE
+    thread_state[3] = 0;    // DOWN_THREAD_ACTIVE
+    thread_state[4] = 0;    // UP_THREAD_LOCK
+    thread_state[5] = 0;    // DOWN_THREAD_LOCK
+    msg_data.set_endpoint(boost::asio::ip::tcp::endpoint());
+    test_obj.up_thread_exit_call_check = false;
+    test_obj.up_thread_exit_process_type = l7vs::tcp_session::LOCAL_PROC;
+    proto_test.handle_session_initialize_res_tag = l7vs::protocol_module_base::CLIENT_DISCONNECT;
+    
+    // test thread start
+    test_obj.test_wait = false;
+    sleep(1);
+    BOOST_CHECK(thread_state.test(0));    // UP_THREAD_ALIVE
+    BOOST_CHECK(thread_state.test(1)); // DOWN_THREAD_ALIVE
+    BOOST_CHECK(!thread_state.test(2)); // UP_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(3)); // DOWN_THREAD_ACTIVE
+    BOOST_CHECK(!thread_state.test(4)); // UP_THREAD_LOCK
+    BOOST_CHECK(!thread_state.test(5)); // DOWN_THREAD_LOCK
+    
+    // unit_test [14] up_thread_run message call check
+    std::cout << "[14] up_thread_run message call check" << std::endl;
+    BOOST_CHECK(test_obj.up_thread_exit_call_check);
+    BOOST_CHECK(test_obj.up_thread_exit_process_type == l7vs::tcp_session::MESSAGE_PROC);
+    
+    proto_test.handle_session_initialize_res_tag = l7vs::protocol_module_base::FINALIZE;
+    thread_state[1] = 0;
+    sleep(1);
+    
+    // error test not find function map 
+    test_obj.clear_function_array();
+    exit_flag = false;
+    session_pause_flag = false;
+    thread_state[1] = 1;
+    
+    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+    l7vs::Logger::putLogError_id = 0;
+    
+    test_obj.test_wait = false;
+    sleep(1);
+    
+    // unit_test [15] up_thread_run not find function map error test
+    std::cout << "[15] up_thread_run not find function map error test" << std::endl;
+    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+    BOOST_CHECK_EQUAL(15,l7vs::Logger::putLogError_id);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
+
+    thread_state[1] = 0;
+    sleep(1);
+    
+    //error test protocol_module returnd illegal EVENT_TAG
+    test_obj.clear_event_map();
+    exit_flag = false;
+    session_pause_flag = false;
+    thread_state[1] = 1;
+    
+    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+    l7vs::Logger::putLogError_id = 0;
+    
+    test_obj.test_wait = false;
+    sleep(1);
+    
+    // unit_test [16] up_thread_run protocol_module returnd illegal EVENT_TAG error test
+    std::cout << "[16] up_thread_run protocol_module returnd illegal EVENT_TAG error test" << std::endl;
+    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+    BOOST_CHECK_EQUAL(14,l7vs::Logger::putLogError_id);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
+    
+    thread_state[1] = 0;
+    sleep(1);
+    
+    
+    // unit_test [17] up_thread_run set non blocking fail check
+    std::cout << "[17] up_thread_run set non blocking fail check" << std::endl;
+    exit_flag = false;
+    session_pause_flag = false;
+    thread_state[1] = 1;
+    
+    l7vs::tcp_socket::set_non_blocking_mode_res = false;
+    l7vs::tcp_socket::set_non_blocking_mode_ec = boost::asio::error::bad_descriptor;
+    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+    l7vs::Logger::putLogError_id = 0;
+    
+    test_obj.test_wait = false;
+    sleep(1);
+    
+    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+    BOOST_CHECK_EQUAL(11,l7vs::Logger::putLogError_id);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
+    l7vs::tcp_socket::set_non_blocking_mode_res = true;
+    l7vs::tcp_socket::set_non_blocking_mode_ec.clear();
+
+    thread_state[1] = 0;
+    sleep(1);
+    
+    //error test client endpoint get error 
+    client_socket.get_socket().close(ec);
+    exit_flag = false;
+    session_pause_flag = false;
+    thread_state[1] = 1;
+    
+    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+    l7vs::Logger::putLogError_id = 0;
+    
+    test_obj.test_wait = false;
+    sleep(1);
+    
+    // unit_test [18] up_thread_run client endpoint get error test
+    std::cout << "[18] up_thread_run client endpoint get error test" << std::endl;
+    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+    BOOST_CHECK_EQUAL(9,l7vs::Logger::putLogError_id);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
+    
+    thread_state[1] = 0;
+    sleep(1);
+    
+    //error test protocol module null error 
+    test_obj.set_protocol_module(NULL);
+    exit_flag = false;
+    session_pause_flag = false;
+    thread_state[1] = 1;
+    
+    l7vs::Logger::putLogError_category = l7vs::LOG_CAT_NONE;
+    l7vs::Logger::putLogError_id = 0;
+    
+    test_obj.test_wait = false;
+    sleep(1);
+    
+    // unit_test [19] up_thread_run protocol module null error test
+    std::cout << "[19] up_thread_run protocol module null error test" << std::endl;
+    BOOST_CHECK_EQUAL(l7vs::LOG_CAT_L7VSD_SESSION,l7vs::Logger::putLogError_category);
+    BOOST_CHECK_EQUAL(8,l7vs::Logger::putLogError_id);
+    std::cout << l7vs::Logger::putLogError_message << std::endl;
+    
+    thread_state[1] = 0;
+    sleep(1);
+    
+    test_obj.test_end = true;
+    test_obj.test_wait = false;
+    std::cout << "test_thread.join wait" << std::endl;
+    test_thread.join();
+    std::cout << "test_thread.join ok" << std::endl;
+    
+    
+    test_server.breq_close_wait_flag = false;    
+    test_server.bstop_flag = true;
+    std::cout << "server_thread.join wait" << std::endl;
+    server_thread.join();
+    std::cout << "server_thread.join ok" << std::endl;
+    
+    
+    BOOST_MESSAGE( "----- up_thread_run ssl mode test end -----" );
+    
+}
+
+
+
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
@@ -13100,6 +13586,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_connection_fail_event_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connection_fail_event_test) );
 
+    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_test ) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_receive_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_realserver_receive_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_sorryserver_receive_test) );
@@ -13133,8 +13620,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
 */
 
-    ts->add( BOOST_TEST_CASE( &up_thread_client_accept_test ) );
-//    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test) );
 
 
     framework::master_test_suite().add( ts );
