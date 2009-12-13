@@ -13167,7 +13167,7 @@ class up_thread_run_ssl_mode_test_class : public l7vs::tcp_session{
         
         void up_thread_all_socket_close(void){
             up_thread_all_socket_close_call_check = true;
-        }
+        };
         bool up_thread_all_socket_close_call_check;
         
         void test_message_set(boost::asio::ip::tcp::endpoint set_endpoint){
@@ -13180,23 +13180,23 @@ class up_thread_run_ssl_mode_test_class : public l7vs::tcp_session{
         
         l7vs::tcp_data& get_up_thread_message_data(){
             return up_thread_message_data;
-        }
+        };
         
         void clear_function_array(){
             for(int i = 0;i <= UP_FUNC_EXIT;i++){
                 up_thread_function_array[i].second = NULL;
             }
-        }
+        };
         void clear_event_map(){
             up_thread_module_event_map.clear();
-        }
+        };
         
         void set_up_thread_next_call_function_client_disconnect(){
             up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
-        }
+        };
         void set_up_thread_next_call_function_exit(){
             up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
-        }
+        };
         
 };
 void up_thread_run_ssl_mode_test(){
