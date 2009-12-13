@@ -13263,7 +13263,7 @@ void up_thread_run_ssl_mode_test(){
     while(!test_server.bconnect_flag){
         sleep(1);
     }
-/*        
+
     test_obj.test_thread_wait.lock();
     thread_state[0] = 0;    // UP_THREAD_ALIVE
     thread_state[1] = 0;    // DOWN_THREAD_ALIVE
@@ -13547,7 +13547,7 @@ void up_thread_run_ssl_mode_test(){
     server_thread.join();
     std::cout << "server_thread.join ok" << std::endl;
     
-    */
+  
     BOOST_MESSAGE( "----- up_thread_run ssl mode test end -----" );
     
 }
