@@ -24,17 +24,17 @@
 
 #include "logger_access_manager.h"
 
-logger_access_manager &logger_access_manager::getInstance()
+l7vs::logger_access_manager &l7vs::logger_access_manager::getInstance()
 {
     static logger_access_manager log_manager;
     return( log_manager );
 }
 
 
-logger_implement_access *logger_access_manager::find_logger_implement_access(
+l7vs::logger_implement_access *l7vs::logger_access_manager::find_logger_implement_access(
     const std::string &aclogFilename, 
     std::map< std::string , std::string > rotate, 
-    error_code& err)
+    l7vs::error_code& err)
 {
     
 /*
@@ -52,16 +52,16 @@ logger_implement_access *logger_access_manager::find_logger_implement_access(
     }
 */
 
-    logger_implement_access l_logdif = new logger_implement_access();
+//    logger_implement_access l_logdif = new logger_implement_access();
 
-    return( l_logac );
+    return( NULL );
 
 
 }
 
-bool logger_access_manager::erase_logger_implement_access(
+bool l7vs::logger_access_manager::erase_logger_implement_access(
     const std::string &aclogFilename, 
-    error_code& err)
+    l7vs::error_code& err)
 {
 /*
     logger_implement_access *l_logac = NULL;
@@ -89,12 +89,12 @@ bool logger_access_manager::erase_logger_implement_access(
 
 
 
-bool access_log_rotate_loadConf()
+bool l7vs::logger_access_manager::access_log_rotate_loadConf()
 {
     return( true );
 }
 
-std::string get_rotate_default_verbose_ displayed contents()
+std::string l7vs::logger_access_manager::get_rotate_default_verbose_displayed_contents()
 {
     return( rotate_default_verbose_displayed_contents );
 }
