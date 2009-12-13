@@ -12757,9 +12757,9 @@ void initialize_ssl_mode_test(){
     l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
 
     //tset case 1 ssl_cache_flag on 
-    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
-    bool set_ssl_cache_flag(true);
-    initialize_ssl_mode_test_class test_obj1(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    boost::asio::ssl::context set_context1(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag1(true);
+    initialize_ssl_mode_test_class test_obj1(vs,io,set_option,listen_endpoint,set_mode,set_context1,set_ssl_cache_flag1,set_ssl_handshake_time_out,plogger);
 
     // ssl_clear_keep_cache call OK
     test_obj1.ssl_clear_keep_cache_call_chk = false;
@@ -12789,6 +12789,22 @@ void initialize_ssl_mode_test(){
     BOOST_CHECK(test_obj1.ssl_clear_keep_cache_call_chk);
     BOOST_CHECK(test_obj1.ssl_clear_keep_cache_set_clear_ssl == test_obj1.get_client_ssl_socket().impl()->ssl);
     BOOST_CHECK(msg.flag == true);
+
+
+    //tset case 2 ssl_cache_flag off 
+    boost::asio::ssl::context set_context2(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag2(false);
+    initialize_ssl_mode_test_class test_obj2(vs,io,set_option,listen_endpoint,set_mode,set_context2,set_ssl_cache_flag2,set_ssl_handshake_time_out,plogger);
+
+    // test call
+    msg = test_obj2.initialize();
+
+    // unit_test [3] initialize SSL_clear Error case
+    std::cout << "[3] initialize SSL_clear Error case" << std::endl;
+    BOOST_CHECK(msg.flag == true);
+
+
+
 
 /*
 
