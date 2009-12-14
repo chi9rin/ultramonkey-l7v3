@@ -1,17 +1,23 @@
 #include    <iostream>
 #include    <boost/test/included/unit_test.hpp>
+#include    <boost/test/parameterized_test.hpp>
 #include    "replication.h"
 #include    "logger.h"
 #include    "parameter.h"
 #include    <malloc.h>
+#include    <boost/algorithm/string.hpp>
 
-#define     TARGET_IP_V4        "10.144.169.71"
-#define     TARGET_IP_V6        "fe80::213:21ff:feb5:95fb%eth0"
+#define     TARGET_IP_V4        "10.144.169.70"
+#define     TARGET_IP_V6        "fe80::213:21ff:feb5:555a%eth0"
 #define     TARGET_HOSTNAME     "um08"
 
 int get_string_stubmode = 0;
 int get_int_stubmode = 0;
-char    target_ip[256] = TARGET_IP_V4;
+
+char    target_ip_table[][256] = {
+    TARGET_IP_V4,
+    TARGET_IP_V6
+};
 
 char    get_string_table[][ 256 ] = {
     TARGET_IP_V4,                //    "ip_addr"
@@ -38,6 +44,30 @@ class    l7vs::replication;
 
 using namespace boost::unit_test;
 
+//! endpoint string parse function
+//! @param[in]      endpoint string
+//! @return         endpoint
+template < class T >
+typename T::endpoint make_endpoint( const char*  in_host, const char* in_port ){
+    std::string hostname(in_host);
+    std::string portname(in_port);
+
+    //remove "[","]"
+    boost::algorithm::erase_first( hostname, "[" );
+    boost::algorithm::erase_last( hostname, "]" );
+
+    boost::asio::io_service         io_service;
+    typename T::resolver            resolver(io_service);
+    typename T::resolver::query     query( hostname, portname );
+    typename T::resolver::iterator  end;
+    boost::system::error_code       ec;
+    typename T::resolver::iterator  itr = resolver.resolve( query, ec );
+    if( ec ){
+        return typename T::endpoint();
+    }
+    if( itr == end ) return typename T::endpoint();
+    return *itr;
+}
 
 namespace l7vs{
 
@@ -199,9 +229,10 @@ volatile bool receiver_end = false;
 boost::asio::io_service global_receive_io;
 boost::asio::io_service global_send_io;
 
-void receiver_thread(){
-    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( target_ip ), 40000 );
-    boost::asio::ip::udp::socket    receiver_socket( global_receive_io, udp_endpoint );
+void receiver_thread( const char* target_ip ){
+    //boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( target_ip ), 40000 );
+    boost::asio::ip::udp::endpoint      udp_endpoint( make_endpoint<boost::asio::ip::udp>( target_ip, "40000" ) );
+    boost::asio::ip::udp::socket        receiver_socket( global_receive_io, udp_endpoint );
 
     char    *recv_memory;
     size_t    size;
@@ -440,10 +471,11 @@ void    sender_thread(){
     repli2.finalize();
 }
 
-void    sender2_thread(){
-    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( target_ip ), 40000 );
+void    sender2_thread( const char* target_ip ){
+//    boost::asio::ip::udp::endpoint    udp_endpoint( boost::asio::ip::address::from_string( target_ip, 40000 );
+    boost::asio::ip::udp::endpoint      udp_endpoint( make_endpoint<boost::asio::ip::udp>( target_ip, "40000" ) );
 //    boost::asio::ip::udp::socket    sender_socket( global_send_io, udp_endpoint );
-    boost::asio::ip::udp::socket    sender_socket( global_send_io );
+    boost::asio::ip::udp::socket        sender_socket( global_send_io );
 
     //! Transfer data between active server and standby server.
     struct replication_data_struct{
@@ -547,13 +579,11 @@ void lock_thread( l7vs::replication_fake* p_repliX, const char* name ){
 
 
 //test case1.
-void    replication_initialize_test(){
+void    replication_initialize_test( int proto ){
 //    int    loop;
-    std::cout << "test111" << std::endl;
-
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -564,8 +594,6 @@ void    replication_initialize_test(){
     get_int_table[2] = 1;                            //    "cmponent_size_01"
     get_int_table[3] = 200;                            //    "cmponent_size_02"
     get_int_table[4] = 10;                            //    "compulsorily_interval"
-
-    std::cout << "test222!" << std::endl;
 
     // unit_test[1]  コンストラクタのテスト
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -832,10 +860,10 @@ void    replication_initialize_test(){
 }
 
 //test case2.
-void    replication_switch_to_master_test(){
+void    replication_switch_to_master_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -898,10 +926,10 @@ void    replication_switch_to_master_test(){
 }
 
 //test case3.
-void    replication_switch_to_slave_test(){
+void    replication_switch_to_slave_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip);            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -968,13 +996,13 @@ void    replication_switch_to_slave_test(){
 }
 
 //test case4.
-void    replication_pay_memory_test(){
+void    replication_pay_memory_test( int proto ){
     unsigned int    size;
     void*            ptr;
 
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1158,10 +1186,10 @@ void    replication_pay_memory_test(){
 }
 
 //test case5.
-void    replication_dump_memory_test(){
+void    replication_dump_memory_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1230,10 +1258,10 @@ void    replication_dump_memory_test(){
 }
 
 //test case6.
-void    replication_start_test(){
+void    replication_start_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1298,10 +1326,10 @@ void    replication_start_test(){
 }
 
 //test case7.
-void    replication_stop_test(){
+void    replication_stop_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1364,10 +1392,10 @@ void    replication_stop_test(){
 }
 
 //test case8.
-void    replication_force_replicate_test(){
+void    replication_force_replicate_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1483,7 +1511,7 @@ void    replication_force_replicate_test(){
     BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_MASTER );
 
     receiver_end = false;
-    boost::thread    thread_item1( boost::bind ( &receiver_thread ) );
+    boost::thread    thread_item1( boost::bind ( &receiver_thread, target_ip_table[proto] ) );
 
     repli1.force_replicate();
 
@@ -1499,10 +1527,10 @@ void    replication_force_replicate_test(){
 }
 
 //test case9.
-void    replication_reset_test(){
+void    replication_reset_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1600,10 +1628,10 @@ void    replication_reset_test(){
 }
 
 //test case10.
-void    replication_get_status_test(){
+void    replication_get_status_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1655,10 +1683,10 @@ void    replication_get_status_test(){
 }
 
 //test case11.
-void    replication_lock_test(){
+void    replication_lock_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1777,10 +1805,10 @@ void    replication_lock_test(){
 }
 
 //test case12.
-void    replication_unlock_test(){
+void    replication_unlock_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1857,10 +1885,10 @@ void    replication_unlock_test(){
 }
 
 //test case13.
-void    replication_refer_lock_mutex_test(){
+void    replication_refer_lock_mutex_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -1943,10 +1971,10 @@ void    replication_refer_lock_mutex_test(){
 }
 
 //test case14.
-void    replication_handle_send_test(){
+void    replication_handle_send_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2002,7 +2030,7 @@ void    replication_handle_send_test(){
     repli1.switch_to_master();
 
     receiver_end = false;
-    boost::thread    thread_item1( boost::bind ( &receiver_thread ) );
+    boost::thread    thread_item1( boost::bind ( &receiver_thread, target_ip_table[proto] ) );
 
     // unit_test[141]  send_thread&handle_sendのテスト(MASTER時)
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
@@ -2018,10 +2046,10 @@ void    replication_handle_send_test(){
 }
 
 //test case15.
-void    replication_set_master_test(){
+void    replication_set_master_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2059,16 +2087,16 @@ void    replication_set_master_test(){
 
     BOOST_CHECK_EQUAL( repli1.set_master_wrapper(), 0 );                            // set_masterの時点ではendpointを使用していない
 
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
 
     repli1.finalize();
 }
 
 //test case16.
-void    replication_set_slave_test(){
+void    replication_set_slave_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2109,16 +2137,16 @@ void    replication_set_slave_test(){
 
 //    BOOST_CHECK_EQUAL( repli1.set_slave_wrapper(), -1 );                                // 無理？
 
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
 
     repli1.finalize();
 }
 
 //test case17.
-void    replication_check_parameter_test(){
+void    replication_check_parameter_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2145,10 +2173,10 @@ void    replication_check_parameter_test(){
 }
 
 //test case18.
-void    replication_getrpl_test(){
+void    replication_getrpl_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2178,10 +2206,10 @@ void    replication_getrpl_test(){
 }
 
 //test case19.
-void    replication_getcmp_test(){
+void    replication_getcmp_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2211,10 +2239,10 @@ void    replication_getcmp_test(){
 }
 
 //test case20.
-void    replication_getsrf_test(){
+void    replication_getsrf_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2244,10 +2272,10 @@ void    replication_getsrf_test(){
 }
 
 //test case21.
-void    replication_make_serial_test(){
+void    replication_make_serial_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2279,10 +2307,10 @@ void    replication_make_serial_test(){
 }
 
 //test case22.
-void    replication_releaserpl_test(){
+void    replication_releaserpl_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2312,10 +2340,10 @@ void    replication_releaserpl_test(){
 }
 
 //test case23.
-void    replication_releasecmp_test(){
+void    replication_releasecmp_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2345,10 +2373,10 @@ void    replication_releasecmp_test(){
 }
 
 //test case24.
-void    replication_releasesrf_test(){
+void    replication_releasesrf_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2378,10 +2406,10 @@ void    replication_releasesrf_test(){
 }
 
 //test case25.
-void    replication_finalize_test(){
+void    replication_finalize_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2452,10 +2480,10 @@ void    replication_finalize_test(){
 
 
 //test case26.
-void    replication_handle_receive_test(){
+void    replication_handle_receive_test( int proto ){
     get_string_stubmode = 0;
     get_int_stubmode = 0;
-    strcpy( get_string_table[0], target_ip );            //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );            //    "ip_addr"
     strcpy( get_string_table[1], "40000" );                    //    "service_name"
     strcpy( get_string_table[2], "eth0" );                    //    "nic"
     strcpy( get_string_table[3], "virtualservice" );            //    "cmponent_id_00"
@@ -2470,7 +2498,7 @@ void    replication_handle_receive_test(){
     l7vs::replication    repli1;
 
     //get_string_table[0] = TARGET_HOSTNAME;                    //    "ip_addr"
-    strcpy( get_string_table[0], target_ip);                    //    "ip_addr"
+    strcpy( get_string_table[0], target_ip_table[proto] );                    //    "ip_addr"
     get_int_table[1] = 1;                            //    "cmponent_size_00"
     get_int_table[2] = 1;                            //    "cmponent_size_01"
     get_int_table[3] = 1;                            //    "cmponent_size_02"
@@ -2484,7 +2512,7 @@ void    replication_handle_receive_test(){
     BOOST_MESSAGE( boost::format( "unit_test[%d]" ) % ++count );
 
     {
-        boost::thread    thread_item( boost::bind ( &sender2_thread ) );
+        boost::thread    thread_item( boost::bind ( &sender2_thread, target_ip_table[proto] ) );
 
         thread_item.join();
     }
@@ -2521,7 +2549,7 @@ void    replication_handle_receive_test(){
 
     {
         receiver_end = false;
-        boost::thread    thread_item( boost::bind ( &receiver_thread ) );
+        boost::thread    thread_item( boost::bind ( &receiver_thread, target_ip_table[proto] ) );
 
         while( !receiver_end ){
             global_receive_io.poll();
@@ -2534,7 +2562,7 @@ void    replication_handle_receive_test(){
     BOOST_CHECK_EQUAL( repli1.get_status(), l7vs::replication::REPLICATION_SLAVE );
 
     {
-        boost::thread    thread_item( boost::bind ( &sender2_thread ) );
+        boost::thread    thread_item( boost::bind ( &sender2_thread, target_ip_table[proto] ) );
 
         thread_item.join();
     }
@@ -2568,85 +2596,44 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     logger.loadConf();
 
-    //IPV4 test
-    strcpy( target_ip, TARGET_IP_V4);
-
     // create unit test suite
     test_suite* ts = BOOST_TEST_SUITE( "replication_test" );
 
+    int protos[] = { 0, 1 };
+
     // add test case to test suite
-    ts->add( BOOST_TEST_CASE( &replication_initialize_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_switch_to_master_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_switch_to_slave_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_pay_memory_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_dump_memory_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_start_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_stop_test ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_initialize_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_switch_to_master_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_switch_to_slave_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_pay_memory_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_dump_memory_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_start_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_stop_test, protos, protos+2 ) );
 
-    ts->add( BOOST_TEST_CASE( &replication_force_replicate_test ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_force_replicate_test, protos, protos+2 ) );
 
-    ts->add( BOOST_TEST_CASE( &replication_reset_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_get_status_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_lock_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_unlock_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_refer_lock_mutex_test ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_reset_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_get_status_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_lock_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_unlock_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_refer_lock_mutex_test, protos, protos+2 ) );
 
-    ts->add( BOOST_TEST_CASE( &replication_handle_send_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_set_master_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_set_slave_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_check_parameter_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_getrpl_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_getcmp_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_getsrf_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_make_serial_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_releaserpl_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_releasecmp_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_releasesrf_test ) );
-    ts->add( BOOST_TEST_CASE( &replication_finalize_test ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_handle_send_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_set_master_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_set_slave_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_check_parameter_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_getrpl_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_getcmp_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_getsrf_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_make_serial_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_releaserpl_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_releasecmp_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_releasesrf_test, protos, protos+2 ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_finalize_test, protos, protos+2 ) );
 
-    ts->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
+    ts->add( BOOST_PARAM_TEST_CASE( &replication_handle_receive_test, protos, protos+2 ) );
 
     framework::master_test_suite().add( ts );
-
-    //IPV6 TEST
-    strcpy( target_ip, TARGET_IP_V6);
-
-    // create unit test suite
-    test_suite* ts2 = BOOST_TEST_SUITE( "replication_test" );
-
-    // add test case to test suite
-    ts2->add( BOOST_TEST_CASE( &replication_initialize_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_switch_to_master_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_switch_to_slave_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_pay_memory_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_dump_memory_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_start_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_stop_test ) );
-
-    ts2->add( BOOST_TEST_CASE( &replication_force_replicate_test ) );
-
-    ts2->add( BOOST_TEST_CASE( &replication_reset_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_get_status_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_lock_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_unlock_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_refer_lock_mutex_test ) );
-
-    ts2->add( BOOST_TEST_CASE( &replication_handle_send_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_set_master_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_set_slave_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_check_parameter_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_getrpl_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_getcmp_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_getsrf_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_make_serial_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_releaserpl_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_releasecmp_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_releasesrf_test ) );
-    ts2->add( BOOST_TEST_CASE( &replication_finalize_test ) );
-
-    ts2->add( BOOST_TEST_CASE( &replication_handle_receive_test ) );
-
-    framework::master_test_suite().add( ts2 );
 
     return 0;
 }
