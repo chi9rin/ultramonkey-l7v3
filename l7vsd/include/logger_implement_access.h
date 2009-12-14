@@ -21,8 +21,8 @@
  * 02110-1301 USA
  *
  **********************************************************************/
-#ifndef	LOGGER_IMPLEMENT_ACCESS_H
-#define	LOGGER_IMPLEMENT_ACCESS_H
+#ifndef LOGGER_IMPLEMENT_ACCESS_H
+#define LOGGER_IMPLEMENT_ACCESS_H
 
 #include <sstream>
 #include <map>
@@ -75,32 +75,32 @@ public:
      * @retrun  void
      */
     virtual inline void putLog(const std::string& vsinfo,
-								const std::string& cl_con_org,
-								const std::string& rs_con_org,
-								const std::string& rs_con_dest,
-	                            const std::string& msg){
+                                const std::string& cl_con_org,
+                                const std::string& rs_con_org,
+                                const std::string& rs_con_dest,
+                                const std::string& msg){
 /*
-		std::stringstream	buf;
-		buf << boost::format( "%s%d%02d%05d %s %s" )
-			% LOGGER_ACCESS_PROCESS_ID
-			% 1
-			% LOG_CAT_L7VSD_ACCESS_LOGGER
-			% message_id
-			% message.c_str()
-			% hostname;
-										  
-		try {
-			log4cxx::Logger::getLogger(LOG_CAT_L7VSD_ACCESS_LOGGER)->forcedLog(	log4cxx::Level::getInfo(),
-																		buf.str(),
-																		log4cxx::spi::LocationInfo(file, "", line));
-		}
-		catch (const std::exception& ex) {
-			std::ostringstream oss;
-			oss << "Logging Error (Info Log) : " << ex.what();
-			errorConf( 6, oss.str(), __FILE__, __LINE__);
-		}
+        std::stringstream   buf;
+        buf << boost::format( "%s%d%02d%05d %s %s" )
+            % LOGGER_ACCESS_PROCESS_ID
+            % 1
+            % LOG_CAT_L7VSD_ACCESS_LOGGER
+            % message_id
+            % message.c_str()
+            % hostname;
+
+        try {
+            log4cxx::Logger::getLogger(LOG_CAT_L7VSD_ACCESS_LOGGER)->forcedLog(log4cxx::Level::getInfo(),
+                                                                        buf.str(),
+                                                                        log4cxx::spi::LocationInfo(file, "", line));
+        }
+        catch (const std::exception& ex) {
+            std::ostringstream oss;
+            oss << "Logging Error (Info Log) : " << ex.what();
+            errorConf( 6, oss.str(), __FILE__, __LINE__);
+        }
 */
-	}
+    }
 
     virtual void    addRef();
 
@@ -121,10 +121,10 @@ protected:
 
     std::string acLogFileName;
 
-  	//! initialized flag
-	bool initialized;
+    //! initialized flag
+    bool initialized;
   
-	//! hostname
+    //! hostname
     appender_property access_log_property;
 
     accesslog_rotate_map_type aclog_args;
@@ -137,5 +137,5 @@ protected:
 
 };
 
-#endif //    LOGGER_IMPLEMENT_ACCESS_H	
+#endif //    LOGGER_IMPLEMENT_ACCESS_H
 
