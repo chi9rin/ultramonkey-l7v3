@@ -4,8 +4,13 @@ use strict;
 use warnings;
 
 print <<"L7VSADM";
-Layer-7 Virtual Server version 2.0.0-1
-Prot LocalAddress:Port ProtoMod Scheduler Reschedule Protomod_key_string
+Layer-7 Virtual Server version x.x.x
+Prot LocalAddress:Port ProtoMod Scheduler
+     SSL_config_file
+     Socket option
+     Access_log_flag
+     Access_log_file
+     Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
   -> 127.0.0.1:80                 Masq    1      0          3         
   -> 127.0.0.1:25                 Masq    1      0          3         
