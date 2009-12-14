@@ -5,7 +5,7 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 16;
+use Test::More tests => 22;
 use Socket;
 use Socket6;
 

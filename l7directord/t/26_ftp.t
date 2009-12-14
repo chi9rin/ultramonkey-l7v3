@@ -254,7 +254,7 @@ SKIP: {
 ########################################################################
 #### IPv6 Test
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     skip 'cannot create socket', 1 if !$sock;
     my $pid = prepare_child($sock, [
@@ -266,14 +266,14 @@ SKIP: {
         ]);
     set_default();
     my $v = { negotiatetimeout => 3, login => 'ftp', passwd => 'ftppass' };
-    my $r = { server => {ip => '[::1]', port => $port }, fail_counts => 0 };
+    my $r = { server => {ip => '::1', port => $port }, fail_counts => 0 };
     my $got = check_ftp($v, $r);
     is $got, $main::SERVICE_UP, 'check_ftp - login ok';
     close_child($pid);
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     skip 'cannot create socket', 1 if !$sock;
     my $pid = prepare_child($sock, [
@@ -292,7 +292,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     skip 'cannot create socket', 1 if !$sock;
     my $pid = prepare_child($sock, [
@@ -311,7 +311,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     my $dataport = 53332;
     my $datasock = create_sock6($dataport);
@@ -331,7 +331,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     skip 'cannot create socket', 1 if !$sock;
     my $pid = prepare_child($sock, [
@@ -350,7 +350,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     my $dataport = 53334;
     my $datasock = create_sock6($dataport);
@@ -378,7 +378,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63336;
     my $sock = create_sock6($port);
     my $dataport = 53335;
     my $datasock = create_sock6($dataport);
@@ -406,7 +406,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63335;
     my $sock = create_sock6($port);
     my $dataport = 53334;
     my $datasock = create_sock6($dataport);
@@ -434,7 +434,7 @@ SKIP: {
     close $sock;
 }
 SKIP: {
-    my $port = 63334;
+    my $port = 63336;
     my $sock = create_sock6($port);
     my $dataport = 53334;
     my $datasock = create_sock6($dataport);
@@ -476,17 +476,38 @@ sub create_sock {
         Proto => 'tcp');
     return $sock;
 }
-
 sub create_sock6 {
     my $port = shift;
-    my $sock = IO::Socket::INET6->new(
-        Listen => 5,
-        LocalAddr => '::1',
-        LocalPort => $port,
-        ReuseAddr => 1,
-        Proto => 'tcp');
-    return $sock;
+    my $proto = shift || 'tcp';
+    if ($proto eq 'tcp') {
+        my $sock = IO::Socket::INET6->new(
+            Listen => 5,
+            LocalAddr => '::1',
+            LocalPort => $port,
+            ReuseAddr => 1,
+            Proto => $proto);
+        return $sock;
+    }
+    else {
+        my $sock = IO::Socket::INET6->new(
+            LocalAddr => '::1',
+            LocalPort => $port,
+            ReuseAddr => 1,
+            Proto => $proto);
+        return $sock;
+    }
 }
+##
+##sub create_sock6 {
+##    my $port = shift;
+##    my $sock = IO::Socket::INET6->new(
+##        Listen => 5,
+##        LocalAddr => '::1',
+##        LocalPort => $port,
+##        ReuseAddr => 1,
+##        Proto => 'tcp');
+##    return $sock;
+##}
 sub prepare_child {
     my $sock = shift;
     my $res = shift;

@@ -5,7 +5,7 @@ use lib qw(t/lib lib);
 use subs qw(print);
 use Cwd;
 use L7lib;
-use Test::More tests => 8;
+use Test::More tests => 9;
 use IO::Socket::INET6;
 
 L7lib::chdir();
@@ -109,7 +109,7 @@ TODO: {
 SKIP: {
     my $port = 63334;
     my $sock = create_sock6($port);
-    skip 'cannot create socket', 1 if !$sock;
+    skip 'cannot create socket!!!!', 1 if !$sock;
     set_default();
     my $v = { checktimeout => 3, protocol => 'tcp' };
     my $r = { server => {ip => '::1', port => $port }, fail_counts => 0 };
