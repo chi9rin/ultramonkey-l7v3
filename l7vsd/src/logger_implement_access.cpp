@@ -62,33 +62,33 @@ l7vs::logger_implement_access::logger_implement_access(const std::string &acLogF
 bool l7vs::logger_implement_access::init(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate)
 {
 /*
-	using namespace log4cxx;
-	if (initialized) return true;
+    using namespace log4cxx;
+    if (initialized) return true;
 
   bool rtnFlg = true;
   
-	try {
-		// set loot logger
-		LoggerPtr root = Logger::getRootLogger();
-		if ( NULL == root)	return false;
+    try {
+        // set loot logger
+        LoggerPtr root = Logger::getRootLogger();
+        if ( NULL == root) return false;
 
     rtnFlg = this->setAcLoggerConf();
 
-	}
-	catch (const std::exception& e) {
-		std::ostringstream oss;
-		oss <<  "Logger Initialization Failed : " << e.what();
-		return false;
-	}
+    }
+    catch (const std::exception& e) {
+        std::ostringstream oss;
+        oss <<  "Logger Initialization Failed : " << e.what();
+        return false;
+    }
 
   if( rtnFlg == true ) {
-  	// get hostname
-  	int		ret = 0;
-  	char	buff[HOST_NAME_MAX];
-  	ret = gethostname(buff, HOST_NAME_MAX);
-  	hostname = buff;
+    // get hostname
+    int     ret = 0;
+    char    buff[HOST_NAME_MAX];
+    ret = gethostname(buff, HOST_NAME_MAX);
+    hostname = buff;
     
-  	initialized = true;
+    initialized = true;
   }
 */
   return (true);
@@ -99,52 +99,52 @@ bool l7vs::logger_implement_access::setAcLoggerConf(appender_property& access_lo
 {
     
 /*
-	using namespace log4cxx;
-	using namespace l7vs;
+    using namespace log4cxx;
+    using namespace l7vs;
 
-	// appender setting
-	try {
-		log4cxx::helpers::Pool pool;
+    // appender setting
+    try {
+        log4cxx::helpers::Pool pool;
 
-		log4cxx::LayoutPtr layout =
-			new log4cxx::PatternLayout(LOGGER_ACCESS_LAYOUT);
+        log4cxx::LayoutPtr layout =
+            new log4cxx::PatternLayout(LOGGER_ACCESS_LAYOUT);
 
-		//create RollingFileAppender
-		log4cxx::FileAppenderPtr	accessLogAppender =
-			new log4cxx::FileAppender();
-	  
-		// set layout
-		accessLogAppender->setLayout(layout);
+        //create RollingFileAppender
+        log4cxx::FileAppenderPtr    accessLogAppender =
+            new log4cxx::FileAppender();
+        
+        // set layout
+        accessLogAppender->setLayout(layout);
 
-		// set Log Filename
-		try{
-			accessLogAppender->setFile(this->acLogFileName, true, false, LOGGER_ACCESS_DEFAULT_BUFFER_SIZE, pool);
-		}
-		catch( const std::exception& e ){
-			std::stringstream	buf;
-			buf << "File Create Failed:" << this->acLogFileName;
-			throw std::logic_error( buf.str() );
-		}
+        // set Log Filename
+        try{
+            accessLogAppender->setFile(this->acLogFileName, true, false, LOGGER_ACCESS_DEFAULT_BUFFER_SIZE, pool);
+        }
+        catch( const std::exception& e ){
+            std::stringstream   buf;
+            buf << "File Create Failed:" << this->acLogFileName;
+            throw std::logic_error( buf.str() );
+        }
 
-		// activate appender options
-		accessLogAppender->activateOptions(pool);
+        // activate appender options
+        accessLogAppender->activateOptions(pool);
 
-		log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( LOG_CAT_L7VSD_ACCESS_LOGGER );
-		if (0 == cat_logger) {
-			throw std::logic_error("getLogger Failed.");
-		}
+        log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( LOG_CAT_L7VSD_ACCESS_LOGGER );
+        if (0 == cat_logger) {
+            throw std::logic_error("getLogger Failed.");
+        }
 
-		cat_logger->addAppender(accessLogAppender);
+        cat_logger->addAppender(accessLogAppender);
 
-		//default log level settting
-		cat_logger->setLevel( log4cxx::Level::getInfo() );
+        //default log level settting
+        cat_logger->setLevel( log4cxx::Level::getInfo() );
 
-	}
-	catch (const std::exception& e) {
-		std::ostringstream oss;
-		oss <<  "Logger Reload Config Failed : " << e.what();
-	  return(false);
-	}
+    }
+    catch (const std::exception& e) {
+        std::ostringstream oss;
+        oss <<  "Logger Reload Config Failed : " << e.what();
+      return(false);
+    }
 */
     
   return(true);
@@ -152,19 +152,19 @@ bool l7vs::logger_implement_access::setAcLoggerConf(appender_property& access_lo
 }
 
 
-void	l7vs::logger_implement_access::addRef()
+void l7vs::logger_implement_access::addRef()
 {
   this->access_cnt++;
 }
 
 
-void	l7vs::logger_implement_access::releaseRef()
+void l7vs::logger_implement_access::releaseRef()
 {
   this->access_cnt--;
 }
 
 
-bool	l7vs::logger_implement_access::operator<=(const int access_num )
+bool l7vs::logger_implement_access::operator<=(const int access_num )
 {
   return( this->access_cnt <= access_num );
 }
