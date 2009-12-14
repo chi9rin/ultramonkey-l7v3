@@ -1778,17 +1778,23 @@ sub ld_start {
                 return;
             }
     
-            if ( exists( $current_service->{$vip_id} )
-             && (defined $current_service->{$vip_id}{other_virtual_option} 
-               && defined $nv->{other_virtual_key}
-               && $current_service->{$vip_id}{other_virtual_option}
-                eq  $nv->{other_virtual_key} )) {
-                # service already exists, modify it
-                ld_edit_virtual($nv);
+            if ( exists( $current_service->{$vip_id} )){
+                if(( defined $current_service->{$vip_id}{other_virtual_option} 
+                  && defined $nv->{other_virtual_key})
+                  && $current_service->{$vip_id}{other_virtual_option}
+                   ne  $nv->{other_virtual_key} ) {
+                    ld_delete_virtual($nv);
+                    # no such service, create a new one
+                    ld_add_virtual($nv);
+                    $nv->{other_virtual_key}
+                        = $current_service->{$vip_id}{other_virtual_option};
+                }
+                else {
+                    # service already exists, modify it
+                    ld_edit_virtual($nv);
+                }
             }
             else {
-                # no such service, create a new one
-                ld_delete_virtual($nv);
                 # no such service, create a new one
                 ld_add_virtual($nv);
             }
