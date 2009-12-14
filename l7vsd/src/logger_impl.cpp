@@ -54,35 +54,35 @@
 #define LOGGER_FILE_PATTERN "%i"
 
 #if    defined(LOGGER_PROCESS_VSD)
-    #define    LOGGER_LOG_FILENAME_KEY                    "l7vsd_log_filename"
-    #define LOGGER_ROTATION_KEY                        "l7vsd_rotation"
-    #define LOGGER_MAX_BACKUP_INDEX_KEY                "l7vsd_max_backup_index"
+    #define    LOGGER_LOG_FILENAME_KEY              "l7vsd_log_filename"
+    #define LOGGER_ROTATION_KEY                     "l7vsd_rotation"
+    #define LOGGER_MAX_BACKUP_INDEX_KEY             "l7vsd_max_backup_index"
     #define LOGGER_MAX_FILE_SIZE_KEY                "l7vsd_max_filesize"
-    #define LOGGER_ROTATION_TIMING_KEY                "l7vsd_rotation_timing"
+    #define LOGGER_ROTATION_TIMING_KEY              "l7vsd_rotation_timing"
     #define LOGGER_ROTATION_TIMING_VALUE_KEY        "l7vsd_rotation_timing_value"
 
 #elif defined(LOGGER_PROCESS_ADM)
-    #define    LOGGER_LOG_FILENAME_KEY                    "l7vsadm_log_filename"
-    #define LOGGER_ROTATION_KEY                        "l7vsadm_rotation"
-    #define LOGGER_MAX_BACKUP_INDEX_KEY                "l7vsadm_max_backup_index"
+    #define    LOGGER_LOG_FILENAME_KEY              "l7vsadm_log_filename"
+    #define LOGGER_ROTATION_KEY                     "l7vsadm_rotation"
+    #define LOGGER_MAX_BACKUP_INDEX_KEY             "l7vsadm_max_backup_index"
     #define LOGGER_MAX_FILE_SIZE_KEY                "l7vsadm_max_filesize"
-    #define LOGGER_ROTATION_TIMING_KEY                "l7vsadm_rotation_timing"
+    #define LOGGER_ROTATION_TIMING_KEY              "l7vsadm_rotation_timing"
     #define LOGGER_ROTATION_TIMING_VALUE_KEY        "l7vsadm_rotation_timing_value"
 
 #elif(LOGGER_PROCESS_SNM)
-    #define    LOGGER_LOG_FILENAME_KEY                    "snmp_log_filename"
-    #define LOGGER_ROTATION_KEY                        "snmp_rotation"
-    #define LOGGER_MAX_BACKUP_INDEX_KEY                "snmp_max_backup_index"
+    #define    LOGGER_LOG_FILENAME_KEY              "snmp_log_filename"
+    #define LOGGER_ROTATION_KEY                     "snmp_rotation"
+    #define LOGGER_MAX_BACKUP_INDEX_KEY             "snmp_max_backup_index"
     #define LOGGER_MAX_FILE_SIZE_KEY                "snmp_max_filesize"
-    #define LOGGER_ROTATION_TIMING_KEY                "snmp_rotation_timing"
+    #define LOGGER_ROTATION_TIMING_KEY              "snmp_rotation_timing"
     #define LOGGER_ROTATION_TIMING_VALUE_KEY        "snmp_rotation_timing_value"
 
-    #define LOGGER_CONN_LOG_FILENAME_KEY			"snmp_conn_log_filename"
-    #define LOGGER_CONN_ROTATION_KEY				"snmp_conn_rotation"
-    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY		"snmp_conn_max_backup_index"
-    #define LOGGER_CONN_MAX_FILE_SIZE_KEY			"snmp_conn_max_filesize"
-    #define LOGGER_CONN_ROTATION_TIMING_KEY			"snmp_conn_rotation_timing"
-    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY	"snmp_conn_rotation_timing_value"
+    #define LOGGER_CONN_LOG_FILENAME_KEY            "snmp_conn_log_filename"
+    #define LOGGER_CONN_ROTATION_KEY                "snmp_conn_rotation"
+    #define LOGGER_CONN_MAX_BACKUP_INDEX_KEY        "snmp_conn_max_backup_index"
+    #define LOGGER_CONN_MAX_FILE_SIZE_KEY           "snmp_conn_max_filesize"
+    #define LOGGER_CONN_ROTATION_TIMING_KEY         "snmp_conn_rotation_timing"
+    #define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY   "snmp_conn_rotation_timing_value"
 
 #endif
 
