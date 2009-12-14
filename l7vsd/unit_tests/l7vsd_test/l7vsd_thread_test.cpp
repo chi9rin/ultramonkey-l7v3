@@ -24,6 +24,7 @@
 #include "snmpbridge_stub.h"
 #include "protocol_module_control_stub.h"
 #include "schedule_module_control_stub.h"
+#include "utility.h"
 
 #include "../../src/l7vsd.cpp"
 
@@ -36,7 +37,7 @@ public:
     boost::thread_group&    get_tg(){ return vs_threads; }
 
     bool&    get_help() { return help; }
-    bool&    get_debug() { return debug; }
+//    bool&    get_debug() { return debug; }
 
     vslist_type::iterator    search_vslist( l7vs::virtualservice_element& in_elem ){
         return l7vsd::search_vslist( in_elem );

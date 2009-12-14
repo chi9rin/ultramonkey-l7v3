@@ -26,6 +26,7 @@
 #include "snmpbridge_stub.h"
 #include "protocol_module_control_stub.h"
 #include "schedule_module_control_stub.h"
+#include "utility.h"
 
 #include "../../src/l7vsd.cpp"
 
@@ -39,7 +40,7 @@ public:
     boost::thread_group&    get_tg(){ return vs_threads; }
 
     bool&    get_help() { return help; }
-    bool&    get_debug() { return debug; }
+//    bool&    get_debug() { return debug; }
 
     boost::posix_time::ptime&    get_starttime() { return starttime; }
 
@@ -1446,9 +1447,9 @@ void    run_test(){
         // unit_test[204] l7vsd::run normal case 2(help mode) help mode check
         BOOST_CHECK_EQUAL( vsd_test.get_help(), true );
         // unit_test[205] l7vsd::run normal case 2(help mode) debug mode check
-        BOOST_CHECK_EQUAL( vsd_test.get_debug(), false );
+//        BOOST_CHECK_EQUAL( vsd_test.get_debug(), false );
         vsd_test.get_help() = false;
-        vsd_test.get_debug() = false;
+//        vsd_test.get_debug() = false;
 
         // unit_test[206] l7vsd::run normal case 2(help mode) protocol_module_control initialize call check
         BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, false );
@@ -1478,7 +1479,6 @@ void    run_test(){
         l7vs::snmpbridge::initialize_fail = false;
         l7vs::snmpbridge::finalize_called = false;
     }
-
 // normal case 3(debug mode)
     {
         int        argc    = 2;
@@ -1489,13 +1489,14 @@ void    run_test(){
         vsd_test.set_exit_requested( 0 );
     
         // unit_test[214] l7vsd::run normal case 3(debug mode) return value check
-        BOOST_CHECK_EQUAL( ret, 0 );
+        BOOST_CHECK_EQUAL( ret, -1 );
+/* デバッグモード廃止の為、削除
         // unit_test[215] l7vsd::run normal case 3(debug mode) delp mode check
         BOOST_CHECK_EQUAL( vsd_test.get_help(), false );
         // unit_test[216] l7vsd::run normal case 3(debug mode) debug mode check
-        BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
+//        BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
         vsd_test.get_help() = false;
-        vsd_test.get_debug() = false;
+//        vsd_test.get_debug() = false;
 
         // unit_test[217] l7vsd::run normal case 3(debug mode) protocol_module_control initialize call check
         BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, true );
@@ -1513,7 +1514,7 @@ void    run_test(){
         BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, true );
         // unit_test[224] l7vsd::run normal case 3(debug mode) snmpbridge finalize call check
         BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, true );
-
+*/
         l7vs::protocol_module_control::initialize_called = false;
         l7vs::protocol_module_control::finalize_called = false;
         l7vs::schedule_module_control::initialize_called = false;
@@ -1536,13 +1537,14 @@ void    run_test(){
         vsd_test.set_exit_requested( 0 );
     
         // unit_test[225] l7vsd::run normal case 4(help and debug mode) return value check
-        BOOST_CHECK_EQUAL( ret, 0 );
+        BOOST_CHECK_EQUAL( ret, -1 );
+/*デバッグモード廃止の為、削除
         // unit_test[226] l7vsd::run normal case 4(help and debug mode) delp mode check
         BOOST_CHECK_EQUAL( vsd_test.get_help(), true );
         // unit_test[227] l7vsd::run normal case 4(help and debug mode) debug mode check
-        BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
+//        BOOST_CHECK_EQUAL( vsd_test.get_debug(), true );
         vsd_test.get_help() = false;
-        vsd_test.get_debug() = false;
+//        vsd_test.get_debug() = false;
 
         // unit_test[228] l7vsd::run normal case 4(help and debug mode) protocol_module_control initialize call check
         BOOST_CHECK_EQUAL( l7vs::protocol_module_control::initialize_called, false );
@@ -1560,7 +1562,7 @@ void    run_test(){
         BOOST_CHECK_EQUAL( l7vs::snmpbridge::initialize_called, false );
         // unit_test[235] l7vsd::run normal case 4(help and debug mode) snmpbridge finalize call check
         BOOST_CHECK_EQUAL( l7vs::snmpbridge::finalize_called, false );
-
+*/
         l7vs::protocol_module_control::initialize_called = false;
         l7vs::protocol_module_control::finalize_called = false;
         l7vs::schedule_module_control::initialize_called = false;

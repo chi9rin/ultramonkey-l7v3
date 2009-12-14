@@ -33,14 +33,20 @@ SRCS2		=	\
 
 
 PARAMETER_SRCS	=	\
-			../../parameter/parameter.cpp \
-			../../parameter/parameter_impl.cpp
+			../../src/parameter.cpp \
+			../../src/parameter_impl.cpp
+#			../../parameter/parameter.cpp \
+#			../../parameter/parameter_impl.cpp
 
 LOGGER_SRCS	=	\
-			../../logger/logger.cpp \
-			../../logger/logger_impl.cpp \
-			../../logger/strict_time_based_rolling_policy.cpp \
-			../../logger/time_and_size_based_rolling_policy.cpp
+			../../src/logger.cpp \
+			../../src/logger_impl.cpp \
+			../../src/strict_time_based_rolling_policy.cpp \
+			../../src/time_and_size_based_rolling_policy.cpp
+#			../../logger/logger.cpp \
+#			../../logger/logger_impl.cpp \
+#			../../logger/strict_time_based_rolling_policy.cpp \
+#			../../logger/time_and_size_based_rolling_policy.cpp
 
 .SUFFIXES:	.o .cpp
 .cpp.o:
