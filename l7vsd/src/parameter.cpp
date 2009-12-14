@@ -49,24 +49,24 @@ l7vs::Parameter::Parameter(){
         switch( param_cat ){
         case LOG_CAT_L7VSADM_PARAMETER:
             // DEBUG LOG
-            if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-                std::stringstream buffer;
-                buffer << "Call get_instance().init() :false \n";
-                buffer << "    param_cat : LOG_CAT_L7VSDADM_PARAMETER";
-                Logger::putLogDebug( param_cat, 1, buffer.str(),
-                                     __FILE__, __LINE__ );
-            }
+//            if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//                std::stringstream buffer;
+//                buffer << "Call get_instance().init() :false \n";
+//                buffer << "    param_cat : LOG_CAT_L7VSDADM_PARAMETER";
+//                Logger::putLogDebug( param_cat, 1, buffer.str(),
+//                                     __FILE__, __LINE__ );
+//            }
             // DEBUG LOG END
             break;
         default:
             // DEBUG LOG
-            if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-                std::stringstream buffer;
-                buffer << "Call get_instance().init() :false exit(1)ROOT\n";
-                buffer << "    param_cat : " << param_cat;
-                Logger::putLogDebug( param_cat, 2, buffer.str(),
-                                     __FILE__, __LINE__ );
-            }
+//            if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//                std::stringstream buffer;
+//                buffer << "Call get_instance().init() :false exit(1)ROOT\n";
+//                buffer << "    param_cat : " << param_cat;
+//                Logger::putLogDebug( param_cat, 2, buffer.str(),
+//                                     __FILE__, __LINE__ );
+//            }
             // DEBUG LOG END
             exit(1);
         }
@@ -87,14 +87,14 @@ l7vs::Parameter::~Parameter(){
 bool l7vs::Parameter::init( const PARAMETER_COMPONENT_TAG comp,
                             const std::string& filename ){
     // DEBUG LOG
-    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-        std::stringstream buffer;
-        buffer << "in_function : bool l7vs::Parameter::init( ";
-        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-        buffer << "const std::string& filename = " << filename ;
-        buffer << " )";
-        Logger::putLogDebug( param_cat, 3, buffer.str(), __FILE__, __LINE__ );
-    }
+//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//        std::stringstream buffer;
+//        buffer << "in_function : bool l7vs::Parameter::init( ";
+//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
+//        buffer << "const std::string& filename = " << filename ;
+//        buffer << " )";
+//        Logger::putLogDebug( param_cat, 3, buffer.str(), __FILE__, __LINE__ );
+//    }
     // DEBUG LOG END
     
     ParameterImpl& impl = ParameterImpl::get_instance();
@@ -108,14 +108,14 @@ bool l7vs::Parameter::init( const PARAMETER_COMPONENT_TAG comp,
 bool l7vs::Parameter::read_file( const PARAMETER_COMPONENT_TAG comp,
                                  const std::string& filename ){
     // DEBUG LOG
-    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-        std::stringstream buffer;
-        buffer << "in_function : bool l7vs::Parameter::read_file( ";
-        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-        buffer << "const std::string& filename = " << filename ;
-        buffer << " )";
-        Logger::putLogDebug( param_cat, 4, buffer.str(), __FILE__, __LINE__ );
-    }
+//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//        std::stringstream buffer;
+//        buffer << "in_function : bool l7vs::Parameter::read_file( ";
+//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
+//        buffer << "const std::string& filename = " << filename ;
+//        buffer << " )";
+//        Logger::putLogDebug( param_cat, 4, buffer.str(), __FILE__, __LINE__ );
+//    }
     // DEBUG LOG END
     
     ParameterImpl& impl = ParameterImpl::get_instance();
@@ -130,16 +130,16 @@ int l7vs::Parameter::get_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
                               const std::string& key,
                               l7vs::error_code& err ){
     // DEBUG LOG
-    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-        std::stringstream buffer;
-        buffer << "in_function : int l7vs::Parameter::get_int( ";
-        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-        buffer << "const std::string& key = " << key << " ";
-        buffer << "l7vs::error_code& err= ";
-        buffer << (err ? ("true,"+err.get_message()) : "false") ;
-        buffer << " )";
-        Logger::putLogDebug( param_cat, 5, buffer.str(), __FILE__, __LINE__ );
-    }
+//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//        std::stringstream buffer;
+//        buffer << "in_function : int l7vs::Parameter::get_int( ";
+//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
+//        buffer << "const std::string& key = " << key << " ";
+//        buffer << "l7vs::error_code& err= ";
+//        buffer << (err ? ("true,"+err.get_message()) : "false") ;
+//        buffer << " )";
+//        Logger::putLogDebug( param_cat, 5, buffer.str(), __FILE__, __LINE__ );
+//    }
     // DEBUG LOG END
     
     ParameterImpl& impl = ParameterImpl::get_instance();
@@ -154,16 +154,16 @@ std::string l7vs::Parameter::get_string( const l7vs::PARAMETER_COMPONENT_TAG com
                                          const std::string& key,
                                          l7vs::error_code& err ){
     // DEBUG LOG
-    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-        std::stringstream buffer;
-        buffer << "in_function : int l7vs::Parameter::get_string( ";
-        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-        buffer << "const std::string& key = " << key << " ";
-        buffer << "l7vs::error_code& err= ";
-        buffer << (err ? ("true,"+err.get_message()) : "false") ;
-        buffer << " )";
-        Logger::putLogDebug( param_cat, 6, buffer.str(), __FILE__, __LINE__ );
-    }
+//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//        std::stringstream buffer;
+//        buffer << "in_function : int l7vs::Parameter::get_string( ";
+//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
+//        buffer << "const std::string& key = " << key << " ";
+//        buffer << "l7vs::error_code& err= ";
+//        buffer << (err ? ("true,"+err.get_message()) : "false") ;
+//        buffer << " )";
+//        Logger::putLogDebug( param_cat, 6, buffer.str(), __FILE__, __LINE__ );
+//    }
     // DEBUG LOG END
     
     ParameterImpl& impl = ParameterImpl::get_instance();
@@ -181,18 +181,18 @@ void l7vs::Parameter::get_multistring( const l7vs::PARAMETER_COMPONENT_TAG comp,
                                        std::vector<std::string>& retvec,
                                        l7vs::error_code& err ){
     // DEBUG LOG
-    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
-        std::stringstream buffer;
-        buffer << "in_function : int l7vs::Parameter::get_multistring( ";
-        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-        buffer << "const std::string& key = " << key << " ";
-        buffer << "std::vector<std::string>& retvec = (size)";
-        buffer << retvec.size() << " ";
-        buffer << "l7vs::error_code& err= ";
-        buffer << (err ? ("true,"+err.get_message()) : "false") ;
-        buffer << " )";
-        Logger::putLogDebug( param_cat, 7, buffer.str(), __FILE__, __LINE__ );
-    }
+//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( param_cat ) ) ) {
+//        std::stringstream buffer;
+//        buffer << "in_function : int l7vs::Parameter::get_multistring( ";
+//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
+//        buffer << "const std::string& key = " << key << " ";
+//        buffer << "std::vector<std::string>& retvec = (size)";
+//        buffer << retvec.size() << " ";
+//        buffer << "l7vs::error_code& err= ";
+//        buffer << (err ? ("true,"+err.get_message()) : "false") ;
+//        buffer << " )";
+//        Logger::putLogDebug( param_cat, 7, buffer.str(), __FILE__, __LINE__ );
+//    }
     // DEBUG LOG END
     
     ParameterImpl&    impl = ParameterImpl::get_instance();
