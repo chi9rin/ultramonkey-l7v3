@@ -1327,7 +1327,7 @@ sub ld_setup {
                     $v->{option}{flags} .= ' -q ' . $v->{qosdown};
                 }
                 if ( defined $v->{sslconfigfile} ) {
-                    $v->{option}{flags} .= ' -S ' . $v->{sslconfigfile};
+                    $v->{option}{flags} .= ' -z ' . $v->{sslconfigfile};
                     $v->{other_virtual_key} .= ' ' . $v->{sslconfigfile};
                 }
                 else {
@@ -1841,6 +1841,10 @@ sub ld_start {
     
             # remove remaining entries for real servers
             for my $remove_real_ip_port (keys %$or) {
+                if ( !is_ip ($remove_real_ip_port) 
+                  && !is_ip6($remove_real_ip_port)){
+                    next;
+                }
                 ld_delete_real( $nv, $or->{$remove_real_ip_port} );
                 delete $or->{$remove_real_ip_port};
             }
@@ -1931,6 +1935,11 @@ sub ld_stop {
             }
             if ( exists $srv->{$vid} ) {
                 for my $rid ( keys %{ $srv->{$vid} } ) {
+                    if ( defined $rid 
+                      ||(!is_ip ($rid)
+                      && !is_ip6($rid))){
+                        next;
+                    }
                     ld_delete_real( $v, $srv->{$vid}{$rid} );
                 }
             }
