@@ -185,28 +185,41 @@ public:
                                         const std::string& message,
                                         const char *file,
                                         int line){
-        std::stringstream	buf; 
+        std::stringstream   buf; 
 
-        std::string logger_process_id = LOGGER_PROCESS_ID;
 
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_PROTOCOL_MODULE_ID
+                         % LOG_LV_FATAL
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         case    LOG_CAT_SCHEDULE:
-            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_SCHEDULE_MODULE_ID
+                         % LOG_LV_FATAL
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         default:
-            logger_process_id = LOGGER_PROCESS_ID;
-        }
 
-        buf << boost::format( "%s%d%02d%05d %s %s" )
-                % logger_process_id
-                % LOG_LV_FATAL
-                % cat
-                % message_id
-                % message.c_str()
-                % hostname;
+            buf << boost::format( "%s%d%02d%05d %s %s" )
+                         % LOGGER_PROCESS_ID
+                         % LOG_LV_FATAL
+                         % cat
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
+        }
 
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
@@ -241,26 +254,38 @@ public:
                                         int line){
         std::stringstream    buf;
 
-        std::string logger_process_id = LOGGER_PROCESS_ID;
-
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_PROTOCOL_MODULE_ID
+                         % LOG_LV_ERROR
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         case    LOG_CAT_SCHEDULE:
-            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_SCHEDULE_MODULE_ID
+                         % LOG_LV_ERROR
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         default:
-            logger_process_id = LOGGER_PROCESS_ID;
-        }
 
-        buf << boost::format( "%s%d%02d%05d %s %s" )
-                % logger_process_id
-                % LOG_LV_ERROR
-                % cat
-                % message_id
-                % message.c_str()
-                % hostname;
+            buf << boost::format( "%s%d%02d%05d %s %s" )
+                         % LOGGER_PROCESS_ID
+                         % LOG_LV_ERROR
+                         % cat
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
+        }
 
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
@@ -295,26 +320,38 @@ public:
                                         int line){
         std::stringstream buf;
 
-        std::string logger_process_id = LOGGER_PROCESS_ID;
-
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_PROTOCOL_MODULE_ID
+                         % LOG_LV_WARN
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         case    LOG_CAT_SCHEDULE:
-            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_SCHEDULE_MODULE_ID
+                         % LOG_LV_WARN
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         default:
-            logger_process_id = LOGGER_PROCESS_ID;
-        }
 
-        buf << boost::format( "%s%d%02d%05d %s %s" )
-                % logger_process_id
-                % LOG_LV_WARN
-                % cat
-                % message_id
-                % message.c_str()
-                % hostname;
+            buf << boost::format( "%s%d%02d%05d %s %s" )
+                         % LOGGER_PROCESS_ID
+                         % LOG_LV_WARN
+                         % cat
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
+        }
 
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
@@ -344,28 +381,40 @@ public:
                                         const char *file,
                                         int line){
         std::stringstream    buf;
-       
-        std::string logger_process_id = LOGGER_PROCESS_ID;
-
+      
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_PROTOCOL_MODULE_ID
+                         % LOG_LV_INFO
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         case    LOG_CAT_SCHEDULE:
-            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_SCHEDULE_MODULE_ID
+                         % LOG_LV_INFO
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         default:
-            logger_process_id = LOGGER_PROCESS_ID;
+
+            buf << boost::format( "%s%d%02d%05d %s %s" )
+                         % LOGGER_PROCESS_ID
+                         % LOG_LV_INFO
+                         % cat
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
         }
 
-        buf << boost::format( "%s%d%02d%05d %s %s" )
-                % logger_process_id
-                % LOG_LV_INFO
-                % cat
-                % message_id
-                % message.c_str()
-                % hostname;
- 
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
             log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(    log4cxx::Level::getInfo(),
@@ -398,22 +447,37 @@ public:
 
         switch( cat ){
         case    LOG_CAT_PROTOCOL:
-            logger_process_id = LOGGER_PROCESS_PROTOCOL_MODULE_ID;
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_PROTOCOL_MODULE_ID
+                         % LOG_LV_DEBUG
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         case    LOG_CAT_SCHEDULE:
-            logger_process_id = LOGGER_PROCESS_SCHEDULE_MODULE_ID; 
+
+            buf << boost::format( "%s%d%07d %s %s" )
+                         % LOGGER_PROCESS_SCHEDULE_MODULE_ID
+                         % LOG_LV_DEBUG
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
             break;
         default:
-            logger_process_id = LOGGER_PROCESS_ID;
+
+            buf << boost::format( "%s%d%02d%05d %s %s" )
+                         % LOGGER_PROCESS_ID
+                         % LOG_LV_DEBUG
+                         % cat
+                         % message_id
+                         % message.c_str()
+                         % hostname;
+
         }
 
-        buf << boost::format( "%s%d%02d%05d %s %s" )
-                % logger_process_id
-                % LOG_LV_DEBUG
-                % cat
-                % message_id
-                % message.c_str()
-                % hostname;
 
         try {
             category_name_map_type::iterator categoryname_itr = category_name_map.find( cat );
