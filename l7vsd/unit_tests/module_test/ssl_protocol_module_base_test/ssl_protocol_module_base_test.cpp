@@ -80,6 +80,9 @@ public:
         return result;
     }
 
+    void get_option_info(std::string& option) {
+    }
+
     void register_schedule(tcp_schedule_func_type inschedule) {
     }
 

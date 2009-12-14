@@ -6,7 +6,7 @@
 TARGET		= protocol_module_base_ut
 CPP			= g++
 CPPFLAGS	= -g -Wall -Werror -pthread -O0 -DMAX_BUFFER_SIZE=65535u
-INCLUDES	=	-I../../../logger 
+INCLUDES	=	-I../../../include 
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt
 

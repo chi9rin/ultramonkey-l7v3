@@ -1626,6 +1626,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                 }
             }
         }
+
+        // set last status
+        threaddata->last_status = status;
     }
     catch (int e)
     {
@@ -3049,7 +3052,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                        "handle_realserver_recv() : check_ssl_record_sendable() END. thread id : %d.");
+                                        "handle_realserver_recv() : check_ssl_record_sendable() end. thread id : %d.");
                 formatter % boost::this_thread::get_id();
                 putLogDebug(300106, formatter.str(), __FILE__, __LINE__);
             }
@@ -3355,7 +3358,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                                        "handle_sorryserver_recv() : check_ssl_record_sendable() END. thread id : %d.");
+                                        "handle_sorryserver_recv() : check_ssl_record_sendable() end. thread id : %d.");
                 formatter % boost::this_thread::get_id();
                 putLogDebug(300118, formatter.str(), __FILE__, __LINE__);
             }
@@ -3883,7 +3886,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
         boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                 "handle_client_disconnect(const boost::thread::id thread_id) : "
                                 "thread_id = %d.");
-        formatter % thread_id % FINALIZE;
+        formatter % thread_id;
         putLogDebug(300137, formatter.str(), __FILE__, __LINE__);
     }
     /*------DEBUG LOG END------*/
@@ -4064,9 +4067,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
             putLogDebug(300143, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
-	
+    
         // set return status
-	status = FINALIZE;
+    status = FINALIZE;
     }
     catch (const std::exception& ex)
     {
@@ -4077,7 +4080,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
         putLogError(300082, formatter.str(), __FILE__, __LINE__ );
 
         // set return status
-	status = FINALIZE;
+    status = FINALIZE;
     }
     catch (...)
     {
@@ -4089,7 +4092,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
         putLogError(300083, formatter.str(), __FILE__, __LINE__ );
 
         // set return status
-	status = FINALIZE;
+    status = FINALIZE;
     }
 
     /*-------- DEBUG LOG --------*/
@@ -4188,14 +4191,14 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
             status = threaddata->last_status;
         }
 
-        // set sorry flag on
-        threaddata->sorry_flag = SORRY_FLAG_ON;
+        // set sorry flag off
+        threaddata->sorry_flag = SORRY_FLAG_OFF;
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
-                "handle_sorry_disable(const boost::thread::id thread_id) : SORRY_FLAG_ON. thread id : %d.");
+                "handle_sorry_disable(const boost::thread::id thread_id) : SORRY_FLAG_OFF. thread id : %d.");
         formatter % boost::this_thread::get_id();
         putLogDebug(300147, formatter.str(), __FILE__, __LINE__ );
         }
@@ -4217,7 +4220,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
         /*------DEBUG LOG END------*/
 
         // set return status
-	status = FINALIZE;
+    status = FINALIZE;
     }
     catch (const std::exception& ex)
     {
@@ -4228,7 +4231,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
         putLogError(300085, formatter.str(), __FILE__, __LINE__ );
 
         // set return status
-	status = FINALIZE;
+    status = FINALIZE;
     }
     catch (...)
     {
@@ -4240,7 +4243,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
         putLogError(300086, formatter.str(), __FILE__, __LINE__ );
 
         // set return status
-	status = FINALIZE;
+    status = FINALIZE;
     }
 
     /*-------- DEBUG LOG --------*/

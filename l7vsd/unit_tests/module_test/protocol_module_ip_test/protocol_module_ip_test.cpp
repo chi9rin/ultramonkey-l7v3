@@ -51,53 +51,53 @@ LOG_LEVEL_TAG    stb_getloglevel_is_none()
 
 void    stb_putLogFatal( const unsigned int message_id, const std::string& message, const char* file, int line)
 {
-    //    cout << boost::format( "%s%d%06d %s %s" )
-    //                % "PM"
-    //                % LOG_LV_FATAL
-    //                % message_id
-    //                % message.c_str()
-    //                % hostname;
-    //    cout << endl;
+//        cout << boost::format( "%s%d%06d %s %s" )
+//                    % "PM"
+//                    % LOG_LV_FATAL
+//                    % message_id
+//                    % message.c_str()
+//                    % hostname;
+//        cout << endl;
 }
 void    stb_putLogError( const unsigned int message_id, const std::string& message, const char* file, int line)
 {
-    //    cout << boost::format( "%s%d%06d %s %s" )
-    //                % "PM"
-    //                % LOG_LV_ERROR
-    //                % message_id
-    //                % message.c_str()
-    //                % hostname;
-    //    cout << endl;
+//        cout << boost::format( "%s%d%06d %s %s" )
+//                    % "PM"
+//                    % LOG_LV_ERROR
+//                    % message_id
+//                    % message.c_str()
+//                    % hostname;
+//        cout << endl;
 }
 void    stb_putLogWarn( const unsigned int message_id, const std::string& message, const char* file, int line)
 {
-    //    cout << boost::format( "%s%d%06d %s %s" )
-    //                % "PM"
-    //                % LOG_LV_WARN
-    //                % message_id
-    //                % message.c_str()
-    //                % hostname;
-    //    cout << endl;
+//        cout << boost::format( "%s%d%06d %s %s" )
+//                    % "PM"
+//                    % LOG_LV_WARN
+//                    % message_id
+//                    % message.c_str()
+//                    % hostname;
+//        cout << endl;
 }
 void    stb_putLogInfo( const unsigned int message_id, const std::string& message, const char* file, int line)
 {
-    //    cout << boost::format( "%s%d%06d %s %s" )
-    //                % "PM"
-    //                % LOG_LV_INFO
-    //                % message_id
-    //                % message.c_str()
-    //                % hostname;
-    //    cout << endl;
+//        cout << boost::format( "%s%d%06d %s %s" )
+//                    % "PM"
+//                    % LOG_LV_INFO
+//                    % message_id
+//                    % message.c_str()
+//                    % hostname;
+//        cout << endl;
 }
 void    stb_putLogDebug( const unsigned int message_id, const std::string& message, const char* file, int line)
 {
-    //    cout << boost::format( "%s%d%06d %s %s" )
-    //                % "PM"
-    //                % LOG_LV_DEBUG
-    //                % message_id
-    //                % message.c_str()
-    //                % hostname;
-    //    cout << endl;
+//        cout << boost::format( "%s%d%06d %s %s" )
+//                    % "PM"
+//                    % LOG_LV_DEBUG
+//                    % message_id
+//                    % message.c_str()
+//                    % hostname;
+//        cout << endl;
 }
 
 //new operator function
@@ -2774,7 +2774,7 @@ public:
 
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);
             BOOST_CHECK_EQUAL(data_ptr->last_status, SORRYSERVER_SELECT);
-			BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
+            BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
             this->session_thread_data_map.clear();
             delete this->replication_data_processor;
             delete this->ip_data_processor;
@@ -4204,7 +4204,7 @@ public:
             BOOST_CHECK_EQUAL(ret, SORRYSERVER_SELECT);
             BOOST_CHECK_EQUAL(data_ptr->last_status, SORRYSERVER_SELECT);
             BOOST_CHECK_EQUAL((rs_endpoint == tmp_endpoint), true);
-			BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
+            BOOST_CHECK_EQUAL(data_ptr->sorry_flag, SORRY_FLAG_ON);
 
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
@@ -6370,14 +6370,17 @@ public:
             size_t recvlen = strlen(recvbuffer.data());
             boost::asio::ip::tcp::endpoint ep;
             status = this->handle_realserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
-            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_length, strlen(recvbuffer.data()));
-            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_offset, 0u);
-            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_message_rest_size, strlen(recvbuffer.data()) - 7 + 3);
-            BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_state, HTTP_HEADER);
-            BOOST_CHECK_EQUAL(status, this->session_thread_data_map[boost::this_thread::get_id()]->last_status);
-            BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
-            delete[] down_thread_data->data_buffer;
-            this->session_thread_data_map.erase(boost::this_thread::get_id());
+            {
+                boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
+                BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_length, strlen(recvbuffer.data()));
+                BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_offset, 0u);
+                BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->current_message_rest_size, strlen(recvbuffer.data()) - 7 + 3);
+                BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_state, HTTP_HEADER);
+                BOOST_CHECK_EQUAL(status, this->session_thread_data_map[boost::this_thread::get_id()]->last_status);
+                BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
+                delete[] down_thread_data->data_buffer;
+                this->session_thread_data_map.erase(boost::this_thread::get_id());
+            }
         }
     }
 

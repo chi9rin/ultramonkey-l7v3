@@ -4,6 +4,8 @@ MAX_BUFFER_SIZE	= @l7vs_max_buffer_size@
 AM_CPPFLAGS		= \
 		-g -O0 -Wall -Werror -fPIC -pthread \
 		-I../../include \
+		-I../../logger \
+		-I../../parameter \
 		-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE)
 
 lib_LTLIBRARIES	=	libprotomod_cinsert.la \

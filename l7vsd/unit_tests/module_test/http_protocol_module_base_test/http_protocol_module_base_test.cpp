@@ -94,6 +94,7 @@ check_message_result    add_parameter( const std::vector<std::string>& args ){
     check_message_result    result;
     return result;
 }
+void	get_option_info( std::string& option ){}
 void    register_schedule( tcp_schedule_func_type inschedule ){}
 void    register_schedule( udp_schedule_func_type inschedule ){}
 EVENT_TAG    handle_session_initialize(

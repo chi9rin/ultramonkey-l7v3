@@ -25,6 +25,7 @@ public:
 
     check_message_result    set_parameter( const std::vector<std::string>& args );
     check_message_result    add_parameter( const std::vector<std::string>& args );
+    void    get_option_info( std::string& option );
 
     void    register_schedule( udp_schedule_func_type inschedule );
 
@@ -180,7 +181,8 @@ protocol_module_test2::add_parameter( const std::vector<std::string>& args ){
     result.flag = true;
     return result;
 }
-
+void
+protocol_module_test2::get_option_info( std::string& option ){}
 void
 protocol_module_test2::register_schedule( protocol_module_base::udp_schedule_func_type inschedule ){}
 
