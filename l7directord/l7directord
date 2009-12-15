@@ -3881,6 +3881,9 @@ sub get_ip_port {
     my ($host, $checkport) = @_;
     my $server = defined $host && defined $host->{server} && defined $host->{server}{ip}
                     ? $host->{server}{ip  } : q{};
+    if (is_ip6($server)) {
+        $server = sprintf "[%s]" , $server;
+    }
     my $port   = defined $checkport ? $checkport
                : defined $host && defined $host->{server} && defined $host->{server}{port}
                     ? $host->{server}{port} : q{};
