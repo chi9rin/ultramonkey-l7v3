@@ -1,15 +1,15 @@
 #include <pthread.h>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
-#include <boost/test/unit_test.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+//#include <boost/test/unit_test.hpp>
+//#include <boost/archive/text_oarchive.hpp>
+//#include <boost/archive/text_iarchive.hpp>
 
 #include <vector>
 #include "../../include/atomic.h"
 #include "rdtsc64.h"
 
-##  このテストコードでは、Atomicとwrlock.の確認を同時に実施します。
+//  このテストコードでは、Atomicとwrlock.の確認を同時に実施します。
 
 
 typedef    l7vs::atomic< int >    atomic_int_t;
