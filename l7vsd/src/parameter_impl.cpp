@@ -47,7 +47,6 @@
 #endif
 
 static bool create_map_flag = false;
-static std::vector<std::string> file_vector;
 
 //
 //! Initialize ParameterImpl class
@@ -55,29 +54,13 @@ static std::vector<std::string> file_vector;
 //! @return false   failer
 bool l7vs::ParameterImpl::init(){
 
-    // DEBUG LOG
-//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//        std::stringstream buffer;
-//        buffer << "in_function : l7vs::ParameterImpl::init()";
-//        Logger::putLogDebug( logcat, 8, buffer.str(), __FILE__, __LINE__ );
-//    }
-    // DEBUG LOG END
-
     boost::mutex::scoped_lock lock( create_mutex );
-    if( create_map_flag ){
-        // DEBUG LOG 
-//        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//            Logger::putLogDebug( logcat, 9, "It's initialized already.",
-//                                 __FILE__, __LINE__ );
-//        }
-        // DEBUG LOG END
-         return true;
-    }
+
+    if( create_map_flag ) return true;
 
     tag_section_table_map.clear();
     multistringMap.clear();
     intMap.clear();
-    file_vector.clear();
     tag_section_table_map[PARAM_COMP_L7VSD]          = "l7vsd";
     tag_section_table_map[PARAM_COMP_COMMAND]        = "command"; 
     tag_section_table_map[PARAM_COMP_SESSION]        = "session";
@@ -98,50 +81,19 @@ bool l7vs::ParameterImpl::init(){
 //! @return true  success
 //! @return false failer
 bool l7vs::ParameterImpl::init( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                const std::string& filename ){
-    // DEBUG LOG
-//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//        std::stringstream buffer;
-//        buffer << "in_function : bool l7vs::ParameterImpl::init( ";
-//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-//        buffer << "const std::string& filename = " << filename ;
-//        buffer << " )";
-//        Logger::putLogDebug( logcat, 10, buffer.str(), __FILE__, __LINE__ );
-//    }
-    // DEBUG LOG END
+                                const std::string& file_name ){
 
     boost::mutex::scoped_lock lock( create_mutex );
+
     if( !create_map_flag ){
         // parameter_impl isn't initialized
-        Logger::putLogFatal( logcat, 2, "NOT INITIALIZED", __FILE__, __LINE__ );
+        Logger::putLogFatal( logcat, 4, "NOT INITIALIZED", __FILE__, __LINE__ );
         return false;
     }
 
-    std::vector<std::string>::iterator itr = find( file_vector.begin(),
-                                                   file_vector.end(),
-                                                   filename );
-
-    if( file_vector.end() != itr ) return true;
-
     // read target file
-    bool read_result = read_file( comp, filename );
+    bool read_result = read_file( comp, file_name );
 
-    if( !read_result ){
-        // DEBUG LOG
-//        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//            std::stringstream buffer;
-//            buffer << "call_function false : bool read_file( ";
-//            buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-//            buffer << "const std::string& filename = " << filename;
-//            buffer << " )";
-//            Logger::putLogDebug( logcat, 11, buffer.str(), __FILE__, __LINE__ );
-//        }
-        return read_result;
-    }
-    else{
-        // add file_vector
-        file_vector.push_back( filename );
-    }
     return read_result;
 }
 
@@ -151,18 +103,7 @@ bool l7vs::ParameterImpl::init( const l7vs::PARAMETER_COMPONENT_TAG comp,
 //! @return true read success
 //! @return false read false
 bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                     const std::string& filename ){
-
-    // DEBUG LOG
-//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//        std::stringstream buffer;
-//        buffer << "in_function : bool l7vs::ParameterImpl::read_file( ";
-//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-//        buffer << "const std::string& filename = " << filename ;
-//        buffer << " )";
-//        Logger::putLogDebug( logcat, 12, buffer.str(), __FILE__, __LINE__ );
-//    }
-    // DEBUG LOG END
+                                     const std::string& file_name ){
 
     typedef std::vector< std::string >               split_vector_type;
     typedef std::pair< std::string, int >            int_pair_type;
@@ -170,15 +111,15 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
 
     boost::mutex::scoped_lock lock( param_mutex );
     std::string      line;
-    std::ifstream    ifs( filename.c_str() );
+    std::ifstream    ifs( file_name.c_str() );
     multistring_map_type  multistring_map;
     int_map_type     int_map;
 
     if( !ifs ){
         // don't open config file.
         std::stringstream buf;
-        buf << "CONFIG FILE NOT OPEN : " << filename;
-        Logger::putLogFatal( logcat, 3, buf.str() , __FILE__, __LINE__ );
+        buf << "CONFIG FILE NOT OPEN : " << file_name;
+        Logger::putLogFatal( logcat, 5, buf.str() , __FILE__, __LINE__ );
         return false;
     }
 
@@ -210,7 +151,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
             else{
                 boost::format formatter( "section tag false : %1%" );
                 formatter % split_vec[0];
-                Logger::putLogFatal( logcat, 4, formatter.str(),
+                Logger::putLogFatal( logcat, 6, formatter.str(),
                                      __FILE__, __LINE__ );
                 return false;
             }
@@ -222,14 +163,15 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                 boost::format formatter(
                     "don't match first section. key = %1%, value = %2%" );
                 formatter % split_vec[0] % split_vec[1];
-                Logger::putLogFatal( logcat, 5, formatter.str(),
+                Logger::putLogFatal( logcat, 7, formatter.str(),
                                      __FILE__, __LINE__ );
                 return false;
             }
             // create section.key
             boost::algorithm::trim( split_vec[0] );
             boost::algorithm::trim( split_vec[1] );
-            std::string    key = section_string;
+            std::string key = file_name + "#";
+            key += section_string;
             key += ".";
             key += split_vec[0];
             // insert string value
@@ -244,21 +186,11 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                     // Other component overwrite tmp multimap
 
                     // get compornent tag from section_string
-                    for( std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator section_itr = tag_section_table_map.begin(); section_itr != tag_section_table_map.end(); ++section_itr ){
+                    for( std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator section_itr = tag_section_table_map.begin();
+                         section_itr != tag_section_table_map.end();
+                         ++section_itr ){
                         if( section_itr->second == section_string &&
                             section_itr->first != PARAM_COMP_SSL ){
-                            // DEBUG LOG
-                            if( unlikely( LOG_LV_DEBUG ==
-                                          Logger::getLogLevel( logcat ) ) ) {
-                                boost::format formatter(
-                     "erase multistring_map same key. key = %1%, value = %2%" );
-                                formatter % multistring_map.find(key)->first
-                                          % multistring_map.find(key)->second;
-                                Logger::putLogError( logcat, 1, formatter.str(),
-                                                     __FILE__, __LINE__ );
-                            }
-                            // DEBUG LOG END
-
                             multistring_map.erase( key );
                             break;
                         }
@@ -276,17 +208,6 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                     // check same key
                     if( int_map.end() != int_map.find( key ) ){
                         // Every component overwrite
-
-                        // DEBUG LOG
-                        if( unlikely( LOG_LV_DEBUG ==
-                                      Logger::getLogLevel( logcat ) ) ) {
-                            boost::format formatter(
-                            "erase int_map same key. key = %1%, value = %2%" );
-                            formatter % int_map.find(key)->first
-                                      % int_map.find(key)->second;
-                            Logger::putLogError( logcat, 2, formatter.str(),
-                                                 __FILE__, __LINE__ );
-                        }
                         int_map.erase( key );
                     }
                     // tmp map insert
@@ -297,7 +218,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                         boost::format formatter(
                    "section.key is duplicate. section.key = %1%, value = %2%" );
                         formatter % key % intvalue;
-                        Logger::putLogError( logcat, 3, formatter.str(),
+                        Logger::putLogError( logcat, 1, formatter.str(),
                                              __FILE__, __LINE__ );
                     }
                 }
@@ -305,7 +226,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                 catch( boost::bad_lexical_cast& cast ){
                     boost::format formatter( "value is not numeric : %1%" );
                     formatter % split_vec[1];
-                    Logger::putLogFatal( logcat, 6, formatter.str(),
+                    Logger::putLogFatal( logcat, 8, formatter.str(),
                                          __FILE__, __LINE__ );
                 }
             }
@@ -314,7 +235,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
         else{
             boost::format formatter( "line is not support line = %1%" );
             formatter % line;
-            Logger::putLogError( logcat, 4, formatter.str(),
+            Logger::putLogError( logcat, 2, formatter.str(),
                                  __FILE__, __LINE__ );
         }
     }
@@ -334,7 +255,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
     }
     // comp error
     else if( comp == PARAM_COMP_NOCAT ){
-        Logger::putLogError( logcat, 5,
+        Logger::putLogError( logcat, 3,
                              "parameter_component_none is not suport",
                              __FILE__, __LINE__ );
     }
@@ -347,24 +268,27 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
         // tmp int map copy
         for( int_map_type::iterator itr = intMap.begin();
              itr != intMap.end(); ++itr ){
+            split_vector_type file_vec;
+            boost::algorithm::split( file_vec, itr->first,
+                                     boost::algorithm::is_any_of( "#" ) );
             split_vector_type split_vec;
-            boost::algorithm::split( split_vec, itr->first,
+            boost::algorithm::split( split_vec, file_vec[1],
                                      boost::algorithm::is_any_of( "." ) );
             // target section
-            if( split_vec[0] == section ){
+            if( (file_vec[0] + split_vec[0]) == (file_name + section) ){
                 // erase section
                 intMap.erase( itr );
                 if( intMap.empty() ){
                     break;
                 }
-                else{
-                    itr = intMap.begin();
-                }
             }
         }
         BOOST_FOREACH( int_pair_type p, int_map ){
+            split_vector_type file_vec;
+            boost::algorithm::split( file_vec, p.first,
+                                     boost::algorithm::is_any_of( "#" ) );
             split_vector_type split_vec;
-            boost::algorithm::split( split_vec, p.first,
+            boost::algorithm::split( split_vec, file_vec[1],
                                      boost::algorithm::is_any_of( "." ) );
             // target section
             if( split_vec[0] == section ){
@@ -375,7 +299,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                     boost::format formatter(
                         "not insert key = %1%, value = %2% " );
                     formatter % p.first % p.second;
-                    Logger::putLogError( logcat, 6, formatter.str(),
+                    Logger::putLogError( logcat, 4, formatter.str(),
                                          __FILE__, __LINE__ );
                 }
             }
@@ -384,27 +308,28 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
         // tmp multistring map copy
         for( multistring_map_type::iterator itr = multistringMap.begin();
              itr != multistringMap.end(); ++itr ){
+            split_vector_type file_vec;
+            boost::algorithm::split( file_vec, itr->first,
+                                     boost::algorithm::is_any_of( "#" ) );
             split_vector_type split_vec;
-            boost::algorithm::split( split_vec, itr->first,
+            boost::algorithm::split( split_vec, file_vec[1],
                                      boost::algorithm::is_any_of( "." ) );
             // target section
-            if( ( split_vec[0] == section ) &&
-                ( comp != PARAM_COMP_SSL  )){
-                // only SSL component multistring
+            if( (file_vec[0] + split_vec[0]) == (file_name + section) ){
                 // erase section
                 multistringMap.erase( itr );
                 if( multistringMap.empty() )
                 {
                     break;
                 }
-                else{
-                    itr = multistringMap.begin();
-                }
             }
         }
         BOOST_FOREACH( string_pair_type p, multistring_map ){
+            split_vector_type file_vec;
+            boost::algorithm::split( file_vec, p.first,
+                                     boost::algorithm::is_any_of( "#" ) );
             split_vector_type split_vec;
-            boost::algorithm::split( split_vec, p.first,
+            boost::algorithm::split( split_vec, file_vec[1],
                                      boost::algorithm::is_any_of( "." ) );
             // target section
             if( split_vec[0] == section ){
@@ -417,34 +342,29 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
 }
 
 //! get a integer parameter
-//! @param[in]    PARAMETER_COMPONENT_TAG
-//! @param[in]    const std::string
-//! @param[out]   error code
+//! @param[in]    comp          section TAG
+//! @param[in]    key           key string
+//! @param[out]   err           error_code
+//! @param[in]    file_name     configuration file name
 //! @return       integer value
 int l7vs::ParameterImpl::get_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
                                   const std::string& key,
-                                  l7vs::error_code& err ){
-    // DEBUG LOG
-//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//        std::stringstream buffer;
-//        buffer << "in_function : bool l7vs::ParameterImpl::get_int( ";
-//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-//        buffer << "const std::string& key = " << key << " ";
-//        buffer << "l7vs::error_code& err= ";
-//        buffer << (err ? ("true,"+err.get_message()) : "false") ;
-//        buffer << " )";
-//        Logger::putLogDebug( logcat, 13, buffer.str(), __FILE__, __LINE__ );
-//    }
-    // DEBUG LOG END
+                                  l7vs::error_code& err,
+                                  const std::string& file_name ){
 
     boost::mutex::scoped_lock lock( param_mutex );
+
     // error_code clear
     err.setter(false, "");
     // find section
     std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
         section_table_iterator = tag_section_table_map.find( comp );
-    int_map_type::iterator intmap_iterator =
-        intMap.find( section_table_iterator->second + "." + key );
+    // create search key
+    std::string search_key = file_name +"#";
+    search_key += section_table_iterator->second;
+    search_key += ".";
+    search_key += key;
+    int_map_type::iterator intmap_iterator = intMap.find( search_key );
     if( intmap_iterator != intMap.end() ) {
         return intmap_iterator->second;
     } else {
@@ -454,30 +374,20 @@ int l7vs::ParameterImpl::get_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
 }
 
 //! get a string parameter
-//! @param[in]    PARAMETER_COMPONENT_TAG
-//! @param[in]    const std::string
-//! @param[out]   error code
-//! @return       string value
+//! @param[in]  comp        section TAG
+//! @param[in]  key         key string
+//! @param[out] err         error_code
+//! @param[in]  file_name   configuration file name
+//! @return     string value
 std::string l7vs::ParameterImpl::get_string(
                                  const l7vs::PARAMETER_COMPONENT_TAG comp,
                                  const std::string& key,
-                                 l7vs::error_code& err ){
-    // DEBUG LOG
-//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//        std::stringstream buffer;
-//        buffer << "in_function : bool l7vs::ParameterImpl::get_string( ";
-//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-//        buffer << "const std::string& key = " << key  << " ";
-//        buffer << "l7vs::error_code& err= ";
-//        buffer << (err ? ("true,"+err.get_message()) : "false") ;
-//        buffer << " )";
-//        Logger::putLogDebug( logcat, 14, buffer.str(), __FILE__, __LINE__ );
-//    }
-    // DEBUG LOG END
+                                 l7vs::error_code& err,
+                                 const std::string& file_name ){
 
     std::vector<std::string> retvec;
     // get multistring
-    get_multistring( comp, key, retvec, err );
+    get_multistring( comp, key, retvec, err, file_name );
 
     if( !err ){
         // return string
@@ -487,30 +397,18 @@ std::string l7vs::ParameterImpl::get_string(
 }
 
 //! get multistring parameter
-//! @param[in]    PARAMETER_COMPONENT_TAG
-//! @param[in]    const std::string
-//! @param[inout] std::vector<std::string>& 
-//! @param[out]   error code
+//! @param[in]    comp       section TAG
+//! @param[in]    key        key string
+//! @param[inout] retvec     string vector
+//! @param[out]   err        error_code
+//! @param[in]    file_name  configuration file name
 //! @return       void
 void l7vs::ParameterImpl::get_multistring( const PARAMETER_COMPONENT_TAG comp,
                                            const std::string& key,
                                            std::vector<std::string>& retvec,
-                                           l7vs::error_code& err)
+                                           l7vs::error_code& err,
+                                           const std::string& file_name )
 {
-    // DEBUG LOG
-//    if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( logcat ) ) ) {
-//        std::stringstream buffer;
-//        buffer << "in_function : bool l7vs::ParameterImpl::get_multistring( ";
-//        buffer << "const PARAMETER_COMPONENT_TAG comp = " << comp << " ";
-//        buffer << "const std::string& key = " << key << " ";
-//        buffer << "std::vector<std::string>& retvec = (size)";
-//        buffer << retvec.size() << " ";
-//        buffer << "l7vs::error_code& err= ";
-//        buffer << (err ? ("true,"+err.get_message()) : "false") ;
-//        buffer << " )";
-//        Logger::putLogDebug( logcat, 15, buffer.str(), __FILE__, __LINE__ );
-//    }
-    // DEBUG LOG END
 
     boost::mutex::scoped_lock lock( param_mutex );
     // error_code clear
@@ -518,13 +416,16 @@ void l7vs::ParameterImpl::get_multistring( const PARAMETER_COMPONENT_TAG comp,
     // find section
     std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
         section_table_iterator = tag_section_table_map.find( comp );
-    // create comp_key string
-    std::string comp_key = section_table_iterator->second + "." + key;
+    // create search key
+    std::string search_key = file_name +"#";
+    search_key += section_table_iterator->second;
+    search_key += ".";
+    search_key += key;
     retvec.clear();
     for (multistring_map_type::iterator itr = multistringMap.begin();
          itr != multistringMap.end(); ++itr ) {
-        // hit comp_key
-        if (itr->first == comp_key) {
+        // hit search_key
+        if (itr->first == search_key) {
             retvec.push_back(itr->second);
         }
     }
