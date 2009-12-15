@@ -45,6 +45,7 @@
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
 #include "logger.h"
+#include "logger_access_manager.h"
 #include "parameter.h"
 
 #ifndef    L7VS_MODULE_PATH

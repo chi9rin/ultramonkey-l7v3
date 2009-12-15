@@ -9,11 +9,13 @@
 
 //#include "logger_enum.h"
 //#include "logger_stub.h"
+#include "logger_access_stub.h"
 #include "logger.h"
 
-//#include "parameter_enum.h"
-//#include "parameter_stub.h"
-#include "parameter.h"
+////#include "parameter_enum.h"
+////#include "parameter_stub.h"
+//#include "parameter.h"
+#include "parameter_stub.h"
 
 #include "command_receiver_stub.h"
 #include "virtualservice_stub.h"

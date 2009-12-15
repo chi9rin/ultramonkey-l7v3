@@ -7,15 +7,14 @@ TARGET		= l7vsd_ut
 TARGET2		= l7vsd_thread
 CPP			= g++
 CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./l7vs.cf"'
-INCLUDES	=	-I../../logger \
-				-I../../parameter \
+INCLUDES	=		-I. \
 				-I../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt \
 				-llog4cxx 
 
-LDFLAGS		= -lrt -ldl
+LDFLAGS		= -lrt -ldl -L.
 
 LOGGER		= libtest_logger.a
 PARAMETER	= ligtest_parameter.a
@@ -35,18 +34,12 @@ SRCS2		=	\
 PARAMETER_SRCS	=	\
 			../../src/parameter.cpp \
 			../../src/parameter_impl.cpp
-#			../../parameter/parameter.cpp \
-#			../../parameter/parameter_impl.cpp
 
 LOGGER_SRCS	=	\
 			../../src/logger.cpp \
 			../../src/logger_impl.cpp \
 			../../src/strict_time_based_rolling_policy.cpp \
 			../../src/time_and_size_based_rolling_policy.cpp
-#			../../logger/logger.cpp \
-#			../../logger/logger_impl.cpp \
-#			../../logger/strict_time_based_rolling_policy.cpp \
-#			../../logger/time_and_size_based_rolling_policy.cpp
 
 .SUFFIXES:	.o .cpp
 .cpp.o:

@@ -11,11 +11,14 @@
 
 //#include "logger_enum.h"
 //#include "logger_stub.h"
+#include "logger_access_stub.h"
 #include "logger.h"
 
-//#include "parameter_enum.h"
-//#include "parameter_stub.h"
-#include "parameter.h"
+
+////#include "parameter_enum.h"
+////#include "parameter_stub.h"
+//#include "parameter.h"
+#include "parameter_stub.h"
 
 #include "command_receiver_stub.h"
 #include "virtualservice_stub.h"
@@ -29,6 +32,11 @@
 #include "utility.h"
 
 #include "../../src/l7vsd.cpp"
+
+
+#define    PARAM_SCHED_ALGORITHM    "task_scheduler_algorithm"
+#define PARAM_SCHED_PRIORITY    "task_scheduler_priority"
+
 
 using namespace boost::unit_test_framework;
 
@@ -1531,11 +1539,11 @@ void    run_test(){
     {
         int        argc    = 3;
         char*    argv[]    = { "l7vsd_test", "-d", "-h" };
-    
+
         vsd_test.set_exit_requested( 1 );
         int ret = vsd_test.run( argc, argv );
         vsd_test.set_exit_requested( 0 );
-    
+
         // unit_test[225] l7vsd::run normal case 4(help and debug mode) return value check
         BOOST_CHECK_EQUAL( ret, -1 );
 /*デバッグモード廃止の為、削除
@@ -1574,6 +1582,752 @@ void    run_test(){
         l7vs::snmpbridge::initialize_fail = false;
         l7vs::snmpbridge::finalize_called = false;
     }
+//------*******************************************************************************************************--------//
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = none  PARAM_SCHED_PRIORITY = none case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.rm_int_parameter(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM, err);
+        param.rm_int_parameter(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[236] l7vsd::run task scheduler set test ALGORITHM = 99 PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[237] l7vsd::run task scheduler set test ALGORITHM = 99 PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 0 );
+
+        // unit_test[238] l7vsd::run task scheduler set test ALGORITHM = 99 PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 0 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = 99 PARAM_SCHED_PRIORITY = 0 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,99, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,0, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[239] l7vsd::run task scheduler set test ALGORITHM = 99 PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[240] l7vsd::run task scheduler set test ALGORITHM = 99 PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 0 );
+
+        // unit_test[241] l7vsd::run task scheduler set test ALGORITHM = 99 PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 0 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_FIFO(1) PARAM_SCHED_PRIORITY = 0 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,1, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,0, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[242] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[243] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 1 );
+
+        // unit_test[244] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 1 );
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_FIFO(1) PARAM_SCHED_PRIORITY = 1 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,1, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,1, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[245] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 1 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[246] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 1 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 1 );
+
+        // unit_test[247] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 1 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 1 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_FIFO(1) PARAM_SCHED_PRIORITY = 99 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,1, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,99, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[248] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 99 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[249] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 99 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 1 );
+
+        // unit_test[250] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 99 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 99 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_FIFO(1) PARAM_SCHED_PRIORITY = 100 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,1, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,100, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[251] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 100 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[252] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 100 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 1 );
+
+        // unit_test[253] l7vsd::run task scheduler set test ALGORITHM = SCHED_FIFO(1) PRIORITY = 100 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 1 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_RR(2) PARAM_SCHED_PRIORITY = 0 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,2, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,0, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[254] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[255] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 2 );
+
+        // unit_test[256] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 1 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_RR(2) PARAM_SCHED_PRIORITY = 1 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,2, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,1, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[257] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 1 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[258] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 1 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 2 );
+
+        // unit_test[259] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 1 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 1 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_RR(2) PARAM_SCHED_PRIORITY = 99 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,2, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,99, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[260] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 99 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[261] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 99 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 2 );
+
+        // unit_test[262] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 99 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 99 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_RR(2) PARAM_SCHED_PRIORITY = 100 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,2, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,100, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[263] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 100 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[264] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 100 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 2 );
+
+        // unit_test[265] l7vsd::run task scheduler set test ALGORITHM = SCHED_RR(2) PRIORITY = 100 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 1 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_OTHER(0) PARAM_SCHED_PRIORITY = 0 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,0, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,0, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[266] l7vsd::run task scheduler set test ALGORITHM = SCHED_OTHER(0) PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[267] l7vsd::run task scheduler set test ALGORITHM = SCHED_OTHER(0) PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 0 );
+
+        // unit_test[268] l7vsd::run task scheduler set test ALGORITHM = SCHED_OTHER(0) PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 0 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+
+
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_OTHER(0) PARAM_SCHED_PRIORITY = 1 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,0, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,1, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[269] l7vsd::run task scheduler set test ALGORITHM = SCHED_OTHER(0) PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[270] l7vsd::run task scheduler set test ALGORITHM = SCHED_OTHER(0) PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 0 );
+
+        // unit_test[271] l7vsd::run task scheduler set test ALGORITHM = SCHED_OTHER(0) PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 0 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_BATCH(3) PARAM_SCHED_PRIORITY = 0 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,3, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,0, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[272] l7vsd::run task scheduler set test ALGORITHM = SCHED_BATCH(3) PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[273] l7vsd::run task scheduler set test ALGORITHM = SCHED_BATCH(3) PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 3 );
+
+        // unit_test[274] l7vsd::run task scheduler set test ALGORITHM = SCHED_BATCH(3) PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 0 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
+
+// task scheduler set test PARAM_SCHED_ALGORITHM = SCHED_BATCH(3) PARAM_SCHED_PRIORITY = 1 case
+// 注意：このテストは実行時にスーパユーザ権限が必要です
+    {
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+
+        daemon_ret = 0;
+    
+        int        argc    = 1;
+        char*    argv[]    = { "l7vsd_test" };
+
+        l7vs::Parameter    param;
+        l7vs::error_code    err;
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM,3, err);
+        param.set_int(l7vs::PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY,1, err);
+
+        vsd_test.set_exit_requested( 1 );
+        int ret = vsd_test.run( argc, argv );
+        vsd_test.set_exit_requested( 0 );
+
+        // unit_test[275] l7vsd::run task scheduler set test ALGORITHM = SCHED_BATCH(3) PRIORITY = 0 case reutrn value check
+        BOOST_CHECK_EQUAL( ret, 0 );
+
+        // unit_test[276] l7vsd::run task scheduler set test ALGORITHM = SCHED_BATCH(3) PRIORITY = 0 case set ALGORITHM check
+        BOOST_CHECK_EQUAL( sched_getscheduler(0) , 3 );
+
+        // unit_test[277] l7vsd::run task scheduler set test ALGORITHM = SCHED_BATCH(3) PRIORITY = 0 case set PRIORITY check
+        sched_param        scheduler_param;
+        int    ret_val        = sched_getparam( 0, &scheduler_param );
+        BOOST_CHECK_EQUAL( ret_val , 0 );
+        BOOST_CHECK_EQUAL( scheduler_param.__sched_priority , 0 );
+
+
+        l7vs::protocol_module_control::initialize_called = false;
+        l7vs::protocol_module_control::finalize_called = false;
+        l7vs::schedule_module_control::initialize_called = false;
+        l7vs::schedule_module_control::finalize_called = false;
+        l7vs::replication::initialize_called = false;
+        l7vs::replication::initialize_fail = false;
+        l7vs::replication::finalize_called = false;
+        l7vs::snmpbridge::initialize_called = false;
+        l7vs::snmpbridge::initialize_fail = false;
+        l7vs::snmpbridge::finalize_called = false;
+    }
+
 
     BOOST_MESSAGE( "----- run_test end -----" );
 }
@@ -1597,9 +2351,9 @@ void    sig_exit_handler_test(){
     usleep( 10 );
     pthread_kill( th, SIGHUP );
     pthread_join( th, NULL );
-    // unit_test[236] sig_exit_handler SIGHUP exit_requested check
+    // unit_test[278] sig_exit_handler SIGHUP exit_requested check
     BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
-    // unit_test[237] sig_exit_handler SIGHUP received_sig check
+    // unit_test[279] sig_exit_handler SIGHUP received_sig check
     BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 1 );
 
     // sig_exit_handler SIGINT
@@ -1609,9 +2363,9 @@ void    sig_exit_handler_test(){
     usleep( 10 );
     pthread_kill( th, SIGINT );
     pthread_join( th, NULL );
-    // unit_test[238] sig_exit_handler SIGINT exit_requested check
+    // unit_test[280] sig_exit_handler SIGINT exit_requested check
     BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
-    // unit_test[239] sig_exit_handler SIGINT received_sig check
+    // unit_test[281] sig_exit_handler SIGINT received_sig check
     BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 2 );
 
     // sig_exit_handler SIGQUIT
@@ -1621,9 +2375,9 @@ void    sig_exit_handler_test(){
     usleep( 10 );
     pthread_kill( th, SIGQUIT );
     pthread_join( th, NULL );
-    // unit_test[240] sig_exit_handler SIGQUIT exit_requested check
+    // unit_test[282] sig_exit_handler SIGQUIT exit_requested check
     BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
-    // unit_test[241] sig_exit_handler SIGQUIT received_sig check
+    // unit_test[283] sig_exit_handler SIGQUIT received_sig check
     BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 3 );
 
     // sig_exit_handler SIGTERM
@@ -1633,9 +2387,9 @@ void    sig_exit_handler_test(){
     usleep( 10 );
     pthread_kill( th, SIGTERM );
     pthread_join( th, NULL );
-    // unit_test[242] sig_exit_handler SIGQUIT exit_requested check
+    // unit_test[284] sig_exit_handler SIGQUIT exit_requested check
     BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 1 );
-    // unit_test[243] sig_exit_handler SIGQUIT received_sig check
+    // unit_test[285] sig_exit_handler SIGQUIT received_sig check
     BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 15 );
 
     // sig_exit_handler SIGUSR1
@@ -1645,9 +2399,9 @@ void    sig_exit_handler_test(){
     usleep( 10 );
     pthread_kill( th, SIGUSR1 );
     usleep( 10 );
-    // unit_test[244] sig_exit_handler SIGUSR1 exit_requested check
+    // unit_test[286] sig_exit_handler SIGUSR1 exit_requested check
     BOOST_CHECK_EQUAL( vsd_test.get_exit_requested(), 0 );
-    // unit_test[245] sig_exit_handler SIGUSR1 received_sig check
+    // unit_test[287] sig_exit_handler SIGUSR1 received_sig check
     BOOST_CHECK_EQUAL( vsd_test.get_received_sig(), 0 );
 
     pthread_kill( th, SIGINT );

@@ -851,19 +851,42 @@ int    l7vsd::run( int argc, char* argv[] ) {
         //set process scheduler & priority
         int    scheduler = SCHED_OTHER;
         int    int_val = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM, err);
-        if( (SCHED_FIFO == int_val) || (SCHED_RR == int_val) || (SCHED_OTHER == int_val) || (SCHED_BATCH == int_val) )
-            scheduler = int_val;
+        if( err ){
+            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 4, "task scheduler algorithm parameter not found.", __FILE__, __LINE__ );
+        }else{
+            if( (SCHED_FIFO == int_val) || (SCHED_RR == int_val) || (SCHED_OTHER == int_val) || (SCHED_BATCH == int_val) ){
+                scheduler = int_val;
+            }else{
+                logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 5, "invalid parameter for task scheduler algorithm.", __FILE__, __LINE__ );
+               // scheduler = SCHED_OTHER;
+            }
+        }
         int    proc_pri  = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err);
         if( err ){
+            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 6, "task scheduler priority parameter not found.", __FILE__, __LINE__ );
             proc_pri  = sched_get_priority_min( scheduler );
+        }else{
+            if( (SCHED_FIFO == scheduler) || (SCHED_RR == scheduler) ){
+                if(proc_pri < 1 || 99 < proc_pri){
+                    logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 7, "invalid parameter for task scheduler priority.", __FILE__, __LINE__ );
+                    proc_pri  = sched_get_priority_min( scheduler );
+                }
+            }
+            if( (SCHED_OTHER == scheduler) || (SCHED_BATCH == scheduler) ){
+                if(proc_pri != 0){
+                    logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 8, "invalid parameter for task scheduler priority.", __FILE__, __LINE__ );
+                    proc_pri  = sched_get_priority_min( scheduler );
+                }
+            }
         }
 
         sched_param        scheduler_param;
         int    ret_val        = sched_getparam( 0, &scheduler_param );
-        if( (SCHED_FIFO == scheduler) || (SCHED_RR == scheduler) ){
-            scheduler_param.__sched_priority    = proc_pri;
-        }
+        scheduler_param.__sched_priority    = proc_pri;
         ret_val            = sched_setscheduler( 0, scheduler, &scheduler_param );
+        if(ret_val != 0){
+            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 9, "task scheduler setting failed.", __FILE__, __LINE__ );
+        }
 
         struct rlimit lim;
         lim.rlim_cur = maxfileno;
@@ -904,7 +927,7 @@ int    l7vsd::run( int argc, char* argv[] ) {
         if( 0 > rep->initialize() ){
             logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 3, "replication initialize failed.", __FILE__, __LINE__ );
         }
-    
+
         // snmp bridge initialize
         bridge.reset( new snmpbridge( *this, dispatcher ) );
         if( NULL ==  bridge ){
@@ -917,10 +940,13 @@ int    l7vsd::run( int argc, char* argv[] ) {
             munlockall();
             return -1;
         }
-    
-        // snmp trap function set
-        Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
-    
+
+//SNMP is unsupported.
+//
+//        // snmp trap function set
+//        Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
+//
+
         // main loop
         for(;;){
             if( unlikely( exit_requested ) ){
@@ -1057,6 +1083,7 @@ int pthread_sigmask( int, const sigset_t*, sigset_t*) __attribute__((weak,alias(
 
 //! main function
 int main( int argc, char* argv[] ){
+
     int ret = 0;
 
     // signal block
@@ -1071,8 +1098,10 @@ int main( int argc, char* argv[] ){
         l7vs::Logger    logger_instance;
         l7vs::Parameter    parameter_instance;
         logger_instance.loadConf();
-    
+        l7vs::logger_access_manager::getInstance().access_log_rotate_loadConf();
+
         l7vs::l7vsd vsd;
+
         ret =  vsd.run( argc, argv );
     }
     catch( ... ){
