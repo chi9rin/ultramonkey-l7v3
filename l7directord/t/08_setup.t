@@ -405,7 +405,7 @@ our @get_forward_flag_returns = ();
         option => {
             protocol => '-t',
             main  => '-t ip:port -m ip',
-            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -S /etc/ha.d/conf/ssl_config.cf',
+            flags => '-t ip:port -m ip -s rr -u 1000 -b sorryip:sorryport -Q 100M -q 100K -z /etc/ha.d/conf/ssl_config.cf',
         },
         module => {
             name => 'ip',
