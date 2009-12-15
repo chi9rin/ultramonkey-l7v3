@@ -86,30 +86,36 @@ public:
     //! @param[in]    component tag
     //! @param[in]    keystring
     //! @param[out]   errorcode
+    //! @param[in]    file name
     //! @return int value
     int get_int( const PARAMETER_COMPONENT_TAG,
                  const std::string&,
-                 error_code& );
+                 error_code&,
+                 const std::string& );
 
     //! string value getter
     //! @param[in]    component tag
     //! @param[in]    keystring
     //! @param[out]   errorcode
+    //! @param[in]    file name
     //! @return string value
     std::string get_string( const PARAMETER_COMPONENT_TAG,
                             const std::string&,
-                            error_code& );
+                            error_code&,
+                            const std::string& );
 
     //! multistring value getter
     //! @param[in]    component tag
     //! @param[in]    keystring
     //! @param[inout] string vector
     //! @param[out]   errorcode
+    //! @param[in]    file name
     //! @return       void
     void get_multistring( const PARAMETER_COMPONENT_TAG,
                           const std::string&,
                           std::vector<std::string>&,
-                          error_code& );
+                          error_code&,
+                          const std::string& );
 };
 
 }

@@ -65,30 +65,39 @@ public:
     //! @param[in]    parametercategory
     //! @param[in]    parameter key
     //! @param[out]   error code
+    //! @param[in]    configuration filename
+    //!                   default:PARAMETER_FILE
     //! @return int value
     int get_int(const PARAMETER_COMPONENT_TAG,
                 const std::string&,
-                error_code& );
+                error_code&,
+                const std::string& = PARAMETER_FILE );
 
     //! parameter string value getter
     //! @param[in]    parametercategory
     //! @param[in]    parameter key
     //! @param[out]   error code
+    //! @param[in]    configuration filename
+    //!                   default:PARAMETER_FILE
     //! @return string value
     std::string get_string(const PARAMETER_COMPONENT_TAG,
                            const std::string&,
-                           error_code& );
+                           error_code&,
+                           const std::string& = PARAMETER_FILE );
 
     //! parameter multistring value getter
     //! @param[in]    parametercategory
     //! @param[in]    parameter key
     //! @param[inout] string vector
     //! @param[out]   error code
+    //! @param[in]    configuration filename
+    //!                   default:PARAMETER_FILE
     //! @return string value
     void get_multistring(const PARAMETER_COMPONENT_TAG,
                          const std::string&,
                          std::vector<std::string>&,
-                         error_code& );
+                         error_code&,
+                         const std::string& = PARAMETER_FILE );
 };
 
 } //namespace l7vs
