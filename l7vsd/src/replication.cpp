@@ -23,6 +23,7 @@
  **********************************************************************/
 #include    <boost/lexical_cast.hpp>
 #include    <boost/format.hpp>
+#include    <boost/algorithm/string.hpp>
 #include    "replication.h"
 #include    "parameter.h"
 #include    "logger.h"
@@ -47,7 +48,7 @@ int            replication::initialize(){
     Logger    logger( LOG_CAT_L7VSD_REPLICATION, 1, "replication::initialize", __FILE__, __LINE__ );
 
     Parameter    param;
-    error_code    ip_addr_ret, service_name_ret, nic_ret, interval_ret;
+    error_code    ip_addr_ret, service_name_ret, recv_ip_addr_ret, interval_ret;
     std::string    buf;
 
     // Check by continuous initialize.
@@ -62,11 +63,11 @@ int            replication::initialize(){
     // Check the Parameter exists
     replication_info.ip_addr = param.get_string( PARAM_COMP_REPLICATION, "ip_addr", ip_addr_ret );
     replication_info.service_name = param.get_string( PARAM_COMP_REPLICATION, "service_name", service_name_ret );
-    replication_info.nic = param.get_string( PARAM_COMP_REPLICATION, "nic", nic_ret );
+    replication_info.recv_ip_addr = param.get_string( PARAM_COMP_REPLICATION, "recv_ip_addr", recv_ip_addr_ret );
     replication_info.interval = param.get_int( PARAM_COMP_REPLICATION, "interval", interval_ret );
 
     // SG File not set
-    if ( ip_addr_ret && service_name_ret && nic_ret && interval_ret ){
+    if ( ip_addr_ret && service_name_ret && recv_ip_addr_ret && interval_ret ){
         Logger::putLogInfo( LOG_CAT_L7VSD_REPLICATION, 1, "Required item is not set in l7vs.", __FILE__, __LINE__ );
         // Status Set
         replication_state.service_status = REPLICATION_SINGLE;
@@ -87,9 +88,9 @@ int            replication::initialize(){
         replication_state.service_status = REPLICATION_SINGLE;
         return -1;
     }
-    // NIC exists
-    if ( nic_ret ){
-        Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 4, "NIC is not set.", __FILE__, __LINE__ );
+    // Receive IP Address exists
+    if ( recv_ip_addr_ret ){
+        Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 4, "Receive IP Address is not set.", __FILE__, __LINE__ );
         // Status Set
         replication_state.service_status = REPLICATION_SINGLE;
         return -1;
@@ -118,13 +119,19 @@ int            replication::initialize(){
         return -1;
     }
 
-    // Failed in the acquisition of NIC
-    if ( replication_info.nic == "" ){
-        Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 8, "Could not get NIC.", __FILE__, __LINE__ );
+    // Failed in the acquisition of Receive IP Address
+    if ( replication_info.recv_ip_addr == "" ){
+        Logger::putLogError( LOG_CAT_L7VSD_REPLICATION, 8, "Could not get Receive IP Address.", __FILE__, __LINE__ );
         // Status Set
         replication_state.service_status = REPLICATION_SINGLE;
         return -1;
     }
+
+    // Remove "[]" from ip address
+    boost::algorithm::erase_first( replication_info.ip_addr, "[" );
+    boost::algorithm::erase_last( replication_info.ip_addr, "]" );
+    boost::algorithm::erase_first( replication_info.recv_ip_addr, "[" );
+    boost::algorithm::erase_last( replication_info.recv_ip_addr, "]" );
 
     // Variable that sets ID
     std::string key_id;
@@ -297,7 +304,7 @@ void        replication::finalize(){
     // reset of replication_info
     replication_info.ip_addr = "";
     replication_info.service_name = "";
-    replication_info.nic = "";
+    replication_info.recv_ip_addr = "";
     replication_info.interval = 0;
     replication_info.component_num = 0;
     for ( int loop = 0; loop < CMP_MAX; loop++ ){
@@ -1099,52 +1106,35 @@ int            replication::check_parameter(){
     size_t sum=0;
     std::string buf;
 
-//std::cout << "check1 " << replication_info.ip_addr << ":" << replication_info.service_name << "\n";
     // Whether IP and the port are effective is confirmed.
     try{
-//        replication_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( replication_info.ip_addr ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
-
-        boost::asio::ip::udp::resolver                udp_resolver( service_io );
-        boost::asio::ip::udp::resolver::query        udp_query( replication_info.ip_addr, replication_info.service_name );
+        boost::asio::ip::udp::resolver              udp_resolver( service_io );
+        boost::asio::ip::udp::resolver::query       udp_query( replication_info.ip_addr, replication_info.service_name );
         boost::asio::ip::udp::resolver::iterator    itr = udp_resolver.resolve( udp_query );
         replication_endpoint = *itr;
     }
     catch(...){
-        buf = boost::io::str( boost::format( "Failed to get IP or Service Name.(%s:%s)" ) % replication_info.ip_addr % replication_info.service_name );
+        buf = boost::io::str( boost::format( "Failed to get IP or Service Name.(%s:%s)" )
+            % replication_info.ip_addr
+            % replication_info.service_name );
         Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 1, buf, __FILE__, __LINE__ );
         goto END;
     }
-//std::cout << "check2 " << replication_endpoint.address() << ":" << replication_endpoint.port() << "\n";
 
-    // get ip address from nic
+    // Get Receive IP Address
     try{
-        struct sockaddr_in addr;
-
-        //Networkdevice struct define
-        struct ifreq ifr;
-        memset( &ifr, 0, sizeof( struct ifreq ) );
-
-        //create socket
-        int fd  = socket( AF_INET, SOCK_DGRAM, 0 );
-        if ( fd >= 0 ){
-            //get networkdevice struct for IPv4
-            strncpy( ifr.ifr_name, replication_info.nic.c_str(), IFNAMSIZ-1 );
-            ifr.ifr_addr.sa_family = AF_INET;
-
-            if ( ioctl( fd, SIOCGIFADDR, &ifr ) >= 0 ){
-                memcpy( &addr, &(ifr.ifr_addr), sizeof( struct sockaddr_in ) );
-            }
-
-            close( fd );
-        }
-
-        bind_endpoint = boost::asio::ip::udp::endpoint( boost::asio::ip::address::from_string( inet_ntoa( addr.sin_addr ) ), boost::lexical_cast<unsigned short>( replication_info.service_name ) );
+        boost::asio::ip::udp::resolver              udp_resolver( service_io );
+        boost::asio::ip::udp::resolver::query       udp_query( replication_info.recv_ip_addr, replication_info.service_name );
+        boost::asio::ip::udp::resolver::iterator    itr = udp_resolver.resolve( udp_query );
+        bind_endpoint = *itr;
     }
     catch(...){
-        Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 2, "You can not get IP address from nic.", __FILE__, __LINE__ );
+        buf = boost::io::str( boost::format( "Failed to get Receive IP or Service Name.(%s:%s)" )
+            % replication_info.recv_ip_addr
+            % replication_info.service_name );
+        Logger::putLogError( LOG_CAT_L7VSD_SYSTEM_ENDPOINT, 2, buf, __FILE__, __LINE__ );
         goto END;
     }
-//std::cout << "check3 " << bind_endpoint.address() << ":" << bind_endpoint.port() << "\n";
 
     // Interval check
     if ( ( MIN_INTERVAL>replication_info.interval ) || ( MAX_INTERVAL<replication_info.interval ) ){
