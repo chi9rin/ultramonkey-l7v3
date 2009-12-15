@@ -7,7 +7,7 @@ TARGET1		= parameter_ut
 TARGET2		= parameter_impl_ut
 TARGET3		= parameter_impl_thread_ut
 CPP		= g++
-CPPFLAGS	= -g -Wall -Werror -pthread -O0 -D PARAMETER_FILE='"./sample.ini"' -L../../src -DCASE5
+CPPFLAGS	= -g -Wall -Werror -pthread -O0 -D PARAMETER_FILE='"./sample.ini"' -L../../src -DCASE1
 INCLUDES	=  \
 			-I../../src \
                         -I../../include

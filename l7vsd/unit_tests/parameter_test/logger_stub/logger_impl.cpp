@@ -378,8 +378,6 @@ void l7vs::LoggerImpl::logic_error( const unsigned int logno, const std::string&
 	putLogError( l7vs::LOG_CAT_L7VSADM_LOGGER,logno, str, file, line );
 #elif defined(LOGGER_PROCESS_SNM)
 	putLogError( l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line );
-#elif defined(LOGGER_PROCESS_SSL)
-	putLogError( l7vs::LOG_CAT_SSLPROXY_LOGGER, logno, str, file, line );
 #endif	
 
 throw std::logic_error( str );
@@ -491,8 +489,6 @@ void l7vs::LoggerImpl::errorConf(	unsigned int message_id,
 		log_category = LOG_CAT_L7VSADM_LOGGER;
 #elif defined(LOGGER_PROCESS_SNM)
 		log_category = LOG_CAT_SNMPAGENT_LOGGER;
-#elif defined(LOGGER_PROCESS_SSL)
-		log_category = LOG_CAT_SSLPROXY_LOGGER;
 #else
 		log_category = LOG_CAT_L7VSD_LOGGER;
 #endif
@@ -790,8 +786,6 @@ void l7vs::LoggerImpl::loadConf(){
 			log_category = LOG_CAT_L7VSADM_LOGGER;
 #elif defined(LOGGER_PROCESS_SNM)
 			log_category = LOG_CAT_SNMPAGENT_LOGGER;
-#elif defined(LOGGER_PROCESS_SSL)
-			log_category = LOG_CAT_SSLPROXY_LOGGER;
 #else
 			log_category = LOG_CAT_L7VSD_LOGGER;
 #endif

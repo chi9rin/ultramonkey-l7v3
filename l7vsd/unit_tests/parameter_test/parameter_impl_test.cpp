@@ -105,13 +105,21 @@ void parameter_impl_init_test(){
     BOOST_CHECK_EQUAL( sectionmap.size(), (unsigned int) 10);
 
     for( unsigned int i = 0 ; i < 10; ++i ){
-        std::string key = sectionstrings[i] + "." + keystr[0];
+        std::string key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[0];
         // unit test[15] int value check(loaded file)
         if( i == 0 )
             BOOST_CHECK_EQUAL( intmap.find( key )->second , 2 );
         else
             BOOST_CHECK_EQUAL( intmap.find( key )->second , 1 );
-        key = sectionstrings[i] + "." + keystr[1];
+        key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[1];
         // unit_test[16] string value check(loaded file)
         // unit_test[17] double cautation erase check(loaded file)
         if( i == 0 )
@@ -145,18 +153,26 @@ void parameter_impl_init_test(){
     // unit_test[20] stringmap size check(+loaded files)
     BOOST_CHECK_EQUAL( strmap.size(), (unsigned int) 12 );
     // unit_test[21] integermap size check(+loaded files)
-    BOOST_CHECK_EQUAL( intmap.size(), (unsigned int) 11 );
+    BOOST_CHECK_EQUAL( intmap.size(), (unsigned int) 12 );
     // unit_test[22] sectionmap size check(+loaded files)
     BOOST_CHECK_EQUAL( sectionmap.size(), (unsigned int) 10 );
 
     for( unsigned int i = 0 ; i < 10; ++i ){
-        std::string key = sectionstrings[i] + "." + keystr[0];
+        std::string key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[0];
         // unit test[23] int value check(loaded file)
         if( i == 0 )
             BOOST_CHECK_EQUAL( intmap.find( key )->second , 2 );
         else
             BOOST_CHECK_EQUAL( intmap.find( key )->second , 1 );
-        key = sectionstrings[i] + "." + keystr[1];
+        key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[1];
         // unit_test[24] string value check(loaded file)
         // unit_test[25] double cautation erase check(loaded file)
         if( i == 0 )
@@ -165,23 +181,86 @@ void parameter_impl_init_test(){
             BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings" );
     }
     // unit_test[26] int value check(+loaded files)
-    std::string key = sectionstrings[0] + ".key3";
+    std::string key = "./add.cf#" + sectionstrings[0] + ".key1";
+    BOOST_CHECK_EQUAL( intmap.count( key ) , (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[0] + ".key3";
     BOOST_CHECK_EQUAL( intmap.count( key ) , (unsigned int) 0 );
     // unit_test[27] int value check(+loaded files)
-    key = sectionstrings[9] + ".key3";
+    key = "./add.cf#" + sectionstrings[9] + ".key1";
+    BOOST_CHECK_EQUAL( intmap.find( key )->second , 1 );
+    key = "./add.cf#" + sectionstrings[9] + ".key3";
     BOOST_CHECK_EQUAL( intmap.find( key )->second , 1 );
     // unit_test[28] string value check(+loaded files)
-    key = sectionstrings[0] + ".key4";
+    key = "./add.cf#" + sectionstrings[0] + ".key2";
+    BOOST_CHECK_EQUAL( strmap.count( key ), (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[0] + ".key4";
     BOOST_CHECK_EQUAL( strmap.count( key ), (unsigned int) 0 );
     // unit_test[29] string value check(+loaded files)
-    key = sectionstrings[9] + ".key2";
-    BOOST_CHECK_EQUAL( strmap.count( key ), (unsigned int) 2 );
+    key = "./add.cf#" + sectionstrings[9] + ".key2";
+    BOOST_CHECK_EQUAL( strmap.find( key )->second, "strings" );
     // unit_test[30] string value check(+loaded files)
-    key = sectionstrings[9] + ".key4";
+    key = "./add.cf#" + sectionstrings[9] + ".key4";
     BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings" );
+
+    unlink( "./add.cf" );
+
+    std::ofstream ofs3( "./add.cf" );
+    ofs3 << "# comment1" << std::endl;
+    ofs3 << " # spase comment2" << std::endl;
+    ofs3 << "	# tab comment3" << std::endl;
+    ofs3 << "[" << sectionstrings[9] << "]\n";
+    ofs3 << "key1" << "=11"              << std::endl; //overwrite int
+    ofs3 << "key2" << "=\"strings22\""   << std::endl; //overwrite string
+    ofs3 << "key5" << "=55"              << std::endl; //add int
+    ofs3 << "key6" << "=\"strings66\""   << std::endl; //add string
+    ofs3.close();
 
     // unit_test[31] init(filename) readed check
     BOOST_CHECK_EQUAL( impl.init( l7vs::PARAM_COMP_SSL, "./add.cf" ), true); 
+
+    BOOST_CHECK_EQUAL( strmap.size(), (unsigned int) 12 );
+    BOOST_CHECK_EQUAL( intmap.size(), (unsigned int) 12 );
+    BOOST_CHECK_EQUAL( sectionmap.size(), (unsigned int) 10 );
+    for( unsigned int i = 0 ; i < 10; ++i ){
+        std::string key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[0];
+        if( i == 0 )
+            BOOST_CHECK_EQUAL( intmap.find( key )->second , 2 );
+        else
+            BOOST_CHECK_EQUAL( intmap.find( key )->second , 1 );
+        key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[1];
+        if( i == 0 )
+            BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings2" );
+        else
+            BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings" );
+    }
+    key = "./add.cf#" + sectionstrings[0] + ".key1";
+    BOOST_CHECK_EQUAL( intmap.count( key ) , (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[0] + ".key3";
+    BOOST_CHECK_EQUAL( intmap.count( key ) , (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[9] + ".key1";
+    BOOST_CHECK_EQUAL( intmap.find( key )->second , 11 );
+    key = "./add.cf#" + sectionstrings[9] + ".key3";
+    BOOST_CHECK_EQUAL( intmap.count( key ) , (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[9] + ".key5";
+    BOOST_CHECK_EQUAL( intmap.find( key )->second , 55 );
+    key = "./add.cf#" + sectionstrings[0] + ".key2";
+    BOOST_CHECK_EQUAL( strmap.count( key ), (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[0] + ".key4";
+    BOOST_CHECK_EQUAL( strmap.count( key ), (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[9] + ".key2";
+    BOOST_CHECK_EQUAL( strmap.find( key )->second, "strings22" );
+    key = "./add.cf#" + sectionstrings[0] + ".key4";
+    BOOST_CHECK_EQUAL( strmap.count( key ), (unsigned int) 0 );
+    key = "./add.cf#" + sectionstrings[9] + ".key6";
+    BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings66" );
 
     // unit_test[32] non read file check
     unlink( PARAMETER_FILE );
@@ -193,17 +272,25 @@ void parameter_impl_init_test(){
     // unit_test[33] strmap is no change check
     BOOST_CHECK_EQUAL( strmap.size(), (unsigned int) 12 );
     // unit_test[34] intmap is no change check
-    BOOST_CHECK_EQUAL( intmap.size(), (unsigned int) 11 );
+    BOOST_CHECK_EQUAL( intmap.size(), (unsigned int) 12 );
     // unit_test[35] sectionmap is change check
     BOOST_CHECK_EQUAL( sectionmap.size(), (unsigned int) 10);
     for( unsigned int i = 0 ; i < 10; ++i ){
-        std::string key = sectionstrings[i] + "." + keystr[0];
+        std::string key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[0];
         // unit test[36] int value check(loaded file)
         if( i == 0 )
             BOOST_CHECK_EQUAL( intmap.find( key )->second , 2 );
         else
             BOOST_CHECK_EQUAL( intmap.find( key )->second , 1 );
-        key = sectionstrings[i] + "." + keystr[1];
+        key = PARAMETER_FILE;
+        key += "#";
+        key += sectionstrings[i];
+        key += ".";
+        key += keystr[1];
         // unit_test[37] string value check(loaded file)
         // unit_test[38] double cautation erase check(loaded file)
         if( i == 0 )
@@ -211,6 +298,14 @@ void parameter_impl_init_test(){
         else
             BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings" );
     }
+    key = "./add.cf#" + sectionstrings[9] + ".key1";
+    BOOST_CHECK_EQUAL( intmap.find( key )->second , 11 );
+    key = "./add.cf#" + sectionstrings[9] + ".key5";
+    BOOST_CHECK_EQUAL( intmap.find( key )->second , 55 );
+    key = "./add.cf#" + sectionstrings[9] + ".key2";
+    BOOST_CHECK_EQUAL( strmap.find( key )->second, "strings22" );
+    key = "./add.cf#" + sectionstrings[9] + ".key6";
+    BOOST_CHECK_EQUAL( strmap.find( key )->second , "strings66" );
     
 }
 
@@ -306,7 +401,7 @@ void parameter_impl_read_file_test()
 
     // unit_test[43] read file(PARAM_COMP_NOCAT)
     BOOST_CHECK_EQUAL( impl.read_file(l7vs::PARAM_COMP_NOCAT, PARAMETER_FILE),
-                       false );
+                       true );
     // check log "parameter_component_none is not suport"
     // stringmap size check (PARAM_COMP_NOCAT)
     BOOST_CHECK_EQUAL( strmap.size(), (unsigned int) 1 );
@@ -348,22 +443,34 @@ void parameter_impl_get_int_test(){
     BOOST_CHECK_EQUAL( impl.read_file( l7vs::PARAM_COMP_ALL, PARAMETER_FILE ),
                        true );
     // unit_test[45] zero value check
-    int ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "zero_value", err );
+    int ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "zero_value",
+                            err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret , zero_value );
     // unit_test[46] one value check
-    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "one_value", err );
+    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "one_value",
+                        err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret , one_value );
     // unit_test[47] under one value check
-    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "under_one_value", err );
+    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "under_one_value",
+                        err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret,  under_one_value );
     // unit_test[48] int max value check
-    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "int_max_value", err );
+    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "int_max_value",
+                        err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret, int_max_value );
     // unit_test[49] int min value check
-    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "int_min_value", err );
+    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "int_min_value",
+                        err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret, int_min_value );
     // unit_test[50] no key error check
-    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "no_key_value", err );
+    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "no_key_value",
+                        err, PARAMETER_FILE );
+    BOOST_CHECK_EQUAL( ret, 0 );
+    BOOST_CHECK_EQUAL( err, true );
+
+    // unit_test[a1] no read file check
+    ret = impl.get_int( l7vs::PARAM_COMP_L7VSD, "zero_value",
+                        err, "./add.cf");
     BOOST_CHECK_EQUAL( ret, 0 );
     BOOST_CHECK_EQUAL( err, true );
 
@@ -395,22 +502,31 @@ void parameter_impl_get_string_test(){
     BOOST_CHECK_EQUAL( impl.read_file( l7vs::PARAM_COMP_ALL, PARAMETER_FILE ),
                        true );
     // unit_test[52] str value check
-    std::string ret = impl.get_string( l7vs::PARAM_COMP_L7VSD,
-                                       "str_value",
-                                       err );
+    std::string ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "str_value",
+                                       err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( err, false );
     BOOST_CHECK_EQUAL( ret, str_value );
     // unit_test[53] zero size string test
-    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "zero_str_value", err );
+    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "zero_str_value",
+                           err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret, zero_str_value );
     // unit_test[54] long string test
-    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "long_str_value", err );
+    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "long_str_value",
+                           err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret, long_str_value );
     // unit_test[55] space string test
-    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "space_str_value",err );
+    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "space_str_value",
+                           err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( ret , space_str_value );
     // unit_test[56] string no key test
-    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "no_key_value", err );
+    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "no_key_value",
+                           err, PARAMETER_FILE );
+    BOOST_CHECK_EQUAL( ret, std::string("") );
+    BOOST_CHECK_EQUAL( err, true );
+
+    // unit_test[a2] no read file check
+    ret = impl.get_string( l7vs::PARAM_COMP_L7VSD, "str_value",
+                           err, "./add.cf" );
     BOOST_CHECK_EQUAL( ret, std::string("") );
     BOOST_CHECK_EQUAL( err, true );
 
@@ -440,18 +556,27 @@ void parameter_impl_get_multistring_test(){
     BOOST_CHECK_EQUAL( impl.read_file( l7vs::PARAM_COMP_SSL, PARAMETER_FILE ),
                        true );
     // unit_test[58] multistring value check(2 values)
-    impl.get_multistring(l7vs::PARAM_COMP_SSL, "str_value2", ret_vector, err);
+    impl.get_multistring(l7vs::PARAM_COMP_SSL, "str_value2", ret_vector,
+                         err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( err, false );
     BOOST_CHECK_EQUAL( ret_vector.size(), (unsigned int)2 );
     BOOST_CHECK_EQUAL( ret_vector[0], str_value2 );
     BOOST_CHECK_EQUAL( ret_vector[1], str_value2 );
     // unit_test[59] multistring value check(1 value)
-    impl.get_multistring(l7vs::PARAM_COMP_SSL, "str_value1", ret_vector, err);
+    impl.get_multistring(l7vs::PARAM_COMP_SSL, "str_value1", ret_vector,
+                         err, PARAMETER_FILE );
     BOOST_CHECK_EQUAL( err, false );
     BOOST_CHECK_EQUAL( ret_vector.size(), (unsigned int)1 );
     BOOST_CHECK_EQUAL( ret_vector[0], str_value1 );
     // unit_test[60] multistring no key test
-    impl.get_multistring(l7vs::PARAM_COMP_SSL, "no_key_value", ret_vector, err);
+    impl.get_multistring(l7vs::PARAM_COMP_SSL, "no_key_value", ret_vector,
+                         err, PARAMETER_FILE );
+    BOOST_CHECK_EQUAL( ret_vector.empty(), true );
+    BOOST_CHECK_EQUAL( err, true );
+
+    // unit_test[a3] no read file check
+    impl.get_multistring( l7vs::PARAM_COMP_L7VSD, "str_value1", ret_vector,
+                          err, "./add.cf" );
     BOOST_CHECK_EQUAL( ret_vector.empty(), true );
     BOOST_CHECK_EQUAL( err, true );
 
