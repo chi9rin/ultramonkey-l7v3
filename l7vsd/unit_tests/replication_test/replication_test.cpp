@@ -8,13 +8,13 @@
 #include    <boost/algorithm/string.hpp>
 
 #define     TARGET_IP_V4        "10.144.169.70"
-//#define     TARGET_IP_V6        "fe80::213:21ff:feb5:555a%eth0"
-#define     TARGET_IP_V6        "2001::10"
+//#define     TARGET_IP_V6        "[fe80::213:21ff:feb5:555a%eth0]"
+#define     TARGET_IP_V6        "[2001::10]"
 #define     TARGET_HOSTNAME     "um08"
 #define     REPLICATION_PORT    "40000"
 #define     RECV_IP_V4          "10.144.169.70"
-//#define     RECV_IP_V6          "fe80::213:21ff:feb5:555a%eth0"
-#define     RECV_IP_V6          "2001::10"
+//#define     RECV_IP_V6          "[fe80::213:21ff:feb5:555a%eth0]"
+#define     RECV_IP_V6          "[2001::10]"
 
 int get_string_stubmode = 0;
 int get_int_stubmode = 0;
