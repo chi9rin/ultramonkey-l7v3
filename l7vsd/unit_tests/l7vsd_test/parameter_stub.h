@@ -122,16 +122,17 @@ public:
     void set_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
                                   const std::string& key,
                                   int set_value,
-                                  l7vs::error_code& err ){
+                                  l7vs::error_code& err,
+                                  const std::string& file_name ){
         // find section
         std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
             section_table_iterator = tag_section_table_map.find( comp );
         int_map_type::iterator intmap_iterator =
-            intMap.find( section_table_iterator->second + "." + key );
+            intMap.find( file_name + "#" + section_table_iterator->second + "." + key );
         if( intmap_iterator != intMap.end() ) {
             intmap_iterator->second = set_value;
         } else {
-            std::string str_key = section_table_iterator->second + "." + key;
+            std::string str_key = file_name + "#" + section_table_iterator->second + "." + key;
             std::pair< std::string, int > add_para;
             add_para.first = str_key;
             add_para.second = set_value;
@@ -142,14 +143,15 @@ public:
 
     void rm_int_parameter( const l7vs::PARAMETER_COMPONENT_TAG comp,
                                   const std::string& key,
-                                  l7vs::error_code& err ){
+                                  l7vs::error_code& err,
+                                  const std::string& file_name ){
         // find section
         std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
             section_table_iterator = tag_section_table_map.find( comp );
         int_map_type::iterator intmap_iterator =
-            intMap.find( section_table_iterator->second + "." + key );
+            intMap.find( file_name +"#" + section_table_iterator->second + "." + key );
         if( intmap_iterator != intMap.end() ) {
-            intMap.erase(section_table_iterator->second + "." + key);
+            intMap.erase( file_name +"#" + section_table_iterator->second + "." + key);
         }
     };
 };
@@ -259,21 +261,21 @@ public:
                          const std::string& = PARAMETER_FILE );
 
 
-
-
     void set_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
                                   const std::string& key,
                                   int set_value,
-                                  l7vs::error_code& err ){
+                                  l7vs::error_code& err,
+                                  const std::string& file_name = PARAMETER_FILE  ){
         ParameterImpl& impl = ParameterImpl::get_instance();
-        impl.set_int( comp, key, set_value, err );
+        impl.set_int( comp, key, set_value, err ,file_name);
     };
 
     void rm_int_parameter( const l7vs::PARAMETER_COMPONENT_TAG comp,
                                   const std::string& key,
-                                  l7vs::error_code& err ){
+                                  l7vs::error_code& err,
+                                  const std::string& file_name = PARAMETER_FILE  ){
         ParameterImpl& impl = ParameterImpl::get_instance();
-        impl.rm_int_parameter( comp, key, err );
+        impl.rm_int_parameter( comp, key, err ,file_name);
     };
 
 
