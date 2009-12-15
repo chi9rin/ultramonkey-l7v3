@@ -508,7 +508,7 @@ void l7vs::LoggerImpl::loadConf(){
     using namespace log4cxx;
     using namespace l7vs;
 
-    ParameterImpl& param = ParameterImpl::get_instance();
+    Parameter param;
 
     // Connection category Logger setting.
     normal_log_property.log_filename_key                = LOGGER_LOG_FILENAME_KEY;
