@@ -41,7 +41,7 @@
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
 #include "logger_impl.h"
-#include "parameter_impl.h"
+#include "parameter.h"
 #include "strict_time_based_rolling_policy.h"
 #include "time_and_size_based_rolling_policy.h"
 
