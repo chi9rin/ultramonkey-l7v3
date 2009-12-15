@@ -43,9 +43,10 @@ bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp, const std::string&
  * @param[in]    key    key string
  * @return        value
  */
-int l7vs::Parameter::get_int(    const l7vs::PARAMETER_COMPONENT_TAG comp,
+int l7vs::Parameter::get_int(   const l7vs::PARAMETER_COMPONENT_TAG comp,
                                 const std::string& key,
-                                l7vs::error_code& err ){
+                                l7vs::error_code& err,
+                                const std::string& ){
     int        value = 0;
 
     if ( 1000 <= get_int_stubmode ) {
@@ -75,7 +76,8 @@ int l7vs::Parameter::get_int(    const l7vs::PARAMETER_COMPONENT_TAG comp,
  */
 std::string l7vs::Parameter::get_string(        const l7vs::PARAMETER_COMPONENT_TAG comp,
                                                 const std::string& key,
-                                                l7vs::error_code& err ){
+                                                l7vs::error_code& err,
+                                                const std::string& ){
     std::string    str( "" );
 
 
@@ -85,7 +87,7 @@ std::string l7vs::Parameter::get_string(        const l7vs::PARAMETER_COMPONENT_
         str = get_string_table[0];
     } else if ( "service_name" == key && 2 != ( get_string_stubmode % 100 ) ){
         str = get_string_table[1];
-    } else if ( "nic" == key && 3 != ( get_string_stubmode % 100 ) ){
+    } else if ( "recv_ip_addr" == key && 3 != ( get_string_stubmode % 100 ) ){
         str = get_string_table[2];
     } else if ( "cmponent_id_00" == key && 4 != ( get_string_stubmode % 100 ) ){
         str = get_string_table[3];
