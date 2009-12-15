@@ -1520,7 +1520,7 @@ bool    l7vs::l7vsadm::parse_help_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG 
     "  --flag             -f sorry-flag          sorry status set to virtual service\n"
     "  --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
     "  --qos-down         -q QoSval-down         QoS Threshold(bps) set to client direction\n"
-    "  --ssl-proxy        -z ssl-config-file     SSL configuration file(Use SSL)\n"
+    "  --ssl              -z ssl-config-file     SSL configuration file(Use SSL)\n"
     "  --sockopt          -O socket-option       deferaccept,nodelay,cork,quickackon or quickackoff set to socket option\n"
     "  --access-log       -L access-log-flag     access log flag 0(none) or 1(output)\n"
     "  --access-log-name  -L access-log-file     access log file\n"
@@ -1834,7 +1834,7 @@ l7vs::l7vsadm::l7vsadm()
     vs_option_dic["-p"]             = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
     vs_option_dic["--udp"]          = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
     vs_option_dic["-z"]             = boost::bind( &l7vsadm::parse_opt_vs_ssl_file_func, this, _1, _2, _3 );
-    vs_option_dic["--ssl-proxy"]    = boost::bind( &l7vsadm::parse_opt_vs_ssl_file_func, this, _1, _2, _3 );
+    vs_option_dic["--ssl"]          = boost::bind( &l7vsadm::parse_opt_vs_ssl_file_func, this, _1, _2, _3 );
     vs_option_dic["-O"]             = boost::bind( &l7vsadm::parse_opt_vs_socket_func, this, _1, _2, _3 );
     vs_option_dic["--sockopt"]      = boost::bind( &l7vsadm::parse_opt_vs_socket_func, this, _1, _2, _3 );
     vs_option_dic["-L"]             = boost::bind( &l7vsadm::parse_opt_vs_access_log_func, this, _1, _2, _3 );
