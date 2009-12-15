@@ -98,20 +98,6 @@
 	#define LOGGER_CONN_ROTATION_TIMING_KEY			"snmp_conn_rotation_timing"
 	#define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY	"snmp_conn_rotation_timing_value"
 
-#else	//sslproxy
-	#define LOGGER_LOG_FILENAME_KEY					"sslproxy_log_filename"
-	#define LOGGER_ROTATION_KEY						"sslproxy_rotation"
-	#define LOGGER_MAX_BACKUP_INDEX_KEY				"sslproxy_max_backup_index"
-	#define LOGGER_MAX_FILE_SIZE_KEY				"sslproxy_max_filesize"
-	#define LOGGER_ROTATION_TIMING_KEY				"sslproxy_rotation_timing"
-	#define LOGGER_ROTATION_TIMING_VALUE_KEY		"sslproxy_rotation_timing_value"
-	
-	#define LOGGER_CONN_LOG_FILENAME_KEY			"sslproxy_conn_log_filename"
-	#define LOGGER_CONN_ROTATION_KEY				"sslproxy_conn_rotation"
-	#define LOGGER_CONN_MAX_BACKUP_INDEX_KEY		"sslproxy_conn_max_backup_index"
-	#define LOGGER_CONN_MAX_FILE_SIZE_KEY			"sslproxy_conn_max_filesize"
-	#define LOGGER_CONN_ROTATION_TIMING_KEY			"sslproxy_conn_rotation_timing"
-	#define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY	"sslproxy_conn_rotation_timing_value"
 #endif
 
 /*!
