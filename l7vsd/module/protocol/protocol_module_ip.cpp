@@ -105,8 +105,24 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600002, "in/out_function : void protocol_module_ip::"
-                        "replication_interrupt().", __FILE__, __LINE__ );
+            putLogDebug(600002, "in_function : protocol_module_ip::replication_interrupt().", __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+        if (replication_data_processor)
+        {
+            replication_data_processor->write_replication_area();
+            /*-------- DEBUG LOG --------*/
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            {
+                putLogDebug(600003, "function : protocol_module_ip::replication_interrupt() : "
+                            "write_replication_area() end.", __FILE__, __LINE__);
+            }
+            /*------DEBUG LOG END------*/
+        }
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+        {
+            putLogDebug(600004, "out_function : void protocol_module_ip::replication_interrupt().", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
     }
@@ -125,7 +141,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600003, "in_function : void protocol_module_ip::initialize("
+            putLogDebug(600005, "in_function : void protocol_module_ip::initialize("
                         "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end, "
                         "rs_list_itr_next_func_type inlist_next, boost::function< void(void) > "
                         "inlist_lock, boost::function< void(void) > inlist_unlock).", __FILE__, __LINE__);
@@ -146,7 +162,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600004, "out_function : void protocol_module_ip::initialize("
+            putLogDebug(600006, "out_function : void protocol_module_ip::initialize("
                         "rs_list_itr_func_type inlist_begin, rs_list_itr_func_type inlist_end, "
                         "rs_list_itr_next_func_type inlist_next, boost::function< void(void) > "
                         "inlist_lock, boost::function< void(void) > inlist_unlock).", __FILE__, __LINE__);
@@ -160,7 +176,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600005, "in_function : void protocol_module_ip::finalize().", __FILE__, __LINE__);
+            putLogDebug(600007, "in_function : void protocol_module_ip::finalize().", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -187,7 +203,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600006, "function : void protocol_module_ip::finalize() : "
+            putLogDebug(600008, "function : void protocol_module_ip::finalize() : "
                         "rs_list_begin.clear(), rs_list_end.clear(), rs_list_next.clear(), "
                         "rs_list_lock.clear(), rs_list_unlock.clear() end.", __FILE__, __LINE__);
         }
@@ -199,7 +215,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600007, "function : void protocol_module_ip::finalize() : "
+            putLogDebug(600009, "function : void protocol_module_ip::finalize() : "
                         "schedule_tcp.clear() end.", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -222,7 +238,7 @@ namespace l7vs
             {
                 boost::format formatter("delete : address = &(%d).");
                 formatter % static_cast<void*>(replication_data_processor);
-                putLogDebug(600008, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600010, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -238,7 +254,7 @@ namespace l7vs
             {
                 boost::format formatter("delete : address = &(%d).");
                 formatter % static_cast<void*>(ip_data_processor);
-                putLogDebug(600009, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600011, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -249,7 +265,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600010, "out_function : void protocol_module_ip::finalize().", __FILE__, __LINE__);
+            putLogDebug(600012, "out_function : void protocol_module_ip::finalize().", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -276,7 +292,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600011, "in/out_function : bool protocol_module_ip::is_use_sorry() : return_value = true.",
+            putLogDebug(600013, "in/out_function : bool protocol_module_ip::is_use_sorry() : return_value = true.",
                         __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -289,7 +305,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600012, "in/out_function : void protocol_module_ip::handle_rslist_update().",
+            putLogDebug(600014, "in/out_function : void protocol_module_ip::handle_rslist_update().",
                         __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -314,7 +330,7 @@ namespace l7vs
                 argsdump += *it;
             }
             formatter % argsdump;
-            putLogDebug(600013, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600015, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -329,12 +345,12 @@ namespace l7vs
         bool sorryuri_checked = false;
         sregex    sorry_uri_regex
         =    +(    '/' >>
-             *(    alpha |
-                digit |
-                ( set = ';', ':', '@', '&', '=' ) |
-                ( set = '$', '-', '_', '.', '+' ) |
-                ( set = '!', '*', '\'', '\(', ')', ',' ) |
-                '%' >> repeat<2>(xdigit)));
+                   *(    alpha |
+                         digit |
+                         ( set = ';', ':', '@', '&', '=' ) |
+                         ( set = '$', '-', '_', '.', '+' ) |
+                         ( set = '!', '*', '\'', '\(', ')', ',' ) |
+                         '%' >> repeat<2>(xdigit)));
 
         typedef std::vector<std::string>::const_iterator vec_str_it;
 
@@ -575,7 +591,7 @@ namespace l7vs
                                     "const std::vector<std::string>& args) : return_value = ("
                                     "check_message_result.flag = %d, check_message_result.message = %s).");
             formatter % check_result.flag % check_result.message;
-            putLogDebug(600014, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600016, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -602,7 +618,7 @@ namespace l7vs
                 argsdump += " ";
             }
             formatter % argsdump;
-            putLogDebug(600015, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600017, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -617,12 +633,12 @@ namespace l7vs
         boost::format formatter;
         sregex    sorry_uri_regex
         =    +(    '/' >>
-             *(    alpha |
-                digit |
-                ( set = ';', ':', '@', '&', '=' ) |
-                ( set = '$', '-', '_', '.', '+' ) |
-                ( set = '!', '*', '\'', '\(', ')', ',' ) |
-                '%' >> repeat<2>(xdigit)));
+                   *(    alpha |
+                         digit |
+                         ( set = ';', ':', '@', '&', '=' ) |
+                         ( set = '$', '-', '_', '.', '+' ) |
+                         ( set = '!', '*', '\'', '\(', ')', ',' ) |
+                         '%' >> repeat<2>(xdigit)));
 
         typedef std::vector<std::string>::const_iterator vec_str_it;
 
@@ -708,7 +724,7 @@ namespace l7vs
                     {
                         // not set no-reschedule flag
                         reschedule_flag = true;
-            reschedule = 1;
+                        reschedule = 1;
                     }
                     else
                     {
@@ -726,7 +742,7 @@ namespace l7vs
                     {
                         // not set reschedule flag
                         no_reschedule_flag = true;
-            reschedule = 0;
+                        reschedule = 0;
 
                     }
                     else
@@ -743,7 +759,7 @@ namespace l7vs
                 {
                     //set forwarded flag ON
                     forward_checked = true;
-            forwarded_for = FORWARDED_FOR_ON;
+                    forwarded_for = FORWARDED_FOR_ON;
                 }
                 //option string  = "-S"
                 else if (*it == "-S" || *it == "--sorry-uri")
@@ -786,7 +802,7 @@ namespace l7vs
                                 if (regex_match(*it, sorry_uri_regex))
                                 {
                                     sorryuri_checked = true;
-                    memcpy(sorry_uri.data(), it->c_str(), it->size());
+                                    memcpy(sorry_uri.data(), it->c_str(), it->size());
                                 }
                                 //check NG
                                 else
@@ -870,7 +886,7 @@ namespace l7vs
                                         "protocol_module_ip::set_parameter(const std::vector<std::string>& args) : "
                                         "timeout = %d, reschedule = %d.");
                 formatter % timeout  % reschedule;
-                putLogDebug(600016, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600018, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -881,12 +897,12 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600017, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600019, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : replication_pay_memory() end.", __FILE__, __LINE__);
                 boost::format formatter("function : protocol_module_ip::check_message_result protocol_module_ip::"
                                         "set_parameter() : data_addr = &(%d), data_size = %d.");
                 formatter % data_addr % data_size;
-                putLogDebug(600018, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600020, formatter.str(), __FILE__, __LINE__);
             }
 
             /*------DEBUG LOG END------*/
@@ -898,7 +914,7 @@ namespace l7vs
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
-                    putLogDebug(600019, "function : protocol_module_ip::check_message_result "
+                    putLogDebug(600021, "function : protocol_module_ip::check_message_result "
                                 "protocol_module_ip::set_parameter() : "
                                 "Replication area is null.", __FILE__, __LINE__);
                 }
@@ -923,7 +939,7 @@ namespace l7vs
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(replication_data_processor)
                 % sizeof(ip_replication_data_processor);
-                putLogDebug(600020, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600022, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -932,7 +948,7 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600021, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600023, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : register_replication_area_lock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -942,7 +958,7 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600022, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600024, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : register_replication_area_unlock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -964,7 +980,7 @@ namespace l7vs
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(ip_data_processor)
                 % sizeof(ip_session_data_processor);
-                putLogDebug(600023, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600025, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -974,7 +990,7 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600024, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600026, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : get_replication_area() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -984,7 +1000,7 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600025, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600027, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -994,7 +1010,7 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600026, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600028, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -1004,7 +1020,7 @@ namespace l7vs
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
-                putLogDebug(600027, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                putLogDebug(600029, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                             "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
@@ -1077,7 +1093,7 @@ namespace l7vs
                                     "const std::vector<std::string>& args) : return_value = ("
                                     "check_message_result.flag = %d, check_message_result.message = %s).");
             formatter % check_result.flag % check_result.message;
-            putLogDebug(600028, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600030, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         return check_result;
@@ -1101,7 +1117,7 @@ namespace l7vs
                 argsdump += *it;
             }
             formatter % argsdump;
-            putLogDebug(600029, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600031, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         check_message_result check_result;
@@ -1125,7 +1141,7 @@ namespace l7vs
                                     "protocol_module_ip::add_parameter(const std::vector<std::string>& args) : "
                                     "return_value = (check_message_result.flag = %d, check_message_result.message = %s).");
             formatter % check_result.flag % check_result.message;
-            putLogDebug(600030, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600032, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         return check_result;
@@ -1138,14 +1154,14 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600031, "in_function : void protocol_module_ip::get_option_info("
+            putLogDebug(600033, "in_function : void protocol_module_ip::get_option_info("
                         "std::string& option).", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
         boost::format option_formatter("--timeout %d%s %s --sorry-uri '%s'");
         option_formatter % timeout % (forwarded_for ? " --forwarded-for" : "") % (reschedule ? "--reschedule" : "--no-reschedule") % sorry_uri.c_array();
-        option.assign(option_formatter.str());     
+        option.assign(option_formatter.str());
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1153,7 +1169,7 @@ namespace l7vs
             boost::format formatter("out_function : void protocol_module_ip::get_option_info("
                                     "std::string& option) : option = %s.");
             formatter % option;
-            putLogDebug(600032, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600034, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
     }
@@ -1165,7 +1181,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600033, "in_function : void protocol_module_ip::register_schedule("
+            putLogDebug(600035, "in_function : void protocol_module_ip::register_schedule("
                         "tcp_schedule_func_type inschedule).", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -1173,7 +1189,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600034, "out_function : void protocol_module_ip::register_schedule("
+            putLogDebug(600036, "out_function : void protocol_module_ip::register_schedule("
                         "tcp_schedule_func_type inschedule).", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -1186,7 +1202,7 @@ namespace l7vs
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
-            putLogDebug(600035, "in/out_function : void protocol_module_ip::register_schedule("
+            putLogDebug(600037, "in/out_function : void protocol_module_ip::register_schedule("
                         "udp_schedule_func_type inschedule).", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
@@ -1211,7 +1227,7 @@ namespace l7vs
                                     "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : "
                                     "up_thread_id = %d, down_thread_id = %d.");
             formatter % up_thread_id % down_thread_id;
-            putLogDebug(600036, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600038, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -1227,7 +1243,7 @@ namespace l7vs
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(p_up.get()) % sizeof(session_thread_data_ip);
-                putLogDebug(600037, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600039, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1281,7 +1297,7 @@ namespace l7vs
                 % p_up->ip_hash;
 
 
-                putLogDebug(600038, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600040, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1292,7 +1308,7 @@ namespace l7vs
             {
                 boost::format formatter("new : address = &(%d), size = %lu.");
                 formatter % static_cast<void*>(p_down.get()) % sizeof(session_thread_data_ip);
-                putLogDebug(600039, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600041, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1341,7 +1357,7 @@ namespace l7vs
                 % p_down->current_message_rest_size
                 % p_down->data_state
                 % p_down->ip_hash;
-                putLogDebug(600040, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600042, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -1394,7 +1410,7 @@ namespace l7vs
                                     "const boost::asio::ip::udp::endpoint& client_endpoint_udp) : return_value = %d. "
                                     "thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600041, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600043, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -1415,7 +1431,7 @@ namespace l7vs
                                     "const boost::thread::id down_thread_id) : "
                                     "up_thread_id = %d, down_thread_id = %d.");
             formatter % up_thread_id % down_thread_id;
-            putLogDebug(600042, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600044, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = STOP;
@@ -1437,7 +1453,7 @@ namespace l7vs
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_up->data_buffer);
-                    putLogDebug(600043, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(600045, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1447,7 +1463,7 @@ namespace l7vs
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_up.get());
-                    putLogDebug(600044, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(600046, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1464,7 +1480,7 @@ namespace l7vs
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_up->data_buffer);
-                    putLogDebug(600045, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(600047, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1474,7 +1490,7 @@ namespace l7vs
                 {
                     boost::format formatter("delete : address = &(%d).");
                     formatter % static_cast<void*>(p_down.get());
-                    putLogDebug(600046, formatter.str(), __FILE__, __LINE__);
+                    putLogDebug(600048, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
 
@@ -1510,7 +1526,7 @@ namespace l7vs
                                     "handle_session_finalize(const boost::thread::id up_thread_id, "
                                     "const boost::thread::id down_thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600047, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600049, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -1527,7 +1543,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_accept(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600048, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600050, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1561,7 +1577,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_accept(const boost::thread::id thread_id) : ACCEPT_END_FLAG_ON. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600049, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600051, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -1589,7 +1605,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_accept() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600050, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600052, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -1620,7 +1636,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_accept(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600051, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600053, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1647,7 +1663,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : thread_id = %d, recvbuffer = %s, recvlen = %d.");
             formatter % thread_id % buffer % recvlen;
-            putLogDebug(600052, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600054, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1684,7 +1700,7 @@ namespace l7vs
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(600053, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600055, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return status;
@@ -1734,10 +1750,10 @@ namespace l7vs
                     {
                         //search http header
                         find_ret = http_utility::find_http_header_all(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                                                        session_data_ptr->data_length,
-                                                        http_header_offset,
-                                                        http_header_len
-                                                       );
+                                   session_data_ptr->data_length,
+                                   http_header_offset,
+                                   http_header_len
+                                                                     );
 
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1746,7 +1762,7 @@ namespace l7vs
                                                     "handle_client_recv() : call find_http_header_all : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                            putLogDebug(600054, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600056, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -1775,7 +1791,7 @@ namespace l7vs
                                                         "handle_client_recv() : call check_http_method_and_version : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % check_ret % boost::this_thread::get_id();
-                                putLogDebug(600055, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600057, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -1802,7 +1818,7 @@ namespace l7vs
                                                             "handle_client_recv() : call find_http_header_content_length : "
                                                             "return_value = %d. thread id : %d.");
                                     formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                                    putLogDebug(600056, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(600058, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
 
@@ -1906,7 +1922,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_client_recv() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600057, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600059, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -1948,7 +1964,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600058, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600060, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1971,7 +1987,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint& rs_endpoint) : "
                                     "thread_id = %d, rs_endpoint = [%s]:%d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(600059, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600061, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -1997,7 +2013,7 @@ namespace l7vs
                                         "boost::asio::ip::tcp::endpoint& rs_endpoint)"
                                         " : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(600060, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600062, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return FINALIZE;
@@ -2037,7 +2053,7 @@ namespace l7vs
                                         "protocol_module_ip::handle_realserver_select() : "
                                         "get_endpoint_from_session_data() end. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600061, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600063, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -2097,7 +2113,7 @@ namespace l7vs
                                                     "handle_realserver_select() : call schedule_tcp : "
                                                     "rs_endpoint = [%s]:%d. thread id : %d.");
                             formatter % rs_endpoint.address().to_string() % rs_endpoint.port() % boost::this_thread::get_id();
-                            putLogDebug(600062, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600064, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -2115,7 +2131,7 @@ namespace l7vs
                                                         "protocol_module_ip::handle_realserver_select() : "
                                                         "write_session_data() end. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600063, formatter.str(), __FILE__, __LINE__);
+                                putLogDebug(600065, formatter.str(), __FILE__, __LINE__);
                             }
                             /*------DEBUG LOG END------*/
 
@@ -2140,10 +2156,10 @@ namespace l7vs
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
-                                        "handle_realserver_select()"
-                                        " : SORRY_FLAG_ON. thread id : %d.");
+                                                        "handle_realserver_select()"
+                                                        " : SORRY_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600064, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600066, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -2175,7 +2191,7 @@ namespace l7vs
                                             "handle_realserver_select() : call schedule_tcp : "
                                             "rs_endpoint = [%s]:%d. thread id : %d.");
                     formatter % rs_endpoint.address().to_string() % rs_endpoint.port() % boost::this_thread::get_id();
-                    putLogDebug(600065, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600067, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -2193,7 +2209,7 @@ namespace l7vs
                                                 "protocol_module_ip::handle_realserver_select() : "
                                                 "write_session_data() end. thread id : %d.");
                         formatter % boost::this_thread::get_id();
-                        putLogDebug(600066, formatter.str(), __FILE__, __LINE__);
+                        putLogDebug(600068, formatter.str(), __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
 
@@ -2218,10 +2234,10 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
-                                "handle_realserver_select()"
-                                " : SORRY_FLAG_ON. thread id : %d.");
+                                                "handle_realserver_select()"
+                                                " : SORRY_FLAG_ON. thread id : %d.");
                         formatter % boost::this_thread::get_id();
-                        putLogDebug(600067, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600069, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //set return status
@@ -2241,7 +2257,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_realserver_select() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600068, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600070, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             status = FINALIZE;
@@ -2274,7 +2290,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint& rs_endpoint)"
                                     " : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600069, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600071, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return status;
@@ -2299,7 +2315,7 @@ namespace l7vs
                                     "size_t& datalen) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(600070, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600072, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -2320,7 +2336,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600071, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600073, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2388,7 +2404,7 @@ namespace l7vs
                                 "handle_realserver_connect() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter %  x_forwarded_for_context.size() % datadump;
-                            putLogDebug(600072, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600074, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -2407,7 +2423,7 @@ namespace l7vs
                                 "handle_realserver_connect() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % x_forwarded_for_context.size() % datadump;
-                            putLogDebug(600073, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600075, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -2467,7 +2483,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_realserver_connect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600074, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600076, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -2505,7 +2521,7 @@ namespace l7vs
                                     "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                     "size_t& datalen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600075, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600077, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2527,7 +2543,7 @@ namespace l7vs
                                     "const boost::asio::ip::tcp::endpoint& rs_endpoint) : "
                                     "thread_id = %d, rs_endpoint = [%s]:%d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(600076, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600078, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2564,7 +2580,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_realserver_connection_fail() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600077, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600079, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -2602,7 +2618,7 @@ namespace l7vs
                                     "handle_realserver_connection_fail(const boost::thread::id thread_id, "
                                     "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600078, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600080, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2620,7 +2636,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_send(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600079, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600081, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2692,10 +2708,10 @@ namespace l7vs
                     {
                         //search whole http header, get whole http header's offset and length
                         find_ret = http_utility::find_http_header_all(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                                                        session_data_ptr->data_length,
-                                                        http_header_all_offset,
-                                                        http_header_all_len
-                                                       );
+                                   session_data_ptr->data_length,
+                                   http_header_all_offset,
+                                   http_header_all_len
+                                                                     );
 
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -2704,7 +2720,7 @@ namespace l7vs
                                                     "handle_realserver_send() : call find_http_header_all : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                            putLogDebug(600080, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600082, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -2731,7 +2747,7 @@ namespace l7vs
                                                         "handle_realserver_send() : call check_http_method_and_version : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % check_ret % boost::this_thread::get_id();
-                                putLogDebug(600081, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600083, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -2760,7 +2776,7 @@ namespace l7vs
                                                             "handle_realserver_send() : call find_http_header_content_length : "
                                                             "return_value = %d. thread id : %d.");
                                     formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                                    putLogDebug(600082, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(600084, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
 
@@ -2855,7 +2871,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_realserver_send() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600083, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600085, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -2903,7 +2919,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_send(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600084, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600086, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2925,7 +2941,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint& sorry_endpoint) : "
                                     "thread_id = %d, sorry_endpoint = [%s]:%d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-            putLogDebug(600085, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600087, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -2976,7 +2992,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorryserver_select() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600086, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600088, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3015,7 +3031,7 @@ namespace l7vs
                                     "boost::asio::ip::tcp::endpoint& sorry_endpoint)"
                                     " : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600087, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600089, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3038,7 +3054,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600088, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600090, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3081,7 +3097,7 @@ namespace l7vs
                 {
                     //search uri
                     http_utility::find_uri(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                             session_data_ptr->data_length, uri_offset, uri_len);
+                                           session_data_ptr->data_length, uri_offset, uri_len);
 
                     //set buffer's position
                     buffer_element.first = session_data_ptr->data_buffer + session_data_ptr->data_offset;
@@ -3129,7 +3145,7 @@ namespace l7vs
                                 "handle_sorryserver_connect() : before memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter %  x_forwarded_for_context.size() % datadump;
-                            putLogDebug(600089, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600091, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -3148,7 +3164,7 @@ namespace l7vs
                                 "handle_sorryserver_connect() : after memcpy (data dump) : "
                                 "data begin = 0, data_size = %d, data = %s");
                             formatter % x_forwarded_for_context.size() % datadump;
-                            putLogDebug(600090, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600092, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -3209,7 +3225,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorryserver_connect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600091, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600093, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3247,7 +3263,7 @@ namespace l7vs
                                     "boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                     "size_t& datalen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600092, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600094, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3268,7 +3284,7 @@ namespace l7vs
                                     "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : "
                                     "thread_id = %d, sorry_endpoint = [%s]:%d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-            putLogDebug(600093, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600095, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3305,7 +3321,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorryserver_connection_fail() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600094, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600096, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3343,7 +3359,7 @@ namespace l7vs
                                     "handle_sorryserver_connection_fail(const boost::thread::id thread_id, "
                                     "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600095, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600097, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3362,7 +3378,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_send(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600096, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600098, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3434,10 +3450,10 @@ namespace l7vs
                     {
                         //search whole http header, get whole http header's offset and length
                         find_ret = http_utility::find_http_header_all(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                                                        session_data_ptr->data_length,
-                                                        http_header_all_offset,
-                                                        http_header_all_len
-                                                       );
+                                   session_data_ptr->data_length,
+                                   http_header_all_offset,
+                                   http_header_all_len
+                                                                     );
 
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3446,7 +3462,7 @@ namespace l7vs
                                                     "handle_sorryserver_send() : call find_http_header_all : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                            putLogDebug(600097, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600099, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -3473,7 +3489,7 @@ namespace l7vs
                                                         "handle_sorryserver_send() : call check_http_method_and_version : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % check_ret % boost::this_thread::get_id();
-                                putLogDebug(600098, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600100, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -3502,7 +3518,7 @@ namespace l7vs
                                                             "handle_sorryserver_send() : call find_http_header_content_length : "
                                                             "return_value = %d. thread id : %d.");
                                     formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                                    putLogDebug(600099, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(600101, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
 
@@ -3598,7 +3614,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorryserver_send() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600100, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600102, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3646,7 +3662,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_send(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600101, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600103, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3672,7 +3688,7 @@ namespace l7vs
                                     "const size_t& recvlen) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(600102, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600104, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -3701,7 +3717,7 @@ namespace l7vs
                                     "const size_t recvlen) : thread_id = %d, rs_endpoint = [%s]:%d, recvbuffer = %s, recvlen = %d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port()
             % buffer % recvlen;
-            putLogDebug(600103, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600105, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -3740,7 +3756,7 @@ namespace l7vs
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(600104, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600106, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3777,7 +3793,7 @@ namespace l7vs
                                         "const size_t recvlen) : SWITCH_FLAG_OFF. "
                                         "thread_id = %d, rs_endpoint = [%s]:%d.");
                 formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-                putLogDebug(600105, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600107, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -3798,10 +3814,10 @@ namespace l7vs
                 {
                     //search http header
                     find_ret = http_utility::find_http_header_all(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                                                    session_data_ptr->data_length,
-                                                    http_header_offset,
-                                                    http_header_len
-                                                   );
+                               session_data_ptr->data_length,
+                               http_header_offset,
+                               http_header_len
+                                                                 );
 
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3810,7 +3826,7 @@ namespace l7vs
                                                 "handle_realserver_recv() : call find_http_header_all : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                        putLogDebug(600106, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600108, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -3840,7 +3856,7 @@ namespace l7vs
                                                     "handle_realserver_recv() : call check_http_version_and_status_code : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_ret % boost::this_thread::get_id();
-                            putLogDebug(600107, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600109, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -3868,7 +3884,7 @@ namespace l7vs
                                                         "handle_realserver_recv() : call find_http_header_content_length : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                                putLogDebug(600108, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600110, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -3961,7 +3977,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_realserver_recv() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600109, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600111, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4012,7 +4028,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
             formatter % FINALIZE % boost::this_thread::get_id();
-            putLogDebug(600110, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600112, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4044,7 +4060,7 @@ namespace l7vs
                                     "const size_t recvlen) : thread_id = %d, sorry_endpoint = [%s]:%d, recvbuffer = %s, recvlen = %d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port()
             % buffer % recvlen;
-            putLogDebug(600111, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600113, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4081,7 +4097,7 @@ namespace l7vs
                                         "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t recvlen) : return_value = %d. thread id : %d.");
                 formatter % FINALIZE % boost::this_thread::get_id();
-                putLogDebug(600112, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600114, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4118,7 +4134,7 @@ namespace l7vs
                                         "const size_t recvlen) : SWITCH_FLAG_OFF. "
                                         "thread_id = %d, rs_endpoint = [%s]:%d.");
                 formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-                putLogDebug(600113, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600115, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4140,10 +4156,10 @@ namespace l7vs
                 {
                     //search http header
                     find_ret = http_utility::find_http_header_all(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                                                    session_data_ptr->data_length,
-                                                    http_header_offset,
-                                                    http_header_len
-                                                   );
+                               session_data_ptr->data_length,
+                               http_header_offset,
+                               http_header_len
+                                                                 );
 
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -4152,7 +4168,7 @@ namespace l7vs
                                                 "handle_sorryserver_recv() : call find_http_header_all : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                        putLogDebug(600114, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600116, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -4182,7 +4198,7 @@ namespace l7vs
                                                     "handle_sorryserver_recv() : call check_http_version_and_status_code : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_ret % boost::this_thread::get_id();
-                            putLogDebug(600115, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600117, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -4210,7 +4226,7 @@ namespace l7vs
                                                         "handle_sorryserver_recv() : call find_http_header_content_length : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                                putLogDebug(600116, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600118, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -4304,7 +4320,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorryserver_recv() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600117, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600119, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4355,7 +4371,7 @@ namespace l7vs
                                     "const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t recvlen) : return_value = %d. thread id : %d.");
             formatter % FINALIZE % boost::this_thread::get_id();
-            putLogDebug(600118, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600120, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4376,7 +4392,7 @@ namespace l7vs
                                     "handle_response_send_inform(const boost::thread::id thread_id) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(600119, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600121, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4399,7 +4415,7 @@ namespace l7vs
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : "
                                     "thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600120, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600122, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4449,7 +4465,7 @@ namespace l7vs
                     "handle_client_connection_check() : before memcpy (data dump) : "
                     "data begin = %d, data_size = %d, data = %s");
                 formatter % session_data_ptr->data_offset % send_possible_size % datadump;
-                putLogDebug(600121, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600123, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4468,7 +4484,7 @@ namespace l7vs
                     "handle_client_connection_check() : after memcpy (data dump) : "
                     "data begin = 0, data_size = %d, data = %s");
                 formatter % send_possible_size % datadump;
-                putLogDebug(600122, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600124, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4508,7 +4524,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_client_connection_check() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600123, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600125, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4545,7 +4561,7 @@ namespace l7vs
                                     "handle_client_connection_check(const boost::thread::id thread_id, "
                                     "boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t& datalen) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600124, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600126, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4571,7 +4587,7 @@ namespace l7vs
                                     "const size_t& datalen) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(600125, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600127, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return STOP;
@@ -4589,7 +4605,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_send(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % thread_id;
-            putLogDebug(600126, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600128, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4661,10 +4677,10 @@ namespace l7vs
                     {
                         //search whole http header, get whole http header's offset and length
                         find_ret = http_utility::find_http_header_all(session_data_ptr->data_buffer + session_data_ptr->data_offset,
-                                                        session_data_ptr->data_length,
-                                                        http_header_all_offset,
-                                                        http_header_all_len
-                                                       );
+                                   session_data_ptr->data_length,
+                                   http_header_all_offset,
+                                   http_header_all_len
+                                                                     );
 
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -4673,7 +4689,7 @@ namespace l7vs
                                                     "handle_client_send() : call find_http_header_all : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                            putLogDebug(600127, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600129, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -4700,7 +4716,7 @@ namespace l7vs
                                                         "handle_client_send() : call check_http_version_and_status_code : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % check_ret % boost::this_thread::get_id();
-                                putLogDebug(600128, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600130, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -4729,7 +4745,7 @@ namespace l7vs
                                                             "handle_client_send() : call find_http_header_content_length : "
                                                             "return_value = %d. thread id : %d.");
                                     formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-                                    putLogDebug(600129, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(600131, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
 
@@ -4843,7 +4859,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_client_send() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600130, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600132, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -4891,7 +4907,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_send(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600131, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600133, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4910,7 +4926,7 @@ namespace l7vs
             boost::format formatter("in/out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_disconnect(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % FINALIZE % boost::this_thread::get_id();
-            putLogDebug(600132, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600134, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
         return FINALIZE;
@@ -4928,7 +4944,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorry_enable(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600133, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600135, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -4981,7 +4997,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                         "handle_sorry_enable(const boost::thread::id thread_id) : SWITCH_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600134, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600136, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -5011,7 +5027,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                         "handle_sorry_enable(const boost::thread::id thread_id) : SWITCH_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600135, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600137, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                         }
@@ -5027,7 +5043,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                         "handle_sorry_enable(const boost::thread::id thread_id) : END_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600136, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600138, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                         }
@@ -5076,7 +5092,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                     "handle_sorry_enable(const boost::thread::id thread_id) : SWITCH_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(600137, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600139, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5101,7 +5117,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorry_enable(const boost::thread::id thread_id) : SORRY_FLAG_ON. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600138, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600140, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5117,7 +5133,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorry_enable() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600139, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600141, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5154,7 +5170,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorry_enable(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600140, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600142, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5173,7 +5189,7 @@ namespace l7vs
             boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorry_disable(const boost::thread::id thread_id) : thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600141, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600143, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5225,7 +5241,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                         "handle_sorry_disable(const boost::thread::id thread_id) : SWITCH_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600142, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600144, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -5242,7 +5258,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                         "handle_sorry_disable(const boost::thread::id thread_id) : END_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600143, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600145, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
                         }
@@ -5267,7 +5283,7 @@ namespace l7vs
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                         "handle_sorry_disable(const boost::thread::id thread_id) : SWITCH_FLAG_ON. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
-                                putLogDebug(600144, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(600146, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
 
@@ -5322,7 +5338,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                     "handle_sorry_disable(const boost::thread::id thread_id) : SWITCH_FLAG_ON. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(600145, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600147, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5347,7 +5363,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorry_disable(const boost::thread::id thread_id) : SORRY_FLAG_OFF. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600146, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600148, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5362,7 +5378,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorry_disable() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600147, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600149, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5399,7 +5415,7 @@ namespace l7vs
             boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorry_disable(const boost::thread::id thread_id) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600148, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600150, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5420,7 +5436,7 @@ namespace l7vs
                                     "handle_realserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint& rs_endpoint) : "
                                     "thread_id = %d, rs_endpoint = [%s]:%d.");
             formatter % thread_id % rs_endpoint.address().to_string() % rs_endpoint.port();
-            putLogDebug(600149, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600151, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5482,7 +5498,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                     "handle_realserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &"                         "rs_endpoint) : SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(600150, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600152, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
                     }
@@ -5512,7 +5528,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_realserver_disconnect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600151, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600153, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5550,7 +5566,7 @@ namespace l7vs
                                     "handle_realserver_disconnect(const boost::thread::id thread_id, "
                                     "const boost::asio::ip::tcp::endpoint& rs_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600152, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600154, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5573,7 +5589,7 @@ namespace l7vs
                                     "handle_sorryserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint& sorry_endpoint) : "
                                     "thread_id = %d, sorry_endpoint = [%s]:%d.");
             formatter % thread_id % sorry_endpoint.address().to_string() % sorry_endpoint.port();
-            putLogDebug(600153, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600155, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5634,7 +5650,7 @@ namespace l7vs
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                                     "handle_sorryserver_disconnect(const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &"                         "sorry_endpoint) : SWITCH_FLAG_OFF. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(600154, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600156, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5666,7 +5682,7 @@ namespace l7vs
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                         "handle_sorryserver_disconnect() : catch exception e = %d. thread id : %d.");
                 formatter % e % boost::this_thread::get_id();
-                putLogDebug(600155, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600157, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5705,7 +5721,7 @@ namespace l7vs
                                     "handle_sorryserver_disconnect(const boost::thread::id thread_id, "
                                     "const boost::asio::ip::tcp::endpoint& sorry_endpoint) : return_value = %d. thread id : %d.");
             formatter % status % boost::this_thread::get_id();
-            putLogDebug(600156, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600158, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5727,7 +5743,7 @@ namespace l7vs
                                     "boost::asio::ip::udp::endpoint& rs_endpoint) : "
                                     "return_value = %d. thread id : %d.");
             formatter % STOP % boost::this_thread::get_id();
-            putLogDebug(600157, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600159, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -5745,7 +5761,7 @@ namespace l7vs
                                     "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                     "const size_t& recvlen) : thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600158, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600160, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -5765,7 +5781,7 @@ namespace l7vs
                                         "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t& recvlen) : return_value = false. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600159, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600161, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5787,7 +5803,7 @@ namespace l7vs
                     "get_data_from_recvbuffer() : before memcpy (data dump) : "
                     "data begin = 0, data_size = %d, data = %s");
                 formatter % recvlen % datadump;
-                putLogDebug(600160, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600162, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5803,7 +5819,7 @@ namespace l7vs
                     "get_data_from_recvbuffer() : after memcpy (data dump) : "
                     "data begin = 0, data_size = %d, data = %s");
                 formatter % recvlen % datadump;
-                putLogDebug(600161, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600163, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
 
@@ -5816,7 +5832,7 @@ namespace l7vs
                                         "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                         "const size_t& recvlen) : return_value = true. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600162, formatter.str(), __FILE__, __LINE__ );
+                putLogDebug(600164, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
             return true;
@@ -5837,7 +5853,7 @@ namespace l7vs
                         "get_data_from_recvbuffer() : before memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % recvlen % datadump;
-                    putLogDebug(600163, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600165, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -5853,7 +5869,7 @@ namespace l7vs
                         "get_data_from_recvbuffer() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % recvlen % datadump;
-                    putLogDebug(600164, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600166, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -5867,7 +5883,7 @@ namespace l7vs
                                             "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                             "const size_t& recvlen) : return_value = true. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogDebug(600165, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600167, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -5890,7 +5906,7 @@ namespace l7vs
                                                 "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                 "const size_t& recvlen) : return_value = false. thread id : %d.");
                         formatter % boost::this_thread::get_id();
-                        putLogDebug(600166, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600168, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5905,7 +5921,7 @@ namespace l7vs
                         {
                             boost::format formatter("new : address = &(%d), size = %lu.");
                             formatter % static_cast<void*>(tmpbuffer) % MAX_IP_MODULE_BUFFER_SIZE;
-                            putLogDebug(600167, formatter.str(), __FILE__, __LINE__);
+                            putLogDebug(600169, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5926,7 +5942,7 @@ namespace l7vs
                                                     "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                     "const size_t& recvlen) : return_value = false. thread id : %d.");
                             formatter % boost::this_thread::get_id();
-                            putLogDebug(600168, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(600170, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
 
@@ -5945,7 +5961,7 @@ namespace l7vs
                             "get_data_from_recvbuffer() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % data_ptr->data_length % datadump;
-                        putLogDebug(600169, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600171, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5962,7 +5978,7 @@ namespace l7vs
                             "get_data_from_recvbuffer() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % data_ptr->data_length % datadump;
-                        putLogDebug(600170, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600172, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5971,7 +5987,7 @@ namespace l7vs
                     {
                         boost::format formatter("delete : address = &(%d).");
                         formatter % static_cast<void*>(data_ptr->data_buffer);
-                        putLogDebug(600171, formatter.str(), __FILE__, __LINE__);
+                        putLogDebug(600173, formatter.str(), __FILE__, __LINE__);
                     }
                     /*------DEBUG LOG END------*/
 
@@ -5990,7 +6006,7 @@ namespace l7vs
                             "get_data_from_recvbuffer() : before memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % recvlen % datadump;
-                        putLogDebug(600172, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600174, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -6007,7 +6023,7 @@ namespace l7vs
                             "get_data_from_recvbuffer() : after memcpy (data dump) : "
                             "data begin = 0, data_size = %d, data = %s");
                         formatter % recvlen % datadump;
-                        putLogDebug(600173, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600175, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -6021,7 +6037,7 @@ namespace l7vs
                                                 "thread_data_ptr data_ptr, const boost::array<char,MAX_BUFFER_SIZE>& recvbuffer, "
                                                 "const size_t& recvlen) : return_value = true. thread id : %d.");
                         formatter % boost::this_thread::get_id();
-                        putLogDebug(600174, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(600176, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
 
@@ -6042,7 +6058,7 @@ namespace l7vs
                                     "thread_data_ptr data_ptr, boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                     "size_t& datalen) : thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600175, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600177, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -6062,7 +6078,7 @@ namespace l7vs
                                         "thread_data_ptr data_ptr, boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                         "size_t& datalen) : return_value = false. thread_id = %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600176, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600178, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -6090,7 +6106,7 @@ namespace l7vs
                         "put_data_to_sendbuffer() : before memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % buffer_element.second % datadump;
-                    putLogDebug(600177, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600179, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -6107,7 +6123,7 @@ namespace l7vs
                         "put_data_to_sendbuffer() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % buffer_element.second % datadump;
-                    putLogDebug(600178, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600180, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -6141,7 +6157,7 @@ namespace l7vs
                         "put_data_to_sendbuffer() : before memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % sendbuffer_rest_size % datadump;
-                    putLogDebug(600179, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600181, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -6158,7 +6174,7 @@ namespace l7vs
                         "put_data_to_sendbuffer() : after memcpy (data dump) : "
                         "data begin = 0, data_size = %d, data = %s");
                     formatter % sendbuffer_rest_size % datadump;
-                    putLogDebug(600180, formatter.str(), __FILE__, __LINE__ );
+                    putLogDebug(600182, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
 
@@ -6179,7 +6195,7 @@ namespace l7vs
                                     "thread_data_ptr data_ptr, boost::array<char,MAX_BUFFER_SIZE>& sendbuffer, "
                                     "size_t& datalen) : return_value = true. thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600181, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600183, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -6210,7 +6226,7 @@ namespace l7vs
                                     "const std::string& client_endpoint, const char* buffer, const size_t buffer_len, "
                                     "size_t& x_forwarded_for_insert_pos, std::string& x_forwarded_for_context) : thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600182, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600184, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -6232,7 +6248,7 @@ namespace l7vs
                                     "call find_http_header_x_forwarded_for : "
                                     "return_value = %d. thread id : %d.");
             formatter % static_cast<int>(find_ret) % boost::this_thread::get_id();
-            putLogDebug(600183, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600185, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6251,7 +6267,7 @@ namespace l7vs
                                         "const std::string& client_endpoint, const char* buffer, const size_t buffer_len, "
                                         "size_t& x_forwarded_for_insert_pos, std::string& x_forwarded_for_context) : return_value = false. thread_id = %d.");
                 formatter % boost::this_thread::get_id();
-                putLogDebug(600184, formatter.str(), __FILE__, __LINE__);
+                putLogDebug(600186, formatter.str(), __FILE__, __LINE__);
             }
             /*------DEBUG LOG END------*/
 
@@ -6269,7 +6285,7 @@ namespace l7vs
                                     "call find_http_header_all : "
                                     "return_value = true. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600185, formatter.str(), __FILE__, __LINE__ );
+            putLogDebug(600187, formatter.str(), __FILE__, __LINE__ );
         }
         /*------DEBUG LOG END------*/
 
@@ -6287,7 +6303,7 @@ namespace l7vs
                                     "const std::string& client_endpoint, const char* buffer, const size_t buffer_len, "
                                     "size_t& x_forwarded_for_insert_pos, std::string& x_forwarded_for_context) : return_value = true. thread_id = %d.");
             formatter % boost::this_thread::get_id();
-            putLogDebug(600186, formatter.str(), __FILE__, __LINE__);
+            putLogDebug(600188, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 

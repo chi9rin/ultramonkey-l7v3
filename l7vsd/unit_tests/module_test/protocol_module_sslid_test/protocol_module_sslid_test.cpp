@@ -80,13 +80,13 @@ void    stb_putLogInfo( const unsigned int message_id, const std::string& messag
     //    cout << endl;
 }
 void    stb_putLogDebug( const unsigned int message_id, const std::string& message, const char* file, int line){
-    //    cout << boost::format( "%s%d%06d %s %s" )
-    //                % "PM"
-    //                % LOG_LV_DEBUG
-    //                % message_id
-    //                % message.c_str()
-    //                % hostname;
-    //    cout << endl;
+     //   cout << boost::format( "%s%d%06d %s %s" )
+     //               % "PM"
+     //               % LOG_LV_DEBUG
+     //               % message_id
+     //               % message.c_str()
+     //               % hostname;
+     //   cout << endl;
 }
 
 //new operator function
@@ -2302,7 +2302,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[128]--------------------------------------------- " << endl;
         // unit_test[128] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-        // unit_test[128] 且つdata_begain_offset が 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
+        // unit_test[128] 且つdata_begain_offset が 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をREALSERVER_SELECTに設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2324,14 +2324,14 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(mem_cmp_result, 0);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
 
         cout << "[129]--------------------------------------------- " << endl;
         // unit_test[129] 終了フラグがOFFで、 且つ データサイズが0で、 且つ 新SSLレコードで、
-        // unit_test[129] 且つdata_begain_offset > 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をFINALIZEに設定する。
+        // unit_test[129] 且つdata_begain_offset > 0で,且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合、戻り値をREALSERVER_SELECTに設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2353,7 +2353,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(mem_cmp_result, 0);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 6u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
@@ -2623,7 +2623,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         cout << "[138]--------------------------------------------- " << endl;
         // unit_test[138] 終了フラグがOFFで、且つ データサイズ > 0、且つ新SSLレコードで,且つdata_begain_offset > 0
         // unit_test[138] 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
-        // unit_test[138] 戻り値がFINALIZEで設定する。
+        // unit_test[138] 戻り値がREALSERVER_SELECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2649,7 +2649,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(mem_cmp_result, 0);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -2658,7 +2658,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         cout << "[139]--------------------------------------------- " << endl;
         // unit_test[139] 終了フラグがOFFで、 且つ データサイズ > 0、且つ新SSLレコードで、且つdata_begain_offset = 0
         // unit_test[139] 且つcheck_ssl_record_sendable()の戻り値が-1 (異常)の場合
-        // unit_test[139] 戻り値がFINALIZEで設定する。
+        // unit_test[139] 戻り値がREALSERVER_SELECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->end_flag = END_FLAG_OFF;
@@ -2684,7 +2684,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         BOOST_CHECK_EQUAL(mem_cmp_result, 0);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_size, 15u);
         BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_begain_offset, 0u);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, REALSERVER_SELECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -3084,8 +3084,9 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[151]--------------------------------------------- " << endl;
         // unit_test[151] selected_realserver が NULLで、 且つhello_message_flagがfalseの場合
-        // unit_test[151] 戻り値がFINALIZEで設定する。
+        // unit_test[151] 戻り値がSORRYSERVER_SELECTで設定する。
         {
+        this->schedule_tcp = schedule_tcp_func2;
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->selected_realserver = ep2;
         up_thread_data->hello_message_flag = false;
@@ -3094,8 +3095,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
             = up_thread_data;
         status = this->handle_realserver_select(boost::this_thread::get_id(),
             rs_endpoint);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, SORRYSERVER_SELECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
@@ -3450,7 +3450,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[162]--------------------------------------------- " << endl;
         // unit_test[162] selected_realserver が　NULLで, 且つhello_message_flag が falseの場合
-        // unit_test[162] 戻り値がFINALIZEで設定する。
+        // unit_test[162] 戻り値がSORRYSERVER_SELECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->selected_realserver = ep2;
@@ -3460,8 +3460,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
             = up_thread_data;
         status = this->handle_realserver_select(boost::this_thread::get_id(),
             rs_endpoint);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, SORRYSERVER_SELECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
@@ -4327,7 +4326,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[190]--------------------------------------------- " << endl;
         // unit_test[190] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
-        // unit_test[190] 戻り値がFINALIZEで設定する。
+        // unit_test[190] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4338,15 +4337,14 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
         status = this->handle_realserver_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
 
         cout << "[191]--------------------------------------------- " << endl;
         // unit_test[191] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
-        // unit_test[191] 戻り値がFINALIZEで設定する。
+        // unit_test[191] 戻り値がREALSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -4357,8 +4355,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
         status = this->handle_realserver_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, REALSERVER_CONNECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
@@ -4565,7 +4562,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[200]--------------------------------------------- " << endl;
         // unit_test[200] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
-        // unit_test[200] 戻り値がFINALIZEで設定する。
+        // unit_test[200] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
         {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -4586,8 +4583,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
             rs_endpoint, recvbuffer, recvlen);
         mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
         BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
         BOOST_CHECK_EQUAL(status, down_thread_data->last_status);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();
@@ -5276,7 +5272,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[229]--------------------------------------------- " << endl;
         // unit_test[229] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
-        // unit_test[229] 戻り値がFINALIZEで設定する。
+        // unit_test[229] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
         {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -5285,15 +5281,14 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         down_thread_data->data_begain_offset = 0u;
         this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
         status = this->handle_client_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
         BOOST_CHECK_EQUAL(status, down_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
 
         cout << "[230]--------------------------------------------- " << endl;
         // unit_test[230] データサイズ>0で,且つcurrent_record_rest_sizeが0で,且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
-        // unit_test[230] 戻り値がFINALIZEで設定する。
+        // unit_test[230] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
         {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 10u;
@@ -5302,8 +5297,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         down_thread_data->data_begain_offset = 10u;
         this->session_thread_data_map[boost::this_thread::get_id()] = down_thread_data;
         status = this->handle_client_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
         BOOST_CHECK_EQUAL(status, down_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
@@ -6085,7 +6079,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[263]--------------------------------------------- " << endl;
         // unit_test[263] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offsetが0の場合
-        // unit_test[263] 戻り値がFINALIZEで設定する。
+        // unit_test[263] 戻り値がSORRYSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -6096,15 +6090,14 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
         status = this->handle_sorryserver_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
 
         cout << "[264]--------------------------------------------- " << endl;
         // unit_test[264] データサイズ > 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)で,且つdata_begain_offset>0の場合
-        // unit_test[264] 戻り値がFINALIZEで設定する。
+        // unit_test[264] 戻り値がSORRYSERVER_CONNECTで設定する。
         {
         thread_data_ptr up_thread_data(new session_thread_data_sslid);
         up_thread_data->data_size = 10u;
@@ -6115,8 +6108,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
         this->session_thread_data_map[boost::this_thread::get_id()]
             = up_thread_data;
         status = this->handle_sorryserver_send(boost::this_thread::get_id());
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, SORRYSERVER_CONNECT);
         BOOST_CHECK_EQUAL(status, up_thread_data->last_status);
         this->session_thread_data_map.clear();
         }
@@ -6324,7 +6316,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
 
         cout << "[273]--------------------------------------------- " << endl;
         // unit_test[273] データサイズ が 0で, 且つcurrent_record_rest_size が 0で, 且つcheck_ssl_record_sendable()の戻り値が-1(異常)の場合
-        // unit_test[273] 戻り値がFINALIZEで設定する。
+        // unit_test[273] 戻り値がCLIENT_CONNECTION_CHECKで設定する。
         {
         thread_data_ptr down_thread_data(new session_thread_data_sslid);
         down_thread_data->data_size = 0u;
@@ -6345,8 +6337,7 @@ class protocol_module_sslid_test_class: public protocol_module_sslid {
             rs_endpoint, recvbuffer, recvlen);
         mem_cmp_result = memcmp(mem_cmp_buffer, this->session_thread_data_map[boost::this_thread::get_id()]->data_buffer.c_array(), mem_cmp_length);
         BOOST_CHECK_EQUAL(mem_cmp_result, 0);
-        BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->end_flag, END_FLAG_ON);
-        BOOST_CHECK_EQUAL(status, FINALIZE);
+        BOOST_CHECK_EQUAL(status, CLIENT_CONNECTION_CHECK);
         BOOST_CHECK_EQUAL(status, down_thread_data->last_status);
         delete[] mem_cmp_buffer;
         this->session_thread_data_map.clear();

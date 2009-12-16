@@ -144,7 +144,8 @@ int ssl_protocol_module_base::check_ssl_record_sendable( bool is_message_form_cl
                             else
                             {
                                 //data error
-                                return -1;
+                                all_length = recv_length;
+                                return 0;
                             }
                         }
                         else
@@ -178,8 +179,9 @@ int ssl_protocol_module_base::check_ssl_record_sendable( bool is_message_form_cl
         }
         else
         {
-            //is not ssl record
-            return -1;
+            //is not sslv3 record
+            all_length = recv_length;
+            return 0;
         }
     }
     else

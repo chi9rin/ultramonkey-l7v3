@@ -89,7 +89,7 @@ public:
     std::deque<ip_replication_temp_data>& get_temp_list(){
         return this->temp_list;
     }
-    
+
 };
 
 // test class
@@ -439,7 +439,6 @@ public:
             (dynamic_cast<ip_replication_data_processor_replacement *>(this->replication_data_processor))->to_get_from_temp_list(temp_data);
             BOOST_CHECK_EQUAL(ret, 0);
             BOOST_CHECK_EQUAL(this->session_table[ip_hash].last_time, now);
-            BOOST_CHECK_EQUAL(this->session_table[ip_hash].rs_endpoint, rs_endpoint);
             BOOST_CHECK_EQUAL(temp_data.op_code, 'U');
             BOOST_CHECK_EQUAL(temp_data.ip_hash, ip_hash);
             BOOST_CHECK_EQUAL(temp_data.last_time, now);
@@ -474,7 +473,7 @@ public:
             BOOST_CHECK_EQUAL(temp_data.op_code, 'A');
             BOOST_CHECK_EQUAL(temp_data.ip_hash, ip_hash2);
             BOOST_CHECK_EQUAL(temp_data.last_time, time2);
-            BOOST_CHECK_EQUAL(temp_data.rs_endpoint, rs_endpoint2);            
+            BOOST_CHECK_EQUAL(temp_data.rs_endpoint, rs_endpoint2);
         }
 
         cout << "[19]--------------------------------------------- " << endl;
@@ -501,7 +500,6 @@ public:
             BOOST_CHECK_EQUAL(this->session_table[ip_hash1].last_time, time1);
             BOOST_CHECK_EQUAL(this->session_table[ip_hash1].rs_endpoint, rs_endpoint1);
             BOOST_CHECK_EQUAL(this->session_table[ip_hash2].last_time, time2);
-            BOOST_CHECK_EQUAL(this->session_table[ip_hash2].rs_endpoint, rs_endpoint2);
             BOOST_CHECK_EQUAL(temp_data.op_code, 'U');
             BOOST_CHECK_EQUAL(temp_data.ip_hash, ip_hash2);
             BOOST_CHECK_EQUAL(temp_data.last_time, time2);
@@ -557,7 +555,7 @@ public:
 
     // read_session_data_from_replication_area_test
     void read_session_data_from_replication_area_test(){
-        
+
         cout << "[22]--------------------------------------------- " << endl;
         // unit_test[22] replication area初期値でないの場合
         {
