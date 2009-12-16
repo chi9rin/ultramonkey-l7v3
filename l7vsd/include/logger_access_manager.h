@@ -47,31 +47,33 @@ namespace l7vs{
 class logger_access_manager {
 
 public:
-    typedef std::map< std::string , logger_implement_access* > logimp_access_map_type;
+    typedef std::map< std::string , logger_implement_access* > 
+                    logimp_access_map_type;
 
-    typedef std::map< std::string , std::string > accesslog_rotate_default_map_type;
-    
+    typedef std::map< std::string , std::string > 
+                    accesslog_rotate_default_map_type;
+
+    typedef std::map< std::string , std::string >::iterator 
+                    accesslog_rotate_default_map_type_iterator;
+
     static logger_access_manager &getInstance();
 
     logger_implement_access *find_logger_implement_access(
-        const std::string &aclogFilename, 
-        std::map< std::string , std::string > rotate, 
-        l7vs::error_code& err);
+                                const std::string &access_log_filename, 
+                                std::map< std::string , std::string > rotatedata,
+                                l7vs::error_code& err);
 
-    bool erase_logger_implement_access(
-        const std::string &aclogFilename, 
-        l7vs::error_code& err);
+    void erase_logger_implement_access(
+                                const std::string &access_log_filename, 
+                                l7vs::error_code& err);
 
     bool access_log_logrotate_parameter_check(
-        std::map<std::string,std::string>& rotatedata)
-    {
-        return(true);
-    }
+                    const std::map<std::string,std::string>& rotatedata);
 
-    bool access_log_rotate_loadConf();
+    void access_log_rotate_loadConf();
 
     std::string get_rotate_default_verbose_displayed_contents();
-    
+
 protected:
 
 
@@ -87,21 +89,9 @@ protected:
 
     std::string rotate_default_verbose_displayed_contents;
 
-    logger_access_manager() 
-                    : rotate_default_load_flag(false) , 
-                    rotate_default_verbose_displayed_contents("") {
-    
-        logimp_access_map.clear();
-        access_log_default_data.clear();
-    
-    }
+    logger_access_manager();
 
-    virtual ~logger_access_manager() {
-    
-        logimp_access_map.clear();
-        access_log_default_data.clear();
-    
-    }
+    virtual ~logger_access_manager();
 
 
 };
