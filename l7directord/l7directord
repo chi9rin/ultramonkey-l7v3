@@ -3783,7 +3783,6 @@ sub is_ip6 {
                               ([0-9a-fA-F]{1,4}):
                               ([0-9a-fA-F]{1,4}):
                               ([0-9a-fA-F]{1,4})(%.+)?$/x) {
-        ld_log( _message('ERR0501') );
         return 0;
     }
     @return_array = (1, @address);
