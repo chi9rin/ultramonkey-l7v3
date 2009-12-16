@@ -11319,6 +11319,270 @@ void up_thread_realserver_connect_test(){
     BOOST_MESSAGE( "----- up_thread_realserver_connect test end -----" );
 }
 
+//up_thread_realserver_connect access log test
+//up_thread_realserver_connect  access log class 
+class up_thread_realserver_connect_access_log_test_class : public l7vs::tcp_session{
+    public:
+       up_thread_realserver_connect_access_log_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+
+        ~up_thread_realserver_connect_access_log_test_class(){};
+        
+        void test_call(){
+            l7vs::tcp_session::up_thread_realserver_connect(LOCAL_PROC);
+        };
+        
+        void set_protocol_module(l7vs::protocol_module_base* set_prot){
+            protocol_module = set_prot;
+        };
+        l7vs::tcp_data& get_up_thread_data_client_side(){
+            return up_thread_data_client_side;
+        };
+        l7vs::tcp_data& get_up_thread_data_dest_side(){
+            return up_thread_data_dest_side;
+        };
+        l7vs::tcp_data& get_down_thread_data_client_side(){
+            return down_thread_data_client_side;
+        };
+        l7vs::tcp_data& get_down_thread_data_dest_side(){
+            return down_thread_data_dest_side;
+        };
+        l7vs::tcp_socket& get_client_socket(){
+            return client_socket;
+        };
+        socket_element& get_sorryserver_socket(){
+            return sorryserver_socket;
+        };
+        std::list<socket_element>& get_down_thread_receive_realserver_socket_list(){
+            return down_thread_receive_realserver_socket_list;
+        };
+        std::map<endpoint,tcp_socket_ptr>& get_up_thread_send_realserver_socket_map(){
+            return up_thread_send_realserver_socket_map;
+        };
+        std::list<socket_element>::iterator& get_down_thread_current_receive_realserver_socket(){
+            return down_thread_current_receive_realserver_socket;
+        };
+        l7vs::tcp_realserver_connect_socket_list& get_down_thread_connect_socket_list(){
+            return down_thread_connect_socket_list;
+        };
+        
+        
+        void set_up_thread_id(boost::thread::id set_id){
+            up_thread_id = set_id;
+        }
+        void set_down_thread_id(boost::thread::id set_id){
+            down_thread_id = set_id;
+        }
+        
+        void next_up_function_call(){
+            up_thread_next_call_function.second(LOCAL_PROC);
+        }
+        void next_down_function_call(){
+            down_thread_next_call_function.second(LOCAL_PROC);
+        }
+        
+        void set_up_thread_next_function_call_exit(){
+            up_thread_function_pair fun_it = up_thread_function_array[UP_FUNC_EXIT];
+            up_thread_next_call_function = fun_it;
+        };
+        
+        void set_down_thread_next_function_call_exit(){
+            down_thread_function_pair fun_it = down_thread_function_array[DOWN_FUNC_EXIT];
+            down_thread_next_call_function = fun_it;
+        };
+        
+        // next call function check
+        void up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type){
+            up_thread_realserver_connect_event_call_check = true;
+        };
+        bool up_thread_realserver_connect_event_call_check;
+        void up_thread_realserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type){
+            up_thread_realserver_connection_fail_event_check = true;
+        };
+        bool up_thread_realserver_connection_fail_event_check;
+        
+        void up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
+            up_thread_exit_call_check = true;
+        }
+        bool up_thread_exit_call_check;
+        
+        void down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
+            down_thread_exit_call_check = true;
+        }
+        bool down_thread_exit_call_check;
+        
+        // map clear
+        void up_thread_function_array_clear(){
+            for(int i = 0;i <= UP_FUNC_EXIT;i++){
+                up_thread_function_array[i].second = NULL;
+            }
+        };
+        void down_thread_function_array_clear(){
+            for(int i = 0;i <= DOWN_FUNC_EXIT;i++){
+                down_thread_function_array[i].second = NULL;
+            }
+        };
+        
+        void up_thread_module_event_map_clear(){
+            up_thread_module_event_map.clear();
+        };
+        
+        void down_thread_module_event_map_clear(){
+            down_thread_module_event_map.clear();
+        };
+
+
+        void set_client_endpoint(boost::asio::ip::tcp::endpoint& set_endpoint){
+            client_endpoint = set_endpoint;
+        };
+
+        std::string get_test_string(boost::asio::ip::tcp::endpoint& set_endpoint){
+            return endpoint_to_string(set_endpoint);
+        }
+};
+
+void up_thread_realserver_connect_access_log_test(){
+    BOOST_MESSAGE( "----- up_thread_realserver_connect access log test start -----" );
+
+    boost::asio::io_service io;
+    l7vs::virtualservice_tcp vs;
+
+    std::string test_protocol_name("test protocol");
+    l7vs::test_protocol_module proto_test(test_protocol_name);
+
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(192.168.0.1), 8080);
+    bool set_mode(false);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    l7vs::logger_implement_access* plogger = new l7vs::logger_implement_access( "test.log" );
+
+    up_thread_realserver_connect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    boost::asio::ip::tcp::endpoint client_src_endpoint(boost::asio::ip::address::from_string(192.168.10.20), 54321);
+    test_obj.set_client_endpoint(client_src_endpoint);
+
+    test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
+    boost::thread::id proc_id = boost::this_thread::get_id();
+
+    l7vs::tcp_data& con_data = test_obj.get_up_thread_data_dest_side();
+    boost::asio::ip::tcp::endpoint con_end(boost::asio::ip::address::from_string(DUMMI_SERVER_IP),DUMMI_SERVER_PORT);
+
+    //up_thread_data_dest_side set
+    con_data.initialize();
+    con_data.set_endpoint(con_end);
+    // thread_id set
+    test_obj.set_up_thread_id(boost::thread::id());
+    test_obj.set_down_thread_id(proc_id);
+    // socket set
+    l7vs::tcp_socket::connect_res = true;
+    l7vs::tcp_socket::connect_connect_endpoint = boost::asio::ip::tcp::endpoint();
+    l7vs::tcp_socket::connect_ec = NULL;
+    l7vs::tcp_socket::connect_call_check = false;
+    l7vs::tcp_socket::is_connect = true;
+    // vs set
+    vs.connection_active_list.clear();
+    // map set
+    std::map< boost::asio::ip::tcp::endpoint, boost::shared_ptr< l7vs::tcp_socket > >& rs_map = test_obj.get_up_thread_send_realserver_socket_map();
+    rs_map.clear();
+    // connection list set
+    l7vs::tcp_realserver_connect_socket_list& con_list = test_obj.get_down_thread_connect_socket_list();
+    con_list.clear();
+    //tcp_session set
+    test_obj.set_up_thread_next_function_call_exit();
+    test_obj.up_thread_realserver_connect_event_call_check = false;
+
+    // dummy server 
+    test_mirror_server test_server;
+    // accept req
+    test_server.breq_acc_flag = true;
+    // close wait req
+    test_server.breq_close_wait_flag = true;
+    // recv cont
+    test_server.req_recv_cnt = 0;
+    // test server start
+    boost::thread server_thread(boost::bind(&test_mirror_server::run,&test_server));
+    while( !test_server.brun_flag ){
+        sleep(1);
+    }
+
+    test_obj.test_call();
+
+    BOOST_CHECK(con_end == l7vs::tcp_socket::connect_connect_endpoint);
+    BOOST_CHECK(l7vs::tcp_socket::connect_ec != NULL);
+    BOOST_CHECK(l7vs::tcp_socket::connect_call_check);
+
+    BOOST_CHECK(!con_list.empty());
+    std::pair<boost::asio::ip::tcp::endpoint,boost::shared_ptr<l7vs::tcp_socket> > set_socket = con_list.get_socket();
+    BOOST_CHECK(set_socket.first == con_end);
+    BOOST_CHECK(set_socket.second == rs_map.begin()->second);
+
+    std::string cl_rm_end = test_obj.get_test_string( client_src_endpoint );
+    std::string cl_lo_end = test_obj.get_test_string( listen_endpoint );
+    std::string rs_lo_end = test_obj.get_test_string( set_socket.second->get_socket().local_endpoint() );
+    std::string rs_rm_end = test_obj.get_test_string( con_end );
+
+    // unit_test [1] up_thread_realserver_connect client endpoint string check
+    std::cout << "[1] up_thread_realserver_connect client endpoint string check" << std::endl;
+    BOOST_CHECK_EQUAL( cl_rm_end.to_str() , plogger->putLog_cl_con_org );
+    // unit_test [2] up_thread_realserver_connect virtualservice endpoint string check
+    std::cout << "[2] up_thread_realserver_connect virtualservice endpoint string check" << std::endl;
+    BOOST_CHECK_EQUAL( cl_lo_end.to_str() , plogger->putLog_vsinfo );
+    // unit_test [3] up_thread_realserver_connect realserver local endpoint string check
+    std::cout << "[3] up_thread_realserver_connect realserver local endpoint string check" << std::endl;
+    BOOST_CHECK_EQUAL( rs_lo_end.to_str() , plogger->putLog_rs_con_org );
+    // unit_test [4] up_thread_realserver_connect realserver remote endpoint string check
+    std::cout << "[4] up_thread_realserver_connect realserver remote endpoint string check" << std::endl;
+    BOOST_CHECK_EQUAL( rs_rm_end.to_str() , plogger->putLog_rs_con_dest );
+    // unit_test [5] up_thread_realserver_connect realserver local endpoint string check
+    std::cout << "[5] up_thread_realserver_connect realserver local endpoint string check" << std::endl;
+    BOOST_CHECK_EQUAL( "" , plogger->putLog_msg );
+
+    rs_map.clear();
+    con_list.clear();
+
+    set_socket.second->get_socket().close();
+
+    // dummy server stop
+    test_server.breq_close_wait_flag = false;   
+    test_server.bstop_flag = true;
+    server_thread.join();
+
+    delete plogger;
+    plogger = NULL;
+
+    BOOST_MESSAGE( "----- up_thread_realserver_connect access log end -----" );
+}
 
 //up_thread_sorryserver_connect test
 //up_thread_sorryserver_connect test class 
@@ -13697,9 +13961,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
     ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
     ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
-*/
     ts->add( BOOST_TEST_CASE( &endpoint_to_string_test ));
-/*
+
     ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
@@ -13729,6 +13992,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
 */
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
+    ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_access_log_test) );
 /*
     ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );

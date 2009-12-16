@@ -57,10 +57,18 @@ public:
 					const std::string& rs_con_org,
 					const std::string& rs_con_dest,
                                         const std::string& msg){
-
-
-
+            putLog_vsinfo = vsinfo;
+            putLog_cl_con_org = cl_con_org;
+            putLog_rs_con_org = rs_con_org;
+            putLog_rs_con_dest =rs_con_dest;
+            putLog_msg = msg;
 	};
+
+        std::string putLog_vsinfo;
+        std::string putLog_cl_con_org;
+        std::string putLog_rs_con_org;
+        std::string putLog_rs_con_dest;
+        std::string putLog_msg;
 
 //    void	addRef();
 
