@@ -43,14 +43,21 @@
 
 
 
-l7vs::logger_implement_access::logger_implement_access(const std::string &access_log_file_name):access_cnt(1),initialized( false ),rotate_default_flag( false )
+l7vs::logger_implement_access::logger_implement_access(
+                            const std::string &access_log_file_name)
+                                                 :access_cnt         ( 1     ),
+                                                  initialized        ( false ),
+                                                  rotate_default_flag( false )
 {
     access_log_file_name_ = access_log_file_name;
     aclog_args.clear();
 }
 
 
-bool l7vs::logger_implement_access::init(const bool rotate_default_flag,const appender_property& access_log_default_property,accesslog_rotate_map_type& rotatedata)
+bool l7vs::logger_implement_access::init(
+              const bool                       rotate_default_flag,
+              const appender_property&         access_log_default_property,
+                    accesslog_rotate_map_type& rotatedata)
 {
 
     using namespace log4cxx;
@@ -73,7 +80,9 @@ bool l7vs::logger_implement_access::init(const bool rotate_default_flag,const ap
 }
 
 
-bool l7vs::logger_implement_access::setAcLoggerConf(const appender_property& access_log_default_property,accesslog_rotate_map_type& rotatedata)
+bool l7vs::logger_implement_access::setAcLoggerConf(
+        const appender_property&         access_log_default_property,
+              accesslog_rotate_map_type& rotatedata)
 {
     bool lotate_check_flag = true;
     aclog_args = rotatedata;
@@ -81,13 +90,19 @@ bool l7vs::logger_implement_access::setAcLoggerConf(const appender_property& acc
     access_log_property.log_filename_value = access_log_file_name_;
     
     if( this->rotate_default_flag == false ) {
-        lotate_check_flag = logger_logrotate_utility::acccess_log_LogrotateParamCheck( rotatedata , access_log_property );
+        lotate_check_flag =
+          logger_logrotate_utility::acccess_log_LogrotateParamCheck(
+                                                        rotatedata,
+                                                        access_log_property );
     }
-    
+
     if ( lotate_check_flag == true ) {
-        logger_logrotate_utility::set_appender(access_log_property,LOGGER_ACCESS_LAYOUT,access_log_property.log_filename_value);
+        logger_logrotate_utility::set_appender(
+                                 access_log_property,
+                                 LOGGER_ACCESS_LAYOUT,
+                                 access_log_property.log_filename_value);
     }
-    
+
     return(lotate_check_flag);
 
 }
@@ -116,13 +131,19 @@ std::string l7vs::logger_implement_access::getAcLogFileName()
 }
 
 
-bool l7vs::logger_implement_access::checkRotateParameterComp(accesslog_rotate_map_type &rotatedata)
+bool l7vs::logger_implement_access::checkRotateParameterComp(
+                                       accesslog_rotate_map_type &rotatedata)
 {
     bool comp_flg = true;
+    accesslog_rotate_map_type_iterator itr_comp_in;
+    accesslog_rotate_map_type_iterator itr_find;
     
-    for( accesslog_rotate_map_type_iterator itr_comp_in = rotatedata.begin(); itr_comp_in != rotatedata.end(); itr_comp_in++ ) {
+    for( itr_comp_in  = rotatedata.begin();
+         itr_comp_in != rotatedata.end()  ;
+         itr_comp_in++ ){
         
-        accesslog_rotate_map_type_iterator itr_find = aclog_args.find( itr_comp_in->first );
+        accesslog_rotate_map_type_iterator itr_find
+                     = aclog_args.find( itr_comp_in->first );
 
         if ( itr_find != aclog_args.end() ) {
         
@@ -148,42 +169,3 @@ bool l7vs::logger_implement_access::is_rotate_default_flag()
     return(rotate_default_flag);
 }
 
-// ログフォーマット 2008/12/07 20:08:31 [INFO] [[AccessLog] (CL)192.168.2.1 --> 192.168.2.2 --UM-- 192.168.1.101:37259 --> (RS-DST)192.168.1.106:80 ]
-/*!
- * output access info log.
- *
- * @param   virtualservice endpoint info
- * @param   client endpoint info
- * @param   realserver connect origin info
- * @param   realserver connect destination info
- * @param   add msg
- * @retrun  void
- */
-void l7vs::logger_implement_access::putLog(
-                            const std::string& vsinfo,
-                            const std::string& cl_con_org,
-                            const std::string& rs_con_org,
-                            const std::string& rs_con_dest,
-                            const std::string& msg){
-
-    std::stringstream    buf;
-    buf << boost::format( "[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]" )
-        % LOGGER_ACCESS_PROCESS_ID
-        % vsinfo
-        % cl_con_org
-        % rs_con_org
-        % rs_con_dest
-        % msg;
-
-    try {
-        log4cxx::Logger::getLogger( access_log_file_name_ )->forcedLog(    log4cxx::Level::getInfo(),
-                                                                    buf.str(),
-                                                                    log4cxx::spi::LocationInfo("", "", 0));
-    }
-    catch (const std::exception& ex) {
-        std::ostringstream oss;
-        oss << "Logging Error (Access Log) : " << ex.what();
-        logger_logrotate_utility::loglotation_utility_logic_error( 118, oss.str(), __FILE__, __LINE__ );
-    }
-
-}
