@@ -36,6 +36,7 @@
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/foreach.hpp>
 #include "appender_property.h"
+#include "logger_logrotate_utility.h"
 
 #define LOGGER_ACCESS_PROCESS_ID "AccessLog"
 
@@ -88,7 +89,34 @@ public:
                                 const std::string& cl_con_org,
                                 const std::string& rs_con_org,
                                 const std::string& rs_con_dest,
-                                const std::string& msg = "");
+                                const std::string& msg = ""){
+        std::stringstream    buf;
+        buf << boost::format( "[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]" )
+            % cl_con_org
+            % vsinfo
+            % rs_con_org
+            % rs_con_dest
+            % msg;
+    
+        try {
+            log4cxx::Logger::getLogger( access_log_file_name_ )
+                                        ->forcedLog(
+                                                log4cxx::Level::getInfo(),
+                                                buf.str(),
+                                                log4cxx::spi::LocationInfo("", "", 0));
+        }
+        catch (const std::exception& ex) {
+            std::ostringstream oss;
+            oss << "Logging Error (Access Log) : " << ex.what();
+            logger_logrotate_utility::loglotation_utility_logic_error(
+                                                                   118,
+                                                                   oss.str(),
+                                                                   __FILE__,
+                                                                   __LINE__ );
+        }
+    }
+
+
 
     virtual void    addRef();
 
