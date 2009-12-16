@@ -38,147 +38,152 @@
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
-
-
 #include "logger_implement_access.h"
+#include "logger_logrotate_utility.h"
 
 
-#define LOGGER_ACCESS_LAYOUT "%d{%Y/%m/%d %H:%M:%S} [%p] %c %m %t %F:%L%n"
-#define LOGGER_ACCESS_DEFAULT_BUFFER_SIZE (8 * 1024)
-#define LOGGER_ACCESS_SYSLOG_FACILITY "USER"
-#define LOGGER_ACCESS_BACKUP_INDEX_LOWER_LIMIT (1)
-#define LOGGER_ACCESS_BACKUP_INDEX_LIMIT (12)
-#define LOGGER_ACCESS_FILESIZE_LOWER_LIMIT (65535)
-#define LOGGER_ACCESS_FILE_PATTERN "%i"
 
-
-l7vs::logger_implement_access::logger_implement_access(const std::string &acLogFileName):access_cnt(1),initialized( false ),rotate_default_flag( false )
+l7vs::logger_implement_access::logger_implement_access(const std::string &access_log_file_name):access_cnt(1),initialized( false ),rotate_default_flag( false )
 {
-    this->acLogFileName = acLogFileName;
+    access_log_file_name_ = access_log_file_name;
     aclog_args.clear();
 }
 
 
-bool l7vs::logger_implement_access::init(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate)
+bool l7vs::logger_implement_access::init(const bool rotate_default_flag,const appender_property& access_log_default_property,accesslog_rotate_map_type& rotatedata)
 {
-/*
+
     using namespace log4cxx;
     if (initialized) return true;
 
-  bool rtnFlg = true;
-  
-    try {
-        // set loot logger
-        LoggerPtr root = Logger::getRootLogger();
-        if ( NULL == root) return false;
+    bool rtnFlg = true;
 
-    rtnFlg = this->setAcLoggerConf();
+    try {
+
+        this->rotate_default_flag = rotate_default_flag;
+        rtnFlg = this->setAcLoggerConf(access_log_default_property,rotatedata);
 
     }
     catch (const std::exception& e) {
-        std::ostringstream oss;
-        oss <<  "Logger Initialization Failed : " << e.what();
         return false;
     }
 
-  if( rtnFlg == true ) {
-    // get hostname
-    int     ret = 0;
-    char    buff[HOST_NAME_MAX];
-    ret = gethostname(buff, HOST_NAME_MAX);
-    hostname = buff;
-    
-    initialized = true;
-  }
-*/
-  return (true);
+    return (rtnFlg);
+
 }
 
 
-bool l7vs::logger_implement_access::setAcLoggerConf(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate)
+bool l7vs::logger_implement_access::setAcLoggerConf(const appender_property& access_log_default_property,accesslog_rotate_map_type& rotatedata)
 {
+    bool lotate_check_flag = true;
+    aclog_args = rotatedata;
+
+    access_log_property.log_filename_value = access_log_file_name_;
     
-/*
-    using namespace log4cxx;
-    using namespace l7vs;
-
-    // appender setting
-    try {
-        log4cxx::helpers::Pool pool;
-
-        log4cxx::LayoutPtr layout =
-            new log4cxx::PatternLayout(LOGGER_ACCESS_LAYOUT);
-
-        //create RollingFileAppender
-        log4cxx::FileAppenderPtr    accessLogAppender =
-            new log4cxx::FileAppender();
-        
-        // set layout
-        accessLogAppender->setLayout(layout);
-
-        // set Log Filename
-        try{
-            accessLogAppender->setFile(this->acLogFileName, true, false, LOGGER_ACCESS_DEFAULT_BUFFER_SIZE, pool);
-        }
-        catch( const std::exception& e ){
-            std::stringstream   buf;
-            buf << "File Create Failed:" << this->acLogFileName;
-            throw std::logic_error( buf.str() );
-        }
-
-        // activate appender options
-        accessLogAppender->activateOptions(pool);
-
-        log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( LOG_CAT_L7VSD_ACCESS_LOGGER );
-        if (0 == cat_logger) {
-            throw std::logic_error("getLogger Failed.");
-        }
-
-        cat_logger->addAppender(accessLogAppender);
-
-        //default log level settting
-        cat_logger->setLevel( log4cxx::Level::getInfo() );
-
+    if( this->rotate_default_flag == false ) {
+        lotate_check_flag = logger_logrotate_utility::acccess_log_LogrotateParamCheck( rotatedata , access_log_property );
     }
-    catch (const std::exception& e) {
-        std::ostringstream oss;
-        oss <<  "Logger Reload Config Failed : " << e.what();
-      return(false);
-    }
-*/
     
-  return(true);
-  
+    if ( lotate_check_flag == true ) {
+        logger_logrotate_utility::set_appender(access_log_property,LOGGER_ACCESS_LAYOUT,access_log_property.log_filename_value);
+    }
+    
+    return(lotate_check_flag);
+
 }
 
 
 void l7vs::logger_implement_access::addRef()
 {
-  this->access_cnt++;
+    access_cnt++;
 }
 
 
 void l7vs::logger_implement_access::releaseRef()
 {
-  this->access_cnt--;
+    access_cnt--;
 }
 
 
 bool l7vs::logger_implement_access::operator<=(const int access_num )
 {
-  return( this->access_cnt <= access_num );
+    return( access_cnt <= access_num );
 }
+
+std::string l7vs::logger_implement_access::getAcLogFileName()
+{
+    return( access_log_file_name_ ); 
+}
+
 
 bool l7vs::logger_implement_access::checkRotateParameterComp(accesslog_rotate_map_type &rotatedata)
 {
-    return(true);
-}
+    bool comp_flg = true;
+    
+    for( accesslog_rotate_map_type_iterator itr_comp_in = rotatedata.begin(); itr_comp_in != rotatedata.end(); itr_comp_in++ ) {
+        
+        accesslog_rotate_map_type_iterator itr_find = aclog_args.find( itr_comp_in->first );
 
+        if ( itr_find != aclog_args.end() ) {
+        
+            if( itr_comp_in->second != itr_find->second ) {
+                comp_flg = false;
+            }
+            
+        } else {
+            comp_flg = false;
+        }
+        
+        if( comp_flg == false ) {
+            break;
+        }
+        
+    }
+    
+    return(comp_flg);
+}
 
 bool l7vs::logger_implement_access::is_rotate_default_flag()
 {
-    return(true);
+    return(rotate_default_flag);
 }
 
+// ログフォーマット 2008/12/07 20:08:31 [INFO] [[AccessLog] (CL)192.168.2.1 --> 192.168.2.2 --UM-- 192.168.1.101:37259 --> (RS-DST)192.168.1.106:80 ]
+/*!
+ * output access info log.
+ *
+ * @param   virtualservice endpoint info
+ * @param   client endpoint info
+ * @param   realserver connect origin info
+ * @param   realserver connect destination info
+ * @param   add msg
+ * @retrun  void
+ */
+void l7vs::logger_implement_access::putLog(
+                            const std::string& vsinfo,
+                            const std::string& cl_con_org,
+                            const std::string& rs_con_org,
+                            const std::string& rs_con_dest,
+                            const std::string& msg){
 
+    std::stringstream    buf;
+    buf << boost::format( "[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]" )
+        % LOGGER_ACCESS_PROCESS_ID
+        % vsinfo
+        % cl_con_org
+        % rs_con_org
+        % rs_con_dest
+        % msg;
 
+    try {
+        log4cxx::Logger::getLogger( access_log_file_name_ )->forcedLog(    log4cxx::Level::getInfo(),
+                                                                    buf.str(),
+                                                                    log4cxx::spi::LocationInfo("", "", 0));
+    }
+    catch (const std::exception& ex) {
+        std::ostringstream oss;
+        oss << "Logging Error (Access Log) : " << ex.what();
+        logger_logrotate_utility::loglotation_utility_logic_error( 118, oss.str(), __FILE__, __LINE__ );
+    }
+
+}
