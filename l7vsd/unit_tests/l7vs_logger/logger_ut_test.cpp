@@ -117,24 +117,39 @@ int hierarchySetConfiguredCalled = 0;
 void check_rotate_type_test(){
     BOOST_MESSAGE( "----- check_rotate_type test start -----" );
 
-std::cout << "test func start" << std::endl;
-
     l7vs::LOG_ROTATION_TAG res;
+    std::string ret_msg;    
     
-    // case 1 size    
-    // unit_test [1] up_thread_run ssl mode test not find function map error test
-    std::cout << "[1] up_thread_run ssl mode test not find function map error test" << std::endl;
+    // unit_test [1] check_rotate_type test case "size"
+    std::cout << "[1] check_rotate_type test" << std::endl;
     res  =  l7vs::logger_logrotate_utility::check_rotate_type("size");
     BOOST_CHECK_EQUAL( l7vs::LOG_ROT_SIZE , res );
-    // case 2 date
+    
+    // unit_test [2] check_rotate_type test case "date"
+    std::cout << "[2] check_rotate_type test" << std::endl;
     res  =  l7vs::logger_logrotate_utility::check_rotate_type("date");
-    BOOST_CHECK_EQUAL( l7vs::LOG_ROT_SIZE , res );
-    // case 3 datesize
+    BOOST_CHECK_EQUAL( l7vs::LOG_ROT_DATE , res );
+    
+    // unit_test [3] check_rotate_type test case "datesize"
+    std::cout << "[3] check_rotate_type test" << std::endl;
     res  =  l7vs::logger_logrotate_utility::check_rotate_type("datesize");
     BOOST_CHECK_EQUAL( l7vs::LOG_ROT_DATESIZE , res );
 
-    // case "Not Exist Log Rotation Setting."
-    //res  =  logger_logrotate_utility::check_rotate_type("");
+    // unit_test [4] check_rotate_type test case "date size"
+    std::cout << "[4] check_rotate_type test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_rotate_type( "date size" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid Log Rotation Setting : date size");
+    }
+       
+    // unit_test [5] check_rotate_type test ""
+    std::cout << "[5] check_rotate_type test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_rotate_type( "" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Not Exist Log Rotation Setting.");
+    }
 
     BOOST_MESSAGE( "----- check_rotate_type test -----" );
 }
@@ -160,6 +175,7 @@ std::cout << "test start" << std::endl;
                                 const std::string &max_file_size);
 
     static LOG_ROTATION_TIMING_TAG check_rotate_timing(
+G_
                                 const std::string &rotation_timing);
 
     static std::string check_rotate_timing_value(
