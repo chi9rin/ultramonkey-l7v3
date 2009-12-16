@@ -118,7 +118,6 @@ void check_rotate_type_test(){
     BOOST_MESSAGE( "----- check_rotate_type test start -----" );
 
     l7vs::LOG_ROTATION_TAG res;
-    std::string ret_msg;    
     
     // unit_test [1] check_rotate_type test case "size"
     std::cout << "[1] check_rotate_type test" << std::endl;
@@ -151,52 +150,102 @@ void check_rotate_type_test(){
             BOOST_CHECK_EQUAL(ex.what(), "Not Exist Log Rotation Setting.");
     }
 
-    BOOST_MESSAGE( "----- check_rotate_type test -----" );
+    BOOST_MESSAGE( "----- check_rotate_type test end -----" );
 }
+
+void check_max_backup_index_test(){
+    BOOST_MESSAGE( "----- check_max_backup_index test start -----" );
+
+    unsigned int res;
+    
+    // unit_test [1] check_max_backup_index test case "1"
+    std::cout << "[1] check_max_backup_index test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_backup_index("1");
+    BOOST_CHECK_EQUAL( (unsigned int)1 , res );
+
+    // unit_test [2] check_max_backup_index test case "12"
+    std::cout << "[2] check_max_backup_index test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_backup_index("12");
+    BOOST_CHECK_EQUAL( (unsigned int)12 , res );
+
+    // unit_test [3] check_max_backup_index test case "0"
+    std::cout << "[3] check_max_backup_index test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_backup_index( "0" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Max Backup Index must at least 1.");
+    }
+
+    // unit_test [4] check_max_backup_index test case "13"
+    std::cout << "[4] check_max_backup_index test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_backup_index( "13" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Max Backup Index must at most 12.");
+    }
+
+    // unit_test [5] check_max_backup_index test case "ABC"
+    std::cout << "[5] check_max_backup_index test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_backup_index( "ABC" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid MaxBackupIndex Value : ABC.");
+    }
+
+    // unit_test [6] check_max_backup_index test ""
+    std::cout << "[6] check_max_backup_index test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_backup_index( "" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Not Exist Log MaxBackupIndex Setting.");
+    }
+
+    BOOST_MESSAGE( "----- check_max_backup_index test end -----" );
+}
+
+
+
 
 
 test_suite* init_unit_test_suite( int argc, char* argv[] ){
 
    test_suite* test = BOOST_TEST_SUITE( "logger rotate utility class test" );
 
-std::cout << "test start" << std::endl;
-
- 
+//    static LOG_ROTATION_TAG check_rotate_type(
+//                                const std::string &rotation_type);
    test->add( BOOST_TEST_CASE( &check_rotate_type_test ) );
-   
-/*
-    static LOG_ROTATION_TAG check_rotate_type(
-                                const std::string &rotation_type);
 
-    static unsigned int check_max_backup_index(
-                                const std::string &max_backup_index);
+//    static unsigned int check_max_backup_index(
+//                                const std::string &max_backup_index);
+   test->add( BOOST_TEST_CASE( &check_max_backup_index_test ) );
 
-    static unsigned long long check_max_file_size(
-                                const std::string &max_file_size);
 
-    static LOG_ROTATION_TIMING_TAG check_rotate_timing(
-G_
-                                const std::string &rotation_timing);
+//    static unsigned long long check_max_file_size(
+//                                const std::string &max_file_size);
 
-    static std::string check_rotate_timing_value(
-                                const std::string rotation_timing_value_key,
-                                const LOG_ROTATION_TIMING_TAG rotation_timing);
 
-    static void set_appender(
-                                const appender_property& log_property,
-                                const char *logger_layout,
-                                const std::string &log_category);
+//    static LOG_ROTATION_TIMING_TAG check_rotate_timing(
+//                                const std::string &rotation_timing);
 
-    static bool acccess_log_LogrotateParamCheck(
-                                accesslog_rotate_map_type& rotatedata,
-                                appender_property &access_log_property);
 
-    static void loglotation_utility_logic_error(
-                                const unsigned int logno, 
-                                const std::string& str, 
-                                const char* file , 
-                                const unsigned int line);
-*/
+//    static std::string check_rotate_timing_value(
+//                                const std::string rotation_timing_value_key,
+//                                const LOG_ROTATION_TIMING_TAG rotation_timing);
+
+//    static void set_appender(
+//                                const appender_property& log_property,
+//                                const char *logger_layout,
+//                                const std::string &log_category);
+
+//    static bool acccess_log_LogrotateParamCheck(
+//                                accesslog_rotate_map_type& rotatedata,
+//                                appender_property &access_log_property);
+
+//    static void loglotation_utility_logic_error(
+//                                const unsigned int logno, 
+//                                const std::string& str, 
+//                                const char* file , 
+//                                const unsigned int line);
 
 
     
