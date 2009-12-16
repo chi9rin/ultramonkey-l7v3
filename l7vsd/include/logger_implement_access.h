@@ -37,7 +37,7 @@
 #include <boost/foreach.hpp>
 #include "appender_property.h"
 
-#define LOGGER_ACCESS_PROCESS_ID "ACCESS"
+#define LOGGER_ACCESS_PROCESS_ID "AccessLog"
 
 
 #define LOGGER_NULL "/dev/null"
@@ -46,6 +46,7 @@
 
 #define LOG_CAT_L7VSD_ACCESS_LOGGER "l7vsd_access_logger"
 
+
 namespace log4cxx
 {
     typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
@@ -53,16 +54,24 @@ namespace log4cxx
 
 namespace l7vs{
 
+//! @class logger_implement_access
+//! @brief access logger implement class.
+//! @brief this class manage logger for access setting and access logging by log4cxx.
 class logger_implement_access {
 public:
     
     typedef std::map< std::string , std::string > accesslog_rotate_map_type;
 
-    logger_implement_access(const std::string &aclogFilename);
+    typedef std::map< std::string , std::string >::iterator accesslog_rotate_map_type_iterator;
+
+    logger_implement_access(const std::string &access_log_file_name);
     virtual ~logger_implement_access(){};
 
     //! initialze function
-    virtual bool init(appender_property& access_log_default_property,const std::map<std::string,std::string>& rotate);
+    virtual bool init(
+        const bool rotate_default_flag,
+        const appender_property& access_log_default_property,
+        accesslog_rotate_map_type& rotatedata);
 
     /*!
      * output info log.
@@ -74,33 +83,12 @@ public:
      * @param   current line
      * @retrun  void
      */
-    virtual inline void putLog(const std::string& vsinfo,
+    virtual inline void putLog(
+                                const std::string& vsinfo,
                                 const std::string& cl_con_org,
                                 const std::string& rs_con_org,
                                 const std::string& rs_con_dest,
-                                const std::string& msg){
-/*
-        std::stringstream   buf;
-        buf << boost::format( "%s%d%02d%05d %s %s" )
-            % LOGGER_ACCESS_PROCESS_ID
-            % 1
-            % LOG_CAT_L7VSD_ACCESS_LOGGER
-            % message_id
-            % message.c_str()
-            % hostname;
-
-        try {
-            log4cxx::Logger::getLogger(LOG_CAT_L7VSD_ACCESS_LOGGER)->forcedLog(log4cxx::Level::getInfo(),
-                                                                        buf.str(),
-                                                                        log4cxx::spi::LocationInfo(file, "", line));
-        }
-        catch (const std::exception& ex) {
-            std::ostringstream oss;
-            oss << "Logging Error (Info Log) : " << ex.what();
-            errorConf( 6, oss.str(), __FILE__, __LINE__);
-        }
-*/
-    }
+                                const std::string& msg = "");
 
     virtual void    addRef();
 
@@ -108,9 +96,10 @@ public:
 
     virtual bool    operator<=(const int access_num );
 
-    virtual std::string    getAcLogFileName(){ return( this->acLogFileName ); }
+    virtual std::string getAcLogFileName();
 
-    virtual bool    checkRotateParameterComp(accesslog_rotate_map_type &rotatedata);
+    virtual bool    checkRotateParameterComp(
+                        accesslog_rotate_map_type &rotatedata);
     
     virtual bool    is_rotate_default_flag();
     
@@ -119,9 +108,9 @@ protected:
     
     int access_cnt;
 
-    std::string acLogFileName;
+    std::string access_log_file_name_;
 
-    //! initialized flag
+      //! initialized flag
     bool initialized;
   
     //! hostname
@@ -131,11 +120,13 @@ protected:
     
     bool rotate_default_flag;
     
-    virtual bool setAcLoggerConf(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate);
+    virtual bool setAcLoggerConf(
+                    const appender_property& access_log_default_property,
+                    accesslog_rotate_map_type& rotatedata);
 
 };
 
 };
 
-#endif //    LOGGER_IMPLEMENT_ACCESS_H
+#endif //    LOGGER_IMPLEMENT_ACCESS_H    
 
