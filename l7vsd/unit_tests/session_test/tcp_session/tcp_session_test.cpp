@@ -11454,7 +11454,11 @@ class up_thread_realserver_connect_access_log_test_class : public l7vs::tcp_sess
 
         std::string get_test_string(boost::asio::ip::tcp::endpoint& set_endpoint){
             return endpoint_to_string(set_endpoint);
-        }
+        };
+
+        void set_access_log_flag( bool set_flag ){
+            access_log_flag = set_flag;
+        };
 };
 
 void up_thread_realserver_connect_access_log_test(){
@@ -11480,16 +11484,18 @@ void up_thread_realserver_connect_access_log_test(){
     //! TCP_QUICKACK option value (false:off,true:on)
     set_option.quickack_val = false;
 
-    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(192.168.0.1), 8080);
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string("192.168.0.1"), 8080);
     bool set_mode(false);
     boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
     bool set_ssl_cache_flag(false);
     int set_ssl_handshake_time_out = 0;
     l7vs::logger_implement_access* plogger = new l7vs::logger_implement_access( "test.log" );
 
-    up_thread_realserver_connect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    up_thread_realserver_connect_access_log_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+    test_obj.set_access_log_flag(true);
 
-    boost::asio::ip::tcp::endpoint client_src_endpoint(boost::asio::ip::address::from_string(192.168.10.20), 54321);
+
+    boost::asio::ip::tcp::endpoint client_src_endpoint(boost::asio::ip::address::from_string("192.168.10.20"), 54321);
     test_obj.set_client_endpoint(client_src_endpoint);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
@@ -11549,21 +11555,22 @@ void up_thread_realserver_connect_access_log_test(){
 
     std::string cl_rm_end = test_obj.get_test_string( client_src_endpoint );
     std::string cl_lo_end = test_obj.get_test_string( listen_endpoint );
-    std::string rs_lo_end = test_obj.get_test_string( set_socket.second->get_socket().local_endpoint() );
+    boost::asio::ip::tcp::endpoint rs_local = set_socket.second->get_socket().local_endpoint();
+    std::string rs_lo_end = test_obj.get_test_string( rs_local );
     std::string rs_rm_end = test_obj.get_test_string( con_end );
 
     // unit_test [1] up_thread_realserver_connect client endpoint string check
     std::cout << "[1] up_thread_realserver_connect client endpoint string check" << std::endl;
-    BOOST_CHECK_EQUAL( cl_rm_end.to_str() , plogger->putLog_cl_con_org );
+    BOOST_CHECK_EQUAL( cl_rm_end , plogger->putLog_cl_con_org );
     // unit_test [2] up_thread_realserver_connect virtualservice endpoint string check
     std::cout << "[2] up_thread_realserver_connect virtualservice endpoint string check" << std::endl;
-    BOOST_CHECK_EQUAL( cl_lo_end.to_str() , plogger->putLog_vsinfo );
+    BOOST_CHECK_EQUAL( cl_lo_end , plogger->putLog_vsinfo );
     // unit_test [3] up_thread_realserver_connect realserver local endpoint string check
     std::cout << "[3] up_thread_realserver_connect realserver local endpoint string check" << std::endl;
-    BOOST_CHECK_EQUAL( rs_lo_end.to_str() , plogger->putLog_rs_con_org );
+    BOOST_CHECK_EQUAL( rs_lo_end , plogger->putLog_rs_con_org );
     // unit_test [4] up_thread_realserver_connect realserver remote endpoint string check
     std::cout << "[4] up_thread_realserver_connect realserver remote endpoint string check" << std::endl;
-    BOOST_CHECK_EQUAL( rs_rm_end.to_str() , plogger->putLog_rs_con_dest );
+    BOOST_CHECK_EQUAL( rs_rm_end , plogger->putLog_rs_con_dest );
     // unit_test [5] up_thread_realserver_connect realserver local endpoint string check
     std::cout << "[5] up_thread_realserver_connect realserver local endpoint string check" << std::endl;
     BOOST_CHECK_EQUAL( "" , plogger->putLog_msg );
@@ -13952,7 +13959,7 @@ void endpoint_to_string_test(){
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
-/*
+
     ts->add( BOOST_TEST_CASE( &constructer_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
@@ -13990,10 +13997,8 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
-*/
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_access_log_test) );
-/*
     ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
@@ -14018,7 +14023,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
-*/
+
     framework::master_test_suite().add( ts );
 
     return NULL;
