@@ -692,12 +692,11 @@ bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
     accesslog_rotate_map_type& rotatedata,
     appender_property &access_log_property)
 {
-    std::string rotation_type;
-    std::string max_backup_index;
-    std::string max_file_size;
-    std::string rotation_timing;
-    std::string rotation_timing_value_key;
-
+    std::string rotation_type = "";
+    std::string max_backup_index = "";
+    std::string max_file_size = "";
+    std::string rotation_timing = "";
+    std::string rotation_timing_value_key = "";
     
     try {
 
@@ -747,7 +746,7 @@ void logger_logrotate_utility::loglotation_utility_logic_error( const unsigned i
     Logger::putLogError( l7vs::LOG_CAT_L7VSADM_LOGGER,logno, str, file, line );
 #elif defined(LOGGER_PROCESS_SNM)
     Logger::putLogError( l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line );
-#elif
+#else
     Logger::putLogError( l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line );
 #endif
 
