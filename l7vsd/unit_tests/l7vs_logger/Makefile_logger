@@ -1,0 +1,28 @@
+TARGET	= logger_test
+INCDIR	= ../../../l7vsd/include/
+SRCDIR	= ../../../l7vsd/src/
+CC	= g++
+CFLAGS	= -O0 -g -Wall -Werror 
+LD	= g++
+LIBS	= -L/usr/lib64 -lrt -lboost_unit_test_framework
+LDFLAGS	= 
+
+SRCS	= \
+	  logger_test.cpp 
+
+.SUFFIXES: .cpp .o
+.cpp.o:
+	$(CC) $(CFLAGS) -I./ -I$(INCDIR) -I$(SRCDIR) -c $< -o $@
+
+OBJS	= $(SRCS:.cpp=.o)
+
+all:	$(TARGET)
+
+$(TARGET): $(OBJS) $(PARAMETER)
+	$(LD) $(LDFLAGS) $(LIBS) -o $(TARGET) $(OBJS) 
+
+$(PARAMETER):
+	$(MAKE) -C $(PARAMETERDIR)
+
+clean:
+	rm -f $(TARGET) *.o
