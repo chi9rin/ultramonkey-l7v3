@@ -10998,8 +10998,6 @@ void down_thread_client_send_test(){
 //up_thread_realserver_connect test class 
 class up_thread_realserver_connect_test_class : public l7vs::tcp_session{
     public:
-//        up_thread_realserver_connect_test_class(l7vs::virtualservice_tcp& vs,boost::asio::io_service& session_io,const l7vs::tcp_socket::tcp_socket_option_info set_option) : l7vs::tcp_session(vs,session_io,set_option){
-//        };
        up_thread_realserver_connect_test_class(
                                 l7vs::virtualservice_tcp& vs,
                                 boost::asio::io_service& session_io,
@@ -11154,11 +11152,8 @@ void up_thread_realserver_connect_test(){
     boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
     bool set_ssl_cache_flag(false);
     int set_ssl_handshake_time_out = 0;
-    //std::string access_log_file_name = "test";
-    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
-    
-//    up_thread_realserver_connect_test_class test_obj(vs,io);
-//    up_thread_realserver_connect_test_class test_obj(vs,io,set_option);
+    l7vs::logger_implement_access* plogger = NULL;//  new l7vs::logger_implement_access(access_log_file_name);
+
     up_thread_realserver_connect_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
 
     test_obj.set_protocol_module((l7vs::protocol_module_base*)&proto_test);
@@ -13551,13 +13546,149 @@ void up_thread_run_ssl_mode_test(){
     BOOST_MESSAGE( "----- up_thread_run ssl mode test end -----" );
     
 }
+// endpoint_to_string test
+// endpoint_to_string test class
+class endpoint_to_string_test_class : public l7vs::tcp_session{
+    public:
+       endpoint_to_string_test_class(
+                                l7vs::virtualservice_tcp& vs,
+                                boost::asio::io_service& session_io,
+                                l7vs::tcp_socket_option_info& set_socket_option,
+                                boost::asio::ip::tcp::endpoint listen_endpoint,
+                                bool ssl_mode,
+                                boost::asio::ssl::context& set_ssl_context,
+                                bool set_ssl_cache_flag,
+                                int set_ssl_handshake_time_out,
+                                l7vs::logger_implement_access* set_access_logger) : l7vs::tcp_session(   vs,
+                                                                                                   session_io,
+                                                                                                   set_socket_option,
+                                                                                                   listen_endpoint,
+                                                                                                   ssl_mode,
+                                                                                                   set_ssl_context,
+                                                                                                   set_ssl_cache_flag,
+                                                                                                   set_ssl_handshake_time_out,
+                                                                                                   set_access_logger){};
+        ~endpoint_to_string_test_class(){};
+
+        std::string test_call(boost::asio::ip::tcp::endpoint& test_endpoint){
+            return endpoint_to_string(test_endpoint);
+        };
+
+};
+void endpoint_to_string_test(){
+
+    BOOST_MESSAGE( "----- endpoint_to_string test start -----" );
+
+    boost::asio::io_service io;
+    l7vs::virtualservice_tcp vs;
+    l7vs::tcp_socket_option_info set_option;
+    //! TCP_NODELAY   (false:not set,true:set option)
+    set_option.nodelay_opt = false;
+    //! TCP_NODELAY option value  (false:off,true:on)
+    set_option.nodelay_val = false;
+    //! TCP_CORK      (false:not set,true:set option)
+    set_option.cork_opt = false;
+    //! TCP_CORK option value     (false:off,true:on)
+    set_option.cork_val = false;
+    //! TCP_QUICKACK  (false:not set,true:set option)
+    set_option.quickack_opt = false;
+    //! TCP_QUICKACK option value (false:off,true:on)
+    set_option.quickack_val = false;
+    //
+    boost::asio::ip::tcp::endpoint listen_endpoint(boost::asio::ip::address::from_string(DUMMI_SERVER_IP), DUMMI_SERVER_PORT);
+    bool set_mode(true);
+    boost::asio::ssl::context set_context(io,boost::asio::ssl::context::sslv23);
+    bool set_ssl_cache_flag(false);
+    int set_ssl_handshake_time_out = 0;
+    //std::string access_log_file_name = "test";
+    l7vs::logger_implement_access* plogger = NULL;//new l7vs::logger_implement_access(access_log_file_name);
+
+    boost::system::error_code ec;
+
+    endpoint_to_string_test_class test_obj(vs,io,set_option,listen_endpoint,set_mode,set_context,set_ssl_cache_flag,set_ssl_handshake_time_out,plogger);
+
+    // unit_test [1] endpoint_to_string test IPv4 Address case 1(192.168.0.1:8080) test
+    std::cout << "[1] endpoint_to_string test IPv4 Address case 1(192.168.0.1:8080) test" << std::endl;
+    {
+        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("192.168.0.1"), 8080);
+        std::string ref("192.168.0.1:8080");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [2] endpoint_to_string test IPv4 Address case 2(0.0.0.0:0) test
+    std::cout << "[2] endpoint_to_string test IPv4 Address case 2(0.0.0.0:0) test" << std::endl;
+    {
+        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("0.0.0.0"), 0);
+        std::string ref("0.0.0.0:0");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [3] endpoint_to_string test IPv4 Address case 3(255.255.255.255:65535) test
+    std::cout << "[3] endpoint_to_string test IPv4 Address case 3(255.255.255.255:65535) test" << std::endl;
+    {        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("255.255.255.255"), 65535);
+        std::string ref("255.255.255.255:65535");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [4] endpoint_to_string test IPv6 Address case 1([2031:130f:876a::156a]:8080) test
+    std::cout << "[4] endpoint_to_string test IPv6 Address case 1([2031:130f:876a::156a]:8080) test" << std::endl;
+    {
+        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("2031:130f:876a::156a"), 8080);
+        std::string ref("[2031:130f:876a::156a]:8080");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [5] endpoint_to_string test IPv6 Address case 2([::]:0) test
+    std::cout << "[5] endpoint_to_string test IPv6 Address case 2([::]:0) test" << std::endl;
+    {
+        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("::"), 0);
+        std::string ref("[::]:0");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [6] endpoint_to_string test IPv6 Address case 3([ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]:65535) test
+    std::cout << "[6] endpoint_to_string test IPv6 Address case 3([ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]:65535) test" << std::endl;
+    {
+        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), 65535);
+        std::string ref("[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]:65535");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [7] endpoint_to_string test IPv6 Address case 4([fe80::2%<1st ifname>]:8080) test
+    std::cout << "[7] endpoint_to_string test IPv6 Address case 4([fe80::2%<1st ifname>]:8080) test" << std::endl;
+    {
+        boost::asio::ip::address_v6 v6addr(boost::asio::ip::address_v6::from_string("fe80::2"));
+        v6addr.scope_id(1);
+        boost::asio::ip::tcp::endpoint test_endpoint(v6addr, 8080);
+        BOOST_CHECK( test_endpoint.address().to_v6().scope_id() == 1);
+	BOOST_CHECK(test_endpoint.address().to_v6().is_link_local());
+        char if_name[IF_NAMESIZE];
+        memset(if_name,0,IF_NAMESIZE);
+        if_indextoname(1,if_name);
+        std::string set_if_name(if_name);
+        std::string ref = "[fe80::2%" + set_if_name  + "]:8080";
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+    // unit_test [8] endpoint_to_string test IPv6 Address case 5([::ffff:192.168.0.1]:8080) test
+    std::cout << "[8] endpoint_to_string test IPv6 Address case 5([::ffff:192.168.0.1]:8080) test" << std::endl;
+    {
+        boost::asio::ip::tcp::endpoint test_endpoint(boost::asio::ip::address::from_string("::ffff:192.168.0.1"), 8080);
+        std::string ref("[::ffff:192.168.0.1]:8080");
+        std::string test_string = test_obj.test_call(test_endpoint);
+        BOOST_CHECK_EQUAL(ref,test_string);
+    }
+
+    BOOST_MESSAGE( "----- endpoint_to_string test end -----" );
+}
+
 
 
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     test_suite* ts = BOOST_TEST_SUITE( "l7vs::tcp_socket class test" );
-
+/*
     ts->add( BOOST_TEST_CASE( &constructer_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_test ) );
     ts->add( BOOST_TEST_CASE( &initialize_ssl_mode_test ) );
@@ -13566,7 +13697,9 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &handle_ssl_handshake_timer_test) );
     ts->add( BOOST_TEST_CASE( &is_thread_wait_test) );
     ts->add( BOOST_TEST_CASE( &set_virtual_service_message_test) );
-
+*/
+    ts->add( BOOST_TEST_CASE( &endpoint_to_string_test ));
+/*
     ts->add( BOOST_TEST_CASE( &up_thread_run_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_run_ssl_mode_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_run_test) );
@@ -13594,7 +13727,9 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_send_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_send_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_client_send_test) );
+*/
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_connect_test) );
+/*
     ts->add( BOOST_TEST_CASE( &up_thread_sorryserver_connect_test) );
     ts->add( BOOST_TEST_CASE( &up_thread_realserver_disconnect_test) );
     ts->add( BOOST_TEST_CASE( &down_thread_realserver_disconnect_test) );
@@ -13619,7 +13754,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     ts->add( BOOST_TEST_CASE( &up_thread_client_accept_event_test ) );
     ts->add( BOOST_TEST_CASE( &up_thread_client_respond_event_test ) );
     ts->add( BOOST_TEST_CASE( &down_thread_client_respond_event_test ) );
-
+*/
     framework::master_test_suite().add( ts );
 
     return NULL;

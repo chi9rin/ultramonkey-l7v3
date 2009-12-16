@@ -51,11 +51,14 @@ public:
 	 * @param   current line
 	 * @retrun  void
 	 */
-	virtual inline void putLog(const std::string& vsinfo,
-								const std::string& cl_con_org,
-								const std::string& rs_con_org,
-								const std::string& rs_con_dest,
-                                                                const std::string& msg){
+	virtual inline void putLog(
+					const std::string& vsinfo,
+					const std::string& cl_con_org,
+					const std::string& rs_con_org,
+					const std::string& rs_con_dest,
+                                        const std::string& msg){
+
+
 
 	};
 
