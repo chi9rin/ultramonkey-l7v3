@@ -40,14 +40,12 @@ l7vsd_max_backup_index = "10"
 # l7vsd rotate file size
 l7vsd_max_filesize = "10M"
 
-# l7vsd connection logfile base name
-l7vsd_conn_log_filename = "/var/log/l7vs/l7vsd_conn.log"
-# l7vsd connection log rotate pattern
-l7vsd_conn_rotation = "size"
-# l7vsd connection rotate max backup number
-l7vsd_conn_max_backup_index = "10"
-# l7vsd connection rotate file size
-l7vsd_conn_max_filesize = "10M"
+# l7vsd access log rotate pattern
+l7vsd_accesslog_rotate_type = "size"
+# l7vsd access rotate max backup number
+l7vsd_accesslog_rotate_max_backup_index = "10"
+# l7vsd access rotate file size
+l7vsd_accesslog_rotate_max_filesize = "10M"
 
 # l7vsd log categories level
 l7vsd_network					= "info"
