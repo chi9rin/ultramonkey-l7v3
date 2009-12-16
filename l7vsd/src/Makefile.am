@@ -67,8 +67,14 @@ libl7vsd_logger_a_SOURCES	= \
 			../include/logger.h \
 			../include/logger_impl.h \
 			../include/appender_property.h \
+			../include/logger_implement_access.h \
+			../include/logger_access_manager.h \
+			../include/logger_logrotate_utility.h \
 			logger.cpp \
 			logger_impl.cpp \
+			logger_implement_access.cpp \
+			logger_access_manager.cpp \
+			logger_logrotate_utility.cpp \
 			../include/strict_time_based_rolling_policy.h \
 			strict_time_based_rolling_policy.cpp \
 			../include/time_and_size_based_rolling_policy.h \
@@ -87,10 +93,12 @@ libl7vsadm_logger_a_SOURCES	= \
 			../include/appender_property.h \
 			../include/logger_implement_access.h \
 			../include/logger_access_manager.h \
+			../include/logger_logrotate_utility.h \
 			logger.cpp \
 			logger_impl.cpp \
 			logger_implement_access.cpp \
 			logger_access_manager.cpp \
+			logger_logrotate_utility.cpp \
 			../include/strict_time_based_rolling_policy.h \
 			strict_time_based_rolling_policy.cpp \
 			../include/time_and_size_based_rolling_policy.h \
@@ -108,11 +116,13 @@ libsnmpagent_logger_a_SOURCES	= \
 			../include/appender_property.h \
 			../include/logger_implement_access.h \
 			../include/logger_access_manager.h \
+			../include/logger_logrotate_utility.h \
 			logger_impl.h \
 			logger.cpp \
 			logger_impl.cpp \
 			logger_implement_access.cpp \
 			logger_access_manager.cpp \
+			logger_logrotate_utility.cpp \
 			../include/strict_time_based_rolling_policy.h \
 			strict_time_based_rolling_policy.cpp \
 			../include/time_and_size_based_rolling_policy.h \
