@@ -6,10 +6,13 @@
 
 #include "session_thread_control.h"
 #include "l7vsd.h"
+#include "tcp_socket_option.h"
 
 #include "stub.h"
 
+
 using namespace boost::unit_test;
+using namespace l7vs;
 
 typedef boost::shared_ptr<l7vs::tcp_session>                session_type;
 typedef boost::shared_ptr<l7vs::session_thread_control>        stc_type;
@@ -66,10 +69,28 @@ void    stc_method_test1(){
     l7vs::virtualservice_tcp    tcpservice( vsd, rep, element );
 //     session_type    session( new l7vs::tcp_session( tcpservice, dispatcher ) );
 
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
+
+
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
     cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
     cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
-    stc_type        stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ),
+    stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
 //
@@ -121,25 +142,28 @@ void    stc_method_test1(){
     stc->startupstream();
 //sleepを入れないとsessionのループに入る前にEXITしてしまう
     usleep( 1000 );
-    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
+//    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_ENABLE );
+    stc->session_sorry_enable();
     usleep( 1000 );
     stc->stopupstream();
-    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
+//    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SORRY_STATE_DISABLE );
+    stc->session_sorry_disable();
 
 // unit_test[10]  sessionの下りスレッドが外から停止された場合
     std::cout << counter++ << std::endl;
     BOOST_MESSAGE( "----10" );
     stc->startdownstream();
     usleep( 1000 );
-    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
+//    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
+    stc->session_pause_on();
     usleep( 1000 );
     stc->stopdownstream();
-    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+//    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+    stc->session_pause_off();
 
-
-// unit_test[11]  停止スレッドの待ち合わせ
+// unit_test[12]  停止スレッドの待ち合わせ
     std::cout << counter++ << std::endl;
-    BOOST_MESSAGE( "----11" );
+    BOOST_MESSAGE( "----12" );
     stc->join();
     usleep( 1 );
 }
@@ -153,10 +177,29 @@ void    stc_method_test2(){
     l7vs::virtualservice_element    element;
     l7vs::virtualservice_tcp    tcpservice( vsd, rep, element );
 //     session_type    session( new l7vs::tcp_session( tcpservice, dispatcher ) );
+
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
+
+
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
     cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
     cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
-    stc_type        stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ),
+    stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
 
@@ -252,6 +295,8 @@ void    stc_method_test2(){
     usleep( 100 );
     stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
 
+std::cout << "join 1" << std::endl;
+
 //停止スレッドの待ち合わせ
     stc->join();
 //join後のスレッドID取得のテスト
@@ -329,10 +374,31 @@ void    stc_method_test5(){
     l7vs::virtualservice_element    element;
     l7vs::virtualservice_tcp    tcpservice( vsd, rep, element );
 //     session_type    session( new l7vs::tcp_session( tcpservice, dispatcher ) );
+
+
+
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
     cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
     cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
-    stc_type        stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ),
+
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
+
+    stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
     test_thread    thread1;
@@ -401,8 +467,27 @@ void    stc_method_test6(){
 //     session_type    session( new l7vs::tcp_session( tcpservice, dispatcher ) );
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
     cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
     cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
-    stc_type        stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ),
+
+
+
+    stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
     test_thread    thread1;
@@ -418,7 +503,7 @@ void    stc_method_test6(){
     thread1.stop();
 }
 
-//test case6. スレッド停止と同時にjoinが呼ばれる・その2(下りスレッド)
+//test case7. スレッド停止と同時にjoinが呼ばれる・その2(下りスレッド)
 void    stc_method_test7(){
 //session_thread_controlオブジェクトの作成
     l7vs::l7vsd                    vsd;
@@ -430,7 +515,27 @@ void    stc_method_test7(){
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
     cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
     cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
-    stc_type        stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ),
+
+
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
+
+
+    stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
     test_thread    thread1;
@@ -446,7 +551,7 @@ void    stc_method_test7(){
     thread1.stop();
 }
 
-//test case6. スレッド停止と同時にjoinが呼ばれる・その3(上下スレッド)
+//test case8. スレッド停止と同時にjoinが呼ばれる・その3(上下スレッド)
 void    stc_method_test8(){
 //session_thread_controlオブジェクトの作成
     l7vs::l7vsd                    vsd;
@@ -458,7 +563,25 @@ void    stc_method_test8(){
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
     cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
     cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
-    stc_type        stc( new l7vs::session_thread_control( new l7vs::tcp_session( tcpservice, dispatcher ),
+
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
+
+    stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
     test_thread    thread1;
@@ -475,20 +598,155 @@ void    stc_method_test8(){
     thread1.stop();
 }
 
+//test case9. sorryモード変更関数及びアクセスログ出力設定/解除関数の正常動作確認
+void    stc_method_test9(){
+
+// unit_test[33]  session_thread_controlオブジェクトの作成
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----33" );
+    l7vs::l7vsd                    vsd;
+    boost::asio::io_service        dispatcher;
+    l7vs::replication            rep;
+    l7vs::virtualservice_element    element;
+    l7vs::virtualservice_tcp    tcpservice( vsd, rep, element );
+//     session_type    session( new l7vs::tcp_session( tcpservice, dispatcher ) );
+
+    l7vs::tcp_socket_option_info                set_sock_opt;
+    boost::asio::ip::tcp::endpoint        tcp_accept_endpoint;
+    bool                           ssl_virtualservice_mode_flag;
+    boost::asio::ssl::context            sslcontext(dispatcher, DEFAULT_SSL_METHOD);
+    bool                        is_session_cache_use = false;
+    int                        handshake_timeout = 300;
+
+    l7vs::tcp_session*    sess    = new l7vs::tcp_session(tcpservice,
+                                      dispatcher,
+                                      set_sock_opt,
+                                      element.tcp_accept_endpoint,
+                                      ssl_virtualservice_mode_flag,
+                                      sslcontext,
+                                      is_session_cache_use,
+                                      handshake_timeout,
+                                      NULL);
+
+
+    boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
+    cpu_set_t    vsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( address );
+    cpu_set_t    rsnic_cpumask    = debugg_flug_struct::getInstance().get_cpu_mask( "eth0" );
+    stc_type        stc( new l7vs::session_thread_control( sess,
+                         vsnic_cpumask, rsnic_cpumask, 0 ) );
+
+//
+// unit_test[34]  get_sessionメソッドのテスト
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----34" );
+//     BOOST_CHECK_EQUAL( session, stc->get_session() );
+
+//スレッドID取得のテスト
+// unit_test[35]  上りスレッドID取得
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----35" );
+    std::cout << "upthread id : " << stc->get_upthread_id() << std::endl;
+// unit_test[36]  下りスレッドID取得
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----36" );
+    std::cout << "downthread id : " << stc->get_downthread_id() << std::endl;
+
+//上りスレッド
+
+//パターン１
+// unit_test[37]  上りスレッドスタート
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----37" );
+    stc->startupstream();
+//sleepを入れないとsessionのループに入る前にEXITしてしまう
+    usleep( 4000000 );
+// unit_test[38]  上りスレッドストップ
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----38" );
+    stc->stopupstream();
+//下りスレッド
+
+// unit_test[39]  下りスレッドスタート
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----39" );
+    stc->startdownstream();
+//sleepを入れないとsessionのループに入る前にEXITしてしまう
+    usleep( 4000000 );
+// unit_test[40]  下りスレッドストップ
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----40" );
+    stc->stopdownstream();
+
+// unit_test[41]  sessionの上りスレッドが外から停止された場合 パターン２
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----41" );
+    stc->startupstream();
+//sleepを入れないとsessionのループに入る前にEXITしてしまう
+    usleep( 1000 );
+    stc->session_sorry_mode_change(1);
+    usleep( 1000 );
+    stc->stopupstream();
+    stc->session_sorry_mode_change(INT_MAX);
+
+// unit_test[42]  sessionの上りスレッドが外から停止された場合
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----42" );
+    stc->startupstream();
+//sleepを入れないとsessionのループに入る前にEXITしてしまう
+    usleep( 1000 );
+    stc->session_accesslog_output_mode_on();
+    usleep( 1000 );
+    stc->stopupstream();
+    stc->session_accesslog_output_mode_off();
+
+// unit_test[43]  sessionの上りスレッドが外から停止された場合
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "-----43" );
+    stc->startupstream();
+//sleepを入れないとsessionのループに入る前にEXITしてしまう
+    usleep( 1000 );
+    stc->session_access_log_output_mode_change(true);
+    usleep( 1000 );
+    stc->stopupstream();
+    stc->session_access_log_output_mode_change(false);
+
+// unit_test[44]  sessionの下りスレッドが外から停止された場合
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "----44" );
+    stc->startdownstream();
+    usleep( 1000 );
+//    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_ON );
+    stc->session_pause_on();
+    usleep( 1000 );
+    stc->stopdownstream();
+//    stc->get_session()->set_virtual_service_message( l7vs::tcp_session::SESSION_PAUSE_OFF );
+    stc->session_pause_off();
+
+// unit_test[45]  停止スレッドの待ち合わせ
+    std::cout << counter++ << std::endl;
+    BOOST_MESSAGE( "----45" );
+    stc->join();
+    usleep( 1 );
+}
+
+
+
+
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     // create unit test suite
     test_suite* ts = BOOST_TEST_SUITE( "stc_test" );
 
     // add test case to test suite
-    ts->add( BOOST_TEST_CASE( &stc_method_test1 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test1 ) ); 
     ts->add( BOOST_TEST_CASE( &stc_method_test2 ) );
-    ts->add( BOOST_TEST_CASE( &stc_method_test3 ) );
-    ts->add( BOOST_TEST_CASE( &stc_method_test4 ) );
-    ts->add( BOOST_TEST_CASE( &stc_method_test5 ) );
-    ts->add( BOOST_TEST_CASE( &stc_method_test6 ) );
-    ts->add( BOOST_TEST_CASE( &stc_method_test7 ) );
-    ts->add( BOOST_TEST_CASE( &stc_method_test8 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test3 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test4 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test5 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test6 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test7 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test8 ) );
+//    ts->add( BOOST_TEST_CASE( &stc_method_test9 ) );
 
     framework::master_test_suite().add( ts );
 
