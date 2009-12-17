@@ -817,9 +817,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
     
     request.vs_element.access_log_file_name = access_log_file_name;
     request.vs_element.access_log_rotate_arguments.clear();
+    request.vs_element.access_log_rotate_key_info = "";
     BOOST_FOREACH( virtualservice_element::access_log_rotate_arguments_pair_type pair, arguments_map ){
         request.vs_element.access_log_rotate_arguments.insert( pair );
+        request.vs_element.access_log_rotate_key_info += pair.first + " " + pair.second + " ";
     }
+    boost::algorithm::erase_last( request.vs_element.access_log_rotate_key_info , " " );
 
     return true;
 }
@@ -1640,7 +1643,8 @@ void    l7vs::l7vsadm::disp_list_key(){
         buf << boost::format( "    %d\n" ) % vse.access_log_flag;
         buf << boost::format( "    %s\n" )
             % ( ( 0 == vse.access_log_file_name.length() ) ? "none": vse.access_log_file_name );
-        buf << boost::format( "    %s\n" ) % vse.access_log_rotate_key_info;
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.access_log_rotate_key_info.length() ) ? "none" :  vse.access_log_rotate_key_info );
         
         BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
             std::string    rsepstr;
@@ -1751,7 +1755,8 @@ void    l7vs::l7vsadm::disp_list_verbose(){
         buf << boost::format( "    %d\n" ) % vse.access_log_flag;
         buf << boost::format( "    %s\n" )
             % ( ( 0 == vse.access_log_file_name.length() ) ? "none": vse.access_log_file_name );
-        buf << boost::format( "    %s\n" ) % vse.access_log_rotate_verbose_info;
+        buf << boost::format( "    %s\n" )
+            % ( ( 0 == vse.access_log_rotate_verbose_info.length() ) ? "none" :  vse.access_log_rotate_verbose_info );
 
         BOOST_FOREACH( realserver_element rse, vse.realserver_vector ){
             std::string    rsepstr;

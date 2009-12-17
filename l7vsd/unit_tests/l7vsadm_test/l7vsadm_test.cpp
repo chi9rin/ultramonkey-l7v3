@@ -1671,6 +1671,8 @@ void    parse_opt_vs_access_log_logrotate_func_test(){
         std::map< std::string, std::string >::iterator it =  adm.get_request().vs_element.access_log_rotate_arguments.find("--option");
         BOOST_CHECK( it != adm.get_request().vs_element.access_log_rotate_arguments.end() );
         BOOST_CHECK( it->second == "zzz" );
+        // unit_test[xx] parse_opt_vs_access_log_logrotate_func normal case 1 rotate argument atring check
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.access_log_rotate_key_info, "--option zzz" );
     }
 
 
@@ -1695,6 +1697,8 @@ void    parse_opt_vs_access_log_logrotate_func_test(){
         std::map< std::string, std::string >::iterator it =  adm.get_request().vs_element.access_log_rotate_arguments.find("--option");
         BOOST_CHECK( it != adm.get_request().vs_element.access_log_rotate_arguments.end() );
         BOOST_CHECK( it->second == "zzz" );
+        // unit_test[xx] parse_opt_vs_access_log_logrotate_func normal case 2 rotate argument atring check
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.access_log_rotate_key_info, "--option zzz" );
     }
 
     // parse_opt_vs_access_log_logrotate_func normal case 3 (no rotate arg)
@@ -1714,6 +1718,8 @@ void    parse_opt_vs_access_log_logrotate_func_test(){
         BOOST_CHECK_EQUAL( l7vs::logger_access_manager::access_log_logrotate_parameter_check_called, false );
         // unit_test[xx] parse_opt_vs_access_log_logrotate_func normal case 3 access log file name check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.access_log_file_name, "/var/log/l7vs/access.log" );
+        // unit_test[xx] parse_opt_vs_access_log_logrotate_func normal case 3 rotate argument atring check
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.access_log_rotate_key_info, "" );
     }
 
     // parse_opt_access_log_logrotate_func error case 1 (no access_log_file name)
