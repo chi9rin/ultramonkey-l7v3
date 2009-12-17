@@ -203,9 +203,156 @@ void check_max_backup_index_test(){
     BOOST_MESSAGE( "----- check_max_backup_index test end -----" );
 }
 
+void check_max_file_size_test(){
+    BOOST_MESSAGE( "----- check_max_file_size test start -----" );
+
+    unsigned long long res;
+
+    // unit_test [1] check_max_file_size test case "65535"
+    std::cout << "[1] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("65535");
+    BOOST_CHECK_EQUAL( (unsigned long long)65535 , res );
+    
+    // unit_test [2] check_max_file_size test case "4294967295"
+    std::cout << "[2] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("4294967295");
+    BOOST_CHECK_EQUAL( (unsigned long long)4294967295 , res );
+
+    // unit_test [3] check_max_file_size test case "64K"
+    std::cout << "[3] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("64K");
+    BOOST_CHECK_EQUAL( (unsigned long long)65536 , res );
+
+    // unit_test [4] check_max_file_size test case "4194303K"
+    std::cout << "[4] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("4194303K");
+    BOOST_CHECK_EQUAL( (unsigned long long)4294966272 , res );
+
+    // unit_test [5] check_max_file_size test case "1M"
+    std::cout << "[5] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("1M");
+    BOOST_CHECK_EQUAL( (unsigned long long)1048576 , res );
+
+    // unit_test [6] check_max_file_size test case "4095M"
+    std::cout << "[6] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("4095M");
+    BOOST_CHECK_EQUAL( (unsigned long long)4293918720 , res );
+
+    // unit_test [7] check_max_file_size test case "1G"
+    std::cout << "[7] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("1G");
+    BOOST_CHECK_EQUAL( (unsigned long long)1073741824 , res );
+
+    // unit_test [8] check_max_file_size test case "3G"
+    std::cout << "[8] check_max_file_size test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_max_file_size("3G");
+    BOOST_CHECK_EQUAL( (unsigned long long)3221225472 , res );
+
+    // unit_test [9] check_max_file_size test case "65534"
+    std::cout << "[9] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "65534" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "FileSize must at least 65535 bytes.");
+    }
+    // unit_test [10] check_max_file_size test case "63K"
+    std::cout << "[10] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "63K" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "FileSize must at least 65535 bytes.");
+    }
+    // unit_test [11] check_max_file_size test case "0M"
+    std::cout << "[11] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "0M" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "FileSize must at least 65535 bytes.");
+    }
+    // unit_test [12] check_max_file_size test case "0G"
+    std::cout << "[12] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "0G" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "FileSize must at least 65535 bytes.");
+    }
+
+    // unit_test [13] check_max_file_size test case "4294967296"
+    std::cout << "[13] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "4294967296" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [14] check_max_file_size test case "4194304K"
+    std::cout << "[14] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "4194304K" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [15] check_max_file_size test case "4096M"
+    std::cout << "[15] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "4096M" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [16] check_max_file_size test case "4G"
+    std::cout << "[16] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "4G" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [17] check_max_file_size test case "1T"
+    std::cout << "[17] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "1T" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [18] check_max_file_size test case "ABC"
+    std::cout << "[18] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "ABC" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [19] check_max_file_size test case "ABCK"
+    std::cout << "[19] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "ABCK" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [20] check_max_file_size test case "ABCM"
+    std::cout << "[20] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "ABCM" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid FileSize Value.");
+    }
+
+    // unit_test [22] check_max_file_size test case ""
+    std::cout << "[22] check_max_file_size test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_max_file_size( "" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Not Exist Log MaxFileSize Setting.");
+    }
 
 
 
+    BOOST_MESSAGE( "----- check_max_file_size test end -----" );
+}
 
 test_suite* init_unit_test_suite( int argc, char* argv[] ){
 
@@ -222,15 +369,16 @@ test_suite* init_unit_test_suite( int argc, char* argv[] ){
 
 //    static unsigned long long check_max_file_size(
 //                                const std::string &max_file_size);
-
+   test->add( BOOST_TEST_CASE( &check_max_file_size_test ) );
 
 //    static LOG_ROTATION_TIMING_TAG check_rotate_timing(
 //                                const std::string &rotation_timing);
-
+ 
 
 //    static std::string check_rotate_timing_value(
 //                                const std::string rotation_timing_value_key,
 //                                const LOG_ROTATION_TIMING_TAG rotation_timing);
+
 
 //    static void set_appender(
 //                                const appender_property& log_property,
