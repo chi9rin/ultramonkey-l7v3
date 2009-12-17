@@ -12,6 +12,7 @@
 #include "replication.h"
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
+#include "error_code.h"
 #include "stub.h"
 
 // protocol_module_control　STUB code
@@ -57,7 +58,7 @@ l7vs::Parameter::Parameter(){}
 
 l7vs::Parameter::~Parameter(){}
 
-bool    l7vs::Parameter::read_file( const PARAMETER_COMPONENT_TAG in ){    return true; }
+bool    l7vs::Parameter::read_file( const PARAMETER_COMPONENT_TAG in,const std::string& filename ){    return true; }
 
 int        l7vs::Parameter::get_int(    const PARAMETER_COMPONENT_TAG in_tag,
                                     const std::string& in_str,
@@ -71,12 +72,26 @@ int        l7vs::Parameter::get_int(    const PARAMETER_COMPONENT_TAG in_tag,
     return retval;
 }
 
+bool l7vs::Parameter::init( const PARAMETER_COMPONENT_TAG in_tag, const std::string& data){
+
+    return(true);
+}
+
+
 std::string        l7vs::Parameter::get_string(const PARAMETER_COMPONENT_TAG in_tag,
                                             const std::string& in_str,
                                             error_code& err){
     return "";
 }
 
+
+void l7vs::Parameter::get_multistring(const PARAMETER_COMPONENT_TAG,
+                         const std::string&,
+                         std::vector<std::string>&,
+                         error_code& ){
+
+
+}
 
 l7vs::Logger::Logger() :
     scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
@@ -199,11 +214,11 @@ bool    l7vs::tcp_realserver_connect_socket_list::empty(){
     return true;
 }
 
-l7vs::tcp_thread_message::tcp_thread_message(){}
-l7vs::tcp_thread_message::~tcp_thread_message(){}
+//l7vs::tcp_thread_message::tcp_thread_message(){}
+//l7vs::tcp_thread_message::~tcp_thread_message(){}
 
-l7vs::tcp_thread_message_que::tcp_thread_message_que(){}
-l7vs::tcp_thread_message_que::~tcp_thread_message_que(){}
+//l7vs::tcp_thread_message_que::tcp_thread_message_que(){}
+//l7vs::tcp_thread_message_que::~tcp_thread_message_que(){}
 
 void    l7vs::tcp_thread_message_que::push(tcp_thread_message_ptr message){}
 l7vs::tcp_thread_message_que::tcp_thread_message_ptr    l7vs::tcp_thread_message_que::front(){
@@ -223,11 +238,11 @@ boost::asio::ip::tcp::endpoint    l7vs::tcp_data::get_endpoint(){
     return endpoint_info;
 }
 */
-l7vs::tcp_socket::tcp_socket(boost::asio::io_service& io) : my_socket( io ){}
-l7vs::tcp_socket::~tcp_socket(){}
-boost::asio::ip::tcp::socket&    l7vs::tcp_socket::get_socket(){
-    return my_socket;
-}
+//l7vs::tcp_socket::tcp_socket(boost::asio::io_service& io) : my_socket( io ){}
+//l7vs::tcp_socket::~tcp_socket(){}
+//boost::asio::ip::tcp::socket&    l7vs::tcp_socket::get_socket(){
+//    return my_socket;
+//}
 bool    l7vs::tcp_socket::connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec){
     return true;
 }
@@ -248,10 +263,37 @@ std::size_t        l7vs::tcp_socket::read_some(boost::asio::mutable_buffers_1 bu
 
 
 
+l7vs::tcp_session::tcp_session(virtualservice_tcp& vs,
+            boost::asio::io_service& session_io,
+            const tcp_socket_option_info set_option,
+            const boost::asio::ip::tcp::endpoint listen_endpoint,
+            const bool ssl_mode,
+            boost::asio::ssl::context& set_ssl_context,
+            const bool set_ssl_cache_flag,
+            const int set_ssl_handshake_time_out,
+            logger_implement_access* set_access_logger)
+        :
+        io(session_io),
+        parent_service(vs),
+        exit_flag(false),
+        thread_state(0),
+        protocol_module(NULL),
+        session_pause_flag(false),
+        client_socket(session_io,set_option),
+        upstream_buffer_size(8192),
+        downstream_buffer_size(8192),
+        virtualservice_endpoint(listen_endpoint),
+        access_log_flag(false),
+        access_logger(set_access_logger),
+        ssl_flag(ssl_mode),
+        client_ssl_socket(session_io, set_ssl_context,set_option),
+        ssl_context(set_ssl_context),
+        ssl_cache_flag(set_ssl_cache_flag),
+        ssl_handshake_timer_flag(false),
+        ssl_handshake_time_out(set_ssl_handshake_time_out),
+        ssl_handshake_time_out_flag(false),
+        socket_opt_info(set_option){
 
-l7vs::tcp_session::tcp_session(l7vs::virtualservice_tcp& vs, boost::asio::io_service& session_io) : io( session_io ),
-                                                                                                    parent_service( vs ),
-                                                                                                    client_socket( io ) {
     exit_flag = false;
     session_pause_flag = false;
     std::cout << "SESSION:CREATE" << std::endl;
@@ -266,6 +308,11 @@ l7vs::session_result_message l7vs::tcp_session::initialize(void){
 
 boost::asio::ip::tcp::socket& l7vs::tcp_session::get_client_socket(void){
     return client_socket.get_socket();
+}
+
+ssl_socket& l7vs::tcp_session::get_client_ssl_socket()
+{
+    return client_ssl_socket.get_socket();
 }
 
 bool    l7vs::tcp_session::is_thread_wait(void){
@@ -306,6 +353,16 @@ void    l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE
             session_pause_flag = false;
         }
         break;
+    case    ACCESS_LOG_ON:{
+        std::cout<< "set_virtual_service_message called : ACCESS_LOG_ON" << std::endl;
+        break;
+    }
+    case    ACCESS_LOG_OFF:{
+        std::cout<< "set_virtual_service_message called : ACCESS_LOG_OFF" << std::endl;
+        break;
+    }
+
+
     }
 }
 
@@ -379,6 +436,7 @@ void    l7vs::tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYP
 void    l7vs::tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){}
 void    l7vs::tcp_session::down_thread_all_socket_close(){}
 
+void    l7vs::tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type){}
 
 l7vs::udp_session::udp_session(virtualservice_udp& vs, boost::asio::io_service& session_io) :    io( session_io ),
                                                                                                 parent_service( vs ),
