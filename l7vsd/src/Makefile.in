@@ -136,7 +136,6 @@ am_l7vsd_OBJECTS = l7vsd-l7vsd.$(OBJEXT) \
 	l7vsd-tcp_data.$(OBJEXT) l7vsd-tcp_socket.$(OBJEXT) \
 	l7vsd-tcp_ssl_socket.$(OBJEXT) \
 	l7vsd-tcp_realserver_connect_socket_list.$(OBJEXT) \
-	l7vsd-tcp_thread_message_que.$(OBJEXT) \
 	l7vsd-udp_data.$(OBJEXT) \
 	l7vsd-udp_request_thread_control.$(OBJEXT) \
 	l7vsd-udp_request.$(OBJEXT) l7vsd-tcp_session.$(OBJEXT) \
@@ -478,7 +477,6 @@ l7vsd_SOURCES = \
 			../include/tcp_socket_option.h \
 			../include/tcp_realserver_connetc_socket_list.h \
 			../include/tcp_thread_message.h \
-			../include/tcp_thread_message_que.h \
 			../include/tcp_session.h \
 			../include/udp_data.h \
 			../include/udp_request.h \
@@ -502,7 +500,6 @@ l7vsd_SOURCES = \
 			tcp_socket.cpp \
 			tcp_ssl_socket.cpp \
 			tcp_realserver_connect_socket_list.cpp \
-			tcp_thread_message_que.cpp \
 			udp_data.cpp \
 			udp_request_thread_control.cpp \
 			udp_request.cpp \
@@ -673,7 +670,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_session.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_ssl_socket.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-tcp_thread_message_que.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-udp_request_thread_control.Po@am__quote@
@@ -684,27 +680,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l7vsd-virtualservice_udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger_access_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger_logrotate_utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger_implement_access.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-logger_logrotate_utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-strict_time_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_parameter_a-parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsadm_parameter_a-parameter_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger_access_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger_logrotate_utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger_implement_access.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-logger_logrotate_utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-strict_time_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_parameter_a-parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libl7vsd_parameter_a-parameter_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger_access_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger_logrotate_utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger_implement_access.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-logger_logrotate_utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-strict_time_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_parameter_a-parameter.Po@am__quote@
@@ -1478,20 +1474,6 @@ l7vsd-tcp_realserver_connect_socket_list.obj: tcp_realserver_connect_socket_list
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_realserver_connect_socket_list.cpp' object='l7vsd-tcp_realserver_connect_socket_list.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_realserver_connect_socket_list.obj `if test -f 'tcp_realserver_connect_socket_list.cpp'; then $(CYGPATH_W) 'tcp_realserver_connect_socket_list.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_realserver_connect_socket_list.cpp'; fi`
-
-l7vsd-tcp_thread_message_que.o: tcp_thread_message_que.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_thread_message_que.o -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" -c -o l7vsd-tcp_thread_message_que.o `test -f 'tcp_thread_message_que.cpp' || echo '$(srcdir)/'`tcp_thread_message_que.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" "$(DEPDIR)/l7vsd-tcp_thread_message_que.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_thread_message_que.cpp' object='l7vsd-tcp_thread_message_que.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_thread_message_que.o `test -f 'tcp_thread_message_que.cpp' || echo '$(srcdir)/'`tcp_thread_message_que.cpp
-
-l7vsd-tcp_thread_message_que.obj: tcp_thread_message_que.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-tcp_thread_message_que.obj -MD -MP -MF "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" -c -o l7vsd-tcp_thread_message_que.obj `if test -f 'tcp_thread_message_que.cpp'; then $(CYGPATH_W) 'tcp_thread_message_que.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_thread_message_que.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo" "$(DEPDIR)/l7vsd-tcp_thread_message_que.Po"; else rm -f "$(DEPDIR)/l7vsd-tcp_thread_message_que.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tcp_thread_message_que.cpp' object='l7vsd-tcp_thread_message_que.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o l7vsd-tcp_thread_message_que.obj `if test -f 'tcp_thread_message_que.cpp'; then $(CYGPATH_W) 'tcp_thread_message_que.cpp'; else $(CYGPATH_W) '$(srcdir)/tcp_thread_message_que.cpp'; fi`
 
 l7vsd-udp_data.o: udp_data.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsd-udp_data.o -MD -MP -MF "$(DEPDIR)/l7vsd-udp_data.Tpo" -c -o l7vsd-udp_data.o `test -f 'udp_data.cpp' || echo '$(srcdir)/'`udp_data.cpp; \

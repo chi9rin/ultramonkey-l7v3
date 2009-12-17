@@ -197,7 +197,6 @@ l7vsd_SOURCES	=	\
 			../include/tcp_socket_option.h \
 			../include/tcp_realserver_connetc_socket_list.h \
 			../include/tcp_thread_message.h \
-			../include/tcp_thread_message_que.h \
 			../include/tcp_session.h \
 			../include/udp_data.h \
 			../include/udp_request.h \
@@ -221,7 +220,6 @@ l7vsd_SOURCES	=	\
 			tcp_socket.cpp \
 			tcp_ssl_socket.cpp \
 			tcp_realserver_connect_socket_list.cpp \
-			tcp_thread_message_que.cpp \
 			udp_data.cpp \
 			udp_request_thread_control.cpp \
 			udp_request.cpp \
