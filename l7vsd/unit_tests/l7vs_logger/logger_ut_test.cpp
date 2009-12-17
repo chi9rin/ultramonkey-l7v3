@@ -348,11 +348,59 @@ void check_max_file_size_test(){
     } catch ( const std::logic_error& ex ) {
             BOOST_CHECK_EQUAL(ex.what(), "Not Exist Log MaxFileSize Setting.");
     }
-
-
-
     BOOST_MESSAGE( "----- check_max_file_size test end -----" );
 }
+
+void check_rotate_timing_test(){
+    
+    BOOST_MESSAGE( "----- check_rotate_timing test start -----" );
+
+    l7vs::LOG_ROTATION_TIMING_TAG res;
+
+    // unit_test [1] check_rotate_timing test case "year"
+    std::cout << "[1] check_rotate_timing test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_rotate_timing("year");
+    BOOST_CHECK_EQUAL( l7vs::LOG_TIM_YEAR , res );
+
+    // unit_test [2] check_rotate_timing test case "month"
+    std::cout << "[2] check_rotate_timing test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_rotate_timing("month");
+    BOOST_CHECK_EQUAL( l7vs::LOG_TIM_MONTH , res );
+
+    // unit_test [3] check_rotate_timing test case "week"
+    std::cout << "[3] check_rotate_timing test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_rotate_timing("week");
+    BOOST_CHECK_EQUAL( l7vs::LOG_TIM_WEEK , res );
+
+    // unit_test [4] check_rotate_timing test case "date"
+    std::cout << "[4] check_rotate_timing test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_rotate_timing("date");
+    BOOST_CHECK_EQUAL( l7vs::LOG_TIM_DATE , res );
+
+    // unit_test [5] check_rotate_timing test case "hour"
+    std::cout << "[5] check_rotate_timing test" << std::endl;
+    res  =  l7vs::logger_logrotate_utility::check_rotate_timing("hour");
+    BOOST_CHECK_EQUAL( l7vs::LOG_TIM_HOUR , res );
+
+    // unit_test [6] check_rotate_timing test case "ABC"
+    std::cout << "[6] check_rotate_timing test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_rotate_timing( "ABC" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Invalid Log RotationTiming Setting.");
+    }
+
+    // unit_test [7] check_rotate_timing test case ""
+    std::cout << "[7] check_rotate_timing test" << std::endl;
+    try {
+        l7vs::logger_logrotate_utility::check_rotate_timing( "" );
+    } catch ( const std::logic_error& ex ) {
+            BOOST_CHECK_EQUAL(ex.what(), "Not Exist Log RotaionTiming Setting.");
+    }
+    BOOST_MESSAGE( "----- check_rotate_timing test end -----" );
+}
+
+
 
 test_suite* init_unit_test_suite( int argc, char* argv[] ){
 
@@ -373,7 +421,9 @@ test_suite* init_unit_test_suite( int argc, char* argv[] ){
 
 //    static LOG_ROTATION_TIMING_TAG check_rotate_timing(
 //                                const std::string &rotation_timing);
+   test->add( BOOST_TEST_CASE( &check_rotate_timing_test ) );
  
+
 
 //    static std::string check_rotate_timing_value(
 //                                const std::string rotation_timing_value_key,
