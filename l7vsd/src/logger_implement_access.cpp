@@ -142,8 +142,7 @@ bool l7vs::logger_implement_access::checkRotateParameterComp(
          itr_comp_in != rotatedata.end()  ;
          itr_comp_in++ ){
         
-        accesslog_rotate_map_type_iterator itr_find
-                     = aclog_args.find( itr_comp_in->first );
+        itr_find = aclog_args.find( itr_comp_in->first );
 
         if ( itr_find != aclog_args.end() ) {
         
