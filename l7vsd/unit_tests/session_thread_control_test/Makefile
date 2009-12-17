@@ -5,20 +5,18 @@
 #
 TARGET		= stc_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -D__SNMPBRIDGE_H__ -DMAX_BUFFER_SIZE=65535
 INCLUDES	=	\
 				-I./ \
-				-I../../logger \
-				-I../../parameter \
 				-I../../src \
 				-I../../include \
-				-I../../snmpagent
+				-I/usr/include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt \
 				-lboost_serialization-gcc41-mt
 
-LDFLAGS		= -lrt -ldl
+LDFLAGS		= -lrt -ldl -lssl
 
 SRCS		=	\
 			stub.cpp \
