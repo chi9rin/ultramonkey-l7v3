@@ -199,7 +199,7 @@ ssl_flag			= 1
 [replication]
 #ip_addr = "192.168.0.254"
 #service_name = "40000"
-#nic = "eth0"
+#recv_ip_addr = "192.168.0.253"
 #interval = 1000
 #compulsorily_interval = 40
 
