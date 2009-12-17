@@ -25,8 +25,9 @@ class    test_thread{
     boost::thread                acc_thread;
     bool                        stop_flag;
     boost::mutex                flag_mutex;
+    unsigned int                call_cnt;
     void    run(){
-        for( unsigned int i = 0; i < UINT_MAX; ++i ){
+        for( unsigned int i = 0; i < call_cnt; ++i ){
             {
                 boost::mutex::scoped_lock( flag_mutex );
                 if( stop_flag )break;
@@ -36,7 +37,7 @@ class    test_thread{
         }
     }
 public:
-    test_thread(){}
+    test_thread(unsigned int set_call_cnt = UINT_MAX){ call_cnt = set_call_cnt; }
     ~test_thread(){ stop(); acc_thread.join(); }
     boost::thread::id    get_id(){ return acc_thread.get_id(); }
     void    start( boost::function<void()>    in_func ){
@@ -202,7 +203,6 @@ void    stc_method_test2(){
     stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
-
 // unit_test[12]  上りスレッドと下りスレッドを開始し、順番に停止する(sessionループは自然に終了)
     std::cout << counter++ << std::endl;
     BOOST_MESSAGE( "----12" );
@@ -308,22 +308,8 @@ std::cout << "join 1" << std::endl;
     std::cout << counter++ << std::endl;
     BOOST_MESSAGE( "-----21" );
     std::cout << "downthread id : " << stc->get_downthread_id() << std::endl;
-
-// unit_test[22]  joinを何回も連続で呼ぶ
-    std::cout << counter++ << std::endl;
-    BOOST_MESSAGE( "-----22" );
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-    stc->join();
-
 }
+
 
 //test case3
 void    stc_method_test3(){
@@ -490,7 +476,7 @@ void    stc_method_test6(){
     stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
-    test_thread    thread1;
+    test_thread    thread1(1);
 
 // unit_test[29]  上りスレッド停止と同時にjoinを呼ぶ
     std::cout << counter++ << std::endl;
@@ -538,7 +524,7 @@ void    stc_method_test7(){
     stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
-    test_thread    thread1;
+    test_thread    thread1(1);
 
 // unit_test[30]  下りスレッド停止と同時にjoinを呼ぶ
     std::cout << counter++ << std::endl;
@@ -584,7 +570,7 @@ void    stc_method_test8(){
     stc_type        stc( new l7vs::session_thread_control( sess,
                          vsnic_cpumask, rsnic_cpumask, 0 ) );
 
-    test_thread    thread1;
+    test_thread    thread1(1);
 
 // unit_test[31]  上下スレッド停止と同時にjoinを呼ぶ
     std::cout << counter++ << std::endl;
@@ -738,15 +724,15 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     test_suite* ts = BOOST_TEST_SUITE( "stc_test" );
 
     // add test case to test suite
-//    ts->add( BOOST_TEST_CASE( &stc_method_test1 ) ); 
+    ts->add( BOOST_TEST_CASE( &stc_method_test1 ) ); 
     ts->add( BOOST_TEST_CASE( &stc_method_test2 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test3 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test4 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test5 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test6 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test7 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test8 ) );
-//    ts->add( BOOST_TEST_CASE( &stc_method_test9 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test3 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test4 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test5 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test6 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test7 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test8 ) );
+    ts->add( BOOST_TEST_CASE( &stc_method_test9 ) );
 
     framework::master_test_suite().add( ts );
 

@@ -3,7 +3,7 @@
 #include "l7vsd.h"
 #include "data_buff_base.h"
 #include "tcp_thread_message.h"
-#include "tcp_thread_message_que.h"
+//#include "tcp_thread_message_que.h"
 #include "tcp_data.h"
 #include "tcp_socket.h"
 #include "tcp_session.h"
@@ -54,6 +54,7 @@ void    l7vs::schedule_module_control::unload_module( schedule_module_base* modu
 
 
 // parameter stub
+
 l7vs::Parameter::Parameter(){}
 
 l7vs::Parameter::~Parameter(){}
@@ -62,7 +63,8 @@ bool    l7vs::Parameter::read_file( const PARAMETER_COMPONENT_TAG in,const std::
 
 int        l7vs::Parameter::get_int(    const PARAMETER_COMPONENT_TAG in_tag,
                                     const std::string& in_str,
-                                    error_code& err ){
+                                    error_code& err,
+					const std::string& file_name){
     int    retval = 0;
     if( debugg_flug_struct::getInstance().param_exist_flag() ){
         retval = SESSION_POOL_NUM_PARAM;
@@ -80,7 +82,7 @@ bool l7vs::Parameter::init( const PARAMETER_COMPONENT_TAG in_tag, const std::str
 
 std::string        l7vs::Parameter::get_string(const PARAMETER_COMPONENT_TAG in_tag,
                                             const std::string& in_str,
-                                            error_code& err){
+                                            error_code& err,const std::string& file_name){
     return "";
 }
 
@@ -88,7 +90,7 @@ std::string        l7vs::Parameter::get_string(const PARAMETER_COMPONENT_TAG in_
 void l7vs::Parameter::get_multistring(const PARAMETER_COMPONENT_TAG,
                          const std::string&,
                          std::vector<std::string>&,
-                         error_code& ){
+                         error_code&,const std::string& file_name ){
 
 
 }
@@ -220,14 +222,14 @@ bool    l7vs::tcp_realserver_connect_socket_list::empty(){
 //l7vs::tcp_thread_message_que::tcp_thread_message_que(){}
 //l7vs::tcp_thread_message_que::~tcp_thread_message_que(){}
 
-void    l7vs::tcp_thread_message_que::push(tcp_thread_message_ptr message){}
-l7vs::tcp_thread_message_que::tcp_thread_message_ptr    l7vs::tcp_thread_message_que::front(){
-    return message_que.front();
-}
-bool    l7vs::tcp_thread_message_que::empty(){
-    return true;
-}
-void     l7vs::tcp_thread_message_que::clear(){}
+//void    l7vs::tcp_thread_message_que::push(tcp_thread_message_ptr message){}
+//l7vs::tcp_thread_message_que::tcp_thread_message_ptr    l7vs::tcp_thread_message_que::front(){
+//    return message_que.front();
+//}
+//bool    l7vs::tcp_thread_message_que::empty(){
+//    return true;
+//}
+//void     l7vs::tcp_thread_message_que::clear(){}
 
 /*
 l7vs::tcp_data::tcp_data(){}
@@ -318,6 +320,16 @@ ssl_socket& l7vs::tcp_session::get_client_ssl_socket()
 bool    l7vs::tcp_session::is_thread_wait(void){
     return true;
 }
+
+//! handshake timer handler
+void l7vs::tcp_session::handle_ssl_handshake_timer(const boost::system::error_code& error){};
+//! reset ssl object for reuse
+bool l7vs::tcp_session::ssl_clear_keep_cache(SSL *clear_ssl){
+    return true;
+}
+std::string l7vs::tcp_session::endpoint_to_string( const boost::asio::ip::tcp::endpoint& target_endpoint){
+    return "";
+}; 
 
 void    l7vs::tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){
     switch( message ){
