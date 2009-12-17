@@ -36,6 +36,7 @@
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/foreach.hpp>
 #include "appender_property.h"
+#include "logger.h"
 #include "logger_logrotate_utility.h"
 
 #define LOGGER_ACCESS_PROCESS_ID "AccessLog"
@@ -108,11 +109,13 @@ public:
         catch (const std::exception& ex) {
             std::ostringstream oss;
             oss << "Logging Error (Access Log) : " << ex.what();
-            logger_logrotate_utility::loglotation_utility_logic_error(
-                                                                   118,
-                                                                   oss.str(),
-                                                                   __FILE__,
-                                                                   __LINE__ );
+            Logger::putLogError(
+                          LOG_CAT_L7VSD_SESSION,
+                          3,
+                          oss.str(),
+                          __FILE__,
+                          __LINE__ );
+
         }
     }
 
