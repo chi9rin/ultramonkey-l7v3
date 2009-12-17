@@ -778,16 +778,16 @@ namespace l7vs{
         } else {
             client_ssl_socket.accept();
         }
-        endpoint cl_end;
+        
         {
             rd_scoped_lock scoped_lock(exit_flag_update_mutex);
             is_exit = exit_flag;
         }
         if(likely( !is_exit )){
             if (!ssl_flag) {
-                cl_end = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
+                client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
             } else {
-                cl_end = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+                client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
             }
             if(unlikely( ec )){
                 //client endpoint get Error!
@@ -892,7 +892,7 @@ namespace l7vs{
             is_exit = exit_flag;
         }
         if(likely(!is_exit)){
-            module_event = protocol_module->handle_session_initialize(up_thread_id,down_thread_id,cl_end,dumy_end);
+            module_event = protocol_module->handle_session_initialize(up_thread_id,down_thread_id,client_endpoint,dumy_end);
             func_type = up_thread_module_event_map.find(module_event);
             if(unlikely( func_type == up_thread_module_event_map.end() )){
                 //Error unknown protocol_module_base::EVENT_TAG return
@@ -1251,6 +1251,19 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
+    }
+
+    //! endpoint data to string infomation
+    //! @param[in]        endpoint is target endpoint object
+    std::string tcp_session::endpoint_to_string(
+                const boost::asio::ip::tcp::endpoint& target_endpoint){
+        std::stringstream ret;
+	if( target_endpoint.address().is_v6() ){
+            ret << "[" << target_endpoint.address().to_string() << "]:" << target_endpoint.port();
+        }else{
+            ret << target_endpoint.address().to_string() << ":" << target_endpoint.port();
+        }
+        return ret.str();
     }
 
     //! up thread accept client side
@@ -1733,6 +1746,22 @@ namespace l7vs{
             boost::system::error_code ec;
             bool bres = new_socket->connect(server_endpoint,ec);
             if(likely( bres )){
+                {
+                    rd_scoped_lock scoped_lock( access_log_flag_mutex );
+                    if( access_log_flag && access_logger != NULL ){
+                        boost::asio::ip::tcp::endpoint server_side_endpoint = 
+                            new_socket->get_socket().local_endpoint(ec);
+                        if( !ec ){
+                            std::string reserv_msg("");
+                            access_logger->putLog(
+                                endpoint_to_string( virtualservice_endpoint ),
+                                endpoint_to_string( client_endpoint ),
+                                endpoint_to_string( server_side_endpoint ),
+                                endpoint_to_string( server_endpoint ), 
+                                reserv_msg);
+                        }
+                    }
+                }
                 parent_service.connection_active(server_endpoint);
                 if(unlikely( !new_socket->set_non_blocking_mode(ec) )){
                     // socket set nonblocking mode error
