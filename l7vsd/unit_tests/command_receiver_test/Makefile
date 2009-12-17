@@ -6,9 +6,10 @@
 TARGET		= command_receiver_ut
 CPP			= g++
 CPPFLAGS	= -Wall -O0 -g -Werror -pthread -D PARAMETER_FILE='"./l7vs.cf"'
-INCLUDES	=	-I../../logger \
-				-I../../parameter \
-				-I../../include
+INCLUDES        =       -I../../include
+#INCLUDES	=	-I../../logger \
+#				-I../../parameter \
+#				-I../../include
 LIBS		=	-lboost_system-gcc41-mt \
 				-lboost_thread-gcc41-mt \
 				-lboost_unit_test_framework-gcc41-mt \
@@ -27,14 +28,20 @@ SRCS		=	\
 			command_receiver_test.cpp
 
 PARAMETER_SRCS	=	\
-			../../parameter/parameter.cpp \
-			../../parameter/parameter_impl.cpp
+                        ../../src/parameter.cpp \
+                        ../../src/parameter_impl.cpp
+#			../../parameter/parameter.cpp \
+#			../../parameter/parameter_impl.cpp
 
 LOGGER_SRCS	=	\
-			../../logger/logger.cpp \
-			../../logger/logger_impl.cpp \
-			../../logger/strict_time_based_rolling_policy.cpp \
-			../../logger/time_and_size_based_rolling_policy.cpp
+                        ../../src/logger.cpp \
+                        ../../src/logger_impl.cpp \
+                        ../../src/strict_time_based_rolling_policy.cpp \
+                        ../../src/time_and_size_based_rolling_policy.cpp
+#			../../logger/logger.cpp \
+#			../../logger/logger_impl.cpp \
+#			../../logger/strict_time_based_rolling_policy.cpp \
+#			../../logger/time_and_size_based_rolling_policy.cpp
 
 .SUFFIX:	.cpp .o
 .cpp.o:
