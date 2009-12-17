@@ -2819,6 +2819,35 @@ sub check_ftp {
 
     my $ip_port = get_ip_port($r, $v->{checkport});
 
+    if (is_ip6($r->{server}{ip}) ){
+        ## IPv6 route
+        ## use 'lftp' Command
+        ## lftp 
+        ##   -e ' set net:max-retries 1;
+        ##        set net:reconnect-interval-multiplier 1;
+        ##        set cmd:fail-exit true;
+        ##        set net:reconnect-interval-base 1;
+        ##        ls;ls ;exit'
+        ##   -u user,passwd ipv6addr >/dev/null 2>&1
+
+        my $ftp_command     = "lftp ";
+        my $ftp_enviroment1 = "-e \"set net:max-retries 2;";
+        my $ftp_enviroment2 = "set net:reconnect-interval-multiplier 1;";
+        my $ftp_enviroment3 = "set cmd:fail-exit true;";
+        my $ftp_enviroment4 = "set net:reconnect-interval-base $v->{negotiatetimeout};";
+        my $ftp_enviroment5 = "ls;ls;exit\" ";
+        my $ftp_parameter   = "-u $v->{login},$v->{passwd} $ip_port >/dev/null 2>&1";
+        $ftp_command .= $ftp_enviroment1 . $ftp_enviroment2. $ftp_enviroment3. $ftp_enviroment4. $ftp_enviroment5. $ftp_parameter;
+
+## print "ftpCommand:". $ftp_command;
+        if( system_wrapper( $ftp_command )) {
+            ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+        return $SERVICE_UP ;
+    }
+    ## IPv4 route
+
     ld_debug(2, "Checking ftp server=$ip_port");
     my $debug_flag = $DEBUG_LEVEL ? 1 : 0;
 
