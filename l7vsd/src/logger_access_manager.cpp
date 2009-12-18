@@ -26,14 +26,22 @@
 #include "logger_logrotate_utility.h"
 #include "parameter.h"
 
-
+/*!
+ * initialze function.
+ *
+ * @retrun  current instance.
+ */
 l7vs::logger_access_manager &l7vs::logger_access_manager::getInstance()
 {
     static logger_access_manager log_manager;
     return( log_manager );
 }
 
-
+/*!
+ * constructor initialize member variables.
+ *
+ * @param   access log file name
+ */
 l7vs::logger_access_manager::logger_access_manager() 
                 : rotate_default_load_flag(false) , 
                 rotate_default_verbose_displayed_contents("") 
@@ -44,6 +52,9 @@ l7vs::logger_access_manager::logger_access_manager()
 
 }
 
+/*!
+ * destructor.
+ */
 l7vs::logger_access_manager::~logger_access_manager() 
 {
 
@@ -52,7 +63,14 @@ l7vs::logger_access_manager::~logger_access_manager()
 
 }
 
-
+/*!
+ * find or create logger_implement_access class function.
+ *
+ * @param   access log file name
+ * @param   logrotation designation contents
+ * @param   error_code
+ * @retrun  void.
+ */
 l7vs::logger_implement_access *l7vs::logger_access_manager::find_logger_implement_access(
     const std::string &access_log_filename, 
     std::map< std::string , std::string > rotatedata,
@@ -100,6 +118,13 @@ l7vs::logger_implement_access *l7vs::logger_access_manager::find_logger_implemen
 
 }
 
+/*!
+ * erase logger_implement_access class function.
+ *
+ * @param   access log file name
+ * @param   error_code
+ * @retrun  void.
+ */
 void l7vs::logger_access_manager::erase_logger_implement_access(
     const std::string &access_log_filename, 
     l7vs::error_code& err)
@@ -126,6 +151,12 @@ void l7vs::logger_access_manager::erase_logger_implement_access(
   
 }
 
+/*!
+ * log rotate parameter check function.
+ *
+ * @param   logrotation designation contents
+ * @retrun  false faild.
+ */
 bool l7vs::logger_access_manager::access_log_logrotate_parameter_check(
     const std::map<std::string,std::string>& rotatedata)
 {
@@ -135,7 +166,11 @@ bool l7vs::logger_access_manager::access_log_logrotate_parameter_check(
     return( logger_logrotate_utility::acccess_log_LogrotateParamCheck( rotatedata_cpy , access_log_property ) );
 }
 
-
+/*!
+ * load logrotation info from l7vs.cf.
+ *
+ * @retrun  void.
+ */
 void l7vs::logger_access_manager::access_log_rotate_loadConf()
 {
     using namespace log4cxx;
@@ -164,7 +199,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
         logger_logrotate_utility::loglotation_utility_logic_error( 110, "Not Exist Log Rotation Setting.", __FILE__, __LINE__ );
     }
 
-    rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_TYPE + rotation_type;
+    rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_TYPE + " " + rotation_type;
     
     access_log_default_data[ ACCESS_LOG_ROTATE_TYPE ] = rotation_type;
     
@@ -175,7 +210,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
         logger_logrotate_utility::loglotation_utility_logic_error( 111, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__ );
     }
 
-    rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_MAX_BACKUP_INDEX + max_backup_index;
+    rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_MAX_BACKUP_INDEX + " " + max_backup_index;
 
     access_log_default_data[ ACCESS_LOG_ROTATE_MAX_BACKUP_INDEX ] = max_backup_index;
     
@@ -188,7 +223,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
             logger_logrotate_utility::loglotation_utility_logic_error( 112, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
         }
 
-        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_MAX_FILESIZE + max_file_size;
+        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_MAX_FILESIZE + " " + max_file_size;
         
         access_log_default_data[ ACCESS_LOG_ROTATE_MAX_FILESIZE ] = max_file_size;
         
@@ -201,7 +236,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
             logger_logrotate_utility::loglotation_utility_logic_error( 113, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__ );
         }
 
-        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_ROTATION_TIMING + rotation_timing;
+        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_ROTATION_TIMING + " " + rotation_timing;
         
         access_log_default_data[ ACCESS_LOG_ROTATE_ROTATION_TIMING ] = rotation_timing;
 
@@ -214,7 +249,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
             logger_logrotate_utility::loglotation_utility_logic_error( 114, ss.str(), __FILE__, __LINE__ );
         }
 
-        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATION_TIMING_VALUE + rotation_timing_value_key;
+        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATION_TIMING_VALUE + " " + rotation_timing_value_key;
         
         access_log_default_data[ ACCESS_LOG_ROTATION_TIMING_VALUE ] = rotation_timing_value_key;
         
@@ -227,7 +262,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
             logger_logrotate_utility::loglotation_utility_logic_error( 115, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__ );
         }
 
-        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_MAX_FILESIZE + max_file_size;
+        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_MAX_FILESIZE + " " + max_file_size;
         
         access_log_default_data[ ACCESS_LOG_ROTATE_MAX_FILESIZE ] = max_file_size;
         
@@ -238,7 +273,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
             logger_logrotate_utility::loglotation_utility_logic_error( 116, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__ );
         }
 
-        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_ROTATION_TIMING + rotation_timing;
+        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_ROTATION_TIMING + " " + rotation_timing;
 
         access_log_default_data[ ACCESS_LOG_ROTATE_ROTATION_TIMING ] = rotation_timing;
         
@@ -251,7 +286,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
             logger_logrotate_utility::loglotation_utility_logic_error( 117, ss.str(), __FILE__, __LINE__ );
         }
 
-        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATION_TIMING_VALUE + rotation_timing_value_key;
+        rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATION_TIMING_VALUE + " " + rotation_timing_value_key;
         
         access_log_default_data[ ACCESS_LOG_ROTATION_TIMING_VALUE ] = rotation_timing_value_key;
         
@@ -262,6 +297,11 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
     
 }
 
+/*!
+ * member variable data getter.
+ *
+ * @retrun  default rotate info str
+ */
 std::string l7vs::logger_access_manager::get_rotate_default_verbose_displayed_contents()
 {
     return( rotate_default_verbose_displayed_contents );
