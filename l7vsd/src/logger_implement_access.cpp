@@ -42,7 +42,11 @@
 #include "logger_logrotate_utility.h"
 
 
-
+/*!
+ * constructor initialize member variables.
+ *
+ * @param   access log file name
+ */
 l7vs::logger_implement_access::logger_implement_access(
                             const std::string &access_log_file_name)
                                                  :access_cnt         ( 1     ),
@@ -53,7 +57,14 @@ l7vs::logger_implement_access::logger_implement_access(
     aclog_args.clear();
 }
 
-
+/*!
+ * initialze function.
+ *
+ * @param   default logrotation info use flag
+ * @param   default logrotation info
+ * @param   logrotation designation contents
+ * @retrun  false failed
+ */
 bool l7vs::logger_implement_access::init(
               const bool                       rotate_default_flag,
               const appender_property&         access_log_default_property,
@@ -79,7 +90,13 @@ bool l7vs::logger_implement_access::init(
 
 }
 
-
+/*!
+ * Logger setting function.
+ *
+ * @param   default logrotation info use flag
+ * @param   logrotation designation contents
+ * @retrun  false failed
+ */
 bool l7vs::logger_implement_access::setAcLoggerConf(
         const appender_property&         access_log_default_property,
               accesslog_rotate_map_type& rotatedata)
@@ -94,6 +111,29 @@ bool l7vs::logger_implement_access::setAcLoggerConf(
           logger_logrotate_utility::acccess_log_LogrotateParamCheck(
                                                         rotatedata,
                                                         access_log_property );
+    } else {
+        
+        access_log_property.rotation_key                    
+            = access_log_default_property.rotation_key;
+        access_log_property.rotation_value                  
+            = access_log_default_property.rotation_value;
+        access_log_property.max_backup_index_key            
+            = access_log_default_property.max_backup_index_key;
+        access_log_property.max_backup_index_value          
+            = access_log_default_property.max_backup_index_value;
+        access_log_property.max_file_size_key               
+            = access_log_default_property.max_file_size_key;
+        access_log_property.max_file_size_value             
+            = access_log_default_property.max_file_size_value;
+        access_log_property.rotation_timing_key             
+            = access_log_default_property.rotation_timing_key;
+        access_log_property.rotation_timing_value           
+            = access_log_default_property.rotation_timing_value;
+        access_log_property.rotation_timing_value_key       
+            = access_log_default_property.rotation_timing_value_key;
+        access_log_property.rotation_timing_value_value     
+            = access_log_default_property.rotation_timing_value_value;
+        
     }
 
     if ( lotate_check_flag == true ) {
@@ -107,30 +147,53 @@ bool l7vs::logger_implement_access::setAcLoggerConf(
 
 }
 
-
+/*!
+ * increase reffernce count.
+ *
+ * @retrun void
+ */
 void l7vs::logger_implement_access::addRef()
 {
     access_cnt++;
 }
 
-
+/*!
+ * decrease reffernce count.
+ *
+ * @retrun void
+ */
 void l7vs::logger_implement_access::releaseRef()
 {
     access_cnt--;
 }
 
-
+/*!
+ * decrease reffernce count.
+ *
+ * @param inequal check object
+ * @return check result
+ */
 bool l7vs::logger_implement_access::operator<=(const int access_num )
 {
     return( access_cnt <= access_num );
 }
 
+/*!
+ * member variable data getter.
+ *
+ * @retrun member variable data
+ */
 std::string l7vs::logger_implement_access::getAcLogFileName()
 {
     return( access_log_file_name_ ); 
 }
 
-
+/*!
+ * logrotate data compare.
+ *
+ * @param check object
+ * @retrun true logrotate data equal
+ */
 bool l7vs::logger_implement_access::checkRotateParameterComp(
                                        accesslog_rotate_map_type &rotatedata)
 {
@@ -163,6 +226,11 @@ bool l7vs::logger_implement_access::checkRotateParameterComp(
     return(comp_flg);
 }
 
+/*!
+ * member variable data getter.
+ *
+ * @retrun member variable data
+ */
 bool l7vs::logger_implement_access::is_rotate_default_flag()
 {
     return(rotate_default_flag);
