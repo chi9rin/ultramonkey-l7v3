@@ -53,31 +53,31 @@ override();
 }
 ####### IPv6
 {
-    my $host = { server => { ip => '[::]', port => undef } };
+    my $host = { server => { ip => '::', port => undef } };
     my $checkport = undef;
     my $got = get_ip_port($host, $checkport);
     is $got, '', 'get_ip_port - host port and checkport is undef';
 }
 {
-    my $host = { server => { ip => '[::1]', port => 80 } };
+    my $host = { server => { ip => '::1', port => 80 } };
     my $checkport = undef;
     my $got = get_ip_port($host, $checkport);
     is $got, '[::1]:80', 'get_ip_port - get host ip6 and port';
 }
 {
-    my $host = { server => { ip => '[::1]', port => 80 } };
+    my $host = { server => { ip => '::1', port => 80 } };
     my $checkport = 8080;
     my $got = get_ip_port($host, $checkport);
     is $got, '[::1]:8080', 'get_ip_port - get host ip6 and checkport';
 }
 {
-    my $host = { server => { ip => '[::1]', port => 0 } };
+    my $host = { server => { ip => '::1', port => 0 } };
     my $checkport = undef;
     my $got = get_ip_port($host, $checkport);
-    is $got, '127.0.0.1:0', 'get_ip_port - get host ip6 and port zero';
+    is $got, '[::1]:0', 'get_ip_port - get host ip6 and port zero';
 }
 {
-    my $host = { server => { ip => '[fe80::200:1aff:fe19:5534%eth0]', port => 0 } };
+    my $host = { server => { ip => 'fe80::200:1aff:fe19:5534%eth0', port => 0 } };
     my $checkport = undef;
     my $got = get_ip_port($host, $checkport);
     is $got, '[fe80::200:1aff:fe19:5534%eth0]:0', 'get_ip_port - get host ip6(LinkLocal) and port zero';
