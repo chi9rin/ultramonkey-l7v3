@@ -159,7 +159,7 @@ sharedstatedir = @sharedstatedir@
 snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = init.d src module modtester
+SUBDIRS = init.d src module
 all: all-recursive
 
 .SUFFIXES:

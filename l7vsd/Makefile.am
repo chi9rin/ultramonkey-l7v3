@@ -1,1 +1,1 @@
-SUBDIRS = init.d src module modtester
+SUBDIRS = init.d src module
