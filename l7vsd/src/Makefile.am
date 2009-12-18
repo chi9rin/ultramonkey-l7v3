@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS	= foreign
 
-noinst_LIBRARIES =	libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a libsslproxy_parameter.a \
-			libl7vsd_logger.a libl7vsadm_logger.a libsnmpagent_logger.a libsslproxy_logger.a 
+noinst_LIBRARIES =	libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a \
+			libl7vsd_logger.a libl7vsadm_logger.a libsnmpagent_logger.a 
 
 PARAMETER_FILE		= @l7vs_config@
 
@@ -46,20 +46,6 @@ libsnmpagent_parameter_a_CPPFLAGS	= \
 				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 				-DVERSION=\"$(VERSION)\" \
 				-DLOGGER_PROCESS_SNM
-
-libsslproxy_parameter_a_SOURCES	= \
-				../include/parameter_enum.h \
-				../include/parameter.h \
-				../include/parameter_impl.h \
-				parameter.cpp \
-				parameter_impl.cpp
-
-libsslproxy_parameter_a_CPPFLAGS	= \
-				-O2 -g -Wall -Werror \
-				-I../include \
-				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
-				-DVERSION=\"$(VERSION)\" \
-				-DLOGGER_PROCESS_SSL
 
 libl7vsd_logger_a_SOURCES	= \
 			../include/logger_enum.h \
@@ -132,25 +118,6 @@ libsnmpagent_logger_a_CPPFLAGS	= \
 			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
 			-DLOGGER_PROCESS_SNM \
 			-DVERSION=\"$(VERSION)\"
-
-libsslproxy_logger_a_SOURCES	= \
-			../include/logger_enum.h \
-			../include/logger_rotation_enum.h \
-			../include/logger.h \
-			../include/logger_impl.h \
-			../include/appender_property.h \
-			logger.cpp \
-			logger_impl.cpp \
-			../include/strict_time_based_rolling_policy.h \
-			strict_time_based_rolling_policy.cpp \
-			../include/time_and_size_based_rolling_policy.h \
-			time_and_size_based_rolling_policy.cpp
-
-libsslproxy_logger_a_CPPFLAGS	= \
-			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
-			-DLOGGER_PROCESS_SSL \
-			-DVERSION=\"$(VERSION)\"
-
 
 sbin_PROGRAMS		= l7vsd l7vsadm
 PKGLIBDIR		= @l7vs_moddir@
