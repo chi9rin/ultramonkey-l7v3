@@ -36,7 +36,8 @@
 
 #include "utility.h"
 
-//#include "logger_implement_access.h"
+#include "logger_access_manager.h"
+
 
 //static int new_session_cb(SSL *ssl, SSL_SESSION *session);
 //static SSL_SESSION *get_session_cb(SSL *ssl, unsigned char *ssid, int ssid_len, int *ref);
@@ -427,6 +428,31 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         return;
     }
 
+    // access log flag and access log file name setting contents check.
+    if( element.access_log_flag == 1 && element.access_log_file_name == "" ) {
+        boost::format formatter("access log file name not set error");
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
+        err.setter( true, "access log file name not set error" );
+        return;
+    }
+
+    logger_implement_access *access_log_instance = NULL;
+    // access log instance create.
+    if( element.access_log_file_name != "" ) {
+        access_log_instance 
+                        = logger_access_manager::getInstance().find_logger_implement_access( 
+                                                                    element.access_log_file_name, 
+                                                                    element.access_log_rotate_arguments, 
+                                                                    err );
+        if( access_log_instance == NULL ) {
+            boost::format formatter("access logger Instance acquisition err = %s, err.message = %s ");
+            formatter % ( err ? "true" : "false") % err.get_message();
+            Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
+            err.setter( true, "access log class instance create failed" );
+            return;
+        }
+    }
+
     //get cpumask
     boost::asio::ip::address    address    = element.tcp_accept_endpoint.address();
 #ifdef    SCHED_SETAFFINITY
@@ -448,17 +474,20 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         err.setter( true, acceptor_err.message() );
         return;
     }
+    if( likely(address.is_v6()) ) {
+        boost::asio::ip::v6_only option(true);
+        acceptor_.set_option( option, acceptor_err );
+        if( acceptor_err ) {
+            Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, acceptor_err.message(), __FILE__, __LINE__ );
+            err.setter( true, acceptor_err.message() );
+            return;
+        }
+    }
     acceptor_.bind( element.tcp_accept_endpoint, acceptor_err );
     if( acceptor_err ){
         Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 7, acceptor_err.message(), __FILE__, __LINE__ );
         err.setter( true, acceptor_err.message() );
         return;
-    }
-
-    boost::asio::ip::address address_check = element.tcp_accept_endpoint.address();
-    if( likely(address_check.is_v6()) ) {
-        boost::asio::ip::v6_only option(true);
-        acceptor_.set_option(option);
     }
 
     //read replication data
@@ -559,6 +588,22 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                     element.tcp_accept_endpoint,
                     element.udp_recv_endpoint );
 
+    // access log flag set 
+    access_log_flag = false;
+    if ( element.access_log_flag == 1 ) {
+        access_log_flag = true;
+    }
+
+    // access log rotation infomation set.
+    if ( element.access_log_rotate_key_info == "" ) {
+       element.access_log_rotate_key_info = "none";
+       element.access_log_rotate_verbose_info = logger_access_manager::getInstance().get_rotate_default_verbose_displayed_contents(); 
+    } else {
+        element.access_log_rotate_verbose_info = element.access_log_rotate_key_info;
+    }
+    access_log_file_name = element.access_log_file_name;
+    access_log_rotate_arguments = element.access_log_rotate_arguments;
+
     // SSL setting
     ssl_virtualservice_mode_flag = false;
     ssl_file_name = element.ssl_file_name;
@@ -581,34 +626,6 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
         ssl_virtualservice_mode_flag = true;
     }
 
-    // access log flag set 
-    access_log_flag = false;
-    if ( element.access_log_flag == 1 ) {
-        access_log_flag = true;
-    }
-
-//    // @002 getInstance().find_LoggerAccess
-//    /* @002 add start
-    if ( element.access_log_rotate_key_info == "" ) {
-       element.access_log_rotate_key_info = "none";
-       element.access_log_rotate_verbose_info = "--ac-rotate-type size --ac-rotate-max-backup-index 5 --ac-rotate-max-filesize 10M";
-       //element.access_log_rotate_verbose_info = getInstance().get_rotate_default_verbose_displayed_contents(); 
-    } else {
-        element.access_log_rotate_verbose_info = element.access_log_rotate_key_info;
-    }
-    access_log_file_name = element.access_log_file_name;
-    access_log_rotate_arguments = element.access_log_rotate_arguments;
-        
-    //logger_implement_access *logger_access_instance = new logger_implement_access(access_log_file_name);
-
-    //if( logger_access_instance == NULL  ) {
-    //    boost::format formatter("access logger Instance acquisition error:%s");
-    //    formatter % ( err ? "true" : "false") % err.get_message();
-    //    Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, formatter.str(), __FILE__, __LINE__ );
-    //    err.setter( true, "access log class instance create failed" );
-    //    return;
-    //}
-//    */ @002 add end
 
     set_socket_option();
 
@@ -624,7 +641,7 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                                       sslcontext,
                                       is_session_cache_use,
                                       handshake_timeout,
-                                      NULL);
+                                      access_log_instance);
                 session_result_message    result    = sess->initialize();
                 if( result.flag == true ){
                     err.setter( result.flag, result.message );
@@ -783,8 +800,16 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 
     vsd.release_virtual_service( element );
 
-    // @002 getInstance().erase_LoggerAccess
-
+    // erase access log instance.
+    logger_access_manager::getInstance().erase_logger_implement_access( access_log_file_name, err );
+    if ( unlikely(err) ) {
+        boost::format    fmt( "access logger instance erase err:%s" );
+        fmt % err.get_message();
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                               fmt.str(),
+                               __FILE__, __LINE__ );
+    }
+    
     err.setter( false, "" );
 
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -793,6 +818,7 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
         formatter % ( err ? "true" : "false") % err.get_message();
         Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 77, formatter.str(), __FILE__, __LINE__ );
     }
+
 }
 
 /*!
@@ -962,12 +988,20 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         active_sessions.do_all( boost::bind( &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag ) );
     }
 
+    // access log flag ON and access log filename not set.
+    if ( elem.access_log_flag == 1 && element.access_log_file_name == "" ) {
+        //ERROR case
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 10, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+        err.setter( true, "access log flag change err." );
+        return;
+    }
+
     // access log flag check and send access log output ON or OFF message to tcp_session
     element.access_log_flag = elem.access_log_flag;
-    if (elem.access_log_flag==1 || access_log_flag==false ) {
+    if (elem.access_log_flag==1 && access_log_flag==false ) {
         active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
         access_log_flag = true;
-    } else if ( elem.access_log_flag==0 || access_log_flag==true ) {
+    } else if ( elem.access_log_flag==0 && access_log_flag==true ) {
         active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
         access_log_flag = false;
     }
@@ -1568,35 +1602,40 @@ void l7vs::virtualservice_tcp::set_socket_option(){
 
 }
 
-/*!
- * get private key file password (for callback function)
- *
- * @return password string
- */
-std::string    l7vs::virtualservice_tcp::get_ssl_password()
+//!
+//! get private key file password (for callback function)
+//! @return password string
+std::string l7vs::virtualservice_tcp::get_ssl_password()
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "in_function : td::string    l7vs::virtualservice_tcp::get_ssl_password()";
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
+        buf << "in_function : ";
+        buf << "std::string l7vs::virtualservice_tcp::get_ssl_password()";
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
 
     // Get password from file.
     std::string retstr = "";
-    FILE  *fp;
+    FILE *fp;
     char buf[MAX_SSL_PASSWD_SIZE + 3];
-    if ((fp = fopen((private_key_passwd_dir + private_key_passwd_file).c_str(), "r")) == NULL) {
-        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password file cannot open.", __FILE__, __LINE__ );
+    if ((fp = fopen((private_key_passwd_dir + private_key_passwd_file).c_str(),
+                    "r")) == NULL) {
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                             "Password file cannot open.", __FILE__, __LINE__ );
     } else {
         if (fgets(buf, MAX_SSL_PASSWD_SIZE + 3, fp) == NULL) {
-            Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password not found in file.", __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                                 "Password not found in file.",
+                                 __FILE__, __LINE__ );
         } else {
-            if (strlen(buf) > MAX_SSL_PASSWD_SIZE) {
-                Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Password is too long.", __FILE__, __LINE__ );
+            if ( strlen(buf) > MAX_SSL_PASSWD_SIZE ) {
+                Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                                     "Password is too long.",
+                                     __FILE__, __LINE__ );
             } else {
                 buf[strlen(buf) - 1] = '\0';
                 retstr = buf;
@@ -1605,48 +1644,50 @@ std::string    l7vs::virtualservice_tcp::get_ssl_password()
         fclose(fp);
     }
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "out_function : std::string    l7vs::virtualservice_tcp::get_ssl_password() : ";
+        buf << "out_function : ";
+        buf << "std::string l7vs::virtualservice_tcp::get_ssl_password() : ";
         buf << "retstr = " << retstr;
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
 
     return retstr;
 }
 
-/*!
- * Convert verify option string to intger(#define).
- *
- * @param[in]    opt_string    option string
- * @retval    ret    option value
- * @retval    -1    no match
- */
+//!
+//! Convert verify option string to intger(#define).
+//!
+//! @param[in] opt_string  option string
+//! @retval    ret         option value
+//! @retval    -1          no match
 int l7vs::virtualservice_tcp::conv_verify_option(std::string opt_string)
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "in_function : int virtualservice_tcp::conv_verify_option(std::string opt_string) : ";
+        buf << "in_function : ";
+        buf << "int virtualservice_tcp::conv_verify_option";
+        buf << "(std::string opt_string) : ";
         buf << "opt_string = " << opt_string;
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
 
     int ret = -1;
-    /*!
-     * /usr/include/openssl/ssl.h
-     * #define SSL_VERIFY_NONE                 0x00
-     * #define SSL_VERIFY_PEER                 0x01
-     * #define SSL_VERIFY_FAIL_IF_NO_PEER_CERT 0x02
-     * #define SSL_VERIFY_CLIENT_ONCE          0x04
-     */
+    //!
+    // /usr/include/openssl/ssl.h
+    // #define SSL_VERIFY_NONE                 0x00
+    // #define SSL_VERIFY_PEER                 0x01
+    // #define SSL_VERIFY_FAIL_IF_NO_PEER_CERT 0x02
+    // #define SSL_VERIFY_CLIENT_ONCE          0x04
+    //
     if (opt_string == "SSL_VERIFY_NONE") {
         ret = SSL_VERIFY_NONE;
     } else if (opt_string == "SSL_VERIFY_PEER") {
@@ -1655,72 +1696,78 @@ int l7vs::virtualservice_tcp::conv_verify_option(std::string opt_string)
         ret = SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
     } else if (opt_string == "SSL_VERIFY_CLIENT_ONCE") {
         ret = SSL_VERIFY_CLIENT_ONCE;
+    } else {
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                             "verify option string no match.",
+                             __FILE__, __LINE__ );
     }
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "out_function : int virtualservice_tcp::conv_verify_option(std::string opt_string) : ";
+        buf << "out_function : ";
+        buf << "int virtualservice_tcp::conv_verify_option";
+        buf << "(std::string opt_string) : ";
         buf << "return_value = " << ret;
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
     // if ret == -1 then No match.
     return ret;
 }
 
-/*!
- * Convert SSL option string to intger(#define).
- *
- * @param[in]    opt_string    option string
- * @retval    ret    option value
- * @retval    -1    no match
- */
+//!
+// Convert SSL option string to intger(#define).
+//
+// @param[in] opt_string  option string
+// @retval    ret         option value
+// @retval    -1          no match
 long int l7vs::virtualservice_tcp::conv_ssl_option(std::string opt_string)
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "in_function : long int virtualservice_tcp::conv_ssl_option(std::string opt_string) : ";
+        buf << "in_function : ";
+        buf << "long int virtualservice_tcp::conv_ssl_option";
+        buf << "(std::string opt_string) : ";
         buf << "opt_string = " << opt_string;
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
 
     long int ret = -1;
-    /*!
-     * /usr/include/openssl/ssl.h
-     * #define SSL_OP_MICROSOFT_SESS_ID_BUG                    0x00000001L
-     * #define SSL_OP_NETSCAPE_CHALLENGE_BUG                   0x00000002L
-     * #define SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG         0x00000008L
-     * #define SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG              0x00000010L
-     * #define SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER               0x00000020L
-     * #define SSL_OP_MSIE_SSLV2_RSA_PADDING                   0x00000040L
-     * #define SSL_OP_SSLEAY_080_CLIENT_DH_BUG                 0x00000080L
-     * #define SSL_OP_TLS_D5_BUG                               0x00000100L
-     * #define SSL_OP_TLS_BLOCK_PADDING_BUG                    0x00000200L
-     * #define SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS              0x00000800L
-     * #define SSL_OP_ALL                                      0x00000FF7L
-     * #define SSL_OP_NO_QUERY_MTU                             0x00001000L
-     * #define SSL_OP_COOKIE_EXCHANGE                          0x00002000L
-     * #define SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION   0x00010000L
-     * #define SSL_OP_SINGLE_ECDH_USE                          0x00080000L
-     * #define SSL_OP_SINGLE_DH_USE                            0x00100000L
-     * #define SSL_OP_EPHEMERAL_RSA                            0x00200000L
-     * #define SSL_OP_CIPHER_SERVER_PREFERENCE                 0x00400000L
-     * #define SSL_OP_TLS_ROLLBACK_BUG                         0x00800000L
-     * #define SSL_OP_NO_SSLv2                                 0x01000000L
-     * #define SSL_OP_NO_SSLv3                                 0x02000000L
-     * #define SSL_OP_NO_TLSv1                                 0x04000000L
-     * #define SSL_OP_PKCS1_CHECK_1                            0x08000000L
-     * #define SSL_OP_PKCS1_CHECK_2                            0x10000000L
-     * #define SSL_OP_NETSCAPE_CA_DN_BUG                       0x20000000L
-     * #define SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG          0x40000000L
-     */
+    //!
+    // /usr/include/openssl/ssl.h
+    // #define SSL_OP_MICROSOFT_SESS_ID_BUG                    0x00000001L
+    // #define SSL_OP_NETSCAPE_CHALLENGE_BUG                   0x00000002L
+    // #define SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG         0x00000008L
+    // #define SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG              0x00000010L
+    // #define SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER               0x00000020L
+    // #define SSL_OP_MSIE_SSLV2_RSA_PADDING                   0x00000040L
+    // #define SSL_OP_SSLEAY_080_CLIENT_DH_BUG                 0x00000080L
+    // #define SSL_OP_TLS_D5_BUG                               0x00000100L
+    // #define SSL_OP_TLS_BLOCK_PADDING_BUG                    0x00000200L
+    // #define SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS              0x00000800L
+    // #define SSL_OP_ALL                                      0x00000FF7L
+    // #define SSL_OP_NO_QUERY_MTU                             0x00001000L
+    // #define SSL_OP_COOKIE_EXCHANGE                          0x00002000L
+    // #define SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION   0x00010000L
+    // #define SSL_OP_SINGLE_ECDH_USE                          0x00080000L
+    // #define SSL_OP_SINGLE_DH_USE                            0x00100000L
+    // #define SSL_OP_EPHEMERAL_RSA                            0x00200000L
+    // #define SSL_OP_CIPHER_SERVER_PREFERENCE                 0x00400000L
+    // #define SSL_OP_TLS_ROLLBACK_BUG                         0x00800000L
+    // #define SSL_OP_NO_SSLv2                                 0x01000000L
+    // #define SSL_OP_NO_SSLv3                                 0x02000000L
+    // #define SSL_OP_NO_TLSv1                                 0x04000000L
+    // #define SSL_OP_PKCS1_CHECK_1                            0x08000000L
+    // #define SSL_OP_PKCS1_CHECK_2                            0x10000000L
+    // #define SSL_OP_NETSCAPE_CA_DN_BUG                       0x20000000L
+    // #define SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG          0x40000000L
     if (opt_string == "SSL_OP_MICROSOFT_SESS_ID_BUG") {
         ret = SSL_OP_MICROSOFT_SESS_ID_BUG;
     } else if (opt_string == "SSL_OP_NETSCAPE_CHALLENGE_BUG") {
@@ -1778,36 +1825,40 @@ long int l7vs::virtualservice_tcp::conv_ssl_option(std::string opt_string)
         ret = SSL_OP_NETSCAPE_CA_DN_BUG;
     } else if (opt_string == "SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG") {
         ret = SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG;
+    } else {
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
+                             "ssl option string no match.",
+                             __FILE__, __LINE__ );
     }
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
-        buf << "out_function : long int virtualservice_tcp::conv_ssl_option(std::string opt_string) : ";
+        buf << "out_function : ";
+        buf << "long int virtualservice_tcp::conv_ssl_option";
+        buf << "(std::string opt_string) : ";
         buf << "return_value = " << ret;
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
+        Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //------ DEBUG LOG END ------*/
     // if ret == -1 then No match.
     return ret;
 }
 
-/*!
- * get ssl parameter
- *
- * @return get ssl parameter result
- */
+//!
+//! get ssl parameter
+//! @return get ssl parameter result
 bool l7vs::virtualservice_tcp::get_ssl_parameter()
 {
-    /*-------- DEBUG LOG --------*/
+    //*-------- DEBUG LOG --------*/
     if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
             "in_function : bool virtualservice_tcp::get_ssl_parameter()",
              __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
     typedef std::vector< std::string > string_vector_type;
 
     Parameter param;
@@ -1826,7 +1877,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
 
         //// SSL context parameter
         // Get parameter "ca_dir".
-        ca_dir = param.get_string(l7vs::PARAM_COMP_SSL, "ca_dir", err);
+        ca_dir = param.get_string(l7vs::PARAM_COMP_SSL, "ca_dir",
+                                  err, ssl_file_name);
         if (unlikely(err) || ca_dir == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                                "ca_dir parameter not found. Use default value.",
@@ -1835,7 +1887,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         }
 
         // Get parameter "ca_file".
-        ca_file = param.get_string(l7vs::PARAM_COMP_SSL, "ca_file", err);
+        ca_file = param.get_string(l7vs::PARAM_COMP_SSL, "ca_file",
+                                   err, ssl_file_name);
         if (unlikely(err)) {
             Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get ca_file parameter.",
@@ -1846,7 +1899,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "cert_chain_dir".
         cert_chain_dir = param.get_string(l7vs::PARAM_COMP_SSL,
                                           "cert_chain_dir",
-                                          err);
+                                          err,
+                                          ssl_file_name);
         if (unlikely(err) || cert_chain_dir == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "cert_chain_dir parameter not found. Use default value.",
@@ -1857,7 +1911,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "cert_chain_file".
         cert_chain_file = param.get_string(l7vs::PARAM_COMP_SSL,
                                            "cert_chain_file",
-                                           err);
+                                           err,
+                                           ssl_file_name);
         if (unlikely(err) || cert_chain_file == "") {
             Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get cert_chain_file parameter.",
@@ -1868,7 +1923,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "private_key_dir".
         private_key_dir = param.get_string(l7vs::PARAM_COMP_SSL,
                                            "private_key_dir",
-                                           err);
+                                           err,
+                                           ssl_file_name);
         if (unlikely(err) || private_key_dir == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                     "private_key_dir parameter not found. Use default value.",
@@ -1879,7 +1935,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "private_key_file".
         private_key_file = param.get_string(l7vs::PARAM_COMP_SSL,
                                             "private_key_file",
-                                            err);
+                                            err,
+                                            ssl_file_name);
         if (unlikely(err) || private_key_file == "") {
             Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get private_key_file parameter.",
@@ -1889,16 +1946,17 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
 
         // Get parameter "private_key_filetype".
         // and convert string to filetype define value.
-        /*!
-         * /usr/include/openssl/ssl.h
-         * #define SSL_FILETYPE_PEM        X509_FILETYPE_PEM  ->1
-         * #define SSL_FILETYPE_ASN1       X509_FILETYPE_ASN1 ->2
-         */
+        //!
+        // /usr/include/openssl/ssl.h
+        // #define SSL_FILETYPE_PEM        X509_FILETYPE_PEM  ->1
+        // #define SSL_FILETYPE_ASN1       X509_FILETYPE_ASN1 ->2
+        //
 
         std::string filetype_str = param.get_string(
                                        l7vs::PARAM_COMP_SSL,
                                        "private_key_filetype",
-                                       err);
+                                       err,
+                                       ssl_file_name);
         if (unlikely(err) || filetype_str == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                 "private_key_filetype parameter not found. Use default value.",
@@ -1918,7 +1976,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "private_key_passwd_dir".
         private_key_passwd_dir = param.get_string(l7vs::PARAM_COMP_SSL,
                                                   "private_key_passwd_dir",
-                                                  err);
+                                                  err,
+                                                  ssl_file_name);
         if (unlikely(err) || private_key_passwd_dir == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
               "private_key_passwd_dir parameter not found. Use default value.",
@@ -1929,7 +1988,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "private_key_passwd_file".
         private_key_passwd_file = param.get_string(l7vs::PARAM_COMP_SSL,
                                                    "private_key_passwd_file",
-                                                   err);
+                                                   err,
+                                                   ssl_file_name);
         if (unlikely(err) || private_key_passwd_file == "") {
             Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                         "Cannot get private_key_passwd_file parameter.",
@@ -1941,7 +2001,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         param.get_multistring(l7vs::PARAM_COMP_SSL,
                               "verify_options",
                               string_vector,
-                              err);
+                              err,
+                              ssl_file_name);
         if (unlikely(err)) {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "verify_options parameter not found. Use default value.",
@@ -1966,7 +2027,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "verify_cert_depth".
         verify_cert_depth = param.get_int(l7vs::PARAM_COMP_SSL,
                                           "verify_cert_depth",
-                                          err);
+                                          err,
+                                          ssl_file_name);
         if (unlikely(err)) {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                 "verify_cert_depth parameter not found. Use default value.",
@@ -1986,7 +2048,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         param.get_multistring(l7vs::PARAM_COMP_SSL,
                               "ssl_options",
                               string_vector,
-                              err);
+                              err,
+                              ssl_file_name);
         if (unlikely(err)) {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "ssl_options parameter not found. Use default value.",
@@ -2015,17 +2078,19 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
             // Get parameter "tmp_dh_dir".
             tmp_dh_dir = param.get_string(l7vs::PARAM_COMP_SSL,
                                           "tmp_dh_dir",
-                                          err);
+                                          err,
+                                          ssl_file_name);
             if (unlikely(err) || tmp_dh_dir == "") {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                            "tmp_dh_dir parameter not found. Use default value.",
                            __FILE__, __LINE__ );
                 tmp_dh_dir = DEFAULT_SSL_TMP_DH_DIR;
             }
-           // Get parameter "tmp_dh_file".
+            // Get parameter "tmp_dh_file".
             tmp_dh_file = param.get_string(l7vs::PARAM_COMP_SSL,
                                            "tmp_dh_file",
-                                           err);
+                                           err,
+                                           ssl_file_name);
             if (unlikely(err) || tmp_dh_file == "") {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                             "Cannot get tmp_dh_file parameter.",
@@ -2037,7 +2102,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "cipher_list".
         cipher_list = param.get_string(l7vs::PARAM_COMP_SSL,
                                        "cipher_list",
-                                       err);
+                                       err,
+                                       ssl_file_name);
         if (unlikely(err) || cipher_list == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "cipher_list parameter not found. Use default value.",
@@ -2050,7 +2116,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         is_session_cache_use = false;
         std::string cache_str = param.get_string(l7vs::PARAM_COMP_SSL,
                                                  "session_cache",
-                                                 err);
+                                                 err,
+                                                 ssl_file_name);
         if (unlikely(err) || cache_str == "") {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "session_cache parameter not found. Use default value.",
@@ -2072,14 +2139,15 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
             // Get parameter "session_cache_size".
             session_cache_size = param.get_int(l7vs::PARAM_COMP_SSL,
                                                "session_cache_size",
-                                               err);
+                                               err,
+                                               ssl_file_name);
             if (unlikely(err)) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                   "session_cache_size parameter not found. Use default value.",
                   __FILE__, __LINE__ );
                 session_cache_size = DEFAULT_SSL_SESSION_CACHE_SIZE;
             } else if (session_cache_size < 0 ||
-                       session_cache_size > LONG_MAX) {
+                       session_cache_size > INT_MAX) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                             "Invalid session_cache_size parameter value.",
                             __FILE__, __LINE__ );
@@ -2088,14 +2156,15 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
             // Get parameter "session_cache_timeout".
             session_cache_timeout = param.get_int(l7vs::PARAM_COMP_SSL,
                                                   "session_cache_timeout",
-                                                  err);
+                                                  err,
+                                                  ssl_file_name);
             if (unlikely(err)) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                 "session_cache_timeout parameter not found. Use default value.",
                 __FILE__, __LINE__ );
                 session_cache_timeout = DEFAULT_SSL_SESSION_CACHE_TIMEOUT;
             } else if (session_cache_timeout < 0 ||
-                       session_cache_timeout > LONG_MAX) {
+                       session_cache_timeout > INT_MAX) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                             "Invalid session_cache_timeout parameter value.",
                             __FILE__, __LINE__ );
@@ -2109,7 +2178,8 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         // Get parameter "timeout_sec".
         handshake_timeout = param.get_int(l7vs::PARAM_COMP_SSL,
                                           "timeout_sec",
-                                          err);
+                                          err,
+                                          ssl_file_name);
         if (unlikely(err)) {
             Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
                        "timeout_sec parameter not found. Use default value.",
@@ -2128,8 +2198,9 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
         retbool = false;
     }
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
         buf<<"out_function : bool virtualservice_tcp::get_ssl_parameter() : ";
         buf<<"ca_dir = "                 << ca_dir                  << ", ";
@@ -2159,24 +2230,23 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
                             buf.str(),
                             __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
     return retbool;
 }
 
-/*!
- * set ssl context and ssl session cache configuration
- *
- * @return set ssl config result
- */
-bool    l7vs::virtualservice_tcp::set_ssl_config()
+//!
+// set ssl context and ssl session cache configuration
+// @return set ssl config result
+bool l7vs::virtualservice_tcp::set_ssl_config()
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-            "in_function : bool virtualservice_tcp::set_ssl_config()",
-             __FILE__, __LINE__ );
+                    "in_function : bool virtualservice_tcp::set_ssl_config()",
+                    __FILE__, __LINE__ );
     }
-    /*------ DEBUG LOG END ------*/
+    //*------ DEBUG LOG END ------*/
 
     bool retbool = false;
 
@@ -2211,37 +2281,37 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
 
         // Set certificate chain file.
         try {
-            sslcontext.use_certificate_chain_file(cert_chain_dir + cert_chain_file);
+            sslcontext.use_certificate_chain_file(
+                                             cert_chain_dir + cert_chain_file);
         } catch (std::exception& e) {
             std::stringstream buf;
             buf << "Set certificate chain file error : " << e.what() << ".";
-            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                        buf.str(),
-                        __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                                __FILE__, __LINE__ );
             throw -1;
         }
 
         // Set password callback function.
         try {
-            sslcontext.set_password_callback(boost::bind(&virtualservice_tcp::get_ssl_password, this));
+            sslcontext.set_password_callback(
+                    boost::bind(&virtualservice_tcp::get_ssl_password, this));
         } catch (std::exception& e) {
             std::stringstream buf;
             buf << "Set password callback error : " << e.what() << ".";
-            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                        buf.str(),
-                        __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                                __FILE__, __LINE__ );
             throw -1;
         }
 
         // Set private key file and filetype.
         try {
-            sslcontext.use_private_key_file(private_key_dir + private_key_file, private_key_filetype);
+            sslcontext.use_private_key_file(
+                    private_key_dir + private_key_file, private_key_filetype);
         } catch (std::exception& e) {
             std::stringstream buf;
-            buf << "Set private key file and filetype error : " << e.what() << ".";
-            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                        buf.str(),
-                        __FILE__, __LINE__ );
+            buf <<"Set private key file and filetype error : "<<e.what()<<".";
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                                __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -2251,9 +2321,8 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
         } catch (std::exception& e) {
             std::stringstream buf;
             buf << "Set verify option error : " << e.what() << ".";
-            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                        buf.str(),
-                        __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                                __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -2266,9 +2335,8 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
         } catch (std::exception& e) {
             std::stringstream buf;
             buf << "Set SSL option error : " << e.what() << ".";
-            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                        buf.str(),
-                        __FILE__, __LINE__ );
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                                __FILE__, __LINE__ );
             throw -1;
         }
 
@@ -2288,7 +2356,8 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
         }
 
         // Set cipher list on the context.
-        if (unlikely(SSL_CTX_set_cipher_list(sslcontext.impl(), cipher_list.c_str()) != 1)) {
+        if (unlikely(SSL_CTX_set_cipher_list(sslcontext.impl(),
+                                             cipher_list.c_str()) != 1)) {
             std::stringstream buf;
             buf << "Set cipher list error.";
             Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
@@ -2300,7 +2369,9 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
         //// SSL session cache setting.
         if (is_session_cache_use) {
             // Set session id context on the context.
-            if (unlikely(SSL_CTX_set_session_id_context(sslcontext.impl(), (const unsigned char *)"sslproxy", 8) != 1)) {
+            if (unlikely( SSL_CTX_set_session_id_context(
+                              sslcontext.impl(),
+                              (const unsigned char *)"ultramonkey", 11) != 1)) {
                 std::stringstream buf;
                 buf << "Set session id context error.";
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
@@ -2310,7 +2381,8 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
             }
 
             // Set session cache mode on the context.
-            SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode);
+            SSL_CTX_set_session_cache_mode(
+                                        sslcontext.impl(),session_cache_mode);
 
             // Set session cache size on the context.
             SSL_CTX_sess_set_cache_size(sslcontext.impl(), session_cache_size);
@@ -2318,18 +2390,10 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
             // Set session cache timeout on the context.
             SSL_CTX_set_timeout(sslcontext.impl(), session_cache_timeout);
 
-//// For external SSL session cache
-//            // Set session cache mode on the context (no internal cache).
-//            SSL_CTX_set_session_cache_mode(sslcontext.impl(), session_cache_mode | SSL_SESS_CACHE_NO_INTERNAL);
-//            // Set SSL session cache callback function.(new/get/remove)
-//            int (*pFunc)(ssl_st*, SSL_SESSION*) = &virtualservice_tcp::new_session_cb;
-//            SSL_CTX_sess_set_new_cb(sslcontext.impl(), pFunc);
-//            SSL_CTX_sess_set_new_cb(sslcontext.impl(), new_session_cb);
-//            SSL_CTX_sess_set_get_cb(sslcontext.impl(), get_session_cb);
-//            SSL_CTX_sess_set_remove_cb(sslcontext.impl(), remove_session_cb);
         } else {
             // session cache OFF.
-            SSL_CTX_set_session_cache_mode(sslcontext.impl(), SSL_SESS_CACHE_OFF);
+            SSL_CTX_set_session_cache_mode(sslcontext.impl(),
+                                           SSL_SESS_CACHE_OFF);
         }
 
         retbool = true;
@@ -2337,317 +2401,39 @@ bool    l7vs::virtualservice_tcp::set_ssl_config()
     } catch (int e) {
         retbool = false;
     }
-    /*-------- DEBUG LOG --------*/
-//    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+    //*-------- DEBUG LOG --------*/
+    if (unlikely(LOG_LV_DEBUG ==
+                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
         std::stringstream buf;
         buf << "out_function : bool virtualservice_tcp::set_ssl_config() : ";
         get_ssl_config(buf);
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999,
-                    buf.str(),
-                    __FILE__, __LINE__ );
-//    }
-    /*------ DEBUG LOG END ------*/
+        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(),
+                            __FILE__, __LINE__ );
+    }
+    //*------ DEBUG LOG END ------*/
     return retbool;
 }
 
-/*!
- * flush ssl session
- */
-void    l7vs::virtualservice_tcp::flush_ssl_session()
+//!
+// flush ssl session
+void l7vs::virtualservice_tcp::flush_ssl_session()
 {
     // check expired cached sessions and do flushing
     // Need ssl_context lock?
     SSL_CTX_flush_sessions(sslcontext.impl(), time(0));
 }
 
-//// For external SSL session cache
-//! SSL session cache table
-//std::map<std::string, SSL_SESSION>        sessioncacheTable;
-//boost::mutex                    sessioncacheTable_mutex;
-
-//// For external SSL session cache
-//! default value of session-id size and session cache table size
-//#define MAX_SESSION_ID_SIZE SSL_MAX_SSL_SESSION_ID_LENGTH * 2 + 1
-//#define MAX_SESSION_CACHE_SIZE 10
-
-/*
-//// For external SSL session cache
-//! session callback functions (new/remove/get)
-//  global function -> OK. virtualservice_tcp class member function -> NG.
-//static int new_session_cb(SSL *ssl, SSL_SESSION *session)
-int l7vs::virtualservice_tcp::new_session_cb(SSL *ssl, SSL_SESSION *session)
-{
-    {
-        std::stringstream buf;
-        buf << "Callback new_session_cb() SSL_MAX_SSL_SESSION_ID_LENGTH[";
-        buf << SSL_MAX_SSL_SESSION_ID_LENGTH;
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-
-    char session_key[MAX_SESSION_ID_SIZE] = {0};
-
-    // Make session_key for add.
-    for (unsigned int i = 0; i < session->session_id_length; i++) {
-        sprintf(session_key, "%s%02X", session_key, session->session_id[i]);
-    }
-    session_key[strlen(session_key)] = '\0';
-
-    struct timeval now;
-
-    gettimeofday(&now, NULL);
-
-    std::vector<std::string> cleanup_list;
-
-    boost::mutex::scoped_lock sclock(sessioncacheTable_mutex);
-
-    if (sessioncacheTable.size() >= MAX_SESSION_CACHE_SIZE) {
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : sessioncacheTable overflow. Cleanup session.", __FILE__, __LINE__ );
-
-        std::map<std::string, SSL_SESSION>::iterator it = sessioncacheTable.begin();
-        std::map<std::string, SSL_SESSION>::iterator ite = sessioncacheTable.end();
-
-        for (std::map<std::string, SSL_SESSION>::iterator its = it; its != ite; its++) {
-            {
-                std::stringstream buf;
-                buf << "For clean session.time[";
-                buf << its->second.time;
-                buf << "] session.timeout[";
-                buf << its->second.timeout;
-                buf << "] now[";
-                buf << now.tv_sec;
-                buf << "]";
-                l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-            }
-            {
-                std::stringstream buf;
-                buf << "For clean session_id[";
-                buf << its->first;
-                buf << "]";
-                l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-            }
-            // Check expire.
-            if (its->second.time + its->second.timeout < now.tv_sec) {
-                cleanup_list.push_back(its->first);
-                // sessioncacheTable.erase(its);
-                // 消した状態でイテレータループまわすと消したものにもアクセスする？
-                l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Expire session found.", __FILE__, __LINE__ );
-            }
-        }
-        {
-            std::stringstream buf;
-            buf << "In new_session_cb() : Expire session count[";
-            buf << cleanup_list.size();
-            buf << "]";
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-        }
-        for (unsigned int i = 0; i < cleanup_list.size(); i++) {
-            sessioncacheTable.erase(cleanup_list[i]);
-        }
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Cleanup END.", __FILE__, __LINE__ );
-    }
-
-    std::string ssid = boost::lexical_cast<std::string>(session_key);
-    {
-        std::stringstream buf;
-        buf << "String session_id[";
-        buf << ssid;
-        buf << "] len[";
-        buf << ssid.size();
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-    {
-        std::stringstream buf;
-        buf << "For new session.time[";
-        buf << session->time;
-        buf << "] session.timeout[";
-        buf << session->timeout;
-        buf << "] now[";
-        buf << now.tv_sec;
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-
-    if (sessioncacheTable.size() < MAX_SESSION_CACHE_SIZE) {
-        if (sessioncacheTable.end() != sessioncacheTable.find(ssid)) {
-            sessioncacheTable.erase(ssid);
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Session already exist. Session erased.", __FILE__, __LINE__ );
-        }
-        memcpy(&sessioncacheTable[ssid], session, sizeof(SSL_SESSION));
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : Session added.", __FILE__, __LINE__ );
-    } else {
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In new_session_cb() : sessioncacheTable overflow. Session not added.", __FILE__, __LINE__ );
-    }
-
-    {
-        std::stringstream buf;
-        buf << "sessioncacheTable.size[";
-        buf << sessioncacheTable.size();
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-
-    return 0;
-}
-
-//static SSL_SESSION* get_session_cb(SSL *ssl, unsigned char *session_id, int session_id_len, int *ref)
-SSL_SESSION* l7vs::virtualservice_tcp::get_session_cb(SSL *ssl, unsigned char *session_id, int session_id_len, int *ref)
-{
-    l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Callback get_session_cb()", __FILE__, __LINE__ );
-
-    char session_key[MAX_SESSION_ID_SIZE] = {0};
-
-    // Make session_key for get.
-    for (int i = 0; i < session_id_len; i++) {
-        sprintf(session_key, "%s%02X", session_key, session_id[i]);
-    }
-    session_key[strlen(session_key)] = '\0';
-
-    SSL_SESSION *ret_session = NULL;
-    struct timeval now;
-
-    gettimeofday(&now, NULL);
-
-    boost::mutex::scoped_lock sclock(sessioncacheTable_mutex);
-
-    std::string ssid = boost::lexical_cast<std::string>(session_key);
-    {
-        std::stringstream buf;
-        buf << "String session_id[";
-        buf << ssid;
-        buf << "] len[";
-        buf << ssid.size();
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-
-    if (sessioncacheTable.end() != sessioncacheTable.find(ssid)) {
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Session found.", __FILE__, __LINE__ );
-        {
-            std::stringstream buf;
-            buf << "For get sessioncacheTable[ssid].time[";
-            buf << sessioncacheTable[ssid].time;
-            buf << "] sessioncacheTable[ssid].timeout[";
-            buf << sessioncacheTable[ssid].timeout;
-            buf << "] now[";
-            buf << now.tv_sec;
-            buf << "]";
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-        }
-        // Check expire.
-        if (sessioncacheTable[ssid].time + sessioncacheTable[ssid].time < now.tv_sec) {
-            sessioncacheTable.erase(ssid);
-            ret_session = NULL;
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Session expired. Session erased.", __FILE__, __LINE__ );
-        } else {
-            ret_session = &sessioncacheTable[ssid];
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Get session OK.", __FILE__, __LINE__ );
-        }
-    } else {
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In get_session_cb() : Session not found.", __FILE__, __LINE__ );
-    }
-
-    ref = 0;
-    return ret_session;
-}
-
-//static void remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *session)
-void l7vs::virtualservice_tcp::remove_session_cb(SSL_CTX *ssl_ctx, SSL_SESSION *session)
-{
-    l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Callback remove_session_cb()", __FILE__, __LINE__ );
-
-    char session_key[MAX_SESSION_ID_SIZE] = {0};
-
-    // Make session_key for add.
-    for (unsigned int i = 0; i < session->session_id_length; i++) {
-        sprintf(session_key, "%s%02X", session_key, session->session_id[i]);
-    }
-    session_key[strlen(session_key)] = '\0';
-
-    struct timeval now;
-
-    gettimeofday(&now, NULL);
-
-    boost::mutex::scoped_lock sclock(sessioncacheTable_mutex);
-
-    std::string ssid = boost::lexical_cast<std::string>(session->session_id);
-    {
-        std::stringstream buf;
-        buf << "String session_id[";
-        buf << ssid;
-        buf << "] len[";
-        buf << ssid.size();
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-    {
-        std::stringstream buf;
-        buf << "For remove session.time[";
-        buf << session->time;
-        buf << "] session.timeout[";
-        buf << session->timeout;
-        buf << "] now[";
-        buf << now.tv_sec;
-        buf << "]";
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-    }
-    if(sessioncacheTable.end() != sessioncacheTable.find(ssid)) {
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Session found. ", __FILE__, __LINE__ );
-        {
-            std::stringstream buf;
-            buf << "sessioncacheTable[ssid].time[";
-            buf << sessioncacheTable[ssid].time;
-            buf << "] sessioncacheTable[ssid].timeout[";
-            buf << sessioncacheTable[ssid].timeout;
-            buf << "] now[";
-            buf << now.tv_sec;
-            buf << "]";
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, buf.str(), __FILE__, __LINE__ );
-        }
-        // Check expire.
-        if (sessioncacheTable[ssid].time + sessioncacheTable[ssid].time < now.tv_sec) {
-            sessioncacheTable.erase(ssid);
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Remove session OK.", __FILE__, __LINE__ );
-        } else {
-            l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Session not expired. Session not erased.", __FILE__, __LINE__ );
-        }
-    } else {
-        l7vs::Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "In remove_session_cb() : Session not found.", __FILE__, __LINE__ );
-    }
-
-    return;
-}
-//// For external SSL session cache
-*/
-
-/*!
- * get ssl configuration form ssl context. (for debug)
- */
+//!
+// get ssl configuration form ssl context. (for debug)
 void l7vs::virtualservice_tcp::get_ssl_config(std::stringstream& buf)
 {
-    buf << "SSL configuration information : ";
-    buf << "Verify mode["    << SSL_CTX_get_verify_mode(sslcontext.impl())        << "] ";
-    buf << "Verify depth["    << SSL_CTX_get_verify_depth(sslcontext.impl())        << "] ";
-    buf << "SSL options["    << SSL_CTX_get_options(sslcontext.impl())        << "] ";
-    buf << "Cache mode["    << SSL_CTX_get_session_cache_mode(sslcontext.impl())    << "] ";
-    buf << "Cache size["    << SSL_CTX_sess_get_cache_size(sslcontext.impl())    << "] ";
-    buf << "Cache timeout["    << SSL_CTX_get_timeout(sslcontext.impl())        << "] ";
+    buf<<"SSL configuration information : ";
+    buf<<"Verify mode[" << SSL_CTX_get_verify_mode(sslcontext.impl()) << "] ";
+    buf<<"Verify depth["<< SSL_CTX_get_verify_depth(sslcontext.impl())<< "] ";
+    buf<<"SSL options[" << SSL_CTX_get_options(sslcontext.impl()) << "] ";
+    buf<<"Cache mode["  << SSL_CTX_get_session_cache_mode(sslcontext.impl());
+    buf<<"] ";
+    buf<<"Cache size["<<SSL_CTX_sess_get_cache_size(sslcontext.impl())<< "] ";
+    buf<<"Cache timeout[" << SSL_CTX_get_timeout(sslcontext.impl()) << "] ";
 }
 
-/*!
- * get ssl session cache information form ssl context. (for debug)
- */
-void l7vs::virtualservice_tcp::get_ssl_session_cache_info(std::stringstream& buf)
-{
-    // Need Lock?
-    buf << "SSL session cache information : ";
-    buf << "Session number["    << SSL_CTX_sess_number(sslcontext.impl())        << "] ";
-    buf << "Accept["        << SSL_CTX_sess_accept(sslcontext.impl())        << "] ";
-    buf << "Accept good["        << SSL_CTX_sess_accept_good(sslcontext.impl())        << "] ";
-    buf << "Accept renegotiate["    << SSL_CTX_sess_accept_renegotiate(sslcontext.impl())    << "] ";
-    buf << "Hits["            << SSL_CTX_sess_hits(sslcontext.impl())            << "] ";
-    buf << "Misses["        << SSL_CTX_sess_misses(sslcontext.impl())        << "] ";
-    buf << "Timeouts["        << SSL_CTX_sess_timeouts(sslcontext.impl())        << "] ";
-    buf << "Cache full["        << SSL_CTX_sess_cache_full(sslcontext.impl())        << "] ";
-}
