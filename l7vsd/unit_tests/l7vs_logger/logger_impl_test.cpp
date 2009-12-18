@@ -3736,26 +3736,6 @@ init_unit_test_suite(int argc, char* argv[])
 	test->add(BOOST_TEST_CASE(logger_impl_get_log_level_test));
 	test->add(BOOST_TEST_CASE(logger_impl_constructor_test));
 
-//	test->add(BOOST_TEST_CASE(logger_impl_init_test));
-/*
-	test->add(BOOST_TEST_CASE(logger_impl_constructor_test));
-	test->add(BOOST_TEST_CASE(logger_impl_get_instance_test));
-	test->add(BOOST_TEST_CASE(logger_impl_to_level_test));
-//	test->add(BOOST_TEST_CASE(logger_impl_to_level_tag_test));
-	test->add(BOOST_TEST_CASE(logger_impl_init_test));
-	test->add(BOOST_TEST_CASE(logger_impl_error_conf_test));
-	test->add(BOOST_TEST_CASE(logger_impl_load_conf_test));
-	test->add(BOOST_TEST_CASE(logger_impl_get_log_level_test));
-	test->add(BOOST_TEST_CASE(logger_impl_set_log_level_test));
-	test->add(BOOST_TEST_CASE(logger_impl_put_log_fatal_test));
-	test->add(BOOST_TEST_CASE(logger_impl_put_log_error_test));
-	test->add(BOOST_TEST_CASE(logger_impl_put_log_warn_test));
-	test->add(BOOST_TEST_CASE(logger_impl_put_log_info_test));
-	test->add(BOOST_TEST_CASE(logger_impl_put_log_debug_test));
-//	test->add(BOOST_TEST_CASE(logger_impl_get_categor_range_start_test));
-//	test->add(BOOST_TEST_CASE(logger_impl_get_categor_range_end_test));
-*/
-
 	return test;
 
 
