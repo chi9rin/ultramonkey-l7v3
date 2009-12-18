@@ -264,6 +264,7 @@ void protocol_module_sessionless_test(){
     BOOST_CHECK_EQUAL(this->forwarded_for, FORWARDED_FOR_OFF);
     char chk[MAX_OPTION_SIZE];
     memset(chk, '\0', MAX_OPTION_SIZE);
+	chk[0] = '/';
     //sorry_uriに'\0'を設定する
     BOOST_CHECK_EQUAL(memcmp(this->sorry_uri.data(), chk, MAX_OPTION_SIZE), 0);
 }

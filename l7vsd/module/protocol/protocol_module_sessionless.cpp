@@ -64,6 +64,7 @@ namespace l7vs
             http_protocol_module_base(MODULE_NAME), forwarded_for(FORWARDED_FOR_OFF)
     {
         sorry_uri.assign('\0');
+        sorry_uri[0] = '/';
     }
     //! destractor
     protocol_module_sessionless::~protocol_module_sessionless()

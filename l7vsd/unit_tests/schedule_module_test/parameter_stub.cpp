@@ -32,9 +32,9 @@ l7vs::Parameter::~Parameter(){
  * @param[in]   comp    section TAG
  * @return    true = success read file / false = failure read file
  */
-bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp){
-    return true;
-}
+//bool l7vs::Parameter::read_file(PARAMETER_COMPONENT_TAG comp){
+//    return true;
+//}
 
 
 /*!
