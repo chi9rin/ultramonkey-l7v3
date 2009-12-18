@@ -55,7 +55,12 @@
 using namespace log4cxx;
 using namespace l7vs;
 
-
+/*!
+ * rotate type check.
+ *
+ * @param   rotaton string("size" or "date" or "datesize")
+ * @return  LOG_ROTATION_TAG val
+ */
 LOG_ROTATION_TAG logger_logrotate_utility::check_rotate_type(const std::string &rotation_type)
 {
     LOG_ROTATION_TAG rotation_value = LOG_ROT_SIZE;
@@ -78,6 +83,12 @@ LOG_ROTATION_TAG logger_logrotate_utility::check_rotate_type(const std::string &
     return( rotation_value );
 }
 
+/*!
+ * log file max backup check.
+ *
+ * @param   file backup val string
+ * @return  file backup val
+ */
 unsigned int logger_logrotate_utility::check_max_backup_index(const std::string &max_backup_index)
 {
     unsigned int max_backup_index_value = 0;
@@ -109,6 +120,12 @@ unsigned int logger_logrotate_utility::check_max_backup_index(const std::string 
     return( max_backup_index_value );
 }
 
+/*!
+ * log file max file size check.
+ *
+ * @param   file max size string
+ * @return  file max size val
+ */
 unsigned long long logger_logrotate_utility::check_max_file_size(const std::string &max_file_size)
 {
 
@@ -165,6 +182,12 @@ unsigned long long logger_logrotate_utility::check_max_file_size(const std::stri
     return( max_file_size_value );
 }
 
+/*!
+ * log file rotate timing check.
+ *
+ * @param   rotate timing string
+ * @return  LOG_ROTATION_TIMING_TAG val
+ */
 LOG_ROTATION_TIMING_TAG logger_logrotate_utility::check_rotate_timing( const std::string &rotation_timing )
 {
 
@@ -184,6 +207,13 @@ LOG_ROTATION_TIMING_TAG logger_logrotate_utility::check_rotate_timing( const std
     return( rotation_timing_value );
 }
 
+/*!
+ * rotate timing value check.
+ *
+ * @param   rotate timing val string
+ * @param   LOG_ROTATION_TIMING_TAG val
+ * @return rotate timing val
+ */
 std::string logger_logrotate_utility::check_rotate_timing_value(const std::string rotation_timing_value_key,const LOG_ROTATION_TIMING_TAG rotation_timing)
 {
     std::string rotation_timing_value_value = "";
@@ -486,6 +516,14 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
     return( rotation_timing_value_value );
 }
 
+/*!
+ * Logger set appender.
+ *
+ * @param   appender property
+ * @param   logger layout
+ * @param   log category
+ * @return  void
+ */
 void logger_logrotate_utility::set_appender(const appender_property& log_property,const char *logger_layout,const std::string &log_category)
 {
 
@@ -688,6 +726,13 @@ void logger_logrotate_utility::set_appender(const appender_property& log_propert
 
 }
 
+/*!
+ * log rotate parameter check.
+ *
+ * @param   check object.
+ * @param   appender property
+ * @return  false faild
+ */
 bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
     accesslog_rotate_map_type& rotatedata,
     appender_property &access_log_property)
@@ -721,12 +766,12 @@ bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
         access_log_property.max_backup_index_value = logger_logrotate_utility::check_max_backup_index(max_backup_index);
         
         if(  access_log_property.rotation_value == LOG_ROT_SIZE ) {
-            access_log_property.max_backup_index_value = logger_logrotate_utility::check_max_file_size(max_file_size);
+            access_log_property.max_file_size_value = logger_logrotate_utility::check_max_file_size(max_file_size);
         } else if(  access_log_property.rotation_value == LOG_ROT_DATE ) {
             access_log_property.rotation_timing_value = logger_logrotate_utility::check_rotate_timing(rotation_timing );
             access_log_property.rotation_timing_value_value = logger_logrotate_utility::check_rotate_timing_value(rotation_timing_value_key,access_log_property.rotation_timing_value);
         } else {
-            access_log_property.max_backup_index_value = logger_logrotate_utility::check_max_file_size(max_file_size);
+            access_log_property.max_file_size_value = logger_logrotate_utility::check_max_file_size(max_file_size);
             access_log_property.rotation_timing_value = logger_logrotate_utility::check_rotate_timing(rotation_timing );
             access_log_property.rotation_timing_value_value = logger_logrotate_utility::check_rotate_timing_value(rotation_timing_value_key,access_log_property.rotation_timing_value);
         }
@@ -739,6 +784,15 @@ bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
     return( true );
 }
 
+/*!
+ * error log out put.
+ *
+ * @param   msg no.
+ * @param   err msg
+ * @param   file name
+ * @param   line no
+ * @return  void
+ */
 void logger_logrotate_utility::loglotation_utility_logic_error( const unsigned int logno, const std::string& str, const char* file , const unsigned int line){
 #if    defined(LOGGER_PROCESS_VSD)
     Logger::putLogError( l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line );
