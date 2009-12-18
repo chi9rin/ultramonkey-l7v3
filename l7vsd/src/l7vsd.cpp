@@ -264,7 +264,7 @@ void    l7vsd::add_virtual_service( const virtualservice_element* in_vselement, 
     }
     else {
         std::string msg("virtual service already exist.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 8, msg, __FILE__, __LINE__);
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 23, msg, __FILE__, __LINE__);
 
         err.setter( true, msg );
         return;
@@ -310,7 +310,7 @@ void    l7vsd::del_virtual_service( const virtualservice_element* in_vselement, 
     }
     else {
         std::string msg("virtual service not found.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 9, msg, __FILE__, __LINE__);
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 24, msg, __FILE__, __LINE__);
 
         err.setter( true, msg );
         return;
@@ -350,7 +350,7 @@ void    l7vsd::edit_virtual_service( const virtualservice_element* in_vselement,
     }
     else {
         std::string msg("virtual service not found.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 10, msg, __FILE__, __LINE__);
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 25, msg, __FILE__, __LINE__);
 
         err.setter( true, msg );
         return;
@@ -390,7 +390,7 @@ void    l7vsd::add_real_server( const virtualservice_element* in_vselement, erro
     }
     else {
         std::string msg("virtual service not found.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 11, msg, __FILE__, __LINE__);
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 26, msg, __FILE__, __LINE__);
 
         err.setter( true, msg );
         return;
@@ -430,7 +430,7 @@ void    l7vsd::del_real_server( const virtualservice_element* in_vselement, erro
     }
     else {
         std::string msg("virtual service not found.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 12, msg, __FILE__, __LINE__);
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, msg, __FILE__, __LINE__);
 
         err.setter( true, msg );
         return;
@@ -470,7 +470,7 @@ void    l7vsd::edit_real_server( const virtualservice_element* in_vselement, err
     }
     else {
         std::string msg("virtual service not found.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 13, msg, __FILE__, __LINE__);
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 28, msg, __FILE__, __LINE__);
 
         err.setter( true, msg );
         return;
