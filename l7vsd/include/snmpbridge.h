@@ -28,7 +28,6 @@
 #include <boost/thread.hpp>
 #include <boost/array.hpp>
 #include "l7vsd.h"
-#include "logger_wrapper.h"
 #include "l7ag_parameter.h"
 #include "message.h"
 
