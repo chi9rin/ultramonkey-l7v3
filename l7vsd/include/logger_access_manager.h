@@ -44,34 +44,76 @@
 
 namespace l7vs{
 
+//! @class Lologger_access_managergger
+//! @brief logger_implement_access creation class.
+//! @brief this class create logger_implement_access and rotate check function.
 class logger_access_manager {
 
 public:
     typedef std::map< std::string , logger_implement_access* > 
-                    logimp_access_map_type;
+                                logimp_access_map_type;
 
+    typedef std::map< std::string , logger_implement_access* >::iterator 
+                                logimp_access_map_type_iterator;
+    
     typedef std::map< std::string , std::string > 
-                    accesslog_rotate_default_map_type;
+                                accesslog_rotate_default_map_type;
 
     typedef std::map< std::string , std::string >::iterator 
-                    accesslog_rotate_default_map_type_iterator;
+                                accesslog_rotate_default_map_type_iterator;
 
+    /*!
+     * initialze function.
+     *
+     * @retrun  current instance.
+     */
     static logger_access_manager &getInstance();
 
+    /*!
+     * find or create logger_implement_access class function.
+     *
+     * @param   access log file name
+     * @param   logrotation designation contents
+     * @param   error_code
+     * @retrun  void.
+     */
     logger_implement_access *find_logger_implement_access(
-                                const std::string &access_log_filename, 
-                                std::map< std::string , std::string > rotatedata,
-                                l7vs::error_code& err);
+                            const std::string &access_log_filename, 
+                            std::map< std::string , std::string > rotatedata,
+                            l7vs::error_code& err);
 
+    /*!
+     * erase logger_implement_access class function.
+     *
+     * @param   access log file name
+     * @param   error_code
+     * @retrun  void.
+     */
     void erase_logger_implement_access(
                                 const std::string &access_log_filename, 
                                 l7vs::error_code& err);
 
+    /*!
+     * log rotate parameter check function.
+     *
+     * @param   logrotation designation contents
+     * @retrun  false faild.
+     */
     bool access_log_logrotate_parameter_check(
                     const std::map<std::string,std::string>& rotatedata);
 
+    /*!
+     * load logrotation info from l7vs.cf.
+     *
+     * @retrun  void.
+     */
     void access_log_rotate_loadConf();
 
+    /*!
+     * member variable data getter.
+     *
+     * @retrun  default rotate info str
+     */
     std::string get_rotate_default_verbose_displayed_contents();
 
 protected:
@@ -89,8 +131,16 @@ protected:
 
     std::string rotate_default_verbose_displayed_contents;
 
+    /*!
+     * constructor initialize member variables.
+     *
+     * @param   access log file name
+     */
     logger_access_manager();
 
+    /*!
+     * destructor.
+     */
     virtual ~logger_access_manager();
 
 
