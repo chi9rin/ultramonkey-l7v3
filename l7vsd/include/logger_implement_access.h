@@ -62,27 +62,45 @@ namespace l7vs{
 class logger_implement_access {
 public:
     
-    typedef std::map< std::string , std::string > accesslog_rotate_map_type;
+    typedef std::map< std::string , std::string > 
+                            accesslog_rotate_map_type;
 
-    typedef std::map< std::string , std::string >::iterator accesslog_rotate_map_type_iterator;
+    typedef std::map< std::string , std::string >::iterator 
+                            accesslog_rotate_map_type_iterator;
 
+    /*!
+     * constructor initialize member variables.
+     *
+     * @param   access log file name
+     */
     logger_implement_access(const std::string &access_log_file_name);
+    
+    /*!
+     * destructor.
+     */
     virtual ~logger_implement_access(){};
 
-    //! initialze function
+    /*!
+     * initialze function.
+     *
+     * @param   default logrotation info use flag
+     * @param   default logrotation info
+     * @param   logrotation designation contents
+     * @retrun  false failed
+     */
     virtual bool init(
         const bool rotate_default_flag,
         const appender_property& access_log_default_property,
         accesslog_rotate_map_type& rotatedata);
 
     /*!
-     * output info log.
+     * output access info log.
      *
-     * @param   category that logging matter occured
-     * @param   log message id
-     * @param   log message
-     * @param   current file
-     * @param   current line
+     * @param   virtualservice endpoint info
+     * @param   client ip info
+     * @param   realserver connection origin info
+     * @param   realserver connection destination info
+     * @param   add msg
      * @retrun  void
      */
     virtual inline void putLog(
@@ -119,19 +137,49 @@ public:
         }
     }
 
-
-
+    /*!
+     * increase reffernce count.
+     *
+     * @retrun void
+     */
     virtual void    addRef();
 
+    /*!
+     * decrease reffernce count.
+     *
+     * @retrun void
+     */
     virtual void    releaseRef();
 
+    /*!
+     * decrease reffernce count.
+     *
+     * @param inequal check object
+     * @return check result
+     */
     virtual bool    operator<=(const int access_num );
 
+    /*!
+     * member variable data getter.
+     *
+     * @retrun member variable data
+     */
     virtual std::string getAcLogFileName();
 
+    /*!
+     * logrotate data compare.
+     *
+     * @param check object
+     * @retrun true logrotate data equal
+     */
     virtual bool    checkRotateParameterComp(
                         accesslog_rotate_map_type &rotatedata);
     
+    /*!
+     * member variable data getter.
+     *
+     * @retrun member variable data
+     */
     virtual bool    is_rotate_default_flag();
     
 protected:
@@ -141,16 +189,22 @@ protected:
 
     std::string access_log_file_name_;
 
-      //! initialized flag
+    //! initialized flag
     bool initialized;
   
-    //! hostname
     appender_property access_log_property;
 
     accesslog_rotate_map_type aclog_args;
     
     bool rotate_default_flag;
     
+    /*!
+     * Logger setting function.
+     *
+     * @param   default logrotation info use flag
+     * @param   logrotation designation contents
+     * @retrun  false failed
+     */
     virtual bool setAcLoggerConf(
                     const appender_property& access_log_default_property,
                     accesslog_rotate_map_type& rotatedata);
