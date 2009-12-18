@@ -441,6 +441,9 @@ void    virtualservice_tcp_test2(){
             break;
         }
     }
+    // unit_test[xx]  active_connection test
+    BOOST_CHECK_EQUAL( vs->get_active_count(), 1ULL );
+
     // unit_test[23]  connection_inactive method call
     std::cout << counter++ << std::endl;
     BOOST_MESSAGE( "-------23" );
@@ -453,6 +456,8 @@ void    virtualservice_tcp_test2(){
             break;
         }
     }
+    // unit_test[xx]  active_connection test
+    BOOST_CHECK_EQUAL( vs->get_active_count(), 0ULL );
 
     vs_err.setter(false,"");
     vs->finalize( vs_err );

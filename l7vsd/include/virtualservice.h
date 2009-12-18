@@ -348,7 +348,7 @@ protected:
     session_map_type            waiting_sessions;
     session_map_type            active_sessions;
     l7vs::atomic<unsigned long long>
-                                sorry_count;
+                                active_count;
 
     bool                        defer_accept_opt;
                                        //! is set option TCP_DEFER_ACCEPT

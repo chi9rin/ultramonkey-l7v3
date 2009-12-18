@@ -3,7 +3,7 @@
 #	Makefile for module_control unit test frameworks.
 #
 #
-TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_thread_ut2 vs_tcp_it
+TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_thread_ut2 vs_tcp_it vs_tcp_sorry_ut
 #TARGET		= vs_tcp_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -D__SNMPBRIDGE_H__ -DMAX_BUFFER_SIZE=65535 -DDEBUG
@@ -102,6 +102,17 @@ ITSRCS		=	\
 				virtualservice.cpp \
 				vs_tcp_it_ut.cpp
 
+SORRYSRCS		=	\
+				stub_sorry.cpp \
+				../../src/logger_implement_access.cpp \
+				../../src/logger_logrotate_utility.cpp \
+				../../src/logger_access_manager.cpp \
+				../../src/strict_time_based_rolling_policy.cpp \
+ 				../../src/time_and_size_based_rolling_policy.cpp \
+				virtualservice_udp.cpp \
+				virtualservice.cpp \
+				vs_tcp_sorry_test.cpp
+
 .SUFFIX:	.cpp .o
 .cpp.o:
 		$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
@@ -115,6 +126,8 @@ TPCTOBJS	= $(TCPTSRCS:.cpp=.o)
 TPCT2OBJS	= $(TCPT2SRCS:.cpp=.o)
 
 ITOBJS		= $(ITSRCS:.cpp=.o)
+
+SORRYOBJS		= $(SORRYSRCS:.cpp=.o)
 
 all:	$(TARGET)
 
@@ -133,10 +146,12 @@ vs_tcp_thread_ut2: $(TPCT2OBJS)
 vs_tcp_it: $(ITOBJS)
 	$(CPP) $(INCLUDES) -o vs_tcp_it $(ITOBJS) $(LDFLAGS) $(LIBS)
 
+vs_tcp_sorry_ut: $(SORRYOBJS)
+	$(CPP) $(INCLUDES) -o vs_tcp_sorry_ut $(SORRYOBJS) $(LDFLAGS) $(LIBS)
 
 # $(TARGET):	$(OBJS)
 # 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS) $(TPCT2OBJS) $(ITOBJS)
+	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS) $(TPCT2OBJS) $(ITOBJS) $(SORRYOBJS)
 
