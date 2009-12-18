@@ -99,21 +99,6 @@ am_libsnmpagent_parameter_a_OBJECTS =  \
 	libsnmpagent_parameter_a-parameter_impl.$(OBJEXT)
 libsnmpagent_parameter_a_OBJECTS =  \
 	$(am_libsnmpagent_parameter_a_OBJECTS)
-libsslproxy_logger_a_AR = $(AR) $(ARFLAGS)
-libsslproxy_logger_a_LIBADD =
-am_libsslproxy_logger_a_OBJECTS =  \
-	libsslproxy_logger_a-logger.$(OBJEXT) \
-	libsslproxy_logger_a-logger_impl.$(OBJEXT) \
-	libsslproxy_logger_a-strict_time_based_rolling_policy.$(OBJEXT) \
-	libsslproxy_logger_a-time_and_size_based_rolling_policy.$(OBJEXT)
-libsslproxy_logger_a_OBJECTS = $(am_libsslproxy_logger_a_OBJECTS)
-libsslproxy_parameter_a_AR = $(AR) $(ARFLAGS)
-libsslproxy_parameter_a_LIBADD =
-am_libsslproxy_parameter_a_OBJECTS =  \
-	libsslproxy_parameter_a-parameter.$(OBJEXT) \
-	libsslproxy_parameter_a-parameter_impl.$(OBJEXT)
-libsslproxy_parameter_a_OBJECTS =  \
-	$(am_libsslproxy_parameter_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
@@ -166,16 +151,12 @@ SOURCES = $(libl7vsadm_logger_a_SOURCES) \
 	$(libl7vsd_parameter_a_SOURCES) \
 	$(libsnmpagent_logger_a_SOURCES) \
 	$(libsnmpagent_parameter_a_SOURCES) \
-	$(libsslproxy_logger_a_SOURCES) \
-	$(libsslproxy_parameter_a_SOURCES) $(l7vsadm_SOURCES) \
 	$(l7vsd_SOURCES)
 DIST_SOURCES = $(libl7vsadm_logger_a_SOURCES) \
 	$(libl7vsadm_parameter_a_SOURCES) $(libl7vsd_logger_a_SOURCES) \
 	$(libl7vsd_parameter_a_SOURCES) \
 	$(libsnmpagent_logger_a_SOURCES) \
 	$(libsnmpagent_parameter_a_SOURCES) \
-	$(libsslproxy_logger_a_SOURCES) \
-	$(libsslproxy_parameter_a_SOURCES) $(l7vsadm_SOURCES) \
 	$(l7vsd_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -284,8 +265,8 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-noinst_LIBRARIES = libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a libsslproxy_parameter.a \
-			libl7vsd_logger.a libl7vsadm_logger.a libsnmpagent_logger.a libsslproxy_logger.a 
+noinst_LIBRARIES = libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a \
+			libl7vsd_logger.a libl7vsadm_logger.a libsnmpagent_logger.a 
 
 PARAMETER_FILE = @l7vs_config@
 libl7vsd_parameter_a_SOURCES = \
@@ -329,20 +310,6 @@ libsnmpagent_parameter_a_CPPFLAGS = \
 				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 				-DVERSION=\"$(VERSION)\" \
 				-DLOGGER_PROCESS_SNM
-
-libsslproxy_parameter_a_SOURCES = \
-				../include/parameter_enum.h \
-				../include/parameter.h \
-				../include/parameter_impl.h \
-				parameter.cpp \
-				parameter_impl.cpp
-
-libsslproxy_parameter_a_CPPFLAGS = \
-				-O2 -g -Wall -Werror \
-				-I../include \
-				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
-				-DVERSION=\"$(VERSION)\" \
-				-DLOGGER_PROCESS_SSL
 
 libl7vsd_logger_a_SOURCES = \
 			../include/logger_enum.h \
@@ -414,24 +381,6 @@ libsnmpagent_logger_a_SOURCES = \
 libsnmpagent_logger_a_CPPFLAGS = \
 			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
 			-DLOGGER_PROCESS_SNM \
-			-DVERSION=\"$(VERSION)\"
-
-libsslproxy_logger_a_SOURCES = \
-			../include/logger_enum.h \
-			../include/logger_rotation_enum.h \
-			../include/logger.h \
-			../include/logger_impl.h \
-			../include/appender_property.h \
-			logger.cpp \
-			logger_impl.cpp \
-			../include/strict_time_based_rolling_policy.h \
-			strict_time_based_rolling_policy.cpp \
-			../include/time_and_size_based_rolling_policy.h \
-			time_and_size_based_rolling_policy.cpp
-
-libsslproxy_logger_a_CPPFLAGS = \
-			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
-			-DLOGGER_PROCESS_SSL \
 			-DVERSION=\"$(VERSION)\"
 
 PKGLIBDIR = @l7vs_moddir@
@@ -604,14 +553,6 @@ libsnmpagent_parameter.a: $(libsnmpagent_parameter_a_OBJECTS) $(libsnmpagent_par
 	-rm -f libsnmpagent_parameter.a
 	$(libsnmpagent_parameter_a_AR) libsnmpagent_parameter.a $(libsnmpagent_parameter_a_OBJECTS) $(libsnmpagent_parameter_a_LIBADD)
 	$(RANLIB) libsnmpagent_parameter.a
-libsslproxy_logger.a: $(libsslproxy_logger_a_OBJECTS) $(libsslproxy_logger_a_DEPENDENCIES) 
-	-rm -f libsslproxy_logger.a
-	$(libsslproxy_logger_a_AR) libsslproxy_logger.a $(libsslproxy_logger_a_OBJECTS) $(libsslproxy_logger_a_LIBADD)
-	$(RANLIB) libsslproxy_logger.a
-libsslproxy_parameter.a: $(libsslproxy_parameter_a_OBJECTS) $(libsslproxy_parameter_a_DEPENDENCIES) 
-	-rm -f libsslproxy_parameter.a
-	$(libsslproxy_parameter_a_AR) libsslproxy_parameter.a $(libsslproxy_parameter_a_OBJECTS) $(libsslproxy_parameter_a_LIBADD)
-	$(RANLIB) libsslproxy_parameter.a
 install-sbinPROGRAMS: $(sbin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(sbindir)" || $(mkdir_p) "$(DESTDIR)$(sbindir)"
@@ -705,12 +646,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_parameter_a-parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsnmpagent_parameter_a-parameter_impl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-logger.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-logger_impl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_parameter_a-parameter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -1110,90 +1045,6 @@ libsnmpagent_parameter_a-parameter_impl.obj: parameter_impl.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter_impl.cpp' object='libsnmpagent_parameter_a-parameter_impl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsnmpagent_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsnmpagent_parameter_a-parameter_impl.obj `if test -f 'parameter_impl.cpp'; then $(CYGPATH_W) 'parameter_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter_impl.cpp'; fi`
-
-libsslproxy_logger_a-logger.o: logger.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" -c -o libsslproxy_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libsslproxy_logger_a-logger.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger.o `test -f 'logger.cpp' || echo '$(srcdir)/'`logger.cpp
-
-libsslproxy_logger_a-logger.obj: logger.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" -c -o libsslproxy_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger.cpp' object='libsslproxy_logger_a-logger.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger.obj `if test -f 'logger.cpp'; then $(CYGPATH_W) 'logger.cpp'; else $(CYGPATH_W) '$(srcdir)/logger.cpp'; fi`
-
-libsslproxy_logger_a-logger_impl.o: logger_impl.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger_impl.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" -c -o libsslproxy_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libsslproxy_logger_a-logger_impl.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger_impl.o `test -f 'logger_impl.cpp' || echo '$(srcdir)/'`logger_impl.cpp
-
-libsslproxy_logger_a-logger_impl.obj: logger_impl.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-logger_impl.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" -c -o libsslproxy_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo" "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-logger_impl.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='logger_impl.cpp' object='libsslproxy_logger_a-logger_impl.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-logger_impl.obj `if test -f 'logger_impl.cpp'; then $(CYGPATH_W) 'logger_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/logger_impl.cpp'; fi`
-
-libsslproxy_logger_a-strict_time_based_rolling_policy.o: strict_time_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-strict_time_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libsslproxy_logger_a-strict_time_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.o `test -f 'strict_time_based_rolling_policy.cpp' || echo '$(srcdir)/'`strict_time_based_rolling_policy.cpp
-
-libsslproxy_logger_a-strict_time_based_rolling_policy.obj: strict_time_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-strict_time_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-strict_time_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='strict_time_based_rolling_policy.cpp' object='libsslproxy_logger_a-strict_time_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-strict_time_based_rolling_policy.obj `if test -f 'strict_time_based_rolling_policy.cpp'; then $(CYGPATH_W) 'strict_time_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/strict_time_based_rolling_policy.cpp'; fi`
-
-libsslproxy_logger_a-time_and_size_based_rolling_policy.o: time_and_size_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-time_and_size_based_rolling_policy.o -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libsslproxy_logger_a-time_and_size_based_rolling_policy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.o `test -f 'time_and_size_based_rolling_policy.cpp' || echo '$(srcdir)/'`time_and_size_based_rolling_policy.cpp
-
-libsslproxy_logger_a-time_and_size_based_rolling_policy.obj: time_and_size_based_rolling_policy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_logger_a-time_and_size_based_rolling_policy.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo" "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Po"; else rm -f "$(DEPDIR)/libsslproxy_logger_a-time_and_size_based_rolling_policy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='time_and_size_based_rolling_policy.cpp' object='libsslproxy_logger_a-time_and_size_based_rolling_policy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_logger_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_logger_a-time_and_size_based_rolling_policy.obj `if test -f 'time_and_size_based_rolling_policy.cpp'; then $(CYGPATH_W) 'time_and_size_based_rolling_policy.cpp'; else $(CYGPATH_W) '$(srcdir)/time_and_size_based_rolling_policy.cpp'; fi`
-
-libsslproxy_parameter_a-parameter.o: parameter.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter.o -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" -c -o libsslproxy_parameter_a-parameter.o `test -f 'parameter.cpp' || echo '$(srcdir)/'`parameter.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter.cpp' object='libsslproxy_parameter_a-parameter.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter.o `test -f 'parameter.cpp' || echo '$(srcdir)/'`parameter.cpp
-
-libsslproxy_parameter_a-parameter.obj: parameter.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" -c -o libsslproxy_parameter_a-parameter.obj `if test -f 'parameter.cpp'; then $(CYGPATH_W) 'parameter.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter.cpp' object='libsslproxy_parameter_a-parameter.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter.obj `if test -f 'parameter.cpp'; then $(CYGPATH_W) 'parameter.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter.cpp'; fi`
-
-libsslproxy_parameter_a-parameter_impl.o: parameter_impl.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter_impl.o -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" -c -o libsslproxy_parameter_a-parameter_impl.o `test -f 'parameter_impl.cpp' || echo '$(srcdir)/'`parameter_impl.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter_impl.cpp' object='libsslproxy_parameter_a-parameter_impl.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter_impl.o `test -f 'parameter_impl.cpp' || echo '$(srcdir)/'`parameter_impl.cpp
-
-libsslproxy_parameter_a-parameter_impl.obj: parameter_impl.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libsslproxy_parameter_a-parameter_impl.obj -MD -MP -MF "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" -c -o libsslproxy_parameter_a-parameter_impl.obj `if test -f 'parameter_impl.cpp'; then $(CYGPATH_W) 'parameter_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter_impl.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo" "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Po"; else rm -f "$(DEPDIR)/libsslproxy_parameter_a-parameter_impl.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parameter_impl.cpp' object='libsslproxy_parameter_a-parameter_impl.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsslproxy_parameter_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libsslproxy_parameter_a-parameter_impl.obj `if test -f 'parameter_impl.cpp'; then $(CYGPATH_W) 'parameter_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/parameter_impl.cpp'; fi`
 
 l7vsadm-protocol_module_control.o: protocol_module_control.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(l7vsadm_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT l7vsadm-protocol_module_control.o -MD -MP -MF "$(DEPDIR)/l7vsadm-protocol_module_control.Tpo" -c -o l7vsadm-protocol_module_control.o `test -f 'protocol_module_control.cpp' || echo '$(srcdir)/'`protocol_module_control.cpp; \
