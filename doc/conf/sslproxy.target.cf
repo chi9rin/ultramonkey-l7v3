@@ -1,11 +1,8 @@
-# sslproxy configuration file.
-# /etc/l7vs/sslproxy/sslproxy.<target_id>.cf
+# ssl configuration file.
+# /etc/l7vs/sslproxy/sslproxy.target.cf
 
-[sslproxy]
+[ssl]
 # Global configuration.
-recv_endpoint = "0.0.0.0:443"
-target_endpoint = "208.77.188.166:80"
-num_thread = 10
 timeout_sec = 30
 
 # SSL configuration.
@@ -17,8 +14,6 @@ private_key_dir = "/etc/l7vs/sslproxy/"
 private_key_file = "server.pem"
 private_key_filetype = "SSL_FILETYPE_PEM"
 #private_key_filetype = "SSL_FILETYPE_ASN1"
-#private_key_passwd_from = "console"
-private_key_passwd_from = "file"
 private_key_passwd_dir = "/etc/l7vs/sslproxy/"
 private_key_passwd_file = "passwd.txt"
 verify_options = "SSL_VERIFY_NONE"
@@ -60,89 +55,3 @@ cipher_list = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 session_cache = "on"
 session_cache_size = 20480
 session_cache_timeout = 300
-
-# Packet edit configuration.
-# http_request_header:  Edit HTTP client request header message.
-# http_response_header: Edit HTTP server response header message.
-#   Format: "mode:header-field-name[:header-field-value[:replace-value]]
-#   Mode:   'set', 'unset', 'add' or 'replace'
-#   Macro:  %{CLIENT_ADDR} -> client IP address
-#           %{CLIENT_PORT} -> client port number
-#           %{SERVER_ADDR} -> server IP address
-#           %{SERVER_PORT} -> server port number
-#           %{RECV_ADDR}   -> sslproxy IP address
-#           %{RECV_PORT}   -> sslproxy port number
-#   Example: Insert or overwrite "X-Forwarded-Proto: https"
-#http_request_header = "set:X-Forwarded-Proto:https"
-#   Example: Change Host to real address
-#http_request_header = "set:Host:%{SERVER_ADDR}:%{SERVER_PORT}"
-#   Example: Remove "Cookie" field
-#http_request_header = "unset:Cookie"
-#   Example: Add "X-Forwarded-For: old-value,new-value"
-#            or insert "X-Forwarded-For: new-value"
-#http_request_header = "add:X-Forwarded-For:%{CLIENT_ADDR}"
-#   Example: Add or insert "Via"
-#http_request_header = "add:Via:HTTP/1.1 myserver (sslproxy/1.0)"
-#   Example: Replace keep-alive to close
-#http_request_header = "replace:Connection:keep-alive:close"
-#   Example: Replace MSIE User-Agent to Firefox (regex)
-#http_request_header = "replace:User-Agent:^.*MSIE.*$:Mozilla/5.0 (Windows; U; Windows NT 5.1) Firefox/3.0.0"
-#   Example: Add "Set-Cookie"
-#http_response_header = "add:Set-Cookie:sslproxy=on; path=/; secure"
-#   Example: Remove "Server"
-#http_response_header = "unset:Server"
-#   Example: Change "Content-Type" text/html to text/plain
-#http_response_header = "replace:Content-Type:html:plain"
-
-[logger]
-## SSLProxy log configuration.
-# sslproxy logfile base name
-sslproxy_log_filename = "/var/log/l7vs/sslproxy/sslproxy.target.log"
-
-# sslproxy log rotate pattern
-sslproxy_rotation = "size"
-#sslproxy_rotation = "date"
-#sslproxy_rotation = "datesize"
-
-# sslproxy rotate max backup number
-sslproxy_max_backup_index = "10"
-
-# sslproxy rotate file size
-sslproxy_max_filesize = "10M"
-
-# sslproxy rotation timing
-#sslproxy_rotation_timing = "month"
-#sslproxy_rotation_timing_value = "1 0:01"
-
-## Connection log configuration.
-# connection log ON/OFF
-conn_log_flag = "on"
-
-# connection logfile base name
-conn_log_filename = "/var/log/l7vs/sslproxy/sslproxy.target.conn_log"
-
-# connection log rotate pattern
-#conn_rotation = "size"
-conn_rotation = "date"
-#conn_rotation = "datesize"
-
-# connection rotate max backup number
-conn_max_backup_index = "10"
-
-# connection rotate file size
-#conn_max_filesize = "10M"
-
-# sslproxy rotation timing
-conn_rotation_timing = "month"
-conn_rotation_timing_value = "1 0:01"
-
-# Log categories level
-sslproxy_logger     = "warn"
-sslproxy_parameter  = "warn"
-sslproxy_common     = "warn"
-sslproxy_server     = "warn"
-sslproxy_session    = "warn"
-sslproxy_connection = "info"
-packet_edit         = "info"
-packet_edit_http    = "info"
-
