@@ -184,23 +184,6 @@ int        l7vs::replication::refer_lock_mutex( const std::string& inid, mutex_p
     return 0;
 }
 
-/*
-l7vs::data_buff_base::data_buff_base(){}
-l7vs::data_buff_base::~data_buff_base(){}
-void    l7vs::data_buff_base::initialize(){}
-std::size_t    l7vs::data_buff_base::get_size(){
-    return send_size;
-}
-void    l7vs::data_buff_base::set_size(const std::size_t set_size){}
-boost::array< char , MAX_BUFFER_SIZE>&    l7vs::data_buff_base::get_data(){
-    return data;
-}
-void    l7vs::data_buff_base::set_data(const boost::array< char , MAX_BUFFER_SIZE>& data){}
-void    l7vs::data_buff_base::set_send_size(const std::size_t set_size){}
-std::size_t    l7vs::data_buff_base::get_send_size(){
-    return send_size;
-}
-*/
 l7vs::tcp_realserver_connect_socket_list::tcp_realserver_connect_socket_list(){}
 
 l7vs::tcp_realserver_connect_socket_list::~tcp_realserver_connect_socket_list(){}
@@ -216,35 +199,6 @@ bool    l7vs::tcp_realserver_connect_socket_list::empty(){
     return true;
 }
 
-//l7vs::tcp_thread_message::tcp_thread_message(){}
-//l7vs::tcp_thread_message::~tcp_thread_message(){}
-
-//l7vs::tcp_thread_message_que::tcp_thread_message_que(){}
-//l7vs::tcp_thread_message_que::~tcp_thread_message_que(){}
-
-//void    l7vs::tcp_thread_message_que::push(tcp_thread_message_ptr message){}
-//l7vs::tcp_thread_message_que::tcp_thread_message_ptr    l7vs::tcp_thread_message_que::front(){
-//    return message_que.front();
-//}
-//bool    l7vs::tcp_thread_message_que::empty(){
-//    return true;
-//}
-//void     l7vs::tcp_thread_message_que::clear(){}
-
-/*
-l7vs::tcp_data::tcp_data(){}
-l7vs::tcp_data::~tcp_data(){}
-void    l7vs::tcp_data::initialize(){}
-void    l7vs::tcp_data::set_endpoint(const boost::asio::ip::tcp::endpoint set_endpoint){}
-boost::asio::ip::tcp::endpoint    l7vs::tcp_data::get_endpoint(){
-    return endpoint_info;
-}
-*/
-//l7vs::tcp_socket::tcp_socket(boost::asio::io_service& io) : my_socket( io ){}
-//l7vs::tcp_socket::~tcp_socket(){}
-//boost::asio::ip::tcp::socket&    l7vs::tcp_socket::get_socket(){
-//    return my_socket;
-//}
 bool    l7vs::tcp_socket::connect(const boost::asio::ip::tcp::endpoint connect_endpoint,boost::system::error_code& ec){
     return true;
 }
