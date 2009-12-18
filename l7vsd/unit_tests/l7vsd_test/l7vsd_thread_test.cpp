@@ -5,7 +5,6 @@
 #include <boost/multi_array.hpp>
 
 #include "error_code.h"
-#include "logger_wrapper.h"
 
 //#include "logger_enum.h"
 //#include "logger_stub.h"

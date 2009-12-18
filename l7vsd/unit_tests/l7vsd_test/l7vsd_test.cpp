@@ -7,7 +7,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "error_code.h"
-#include "logger_wrapper.h"
 
 //#include "logger_enum.h"
 //#include "logger_stub.h"
