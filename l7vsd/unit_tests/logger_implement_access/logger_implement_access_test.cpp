@@ -25,7 +25,6 @@
 #include "error_code.h"
 #include "logger_enum.h"
 #include "logger.h"
-#include "logger_wrapper.h"
 
 #include "command_receiver_stub.h"
 //#include "realserver_stub.h"
