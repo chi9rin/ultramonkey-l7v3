@@ -20955,7 +20955,7 @@ exec_prefix=/usr
 
 
 
-                                                                                                              ac_config_files="$ac_config_files doc/Makefile l7directord/Makefile l7vsd/Makefile l7vsd/init.d/Makefile l7vsd/modtester/Makefile l7vsd/module/Makefile l7vsd/module/protocol/Makefile l7vsd/module/schedule/Makefile l7vsd/src/Makefile snmpagent/Makefile Makefile"
+                                                                                                    ac_config_files="$ac_config_files doc/Makefile l7directord/Makefile l7vsd/Makefile l7vsd/init.d/Makefile l7vsd/module/Makefile l7vsd/module/protocol/Makefile l7vsd/module/schedule/Makefile l7vsd/src/Makefile snmpagent/Makefile Makefile"
 
 
           ac_config_files="$ac_config_files l7vsd.spec"
@@ -21519,7 +21519,6 @@ do
   "l7directord/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7directord/Makefile" ;;
   "l7vsd/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/Makefile" ;;
   "l7vsd/init.d/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/init.d/Makefile" ;;
-  "l7vsd/modtester/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/modtester/Makefile" ;;
   "l7vsd/module/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/module/Makefile" ;;
   "l7vsd/module/protocol/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/module/protocol/Makefile" ;;
   "l7vsd/module/schedule/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/module/schedule/Makefile" ;;
