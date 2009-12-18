@@ -181,7 +181,7 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         ( request.vs_element.access_log_flag == 1 ) && ( request.vs_element.access_log_file_name.length() == 0 ) ){
         std::string    buf("access log file is not specified.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 89, buf, __FILE__, __LINE__ );
         return false;
         
     }
@@ -680,12 +680,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_udp_func( int& pos, int argc, char* argv[] )
 //! @param[in]    argument count
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_vs_ssl_file_func( int& pos, int argc, char* argv[] ){
-    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_ssl_file_func", __FILE__, __LINE__ );
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 38, "l7vsadm::parse_opt_vs_ssl_file_func", __FILE__, __LINE__ );
 
     if( ++pos >= argc ){
         std::string    buf("ssl config filename is not specified.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 90, buf, __FILE__, __LINE__ );
         return false;
     }
     // ssl config file check.
@@ -693,14 +693,14 @@ bool    l7vs::l7vsadm::parse_opt_vs_ssl_file_func( int& pos, int argc, char* arg
     if( L7VS_FILENAME_LEN < conf_file_name.length() ){
         std::string buf("ssl config filename is too long.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 91, buf, __FILE__, __LINE__ );
         return false;
     }
     FILE  *fp;
     if ((fp = fopen(conf_file_name.c_str(), "r")) == NULL) {
         std::string buf("ssl config file cannot open.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 92, buf, __FILE__, __LINE__ );
         return false;
     }
     fclose(fp);
@@ -713,13 +713,13 @@ bool    l7vs::l7vsadm::parse_opt_vs_ssl_file_func( int& pos, int argc, char* arg
 //! @param[in]    argument count
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_vs_access_log_func( int& pos, int argc, char* argv[] ){
-    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_access_log_func", __FILE__, __LINE__ );
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 39, "l7vsadm::parse_opt_vs_access_log_func", __FILE__, __LINE__ );
 
     if( ++pos >= argc ){
         //don't target access log flag
         std::string    buf("access log flag value is not specified.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 93, buf, __FILE__, __LINE__ );
         return false;
     }
     try{
@@ -727,7 +727,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_func( int& pos, int argc, char* a
         if( ( 0 != tmp ) && ( 1 != tmp ) ){
             std::string    buf("invalid access log flag value.");
             l7vsadm_err.setter( true, buf );
-            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 94, buf, __FILE__, __LINE__ );
             return false;
         }
         if( 0 == tmp )
@@ -739,7 +739,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_func( int& pos, int argc, char* a
         // don't convert argv[pos] is
         std::string    buf("invalid access log flag value.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 95, buf, __FILE__, __LINE__ );
         return false;
     }
     return true;    //
@@ -750,12 +750,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_func( int& pos, int argc, char* a
 //! @param[in]    argument count
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int argc, char* argv[] ){
-    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_accesslog_logrotate_func", __FILE__, __LINE__ );
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 40, "l7vsadm::parse_opt_vs_accesslog_logrotate_func", __FILE__, __LINE__ );
 
     if( ++pos >= argc ){
         std::string    buf("access log filename is not specified.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 96, buf, __FILE__, __LINE__ );
         return false;
     }
     // access log file check.
@@ -763,13 +763,13 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
     if( L7VS_FILENAME_LEN < access_log_file_name.length() ){
         std::string buf("access log filename is too long.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 97, buf, __FILE__, __LINE__ );
         return false;
     }
     if( "/" != access_log_file_name.substr(0, 1) ){
         std::string buf("please specify access log filename in fullpath.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 98, buf, __FILE__, __LINE__ );
         return false;
     }
     
@@ -795,7 +795,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
                 if( !ret.second ){
                     std::string buf("access log rotation argument is duplicated.");
                     l7vsadm_err.setter( true, buf );
-                    Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+                    Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 99, buf, __FILE__, __LINE__ );
                     return false;
                 }
             }
@@ -803,14 +803,14 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
         else{
             std::string buf("access log rotation argument error.");
             l7vsadm_err.setter( true, buf );
-            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 100, buf, __FILE__, __LINE__ );
             return false;
         }
         bool ret = logger_access_manager::getInstance().access_log_logrotate_parameter_check( arguments_map );
         if( !ret ){
             std::string buf("access log rotation argument error.");
             l7vsadm_err.setter( true, buf );
-            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 101, buf, __FILE__, __LINE__ );
             return false;
         }
     }
@@ -832,12 +832,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
 //! @param[in]    argument count
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[] ){
-    Logger    logger( LOG_CAT_L7VSADM_COMMON, 999, "l7vsadm::parse_opt_vs_socket_func", __FILE__, __LINE__ );
+    Logger    logger( LOG_CAT_L7VSADM_COMMON, 41, "l7vsadm::parse_opt_vs_socket_func", __FILE__, __LINE__ );
 
     if( ++pos >= argc ){
         std::string    buf("socket_option is not specified.");
         l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf, __FILE__, __LINE__ );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 102, buf, __FILE__, __LINE__ );
         return false;
     }
 
@@ -866,7 +866,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[
                 std::stringstream buf;
                 buf << "socket option deferaccept is duplicated.";
                 l7vsadm_err.setter( true, buf.str() );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 103, buf.str(), __FILE__, __LINE__ );
                 return false;
             }
         }
@@ -880,7 +880,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[
                 std::stringstream buf;
                 buf << "socket option nodelay is duplicated.";
                 l7vsadm_err.setter( true, buf.str() );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 104, buf.str(), __FILE__, __LINE__ );
                 return false;
             }
         }
@@ -894,7 +894,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[
                 std::stringstream buf;
                 buf << "socket option cork is duplicated.";
                 l7vsadm_err.setter( true, buf.str() );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 105, buf.str(), __FILE__, __LINE__ );
                 return false;
             }
         }
@@ -908,7 +908,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[
                 std::stringstream buf;
                 buf << "socket option quickack is duplicated.";
                 l7vsadm_err.setter( true, buf.str() );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 106, buf.str(), __FILE__, __LINE__ );
                 return false;
             }
         }
@@ -917,7 +917,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[
             std::stringstream buf;
             buf << "unknown socket option.";
             l7vsadm_err.setter( true, buf.str() );
-            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 999, buf.str(), __FILE__, __LINE__ );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 107, buf.str(), __FILE__, __LINE__ );
             return false;
         }
     }
@@ -2298,7 +2298,7 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
                     std::stringstream   buf;
                     buf << boost::format( "connect() failed: %s.") % err.message();
                     l7vsadm_err.setter( true, buf.str() );
-                    Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 999, buf.str(), __FILE__, __LINE__ );
+                    Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 9, buf.str(), __FILE__, __LINE__ );
                     break;
                 }
 
