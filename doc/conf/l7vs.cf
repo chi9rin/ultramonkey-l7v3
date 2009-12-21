@@ -140,31 +140,6 @@ snmpagent_system_endpoint		= "info"
 snmpagent_system_signal			= "info"
 snmpagent_system_environment	= "info"
 
-# sslproxy logfile base name
-sslproxy_log_filename = "/var/log/l7vs/sslproxy.log"
-# sslproxy log rotate pattern
-sslproxy_rotation = "size"
-# sslproxy rotate max backup number
-sslproxy_max_backup_index = "10"
-# sslproxy rotate file size
-sslproxy_max_filesize = "10M"
-
-# sslproxy connection logfile base name
-sslproxy_conn_log_filename = "/var/log/l7vs/sslproxy_conn.log"
-# sslproxy connection log rotate pattern
-sslproxy_conn_rotation = "size"
-# sslproxy connection rotate max backup number
-sslproxy_conn_max_backup_index = "10"
-# sslproxy connection rotate file size
-sslproxy_conn_max_filesize = "10M"
-
-# l7vsadm log categories level
-sslproxy_logger			= "info"
-sslproxy_parameter		= "info"
-sslproxy_common			= "info"
-sslproxy_server			= "info"
-sslproxy_session		= "info"
-sslproxy_connection		= "info"
 
 #
 # l7vsadm setting
@@ -191,7 +166,6 @@ nic_realserver_side			= "eth0"
 session_thread_pool_size	= 32
 throughput_calc_interval	= 500
 num_of_core_uses		= 0
-ssl_flag			= 1
 
 #
 # l7vsd replication setting
