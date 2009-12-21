@@ -1469,6 +1469,11 @@ void        replication::service_thread(){
             break;
         } else {
             service_io.poll();
+            timespec    wait_val;
+            wait_val.tv_sec        = 0;
+            wait_val.tv_nsec    = 10;
+            nanosleep( &wait_val, NULL );
+            boost::this_thread::yield();
         }
         {
             boost::mutex::scoped_lock    lock( service_thread_mutex );
