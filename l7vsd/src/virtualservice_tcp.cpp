@@ -48,7 +48,8 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd& invsd,
                          :
                          virtualservice_base( invsd, inrep, inelement ),
                          acceptor_( dispatcher ),
-                         sslcontext(dispatcher, DEFAULT_SSL_METHOD)
+                         sslcontext(dispatcher, DEFAULT_SSL_METHOD),
+                         access_log_file_name("")
 {
     active_count = 0;
 }
@@ -793,14 +794,16 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
 
     vsd.release_virtual_service( element );
 
-    // erase access log instance.
-    logger_access_manager::getInstance().erase_logger_implement_access( access_log_file_name, err );
-    if ( unlikely(err) ) {
-        boost::format    fmt( "access logger instance erase err:%s" );
-        fmt % err.get_message();
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 8,
-                               fmt.str(),
-                               __FILE__, __LINE__ );
+    if( access_log_file_name != "" ) {
+        // erase access log instance.
+        logger_access_manager::getInstance().erase_logger_implement_access( access_log_file_name, err );
+        if ( unlikely(err) ) {
+            boost::format    fmt( "access logger instance erase err:%s" );
+            fmt % err.get_message();
+            Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 8,
+                                   fmt.str(),
+                                   __FILE__, __LINE__ );
+        }
     }
     
     err.setter( false, "" );
