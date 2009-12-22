@@ -39,6 +39,8 @@
 #include "virtualservice_element.h"
 #include "logger_access_manager.h"
 
+#define VS_CONTACT_CLASS_SSL (0x00000001)
+
 // global function prototype
 static void    sig_exit_handler(int sig);
 static int    set_sighandler(int sig, void (*handler)(int));
@@ -252,7 +254,6 @@ bool    l7vs::l7vsadm::parse_opt_vs_target_func( int& pos, int argc, char* argv[
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_vs_module_func( int& pos, int argc, char* argv[] ){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 5, "l7vsadm::parse_opt_vs_module_func", __FILE__, __LINE__ );
-
     if( ++pos >= argc ){
         //don't target protomod name.
         std::string    buf("protomod name is not specified.");
@@ -704,6 +705,61 @@ bool    l7vs::l7vsadm::parse_opt_vs_ssl_file_func( int& pos, int argc, char* arg
         return false;
     }
     fclose(fp);
+
+    if( ( strcmp( argv[ 1 ] , "-A" ) == 0 ) 
+    || ( strcmp( argv[ 1 ] , "--add-service" ) == 0 ) ) {
+        protocol_module_control&	ctrl 
+                = protocol_module_control::getInstance();
+        ctrl.initialize( L7VS_MODULE_PATH );
+        protocol_module_base* module;
+        try{
+            module 
+                = ctrl.load_module( request.vs_element.protocol_module_name );
+        }
+        catch( ... ){
+            std::stringstream buf;
+            buf << "protocol module load error:" 
+                << request.vs_element.protocol_module_name;
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( 
+                        LOG_CAT_L7VSADM_PARSE, 
+                        108, 
+                        buf.str(), 
+                        __FILE__, 
+                        __LINE__ );
+            return false;
+        }
+        if( !module ){
+            //don't find protocol module.
+            std::stringstream buf;
+            buf << "protocol module not found:" 
+                << request.vs_element.protocol_module_name;
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( 
+                LOG_CAT_L7VSADM_PARSE, 
+                109, buf.str(), 
+                __FILE__, 
+                __LINE__ );
+            return false;
+        }
+        
+        bool module_used_flag = module->is_exec_OK( VS_CONTACT_CLASS_SSL );
+        if( module_used_flag == false ) {
+            //don't find protocol module.
+            std::stringstream buf;
+            buf << "When \"protocol_module sslid\" was designated," 
+                << " it isn't possible to designate \"-z\" option.";
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( 
+                LOG_CAT_L7VSADM_PARSE, 
+                110, 
+                buf.str(), 
+                __FILE__, 
+                __LINE__ );
+            return false;
+        }
+    }
+
     request.vs_element.ssl_file_name = conf_file_name;
     return true;
 }
