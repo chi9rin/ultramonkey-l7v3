@@ -198,6 +198,9 @@ namespace l7vs{
         add_up_thread_message_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT;
         add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event,this,_1);
         up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
+        add_up_thread_message_func.first = DOWN_FUNC_SORRY_ENABLE_EVENT;
+        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_sorry_enable_event,this,_1);
+        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
 
         // set down_thread_module_event_map
         std::pair<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG> add_down_thread_event;
@@ -1702,10 +1705,10 @@ namespace l7vs{
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type){
         boost::asio::ip::tcp::endpoint server_endpoint;
-        
+
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_select(up_thread_id,server_endpoint);
         up_thread_data_dest_side.set_endpoint(server_endpoint);
-        
+
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
         if( unlikely( func_type == up_thread_module_event_map.end() ) ){
             //Error unknown protocol_module_base::EVENT_TAG return
@@ -1730,6 +1733,28 @@ namespace l7vs{
             up_thread_exit(process_type);
             return;
         }
+        if(module_event == protocol_module_base::SORRYSERVER_SELECT){
+            // protocol module sorry mode change 
+            tcp_thread_message*    down_msg    = new tcp_thread_message;
+
+            std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator 
+                down_func = up_thread_message_down_thread_function_map.find(
+                    DOWN_FUNC_SORRY_ENABLE_EVENT);
+
+            if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
+                //Error not find function map
+                std::stringstream buf;
+                buf << "Thread ID[";
+                buf << boost::this_thread::get_id();
+                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_SORRY_ENABLE_EVENT";
+                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 115, buf.str(), __FILE__, __LINE__ );
+                up_thread_exit(process_type);
+                return;
+            }
+            down_msg->message = down_func->second;
+            while(!down_thread_message_que.push(down_msg)){}
+        }
+
         up_thread_next_call_function = func;
     }
     //! up thread connect realserver
