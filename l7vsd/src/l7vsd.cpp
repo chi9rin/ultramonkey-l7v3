@@ -296,7 +296,7 @@ void    l7vsd::del_virtual_service( const virtualservice_element* in_vselement, 
     }
     /*------ DEBUG LOG END ------*/
 
-    vslist_type::iterator vsitr = search_vslist( *in_vselement );
+    vslist_type::iterator vsitr = search_vslist( *in_vselement ,true);
     if( vslist.end() !=  vsitr ){
         // vs stop
         (*vsitr)->stop();
@@ -734,7 +734,9 @@ void    l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG* comp, error_code
 //! vs_list search function
 //! @param[in]    vs_element
 //! @param[out]    error_code
-l7vsd::vslist_type::iterator    l7vsd::search_vslist( const virtualservice_element& in_vselement ) const {
+l7vsd::vslist_type::iterator    l7vsd::search_vslist( 
+    const virtualservice_element& in_vselement,
+    bool find_module_name ) const {
     Logger    logger( LOG_CAT_L7VSD_MAINTHREAD, 28, "l7vsd::search_vslist", __FILE__, __LINE__ );
 
     /*-------- DEBUG LOG --------*/
@@ -752,13 +754,25 @@ l7vsd::vslist_type::iterator    l7vsd::search_vslist( const virtualservice_eleme
         if( in_vselement.udpmode ){
             if(    ( (*itr)->get_element().udpmode ) &&
                 ( (*itr)->get_element().udp_recv_endpoint  == in_vselement.udp_recv_endpoint ) ){
-                return itr;
+                if( find_module_name ){
+                    if( (*itr)->get_element().protocol_module_name ==  in_vselement.protocol_module_name){
+                        return itr;
+                    }
+                }else{
+                    return itr;
+                }
             }
         }
         else{
             if(    ( !((*itr)->get_element().udpmode) ) &&
                 ( (*itr)->get_element().tcp_accept_endpoint == in_vselement.tcp_accept_endpoint ) ){
-                return itr;
+                if( find_module_name ){
+                    if( (*itr)->get_element().protocol_module_name ==  in_vselement.protocol_module_name){
+                        return itr;
+                    }
+                }else{
+                    return itr;
+                }
             }
         }
     }

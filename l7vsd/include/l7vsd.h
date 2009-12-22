@@ -94,8 +94,9 @@ protected:
     boost::mutex                command_mutex;        //!< command execute mutex
     boost::mutex                vslist_mutex;        //!< virtual service list mutex
 
-    virtual    vslist_type::iterator
-                                search_vslist( const virtualservice_element& )    const;    //!< vs_list search function
+    virtual    vslist_type::iterator search_vslist(
+        const virtualservice_element& ,
+        bool find_module_name = false) const; //!< vs_list search function
 
     bool                        help;                //!< help mode
 
