@@ -798,6 +798,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
                     Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 99, buf, __FILE__, __LINE__ );
                     return false;
                 }
+                ++i;
             }
         }
         else{
