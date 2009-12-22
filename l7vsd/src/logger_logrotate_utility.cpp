@@ -527,18 +527,15 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
 void logger_logrotate_utility::set_appender(const appender_property& log_property,const char *logger_layout,const std::string &log_category)
 {
 
+
     // appender setting
     try {
         log4cxx::helpers::Pool pool;
-        // reset current configuration
-        log4cxx::LogManager::resetConfiguration();
 
         log4cxx::LayoutPtr layout =
             new log4cxx::PatternLayout(logger_layout);
 
         log4cxx::rolling::RollingFileAppenderPtr    normalAppender;
-
-        if( "" == log_property.log_filename_key )    return;    // no conn_log setting.
 
         switch (log_property.rotation_value) {
         case LOG_ROT_SIZE:
@@ -577,6 +574,7 @@ void logger_logrotate_utility::set_appender(const appender_property& log_propert
 
                 // set TriggeringPolicy
                 sizeAppender->setTriggeringPolicy(sizeTriggeringPolicy);
+
 
                 // set Log Filename
                 try{
@@ -704,7 +702,6 @@ void logger_logrotate_utility::set_appender(const appender_property& log_propert
 
             }
         }    //switch
-
 
         log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger( log_category );
         if (0 == cat_logger) {
