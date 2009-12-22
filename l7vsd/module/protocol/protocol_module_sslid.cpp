@@ -1805,7 +1805,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                 // schedule the endpoint
                 boost::asio::ip::tcp::endpoint temp_endpoint;
                 boost::asio::ip::tcp::endpoint comp_endpoint;   // for compare the endpoint
-                schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                {
+                    rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
+                    schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                }
+                
                 if (temp_endpoint != comp_endpoint)
                 {
                     // success for get the endpoint by reschedule
@@ -1851,21 +1855,23 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
 
                 if (ret == 0)
                 {
-                    //find the rs_endpoint in the rs_list
-                    rs_list_lock();
-
-                    rs_list_itr = rs_list_begin();
                     int is_match = 0;
-
-                    while (rs_list_itr != rs_list_end())
+                    //find the rs_endpoint in the rs_list
                     {
-                        if (rs_list_itr->tcp_endpoint == threaddata->selected_realserver)
-                        {
-                            is_match = 1;
-                            break;
-                        }
+                        rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
 
-                        rs_list_itr = rs_list_next(rs_list_itr);
+                        rs_list_itr = rs_list_begin();
+
+                        while (rs_list_itr != rs_list_end())
+                        {
+                            if (rs_list_itr->tcp_endpoint == threaddata->selected_realserver)
+                            {
+                                is_match = 1;
+                                break;
+                            }
+
+                            rs_list_itr = rs_list_next(rs_list_itr);
+                        }
                     }
 
                     if (is_match)
@@ -1882,7 +1888,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                             // reschedule mode
                             boost::asio::ip::tcp::endpoint temp_endpoint;
                             boost::asio::ip::tcp::endpoint comp_endpoint;   // for compare the endpoint
-                            schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                            {
+                                rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
+                                schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                            }
+
                             if (temp_endpoint != comp_endpoint)
                             {
                             // get the endpoint by reschedule successfully
@@ -1935,7 +1945,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                         // reschedule mode
                         boost::asio::ip::tcp::endpoint temp_endpoint;
                         boost::asio::ip::tcp::endpoint comp_endpoint;   // for compare the endpoint
-                        schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                        {
+                            rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
+                            schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, temp_endpoint);
+                        }
+
                         if (temp_endpoint != comp_endpoint)
                         {
                             // get the endpoint by reschedule successfully
@@ -2398,7 +2412,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
 //! called from after sorryserver select
 //! @param[in] upstream thread id
 //! @param[in] sorryserver endppiont reference
-//! @return session use EVENT mode(STOP).
+//! @return session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_select(
     const boost::thread::id thread_id,
     boost::asio::ip::tcp::endpoint& sorry_endpoint)
@@ -2495,7 +2509,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_select
 //! @param[in] upstream thread id
 //! @param[out] send buffer reference.
 //! @param[out] send length
-//! @return session use EVENT mode(STOP).
+//! @return session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connect(
     const boost::thread::id thread_id,
     boost::array<char,MAX_BUFFER_SIZE>& sendbuffer,
@@ -2582,7 +2596,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
 //! called from after sorryserver connection fail
 //! @param[in] upstream thread id
 //! @param[in] sorryserver endpoint reference.
-//! @return session use EVENT mode(STOP).
+//! @return session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connection_fail(
     const boost::thread::id thread_id,
     const boost::asio::ip::tcp::endpoint& sorry_endpoint)
@@ -2685,7 +2699,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
 
 //! called from after sorryserver send
 //! @param[in] upstream thread id
-//! @return session use EVENT mode(STOP).
+//! @return session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
     const boost::thread::id thread_id)
 {
@@ -3148,7 +3162,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
 //! @param[in] sorryserver endpoint reference
 //! @param[in] recive from realserver buffer reference.
 //! @param[in] recv data length
-//! @return     session use EVENT mode(STOP).
+//! @return     session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
     const boost::thread::id thread_id,
     const boost::asio::ip::tcp::endpoint& sorry_endpoint,
@@ -3944,7 +3958,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_disconnect(
 
 //! call from sorry mode event. use upstream thread and downstream thread
 //! @param[in] upstream and downstream thread id(check! one thread one event and first time call pattern)
-//! @return     session use EVENT mode(STOP).
+//! @return     session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
     const boost::thread::id thread_id)
 {
@@ -4095,7 +4109,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_enable(
 
 //! call from sorry mode disable. use upstream thread and downstream thread.
 //! @param[in] upstream and downstream thread id(check! one thread one event)
-//! @return     session use EVENT mode(STOP).
+//! @return     session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorry_disable(
     const boost::thread::id thread_id)
 {

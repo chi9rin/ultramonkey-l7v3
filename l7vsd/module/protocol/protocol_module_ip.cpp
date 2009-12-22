@@ -2060,25 +2060,25 @@ namespace l7vs
             //endpoint is matched
             if (ret == 0)
             {
-                //find the rs_endpoint in rs_list
-                rs_list_lock();
-
-                rs_list_itr = rs_list_begin();
                 int is_match = 0;
-
-                while ( rs_list_itr != rs_list_end())
+                //find the rs_endpoint in rs_list
                 {
+                    rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
 
-                    if ( rs_list_itr->tcp_endpoint == rs_endpoint )
+                    rs_list_itr = rs_list_begin();
+                
+                    while ( rs_list_itr != rs_list_end())
                     {
-                        is_match = 1;
-                        break;
+
+                        if ( rs_list_itr->tcp_endpoint == rs_endpoint )
+                        {
+                            is_match = 1;
+                            break;
+                        }
+
+                        rs_list_itr = rs_list_next( rs_list_itr );
                     }
-
-                    rs_list_itr = rs_list_next( rs_list_itr );
                 }
-
-                rs_list_unlock();
 
                 //endpoint is matched in the list
                 if (is_match)
@@ -2104,8 +2104,11 @@ namespace l7vs
                     {
                         // init rs_endpoint
                         rs_endpoint = init_endpoint;
+                        {
+                            rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
+                            schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint);
+                        }
 
-                        schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
@@ -2182,7 +2185,10 @@ namespace l7vs
                 rs_endpoint = init_endpoint;
 
                 //call schedule_module's schedule function, get realserver endpoint
-                schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint);
+                {
+                    rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
+                    schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint);
+                }
 
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))

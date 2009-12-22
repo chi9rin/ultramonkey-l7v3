@@ -2277,7 +2277,11 @@ namespace l7vs
             }
 
             //call schedule_module's schedule function, get realserver endpoint
-            schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint);
+            {
+                rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
+                schedule_tcp(thread_id, rs_list_begin, rs_list_end, rs_list_next, rs_endpoint);
+            }
+
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {

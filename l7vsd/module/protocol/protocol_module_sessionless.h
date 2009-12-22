@@ -276,6 +276,18 @@ public:
     }
 };
 
+class rs_list_scoped_lock {
+    protected: 
+        boost::function< void( void ) >    rs_list_unlock;
+    public:
+        rs_list_scoped_lock(boost::function< void( void ) >    inlist_lock,
+                            boost::function< void( void ) >    inlist_unlock) 
+        {
+            inlist_lock();
+            rs_list_unlock = inlist_unlock; 
+        }
+        ~rs_list_scoped_lock() { rs_list_unlock(); }
+};
 }
 
 #endif  //PROTOCOL_MODULE_SESSIONLESS_H

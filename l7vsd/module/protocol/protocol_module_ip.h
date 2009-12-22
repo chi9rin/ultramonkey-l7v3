@@ -105,7 +105,18 @@ namespace l7vs
         }
         return hash >> 32 - HASH_TABLE_BITS;
         }
-
+        class rs_list_scoped_lock {
+            protected: 
+                boost::function< void( void ) >    rs_list_unlock;
+            public:
+                rs_list_scoped_lock(boost::function< void( void ) >    inlist_lock,
+                                    boost::function< void( void ) >    inlist_unlock) 
+                {
+                    inlist_lock();
+                    rs_list_unlock = inlist_unlock; 
+                }
+                ~rs_list_scoped_lock() { rs_list_unlock(); }
+        };
 
     public:
         static const std::string MODULE_NAME;

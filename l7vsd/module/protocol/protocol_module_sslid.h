@@ -200,6 +200,18 @@ class protocol_module_sslid : public ssl_protocol_module_base
                                 const boost::thread::id& thread_id,
                                 boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
                                 size_t& datalen);
+        class rs_list_scoped_lock {
+            protected: 
+                boost::function< void( void ) >    rs_list_unlock;
+            public:
+                rs_list_scoped_lock(boost::function< void( void ) >    inlist_lock,
+                                    boost::function< void( void ) >    inlist_unlock) 
+                {
+                    inlist_lock();
+                    rs_list_unlock = inlist_unlock; 
+                }
+                ~rs_list_scoped_lock() { rs_list_unlock(); }
+        };
     protected:
         int timeout;
         int maxlist;
