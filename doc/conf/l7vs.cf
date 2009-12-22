@@ -22,9 +22,9 @@
 # 
 #
 # Rivision History.
-#	3.0.0	MultiThread version release.
-#	1.2.0	First verion release.(version was put together l7vsd)
-#		- 2008/03/26 Norihisa Nakai.
+#    3.0.0    MultiThread version release.
+#    1.2.0    First verion release.(version was put together l7vsd)
+#        - 2008/03/26 Norihisa Nakai.
 
 
 #
@@ -48,34 +48,34 @@ l7vsd_accesslog_rotate_max_backup_index = "10"
 l7vsd_accesslog_rotate_max_filesize = "10M"
 
 # l7vsd log categories level
-l7vsd_network					= "info"
-l7vsd_network_qos				= "info"
-l7vsd_network_bandwidth			= "info"
-l7vsd_network_num_connection	= "info"
-l7vsd_network_access			= "info"
-l7vsd_mainthread				= "info"
-l7vsd_virtualservice			= "info"
-l7vsd_virtualservice_thread		= "info"
-l7vsd_session					= "info"
-l7vsd_session_thread			= "info"
-l7vsd_realserver				= "info"
-l7vsd_sorryserver				= "info"
-l7vsd_module					= "info"
-l7vsd_replication				= "info"
-l7vsd_replication_sendthread	= "info"
-l7vsd_parameter					= "info"
-l7vsd_logger					= "info"
-l7vsd_command					= "info"
-l7vsd_start_stop				= "info"
-l7vsd_system					= "info"
-l7vsd_system_memory				= "info"
-l7vsd_system_endpoint			= "info"
-l7vsd_system_signal				= "info"
-l7vsd_system_environment		= "info"
-l7vsd_snmpbridge				= "info"
+l7vsd_network                    = "warn"
+l7vsd_network_qos                = "warn"
+l7vsd_network_bandwidth          = "warn"
+l7vsd_network_num_connection     = "warn"
+l7vsd_network_access             = "warn"
+l7vsd_mainthread                 = "warn"
+l7vsd_virtualservice             = "warn"
+l7vsd_virtualservice_thread      = "warn"
+l7vsd_session                    = "warn"
+l7vsd_session_thread             = "warn"
+l7vsd_realserver                 = "warn"
+l7vsd_sorryserver                = "warn"
+l7vsd_module                     = "warn"
+l7vsd_replication                = "warn"
+l7vsd_replication_sendthread     = "warn"
+l7vsd_parameter                  = "warn"
+l7vsd_logger                     = "warn"
+l7vsd_command                    = "warn"
+l7vsd_start_stop                 = "warn"
+l7vsd_system                     = "warn"
+l7vsd_system_memory              = "warn"
+l7vsd_system_endpoint            = "warn"
+l7vsd_system_signal              = "warn"
+l7vsd_system_environment         = "warn"
+l7vsd_snmpbridge                 = "warn"
 
-l7vsd_protocol					= "info"
-l7vsd_schedule					= "info"
+l7vsd_protocol                   = "warn"
+l7vsd_schedule                   = "warn"
 
 # l7vsadm log file base name
 l7vsadm_log_filename = "/var/log/l7vs/l7vsadm.log"
@@ -89,16 +89,16 @@ l7vsadm_rotation_timing = "month"
 l7vsadm_rotation_timing_value = "1 0:01"
 
 # l7vsadm log categories level
-l7vsadm_parse			= "info"
-l7vsadm_operate			= "info"
-l7vsadm_config_result	= "info"
-l7vsadm_common			= "info"
-l7vsadm_logger			= "info"
-l7vsadm_parameter		= "info"
-l7vsadm_module			= "info"
+l7vsadm_parse                    = "warn"
+l7vsadm_operate                  = "warn"
+l7vsadm_config_result            = "warn"
+l7vsadm_common                   = "warn"
+l7vsadm_logger                   = "warn"
+l7vsadm_parameter                = "warn"
+l7vsadm_module                   = "warn"
 
-l7vsadm_protocol		= "info"
-l7vsadm_schedule		= "info"
+l7vsadm_protocol                 = "warn"
+l7vsadm_schedule                 = "warn"
 
 # snmpagent log file base name
 snmp_log_filename = "/var/log/l7vs/snmpagent.log"
@@ -127,18 +127,18 @@ snmp_conn_rotation_timing = "week"
 snmp_conn_rotation_timing_value = "wed 23:59"
 
 # snmpagent log categories level
-snmpagent_start_stop			= "info"
-snmpagent_manager_receive		= "info"
-snmpagent_manager_send			= "info"
-snmpagent_l7vsd_receive			= "info"
-snmpagent_l7vsd_send			= "info"
-snmpagent_logger				= "info"
-snmpagent_parameter				= "info"
-snmpagent_system				= "info"
-snmpagent_system_memory			= "info"
-snmpagent_system_endpoint		= "info"
-snmpagent_system_signal			= "info"
-snmpagent_system_environment	= "info"
+snmpagent_start_stop             = "warn"
+snmpagent_manager_receive        = "warn"
+snmpagent_manager_send           = "warn"
+snmpagent_l7vsd_receive          = "warn"
+snmpagent_l7vsd_send             = "warn"
+snmpagent_logger                 = "warn"
+snmpagent_parameter              = "warn"
+snmpagent_system                 = "warn"
+snmpagent_system_memory          = "warn"
+snmpagent_system_endpoint        = "warn"
+snmpagent_system_signal          = "warn"
+snmpagent_system_environment     = "warn"
 
 
 #
@@ -155,17 +155,17 @@ con_count = 10
 #
 [l7vsd]
 maxfileno = 65535
-task_scheduler_algorithm	= 2
-task_scheduler_priority		= 99
+task_scheduler_algorithm    = 2
+task_scheduler_priority     = 99
 
 #
 # virtualservice setting
 #
 [virtualservice]
-nic_realserver_side			= "eth0"
-session_thread_pool_size	= 32
-throughput_calc_interval	= 500
-num_of_core_uses		= 0
+nic_realserver_side         = "eth0"
+session_thread_pool_size    = 32
+throughput_calc_interval    = 500
+num_of_core_uses            = 0
 
 #
 # l7vsd replication setting
