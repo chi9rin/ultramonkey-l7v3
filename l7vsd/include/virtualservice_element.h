@@ -63,6 +63,9 @@ public:
     unsigned long long      throughput_upstream;
     unsigned long long      throughput_downstream;
 
+    unsigned long long      qos_upstream_ten_multiple_val;
+    unsigned long long      qos_downstream_ten_multiple_val;
+
     int                     access_log_flag;
     std::string             ssl_file_name;
     std::string             access_log_file_name;
@@ -88,6 +91,8 @@ public:
                                 qos_downstream(0ULL),
                                 throughput_upstream(0ULL),
                                 throughput_downstream(0ULL),
+                                qos_upstream_ten_multiple_val(0ULL),
+                                qos_downstream_ten_multiple_val(0ULL),
                                 access_log_flag(0),
                                 socket_option_tcp_defer_accept(0),
                                 socket_option_tcp_nodelay(0),
@@ -107,6 +112,8 @@ public:
                 qos_downstream( in.qos_downstream ),
                 throughput_upstream( in.throughput_upstream ),
                 throughput_downstream( in.throughput_downstream ),
+                qos_upstream_ten_multiple_val( in.qos_upstream_ten_multiple_val ),
+                qos_downstream_ten_multiple_val( in.qos_downstream_ten_multiple_val ),
                 access_log_flag( in.access_log_flag ),
                 ssl_file_name( in.ssl_file_name ),
                 access_log_file_name( in.access_log_file_name ),
@@ -145,6 +152,8 @@ public:
         qos_downstream = in.qos_downstream;
         throughput_upstream = in.throughput_upstream;
         throughput_downstream = in.throughput_downstream;
+        qos_upstream_ten_multiple_val = in.qos_upstream_ten_multiple_val;
+        qos_downstream_ten_multiple_val = in.qos_downstream_ten_multiple_val;
         access_log_flag = in.access_log_flag;
         ssl_file_name = in.ssl_file_name;
         access_log_file_name = in.access_log_file_name;
@@ -182,6 +191,8 @@ public:
             elem1.qos_downstream == elem2.qos_downstream &&
             elem1.throughput_upstream == elem2.throughput_upstream &&
             elem1.throughput_downstream == elem2.throughput_downstream &&
+            elem1.qos_upstream_ten_multiple_val == elem2.qos_upstream_ten_multiple_val &&
+            elem1.qos_downstream_ten_multiple_val == elem2.qos_downstream_ten_multiple_val &&
             elem1.access_log_flag == elem2.access_log_flag &&
             elem1.ssl_file_name == elem2.ssl_file_name &&
             elem1.access_log_file_name == elem2.access_log_file_name &&
@@ -224,6 +235,8 @@ public:
             elem1.qos_downstream == elem2.qos_downstream &&
             elem1.throughput_upstream == elem2.throughput_upstream &&
             elem1.throughput_downstream == elem2.throughput_downstream &&
+            elem1.qos_upstream_ten_multiple_val == elem2.qos_upstream_ten_multiple_val &&
+            elem1.qos_downstream_ten_multiple_val == elem2.qos_downstream_ten_multiple_val &&
             elem1.access_log_flag == elem2.access_log_flag &&
             elem1.ssl_file_name == elem2.ssl_file_name &&
             elem1.access_log_file_name == elem2.access_log_file_name &&
@@ -313,6 +326,8 @@ public:
                                 "qos_downstream=%d: "
                                 "throughput_upstream=%d: " 
                                 "throughput_downstream=%d: "
+                                "qos_upstream_ten_multiple_val=%d: "
+                                "qos_downstream_ten_multiple_val=%d: "
                                 "access_log_flag=%d: "
                                 "ssl_file_name=%s: "
                                 "access_log_file_name=%s: "
@@ -333,6 +348,8 @@ public:
                                 % elem.qos_downstream
                                 % elem.throughput_upstream
                                 % elem.throughput_downstream
+                                % elem.qos_upstream_ten_multiple_val
+                                % elem.qos_downstream_ten_multiple_val
                                 % elem.access_log_flag
                                 % elem.ssl_file_name
                                 % elem.access_log_file_name
@@ -370,6 +387,8 @@ private:
         ar & qos_downstream;
         ar & throughput_upstream;
         ar & throughput_downstream;
+        ar & qos_upstream_ten_multiple_val;
+        ar & qos_downstream_ten_multiple_val;
         ar & access_log_flag;
         ar & ssl_file_name;
         ar & access_log_file_name;
