@@ -526,6 +526,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
                 return false;
             }
             elem.qos_upstream = ullval * 1024 * 1024 * 1024;        // set qos_upstream
+            elem.qos_upstream_ten_multiple_val = ullval * 1000 * 1000 * 1000;
         }
         else if( *ritr == 'M' || *ritr == 'm' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
@@ -537,6 +538,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
                 return false;
             }
             elem.qos_upstream = ullval * 1024 * 1024;        // set qos_upstream
+            elem.qos_upstream_ten_multiple_val = ullval * 1000 * 1000;
         }
         else if( *ritr == 'K' || *ritr == 'k' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
@@ -548,14 +550,19 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
                 return false;
             }
             elem.qos_upstream = ullval * 1024;        // set qos_upstream
+            elem.qos_upstream_ten_multiple_val = ullval * 1000;        // set qos_upstream
         }
         else{
             elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_upstream
+            elem.qos_upstream_ten_multiple_val = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_upstream
         }
-        if( 0ULL == elem.qos_upstream )
+        if( 0ULL == elem.qos_upstream ) {
             elem.qos_upstream = ULLONG_MAX;        // clear value
-        else
+            elem.qos_upstream_ten_multiple_val = ULLONG_MAX;
+        } else {
             elem.qos_upstream /= 8;        //qos convert to bytes per sec to bit per sec
+            //elem.qos_upstream_ten_multiple_val /= 8;
+        }
     }
     catch( boost::bad_lexical_cast& ex ){    // don't convert string to qos_upsatream
         // don't conv qos upstream
@@ -594,6 +601,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
                 return false;
             }
             elem.qos_downstream = ullval * 1024 * 1024 * 1024;        // set qos_upstream
+            elem.qos_downstream_ten_multiple_val = ullval * 1000 * 1000 * 1000;
         }
         else if( *ritr == 'M' || *ritr == 'm' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
@@ -605,6 +613,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
                 return false;
             }
             elem.qos_downstream = ullval * 1024 * 1024;        // set qos_upstream
+            elem.qos_downstream_ten_multiple_val = ullval * 1000 * 1000;
         }
         else if( *ritr == 'K' || *ritr == 'k' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
@@ -616,14 +625,19 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
                 return false;
             }
             elem.qos_downstream = ullval * 1024;        // set qos_upstream
+            elem.qos_downstream_ten_multiple_val = ullval * 1000;
         }
         else{
             elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_downstream
+            elem.qos_downstream_ten_multiple_val = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_downstream
         }
-        if( 0ULL == elem.qos_downstream )
+        if( 0ULL == elem.qos_downstream ) {
             elem.qos_downstream = ULLONG_MAX;        // clear value
-        else
+            elem.qos_downstream_ten_multiple_val = ULLONG_MAX;
+        } else {
             elem.qos_downstream /= 8;        //qos convert to bytes per sec to bit per sec
+            //elem.qos_downstream_ten_multiple_val /= 8;
+        }
     }
     catch( boost::bad_lexical_cast& ex ){
         // don' conv qos downstream
@@ -1800,10 +1814,12 @@ void    l7vs::l7vsadm::disp_list_verbose(){
         }
         // QoS value and throughput convert from byte/s to bps.
         buf << boost::format( "    %lld %lld\n" )
-            % (vse.qos_upstream * 8)
+//            % (vse.qos_upstream * 8)
+            % (vse.qos_upstream_ten_multiple_val)
             % (vse.throughput_upstream * 8);
         buf << boost::format( "    %lld %lld\n" )
-            % (vse.qos_downstream * 8)
+//            % (vse.qos_downstream * 8)
+            % (vse.qos_downstream_ten_multiple_val)
             % (vse.throughput_downstream * 8);
         buf << boost::format( "    %s\n" )
             % ( ( 0 == vse.ssl_file_name.length() ) ? "none": vse.ssl_file_name );
