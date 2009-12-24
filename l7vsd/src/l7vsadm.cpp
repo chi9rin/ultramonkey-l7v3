@@ -2520,9 +2520,14 @@ static int set_sighandlers() {
 
 #ifndef    UNIT_TEST
 int main( int argc, char* argv[] ){
-    l7vs::Logger        logger;
-    l7vs::Parameter        param;
-    logger.loadConf();
+
+    try {
+        l7vs::Logger        logger;
+        l7vs::Parameter        param;
+        logger.loadConf();
+    } catch(...) {
+    }
+
 
     l7vs::l7vsadm    adm;
     if( !adm.execute( argc, argv ) ){
