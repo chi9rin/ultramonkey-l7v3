@@ -997,11 +997,16 @@ sub validate_config {
                 }
             }
         }
-        elsif ($name eq 'sslconfigfile'
-            || $name eq 'accesslogfile') {
+        elsif ($name eq 'sslconfigfile') {
             if (!defined $value || !-f $value) {
                 config_error($line, 'ERR0116', $config);
             }
+        }
+        elsif ( $name eq 'accesslogfile') {
+            if (!defined $value || $value !~ /^\/.*/) {
+                config_error($line, 'ERR0116', $config);
+            }
+    
         }
         elsif ($name eq 'accesslog_rotate_type') {
             $value = lc $value;
@@ -1388,10 +1393,10 @@ sub ld_setup {
                 if ( defined $v->{accesslog_rotate_rotation_timing_value} ) {
                     $v->{option}{flags}
                        .= ' --ac-rotate-rotation-timing-value '
-                             . $v->{accesslog_rotate_rotation_timing_value};
+                          . qq{"}. $v->{accesslog_rotate_rotation_timing_value}. qq{"};
                     $v->{other_virtual_key} 
                        .= ' --ac-rotate-rotation-timing-value '
-                             . $v->{accesslog_rotate_rotation_timing_value};
+                          . qq{"}. $v->{accesslog_rotate_rotation_timing_value}. qq{"};
                     $option_key_flag = 1;
                 }
                 if ( $option_key_flag == 0 ) {
@@ -3753,7 +3758,7 @@ sub is_ip {
 
     # If we don't have four, . delimited numbers then we have no hope
     if (!defined $alleged_ip || $alleged_ip !~ m/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/) {
-        ld_log( _message('ERR0501') );
+##        ld_log( _message('ERR0501') );
         return 0;
     }
 
