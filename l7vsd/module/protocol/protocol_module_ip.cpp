@@ -909,7 +909,7 @@ namespace l7vs
             if (data_addr == NULL || data_size <= 0)
             {
                 // replication area is null
-                putLogError(600023, "Replication area is null.", __FILE__, __LINE__);
+                putLogInfo(600000, "Replication area is null.", __FILE__, __LINE__);
 
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1043,7 +1043,7 @@ namespace l7vs
             std::cerr << "protocol_module_ip::set_parameter() : exception : Could not allocate memory." << std::endl;
             check_result.flag = false;
             check_result.message = "Could not allocate memory.";
-            putLogError(600024, check_result.message, __FILE__, __LINE__);
+            putLogError(600023, check_result.message, __FILE__, __LINE__);
         }
         catch (const std::exception& ex)
         {
@@ -1064,7 +1064,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_ip::check_message_result "
                                     "protocol_module_ip::set_parameter() : exception : error = %s.");
             formatter % ex.what();
-            putLogError(600025, formatter.str(), __FILE__, __LINE__);
+            putLogError(600024, formatter.str(), __FILE__, __LINE__);
         }
         catch (...)
         {
@@ -1082,7 +1082,7 @@ namespace l7vs
 
             check_result.flag = false;
             std::cerr << "protocol_module_ip::set_parameter() : Unknown exception." << std::endl;
-            putLogError(600026, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+            putLogError(600025, "function : protocol_module_ip::check_message_result protocol_module_ip::"
                         "set_parameter() : Unknown exception.", __FILE__, __LINE__);
         }
         /*-------- DEBUG LOG --------*/
@@ -1131,7 +1131,7 @@ namespace l7vs
             check_result.flag = false;
             //set check result message
             check_result.message = "Cannot add option.";
-            putLogError(600027, check_result.message, __FILE__, __LINE__ );
+            putLogError(600026, check_result.message, __FILE__, __LINE__ );
         }
 
         /*-------- DEBUG LOG --------*/
@@ -1378,7 +1378,7 @@ namespace l7vs
             std::cerr << "protocol_module_ip::handle_session_initialize() : exception : Could not allocate memory." << std::endl;
             boost::format formatter("Could not allocate memory. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600028, formatter.str(), __FILE__, __LINE__);
+            putLogError(600027, formatter.str(), __FILE__, __LINE__);
             status = FINALIZE;
         }
         catch (const std::exception& ex)
@@ -1387,7 +1387,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_session_initialize() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600029, formatter.str(), __FILE__, __LINE__);
+            putLogError(600028, formatter.str(), __FILE__, __LINE__);
             status = FINALIZE;
         }
         catch (...)
@@ -1396,7 +1396,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_session_initialize() : Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600030, formatter.str(), __FILE__, __LINE__);
+            putLogError(600029, formatter.str(), __FILE__, __LINE__);
             status = FINALIZE;
         }
 
@@ -1506,7 +1506,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_session_finalize() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600031, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600030, formatter.str(), __FILE__, __LINE__ );
             status = STOP;
         }
         catch (...)
@@ -1516,7 +1516,7 @@ namespace l7vs
                                     "handle_session_finalize() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600032, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600031, formatter.str(), __FILE__, __LINE__ );
             status = STOP;
         }
         /*-------- DEBUG LOG --------*/
@@ -1561,7 +1561,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600033, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600032, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -1616,7 +1616,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_accept() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600034, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600033, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
         catch (...)
@@ -1626,7 +1626,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_accept() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600035, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600034, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
 
@@ -1690,7 +1690,7 @@ namespace l7vs
             std::cerr << "protocol_module_ip::handle_client_recv() : Data size bigger than buffer size." << std::endl;
             boost::format formatter("Data size bigger than buffer size. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600036, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600035, formatter.str(), __FILE__, __LINE__ );
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1717,7 +1717,7 @@ namespace l7vs
 
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600037, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600036, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -1740,7 +1740,7 @@ namespace l7vs
                     std::cerr << "protocol_module_ip::handle_client_recv() : Data size bigger than buffer size." << std::endl;
                     boost::format formatter("Data size bigger than buffer size. thread id : % id.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600038, formatter.str(), __FILE__, __LINE__);
+                    putLogError(600037, formatter.str(), __FILE__, __LINE__);
                     status = FINALIZE;
                 }
                 else
@@ -1933,7 +1933,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv() : "
                                     "Content_Length field's value is invalid. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600039, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600038, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
         catch (const std::exception& ex)
@@ -1942,7 +1942,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_recv() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600040, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600039, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
         catch (...)
@@ -1952,7 +1952,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_client_recv() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600041, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600040, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
 
@@ -2003,7 +2003,7 @@ namespace l7vs
             std::cerr << "protocol_module_ip::handle_realserver_select() : Schedule_tcp function is empty." << std::endl;
             boost::format formatter("Schedule_tcp function is empty. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600042, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600041, formatter.str(), __FILE__, __LINE__ );
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -2030,7 +2030,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600043, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600042, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -2274,7 +2274,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_select() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600044, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600043, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
         catch (...)
@@ -2284,7 +2284,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_realserver_select() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600045, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600044, formatter.str(), __FILE__, __LINE__ );
             status = FINALIZE;
         }
 
@@ -2365,7 +2365,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600046, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600045, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -2502,7 +2502,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_connect() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600047, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600046, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2513,7 +2513,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_connect() : Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600048, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600047, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2566,7 +2566,7 @@ namespace l7vs
             {
                 boost::format formatter("Invalid thread id. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogError(600049, formatter.str(), __FILE__, __LINE__ );
+                putLogError(600048, formatter.str(), __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -2599,7 +2599,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_connection_fail() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600050, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600049, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2611,7 +2611,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_realserver_connection_fail() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600051, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600050, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2677,7 +2677,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600052, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600051, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -2890,7 +2890,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_send() : "
                                     "Content_Length field's value is invalid. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600053, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600052, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2901,7 +2901,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_send() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600054, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600053, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2913,7 +2913,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_realserver_send() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600055, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600054, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -2967,7 +2967,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600056, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600055, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -3011,7 +3011,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_select() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600057, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600056, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3023,7 +3023,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorryserver_select() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600058, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600057, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3085,7 +3085,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600059, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600058, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -3244,7 +3244,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_connect() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600060, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600059, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3255,7 +3255,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_connect() : Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600061, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600060, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3307,7 +3307,7 @@ namespace l7vs
             {
                 boost::format formatter("Invalid thread id. thread id : %d.");
                 formatter % boost::this_thread::get_id();
-                putLogError(600062, formatter.str(), __FILE__, __LINE__ );
+                putLogError(600061, formatter.str(), __FILE__, __LINE__ );
                 throw -1;
             }
 
@@ -3340,7 +3340,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_connection_fail() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600063, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600062, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3352,7 +3352,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorryserver_connection_fail() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600064, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600063, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3419,7 +3419,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600065, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600064, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -3633,7 +3633,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_send() : "
                                     "Content_Length field's value is invalid. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600066, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600065, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3644,7 +3644,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_send() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600067, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600066, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3656,7 +3656,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorryserver_send() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600068, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600067, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -3751,7 +3751,7 @@ namespace l7vs
             std::cerr << "protocol_module_ip::handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
             boost::format formatter("Data size bigger than buffer size. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600069, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600068, formatter.str(), __FILE__, __LINE__ );
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3779,7 +3779,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600070, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600069, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -3810,7 +3810,7 @@ namespace l7vs
                 std::cerr << "protocol_module_ip::handle_realserver_recv() : Data size bigger than buffer size." << std::endl;
                 boost::format formatter("Data size bigger than buffer size. thread id : % id.");
                 formatter % boost::this_thread::get_id();
-                putLogError(600071, formatter.str(), __FILE__, __LINE__);
+                putLogError(600070, formatter.str(), __FILE__, __LINE__);
                 status = FINALIZE;
             }
             else
@@ -3996,7 +3996,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv() : "
                                     "Content_Length field's value is invalid. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600072, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600071, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4007,7 +4007,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_recv() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600073, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600072, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4019,7 +4019,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_realserver_recv() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600074, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600073, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4092,7 +4092,7 @@ namespace l7vs
             std::cerr << "protocol_module_ip::handle_sorryserver_recv() : Data size bigger than buffer size." << std::endl;
             boost::format formatter("Data size bigger than buffer size. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600075, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600074, formatter.str(), __FILE__, __LINE__ );
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -4120,7 +4120,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600076, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600075, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -4151,7 +4151,7 @@ namespace l7vs
                 std::cerr << "protocol_module_ip::handle_sorryserver_recv() : Data size bigger than buffer size." << std::endl;
                 boost::format formatter("Data size bigger than buffer size. thread id : % id.");
                 formatter % boost::this_thread::get_id();
-                putLogError(600077, formatter.str(), __FILE__, __LINE__);
+                putLogError(600076, formatter.str(), __FILE__, __LINE__);
 
                 status = FINALIZE;
             }
@@ -4339,7 +4339,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_recv() : "
                                     "Content_Length field's value is invalid. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600078, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600077, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4350,7 +4350,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_recv() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600079, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600078, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4362,7 +4362,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorryserver_recv() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600080, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600079, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4439,7 +4439,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600081, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600080, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -4543,7 +4543,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_connection_check() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600082, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600081, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4554,7 +4554,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_connection_check() : Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600083, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600082, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -4646,7 +4646,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600084, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600083, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -4878,7 +4878,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_send() : "
                                     "Content_Length field's value is invalid. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600085, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600084, formatter.str(), __FILE__, __LINE__ );
 
             //set last status
             status = FINALIZE;
@@ -4889,7 +4889,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_client_send() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600086, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600085, formatter.str(), __FILE__, __LINE__ );
 
             //set last status
             status = FINALIZE;
@@ -4901,7 +4901,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_client_send() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600087, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600086, formatter.str(), __FILE__, __LINE__ );
 
             //set last status
             status = FINALIZE;
@@ -4967,7 +4967,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600088, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600087, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -5152,7 +5152,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorry_enable() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600089, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600088, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -5164,7 +5164,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorry_enable() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600090, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600089, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -5212,7 +5212,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600091, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600090, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -5397,7 +5397,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorry_disable() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600092, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600091, formatter.str(), __FILE__, __LINE__ );
 
             //set last status
             status = FINALIZE;
@@ -5409,7 +5409,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorry_disable() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600093, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600092, formatter.str(), __FILE__, __LINE__ );
 
             //set last status
             status = FINALIZE;
@@ -5459,7 +5459,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600094, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600093, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -5547,7 +5547,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_realserver_disconnect() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600095, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600094, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -5559,7 +5559,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_realserver_disconnect() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600096, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600095, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -5612,7 +5612,7 @@ namespace l7vs
                 {
                     boost::format formatter("Invalid thread id. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600097, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600096, formatter.str(), __FILE__, __LINE__ );
                     throw -1;
                 }
 
@@ -5702,7 +5702,7 @@ namespace l7vs
             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
                                     "handle_sorryserver_disconnect() : exception : error = %s. thread id : %d.");
             formatter % ex.what() % boost::this_thread::get_id();
-            putLogError(600098, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600097, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -5714,7 +5714,7 @@ namespace l7vs
                                     "protocol_module_ip::handle_sorryserver_disconnect() : "
                                     "Unknown exception. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600099, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600098, formatter.str(), __FILE__, __LINE__ );
 
             //set return status
             status = FINALIZE;
@@ -5778,7 +5778,7 @@ namespace l7vs
         {
             boost::format formatter("Invalid pointer. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600100, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600099, formatter.str(), __FILE__, __LINE__ );
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -5903,7 +5903,7 @@ namespace l7vs
                 {
                     boost::format formatter("Buffer size is bigger than Max size. thread id : %d.");
                     formatter % boost::this_thread::get_id();
-                    putLogError(600101, formatter.str(), __FILE__, __LINE__ );
+                    putLogError(600100, formatter.str(), __FILE__, __LINE__ );
 
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -5939,7 +5939,7 @@ namespace l7vs
                         std::cerr << "protocol_module_ip::get_data_from_recvbuffer() : exception : Could not allocate memory." << std::endl;
                         boost::format formatter("Could not allocate memory. thread id : %d.");
                         formatter % boost::this_thread::get_id();
-                        putLogError(600102, formatter.str(), __FILE__, __LINE__);
+                        putLogError(600101, formatter.str(), __FILE__, __LINE__);
 
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -6075,7 +6075,7 @@ namespace l7vs
         {
             boost::format formatter("Invalid pointer. thread id : %d.");
             formatter % boost::this_thread::get_id();
-            putLogError(600103, formatter.str(), __FILE__, __LINE__ );
+            putLogError(600102, formatter.str(), __FILE__, __LINE__ );
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))

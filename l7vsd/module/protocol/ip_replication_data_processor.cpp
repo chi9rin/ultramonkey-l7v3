@@ -91,7 +91,7 @@ ip_replication_data_processor::ip_replication_data_processor(
     if (ip_replication_area_begin == NULL)
     {
         // replication area is null
-        putLogError(600110, "Replication area is null.", __FILE__, __LINE__);
+        putLogInfo(600002, "Replication area is null.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
@@ -114,7 +114,7 @@ ip_replication_data_processor::ip_replication_data_processor(
                     sizeof(ip_replication_data_header) * IP_SERVICE_NUMBER + used)
             {
                 // no enough replication area
-                putLogError(600111, "Over replication area.", __FILE__, __LINE__);
+                putLogError(600108, "Over replication area.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
@@ -171,7 +171,7 @@ ip_replication_data_processor::ip_replication_data_processor(
                         static_cast<size_t>(ip_replication_area_size) * DATA_SIZE)
                 {
                     // replication area is full
-                    putLogError(600112, "Replication area is full.", __FILE__, __LINE__);
+                    putLogError(600109, "Replication area is full.", __FILE__, __LINE__);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -209,7 +209,7 @@ ip_replication_data_processor::ip_replication_data_processor(
             else
             {
                 // replication area is full
-                putLogError(600113, "Replication area is full.", __FILE__, __LINE__);
+                putLogError(600110, "Replication area is full.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
@@ -386,7 +386,7 @@ void ip_replication_data_processor::write_replication_area()
         boost::format formatter("function : void ip_replication_data_processor::write_replicaion_area() : "
                                  "exception : error = %s.");
         formatter % e.what();
-        putLogError(600114, formatter.str(), __FILE__, __LINE__);
+        putLogError(600111, formatter.str(), __FILE__, __LINE__);
     }
     catch (boost::thread_interrupted&)
     {
@@ -395,7 +395,7 @@ void ip_replication_data_processor::write_replication_area()
             replication_area_unlock();
         }
         std::cerr << "ip_replication_data_processor::write_replicaion_area() : exception." << std::endl;
-        putLogError(600115, "function : void ip_replication_data_processor::write_replicaion_area() : "
+        putLogError(600112, "function : void ip_replication_data_processor::write_replicaion_area() : "
                      "Thread_interrupted exception.", __FILE__, __LINE__);
     }
     catch (...)
@@ -405,7 +405,7 @@ void ip_replication_data_processor::write_replication_area()
             replication_area_unlock();
         }
         std::cerr << "ip_replication_data_processor::write_replicaion_area() : Unknown exception." << std::endl;
-        putLogError(600116, "function : void ip_replication_data_processor::write_replicaion_area() : "
+        putLogError(600113, "function : void ip_replication_data_processor::write_replicaion_area() : "
                      "Unknown exception.", __FILE__, __LINE__);
     }
 

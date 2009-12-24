@@ -1,6 +1,6 @@
 /*
  * @file  ip_session_data_processor.cpp
- * @brief read ip data from replication area and set ip
+ * @brief read and set session ip data from replication area
  * @brief data to replication area.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
@@ -136,7 +136,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
         // ip hash check
         if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE))
         {
-        putLogError(600104, "invalid parameter value.", __FILE__, __LINE__);
+        putLogError(600103, "invalid parameter value.", __FILE__, __LINE__);
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
@@ -180,7 +180,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
         boost::format formatter("function : int ip_session_data_processor::"
                                 "get_endpoint_from_ip_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(600105, formatter.str(), __FILE__, __LINE__);
+        putLogError(600104, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
@@ -231,7 +231,7 @@ int ip_session_data_processor::write_session_data(
         // ip hash check
         if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE))
         {
-        putLogError(600106, "invalid parameter value.", __FILE__, __LINE__);
+        putLogError(600105, "invalid parameter value.", __FILE__, __LINE__);
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
             {
@@ -282,7 +282,7 @@ int ip_session_data_processor::write_session_data(
         boost::format formatter("function : int ip_session_data_processor::"
                                 "write_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(600107, formatter.str(), __FILE__, __LINE__);
+        putLogError(600106, formatter.str(), __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -331,7 +331,7 @@ int ip_session_data_processor::read_session_data_from_replication_area(
     // null check
     if (replication_area == NULL)
     {
-        putLogError(600108, "Replication area is NULL.", __FILE__, __LINE__);
+        putLogInfo(600001, "Replication area is null.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
@@ -366,7 +366,7 @@ int ip_session_data_processor::read_session_data_from_replication_area(
         boost::format formatter("function : int ip_session_data_processor::"
                                 "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();
-        putLogError(600109, formatter.str(), __FILE__, __LINE__);
+        putLogError(600107, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }

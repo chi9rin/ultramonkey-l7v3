@@ -176,7 +176,7 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "get_endpoint_from_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(300094, formatter.str(), __FILE__, __LINE__);
+        putLogError(300093, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }
@@ -353,7 +353,7 @@ int sslid_session_data_processor::write_session_data(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "write_session_data() : exception : error = %s.");
         formatter % e.what();
-        putLogError(300095, formatter.str(), __FILE__, __LINE__);
+        putLogError(300094, formatter.str(), __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -402,7 +402,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
     // null check
     if (unlikely(replication_area == NULL))
     {
-        putLogError(300096, "Replication area is NULL.", __FILE__, __LINE__);
+        putLogInfo(300005, "Replication area is null.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
@@ -455,7 +455,7 @@ int sslid_session_data_processor::read_session_data_from_replication_area(
         boost::format formatter("function : int sslid_session_data_processor::"
                                 "read_session_data_from_replication_area() : exception : error = %s.");
         formatter % e.what();
-        putLogError(300097, formatter.str(), __FILE__, __LINE__);
+        putLogError(300095, formatter.str(), __FILE__, __LINE__);
 
         ret = -1;
     }

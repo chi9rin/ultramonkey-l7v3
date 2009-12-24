@@ -95,7 +95,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
     if (unlikely(sslid_replication_area_begain == NULL))
     {
         // replication area is null
-        putLogError(300098, "Replication area is null.", __FILE__, __LINE__);
+        putLogInfo(300006, "Replication area is null.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
         {
@@ -118,7 +118,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                     sizeof(sslid_replication_data_header) * SSLID_SERVICE_NUMBER + used)
             {
                 // no enough replication area
-                putLogError(300099, "Over replication area.", __FILE__, __LINE__);
+                putLogError(300096, "Over replication area.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
@@ -172,7 +172,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                             static_cast<size_t>(sslid_replication_area_size) * DATA_SIZE)
                     {
                         // replication area is full
-                        putLogError(300100, "Replication area is full.", __FILE__, __LINE__);
+                        putLogError(300097, "Replication area is full.", __FILE__, __LINE__);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
@@ -239,7 +239,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                 else
                 {
                     // replication area is full
-                    putLogError(300101, "Replication area is full.", __FILE__, __LINE__);
+                    putLogError(300098, "Replication area is full.", __FILE__, __LINE__);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -279,7 +279,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                         static_cast<size_t>(sslid_replication_area_size) * DATA_SIZE)
                 {
                     // replication area is full
-                    putLogError(300102, "Replication area is full.", __FILE__, __LINE__);
+                    putLogError(300099, "Replication area is full.", __FILE__, __LINE__);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -317,7 +317,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
             else
             {
                 // replication area is full
-                putLogError(300103, "Replication area is full.", __FILE__, __LINE__);
+                putLogError(300100, "Replication area is full.", __FILE__, __LINE__);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
@@ -557,7 +557,7 @@ void sslid_replication_data_processor::write_replicaion_area()
         boost::format formatter("function : void sslid_replication_data_processor::write_replicaion_area() : "
                                  "exception : error = %s.");
         formatter % e.what();
-        putLogError(300104, formatter.str(), __FILE__, __LINE__);
+        putLogError(300101, formatter.str(), __FILE__, __LINE__);
     }
     catch (boost::thread_interrupted&)
     {
@@ -566,7 +566,7 @@ void sslid_replication_data_processor::write_replicaion_area()
             replication_area_unlock();
         }
         std::cerr << "sslid_replication_data_processor::write_replicaion_area() : exception." << std::endl;
-        putLogError(300105, "function : void sslid_replication_data_processor::write_replicaion_area() : "
+        putLogError(300102, "function : void sslid_replication_data_processor::write_replicaion_area() : "
                      "Thread_interrupted exception.", __FILE__, __LINE__);
     }
     catch (...)
@@ -576,7 +576,7 @@ void sslid_replication_data_processor::write_replicaion_area()
             replication_area_unlock();
         }
         std::cerr << "sslid_replication_data_processor::write_replicaion_area() : Unknown exception." << std::endl;
-        putLogError(300106, "function : void sslid_replication_data_processor::write_replicaion_area() : "
+        putLogError(300103, "function : void sslid_replication_data_processor::write_replicaion_area() : "
                      "Unknown exception.", __FILE__, __LINE__);
     }
 
