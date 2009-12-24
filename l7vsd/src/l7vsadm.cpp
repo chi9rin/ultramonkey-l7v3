@@ -2271,11 +2271,11 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
                 Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 3, buf.str(), __FILE__, __LINE__ );
                 break;
             }
-    
+   
             // Try lock l7vsadm file.    
             if( lock.try_lock() ){
                  break;
-             }
+            }
 
             ++command_retry_count;
             if (command_retry_count > command_wait_count) {
@@ -2285,6 +2285,11 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
                 Logger::putLogError( LOG_CAT_L7VSADM_COMMON, 4, buf, __FILE__, __LINE__ );
                 break;
             }
+
+            std::stringstream buf;
+            buf << boost::format( "L7vsadm file lock error. (l7vsadm is already executing) (retry %d)" ) % command_retry_count;
+            Logger::putLogWarn( LOG_CAT_L7VSADM_COMMON, 11, buf.str(), __FILE__, __LINE__ );
+
             // Lock retrying.
             boost::xtime xt;
             xtime_get(&xt, boost::TIME_UTC);
