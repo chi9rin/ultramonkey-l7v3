@@ -1104,7 +1104,7 @@ int main( int argc, char* argv[] ){
     sigset_t    newmask;
     sigset_t    oldmask;
     sigfillset( &newmask );
-    ret = pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
+    ret = sigprocmask( SIG_BLOCK, &newmask, &oldmask );
     if( 0 != ret )
         return ret;
 
