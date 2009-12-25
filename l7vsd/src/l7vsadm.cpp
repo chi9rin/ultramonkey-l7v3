@@ -519,50 +519,45 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
         if( *ritr == 'G' || *ritr == 'g' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1024 / 1024 / 1024 ) < ullval ){
+            if( ( ULLONG_MAX / 1000 / 1000 / 1000 ) < ullval ){
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 34, buf, __FILE__, __LINE__ );
                 return false;
             }
-            elem.qos_upstream = ullval * 1024 * 1024 * 1024;        // set qos_upstream
-            elem.qos_upstream_ten_multiple_val = ullval * 1000 * 1000 * 1000;
+            elem.qos_upstream = ullval * 1000 * 1000 * 1000;        // set qos_upstream
         }
         else if( *ritr == 'M' || *ritr == 'm' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1024 / 1024 ) < ullval ){
+            if( ( ULLONG_MAX / 1000 / 1000 ) < ullval ){
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 35, buf, __FILE__, __LINE__ );
                 return false;
             }
-            elem.qos_upstream = ullval * 1024 * 1024;        // set qos_upstream
-            elem.qos_upstream_ten_multiple_val = ullval * 1000 * 1000;
+            elem.qos_upstream = ullval * 1000 * 1000;        // set qos_upstream
         }
         else if( *ritr == 'K' || *ritr == 'k' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1024 ) < ullval ){
+            if( ( ULLONG_MAX / 1000 ) < ullval ){
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 36, buf, __FILE__, __LINE__ );
                 return false;
             }
-            elem.qos_upstream = ullval * 1024;        // set qos_upstream
-            elem.qos_upstream_ten_multiple_val = ullval * 1000;        // set qos_upstream
+            elem.qos_upstream = ullval * 1000;        // set qos_upstream
         }
         else{
             elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_upstream
-            elem.qos_upstream_ten_multiple_val = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_upstream
         }
         if( 0ULL == elem.qos_upstream ) {
             elem.qos_upstream = ULLONG_MAX;        // clear value
-            elem.qos_upstream_ten_multiple_val = ULLONG_MAX;
         } else {
-            elem.qos_upstream /= 8;        //qos convert to bytes per sec to bit per sec
-            //elem.qos_upstream_ten_multiple_val /= 8;
+            elem.qos_upstream /= 8;                //qos convert to bytes per sec to bit per sec
         }
+
     }
     catch( boost::bad_lexical_cast& ex ){    // don't convert string to qos_upsatream
         // don't conv qos upstream
@@ -594,49 +589,43 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
         if( *ritr == 'G' || *ritr == 'g' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1024 / 1024 / 1024 ) < ullval ){
+            if( ( ULLONG_MAX / 1000 / 1000 / 1000 ) < ullval ){
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 39, buf, __FILE__, __LINE__ );
                 return false;
             }
-            elem.qos_downstream = ullval * 1024 * 1024 * 1024;        // set qos_upstream
-            elem.qos_downstream_ten_multiple_val = ullval * 1000 * 1000 * 1000;
+            elem.qos_downstream = ullval * 1000 * 1000 * 1000;        // set qos_upstream
         }
         else if( *ritr == 'M' || *ritr == 'm' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1024 / 1024 ) < ullval ){
+            if( ( ULLONG_MAX / 1000 / 1000 ) < ullval ){
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 40, buf, __FILE__, __LINE__ );
                 return false;
             }
-            elem.qos_downstream = ullval * 1024 * 1024;        // set qos_upstream
-            elem.qos_downstream_ten_multiple_val = ullval * 1000 * 1000;
+            elem.qos_downstream = ullval * 1000 * 1000;        // set qos_upstream
         }
         else if( *ritr == 'K' || *ritr == 'k' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1024 ) < ullval ){
+            if( ( ULLONG_MAX / 1000 ) < ullval ){
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 41, buf, __FILE__, __LINE__ );
                 return false;
             }
-            elem.qos_downstream = ullval * 1024;        // set qos_upstream
-            elem.qos_downstream_ten_multiple_val = ullval * 1000;
+            elem.qos_downstream = ullval * 1000;        // set qos_upstream
         }
         else{
             elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_downstream
-            elem.qos_downstream_ten_multiple_val = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_downstream
         }
         if( 0ULL == elem.qos_downstream ) {
             elem.qos_downstream = ULLONG_MAX;        // clear value
-            elem.qos_downstream_ten_multiple_val = ULLONG_MAX;
         } else {
-            elem.qos_downstream /= 8;        //qos convert to bytes per sec to bit per sec
-            //elem.qos_downstream_ten_multiple_val /= 8;
+            elem.qos_downstream /= 8;                //qos convert to bytes per sec to bit per sec
         }
     }
     catch( boost::bad_lexical_cast& ex ){
@@ -1738,6 +1727,9 @@ void    l7vs::l7vsadm::disp_list_key(){
 void    l7vs::l7vsadm::disp_list_verbose(){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 34, "l7vsadm::disp_list_verbose", __FILE__, __LINE__ );
 
+    unsigned long long output_qos_upstream_value;
+    unsigned long long output_qos_downstream_value;
+
     std::stringstream    buf;
     buf << boost::format( "Layer-7 Virtual Server version %s\n" ) % VERSION;
 
@@ -1792,6 +1784,21 @@ void    l7vs::l7vsadm::disp_list_verbose(){
             vsepstr = endpoint_to_string<boost::asio::ip::udp>( vse.udp_recv_endpoint, numeric_flag );
         else
             vsepstr = endpoint_to_string<boost::asio::ip::tcp>( vse.tcp_accept_endpoint, numeric_flag );
+
+
+        if( vse.qos_upstream == ULLONG_MAX ) {
+            output_qos_upstream_value = 0;
+        } else {
+            output_qos_upstream_value = vse.qos_upstream * 8;
+        }
+
+        if( vse.qos_downstream == ULLONG_MAX ) {
+            output_qos_downstream_value = 0;
+        } else {
+            output_qos_downstream_value = vse.qos_downstream * 8;
+        }
+
+
         buf << boost::format( "%s %s %s %s %s\n" )
             % ( vse.udpmode ? "UDP" : "TCP" )
             % vsepstr
@@ -1814,12 +1821,10 @@ void    l7vs::l7vsadm::disp_list_verbose(){
         }
         // QoS value and throughput convert from byte/s to bps.
         buf << boost::format( "    %lld %lld\n" )
-//            % (vse.qos_upstream * 8)
-            % (vse.qos_upstream_ten_multiple_val)
+            % (output_qos_upstream_value)
             % (vse.throughput_upstream * 8);
         buf << boost::format( "    %lld %lld\n" )
-//            % (vse.qos_downstream * 8)
-            % (vse.qos_downstream_ten_multiple_val)
+            % (output_qos_downstream_value)
             % (vse.throughput_downstream * 8);
         buf << boost::format( "    %s\n" )
             % ( ( 0 == vse.ssl_file_name.length() ) ? "none": vse.ssl_file_name );
