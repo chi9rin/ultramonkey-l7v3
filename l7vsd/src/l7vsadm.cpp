@@ -2195,38 +2195,6 @@ void    l7vs::l7vsadm::set_parameter(){
         Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 4, msg, __FILE__, __LINE__);
     }
 
-    // connect_wait_interval
-    connect_wait_interval = param.get_int(PARAM_COMP_L7VSADM, "con_interval", err);
-    if( !err ){
-        if(    connect_wait_interval < 0 ||
-            connect_wait_interval > L7VSADM_MAX_WAIT ){
-            // When illegal parameter value, use default parameter value.
-            connect_wait_interval = L7VSADM_DEFAULT_WAIT_INTERVAL;
-            std::string    msg("Illegal con_interval parameter value. Use default value.");
-            Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 5, msg, __FILE__, __LINE__);
-        }
-    }
-    else{
-        std::string    msg("Get con_interval parameter error. Use default value.");
-        Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 6, msg, __FILE__, __LINE__);
-    }
-
-    //connect_wait_count 
-    connect_wait_count = param.get_int(PARAM_COMP_L7VSADM, "con_count", err);
-    if( !err ){
-        if(    connect_wait_count < 0 ||
-            connect_wait_count > L7VSADM_MAX_WAIT ){
-            // When illegal parameter value, use default parameter value.
-            connect_wait_count = L7VSADM_DEFAULT_WAIT_COUNT;
-            std::string    msg("Illegal con_count parameter value. Use default value.");
-            Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 7, msg, __FILE__, __LINE__);
-        }
-    }
-    else{
-        std::string    msg("Get con_count parameter error. Use default value.");
-        Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 8, msg, __FILE__, __LINE__);
-    }
-
     if ((command_wait_interval * command_wait_count) > L7VSADM_MAX_WAIT) {
         // When wait value too long, use default parameter value.
         command_wait_interval = L7VSADM_DEFAULT_WAIT_INTERVAL;
