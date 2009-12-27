@@ -994,7 +994,9 @@ bool    l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 13, "l7vsadm::parse_rs_func", __FILE__, __LINE__ );
 
     request.command = cmd;
+
     request.vs_element.realserver_vector.push_back( realserver_element() );
+
     for( int pos = 2; pos < argc; ++pos ){
         parse_opt_map_type::iterator itr = rs_option_dic.find( argv[pos] );
         if( itr != rs_option_dic.end() ){
@@ -1048,9 +1050,12 @@ bool    l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
             return false;
         }
     }
-    // realserver weight default value = 1
-    if( -1 == request.vs_element.realserver_vector.front().weight ){
-        request.vs_element.realserver_vector.front().weight = 1;
+
+    if( l7vsadm_request::CMD_EDIT_RS != cmd ) {
+        // realserver weight default value = 1
+        if( -1 == request.vs_element.realserver_vector.front().weight ){
+            request.vs_element.realserver_vector.front().weight = 1;
+        }
     }
 
     return true;

@@ -1220,7 +1220,11 @@ void    l7vs::virtualservice_tcp::edit_realserver( const l7vs::virtualservice_el
              rs_itr != rs_list.end(); ++rs_itr ){
             if( itr->tcp_endpoint == rs_itr->tcp_endpoint ){
                 rs_itr->udp_endpoint    = itr->udp_endpoint;
-                rs_itr->weight            = itr->weight;
+
+                if( itr->weight != -1 ) {
+                    rs_itr->weight            = itr->weight;
+                }
+
             }
         }
     }
