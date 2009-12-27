@@ -372,7 +372,7 @@ cpu_set_t    l7vs::virtualservice_base::get_cpu_mask( boost::asio::ip::address& 
  */
 l7vs::virtualservice_element&        l7vs::virtualservice_base::get_element(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 16, "in_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 17, "in_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
     }
 
     boost::mutex::scoped_lock lk( element_mutex );
@@ -409,8 +409,8 @@ l7vs::virtualservice_element&        l7vs::virtualservice_base::get_element(){
                         % element.sorry_endpoint % element.sorry_flag % element.qos_upstream % element.qos_downstream \
                         % element.throughput_upstream % element.throughput_downstream \
                         % element.ssl_file_name;
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 17, element_dump.str(), __FILE__, __LINE__ );
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 18, "out_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 18, element_dump.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 19, "out_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__ );
     }
     return element;
 }

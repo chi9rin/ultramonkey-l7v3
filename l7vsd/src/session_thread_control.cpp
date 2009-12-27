@@ -110,6 +110,14 @@ void    session_thread_control::downstream_run(){
             CPU_SET( i, &mask );
         }
         sched_setaffinity( 0, sizeof( cpu_set_t ), &mask );
+        
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+            boost::format formatter("void virtualservice_tcp::downstream_run() "
+                                    "sched_setaffinity after num_of_core_uses = %d");
+            formatter % num_of_core_uses;
+            Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 5, formatter.str(), __FILE__, __LINE__ );
+        }
+
     }
 #ifdef    SCHED_SETAFFINITY
     sched_setaffinity( 0, sizeof( cpu_set_t ), &rsnic_cpumask );
@@ -147,7 +155,7 @@ void    session_thread_control::downstream_run(){
     downthread_joining_condition.notify_all();
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("out_function : void session_thread_control::downstream_run()");
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 5, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 6, fmt.str(), __FILE__, __LINE__ );
     }
 }
 //
@@ -156,7 +164,7 @@ void    session_thread_control::downstream_run(){
 void    session_thread_control::startupstream(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("in_function : void session_thread_control::startupstream()");
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 6, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 7, fmt.str(), __FILE__, __LINE__ );
     }
     rw_scoped_lock    upstate_lock( upthread_state_mutex );
     if( upthread_state != EXIT ) upthread_state = RUNNING;        // upthread state update.[RUNNING] -> alive mode
@@ -164,7 +172,7 @@ void    session_thread_control::startupstream(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("out_function : void session_thread_control::startupstream() :status = %d");
          fmt % upthread_state;
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 7, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 8, fmt.str(), __FILE__, __LINE__ );
     }
 }
 //
@@ -173,14 +181,14 @@ void    session_thread_control::startupstream(){
 void    session_thread_control::stopupstream(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("in_function : void session_thread_control::stopupstream()");
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 8, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 9, fmt.str(), __FILE__, __LINE__ );
     }
     rw_scoped_lock    upstate_lock( upthread_state_mutex );
     if( upthread_state != EXIT ) upthread_state = WAIT;                // upthread state is update [WAIT] -> pooling mode
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("out_function : void session_thread_control::stopupstream() : status = %d");
          fmt % upthread_state;
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 9, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 10, fmt.str(), __FILE__, __LINE__ );
     }
 }
 //
@@ -189,7 +197,7 @@ void    session_thread_control::stopupstream(){
 void    session_thread_control::startdownstream(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("in_function : void session_thread_control::startdownstream()");
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 10, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 11, fmt.str(), __FILE__, __LINE__ );
     }
     rw_scoped_lock    downstate_lock( downthread_state_mutex );
     if( downthread_state != EXIT ) downthread_state = RUNNING;        // downstream state is update [RUNNING] -> alive mode
@@ -197,7 +205,7 @@ void    session_thread_control::startdownstream(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("out_function : void session_thread_control::startdownstream() : status = %d");
         fmt % downthread_state;
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 11, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 12, fmt.str(), __FILE__, __LINE__ );
     }
 }
 //
@@ -206,14 +214,14 @@ void    session_thread_control::startdownstream(){
 void    session_thread_control::stopdownstream(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("in_function : void session_thread_control::stopdownstream()");
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 12, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 13, fmt.str(), __FILE__, __LINE__ );
     }
     rw_scoped_lock    downstate_lock( downthread_state_mutex );
     if( downthread_state != EXIT ) downthread_state = WAIT;            // downstream state is update [WAIT] -> pooling mode
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("out_function : void session_thread_control::stopdownstream() : status = %d");
         fmt % downthread_state;
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 13, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 14, fmt.str(), __FILE__, __LINE__ );
     }
 }
 //
@@ -222,7 +230,7 @@ void    session_thread_control::stopdownstream(){
 void    session_thread_control::join(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("in_function : void session_thread_control::join() :");
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 14, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 15, fmt.str(), __FILE__, __LINE__ );
     }
 
     boost::mutex::scoped_lock    up_lk( upthread_joining_mutex );
@@ -252,7 +260,7 @@ void    session_thread_control::join(){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         boost::format fmt("out_function : void session_thread_control::stopdownstream() : up_status = %d / down_status = %d");
         fmt % upthread_state % downthread_state;
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 15, fmt.str(), __FILE__, __LINE__ );
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 16, fmt.str(), __FILE__, __LINE__ );
     }
 }
 //
