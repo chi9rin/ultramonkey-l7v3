@@ -2381,7 +2381,7 @@ sub check_http {
     else{
         ## ipv6 Check
         ## Wget Comand Check
-        my $command = "/usr/bin/wget " . "--timeout $v->{negotiatetimeout} ".  $r->{url} . ' > /dev/null 2>&1';
+        my $command = "/usr/bin/wget " . "-t 1 --timeout $v->{negotiatetimeout} ".  $r->{url} . ' > /dev/null 2>&1';
         if( system_wrapper( $command )) {
             ld_log( _message( 'WRN1103', 'web', $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
             return $SERVICE_DOWN;
