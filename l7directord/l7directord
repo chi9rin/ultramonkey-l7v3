@@ -992,7 +992,7 @@ sub validate_config {
             my @option_value = split /,/, $value;
             # OPTION:deferaccept,nodelay,cork,quickackon|quickackoff
             for my $option (@option_value) {
-                if($option !~ /deferaccept|nodelay|cork|quickackon|quickackoff/) {
+                if($option !~ /^deferaccept|nodelay|cork|quickackon|quickackoff$/) {
                     config_error($line, 'ERR0124', $config);
                 }
             }
@@ -1022,7 +1022,7 @@ sub validate_config {
         }
         elsif ($name eq 'accesslog_rotate_max_filesize') {
             $value = uc $value;
-            if ( !defined $value || ($value ne '0' && $value !~ /^([1-9]\d{0,2}[KMG]|\d)$/) ) {
+            if ( !defined $value || ($value ne '0' && $value !~ /^([1-9]\d{0,2}[KMG]|\d{1,3})$/) ) {
                 config_error($line, 'ERR0127', $config);
             }
         }
@@ -1039,11 +1039,11 @@ sub validate_config {
             if (!defined $value ) {
                 config_error($line, 'ERR0129', $config);
             }
-            if ($value =~ /^[1-9]\d{0,1}\/[1-9]\d{0,1}\s\d{1,2}:\d{1,2}$/i) {
+            if ($value =~ /^\d{1,2}\/\d{1,2}\s\d{1,2}:\d{1,2}$/) {
                 ## MM/dd hh:mm Check
                 $check = 1;
             }
-            elsif ($value =~ /^[1-9]\d{0,1}\s\d{1,2}:\d{1,2}$/i) {
+            elsif ($value =~ /^\d{1,2}\s\d{1,2}:\d{1,2}$/) {
                 ## dd hh:mm Check
                 $check = 1;
             }
@@ -1051,11 +1051,11 @@ sub validate_config {
                 ## <week> hh:mm Check
                 $check = 1;
             }
-            elsif ($value =~ /^\d{1,2}:\d{1,2}$/i) {
+            elsif ($value =~ /^\d{1,2}:\d{1,2}$/) {
                 ## hh:mm        Check
                 $check = 1;
             }
-            elsif ($value =~ /^\d{1,2}$/i) {
+            elsif ($value =~ /^\d{1,2}$/) {
                 ## mm           Check
                 $check = 1;
             }
@@ -1393,10 +1393,10 @@ sub ld_setup {
                 if ( defined $v->{accesslog_rotate_rotation_timing_value} ) {
                     $v->{option}{flags}
                        .= ' --ac-rotate-rotation-timing-value '
-                          . qq{"}. $v->{accesslog_rotate_rotation_timing_value}. qq{"};
+                          . q{"}. $v->{accesslog_rotate_rotation_timing_value}. q{"};
                     $v->{other_virtual_key} 
                        .= ' --ac-rotate-rotation-timing-value '
-                          . qq{"}. $v->{accesslog_rotate_rotation_timing_value}. qq{"};
+                          . q{"}. $v->{accesslog_rotate_rotation_timing_value}. q{"};
                     $option_key_flag = 1;
                 }
                 if ( $option_key_flag == 0 ) {
@@ -1448,8 +1448,13 @@ sub ld_setup {
                     # build request URL
                     if ( defined $v->{service} && defined $r->{server} ) {
                         my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+                        my $ipaddress = $r->{server}{ip};
+                        if ( is_ip6($ipaddress)){
+                            $ipaddress = qq{ [$r->{server}{ip}] };
+                        }
                         $r->{url} = sprintf "%s://%s:%s/",
-                                            $v->{service}, $r->{server}{ip}, $port;
+                                            $v->{service}, $ipaddress, $port;
+                        $r->{url} =~ s/\s//g;
                     }
                     if ( !defined $r->{request} && defined $v->{request} ) {
                         $r->{request} = $v->{request};
@@ -1941,7 +1946,7 @@ sub ld_stop {
             if ( exists $srv->{$vid} ) {
                 for my $rid ( keys %{ $srv->{$vid} } ) {
                     if ( defined $rid 
-                      ||(!is_ip ($rid)
+                      &&(!is_ip ($rid)
                       && !is_ip6($rid))){
                         next;
                     }
@@ -2339,36 +2344,51 @@ sub check_http {
     my $virtualhost = defined $v->{virtualhost} ? $v->{virtualhost} : $host;
 
     ld_debug(2, "check_http: url=\"$r->{url}\" " . "virtualhost=\"$virtualhost\"");
+    my $status_line ;
 
-    my $ua = LWP::UserAgent->new( timeout => $v->{negotiatetimeout} );
-    my $req = new HTTP::Request( $v->{httpmethod}, $r->{url}, [ Host => $virtualhost ] );
-    my $res;
-    {
-        # LWP makes ungaurded calls to eval
-        # which throw a fatal exception if they fail
-        local $SIG{__DIE__} = 'DEFAULT';
-        local $SIG{ALRM} = sub { die "Can't connect to $r->{server}{ip}:$port (connect: timeout)\n"; };
-        eval {
-            alarm $v->{negotiatetimeout};
-            $res = $ua->request($req);
+    if ( is_ip($r->{server}{ip})){
+        my $ua = LWP::UserAgent->new( timeout => $v->{negotiatetimeout} );
+        my $req = new HTTP::Request( $v->{httpmethod}, $r->{url}, [ Host => $virtualhost ] );
+        my $res;
+        {
+            # LWP makes ungaurded calls to eval
+            # which throw a fatal exception if they fail
+            local $SIG{__DIE__} = 'DEFAULT';
+            local $SIG{ALRM} = sub { die "Can't connect to $r->{server}{ip}:$port (connect: timeout)\n"; };
+            eval {
+                alarm $v->{negotiatetimeout};
+                $res = $ua->request($req);
+                alarm 0;
+            };
             alarm 0;
-        };
-        alarm 0;
-    }
+        }
+    
+        $status_line = $res->status_line;
+        $status_line =~ s/[\r\n]//g;
 
-    my $status_line = $res->status_line;
-    $status_line =~ s/[\r\n]//g;
-
-    my $recstr = $r->{receive};
-    if (!$res->is_success) {
-        ld_log( _message( 'WRN1102', $status_line, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
-        return $SERVICE_DOWN;
+        my $recstr = $r->{receive};
+        if (!$res->is_success) {
+            ld_log( _message( 'WRN1102', $status_line, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+            elsif (defined $recstr && $res->as_string !~ /$recstr/) {
+            ld_log( _message( 'WRN1103', $recstr, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            ld_debug(3, "Headers " . $res->headers->as_string);
+            ld_debug(2, "check_http: $r->{url} is down\n");
+            return $SERVICE_DOWN;
+        }
     }
-    elsif (defined $recstr && $res->as_string !~ /$recstr/) {
-        ld_log( _message( 'WRN1103', $recstr, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
-        ld_debug(3, "Headers " . $res->headers->as_string);
-        ld_debug(2, "check_http: $r->{url} is down\n");
-        return $SERVICE_DOWN;
+    else{
+        ## ipv6 Check
+        ## Wget Comand Check
+        my $command = "/usr/bin/wget " . "--timeout $v->{negotiatetimeout} ".  $r->{url} . ' > /dev/null 2>&1';
+        if( system_wrapper( $command )) {
+            ld_log( _message( 'WRN1103', 'web', $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+        $status_line = '200 OK';
+        return $SERVICE_UP ;
+
     }
 
     ld_debug(2, "check_http: $r->{url} is up\n");
@@ -2836,13 +2856,13 @@ sub check_ftp {
         ##   -u user,passwd ipv6addr >/dev/null 2>&1
 
         my $ftp_command     = "lftp ";
-        my $ftp_enviroment1 = "-e \"set net:max-retries 2;";
-        my $ftp_enviroment2 = "set net:reconnect-interval-multiplier 1;";
-        my $ftp_enviroment3 = "set cmd:fail-exit true;";
-        my $ftp_enviroment4 = "set net:reconnect-interval-base $v->{negotiatetimeout};";
-        my $ftp_enviroment5 = "ls;ls;exit\" ";
+        my $ftp_environment1 = "-e \"set net:max-retries 2;";
+        my $ftp_environment2 = "set net:reconnect-interval-multiplier 1;";
+        my $ftp_environment3 = "set cmd:fail-exit true;";
+        my $ftp_environment4 = "set net:reconnect-interval-base $v->{negotiatetimeout};";
+        my $ftp_environment5 = "ls;ls;exit\" ";
         my $ftp_parameter   = "-u $v->{login},$v->{passwd} $ip_port >/dev/null 2>&1";
-        $ftp_command .= $ftp_enviroment1 . $ftp_enviroment2. $ftp_enviroment3. $ftp_enviroment4. $ftp_enviroment5. $ftp_parameter;
+        $ftp_command .= $ftp_environment1 . $ftp_environment2. $ftp_environment3. $ftp_environment4. $ftp_environment5. $ftp_parameter;
 
 ## print "ftpCommand:". $ftp_command;
         if( system_wrapper( $ftp_command )) {
@@ -3781,7 +3801,6 @@ sub is_ip6 {
     my $alleged_ip = shift;
     my @return_array = (0, undef);
 
-    # If we don't have four, . delimited numbers then we have no hope
     if (!defined $alleged_ip ) {
         ld_log( _message('ERR0501') );
         return 0;
@@ -3833,29 +3852,29 @@ sub is_ip6 {
 sub ip_to_int {
     my $ip_address = shift;
     my $ip_version = 'ipv4';
-    my @result = undef;
-    my @result2 = undef;
+    my $result = undef;
+    my $result2 = undef;
     my @return_array = (undef, -1);
 
 
     if ( is_ip($ip_address) ) {
         my ($oct1, $oct2, $oct3, $oct4)
             = $ip_address =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
-        @result = (($oct1 << 24) + ($oct2 << 16) + ($oct3 << 8) + $oct4);
+        $result = ($oct1 << 24) + ($oct2 << 16) + ($oct3 << 8) + $oct4;
     }
     else {
         my ( $ret, @address ) = is_ip6($ip_address);
         if ( $ret == 1 ) {
             my ( $hex1, $hex2, $hex3, $hex4, $hex5, $hex6, $hex7, $hex8, $linklocal) = @address;
-            @result = ((hex($hex5) << 48)  + (hex($hex6) << 32) + (hex($hex7) << 16)  + hex($hex8));
-            @result2 = ((hex($hex1) << 48)  + (hex($hex2) << 32) + (hex($hex3) << 16)  + hex($hex4));                      
+            $result  = (hex($hex5) << 48)  + (hex($hex6) << 32) + (hex($hex7) << 16)  + hex($hex8);
+            $result2 = (hex($hex1) << 48)  + (hex($hex2) << 32) + (hex($hex3) << 16)  + hex($hex4);                      
             $ip_version = 'ipv6';
         }
         else {
             return @return_array;
         }
     }
-    @return_array = ($ip_version, @result, @result2);
+    @return_array = ($ip_version, $result, $result2);
     return @return_array;
 }
 
@@ -3884,23 +3903,14 @@ sub int_to_ip {
                          ($ip_address >>  32) & 0xffff,
                          ($ip_address >>  16) & 0xffff,
                          ($ip_address       ) & 0xffff;
-
-##                         ($ip_address >> 112) & 0xffff,
-##                         ($ip_address >>  96) & 0xffff,
-##                         ($ip_address >>  80) & 0xffff,
-##                         ($ip_address >>  64) & 0xffff,
-##                         ($ip_address >>  48) & 0xffff,
-##                         ($ip_address >>  32) & 0xffff,
-##                         ($ip_address >>  16) & 0xffff,
-##                         ($ip_address       ) & 0xffff;
     }
     else {
     ## IPv4 Address Change
         $result = sprintf "%d.%d.%d.%d",
-                         ($ip_address >> 24) & 255,
-                         ($ip_address >> 16) & 255,
-                         ($ip_address >> 8 ) & 255,
-                         ($ip_address      ) & 255;
+                         ($ip_address >> 24) & 0xff,
+                         ($ip_address >> 16) & 0xff,
+                         ($ip_address >> 8 ) & 0xff,
+                         ($ip_address      ) & 0xff;
     }
     return $result;
 }
@@ -4172,7 +4182,7 @@ sub ld_gethostservbyname {
         /ix) {
         if ( !defined $hostserv || $hostserv !~ /
                  ^
-                 (\[[a-z0-9.-:]+\])           # host or ip
+	     (\[[a-z0-9.-:%]+\]) # host or ip
                  :                           # colon
                  (\d+|[a-z0-9-]+)            # serv or port
                  $
@@ -4885,7 +4895,7 @@ The setting possible value is described.
            In a socket for communication with Client in Session and RealServer, TCP_QUICKACK setting.
 
 example:
-       socketoption=deferaccept nodelay quickackoff
+       socketoption=deferaccept,nodelay,quickackoff
 
 =item B<accesslog = ">I<ACCESSLOG_ROTATE_TYPE>B<">
 
