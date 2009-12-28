@@ -705,30 +705,84 @@ void    l7vsd::reload_parameter( const PARAMETER_COMPONENT_TAG* comp, error_code
 
     Parameter    param;
     Logger        logger_instance;
-    if( param.read_file( *comp ) ){
-        switch( *comp ){
-        case    PARAM_COMP_REPLICATION:
+
+    switch( *comp ){
+    case    PARAM_COMP_REPLICATION:
+        if( param.read_file( *comp  )){
             rep->reset();
-            break;
-        case    PARAM_COMP_LOGGER:
-            logger_instance.loadConf();
-            break;
-        case    PARAM_COMP_SNMPAGENT:
-            bridge->reload_config();
-            break;
-        default:
-            std::string msg("parameter reload command not found.");
-            Logger::putLogWarn(LOG_CAT_L7VSD_PARAMETER, 1, msg, __FILE__, __LINE__);
+        } else {
+            std::string msg("parameter reload failed.");
+            Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
-    }
-    else{
-        std::string msg("parameter reload failed.");
-        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+        
+        break;
+    case    PARAM_COMP_LOGGER:
+        if( param.read_file( *comp  )){
+        
+            try {
+                logger_instance.loadConf();
+            }catch(...){
+            }
+            
+        } else {
+            std::string msg("parameter reload failed.");
+            Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+            err.setter( true, msg );
+            return;
+        }
+
+        break;
+    case    PARAM_COMP_SNMPAGENT:
+        if( param.read_file( *comp  )){
+            bridge->reload_config();
+        } else {
+            std::string msg("parameter reload failed.");
+            Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+            err.setter( true, msg );
+            return;
+        }
+
+        break;
+    case    PARAM_COMP_ALL:
+        if( !param.read_file( PARAM_COMP_REPLICATION  )){
+            std::string msg("parameter reload failed.");
+            Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+            err.setter( true, msg );
+            return;
+        }
+        
+        if( !param.read_file( PARAM_COMP_LOGGER  )){
+            std::string msg("parameter reload failed.");
+            Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+            err.setter( true, msg );
+            return;
+        }
+        
+        if( !param.read_file( PARAM_COMP_SNMPAGENT  )){
+            std::string msg("parameter reload failed.");
+            Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+            err.setter( true, msg );
+            return;
+        }
+        
+        rep->reset();
+        try {
+            logger_instance.loadConf();
+        }catch(...){
+        }
+        bridge->reload_config();
+    
+        break;
+    default:
+        std::string msg("parameter reload command not found.");
+        Logger::putLogWarn(LOG_CAT_L7VSD_PARAMETER, 1, msg, __FILE__, __LINE__);
         err.setter( true, msg );
         return;
     }
+
+
 }
 
 //! vs_list search function
