@@ -53,7 +53,7 @@
 #define ACCESS_LOG_ROTATE_ROTATION_TIMING   "--ac-rotate-rotation-timing"
 #define ACCESS_LOG_ROTATION_TIMING_VALUE    "--ac-rotate-rotation-timing-value"
 
-#define LOGGER_ACCESS_LAYOUT "%d{%Y/%m/%d %H:%M:%S} [%p] %c %m %t%n"
+#define LOGGER_ACCESS_LAYOUT "%d{%Y/%m/%d %H:%M:%S} [%p] %m %t%n"
 
 #define ACCESS_LOG_ROTATION_KEY                 "l7vsd_accesslog_rotate_type"
 #define ACCESS_LOG_MAX_BACKUP_INDEX_KEY         "l7vsd_accesslog_rotate_max_backup_index"
@@ -164,6 +164,7 @@ public:
                                 const std::string& str, 
                                 const char* file , 
                                 const unsigned int line);
+
     
 };
 
