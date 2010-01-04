@@ -708,6 +708,12 @@ void logger_logrotate_utility::set_appender(const appender_property& log_propert
             logger_logrotate_utility::loglotation_utility_logic_error( 107, "getLogger Failed.", __FILE__, __LINE__);
         }
 
+        AppenderPtr appender_pointer = cat_logger->getAppender( log_category );
+        if( appender_pointer != NULL ) {
+            cat_logger->removeAppender( appender_pointer );
+        }
+        normalAppender->setName( log_category );
+
         cat_logger->addAppender(normalAppender);
 
         //log level settting
