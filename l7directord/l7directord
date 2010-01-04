@@ -3049,7 +3049,7 @@ sub check_ping {
     else {
     ## IPv6 PingCheck
         my $command
-            = sprintf "ping6 %s -w %d > /dev/null 2>&1",
+            = sprintf "ping6 %s -c %d > /dev/null 2>&1",
                                      $r->{server}{ip},
                                      $v->{checktimeout};
 
