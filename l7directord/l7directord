@@ -3199,6 +3199,9 @@ sub _status_up {
             my $weight = 0;
             # all real server's weight are zero.
             for my $real ( keys %{ $current_service->{$vid} } ) {
+                if ( 'other_virtual_option' eq $real ){
+                    next;
+                }
                 # already added fallback server.
                 if ( $real eq get_ip_port( $v_r_list->[0][1] ) ) {
                     return 0;
@@ -3249,6 +3252,9 @@ sub _status_down {
             my $fallback_exist = 0;
             # any real server has weight.
             for my $real ( keys %{ $current_service->{$vid} } ) {
+                if ( 'other_virtual_option' eq $real ){
+                    next;
+                }
                 if ( $real eq get_ip_port( $v_r_list->[0][1] ) ) {
                     $fallback_exist = 1;
                 }
