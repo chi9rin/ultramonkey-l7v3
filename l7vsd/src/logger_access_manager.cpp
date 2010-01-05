@@ -184,12 +184,12 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
     std::string rotation_timing;
     std::string rotation_timing_value_key;
 
-    LOG_ROTATION_TAG rotation_type_data;
-    unsigned int max_backup_index_data;
-    unsigned long long max_file_size_data;
-    LOG_ROTATION_TIMING_TAG rotation_timing_data;
-    std::string rotation_timing_key_data;
-    
+    LOG_ROTATION_TAG rotation_type_data = LOG_ROT_SIZE;
+    unsigned int max_backup_index_data = 0;
+    unsigned long long max_file_size_data = 0;
+    LOG_ROTATION_TIMING_TAG rotation_timing_data = LOG_TIM_YEAR;
+    std::string rotation_timing_key_data = "";
+ 
     l7vs::error_code ec;
 
     rotate_default_verbose_displayed_contents = "";
@@ -293,6 +293,12 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
         rotation_timing_key_data = logger_logrotate_utility::check_rotate_timing_value(rotation_timing_value_key,rotation_timing_data);
         
     }
+
+    access_log_default_property.rotation_value = rotation_type_data;
+    access_log_default_property.max_backup_index_value = max_backup_index_data;
+    access_log_default_property.max_file_size_value = max_file_size_data;
+    access_log_default_property.rotation_timing_value = rotation_timing_data;
+    access_log_default_property.rotation_timing_value_value = rotation_timing_key_data;
 
     
 }

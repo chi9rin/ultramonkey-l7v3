@@ -106,7 +106,7 @@ bool l7vs::logger_implement_access::setAcLoggerConf(
 
     access_log_property.log_filename_value = access_log_file_name_;
     
-    if( this->rotate_default_flag == false ) {
+    if( this->rotate_default_flag == true ) {
         lotate_check_flag =
           logger_logrotate_utility::acccess_log_LogrotateParamCheck(
                                                         rotatedata,
