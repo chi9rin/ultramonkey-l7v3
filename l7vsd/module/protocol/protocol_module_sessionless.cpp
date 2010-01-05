@@ -733,7 +733,7 @@ namespace l7vs
 
         boost::format option_formatter("%s--sorry-uri '%s'");
         option_formatter % (forwarded_for ? "--forwarded-for " : "") % sorry_uri.c_array();
-        option.assign(option_formatter.str());     
+        option.assign(option_formatter.str());
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1167,7 +1167,8 @@ namespace l7vs
         size_t content_len_value = 0;
         size_t pos = 0;
         size_t buffer_size = 0;
-        const size_t cr_lf_len = strlen("\r\n\r\n");
+        const size_t cr_lf_cr_lf_len = strlen("\r\n\r\n");
+        const size_t cr_lf_len = strlen("\r\n");
         std::string str_value;
         const std::string http_header = "";
         const std::string content_header = "Content-Length";
@@ -1830,14 +1831,20 @@ namespace l7vs
 
                                     //send_rest_size recalc
                                     //set whole http header's length + Content_Length's value
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                                 }
                                 //search Content_Length result is NG
                                 else
                                 {
                                     //send_rest_size recalc
                                     //set whole http header's length
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                    if (header_offset_len == 0)
+                                    {
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                    } else
+                                    {
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                    }
                                 }
                                 //set edit_division flag on
                                 it->edit_division = EDIT_DIVISION_EDIT;
@@ -2044,14 +2051,21 @@ namespace l7vs
                                 }
                                 //send_rest_size recalc
                                 //set whole http header's  + whole http header's length + Content_Length's value
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                             }
                             //not searched ContentLength http header
                             else
                             {
                                 //send_rest_size recalc
                                 //set whole http header's  + whole http header's length
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                if (header_offset_len == 0)
+                                {
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                }
+                                else
+                                {
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                }
 
                             }
                             //set edit_division flag on
@@ -4307,7 +4321,8 @@ namespace l7vs
         size_t content_len_value = 0;
         size_t pos = 0;
         size_t buffer_size = 0;
-        const size_t cr_lf_len = strlen("\r\n\r\n");
+        const size_t cr_lf_cr_lf_len = strlen("\r\n\r\n");
+        const size_t cr_lf_len = strlen("\r\n");
         thread_data_ptr session_data;
         char* buffer1 = NULL;
         char* buffer2 = NULL;
@@ -4968,14 +4983,20 @@ namespace l7vs
                                 }
                                 //send_rest_size recalc
                                 //set whole http header's length + Content_Length's value
-                                it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
+                                it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                             }
                             //search Content_Length result is NG
                             else
                             {
                                 //send_rest_size recalc
                                 //set whole http header's length
-                                it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                if (header_offset_len == 0)
+                                {
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                } else
+                                {
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                }
                             }
                         }
                         //search http header result is NG
@@ -5174,14 +5195,22 @@ namespace l7vs
                             }
                             //send_rest_size recalc
                             //set whole http header's  + whole http header's length + Content_Length's value
-                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
+                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                         }
                         //not searched ContentLength http header
                         else
                         {
                             //send_rest_size recalc
                             //set whole http header's  + whole http header's length
-                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                            if (header_offset_len == 0)
+                            {
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                            }
+                            else
+                            {
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                            }
+
                         }
                     }
                     //not searched whole http header
@@ -5371,7 +5400,8 @@ namespace l7vs
         size_t content_len_value = 0;
         size_t pos = 0;
         size_t buffer_size = 0;
-        const size_t cr_lf_len = strlen("\r\n\r\n");
+        const size_t cr_lf_cr_lf_len = strlen("\r\n\r\n");
+        const size_t cr_lf_len = strlen("\r\n");
         std::string str_value;
         const std::string http_header = "";
         const std::string content_header = "Content-Length";
@@ -6016,14 +6046,21 @@ namespace l7vs
                                 }
                                 //send_rest_size recalc
                                 //set whole http header's length + Content_Length's value
-                                it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
+                                it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                             }
                             //search Content_Length result is NG
                             else
                             {
                                 //send_rest_size recalc
                                 //set whole http header's length
-                                it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                if (header_offset_len == 0)
+                                {
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                }
+                                else
+                                {
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                }
                             }
                         }
                         //search http header result is NG
@@ -6220,14 +6257,23 @@ namespace l7vs
                             }
                             //send_rest_size recalc
                             //set whole http header's  + whole http header's length + Content_Length's value
-                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len + content_len_value;
+                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                         }
                         //not searched ContentLength http header
                         else
                         {
                             //send_rest_size recalc
                             //set whole http header's  + whole http header's length
-                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                            if (header_offset_len == 0)
+                            {
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                            }
+                            else
+                            {
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                            }
+
+
                         }
                     }
                     //not searched whole http header
