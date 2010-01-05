@@ -52,6 +52,29 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd& invsd,
                          access_log_file_name("")
 {
     active_count = 0;
+    
+    ca_dir = "";
+    ca_file = "";
+    cert_chain_dir = "";
+    cert_chain_file = "";
+    private_key_dir = "";
+    private_key_file = "";
+    private_key_filetype = DEFAULT_SSL_PRIVATE_KEY_FILETYPE;
+    private_key_passwd_dir = "";
+    private_key_passwd_file = "";
+    verify_options = 0;
+    verify_cert_depth = 0;
+    ssl_options = 0;
+    is_tmp_dh_use = false;
+    tmp_dh_dir = "";
+    tmp_dh_file = "";
+    cipher_list = "";
+    is_session_cache_use = false;
+    session_cache_mode = 0;
+    session_cache_size = 0;
+    session_cache_timeout = 0;
+    handshake_timeout = 0;
+
 }
 /*!
  * virtualservice_tcp class destructor.
@@ -905,8 +928,8 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
     }
 
     virtualservice_element&    elem = const_cast<virtualservice_element&>( in );
-    //繝代Λ繝｡繝ｼ繧ｿ縺祁irtualService縺ｫ荳閾ｴ縺吶ｋ縺区､懈渊
-    //udpmode縺ｨtcp_accept_endpoint縺ｨprotocol_module_name縺御ｸ閾ｴ縺吶ｋ縺薙→
+    //郢昜ｻ｣ﾎ帷ｹ晢ｽ｡郢晢ｽｼ郢ｧ・ｿ邵ｺ逾（rtualService邵ｺ・ｫ闕ｳﾂ髢ｾ・ｴ邵ｺ蜷ｶ・狗ｸｺ蛹ｺ・､諛域ｸ言
+    //udpmode邵ｺ・ｨtcp_accept_endpoint邵ｺ・ｨprotocol_module_name邵ｺ蠕｡・ｸﾂ髢ｾ・ｴ邵ｺ蜷ｶ・狗ｸｺ阮吮・
     if( ( element.udpmode != elem.udpmode ) ||
         ( element.tcp_accept_endpoint != elem.tcp_accept_endpoint ) ||
         ( element.protocol_module_name != elem.protocol_module_name ) ){
