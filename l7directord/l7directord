@@ -1849,10 +1849,15 @@ sub ld_start {
                 }
             }
     
+            my $work_ip = undef;
             # remove remaining entries for real servers
             for my $remove_real_ip_port (keys %$or) {
-                if ( !is_ip ($remove_real_ip_port) 
-                  && !is_ip6($remove_real_ip_port)){
+                if ( 'other_virtual_option' eq $remove_real_ip_port ){
+                    next;
+                }
+                $work_ip = $or->{$remove_real_ip_port}{server}{ip};
+                if ( !is_ip ($work_ip) 
+                  && !is_ip6($work_ip)){
                     next;
                 }
                 ld_delete_real( $nv, $or->{$remove_real_ip_port} );
