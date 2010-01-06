@@ -321,42 +321,45 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
 
     tcp_session*    tmp_session    = stc_ptr_noconst->get_session().get();
 
-    //*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG ==
-                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-        std::stringstream buf;
-        buf << "virtualservice_tcp::handle_accept() : ";
-        buf << "ssl session cache flush before : ";
-        get_ssl_session_cache_info(buf);
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 28,
-                    buf.str(),
-                    __FILE__, __LINE__ );
-    }
-    //*------ DEBUG LOG END ------*/
+    if( ssl_file_name != "" ) {
 
-    // ssl session cache flush
-    if( ( ssl_file_name != "" ) && ( is_session_cache_use == true ) ) {
+        //*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG ==
+                     Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+            std::stringstream buf;
+            buf << "virtualservice_tcp::handle_accept() : ";
+            buf << "ssl session cache flush before : ";
+            get_ssl_session_cache_info(buf);
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 28,
+                        buf.str(),
+                        __FILE__, __LINE__ );
+        }
+        //*------ DEBUG LOG END ------*/
 
-        long ssl_cache_num = SSL_CTX_sess_number(sslcontext.impl());
-        if ( ssl_cache_num >= session_cache_size ) {
-            flush_ssl_session();
+        // ssl session cache flush
+        if( is_session_cache_use == true ) {
+
+            long ssl_cache_num = SSL_CTX_sess_number(sslcontext.impl());
+            if ( ssl_cache_num >= session_cache_size ) {
+                flush_ssl_session();
+            }
+
         }
 
-    }
+        //*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG ==
+                     Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+            std::stringstream buf;
+            buf << "virtualservice_tcp::handle_accept() : ";
+            buf << "ssl session cache flush after : ";
+            get_ssl_session_cache_info(buf);
+            Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 29,
+                        buf.str(),
+                        __FILE__, __LINE__ );
+        }
+        //*------ DEBUG LOG END ------*/
 
-    //*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG ==
-                 Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-        std::stringstream buf;
-        buf << "virtualservice_tcp::handle_accept() : ";
-        buf << "ssl session cache flush after : ";
-        get_ssl_session_cache_info(buf);
-        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 29,
-                    buf.str(),
-                    __FILE__, __LINE__ );
     }
-    //*------ DEBUG LOG END ------*/
-
 
     // send access log output ON or OFF message to tcp_session
     stc_ptr_noconst->session_access_log_output_mode_change( access_log_flag );
