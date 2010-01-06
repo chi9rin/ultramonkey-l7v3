@@ -157,7 +157,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
             }
         }
         // key(split_vec[0]) = value(split_vec[1])
-        else if( split_vec.size() == 2 ){
+        else if( ( split_vec.size() == 2 ) && ( split_vec[1].size() > 0 ) ){
             // non get section_string
             if( section_string.size() == 0 ){
                 boost::format formatter(
