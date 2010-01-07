@@ -30,12 +30,14 @@ namespace l7vs{
 
     //! handshake socket
     //! @param[in]        handshake_type is handshaking as a server or client
-    //! @return         true is handshaked
-    //! @return         false is handshake failure
-    bool tcp_ssl_socket::handshake(boost::system::error_code& ec)
-    {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 74, "in_function : tcp_ssl_socket::handshake", __FILE__, __LINE__);
+    //! @return           true is handshaked
+    //! @return           false is handshake failure
+    bool tcp_ssl_socket::handshake(boost::system::error_code& ec){
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(
+            LOG_CAT_L7VSD_SESSION))) {
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 74, 
+                    "in_function : tcp_ssl_socket::handshake",
+                     __FILE__, __LINE__);
         }
 
         rw_scoped_lock scope_lock(close_mutex);
@@ -46,8 +48,11 @@ namespace l7vs{
             bres = true;
         }
 
-        if (unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 78, "out_function : tcp_ssl_socket::handshake", __FILE__, __LINE__);
+        if (unlikely( LOG_LV_DEBUG == Logger::getLogLevel(
+            LOG_CAT_L7VSD_SESSION))) {
+            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 78, 
+                "out_function : tcp_ssl_socket::handshake",
+                 __FILE__, __LINE__);
         }
         return bres;
     }
@@ -57,8 +62,9 @@ namespace l7vs{
         rw_scoped_lock scope_lock(close_mutex);
 
         open_flag = true;
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+        //----Debug log--------------------------------------------------------
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(
+            LOG_CAT_L7VSD_SESSION))){
             boost::system::error_code ec;
             std::stringstream buf;
             buf << "Thread ID[";
@@ -66,9 +72,10 @@ namespace l7vs{
             buf << "] tcp_ssl_socket::accept [";
             buf << my_socket.lowest_layer().remote_endpoint(ec);
             buf << "]";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 54, buf.str(), __FILE__, __LINE__ );
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 54, buf.str(), 
+                __FILE__, __LINE__ );
         }
-        //----Debug log----------------------------------------------------------------------
+        //----Debug log--------------------------------------------------------
         
         //set TCP_NODELAY
         if(opt_info.nodelay_opt){
@@ -77,7 +84,9 @@ namespace l7vs{
             my_socket.lowest_layer().set_option(set_option,ec);
             if(unlikely(ec)){
                 //ERROR
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 107, "socket option(TCP_NODELAY) set failed" , __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 107,
+                    "socket option(TCP_NODELAY) set failed" , 
+                    __FILE__, __LINE__ );
             }
         }
                 
@@ -86,27 +95,34 @@ namespace l7vs{
             boost::system::error_code ec;
             int val = opt_info.cork_val;
             size_t len = sizeof(val);
-            boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,len,ec);
+            boost::asio::detail::socket_ops::setsockopt(
+                my_socket.lowest_layer().native(),IPPROTO_TCP,
+                TCP_CORK,&val,len,ec);
             if(unlikely(ec)){
                 //ERROR
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 108, "socket option(TCP_CORK) set failed" , __FILE__, __LINE__ );
+                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 108, 
+                    "socket option(TCP_CORK) set failed" , 
+                    __FILE__, __LINE__ );
             }
         }
     }
 
     //! close socket
-    //! @param[out]        ec is reference error code object
-    //! @return         true is socket close
-    //! @return         false is not open socket
+    //! @param[out]       ec is reference error code object
+    //! @return           true is socket close
+    //! @return           false is not open socket
     bool tcp_ssl_socket::close(boost::system::error_code& ec){
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 56, "in_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
+            LOG_CAT_L7VSD_SESSION ) ) ){
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 56, 
+                "in_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
         }
         
         rw_scoped_lock scope_lock(close_mutex);
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+        //----Debug log--------------------------------------------------------
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(
+            LOG_CAT_L7VSD_SESSION))){
             if(open_flag){
                 boost::system::error_code ec;
                 std::stringstream buf;
@@ -115,10 +131,11 @@ namespace l7vs{
                 buf << "] tcp_ssl_socket::close [";
                 buf << my_socket.lowest_layer().remote_endpoint(ec);
                 buf << "]";
-                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 58, buf.str(), __FILE__, __LINE__ );
+                Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 58, buf.str(), 
+                    __FILE__, __LINE__ );
             }
         }
-        //----Debug log----------------------------------------------------------------------
+        //----Debug log--------------------------------------------------------
         bool bres = false;
         if(likely(open_flag)){
             open_flag = false;
@@ -126,49 +143,75 @@ namespace l7vs{
         }
         my_socket.lowest_layer().close(ec);
         
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 57, "out_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
+            LOG_CAT_L7VSD_SESSION ) ) ){
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 57, 
+                "out_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
         }
         return bres;
     }
 
-    //! set non blocking mode of the socket 
-    //! @return            ec is reference error code object
+    //! set non blocking mode of the socket
+    //! @param[out]     ec is reference error code object
+    //! @return         true is set non blocking mode
+    //! @return         false is set non blocking mode failure
     bool tcp_ssl_socket::set_non_blocking_mode(boost::system::error_code& ec){
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 60, "in_function : tcp_ssl_socket::set_non_blocking_mode", __FILE__, __LINE__ );
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
+            LOG_CAT_L7VSD_SESSION ) ) ){
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 60, 
+                "in_function : tcp_ssl_socket::set_non_blocking_mode", 
+                __FILE__, __LINE__ );
         }
-        
+      
+        rd_scoped_lock scope_lock(close_mutex);
+        bool bres = false;
         boost::asio::socket_base::non_blocking_io cmd(true);
         my_socket.lowest_layer().io_control(cmd,ec);
-        
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 61, "out_function : tcp_ssl_socket::set_non_blocking_mode", __FILE__, __LINE__ );
+        if(likely( !ec )){
+            // OK
+            bres = true;
+            non_blocking_flag = true;
         }
-        return true;
+        
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
+            LOG_CAT_L7VSD_SESSION ) ) ){
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 61, 
+                "out_function : tcp_ssl_socket::set_non_blocking_mode", 
+                __FILE__, __LINE__ );
+        }
+        return bres;
     }
 
     //! write socket
-    //! @param[in]        buffers is wite data buffer
+    //! @param[in]         buffers is wite data buffer
     //! @param[out]        ec is reference error code object
     //! @return            write data size    
-    std::size_t tcp_ssl_socket::write_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code& ec){
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 63, "in_function : tcp_ssl_socket::write_some", __FILE__, __LINE__ );
+    std::size_t tcp_ssl_socket::write_some(
+        boost::asio::mutable_buffers_1 buffers, 
+        boost::system::error_code& ec){
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
+            LOG_CAT_L7VSD_SESSION ) ) ){
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 63, 
+                "in_function : tcp_ssl_socket::write_some", 
+                __FILE__, __LINE__ );
         }
 
         rd_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
-        res_size = my_socket.write_some(buffers,ec);
-        if(unlikely(ec)){
-            if (likely(!open_flag)) {
-                res_size = 0;
-                ec.clear();
+        if(likely(non_blocking_flag)){
+            res_size = my_socket.write_some(buffers,ec);
+            if(unlikely(ec)){
+                if (likely(!open_flag)) {
+                    res_size = 0;
+                    ec.clear();
+                }
             }
         }
-
-        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 64, "out_function : tcp_ssl_socket::write_some", __FILE__, __LINE__ );
+        if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
+            LOG_CAT_L7VSD_SESSION ) ) ){
+            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 64, 
+                "out_function : tcp_ssl_socket::write_some", 
+                __FILE__, __LINE__ );
         }
         return res_size;
     }
@@ -177,17 +220,20 @@ namespace l7vs{
     //! @param[out]        buffers is read data buffer
     //! @param[out]        ec is reference error code object
     //! @return            read data size
-    std::size_t tcp_ssl_socket::read_some(boost::asio::mutable_buffers_1 buffers,
+    std::size_t tcp_ssl_socket::read_some(
+        boost::asio::mutable_buffers_1 buffers,
         boost::system::error_code& ec){
 
         rd_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
-        if(unlikely(open_flag)){
+        if(unlikely(open_flag && non_blocking_flag)){
             //set TCP_QUICKACK
             if(opt_info.quickack_opt){
                 int val = opt_info.quickack_val;
                 std::size_t len = sizeof(val);
-                boost::asio::detail::socket_ops::setsockopt(my_socket.lowest_layer().native(),IPPROTO_TCP,TCP_QUICKACK,&val,len,ec);
+                boost::asio::detail::socket_ops::setsockopt(
+                    my_socket.lowest_layer().native(),IPPROTO_TCP,
+                    TCP_QUICKACK,&val,len,ec);
                 if(unlikely(ec)){
                     //ERROR
                     std::stringstream buf;
@@ -195,7 +241,8 @@ namespace l7vs{
                     buf << boost::this_thread::get_id();
                     buf << "] socket option(TCP_QUICKACK) set failed : ";
                     buf << ec.message();
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 109, buf.str() , __FILE__, __LINE__ );
+                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 109, 
+                        buf.str() , __FILE__, __LINE__ );
                 }
             }
             boost::this_thread::yield();
