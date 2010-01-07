@@ -110,19 +110,36 @@ void    l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
     }
     //get session pool size value
     int_val    = param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_POOLSIZE_KEY_NAME, vs_err );
-    if( !vs_err )
-        param_data.session_pool_size = int_val;
+    if( !vs_err ) {
+        if( int_val <= 0 ) {
+            param_data.session_pool_size = virtualservice_base::SESSION_POOL_NUM_DEFAULT;
+        } else {
+            param_data.session_pool_size = int_val;
+        }
+    }
     //get bps calc interval
     int_val    = param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_BPS_CALC_INTERVAL, vs_err );
-    if( !vs_err )
-        param_data.bps_interval = int_val;
+    if( !vs_err ){
+        if( int_val <= 0 ) {
+            param_data.bps_interval = virtualservice_base::BPS_INTERVAL_DEFAULT;
+        } else {
+            param_data.bps_interval = int_val;
+        }
+    }
     //get replication interval
     int_val    = param.get_int( l7vs::PARAM_COMP_REPLICATION, PARAM_REP_INTERVAL, vs_err );
     if( !vs_err )
         param_data.rep_interval = int_val;
 
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, "out_function : void virtualservice_base::load_parameter()", __FILE__, __LINE__ );
+        std::stringstream buf;
+        buf<<"out_function : void virtualservice_base::load_parameter() : ";
+        buf<<"param_data.nic_realserver_side = [" << param_data.nic_realserver_side  << "], ";
+        buf<<"param_data.session_pool_size = ["   << param_data.session_pool_size    << "], ";
+        buf<<"param_data.bps_interval = ["        << param_data.bps_interval         << "], ";
+        buf<<"param_data.rep_interval = ["        << param_data.rep_interval         << "]";
+        
+        l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, buf.str(), __FILE__, __LINE__ );
     }
 }
 
