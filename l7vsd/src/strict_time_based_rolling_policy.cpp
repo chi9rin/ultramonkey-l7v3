@@ -243,7 +243,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
             numTimingDate = boost::lexical_cast<unsigned long long>(rotationTimingValue);
     
             numYear = boost::lexical_cast<int>(now.substr(0, 4));
-            numMonth =boost::lexical_cast<int>(rotationTimingValue.substr(0, 2));
+            numMonth = boost::lexical_cast<int>(rotationTimingValue.substr(0, 2));
             numDate = boost::lexical_cast<int>(rotationTimingValue.substr(2, 2));
             numHour = boost::lexical_cast<int>(rotationTimingValue.substr(4, 2));
             numMinute = boost::lexical_cast<int>(rotationTimingValue.substr(6));
@@ -252,7 +252,11 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                 t.tm_year = numYear - 1900;
             }
             else {
+#if defined(LOGGER_PROCESS_ADM)
+                t.tm_year = numYear - 1900;
+#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
                 t.tm_year = numYear + 1 - 1900;
+#endif
             }
             t.tm_mon = numMonth - 1;
             t.tm_mday = numDate;
@@ -280,6 +284,10 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                 t.tm_mon = numMonth - 1;
             }
             else {
+#if defined(LOGGER_PROCESS_ADM)
+                t.tm_year = numYear - 1900;
+                t.tm_mon = numMonth - 1;
+#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
                 if (12 == numMonth) {
                     t.tm_year = numYear + 1 - 1900;
                     t.tm_mon = 0;
@@ -288,6 +296,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                     t.tm_year = numYear - 1900;
                     t.tm_mon = numMonth + 1 - 1;
                 }
+#endif
             }
     
             if (numDate > dates[t.tm_mon]) {
@@ -324,7 +333,11 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                 t.tm_mday = numDate + (numTimingWeek - numNowWeek); 
             }
             else {
+#if defined(LOGGER_PROCESS_ADM)
+                t.tm_mday = numDate + (numTimingWeek - numNowWeek); 
+#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
                 t.tm_mday = numDate + (7 - (numNowWeek - numTimingWeek));
+#endif
             }
             t.tm_hour = numHour;
             t.tm_min = numMinute;
@@ -352,7 +365,11 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                 t.tm_mday = numDate;
             }
             else {
+#if defined(LOGGER_PROCESS_ADM)
+                t.tm_mday = numDate; 
+#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
                 t.tm_mday = numDate + 1; 
+#endif
             }
             t.tm_hour = numHour;
             t.tm_min = numMinute;
@@ -380,7 +397,11 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                 t.tm_hour = numHour;
             }
             else {
+#if defined(LOGGER_PROCESS_ADM)
+                t.tm_hour = numHour;
+#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
                 t.tm_hour = numHour + 1;
+#endif
             }
             t.tm_min = numMinute;
     
@@ -450,5 +471,21 @@ bool StrictTimeBasedRollingPolicy::isTriggeringEvent(
         LogLog::warn(LOG4CXX_STR("Fail to get time. "));
         return false;
     }
+#if defined(LOGGER_PROCESS_ADM)
+    struct stat sb;
+
+    if (-1 == stat(filename.c_str(), &sb)) {
+        LogLog::warn(LOG4CXX_STR("Fail to get logfile update time. "));
+        return false;
+    }
+    if (now_time > nextCheck && nextCheck > sb.st_mtime) {
+        // Do rollover.
+        return true;
+    } else {
+        // Do not rollover.
+        return false;
+    }
+#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
     return now_time > nextCheck;
+#endif
 }
