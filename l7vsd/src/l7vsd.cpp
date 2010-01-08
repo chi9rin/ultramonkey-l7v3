@@ -913,9 +913,16 @@ int    l7vsd::run( int argc, char* argv[] ) {
         error_code    err;
         int    maxfileno = param.get_int(PARAM_COMP_L7VSD, "maxfileno", err);
         if( err ){
-            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 1, "maxfileno parameter not found.", __FILE__, __LINE__ );
+            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 1, 
+                "maxfileno parameter not found.", __FILE__, __LINE__ );
             maxfileno = 1024;
         }
+        if ( maxfileno < 32 ){
+            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 10, 
+                "invalid parameter for maxfileno.", __FILE__, __LINE__ );
+            maxfileno = 1024;
+        }
+
         //set process scheduler & priority
         int    scheduler = SCHED_OTHER;
         int    int_val = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM, err);
