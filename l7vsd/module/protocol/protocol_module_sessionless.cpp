@@ -7493,10 +7493,18 @@ namespace l7vs
             recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
             if (unlikely(recive_data_it == session_data->recive_data_map.end()))
             {
-                boost::format formatter("Invalid endpoint. thread id : %d.");
-                formatter % boost::this_thread::get_id();
-                putLogError(100121, formatter.str(), __FILE__, __LINE__ );
-                throw -1;
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                {
+                    boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                            "handle_realserver_disconnect(const boost::thread::id thread_id, "
+                                            "const boost::asio::ip::tcp::endpoint & rs_endpoint) : return_value = %d. thread id : %d.");
+                    formatter % FINALIZE % boost::this_thread::get_id();
+                    putLogDebug(100263, formatter.str(), __FILE__, __LINE__ );
+                }
+                /*------DEBUG LOG END------*/
+
+                return FINALIZE;
             }
 
             recive_data& recv_data = recive_data_it->second;
