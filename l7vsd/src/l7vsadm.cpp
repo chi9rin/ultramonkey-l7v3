@@ -525,6 +525,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 34, buf, __FILE__, __LINE__ );
                 return false;
             }
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_upstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 108, buf, __FILE__, __LINE__ );
+                return false;
+            }
             elem.qos_upstream = ullval * 1000 * 1000 * 1000;        // set qos_upstream
         }
         else if( *ritr == 'M' || *ritr == 'm' ){
@@ -534,6 +540,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 35, buf, __FILE__, __LINE__ );
+                return false;
+            }
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_upstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 109, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_upstream = ullval * 1000 * 1000;        // set qos_upstream
@@ -547,10 +559,23 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 36, buf, __FILE__, __LINE__ );
                 return false;
             }
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_upstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 110, buf, __FILE__, __LINE__ );
+                return false;
+            }
             elem.qos_upstream = ullval * 1000;        // set qos_upstream
         }
         else{
-            elem.qos_upstream = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_upstream
+            unsigned long long ullval = boost::lexical_cast< unsigned long long > ( argv[pos] );
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_upstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 111, buf, __FILE__, __LINE__ );
+                return false;
+            }
+            elem.qos_upstream = ullval;    // set qos_upstream
         }
         if( 0ULL == elem.qos_upstream ) {
             elem.qos_upstream = ULLONG_MAX;        // clear value
@@ -595,6 +620,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 39, buf, __FILE__, __LINE__ );
                 return false;
             }
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_downstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 112, buf, __FILE__, __LINE__ );
+                return false;
+            }
             elem.qos_downstream = ullval * 1000 * 1000 * 1000;        // set qos_upstream
         }
         else if( *ritr == 'M' || *ritr == 'm' ){
@@ -604,6 +635,12 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 40, buf, __FILE__, __LINE__ );
+                return false;
+            }
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_downstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 113, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_downstream = ullval * 1000 * 1000;        // set qos_upstream
@@ -617,9 +654,22 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 41, buf, __FILE__, __LINE__ );
                 return false;
             }
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_downstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 114, buf, __FILE__, __LINE__ );
+                return false;
+            }
             elem.qos_downstream = ullval * 1000;        // set qos_upstream
         }
         else{
+            unsigned long long ullval = boost::lexical_cast< unsigned long long > ( argv[pos] );
+            if( ullval > 999 ){
+                std::string    buf("invalid qos_downstream value.");
+                l7vsadm_err.setter( true, buf );
+                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 115, buf, __FILE__, __LINE__ );
+                return false;
+            }
             elem.qos_downstream = boost::lexical_cast< unsigned long long > ( argv[pos] );    // set qos_downstream
         }
         if( 0ULL == elem.qos_downstream ) {
@@ -1904,9 +1954,9 @@ l7vs::l7vsadm::l7vsadm()
     list_option_dic["--numeric"]    = boost::bind( &l7vsadm::parse_opt_list_numeric_func, this, _1, _2, _3 );
     // create virtualservice option dictionary
     vs_option_dic["-t"]             = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
-    vs_option_dic["--target"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+    vs_option_dic["--tcp-service"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
     vs_option_dic["-m"]             = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
-    vs_option_dic["--module"]       = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+    vs_option_dic["--proto-module"]       = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
     vs_option_dic["-s"]             = boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
     vs_option_dic["--scheduler"]    = boost::bind( &l7vsadm::parse_opt_vs_scheduler_func, this, _1, _2, _3 );
     vs_option_dic["-u"]             = boost::bind( &l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3 );
@@ -1932,11 +1982,11 @@ l7vs::l7vsadm::l7vsadm()
                                     = boost::bind( &l7vsadm::parse_opt_vs_access_log_logrotate_func, this, _1, _2, _3 );
     // create realserver option dictionary
     rs_option_dic["-t"]             = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
-    rs_option_dic["--target"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
+    rs_option_dic["--tcp-service"]       = boost::bind( &l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3 );
     rs_option_dic["-w"]             = boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
     rs_option_dic["--weight"]       = boost::bind( &l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3 );
     rs_option_dic["-m"]             = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
-    rs_option_dic["--module"]       = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
+    rs_option_dic["--proto-module"]       = boost::bind( &l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3 );
     rs_option_dic["-p"]             = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
     rs_option_dic["--udp"]          = boost::bind( &l7vsadm::parse_opt_vs_udp_func, this, _1, _2, _3 );
     rs_option_dic["-r"]             = boost::bind( &l7vsadm::parse_opt_rs_realserver_func, this, _1, _2, _3 );
