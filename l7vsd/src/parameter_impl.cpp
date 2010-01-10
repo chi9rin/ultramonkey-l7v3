@@ -133,7 +133,11 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
         if( line[0] == '#' ) continue;
         // comment clear
         std::string::size_type pos = line.find( '#' );
-        if( pos != std::string::npos ) line = line.substr( 0, pos );
+        if( pos != std::string::npos ){
+            line = line.substr( 0, pos );
+            boost::algorithm::trim( line );
+            if( line.size() == 0 ) continue;
+        }
 
         split_vector_type split_vec;
         boost::algorithm::split( split_vec,
@@ -144,32 +148,47 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
             // get section_string
             if( split_vec[0].at(0) == '[' &&
                 split_vec[0].at( split_vec[0].size()-1 ) == ']' ){
-                // erase [
+                // erase "["
                 section_string = 
                              split_vec[0].substr( 1, split_vec[0].size() - 2 );
-            }
-            else{
-                boost::format formatter( "section tag false : %1%" );
-                formatter % split_vec[0];
-                Logger::putLogFatal( logcat, 6, formatter.str(),
-                                     __FILE__, __LINE__ );
-                return false;
+
+                // section_string check
+                boost::algorithm::trim( section_string );
+
+                if( std::string::npos != section_string.find( "[" )  ||
+                    std::string::npos != section_string.find( "]" )  ||
+                    std::string::npos != section_string.find( "\\" ) ||
+                    std::string::npos != section_string.find( "#" )  ||
+                    section_string.size() == 0 ){
+                    
+                    section_string.clear();
+                    continue;
+                }
             }
         }
         // key(split_vec[0]) = value(split_vec[1])
-        else if( ( split_vec.size() == 2 ) && ( split_vec[1].size() > 0 ) ){
+        else if( split_vec.size() == 2 ){
             // non get section_string
-            if( section_string.size() == 0 ){
-                boost::format formatter(
-                    "don't match first section. key = %1%, value = %2%" );
-                formatter % split_vec[0] % split_vec[1];
-                Logger::putLogFatal( logcat, 7, formatter.str(),
-                                     __FILE__, __LINE__ );
-                return false;
-            }
-            // create section.key
+            if( section_string.size() == 0 ) continue;
+
             boost::algorithm::trim( split_vec[0] );
+            // check split_vec[0]
+            if( std::string::npos != split_vec[0].find( "[" )  ||
+                std::string::npos != split_vec[0].find( "]" )  ||
+                std::string::npos != split_vec[0].find( "\\" ) ||
+                std::string::npos != split_vec[0].find( "#" )  ||
+                split_vec[0].size() == 0 ){
+                continue;
+            }
+
             boost::algorithm::trim( split_vec[1] );
+            // check split_vec[1]
+            if( std::string::npos != split_vec[0].find( "\\" ) ||
+                split_vec[1].size() == 0 ){
+                continue;
+            }
+
+            // create section.key
             std::string key = file_name + "#";
             key += section_string;
             key += ".";
@@ -180,6 +199,9 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                 // create string value
                 std::string strvalue =
                                split_vec[1].substr( 1, split_vec[1].size()-2 );
+                // check string value
+                if( std::string::npos != strvalue.find( "\"" ) ) continue;
+
                 // check same key
                 if( multistring_map.end() != multistring_map.find(key)){
                     // Only SSL component can designate more than one value.
@@ -224,19 +246,13 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                 }
                 // exception handing
                 catch( boost::bad_lexical_cast& cast ){
-                    boost::format formatter( "value is not numeric : %1%" );
-                    formatter % split_vec[1];
-                    Logger::putLogFatal( logcat, 8, formatter.str(),
-                                         __FILE__, __LINE__ );
+                    continue;
                 }
             }
         }
         // format error
         else{
-            boost::format formatter( "line is not support line = %1%" );
-            formatter % line;
-            Logger::putLogError( logcat, 2, formatter.str(),
-                                 __FILE__, __LINE__ );
+            continue;
         }
     }
 
@@ -255,7 +271,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
     }
     // comp error
     else if( comp == PARAM_COMP_NOCAT ){
-        Logger::putLogError( logcat, 3,
+        Logger::putLogError( logcat, 2,
                              "parameter_component_none is not suport",
                              __FILE__, __LINE__ );
     }
@@ -299,7 +315,7 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                     boost::format formatter(
                         "not insert key = %1%, value = %2% " );
                     formatter % p.first % p.second;
-                    Logger::putLogError( logcat, 4, formatter.str(),
+                    Logger::putLogError( logcat, 3, formatter.str(),
                                          __FILE__, __LINE__ );
                 }
             }
@@ -337,6 +353,12 @@ bool l7vs::ParameterImpl::read_file( const l7vs::PARAMETER_COMPONENT_TAG comp,
                 multistringMap.insert( p );
             }
         }
+    }
+
+    if( intMap.empty() && multistringMap.empty() ){
+        Logger::putLogFatal( logcat, 6, "Effective data doesn't exist.",
+                             __FILE__, __LINE__ );
+        return false;
     }
     return true;
 }
