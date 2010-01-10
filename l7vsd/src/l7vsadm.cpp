@@ -100,9 +100,17 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 3, "l7vsadm::parse_vs_func", __FILE__, __LINE__ );
 
     request.command = cmd;    // set command
+    std::map< std::string, int > count_map;
+
+    for(parse_opt_map_type::iterator itr = vs_option_dic.begin() ;
+        itr != vs_option_dic.end() ; ++itr ){
+        count_map[ itr->first ] = 0;
+    }
+
     for( int pos = 2; pos < argc; ++pos ){    // check options.
         parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
         if( itr != vs_option_dic.end() ){    // find option
+            count_map[ itr->first ]++;
             if( ! itr->second( pos, argc, argv ) ) return false;    // option function execute.
         }
         else{    // don't find option function.
@@ -185,8 +193,31 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         l7vsadm_err.setter( true, buf );
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 89, buf, __FILE__, __LINE__ );
         return false;
-        
     }
+    if( l7vsadm_request::CMD_EDIT_VS == cmd){
+        // Existence check of the parameter
+        if( count_map["-s"] == 0 &&
+            count_map["--scheduler"] == 0 &&
+            count_map["-u"] == 0 &&
+            count_map["--upper"] == 0 &&
+            count_map["-b"] == 0 &&
+            count_map["--bypass"] == 0 &&
+            count_map["-f"] == 0 &&
+            count_map["--flag"] == 0 &&
+            count_map["-Q"] == 0 &&
+            count_map["--qos-up"] == 0 &&
+            count_map["-q"] == 0 &&
+            count_map["--qos-down"] == 0 &&
+            count_map["-L"] == 0 &&
+            count_map["--access-log"] == 0){
+
+            std::string    buf("All option omitted for edit vs command.");
+            l7vsadm_err.setter( true, buf );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 116, buf, __FILE__, __LINE__ );
+            return false;
+        }
+    }
+
     return true;
 }
 //
