@@ -542,7 +542,7 @@ void l7vs::LoggerImpl::loadConf(){
         else {
             std::stringstream    ss;
             ss << "Invalid Log Rotation Setting : " << rotationStr;
-            throw std::logic_error( ss.str() );
+            logic_error( 118, ss.str(), __FILE__, __LINE__ );
         }
     }
     else{
@@ -558,17 +558,17 @@ void l7vs::LoggerImpl::loadConf(){
         catch (const boost::bad_lexical_cast& bc) {
             std::stringstream    ss;
             ss << "Invalid MaxBackupIndex Value : " << maxBackupIndexStr << ".";
-            throw std::logic_error( ss.str() );
+            logic_error( 119, ss.str(), __FILE__, __LINE__ );
         }
         if (LOGGER_BACKUP_INDEX_LOWER_LIMIT > property->max_backup_index_value) {
             std::stringstream ss;
             ss << "Max Backup Index must at least " << LOGGER_BACKUP_INDEX_LOWER_LIMIT << ".";
-            throw std::logic_error( ss.str() );
+            logic_error( 120, ss.str(), __FILE__, __LINE__ );
         }
         if (LOGGER_BACKUP_INDEX_LIMIT < property->max_backup_index_value) {
             std::stringstream ss;
             ss << "Max Backup Index must at most " << LOGGER_BACKUP_INDEX_LIMIT << ".";
-            throw std::logic_error( ss.str() );
+            logic_error( 121, ss.str(), __FILE__, __LINE__ );
         }
     }
     else {
